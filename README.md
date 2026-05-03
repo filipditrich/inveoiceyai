@@ -3,7 +3,7 @@
 <h4 align="center">Czech-first invoicing — schema-first data, PDF + ISDOC + SPAYD QR</h4>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-phase%200%20docs-slategray?style=for-the-badge" alt="Phase 0 docs" />
+  <img src="https://img.shields.io/badge/status-Plan%201%20bootstrap%20done-brightgreen?style=for-the-badge" alt="Plan 1 bootstrap done" />
   <img src="https://img.shields.io/badge/commits-conventional%20Commits-ff69b4?style=for-the-badge&logo=conventionalcommits&logoColor=white" alt="Conventional Commits" />
   <img src="https://img.shields.io/badge/stack-Next.js%2015%20%7C%20Neon-111111?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 15 | Neon" />
 </p>
@@ -29,7 +29,7 @@ Invoicey is a modern invoicing tool for Czech freelancers and small teams. It tr
 
 The same payload should eventually flow through the UI builder, JSON/MCP tools, or Slack — without duplicate types or drift.
 
-**Current phase:** Phase 0 — in-repo docs, PRD, architecture, domain contracts, and ADRs. **No application code yet.** Implementation starts at Plan 1 (see [Roadmap](#roadmap)).
+**Current phase:** Plan 1 shipped — Turborepo + Next.js 15 admin shell, Drizzle wiring, shadcn/ReUI registry, commitlint. **Next:** Plan 2 (`invoice-core`). See [Roadmap](#roadmap).
 
 ## Why this project
 
@@ -105,78 +105,47 @@ ADRs explain each stack choice: [`docs/decisions/README.md`](docs/decisions/READ
 
 ## Prerequisites
 
-What you need **today** (docs-only repo):
-
 | Tool | Role |
 | --- | --- |
 | Git | Clone and branch |
-| Markdown viewer / IDE | Read [`docs/`](docs/) |
+| [Bun](https://bun.sh) ≥ 1.x | Install deps and run scripts |
+| Node.js | Matches the engines declared by Next.js / ESLint |
+| Neon (or any Postgres URL) | Required before `bun db:push` — copy `.env.example` to `.env.local` |
 
-What you need **after Plan 1** (when `package.json` lands):
-
-| Tool | Role |
-| --- | --- |
-| [Bun](https://bun.sh) ≥ 1.x | Install deps, run scripts (repo standard; no npm/yarn) |
-| Node.js | Matches Next.js / tooling engines once declared in `package.json` |
-
-Optional later: Neon account + Vercel project for deploy (documented in [`docs/architecture.md`](docs/architecture.md)).
+Optional for deploy: Vercel project linked to this repo (see [`docs/architecture.md`](docs/architecture.md)).
 
 ## Getting started
-
-**Phase 0 — read the docs**
 
 ```bash
 git clone <repository-url>
 cd inveoiceyai
-```
-
-Then open [`docs/README.md`](docs/README.md) for the reading order (PRD → glossary → architecture → `invoice-schema` → ADRs).
-
-**After Plan 1 — bootstrap the monorepo** (commands will match `package.json`; illustrative):
-
-```bash
+cp .env.example .env.local   # fill DATABASE_URL (+ optional Neon URLs)
 bun install
-bun dev        # apps/web dev server (once scaffold exists)
+bun dev                     # Next.js dev server (@invoicey/web)
 ```
 
-Until Plan 1 merges, those scripts do not exist in this repository.
+Other useful scripts: `bun run build`, `bun run lint`, `bun run typecheck`, `bun db:push`.
 
 ## Project structure
 
-**Today (Phase 0):**
-
-```text
-├── README.md                 # this file — product intro + navigation
-├── inveoiceyai.code-workspace
-└── docs/                     # source of truth: PRD, architecture, domain, ADRs
-    ├── README.md             # docs index + lifecycle rules
-    ├── PRD.md
-    ├── roadmap.md
-    ├── architecture.md
-    ├── glossary.md
-    ├── domain/
-    ├── decisions/
-    ├── specs/                # JIT specs per implementation plan
-    └── ui/
-```
-
-**Target layout after Plan 1+:**
-
 ```text
 ├── apps/
-│   └── web/                  # Next.js 15 admin UI
+│   └── web/                     # Next.js 15 admin UI (@invoicey/web)
 ├── packages/
-│   ├── invoice-core/         # Zod schema, totals, PDF, QR, ISDOC
-│   ├── db/                   # Drizzle + migrations
-│   ├── ares/                 # ARES REST client
+│   ├── invoice-core/            # domain layer (Plan 2+)
+│   ├── db/                      # Drizzle schema + Neon client
+│   ├── ares/                    # ARES REST client (Plan 4+)
 │   ├── config-eslint/
 │   └── config-ts/
+├── docs/                        # PRD, architecture, domain, ADRs
 ├── turbo.json
-├── package.json              # Bun workspaces
-└── docs/
+├── package.json                 # Bun workspaces + shared tooling
+├── commitlint.config.mjs
+├── .env.example
+└── bun.lock
 ```
 
-`apps/mcp` and `apps/slack` are planned (Plans 12–13); they reuse `invoice-core` and `db` without duplicating schema types.
+`apps/mcp` and `apps/slack` remain roadmap-only (Plans 12–13).
 
 ## Documentation
 
@@ -197,9 +166,9 @@ Per-feature specs under [`docs/specs/`](docs/specs/README.md) and UX flows under
 | Phase | Goal | Status |
 | --- | --- | --- |
 | Plan 0 | Documentation scaffold | Done |
-| Plan 1 | Monorepo bootstrap (Next.js, Drizzle, ReUI, commitlint) | Next |
-| Plans 2–3 | `invoice-core` + PDF / QR / ISDOC | Planned |
-| Plans 4–9 | ARES, issuers & clients UI, builder, grid, dashboard, polish (**MVP**) | Planned |
+| Plan 1 | Monorepo bootstrap (Next.js, Drizzle, ReUI, commitlint) | Done |
+| Plan 2 | `invoice-core` domain package | Next |
+| Plans 3–9 | PDF stack + ARES + issuer/client UI + polish (**MVP**) | Planned |
 | Plans 10–14 | Recurring, email, MCP, Slack, auth | Post-MVP |
 
 High-level diagram:
@@ -207,10 +176,9 @@ High-level diagram:
 ```mermaid
 flowchart LR
     P0["Plan 0<br/>docs"] --> P1["Plan 1<br/>bootstrap"]
-    P1 --> P2["invoice-core"]
-    P2 --> P3["PDF / QR / ISDOC"]
-    P3 --> P9["Plans 4–9<br/>MVP UI"]
-    P9 -.-> Post["Post-MVP"]
+    P1 --> P2["Plan 2<br/>invoice-core"]
+    P2 --> P3["Plans 3–9<br/>MVP UI"]
+    P3 -.-> Post["Post-MVP"]
 ```
 
 Full table: [`docs/roadmap.md`](docs/roadmap.md).
@@ -218,7 +186,7 @@ Full table: [`docs/roadmap.md`](docs/roadmap.md).
 ## Contributing
 
 1. **Docs-first:** Product and domain contracts live under [`docs/`](docs/). If behavior changes, update the relevant doc and add or supersede an ADR ([`docs/decisions/`](docs/decisions/README.md)).
-2. **Commits:** Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat`, `fix`, `docs`, …). If commitlint is added in Plan 1, follow the repo config.
+2. **Commits:** Conventional commits are enforced via `commitlint` + Husky — match [`commitlint.config.mjs`](commitlint.config.mjs).
 3. **Plans:** Implementation should trace to `.cursor/plans/` or equivalent tracked plans; cross-link PRs to the docs they implement.
 4. **Secrets:** Never commit `.env`, API tokens, or UploadThing keys.
 

@@ -18,3 +18,9 @@
 ## Verification
 
 - `bun install`, `bun dev`, `bun db:push` (valid `DATABASE_URL`), invalid commit message rejected.
+
+## Completed (2026-05-03)
+
+- `bun run typecheck`, `bun run lint`, and `bun run build` succeed at repo root.
+- `apps/web` renders the `(app)` sidebar shell with stub routes; `components.json` registers `@reui`.
+- Copy `.env.example` → `.env.local` and set `DATABASE_URL` before `bun db:push`.

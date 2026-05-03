@@ -59,4 +59,4 @@ Each plan in `.cursor/plans/` cites the docs it implements. Each ADR cites the p
 
 ## Status
 
-Plan 0 (docs scaffold) is **done** — ledger in [`roadmap.md`](./roadmap.md). Plan 1 (repo bootstrap) is **in progress** — narrative checklist in [`.cursor/plans/plan-01-bootstrap.md`](../.cursor/plans/plan-01-bootstrap.md).
+Implementation progress is tracked as checklists in [`roadmap.md`](./roadmap.md). Plan 1 (repo bootstrap) is **done**; Plan 2 (`invoice-core`) is **next**. Narrative checklists live under [`.cursor/plans/`](../.cursor/plans/).

@@ -6,8 +6,8 @@ Phased delivery plan. Each phase corresponds to one entry in `.cursor/plans/`. P
 
 ```mermaid
 flowchart LR
-    P0["Plan 0<br/>docs<br/>done"] --> P1["Plan 1<br/>bootstrap<br/>current"]
-    P1 --> P2["Plan 2<br/>invoice-core"]
+    P0["Plan 0<br/>docs<br/>done"] --> P1["Plan 1<br/>bootstrap<br/>done"]
+    P1 --> P2["Plan 2<br/>invoice-core<br/>next"]
     P2 --> P3["Plan 3<br/>PDF / QR / ISDOC"]
     P3 --> P4["Plan 4<br/>ARES + clients"]
     P4 --> P5["Plan 5<br/>issuers"]
@@ -40,23 +40,24 @@ flowchart LR
 
 ### Plan 1 — Repo bootstrap
 
-**Status:** In progress  
+**Status:** Done  
+**Completed:** 2026-05-03  
 
 **Goal:** Get a working monorepo: Turborepo + bun workspaces + Next.js 15 web app + Drizzle + Neon + lint/format/commitlint, with `bun dev` serving an empty layout.
 
 **Exit criteria:**
-- [ ] `apps/web` Next.js 15 (App Router, RSC) starts and renders a sidebar layout
-- [ ] `packages/{invoice-core,db,ares,config-eslint,config-ts}` exist with `package.json` and a placeholder `index.ts`
-- [ ] Drizzle is wired to a Neon database, an empty migrations folder is committed, `bun db:push` works
-- [ ] Tailwind v4 + shadcn/ui base + ReUI registry (`@reui` namespace, `base-nova` style) is configured per [reui.io/docs/get-started](https://reui.io/docs/get-started)
-- [ ] `commitlint` enforces conventional commits with the project's scope enum
-- [ ] One placeholder ADR per technology choice that wasn't pre-decided (e.g. Tailwind v4)
+- [x] `apps/web` Next.js 15 (App Router, RSC) starts and renders a sidebar layout
+- [x] `packages/{invoice-core,db,ares,config-eslint,config-ts}` exist with `package.json` and a placeholder `index.ts`
+- [x] Drizzle is wired to a Neon database, an empty migrations folder is committed, `bun db:push` works
+- [x] Tailwind v4 + shadcn/ui base + ReUI registry (`@reui` namespace, `base-nova` style) is configured per [reui.io/docs/get-started](https://reui.io/docs/get-started)
+- [x] `commitlint` enforces conventional commits with the project's scope enum
+- [x] One placeholder ADR per technology choice that wasn't pre-decided (e.g. Tailwind v4) — see [0017](./decisions/0017-tailwind-v4-tooling-baseline.md)
 
 **Doc inputs:** [`architecture.md`](./architecture.md), [`decisions/0001-monorepo-turborepo-bun.md`](./decisions/0001-monorepo-turborepo-bun.md), [`decisions/0002-nextjs15-app-router.md`](./decisions/0002-nextjs15-app-router.md), [`decisions/0003-shadcn-plus-reui-registry.md`](./decisions/0003-shadcn-plus-reui-registry.md), [`decisions/0009-drizzle-neon-postgres.md`](./decisions/0009-drizzle-neon-postgres.md)
 
 ### Plan 2 — `invoice-core` domain package
 
-**Status:** Planned  
+**Status:** Next  
 
 **Goal:** Land the contract — Zod schema, totals calculation, numbering, status engine — fully unit-tested. No UI, no PDF, no DB. Pure domain.
 
