@@ -6,7 +6,7 @@ Phased delivery plan. Each phase corresponds to one entry in `.cursor/plans/`. P
 
 ```mermaid
 flowchart LR
-    P0["Plan 0<br/>docs<br/>(now)"] --> P1["Plan 1<br/>repo bootstrap"]
+    P0["Plan 0<br/>docs<br/>done"] --> P1["Plan 1<br/>bootstrap<br/>current"]
     P1 --> P2["Plan 2<br/>invoice-core"]
     P2 --> P3["Plan 3<br/>PDF / QR / ISDOC"]
     P3 --> P4["Plan 4<br/>ARES + clients"]
@@ -25,31 +25,38 @@ flowchart LR
 
 ## MVP plans
 
-### Plan 0 — Docs scaffolding (current)
+### Plan 0 — Docs scaffolding
+
+**Status:** Done  
+**Completed:** 2026-05-03  
 
 **Goal:** Land the in-repo docs that lock product scope, architecture, domain model, and decisions captured in the originating chat session.
 
 **Exit criteria:**
-- Every file in `docs/` tree (per [`README.md`](./README.md)) exists and is non-empty
-- All session-level ADRs (0001..0016) are written in Michael Nygard format
-- Domain docs each contain at least one worked example
-- Open product questions are either resolved in the relevant doc or carry a `TODO(plan-N):` marker
+- [x] Every file in `docs/` tree (per [`README.md`](./README.md)) exists and is non-empty
+- [x] All session-level ADRs (0001..0016) are written in Michael Nygard format
+- [x] Domain docs each contain at least one worked example
+- [x] Open product questions are either resolved in the relevant doc or carry a `TODO(plan-N):` marker
 
 ### Plan 1 — Repo bootstrap
+
+**Status:** In progress  
 
 **Goal:** Get a working monorepo: Turborepo + bun workspaces + Next.js 15 web app + Drizzle + Neon + lint/format/commitlint, with `bun dev` serving an empty layout.
 
 **Exit criteria:**
-- `apps/web` Next.js 15 (App Router, RSC) starts and renders a sidebar layout
-- `packages/{invoice-core,db,ares,config-eslint,config-ts}` exist with `package.json` and a placeholder `index.ts`
-- Drizzle is wired to a Neon database, an empty migrations folder is committed, `bun db:push` works
-- Tailwind v4 + shadcn/ui base + ReUI registry (`@reui` namespace, `base-nova` style) is configured per [reui.io/docs/get-started](https://reui.io/docs/get-started)
-- `commitlint` enforces conventional commits with the project's scope enum
-- One placeholder ADR per technology choice that wasn't pre-decided (e.g. Tailwind v4)
+- [ ] `apps/web` Next.js 15 (App Router, RSC) starts and renders a sidebar layout
+- [ ] `packages/{invoice-core,db,ares,config-eslint,config-ts}` exist with `package.json` and a placeholder `index.ts`
+- [ ] Drizzle is wired to a Neon database, an empty migrations folder is committed, `bun db:push` works
+- [ ] Tailwind v4 + shadcn/ui base + ReUI registry (`@reui` namespace, `base-nova` style) is configured per [reui.io/docs/get-started](https://reui.io/docs/get-started)
+- [ ] `commitlint` enforces conventional commits with the project's scope enum
+- [ ] One placeholder ADR per technology choice that wasn't pre-decided (e.g. Tailwind v4)
 
 **Doc inputs:** [`architecture.md`](./architecture.md), [`decisions/0001-monorepo-turborepo-bun.md`](./decisions/0001-monorepo-turborepo-bun.md), [`decisions/0002-nextjs15-app-router.md`](./decisions/0002-nextjs15-app-router.md), [`decisions/0003-shadcn-plus-reui-registry.md`](./decisions/0003-shadcn-plus-reui-registry.md), [`decisions/0009-drizzle-neon-postgres.md`](./decisions/0009-drizzle-neon-postgres.md)
 
 ### Plan 2 — `invoice-core` domain package
+
+**Status:** Planned  
 
 **Goal:** Land the contract — Zod schema, totals calculation, numbering, status engine — fully unit-tested. No UI, no PDF, no DB. Pure domain.
 
@@ -64,6 +71,8 @@ flowchart LR
 **Doc inputs:** [`domain/invoice-schema.md`](./domain/invoice-schema.md), [`domain/vat-czech.md`](./domain/vat-czech.md), [`domain/numbering.md`](./domain/numbering.md), [`domain/status-engine.md`](./domain/status-engine.md)
 
 ### Plan 3 — PDF + QR + ISDOC rendering
+
+**Status:** Planned  
 
 **Goal:** `renderInvoicePdf`, `renderSpaydQr`, `renderIsdoc` with golden-file tests. PDF readable by humans; QR readable by every Czech bank app; ISDOC validates against the public XSD.
 
@@ -80,6 +89,8 @@ flowchart LR
 
 ### Plan 4 — ARES client + client (customer) management
 
+**Status:** Planned  
+
 **Goal:** Lookup any Czech business by IČO, save it as a client, list/edit/delete clients.
 
 **Exit criteria:**
@@ -94,6 +105,8 @@ flowchart LR
 
 ### Plan 5 — Issuer (my-businesses) management
 
+**Status:** Planned  
+
 **Goal:** Manage the businesses I invoice *from* — VAT settings, banking, numbering schemes, optional logo/stamp/signature uploads.
 
 **Exit criteria:**
@@ -106,6 +119,8 @@ flowchart LR
 **Doc inputs:** [`specs/uploads.md`](./specs/uploads.md), [`domain/numbering.md`](./domain/numbering.md), [`decisions/0010-uploadthing-for-files.md`](./decisions/0010-uploadthing-for-files.md)
 
 ### Plan 6 — Invoice builder
+
+**Status:** Planned  
 
 **Goal:** `/invoices/new` — a React-Hook-Form + Zod form that produces an `InvoiceSchema`-valid payload, with live preview and ARES lookup.
 
@@ -122,6 +137,8 @@ flowchart LR
 
 ### Plan 7 — Invoice list + actions
 
+**Status:** Planned  
+
 **Goal:** ReUI Data Grid showing all invoices with filters, sort, search, and row actions.
 
 **Exit criteria:**
@@ -136,6 +153,8 @@ flowchart LR
 
 ### Plan 8 — Dashboard
 
+**Status:** Planned  
+
 **Goal:** Single page showing the invoicing pulse at a glance.
 
 **Exit criteria:**
@@ -145,6 +164,8 @@ flowchart LR
 - Issuer filter that re-scopes everything on the page
 
 ### Plan 9 — Polish
+
+**Status:** Planned  
 
 **Goal:** Make it feel finished.
 
@@ -164,11 +185,15 @@ End of Plan 9 = MVP. Anything past this is post-MVP and lives below.
 
 ### Plan 10 — Recurring invoices
 
+**Status:** Post-MVP backlog  
+
 - New tables: `invoice_templates` (saved invoice payloads), `recurring_schedules` (cadence + next-run + linkage)
 - Vercel Cron Job that runs daily and issues due recurrences
 - UI to create a template from an existing invoice and to manage recurrences
 
 ### Plan 11 — Email delivery
+
+**Status:** Post-MVP backlog  
 
 - Resend wiring with verified sending domain
 - "Send" action on issued invoices: PDF + ISDOC attached, customizable cover text
@@ -176,17 +201,23 @@ End of Plan 9 = MVP. Anything past this is post-MVP and lives below.
 
 ### Plan 12 — MCP server (`apps/mcp`)
 
+**Status:** Post-MVP backlog  
+
 - Tools: `create_invoice`, `list_invoices`, `lookup_business`, `get_invoice`, `mark_paid`
 - Imports `@invoicey/invoice-core` + `@invoicey/db` directly — no HTTP shim
 - Schema parity with the UI is automatic because both consume `InvoiceSchema`
 
 ### Plan 13 — Slack bot (`apps/slack`)
 
+**Status:** Post-MVP backlog  
+
 - Slack app with slash command + `@Invoicey` mention parsing
 - Backed by the same domain layer; Slack identity becomes a workspace member when auth lands
 - Until auth, Slack maps to the single default workspace
 
 ### Plan 14 — Authentication + multi-user
+
+**Status:** Post-MVP backlog  
 
 - Clerk integration (Vercel Marketplace) — see [`decisions/0006-no-auth-mvp-multi-tenant-ready.md`](./decisions/0006-no-auth-mvp-multi-tenant-ready.md)
 - New tables: `users`, `workspace_memberships`

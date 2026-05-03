@@ -59,4 +59,4 @@ Each plan in `.cursor/plans/` cites the docs it implements. Each ADR cites the p
 
 ## Status
 
-Phase 0 (this docs scaffold) — see [Plan 0](../.cursor/plans/) for the originating plan. Plan 1 (repo bootstrap) is the next step.
+Plan 0 (docs scaffold) is **done** — ledger in [`roadmap.md`](./roadmap.md). Plan 1 (repo bootstrap) is **in progress** — narrative checklist in [`.cursor/plans/plan-01-bootstrap.md`](../.cursor/plans/plan-01-bootstrap.md).
