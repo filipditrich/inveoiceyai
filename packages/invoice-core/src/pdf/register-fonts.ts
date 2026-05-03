@@ -1,10 +1,17 @@
 import { Font } from "@react-pdf/renderer";
 import { createRequire } from "node:module";
+import path from "node:path";
 
 const require = createRequire(import.meta.url);
 
-const DejaVuRegular = require.resolve("dejavu-fonts-ttf/ttf/DejaVuSans.ttf");
-const DejaVuBold = require.resolve("dejavu-fonts-ttf/ttf/DejaVuSans-Bold.ttf");
+/** avoid `require.resolve('…/DejaVuSans.ttf')` — bundlers (e.g. Turbopack) trace `.ttf` as invalid JS */
+function resolveDejaVuFontPaths(): { regular: string; bold: string } {
+	const pkgDir = path.dirname(require.resolve("dejavu-fonts-ttf/package.json"));
+	return {
+		regular: path.join(pkgDir, "ttf/DejaVuSans.ttf"),
+		bold: path.join(pkgDir, "ttf/DejaVuSans-Bold.ttf"),
+	};
+}
 
 let registeredFonts = false;
 
@@ -13,6 +20,7 @@ export function registerInvoiceFonts(): void {
 	if (registeredFonts) {
 		return;
 	}
+	const { regular: DejaVuRegular, bold: DejaVuBold } = resolveDejaVuFontPaths();
 	Font.register({
 		family: "DejaVu Sans",
 		fonts: [
