@@ -8,8 +8,17 @@ import type { PublicEnv } from "@invoicey/env/schema";
  */
 function parseClientEnv(): PublicEnv {
   try {
+    const nodeEnvRaw = process.env.NODE_ENV;
+    /** Bundlers occasionally omit NODE_ENV until define passes; coerce for Zod enum. */
+    const nodeEnv =
+      nodeEnvRaw === APP_ENV.PRODUCTION ||
+      nodeEnvRaw === APP_ENV.TEST ||
+      nodeEnvRaw === APP_ENV.DEVELOPMENT
+        ? nodeEnvRaw
+        : APP_ENV.DEVELOPMENT;
+
     const clientEnvVars = {
-      NODE_ENV: process.env.NODE_ENV,
+      NODE_ENV: nodeEnv,
       NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
       NEXT_PUBLIC_APP_STAGE: process.env.NEXT_PUBLIC_APP_STAGE,
     } as const satisfies Record<keyof PublicEnv, string | undefined>;
