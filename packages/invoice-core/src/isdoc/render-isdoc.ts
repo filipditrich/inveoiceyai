@@ -168,6 +168,10 @@ function appendAccountingSupplierParty(root: Xm, invoice: Invoice) {
 		pref.up();
 	}
 
+	const contactEl = party.ele(NSDOC, "Contact");
+	contactEl.ele(NSDOC, "ElectronicMail").txt(invoice.issuer.contactEmail).up();
+	contactEl.up();
+
 	party.up();
 	asp.up();
 }

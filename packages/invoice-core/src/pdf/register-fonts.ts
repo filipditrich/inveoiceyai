@@ -4,9 +4,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 /**
- * Fonts live under repo `packages/invoice-core/assets/fonts/` (vendored from
- * DejaVu Fonts 2.37, see LICENSE-dejavu). Do not use `require.resolve` into
- * `dejavu-fonts-ttf` — Bun `.bun` paths are not reliably openable from Next/pdfkit.
+ * Vendored under `packages/invoice-core/assets/fonts/`:
+ * Inter 4.x (SIL OFL) — all UI sans (body, labels, numbers, totals).
+ * See LICENSE-inter.txt in that folder.
  */
 function resolveVendoredFontFile(fontFileName: string): string {
 	const nextToModule = path.join(
@@ -27,7 +27,6 @@ function resolveVendoredFontFile(fontFileName: string): string {
 		return repoPackageFonts;
 	}
 
-	/** cwd often `apps/web` when Next dev runs package script */
 	const fromAppsWebAncestor = path.join(
 		process.cwd(),
 		"../../packages/invoice-core/assets/fonts",
@@ -48,13 +47,14 @@ export function registerInvoiceFonts(): void {
 	if (registeredFonts) {
 		return;
 	}
-	const DejaVuRegular = resolveVendoredFontFile("DejaVuSans.ttf");
-	const DejaVuBold = resolveVendoredFontFile("DejaVuSans-Bold.ttf");
+	const interR = resolveVendoredFontFile("Inter-Regular.ttf");
+	const interB = resolveVendoredFontFile("Inter-Bold.ttf");
+
 	Font.register({
-		family: "DejaVu Sans",
+		family: "Inter",
 		fonts: [
-			{ src: DejaVuRegular, fontWeight: 400 },
-			{ src: DejaVuBold, fontWeight: 700 },
+			{ src: interR, fontWeight: 400 },
+			{ src: interB, fontWeight: 700 },
 		],
 	});
 	registeredFonts = true;

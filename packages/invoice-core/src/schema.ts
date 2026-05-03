@@ -94,6 +94,7 @@ export const IssuerSnapshotSchema = z.object({
 	stampUrl: z.string().url().optional(),
 	signatureUrl: z.string().url().optional(),
 	registryNote: z.string().max(500).optional(),
+	contactEmail: z.string().trim().email(),
 });
 
 export const ClientSnapshotSchema = z.object({

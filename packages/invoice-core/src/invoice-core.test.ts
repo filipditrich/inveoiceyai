@@ -43,6 +43,7 @@ const issuerBase: Issuer = {
 		bic: "GIBACZPX",
 	},
 	vatPayer: true,
+	contactEmail: "fakturace@acmesupplier.example",
 };
 
 const clientBase: Client = {

@@ -23,7 +23,8 @@
 			"accountNumber": "999888/6060",
 			"iban": "CZ6550600000019998877777"
 		},
-		"vatPayer": true
+		"vatPayer": true,
+		"contactEmail": "faktura@sluzby-demo.cz"
 	},
 	"client": {
 		"id": "f6666666-6666-6666-6666-666666666666",

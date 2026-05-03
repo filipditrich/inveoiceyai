@@ -23,7 +23,8 @@
 			"accountNumber": "123456/0100",
 			"iban": "CZ6501000000001234568798"
 		},
-		"vatPayer": true
+		"vatPayer": true,
+		"contactEmail": "faktury@stavar-demo.cz"
 	},
 	"client": {
 		"id": "d4444444-4444-4444-4444-444444444444",

@@ -1,15 +1,22 @@
 "use client";
 
 import demoSampleInvoice from "@/lib/demo-sample-invoice.json";
+import { demoInvoiceExamples } from "@/lib/demo-invoice-examples";
+import { InvoiceSchema, type Invoice } from "@invoicey/invoice-core/schema";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-function formatSampleJson(sample: typeof demoSampleInvoice): string {
+function formatSampleJson(sample: Invoice): string {
 	return JSON.stringify(sample, null, 2);
 }
 
+const baseDemoInvoice = InvoiceSchema.parse(demoSampleInvoice);
+
 export default function InvoiceFromJsonDemoPage() {
-	const [text, setText] = useState(() => formatSampleJson(demoSampleInvoice));
+	const [text, setText] = useState(() => formatSampleJson(baseDemoInvoice));
+	const [selectedExampleId, setSelectedExampleId] = useState(
+		demoInvoiceExamples[0]?.id ?? "",
+	);
 	const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -84,6 +91,17 @@ export default function InvoiceFromJsonDemoPage() {
 		setBusy(false);
 	}, [pdfUrl, text]);
 
+	const loadSelectedExample = useCallback(() => {
+		const selected = demoInvoiceExamples.find(
+			(example) => example.id === selectedExampleId,
+		);
+		if (!selected) {
+			return;
+		}
+		setText(formatSampleJson(selected.invoice));
+		setError(null);
+	}, [selectedExampleId]);
+
 	return (
 		<div className="space-y-6">
 			<div className="flex flex-wrap items-baseline gap-3">
@@ -109,11 +127,30 @@ export default function InvoiceFromJsonDemoPage() {
 						value={text}
 						onChange={(event) => setText(event.target.value)}
 						spellCheck={false}
-						className="border-input placeholder:text-muted-foreground focus-visible:ring-ring max-h-[40vh] min-h-[14rem] w-full resize-y rounded-md border bg-transparent px-3 py-2 font-mono text-sm shadow-xs focus-visible:ring-2 focus-visible:outline-none xl:max-h-[min(42vh,28rem)]"
+						className="border-input placeholder:text-muted-foreground focus-visible:ring-ring max-h-[40vh] min-h-56 w-full resize-y rounded-md border bg-transparent px-3 py-2 font-mono text-sm shadow-xs focus-visible:ring-2 focus-visible:outline-none xl:max-h-[min(42vh,28rem)]"
 						placeholder="{}"
 						autoComplete="off"
 					/>
 					<div className="flex flex-wrap gap-2">
+						<select
+							value={selectedExampleId}
+							onChange={(event) => setSelectedExampleId(event.target.value)}
+							className="border-input bg-background text-foreground inline-flex min-w-68 rounded-md border px-3 py-2 text-sm"
+						>
+							{demoInvoiceExamples.map((example) => (
+								<option key={example.id} value={example.id}>
+									{example.label}
+								</option>
+							))}
+						</select>
+						<button
+							type="button"
+							disabled={busy}
+							onClick={loadSelectedExample}
+							className="border-input hover:bg-accent inline-flex cursor-pointer rounded-md border px-4 py-2 text-sm disabled:opacity-50"
+						>
+							Load selected example
+						</button>
 						<button
 							type="button"
 							onClick={() => void renderPdf()}
@@ -125,10 +162,10 @@ export default function InvoiceFromJsonDemoPage() {
 						<button
 							type="button"
 							disabled={busy}
-							onClick={() => setText(formatSampleJson(demoSampleInvoice))}
+							onClick={() => setText(formatSampleJson(baseDemoInvoice))}
 							className="border-input hover:bg-accent inline-flex cursor-pointer rounded-md border px-4 py-2 text-sm disabled:opacity-50"
 						>
-							Load sample invoice
+							Load base sample
 						</button>
 					</div>
 					{error ? (
@@ -139,7 +176,8 @@ export default function InvoiceFromJsonDemoPage() {
 						<p className="text-muted-foreground text-xs">
 							Validated with <code>InvoiceSchema.parse</code> inside{" "}
 							<code>/api/demo/invoice-pdf</code>. See{" "}
-							<code>@invoicey/invoice-core</code> fixtures for more examples.
+							<code>@invoicey/invoice-core</code> fixtures and demo presets for
+							more examples.
 						</p>
 					)}
 				</div>

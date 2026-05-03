@@ -23,7 +23,8 @@
 			"iban": "CZ2501000001153743440297",
 			"bic": "KOMBCZPP"
 		},
-		"vatPayer": false
+		"vatPayer": false,
+		"contactEmail": "faktura@invoicey.demo"
 	},
 	"client": {
 		"id": "5bc1d5a7-0c58-4cda-a1f6-4ad9876543ff",

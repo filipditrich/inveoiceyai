@@ -25,6 +25,7 @@
 			"bic": "GIBACZPX"
 		},
 		"vatPayer": true,
+		"contactEmail": "faktura@filipditrich.demo",
 		"logoUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNgYGD4DwABBAEAHb6Q+QAAAABJRU5ErkJggg=="
 	},
 	"client": {

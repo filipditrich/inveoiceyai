@@ -25,7 +25,8 @@
 			"iban": "CZ6508000000192000145399",
 			"bic": "GIBACZPX"
 		},
-		"vatPayer": true
+		"vatPayer": true,
+		"contactEmail": "ucetni@filipditrich.demo"
 	},
 	"client": {
 		"id": "5bc1d5a7-0c58-4cda-a1f6-4ad9876543ff",
