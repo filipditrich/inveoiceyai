@@ -97,6 +97,8 @@ export const IssuerSnapshotSchema = z.object({
 	contactEmail: z.string().trim().email(),
 });
 
+export type IssuerSnapshot = z.infer<typeof IssuerSnapshotSchema>;
+
 export const ClientSnapshotSchema = z.object({
 	id: z.string().uuid(),
 	name: z.string().min(1).max(200),
