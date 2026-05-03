@@ -10,6 +10,9 @@
     },
     "lint": {},
     "typecheck": {},
+    "test": {
+      "outputs": []
+    },
     "db:push": {
       "cache": false
     }
