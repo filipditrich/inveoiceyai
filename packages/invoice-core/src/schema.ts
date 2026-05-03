@@ -106,6 +106,8 @@ export const ClientSnapshotSchema = z.object({
 	contactEmail: z.string().email().optional(),
 });
 
+export type ClientSnapshot = z.infer<typeof ClientSnapshotSchema>;
+
 export const PaymentSchema = z
 	.object({
 		method: z.enum(["transfer", "cash", "card"]),
