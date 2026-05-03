@@ -2,9 +2,9 @@
 
 Per-feature implementation specs. Written **just-in-time** before the plan that consumes them lands.
 
-## Status (Phase 0)
+## Status
 
-This folder is intentionally empty as of Phase 0 — we adopted the [`core_plus_lazy_specs`](../README.md#lifecycle-conventions) doc-depth strategy: domain contracts and ADRs upfront, feature-level specs deferred until each plan starts.
+**Plan 3 specs are present:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md). Earlier phases left this folder empty by design ([`core_plus_lazy_specs`](../README.md#lifecycle-conventions)).
 
 ## Expected specs (with the plan that authors them)
 

@@ -189,14 +189,7 @@ Each post-MVP plan reuses `invoice-core` and `db` directly — no HTTP shim, no 
 
 ## Open architectural questions
 
-### TODO(plan-3): Czech-diacritic font choice
-
-Pick one of {Inter, Roboto, IBM Plex Sans}, version-pin it, store the `.ttf` files inside `packages/invoice-core/assets/fonts/`. Decision lands in `specs/pdf-rendering.md`.
-
 ### TODO(plan-1): Tailwind v4 + ReUI base-nova style compatibility
 
 ReUI ships `base-nova` style on Tailwind v4 ([reui.io/docs/get-started](https://reui.io/docs/get-started)). Confirm the registry config plays nicely with Next.js 16's app-dir CSS handling and that `base-nova` does not conflict with shadcn defaults we override.
 
-### TODO(plan-3): ISDOC XSD source
-
-The 6.0.2 schema is downloadable from [isdoc.cz](https://isdoc.cz). Vendor it into `packages/invoice-core/assets/schemas/` for offline test-time validation, or fetch in CI? Default plan: vendor.

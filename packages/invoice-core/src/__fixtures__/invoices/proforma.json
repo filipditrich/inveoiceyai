@@ -1,0 +1,71 @@
+{
+	"meta": {
+		"docType": "proforma",
+		"number": "PF20260004",
+		"issueDate": "2026-05-03",
+		"dueDate": "2026-05-17",
+		"duzp": "2026-05-03",
+		"language": "cs",
+		"currency": "CZK"
+	},
+	"issuer": {
+		"id": "e5555555-5555-5555-5555-555555555555",
+		"name": "Služby s.r.o.",
+		"ico": "33333333",
+		"dic": "CZ3333333356",
+		"address": {
+			"street": "Provozní 9",
+			"city": "Brno",
+			"zip": "602 00",
+			"country": "CZ"
+		},
+		"bank": {
+			"accountNumber": "999888/6060",
+			"iban": "CZ6550600000019998877777"
+		},
+		"vatPayer": true
+	},
+	"client": {
+		"id": "f6666666-6666-6666-6666-666666666666",
+		"name": "Zákazník XY",
+		"ico": "44444444",
+		"dic": "CZ4444444465",
+		"address": {
+			"street": "Nákupní 1",
+			"city": "Ostrava",
+			"zip": "709 00",
+			"country": "CZ"
+		}
+	},
+	"vat": {
+		"mode": "regular",
+		"suppliesAbroad": "none"
+	},
+	"payment": {
+		"method": "transfer",
+		"bankAccount": {
+			"accountNumber": "999888/6060",
+			"iban": "CZ6550600000019998877777"
+		},
+		"variableSymbol": "987654"
+	},
+	"items": [
+		{
+			"position": 1,
+			"description": "Předzáloha",
+			"quantity": 1,
+			"unit": "ks",
+			"unitPriceWithoutVat": 5000,
+			"vatRate": 21,
+			"lineSubtotal": 5000,
+			"lineVat": 1050,
+			"lineTotal": 6050
+		}
+	],
+	"totals": {
+		"subtotal": 5000,
+		"vatBreakdown": [{ "rate": 21, "base": 5000, "vat": 1050 }],
+		"vatTotal": 1050,
+		"total": 6050
+	}
+}

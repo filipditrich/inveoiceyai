@@ -1,0 +1,64 @@
+# SPAYD payload and QR specification
+
+## Goal
+
+Emit **Short Payment Descriptor (SPAYD) 1.0** payloads and PNG QR codes for Czech bank apps, derived from [`Invoice.payment`](../../packages/invoice-core/src/schema.ts), `issuer`, `client`, `meta`, and `totals`.
+
+## Normative references
+
+- Česká bankovní asociace — SPAYD (structure `SPD*1.0*[KEY:VALUE]*...`).
+- Practical field list used in CZ QR platba: ACC, AM, CC, MSG, RN, VS, SS, KS, DT (due date optional), TP (alternate account format older apps — omit if redundant).
+
+## Inputs / outputs
+
+| Name | Signature | Behaviour |
+| --- | --- | --- |
+| `buildSpaydPayload(invoice)` | `string` | Returns **`null`** when QR must not be shown (non-transfer or missing banking data — see rules). Else returns SPAYD string **without** leading URL scheme (some apps paste raw `SPD*`; QR library encodes that string only). |
+| `renderSpaydQr(invoice)` | `Promise<string \| null>` | If `buildSpaydPayload` is `null`, return `null`. Else generate PNG (`qrcode`), return **`data:image/png;base64,...`**.
+
+## Mandatory vs omitted QR
+
+Include SPAYD (and QR) **only when**:
+
+- `payment.method === 'transfer'`, **and**
+- `payment.bankAccount` is defined (schema guarantees IBAN domestic CZ MVP), **and**
+- `totals.total` is **non-null** financially: for MVP use **rounded half-up to whole koruny** (`Math.round(total)`) — amount `AM` uses **minor units** (haléře): `roundedKoruny * 100` for whole-Kč invoices; SPAYD `AM` is integer minor units.
+
+For **credit notes** with negative totals: SPAYD in CZ QR usually targets **payments to supplier**. Negative amounts may confuse readers. MVP rule: **still encode** QR with negative `AM` if library accepts; otherwise **omit QR** (return `null`) for `totals.total < 0`. (Invoicey emits SPAYD for negative case as **omit**.)
+
+## Field mapping
+
+| SPAYD key | Source |
+| --- | --- |
+| `ACC` | `IBAN+BIC`: format `iban + '+' + bic` **or** plain IBAN-only if no BIC; MVP: `iban` plus optional `bic` separated by `+` per ČBA guidance (if no BIC, use IBAN-only after verifying scanner compatibility — **spec for code:** `{iban}` only when `bic` absent, else `{iban}+{bic}`). |
+| `AM` | `Math.round(Math.abs(invoice.totals.total)) * 100` for payable amount in haléře (credit note → omit QR per above). |
+| `CC` | `CZK` |
+| `MSG` | Short text: `invoice.meta.number` + optional shortened client name truncated to QR limits (ČBA often caps ~60 chars combined — truncate safely). |
+| `RN` | Recipient name (`issuer.name`) truncated per limits. |
+| `VS` | `payment.variableSymbol` if digits present |
+| `KS` | `payment.constantSymbol` if present |
+| `SS` | `payment.specificSymbol` if present |
+| `DT` | Due date compact `YYYYMMDD` from `meta.dueDate` (optional — include for better UX).
+
+Order of keys inside payload: **`ACC`** first after version, then `AM`, `CC`, others in stable order documented in implementation (stable for golden snapshots).
+
+Payload structure:
+
+```
+SPD*1.0*ACC:...*AM:...*CC:CZK*[optional keys in fixed order]*
+
+```
+
+Characters: uppercase keys; escape `*` according to ČBA rules (`*` duplicated in values if needed).
+
+## QR generation (`qrcode` npm)
+
+- **ECC:** `M` (default) acceptable; **`H`** preferred for scanned printed invoices / lower light.
+- **Type:** PNG buffer → base64 → data URL for react-pdf.
+- **Margin:** minimal safe quiet zone (library default module size); **fixed width** in px (spec: **164px**) for deterministic golden tests.
+- **Error:** if encoding fails throw (should not occur for MVP inputs).
+
+## References
+
+- [domain/invoice-schema.md](../domain/invoice-schema.md) (`PaymentSchema`)
+- [0004-pdf-react-pdf-renderer.md](../decisions/0004-pdf-react-pdf-renderer.md)

@@ -8,8 +8,8 @@ Phased delivery plan. Each phase corresponds to one entry in `.cursor/plans/`. P
 flowchart LR
     P0["Plan 0<br/>docs<br/>done"] --> P1["Plan 1<br/>bootstrap<br/>done"]
     P1 --> P2["Plan 2<br/>invoice-core<br/>done"]
-    P2 --> P3["Plan 3<br/>PDF / QR / ISDOC<br/>next"]
-    P3 --> P4["Plan 4<br/>ARES + clients"]
+    P2 --> P3["Plan 3<br/>PDF / QR / ISDOC<br/>done"]
+    P3 --> P4["Plan 4<br/>ARES + clients<br/>next"]
     P4 --> P5["Plan 5<br/>issuers"]
     P5 --> P6["Plan 6<br/>invoice builder"]
     P6 --> P7["Plan 7<br/>invoice list"]
@@ -74,20 +74,23 @@ flowchart LR
 
 ### Plan 3 — PDF + QR + ISDOC rendering
 
-**Status:** Planned  
+**Status:** Done  
+**Completed:** 2026-05-03  
 
 **Goal:** `renderInvoicePdf`, `renderSpaydQr`, `renderIsdoc` with golden-file tests. PDF readable by humans; QR readable by every Czech bank app; ISDOC validates against the public XSD.
 
 **Exit criteria:**
-- `renderInvoicePdf(invoice): Promise<Uint8Array>` produces a PDF with logo / stamp / signature slots, line items, totals, payment block, embedded QR
-- Czech-diacritic font picked, version-pinned, registered with `@react-pdf/renderer` `Font.register`
-- `buildSpaydPayload(invoice)` produces a SPAYD 1.0 string
-- `renderSpaydQr(invoice)` returns a PNG data URL via `qrcode`
-- `renderIsdoc(invoice)` produces ISDOC 6.0.2 XML; validated against the official XSD in tests
-- Golden-file tests check stable byte output for canonical fixtures
-- Spec doc `specs/pdf-rendering.md`, `specs/spayd-qr.md`, `specs/isdoc.md` are written before implementation
+- [x] `renderInvoicePdf(invoice): Promise<Uint8Array>` produces a PDF with logo / stamp / signature slots, line items, totals, payment block, embedded QR
+- [x] Czech-diacritic font picked, version-pinned, registered with `@react-pdf/renderer` `Font.register` (DejaVu Sans via `dejavu-fonts-ttf`; see [`specs/pdf-rendering.md`](./specs/pdf-rendering.md))
+- [x] `buildSpaydPayload(invoice)` produces a SPAYD 1.0 string
+- [x] `renderSpaydQr(invoice)` returns a PNG data URL via `qrcode`
+- [x] `renderIsdoc(invoice)` produces ISDOC 6.0.2 XML with root `Invoice` `version="6.0.2"`; validated against the vendored XSD in tests (`xmllint-wasm`)
+- [x] Golden / stable tests on canonical fixtures: ISDOC string snapshots + XSD; PDF smoke (`%PDF` header); SPAYD string + deterministic QR PNG hash
+- [x] Spec doc `specs/pdf-rendering.md`, `specs/spayd-qr.md`, `specs/isdoc.md` written before implementation
 
 **Doc inputs:** the three specs above + [`domain/invoice-schema.md`](./domain/invoice-schema.md)
+
+**Artifacts:** `@invoicey/invoice-core` exports `pdf/`, `spayd/`, `isdoc/`; XSD [`packages/invoice-core/assets/schemas/isdoc-invoice-6.0.2.xsd`](../packages/invoice-core/assets/schemas/isdoc-invoice-6.0.2.xsd); tests [`packages/invoice-core/src/plan03-render.test.ts`](../packages/invoice-core/src/plan03-render.test.ts).
 
 ### Plan 4 — ARES client + client (customer) management
 
