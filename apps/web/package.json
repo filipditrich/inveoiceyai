@@ -7,9 +7,11 @@
 		"build": "next build --turbopack",
 		"start": "next start",
 		"lint": "eslint",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run"
 	},
 	"dependencies": {
+		"@ai-sdk/gateway": "3.0.109",
 		"@base-ui/react": "1.4.1",
 		"@c15t/react": "2.0.3",
 		"@dnd-kit/core": "6.3.1",
@@ -20,10 +22,14 @@
 		"@invoicey/db": "workspace:*",
 		"@invoicey/env": "workspace:*",
 		"@invoicey/invoice-core": "workspace:*",
+		"@slack/web-api": "7.15.1",
 		"@tanstack/react-table": "8.21.3",
+		"ai": "6.0.174",
 		"class-variance-authority": "0.7.1",
 		"clsx": "2.1.1",
 		"cookie": "1.1.1",
+		"date-fns": "4.1.0",
+		"date-fns-tz": "3.2.0",
 		"drizzle-orm": "0.44.7",
 		"lucide-react": "1.14.0",
 		"next": "16.2.4",
@@ -44,10 +50,12 @@
 		"@types/node": "25.6.0",
 		"@types/react": "19.2.14",
 		"@types/react-dom": "19.2.3",
+		"@vitest/coverage-v8": "4.1.5",
 		"dotenv": "17.4.2",
 		"eslint": "^9",
 		"eslint-config-next": "16.2.4",
 		"tailwindcss": "^4",
-		"typescript": "6.0.3"
+		"typescript": "6.0.3",
+		"vitest": "4.1.5"
 	}
 }
