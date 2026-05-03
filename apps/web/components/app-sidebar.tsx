@@ -2,7 +2,6 @@
 
 import { NavDocuments } from "@/components/nav-documents";
 import { NavMain } from "@/components/nav-main";
-import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import {
 	Sidebar,
@@ -15,7 +14,6 @@ import {
 	SidebarRail,
 } from "@/components/ui/sidebar";
 import {
-	BookOpenIcon,
 	BracesIcon,
 	Building2Icon,
 	FileTextIcon,
@@ -44,14 +42,6 @@ const documentItems = [
 		name: "From JSON",
 		url: "/invoices/from-json",
 		icon: BracesIcon,
-	},
-];
-
-const navSecondaryItems = [
-	{
-		title: "Sidebar docs (shadcn)",
-		url: "https://ui.shadcn.com/docs/components/sidebar",
-		icon: <BookOpenIcon />,
 	},
 ];
 
@@ -118,7 +108,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			<SidebarContent>
 				<NavMain items={navMain} groupLabel="Navigate" />
 				<NavDocuments items={documentItems} />
-				<NavSecondary groupLabel="Links" items={navSecondaryItems} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={demoUser} />
