@@ -151,8 +151,12 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 | `RESEND_API_KEY` | Resend API key | Vercel | Plan 11 |
 | `CLERK_SECRET_KEY` | Clerk secret | Vercel | Plan 14 |
 | `CLERK_PUBLISHABLE_KEY` | Clerk publishable key | Vercel | Plan 14 |
-| `SLACK_BOT_TOKEN` | Slack bot OAuth token | Vercel | Plan 13 |
-| `SLACK_SIGNING_SECRET` | Slack request-signing secret | Vercel | Plan 13 |
+| `SLACK_BOT_TOKEN` | Slack bot OAuth token (`xoxb-…`) | Vercel + `.env.local` | Plan 13a |
+| `SLACK_SIGNING_SECRET` | Slack request-signing secret | Vercel + `.env.local` | Plan 13a |
+| `AI_GATEWAY_API_KEY` | Vercel AI Gateway API key | Vercel + `.env.local` | Plan 13a |
+| `INVOICEY_AI_MODEL` | Gateway model id (e.g. `openai/gpt-4o-mini`) | Vercel + `.env.local` | Plan 13a |
+| `INVOICEY_AI_FALLBACK_MODEL` | Fallback gateway model id | Vercel + `.env.local` | Plan 13a |
+| `INVOICEY_DEMO_ISSUER_JSON` | Optional JSON override for demo `IssuerSnapshot` | Vercel + `.env.local` | Plan 13a |
 
 `.env.example` lives at repo root with every var commented; `.env.local` is git-ignored.
 
@@ -161,7 +165,8 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 - **Vercel** for `apps/web` — Next.js 16 + Server Actions + route handlers run on Vercel Functions
 - **Neon** for Postgres — wired via Vercel Marketplace (auto-injects `DATABASE_URL`)
 - **UploadThing** for files — configured per-app
-- **Future:** `apps/mcp` runs as a separate Vercel deployment (or self-hosted box) when introduced. `apps/slack` runs on Vercel using a slash-command route handler.
+- **Plan 13a (Slack demo):** slash command hits `apps/web/app/api/slack/commands/route.ts` (Node runtime). A future `apps/slack` split remains optional.
+- **Future:** `apps/mcp` runs as a separate Vercel deployment (or self-hosted box) when introduced.
 
 ## Tooling
 
