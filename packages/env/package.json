@@ -1,0 +1,21 @@
+{
+  "name": "@invoicey/env",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./schema": "./src/schema.ts",
+    "./server": "./src/server.ts"
+  },
+  "scripts": {
+    "lint": "echo \"skip: eslint not wired for env yet\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "4.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "25.6.0",
+    "typescript": "6.0.3"
+  }
+}

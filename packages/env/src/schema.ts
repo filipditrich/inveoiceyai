@@ -1,0 +1,94 @@
+import { z } from "zod";
+
+/**
+ * Matches `NODE_ENV` at runtime (`development`, `production`, `test`).
+ */
+export const APP_ENV = {
+  DEVELOPMENT: "development",
+  PRODUCTION: "production",
+  TEST: "test",
+} as const;
+
+export type AppEnv = (typeof APP_ENV)[keyof typeof APP_ENV];
+
+const NODE_ENV_VALUES = [
+  APP_ENV.DEVELOPMENT,
+  APP_ENV.PRODUCTION,
+  APP_ENV.TEST,
+] as const;
+
+/** Deployment intent for banners and toggles (`NEXT_PUBLIC_APP_STAGE`). */
+export const APP_STAGE = {
+  DEVELOPMENT: "development",
+  PRODUCTION: "production",
+  STAGING: "staging",
+  BETA: "beta",
+  ALPHA: "alpha",
+} as const;
+
+export type AppStage = (typeof APP_STAGE)[keyof typeof APP_STAGE];
+
+const APP_STAGE_VALUES = [
+  APP_STAGE.DEVELOPMENT,
+  APP_STAGE.PRODUCTION,
+  APP_STAGE.STAGING,
+  APP_STAGE.BETA,
+  APP_STAGE.ALPHA,
+] as const;
+
+/** Public env vars (safe on the client — only `NEXT_PUBLIC_*` whitelist in `env.config.client.ts`). */
+export const publicEnvSchema = z.object({
+  NODE_ENV: z.enum(NODE_ENV_VALUES),
+  /** Public origin (SPAYD, links, callbacks). */
+  NEXT_PUBLIC_APP_URL: z.url(),
+  NEXT_PUBLIC_APP_STAGE: z.enum(APP_STAGE_VALUES).default(APP_STAGE.DEVELOPMENT),
+});
+
+/** Normalize missing / blank `.env` values to `undefined` for optional fields. */
+function emptyEnvToUndefined(value: unknown): unknown {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== "string") return value;
+  const t = value.trim();
+  return t === "" ? undefined : t;
+}
+
+/** Server-only / secret env vars. */
+export const privateEnvSchema = z.object({
+  DATABASE_URL: z
+    .string()
+    .transform((s) => s.trim())
+    .pipe(z.string().min(1)),
+  DATABASE_URL_UNPOOLED: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
+  /** Default workspace until auth (multi-tenant schema). Optional until callers require it. */
+  INVOICEY_DEFAULT_WORKSPACE_ID: z.preprocess(emptyEnvToUndefined, z.uuid().optional()),
+  UPLOADTHING_TOKEN: z.preprocess(emptyEnvToUndefined, z.string().optional()),
+  UPLOADTHING_APP_ID: z.preprocess(emptyEnvToUndefined, z.string().optional()),
+});
+
+/** Vercel-only system vars (subset). @see https://vercel.com/docs/environment-variables/system-environment-variables */
+export const vercelEnvSchema = z.object({
+  VERCEL: z.enum(["1"]).optional(),
+  VERCEL_ENV: z
+    .enum(["production", "preview", "development"])
+    .optional(),
+  VERCEL_URL: z.string().optional(),
+  VERCEL_BRANCH_URL: z.string().optional(),
+  VERCEL_PROJECT_PRODUCTION_URL: z.string().optional(),
+  VERCEL_REGION: z.string().optional(),
+  VERCEL_DEPLOYMENT_ID: z.string().optional(),
+  VERCEL_PROJECT_ID: z.string().optional(),
+  NEXT_RUNTIME: z.enum(["nodejs", "edge"]).optional(),
+  npm_package_version: z.string().optional(),
+});
+
+export const fullEnvSchema = vercelEnvSchema
+  .merge(publicEnvSchema)
+  .merge(privateEnvSchema);
+
+export type PublicEnv = z.infer<typeof publicEnvSchema>;
+export type PrivateEnv = z.infer<typeof privateEnvSchema>;
+export type VercelEnv = z.infer<typeof vercelEnvSchema>;
+export type FullEnv = z.infer<typeof fullEnvSchema>;
