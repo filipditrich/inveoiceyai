@@ -11,30 +11,29 @@
 	"issuer": {
 		"id": "ca8b8d4e-2e7e-4f6a-9b7d-1f9c1234abcd",
 		"name": "Filip Ditrich",
-		"ico": "12345678",
-		"dic": "CZ12345678",
+		"ico": "09870113",
 		"address": {
-			"street": "Na Příkopě 14",
-			"city": "Praha",
-			"zip": "110 00",
+			"street": "Hrabalová 1092, Liberec XIV-Ruprechtice",
+			"city": "Liberec",
+			"zip": "460 14",
 			"country": "CZ"
 		},
 		"bank": {
-			"accountNumber": "1920014539/0800",
-			"iban": "CZ6508000000192000145399",
-			"bic": "GIBACZPX"
+			"accountNumber": "115-3743440297/0100",
+			"iban": "CZ2501000001153743440297",
+			"bic": "KOMBCZPP"
 		},
-		"vatPayer": true
+		"vatPayer": false
 	},
 	"client": {
 		"id": "5bc1d5a7-0c58-4cda-a1f6-4ad9876543ff",
-		"name": "NFCtron s.r.o.",
-		"ico": "07654321",
-		"dic": "CZ07654321",
+		"name": "NFCtron a.s.",
+		"ico": "07283539",
+		"dic": "CZ07283539",
 		"address": {
-			"street": "Křížová 2598/4",
-			"city": "Brno",
-			"zip": "603 00",
+			"street": "Opletalova 1525/39, Nové Město",
+			"city": "Praha",
+			"zip": "110 00",
 			"country": "CZ"
 		},
 		"contactEmail": "billing@nfctron.com"
@@ -46,30 +45,29 @@
 	"payment": {
 		"method": "transfer",
 		"bankAccount": {
-			"accountNumber": "1920014539/0800",
-			"iban": "CZ6508000000192000145399",
-			"bic": "GIBACZPX"
+			"accountNumber": "115-3743440297/0100",
+			"iban": "CZ2501000001153743440297",
+			"bic": "KOMBCZPP"
 		},
-		"variableSymbol": "20260001",
-		"constantSymbol": "0308"
+		"variableSymbol": "20260001"
 	},
 	"items": [
 		{
 			"position": 1,
-			"description": "Práce",
+			"description": "Služba",
 			"quantity": 1,
 			"unit": "ks",
-			"unitPriceWithoutVat": 1000,
-			"vatRate": 21,
-			"lineSubtotal": 1000,
-			"lineVat": 210,
-			"lineTotal": 1210
+			"unitPriceWithoutVat": 4000,
+			"vatRate": 0,
+			"lineSubtotal": 4000,
+			"lineVat": 0,
+			"lineTotal": 4000
 		}
 	],
 	"totals": {
-		"subtotal": 1000,
-		"vatBreakdown": [{ "rate": 21, "base": 1000, "vat": 210 }],
-		"vatTotal": 210,
-		"total": 1210
+		"subtotal": 4000,
+		"vatBreakdown": [{ "rate": 0, "base": 4000, "vat": 0 }],
+		"vatTotal": 0,
+		"total": 4000
 	}
 }

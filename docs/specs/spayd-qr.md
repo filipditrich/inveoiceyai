@@ -22,7 +22,7 @@ Include SPAYD (and QR) **only when**:
 
 - `payment.method === 'transfer'`, **and**
 - `payment.bankAccount` is defined (schema guarantees IBAN domestic CZ MVP), **and**
-- `totals.total` is **non-null** financially: for MVP use **rounded half-up to whole koruny** (`Math.round(total)`) — amount `AM` uses **minor units** (haléře): `roundedKoruny * 100` for whole-Kč invoices; SPAYD `AM` is integer minor units.
+- `totals.total` is **non-null** financially: round to **2 decimal places** in Kč; SPAYD `AM` is the **payable amount in koruny** (major units), e.g. `1210` or `1210.50`, **not** haléře.
 
 For **credit notes** with negative totals: SPAYD in CZ QR usually targets **payments to supplier**. Negative amounts may confuse readers. MVP rule: **still encode** QR with negative `AM` if library accepts; otherwise **omit QR** (return `null`) for `totals.total < 0`. (Invoicey emits SPAYD for negative case as **omit**.)
 
@@ -31,7 +31,7 @@ For **credit notes** with negative totals: SPAYD in CZ QR usually targets **paym
 | SPAYD key | Source |
 | --- | --- |
 | `ACC` | `IBAN+BIC`: format `iban + '+' + bic` **or** plain IBAN-only if no BIC; MVP: `iban` plus optional `bic` separated by `+` per ČBA guidance (if no BIC, use IBAN-only after verifying scanner compatibility — **spec for code:** `{iban}` only when `bic` absent, else `{iban}+{bic}`). |
-| `AM` | `Math.round(Math.abs(invoice.totals.total)) * 100` for payable amount in haléře (credit note → omit QR per above). |
+| `AM` | Payable total in Kč: `Math.round(total * 100) / 100`, formatted without trailing `.00` when whole-koruna (e.g. `1210`, `99.50`) — major units per ČBA SPAYD / QR platba (credit note → omit QR per above). |
 | `CC` | `CZK` |
 | `MSG` | Short text: `invoice.meta.number` + optional shortened client name truncated to QR limits (ČBA often caps ~60 chars combined — truncate safely). |
 | `RN` | Recipient name (`issuer.name`) truncated per limits. |

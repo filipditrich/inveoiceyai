@@ -43,6 +43,19 @@ function buildAcc(account: Invoice["payment"]["bankAccount"]): string {
 	return account.iban;
 }
 
+/** SPAYD `AM`: payable amount in koruny (major units), not haléře. */
+function formatSpaydAmCz(totalKorunu: number): string {
+	const x = Math.round(totalKorunu * 100) / 100;
+	if (x <= 0) {
+		return "0";
+	}
+	const fixed = x.toFixed(2);
+	if (fixed.endsWith(".00")) {
+		return fixed.slice(0, -3);
+	}
+	return fixed;
+}
+
 /**
  * Builds a Short Payment Descriptor 1.0 string, or null when QR must not appear
  * (`spayd-qr.md`: non-transfer, missing bank, credit note negative total).
@@ -59,12 +72,12 @@ export function buildSpaydPayload(invoice: Invoice): string | null {
 		return null;
 	}
 
-	const cents = Math.round(invoice.totals.total * 100);
+	const amountStr = formatSpaydAmCz(invoice.totals.total);
 	const acc = buildAcc(invoice.payment.bankAccount);
 	const parts = new Map<string, string>();
 
 	parts.set("ACC", escapeSpaydValue(acc));
-	parts.set("AM", escapeSpaydValue(String(cents)));
+	parts.set("AM", escapeSpaydValue(amountStr));
 	parts.set("CC", escapeSpaydValue("CZK"));
 	parts.set("RN", escapeSpaydValue(truncateAscii(invoice.issuer.name, 36)));
 	parts.set(

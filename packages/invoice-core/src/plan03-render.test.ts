@@ -77,7 +77,7 @@ describe("SPAYD", () => {
 		const p = buildSpaydPayload(invoice);
 		expect(p).toContain("SPD*1.0*");
 		expect(p).toContain("*ACC:CZ6508000000192000145399+GIBACZPX*");
-		expect(p).toContain("*AM:");
+		expect(p).toContain("*AM:1210*");
 		expect(buildSpaydPayload(invoice)).toBe(p);
 	});
 
