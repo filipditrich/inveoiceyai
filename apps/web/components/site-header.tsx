@@ -9,10 +9,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { useSidebar } from "@/components/ui/sidebar"
-import { PanelLeftIcon } from "lucide-react"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -31,7 +29,6 @@ function labelForSegment(segment: string): string {
 
 export function SiteHeader() {
   const pathname = usePathname()
-  const { toggleSidebar } = useSidebar()
 
   const segments = pathname.split("/").filter(Boolean)
 
@@ -47,21 +44,16 @@ export function SiteHeader() {
   const lastIndex = crumbs.length - 1
 
   return (
-    <header className="sticky top-0 z-50 flex w-full shrink-0 items-center border-b bg-background">
-      <div className="flex h-[var(--header-height)] w-full items-center gap-3 px-4">
-        <Button
-          variant="ghost"
-          size="icon-sm"
+    <header className="bg-background sticky top-0 z-50 flex w-full shrink-0 border-b">
+      <div className="flex h-(--header-height) w-full items-center gap-2 px-4 transition-[height] duration-200 ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+        <SidebarTrigger
           className="-ml-1"
           aria-label="Přepnout postranní panel"
           title="⌘ / Ctrl+B"
-          onClick={toggleSidebar}
-        >
-          <PanelLeftIcon />
-        </Button>
+        />
         <Separator
           orientation="vertical"
-          className="mr-1 data-vertical:h-4 data-vertical:self-center"
+          className="mr-2 data-vertical:h-4 data-vertical:self-center"
         />
         <Breadcrumb className="mr-auto hidden min-w-0 flex-1 sm:flex">
           <BreadcrumbList className="min-w-0">

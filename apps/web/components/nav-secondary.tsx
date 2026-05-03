@@ -23,6 +23,7 @@ function renderSecondaryAnchor(url: string) {
 
 export function NavSecondary({
   items,
+  groupLabel = "Resources",
   ...props
 }: {
   items: {
@@ -30,10 +31,11 @@ export function NavSecondary({
     url: string
     icon: React.ReactNode
   }[]
+  groupLabel?: string
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>
-      <SidebarGroupLabel className="px-4">Resources</SidebarGroupLabel>
+      <SidebarGroupLabel className="px-4">{groupLabel}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (

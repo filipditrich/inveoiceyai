@@ -1,6 +1,8 @@
 "use client";
 
+import { NavDocuments } from "@/components/nav-documents";
 import { NavMain } from "@/components/nav-main";
+import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import {
 	Sidebar,
@@ -10,8 +12,11 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	SidebarRail,
 } from "@/components/ui/sidebar";
 import {
+	BookOpenIcon,
+	BracesIcon,
 	Building2Icon,
 	FileTextIcon,
 	LayoutDashboardIcon,
@@ -28,6 +33,27 @@ const demoUser = {
 	email: "demo@invoicey.demo",
 	avatar: "",
 };
+
+const documentItems = [
+	{
+		name: "Invoices overview",
+		url: "/invoices",
+		icon: FileTextIcon,
+	},
+	{
+		name: "From JSON",
+		url: "/invoices/from-json",
+		icon: BracesIcon,
+	},
+];
+
+const navSecondaryItems = [
+	{
+		title: "Sidebar docs (shadcn)",
+		url: "https://ui.shadcn.com/docs/components/sidebar",
+		icon: <BookOpenIcon />,
+	},
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const pathname = usePathname();
@@ -73,10 +99,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	];
 
 	return (
-		<Sidebar
-			className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
-			{...props}
-		>
+		<Sidebar collapsible="icon" variant="inset" {...props}>
 			<SidebarHeader>
 				<SidebarMenu>
 					<SidebarMenuItem>
@@ -94,10 +117,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			</SidebarHeader>
 			<SidebarContent>
 				<NavMain items={navMain} groupLabel="Navigate" />
+				<NavDocuments items={documentItems} />
+				<NavSecondary groupLabel="Links" items={navSecondaryItems} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={demoUser} />
 			</SidebarFooter>
+			<SidebarRail />
 		</Sidebar>
 	);
 }
