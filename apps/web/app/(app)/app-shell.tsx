@@ -8,7 +8,6 @@ import type { CSSProperties, ReactNode } from "react";
 export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
 	return (
 		<SidebarProvider
-			className="flex min-h-svh w-full flex-col"
 			style={
 				{
 					"--sidebar-width": "calc(var(--spacing) * 72)",

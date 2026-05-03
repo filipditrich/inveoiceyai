@@ -1,6 +1,7 @@
 "use client"
 
 import { SearchForm } from "@/components/search-form"
+import { ModalSmokeButton } from "@/features/modals-manager/modal-smoke-button"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -76,6 +77,7 @@ export function SiteHeader() {
           </BreadcrumbList>
         </Breadcrumb>
         <SearchForm className="w-full sm:max-w-xs" />
+        <ModalSmokeButton />
       </div>
     </header>
   )

@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 import { APP_ENV, APP_STAGE, publicEnvSchema } from "@invoicey/env/schema";
 import type { PublicEnv } from "@invoicey/env/schema";
 
