@@ -10,6 +10,10 @@
     "lint": "echo \"skip: eslint not wired for ares yet\"",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
+  "dependencies": {
+    "@invoicey/invoice-core": "workspace:*",
+    "zod": "^3.24.4"
+  },
   "devDependencies": {
     "typescript": "6.0.3"
   }

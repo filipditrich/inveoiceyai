@@ -4,7 +4,9 @@ Per-feature implementation specs. Written **just-in-time** before the plan that 
 
 ## Status
 
-**Plan 3 specs are present:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md). Earlier phases left this folder empty by design ([`core_plus_lazy_specs`](../README.md#lifecycle-conventions)).
+**Plan 3 specs:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md).
+
+**Plan 4 spec:** [`ares.md`](./ares.md). Earlier phases left this folder empty by design until each plan ([`core_plus_lazy_specs`](../README.md#lifecycle-conventions)).
 
 ## Expected specs (with the plan that authors them)
 
