@@ -1,0 +1,157 @@
+# Glossary
+
+Czech tax / invoicing / business-registration terms with English equivalents and short definitions. When in doubt about a term used elsewhere in the docs, look here first.
+
+Sorted by Czech name (or original abbreviation).
+
+## Identification & registration
+
+### IČO
+
+**Identifikační číslo osoby** — the 8-digit "company ID" assigned by the Czech statistical office to every economic entity (companies, sole traders, NGOs). The primary key for ARES lookups. Sometimes written `IČ`.
+
+> Example: `28288390`
+
+### DIČ
+
+**Daňové identifikační číslo** — VAT identification number. For Czech entities the format is `CZ` + the IČO (or, for natural persons, `CZ` + birth number). An entity has a DIČ only if it's registered as a *plátce DPH* or *identifikovaná osoba*. Used as the VAT ID in invoices.
+
+> Example: `CZ28288390`
+
+### ARES
+
+**Administrativní registr ekonomických subjektů** — Ministry of Finance public registry of all economic entities. We use its REST API (`https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/{ico}`) to look up businesses by IČO. See [`specs/ares.md`](./specs/ares.md) (written before Plan 4).
+
+### ŽL
+
+**Živnostenský list** — trade license. Colloquial shorthand for being a self-employed sole trader (OSVČ) under one of several trade categories. Such a person has an IČO but is taxed as a natural person.
+
+### s.r.o.
+
+**Společnost s ručením omezeným** — limited liability company. Most common Czech legal form for small companies. Has its own IČO + DIČ.
+
+### a.s.
+
+**Akciová společnost** — joint-stock company. Less common at our scale; mentioned for completeness.
+
+### OSVČ
+
+**Osoba samostatně výdělečně činná** — self-employed person. Umbrella term covering ŽL holders and other self-employed categories.
+
+## VAT (DPH) terminology
+
+### DPH
+
+**Daň z přidané hodnoty** — value-added tax. Czech rates as of 2026: 21 % (standard), 12 % (reduced), 0 % (selected items, mainly books). See [`domain/vat-czech.md`](./domain/vat-czech.md).
+
+### Plátce DPH
+
+**VAT payer** — an entity registered for VAT, required to charge VAT on outputs and entitled to deduct VAT on inputs. Mandatory above ~2 M CZK turnover/year (threshold may shift). Has a DIČ. Issues invoices with VAT lines.
+
+### Neplátce DPH
+
+**Non-VAT-payer** — entity below the threshold (or not registered). Issues simpler invoices without VAT lines. May still have a DIČ if they're an *identifikovaná osoba* (see below).
+
+### Identifikovaná osoba
+
+**Identified person (for VAT)** — a non-VAT-payer that has been assigned a DIČ for limited cross-border transactions (typically intra-EU services). They do not charge VAT on domestic invoices but their DIČ appears on cross-border ones. Out of scope for our default UI; the VAT-payer flag covers the common case.
+
+### DUZP
+
+**Datum uskutečnění zdanitelného plnění** — date of taxable supply. The legally significant date for VAT purposes — typically the date the service was rendered or the goods delivered. Often coincides with the issue date but can differ. Mandatory on every Czech invoice that has VAT lines. See [`domain/vat-czech.md`](./domain/vat-czech.md).
+
+### Přenesená daňová povinnost
+
+**Reverse-charge mechanism** — for certain B2B Czech services (construction, scrap, …) and most cross-border B2B EU services, VAT is accounted for by the *recipient*, not the supplier. The invoice shows a 0 amount in the VAT column and a legal note like "Daň odvede zákazník dle § 92a zákona o DPH". Modeled as `vat.mode = 'reverse_charge'`.
+
+### OSS
+
+**One-Stop Shop** — EU-wide simplification for B2C cross-border digital/services/goods supplies. The supplier charges the *destination* country's VAT rate but reports it via a single OSS return in their home country. Modeled as `vat.mode = 'oss'`. Out of MVP UX scope but the schema accommodates it.
+
+### VIES
+
+**VAT Information Exchange System** — EU service for verifying that a foreign DIČ is valid. ARES does not authoritatively report Czech VAT-payer status (see [`specs/ares.md`](./specs/ares.md) — written before Plan 4). VIES is the canonical source for cross-border DIČ validation. Not used in MVP.
+
+## Payment fields
+
+### VS
+
+**Variabilní symbol** — variable symbol. A numeric code (up to 10 digits) used by the payer in a Czech bank transfer to identify which invoice they're paying. Almost always equal to the invoice number's numeric part. Critical for payment-to-invoice matching.
+
+### KS
+
+**Konstantní symbol** — constant symbol. A 4-digit code categorizing the payment type. `0308` is the standard for invoice payments. Mostly legacy.
+
+### SS
+
+**Specifický symbol** — specific symbol. Optional, payer-defined further identifier. Rarely used.
+
+### IBAN
+
+**International Bank Account Number** — the standardized international form of a bank account number. Format for CZ: `CZ` + 2 check digits + 4-digit bank code + 6-digit prefix + 10-digit account number. Required field in SPAYD QR.
+
+> Example: `CZ65 0800 0000 1920 0014 5399`
+
+### BIC / SWIFT
+
+**Bank Identifier Code** — 8 or 11-char identifier of the recipient bank. Optional alongside IBAN in SPAYD; we omit by default.
+
+### SPAYD
+
+**Short Payment Descriptor** — Czech Banking Association standard for QR-code bank-payment encoding. Format starts with `SPD*1.0*` followed by `KEY:VALUE` pairs separated by `*`. See [`specs/spayd-qr.md`](./specs/spayd-qr.md) (written before Plan 3) and the [Wikipedia article](https://en.wikipedia.org/wiki/Short_Payment_Descriptor).
+
+> Example: `SPD*1.0*ACC:CZ6508000000192000145399*AM:12500.00*CC:CZK*X-VS:2026001*MSG:Faktura 2026001`
+
+## Document terminology
+
+### Faktura
+
+**Invoice** — the primary document. In our schema: `docType = 'invoice'`.
+
+### Zálohová faktura
+
+**Advance invoice** / **proforma for an advance payment** — request for an advance payment before the work is done. Not a tax document on its own; the corresponding tax document is a *daňový doklad k přijaté platbě* issued after the advance is received. We model this as `docType = 'advance'` and (post-MVP) generate the follow-up tax document automatically.
+
+### Proforma
+
+**Proforma invoice** — a non-tax document used as a payment request. Similar to *zálohová faktura* in everyday speech but with subtler legal differences. Modeled as `docType = 'proforma'`.
+
+### Dobropis
+
+**Credit note** — a document that reduces a previously-issued invoice (e.g. partial refund, returned goods, billing error). Has its own number; references the original invoice. Modeled as `docType = 'credit_note'`.
+
+### Daňový doklad
+
+**Tax document** — a document with full VAT particulars (issuer DIČ, recipient DIČ if applicable, DUZP, VAT breakdown). A *faktura* issued by a *plátce DPH* is automatically a *daňový doklad*.
+
+### Číslo faktury
+
+**Invoice number** — the issuer's sequential identifier for the invoice. We generate it via per-issuer numbering schemes — see [`domain/numbering.md`](./domain/numbering.md).
+
+## Standards & file formats
+
+### ISDOC
+
+**Information System Document** — a Czech XML standard for electronic invoicing, maintained by [SPIS](https://www.spis.cz/) (currently version 6.0.2). Most Czech accounting tools (Pohoda, Money S3, iDoklad, …) can import ISDOC. We export every invoice as ISDOC alongside the PDF. See [`specs/isdoc.md`](./specs/isdoc.md) (written before Plan 3).
+
+### ISDOCX
+
+ISDOC packaged together with attachments (typically the PDF rendering of the same invoice) in a single zip-like container. Out of MVP scope; we ship the XML and PDF separately for now.
+
+### CNB
+
+**Česká národní banka** — Czech National Bank. Source of official daily exchange rates. Not used in CZK-only MVP; future multi-currency work will hit `https://www.cnb.cz/cs/financni-trhy/devizovy-trh/kurzy-devizoveho-trhu/`.
+
+## Other terms
+
+### Splatnost
+
+**Due date** — the date by which payment is expected. Standard Czech business term is 14 days, but 30 is also common.
+
+### Účetní doklad
+
+**Accounting document** — any document that triggers an accounting entry (invoice, receipt, cash voucher, internal voucher, …). Wider category than *daňový doklad*.
+
+### Konsolidovaný balíček
+
+**Consolidation Package** — the 2024 Czech tax reform that, among other things, merged the 15 % and 10 % VAT rates into a single 12 % reduced rate. The reason our supported rates are 21 % / 12 % / 0 % rather than the older 21 % / 15 % / 10 %.

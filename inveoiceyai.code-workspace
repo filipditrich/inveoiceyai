@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../NFCtron/nfctron-agents"
+		}
+	],
+	"settings": {}
+}
