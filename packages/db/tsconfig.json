@@ -1,0 +1,9 @@
+{
+  "extends": "../config-ts/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "drizzle.config.ts"]
+}
