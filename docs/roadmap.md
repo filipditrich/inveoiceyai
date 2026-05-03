@@ -43,10 +43,10 @@ flowchart LR
 **Status:** Done  
 **Completed:** 2026-05-03  
 
-**Goal:** Get a working monorepo: Turborepo + bun workspaces + Next.js 15 web app + Drizzle + Neon + lint/format/commitlint, with `bun dev` serving an empty layout.
+**Goal:** Get a working monorepo: Turborepo + bun workspaces + Next.js 16 web app + Drizzle + Neon + lint/format/commitlint, with `bun dev` serving an empty layout.
 
 **Exit criteria:**
-- [x] `apps/web` Next.js 15 (App Router, RSC) starts and renders a sidebar layout
+- [x] `apps/web` Next.js 16 (App Router, RSC) starts and renders a sidebar layout
 - [x] `packages/{invoice-core,db,ares,config-eslint,config-ts}` exist with `package.json` and a placeholder `index.ts`
 - [x] Drizzle is wired to a Neon database, an empty migrations folder is committed, `bun db:push` works
 - [x] Tailwind v4 + shadcn/ui base + ReUI registry (`@reui` namespace, `base-nova` style) is configured per [reui.io/docs/get-started](https://reui.io/docs/get-started)

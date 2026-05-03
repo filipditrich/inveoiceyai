@@ -8,7 +8,7 @@ Accepted (Phase 0, 2026-05-03)
 
 Mutations in `apps/web` could be implemented as:
 
-1. **Server Actions** — Next.js 15's first-class form-/RPC-style API; called via `<form action={…}>` or `useTransition`
+1. **Server Actions** — Next.js 16's first-class form-/RPC-style API; called via `<form action={…}>` or `useTransition`
 2. **Route handlers (`/api/*`) called from `fetch`** — classic JSON API; one route per mutation
 3. **Mixed** — Server Actions for some, route handlers for others
 

@@ -62,7 +62,7 @@ Specifically:
 
 - Two mental models for "where does this component come from?" — mitigate by always using the `add` CLI (component file headers note the origin)
 - ReUI is a smaller ecosystem than shadcn alone; some components might lag updates
-- Tailwind v4 + ReUI base-nova compatibility on Next.js 15 not yet validated end-to-end — see TODO in [`architecture.md`](../architecture.md)
+- Tailwind v4 + ReUI base-nova compatibility on Next.js 16 not yet validated end-to-end — see TODO in [`architecture.md`](../architecture.md)
 
 ### Neutral
 

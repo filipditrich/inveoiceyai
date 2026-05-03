@@ -10,7 +10,7 @@
 ## Execution order
 
 1. Root Turborepo + Bun workspaces; placeholder packages under `packages/*`.
-2. `apps/web` — Next.js 15 App Router, `(app)` group with sidebar shell.
+2. `apps/web` — Next.js 16 App Router, `(app)` group with sidebar shell.
 3. `packages/db` — Drizzle + Neon-compatible URL; `drizzle/` migrations folder committed; `bun db:push`.
 4. Tailwind v4 + `shadcn` init + `components.json` `registries.@reui` (`base-nova`).
 5. `commitlint` + Husky `commit-msg`; `.env.example` at repo root.

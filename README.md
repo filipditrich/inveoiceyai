@@ -5,7 +5,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/status-Plan%201%20bootstrap%20done-brightgreen?style=for-the-badge" alt="Plan 1 bootstrap done" />
   <img src="https://img.shields.io/badge/commits-conventional%20Commits-ff69b4?style=for-the-badge&logo=conventionalcommits&logoColor=white" alt="Conventional Commits" />
-  <img src="https://img.shields.io/badge/stack-Next.js%2015%20%7C%20Neon-111111?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 15 | Neon" />
+  <img src="https://img.shields.io/badge/stack-Next.js%2016%20%7C%20Neon-111111?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 16 | Neon" />
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@ Invoicey is a modern invoicing tool for Czech freelancers and small teams. It tr
 
 The same payload should eventually flow through the UI builder, JSON/MCP tools, or Slack — without duplicate types or drift.
 
-**Current phase:** Plan 1 shipped — Turborepo + Next.js 15 admin shell, Drizzle wiring, shadcn/ReUI registry, commitlint. **Next:** Plan 2 (`invoice-core`). See [Roadmap](#roadmap).
+**Current phase:** Plan 1 shipped — Turborepo + Next.js 16 admin shell, Drizzle wiring, shadcn/ReUI registry, commitlint. **Next:** Plan 2 (`invoice-core`). See [Roadmap](#roadmap).
 
 ## Why this project
 
@@ -50,7 +50,7 @@ Inspired by [Midday.ai](https://midday.ai) (polish, finance UX) and [fakturaonli
 | **Parties** | Multiple issuer businesses; shared client registry; ARES prefetch |
 | **Numbers** | Per-issuer, per-doc-type templates (`{YYYY}{####}`, yearly reset, atomic counters) |
 | **Lifecycle** | Draft → issue → paid / overdue / cancelled (status **derived**, not cron-ticked) |
-| **UI** | Next.js 15, shadcn + [ReUI Data Grid](https://reui.io/components/data-grid), dashboard |
+| **UI** | Next.js 16, shadcn + [ReUI Data Grid](https://reui.io/components/data-grid), dashboard |
 | **Exports** | PDF + embedded QR; ISDOC 6.0.2 |
 | **Assets** | UploadThing for logo / stamp / signature |
 
@@ -94,10 +94,10 @@ ADRs explain each stack choice: [`docs/decisions/README.md`](docs/decisions/READ
 | Layer | Choice |
 | --- | --- |
 | Repo | Turborepo + [Bun](https://bun.sh) workspaces |
-| Web | Next.js 15 App Router (RSC + Server Actions) |
+| Web | Next.js 16 App Router (RSC + Server Actions) |
 | UI | shadcn/ui + [ReUI](https://reui.io/docs/get-started) registry, Tailwind v4 |
 | Forms | React Hook Form + `@hookform/resolvers/zod` |
-| Domain | TypeScript + Zod (`@invoicey/invoice-core`) |
+| Domain | TypeScript 6 + Zod (`@invoicey/invoice-core`) |
 | DB | Neon Postgres + Drizzle ORM |
 | PDF / QR / ISDOC | `@react-pdf/renderer`, `qrcode`, `xmlbuilder2` |
 | Files | UploadThing |
@@ -130,7 +130,7 @@ Other useful scripts: `bun run build`, `bun run lint`, `bun run typecheck`, `bun
 
 ```text
 ├── apps/
-│   └── web/                     # Next.js 15 admin UI (@invoicey/web)
+│   └── web/                     # Next.js 16 admin UI (@invoicey/web)
 ├── packages/
 │   ├── invoice-core/            # domain layer (Plan 2+)
 │   ├── db/                      # Drizzle schema + Neon client

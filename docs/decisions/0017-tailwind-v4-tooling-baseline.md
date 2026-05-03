@@ -6,7 +6,7 @@ Accepted (Plan 1, 2026-05-03)
 
 ## Context
 
-ADR [0003](./0003-shadcn-plus-reui-registry.md) commits ReUI `base-nova`, which targets Tailwind v4. Next.js 15 and shadcn/ui increasingly assume Tailwind v4-first tooling (`@tailwindcss/postcss`, CSS-first config).
+ADR [0003](./0003-shadcn-plus-reui-registry.md) commits ReUI `base-nova`, which targets Tailwind v4. Next.js 16 and shadcn/ui increasingly assume Tailwind v4-first tooling (`@tailwindcss/postcss`, CSS-first config).
 
 Remaining ambiguity from [`architecture.md`](../architecture.md): exact postcss/layout pairing for Next App Router.
 

@@ -7,7 +7,7 @@ How the pieces fit together. Cross-references the ADRs that justify each choice.
 | Layer | Choice | ADR |
 | --- | --- | --- |
 | Monorepo | Turborepo + bun workspaces | [0001](./decisions/0001-monorepo-turborepo-bun.md) |
-| Web framework | Next.js 15 (App Router, RSC, Server Actions) | [0002](./decisions/0002-nextjs15-app-router.md) |
+| Web framework | Next.js 16 (App Router, RSC, Server Actions) | [0002](./decisions/0002-nextjs15-app-router.md) |
 | UI primitives | shadcn/ui base + ReUI registry (`@reui`, `base-nova` style) | [0003](./decisions/0003-shadcn-plus-reui-registry.md) |
 | Styling | Tailwind v4 | inherited from shadcn/ReUI |
 | PDF rendering | `@react-pdf/renderer` | [0004](./decisions/0004-pdf-react-pdf-renderer.md) |
@@ -28,7 +28,7 @@ How the pieces fit together. Cross-references the ADRs that justify each choice.
 ```
 inveoiceyai/
 ├── apps/
-│   └── web/                    Next.js 15 App Router app
+│   └── web/                    Next.js 16 App Router app
 │       ├── app/
 │       │   ├── (app)/          authed-style group, sidebar layout
 │       │   │   ├── dashboard/
@@ -59,7 +59,7 @@ inveoiceyai/
 
 The empty `apps/mcp` and `apps/slack` are *not* added in MVP; they're roadmap items (Plans 12 and 13). Adding them later requires no restructuring because `invoice-core` and `db` are already independent packages.
 
-## Runtime boundaries (Next.js 15)
+## Runtime boundaries (Next.js 16)
 
 ```mermaid
 flowchart TD
@@ -158,7 +158,7 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 
 ## Hosting & deploy
 
-- **Vercel** for `apps/web` — Next.js 15 + Server Actions + route handlers run on Vercel Functions
+- **Vercel** for `apps/web` — Next.js 16 + Server Actions + route handlers run on Vercel Functions
 - **Neon** for Postgres — wired via Vercel Marketplace (auto-injects `DATABASE_URL`)
 - **UploadThing** for files — configured per-app
 - **Future:** `apps/mcp` runs as a separate Vercel deployment (or self-hosted box) when introduced. `apps/slack` runs on Vercel using a slash-command route handler.
@@ -195,7 +195,7 @@ Pick one of {Inter, Roboto, IBM Plex Sans}, version-pin it, store the `.ttf` fil
 
 ### TODO(plan-1): Tailwind v4 + ReUI base-nova style compatibility
 
-ReUI ships `base-nova` style on Tailwind v4 ([reui.io/docs/get-started](https://reui.io/docs/get-started)). Confirm the registry config plays nicely with Next.js 15's app-dir CSS handling and that `base-nova` does not conflict with shadcn defaults we override.
+ReUI ships `base-nova` style on Tailwind v4 ([reui.io/docs/get-started](https://reui.io/docs/get-started)). Confirm the registry config plays nicely with Next.js 16's app-dir CSS handling and that `base-nova` does not conflict with shadcn defaults we override.
 
 ### TODO(plan-3): ISDOC XSD source
 
