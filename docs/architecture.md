@@ -165,7 +165,7 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 - **Vercel** for `apps/web` — Next.js 16 + Server Actions + route handlers run on Vercel Functions
 - **Neon** for Postgres — wired via Vercel Marketplace (auto-injects `DATABASE_URL`)
 - **UploadThing** for files — configured per-app
-- **Plan 13a (Slack demo):** slash command hits `apps/web/app/api/slack/commands/route.ts` (Node runtime). A future `apps/slack` split remains optional.
+- **Plan 13a (Slack demo):** slash command → `apps/web/app/api/slack/commands/route.ts`; Events API `app_mention` → `apps/web/app/api/slack/events/route.ts` (same `SLACK_SIGNING_SECRET` / bot token). A future `apps/slack` split remains optional.
 - **Future:** `apps/mcp` runs as a separate Vercel deployment (or self-hosted box) when introduced.
 
 ## Tooling
