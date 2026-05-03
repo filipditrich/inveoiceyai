@@ -1,7 +1,6 @@
 {
   "extends": "../config-ts/base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "rootDir": "src",
     "noEmit": true
   },
