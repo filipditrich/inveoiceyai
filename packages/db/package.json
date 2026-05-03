@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@invoicey/env": "workspace:*",
     "@neondatabase/serverless": "^1.0.1",
     "drizzle-orm": "^0.44.3"
   },
