@@ -23,4 +23,4 @@
 
 - `bun run typecheck`, `bun run lint`, and `bun run build` succeed at repo root.
 - `apps/web` renders the `(app)` sidebar shell with stub routes; `components.json` registers `@reui`.
-- Copy `.env.example` → `.env.local` and set `DATABASE_URL` before `bun db:push`.
+- Root **`.env`** / **`.env.local`** supply `DATABASE_URL` for `bun db:push` via [`packages/db/drizzle.config.ts`](packages/db/drizzle.config.ts); Next.js still needs `DATABASE_URL` under **`apps/web/`** when the app imports `@invoicey/db`.
