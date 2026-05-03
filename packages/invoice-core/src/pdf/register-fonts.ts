@@ -1,26 +1,55 @@
 import { Font } from "@react-pdf/renderer";
-import { createRequire } from "node:module";
+import { existsSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const require = createRequire(import.meta.url);
+/**
+ * Fonts live under repo `packages/invoice-core/assets/fonts/` (vendored from
+ * DejaVu Fonts 2.37, see LICENSE-dejavu). Do not use `require.resolve` into
+ * `dejavu-fonts-ttf` — Bun `.bun` paths are not reliably openable from Next/pdfkit.
+ */
+function resolveVendoredFontFile(fontFileName: string): string {
+	const nextToModule = path.join(
+		path.dirname(fileURLToPath(import.meta.url)),
+		"../../assets/fonts",
+		fontFileName,
+	);
+	if (existsSync(nextToModule)) {
+		return nextToModule;
+	}
 
-/** avoid `require.resolve('…/DejaVuSans.ttf')` — bundlers (e.g. Turbopack) trace `.ttf` as invalid JS */
-function resolveDejaVuFontPaths(): { regular: string; bold: string } {
-	const pkgDir = path.dirname(require.resolve("dejavu-fonts-ttf/package.json"));
-	return {
-		regular: path.join(pkgDir, "ttf/DejaVuSans.ttf"),
-		bold: path.join(pkgDir, "ttf/DejaVuSans-Bold.ttf"),
-	};
+	const repoPackageFonts = path.join(
+		process.cwd(),
+		"packages/invoice-core/assets/fonts",
+		fontFileName,
+	);
+	if (existsSync(repoPackageFonts)) {
+		return repoPackageFonts;
+	}
+
+	/** cwd often `apps/web` when Next dev runs package script */
+	const fromAppsWebAncestor = path.join(
+		process.cwd(),
+		"../../packages/invoice-core/assets/fonts",
+		fontFileName,
+	);
+	if (existsSync(fromAppsWebAncestor)) {
+		return fromAppsWebAncestor;
+	}
+
+	throw new Error(
+		`Missing vendored invoice font '${fontFileName}' — tried ${nextToModule}, ${repoPackageFonts}, ${fromAppsWebAncestor}`,
+	);
 }
 
 let registeredFonts = false;
 
-/** Pin: `dejavu-fonts-ttf` npm version (TTF metrics for `@react-pdf/renderer` fontkit). */
 export function registerInvoiceFonts(): void {
 	if (registeredFonts) {
 		return;
 	}
-	const { regular: DejaVuRegular, bold: DejaVuBold } = resolveDejaVuFontPaths();
+	const DejaVuRegular = resolveVendoredFontFile("DejaVuSans.ttf");
+	const DejaVuBold = resolveVendoredFontFile("DejaVuSans-Bold.ttf");
 	Font.register({
 		family: "DejaVu Sans",
 		fonts: [

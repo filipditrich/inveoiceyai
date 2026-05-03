@@ -19,9 +19,9 @@ Produce Czech-language invoice PDFs from a validated [`Invoice`](../../packages/
 ## Typography (Czech diacritics)
 
 - **Family:** DejaVu Sans (Bitstream Vera derivative; permissive license; Latin + Czech coverage).
-- **Pin:** npm package **`dejavu-fonts-ttf`** at a **fixed version** (`2.x` published on npm; repo lockfile is source of truth). Code resolves `DejaVuSans.ttf` / `DejaVuSans-Bold.ttf` via `require.resolve` from `dejavu-fonts-ttf/ttf/…`.
+- **Pin:** **vendored TTF copies** under `packages/invoice-core/assets/fonts/` — `DejaVuSans.ttf`, `DejaVuSans-Bold.ttf` (from upstream DejaVu **2.37** distribution; **`LICENSE-dejavu`** bundled alongside files). Fonts are repo contents, **not** read from npm at runtime (`node_modules`/Bun `.bun` layouts are unreliable inside Next/route handlers).
 - **Rationale:** TTF avoids fontkit/layout issues observed with bundled WOFF from some font NPM packages under `@react-pdf/renderer`.
-- **Registration:** Resolve the **`dejavu-fonts-ttf` package directory** via `require.resolve('dejavu-fonts-ttf/package.json')`, then join to `ttf/*.ttf` paths (avoid `require.resolve('…/file.ttf')` so bundlers like Turbopack do not ingest `.ttf` as modules). Register once per process before `pdf()`: `Font.register({ family: 'DejaVu Sans', fonts: [...] })`.
+- **Registration:** Resolve absolute filesystem paths to those vendored files (module-relative `import.meta.url` + fallbacks); then `Font.register({ family: 'DejaVu Sans', fonts: [...] })` once per process before `pdf()`.
 
 ## Layout (A4, default margins)
 
