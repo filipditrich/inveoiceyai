@@ -99,8 +99,8 @@ export default function InvoiceFromJsonDemoPage() {
 				</Link>
 			</p>
 
-			<div className="grid gap-6 lg:grid-cols-2">
-				<div className="flex flex-col gap-3">
+			<div className="flex flex-col gap-6 xl:flex-row xl:items-stretch">
+				<div className="flex w-full shrink-0 flex-col gap-3 xl:max-w-md xl:overflow-hidden">
 					<label htmlFor="invoice-json" className="text-sm font-medium">
 						Invoice JSON
 					</label>
@@ -109,7 +109,7 @@ export default function InvoiceFromJsonDemoPage() {
 						value={text}
 						onChange={(event) => setText(event.target.value)}
 						spellCheck={false}
-						className="border-input placeholder:text-muted-foreground focus-visible:ring-ring min-h-[22rem] w-full resize-y rounded-md border bg-transparent px-3 py-2 font-mono text-sm shadow-xs focus-visible:ring-2 focus-visible:outline-none"
+						className="border-input placeholder:text-muted-foreground focus-visible:ring-ring max-h-[40vh] min-h-[14rem] w-full resize-y rounded-md border bg-transparent px-3 py-2 font-mono text-sm shadow-xs focus-visible:ring-2 focus-visible:outline-none xl:max-h-[min(42vh,28rem)]"
 						placeholder="{}"
 						autoComplete="off"
 					/>
@@ -144,16 +144,16 @@ export default function InvoiceFromJsonDemoPage() {
 					)}
 				</div>
 
-				<div className="flex flex-col gap-2">
+				<div className="flex min-h-0 flex-1 flex-col gap-2">
 					<span className="text-sm font-medium">Preview</span>
 					{pdfUrl ? (
 						<iframe
 							title="Invoice PDF preview"
 							src={`${pdfUrl}#toolbar=1`}
-							className="bg-muted border-input block min-h-[36rem] w-full rounded-md border"
+							className="bg-muted border-input block min-h-[min(88vh,52rem)] w-full flex-1 rounded-md border"
 						/>
 					) : (
-						<div className="bg-muted/50 border-input text-muted-foreground flex min-h-[36rem] items-center justify-center rounded-md border border-dashed text-sm">
+						<div className="bg-muted/50 border-input text-muted-foreground flex min-h-[min(88vh,52rem)] flex-1 items-center justify-center rounded-md border border-dashed text-sm">
 							Run &quot;Render PDF&quot; to see the invoice here.
 						</div>
 					)}
