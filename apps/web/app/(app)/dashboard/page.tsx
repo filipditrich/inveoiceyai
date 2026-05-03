@@ -1,8 +1,4 @@
-import { invoiceCorePlaceholder } from "@invoicey/invoice-core";
-
 export default function DashboardPage() {
-  void invoiceCorePlaceholder;
-
   return (
     <div className="space-y-2">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
