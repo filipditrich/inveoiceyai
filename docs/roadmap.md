@@ -15,12 +15,15 @@ flowchart LR
     P6 --> P7["Plan 7<br/>invoice list"]
     P7 --> P8["Plan 8<br/>dashboard"]
     P8 --> P9["Plan 9<br/>polish"]
+    P3 -.parallel.-> P13a["Plan 13a<br/>Slack bot<br/>stateless demo"]
     P9 -.MVP.-> Post["post-MVP"]
     Post --> P10["Plan 10<br/>recurring"]
     Post --> P11["Plan 11<br/>email"]
     Post --> P12["Plan 12<br/>MCP"]
-    Post --> P13["Plan 13<br/>Slack"]
+    Post --> P13b["Plan 13b<br/>Slack bot<br/>DB-persisted"]
     Post --> P14["Plan 14<br/>auth"]
+    P12 -.feeds.-> P13b
+    P13a -.upgrades to.-> P13b
 ```
 
 ## MVP plans
@@ -28,11 +31,12 @@ flowchart LR
 ### Plan 0 — Docs scaffolding
 
 **Status:** Done  
-**Completed:** 2026-05-03  
+**Completed:** 2026-05-03
 
 **Goal:** Land the in-repo docs that lock product scope, architecture, domain model, and decisions captured in the originating chat session.
 
 **Exit criteria:**
+
 - [x] Every file in `docs/` tree (per [`README.md`](./README.md)) exists and is non-empty
 - [x] All session-level ADRs (0001..0016) are written in Michael Nygard format
 - [x] Domain docs each contain at least one worked example
@@ -41,11 +45,12 @@ flowchart LR
 ### Plan 1 — Repo bootstrap
 
 **Status:** Done  
-**Completed:** 2026-05-03  
+**Completed:** 2026-05-03
 
 **Goal:** Get a working monorepo: Turborepo + bun workspaces + Next.js 16 web app + Drizzle + Neon + lint/format/commitlint, with `bun dev` serving an empty layout.
 
 **Exit criteria:**
+
 - [x] `apps/web` Next.js 16 (App Router, RSC) starts and renders a sidebar layout
 - [x] `packages/{invoice-core,db,ares,config-eslint,config-ts}` exist with `package.json` and a placeholder `index.ts`
 - [x] Drizzle is wired to a Neon database, an empty migrations folder is committed, `bun db:push` works
@@ -58,11 +63,12 @@ flowchart LR
 ### Plan 2 — `invoice-core` domain package
 
 **Status:** Done  
-**Completed:** 2026-05-03  
+**Completed:** 2026-05-03
 
 **Goal:** Land the contract — Zod schema, totals calculation, numbering, status engine — fully unit-tested. No UI, no PDF, no DB. Pure domain.
 
 **Exit criteria:**
+
 - [x] `packages/invoice-core/src/schema.ts` exports `InvoiceSchema`, `IssuerSnapshotSchema`, `ClientSnapshotSchema`, `InvoiceItemSchema`, `TotalsSchema`
 - [x] `calcTotals(items, vat, issuerVatPayer)` is implemented with line-level + per-rate + grand totals (third argument required for neplátce / effective rate rules)
 - [x] `nextInvoiceNumber(scheme, issueDate)` is implemented as a pure function with template tokens
@@ -75,11 +81,12 @@ flowchart LR
 ### Plan 3 — PDF + QR + ISDOC rendering
 
 **Status:** Done  
-**Completed:** 2026-05-03  
+**Completed:** 2026-05-03
 
 **Goal:** `renderInvoicePdf`, `renderSpaydQr`, `renderIsdoc` with golden-file tests. PDF readable by humans; QR readable by every Czech bank app; ISDOC validates against the public XSD.
 
 **Exit criteria:**
+
 - [x] `renderInvoicePdf(invoice): Promise<Uint8Array>` produces a PDF with logo / stamp / signature slots, line items, totals, payment block, embedded QR
 - [x] Czech-diacritic font picked, version-pinned, registered with `@react-pdf/renderer` `Font.register` (DejaVu Sans via `dejavu-fonts-ttf`; see [`specs/pdf-rendering.md`](./specs/pdf-rendering.md))
 - [x] `buildSpaydPayload(invoice)` produces a SPAYD 1.0 string
@@ -95,11 +102,12 @@ flowchart LR
 ### Plan 4 — ARES client + client (customer) management
 
 **Status:** Done  
-**Completed:** 2026-05-03  
+**Completed:** 2026-05-03
 
 **Goal:** Lookup any Czech business by IČO, save it as a client, list/edit/delete clients.
 
 **Exit criteria:**
+
 - [x] `packages/ares/src/client.ts` calls `https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/{ico}` and parses the response with a Zod schema
 - [x] 24h `unstable_cache` per-IČO
 - [x] `apps/web/app/(app)/clients/page.tsx` lists clients in a table
@@ -111,11 +119,12 @@ flowchart LR
 
 ### Plan 5 — Issuer (my-businesses) management
 
-**Status:** Planned  
+**Status:** Planned
 
-**Goal:** Manage the businesses I invoice *from* — VAT settings, banking, numbering schemes, optional logo/stamp/signature uploads.
+**Goal:** Manage the businesses I invoice _from_ — VAT settings, banking, numbering schemes, optional logo/stamp/signature uploads.
 
 **Exit criteria:**
+
 - `apps/web/app/(app)/issuers/page.tsx` lists issuers
 - `issuers/[id]/page.tsx` edits all issuer fields including a numbering-scheme editor (per docType)
 - UploadThing wired for logo/stamp/signature with size + MIME validation
@@ -126,11 +135,12 @@ flowchart LR
 
 ### Plan 6 — Invoice builder
 
-**Status:** Planned  
+**Status:** Planned
 
 **Goal:** `/invoices/new` — a React-Hook-Form + Zod form that produces an `InvoiceSchema`-valid payload, with live preview and ARES lookup.
 
 **Exit criteria:**
+
 - Pick issuer → defaults populate (bank, VAT mode, language, numbering preview)
 - Pick or create client (with ARES lookup)
 - Line items via `useFieldArray` with VAT rate per line
@@ -143,11 +153,12 @@ flowchart LR
 
 ### Plan 7 — Invoice list + actions
 
-**Status:** Planned  
+**Status:** Planned
 
 **Goal:** ReUI Data Grid showing all invoices with filters, sort, search, and row actions.
 
 **Exit criteria:**
+
 - Columns: number, issue date, due date, client (with logo if set), total, status (badge), actions menu
 - Filters: status, issuer, client, date range
 - Search: number, client name, notes
@@ -159,11 +170,12 @@ flowchart LR
 
 ### Plan 8 — Dashboard
 
-**Status:** Planned  
+**Status:** Planned
 
 **Goal:** Single page showing the invoicing pulse at a glance.
 
 **Exit criteria:**
+
 - Cards: count + total amount per status (draft, issued, paid, overdue, upcoming due ≤ 14 days)
 - Chart: monthly issued vs. paid for the last 12 months (basic, ReUI/shadcn chart)
 - Recent invoices table (last 10)
@@ -171,11 +183,12 @@ flowchart LR
 
 ### Plan 9 — Polish
 
-**Status:** Planned  
+**Status:** Planned
 
 **Goal:** Make it feel finished.
 
 **Exit criteria:**
+
 - Empty states everywhere (no invoices, no clients, no issuers — each with a CTA)
 - Loading skeletons via React Suspense
 - Error boundaries with actionable messages
@@ -187,11 +200,32 @@ flowchart LR
 
 End of Plan 9 = MVP. Anything past this is post-MVP and lives below.
 
+## MVP-parallel plans
+
+Plans listed here do not block the MVP and can be picked up in parallel with Plans 5–9. They depend only on Plan 3 (PDF / QR / ISDOC) being done.
+
+### Plan 13a — Slack bot, stateless demo (in `apps/web`)
+
+**Status:** Planned
+
+**Goal:** Let a user post `/invoice <free-text>` in Slack and receive a rendered Czech invoice PDF + ISDOC XML in-thread, with no DB writes. Vercel AI SDK aggregates the message into an `InvoiceSchema`-valid payload via tool calls; the deterministic core renders.
+
+**Exit criteria:**
+
+- Slack route handler at `apps/web/app/api/slack/commands/route.ts` verifies signatures and acks within Slack's 3s window
+- AI tool surface (`lookup_business`, `parse_amount_cz`, `compute_due_date`, `compute_totals`, `assemble_and_validate`, `render_pdf`, `render_isdoc`) wraps existing functions in `@invoicey/invoice-core` + `@invoicey/ares` — no new domain logic
+- Worker uses `generateText({ tools, maxSteps: 8 })` against Vercel AI Gateway; iterates `assemble_and_validate` failures until valid
+- Successful runs reply in-thread with PDF + ISDOC via `files.uploadV2`; failures post a Czech-language ephemeral message listing offending fields
+- Single demo issuer comes from `INVOICEY_DEMO_ISSUER_JSON` or a hard-coded sample — no DB
+- Spec doc [`specs/slack-bot.md`](./specs/slack-bot.md) is written before implementation
+
+**Doc inputs:** [`specs/slack-bot.md`](./specs/slack-bot.md), [`specs/ares.md`](./specs/ares.md), [`specs/isdoc.md`](./specs/isdoc.md), [`specs/pdf-rendering.md`](./specs/pdf-rendering.md)
+
 ## Post-MVP plans
 
 ### Plan 10 — Recurring invoices
 
-**Status:** Post-MVP backlog  
+**Status:** Post-MVP backlog
 
 - New tables: `invoice_templates` (saved invoice payloads), `recurring_schedules` (cadence + next-run + linkage)
 - Vercel Cron Job that runs daily and issues due recurrences
@@ -199,7 +233,7 @@ End of Plan 9 = MVP. Anything past this is post-MVP and lives below.
 
 ### Plan 11 — Email delivery
 
-**Status:** Post-MVP backlog  
+**Status:** Post-MVP backlog
 
 - Resend wiring with verified sending domain
 - "Send" action on issued invoices: PDF + ISDOC attached, customizable cover text
@@ -207,23 +241,25 @@ End of Plan 9 = MVP. Anything past this is post-MVP and lives below.
 
 ### Plan 12 — MCP server (`apps/mcp`)
 
-**Status:** Post-MVP backlog  
+**Status:** Post-MVP backlog
 
 - Tools: `create_invoice`, `list_invoices`, `lookup_business`, `get_invoice`, `mark_paid`
 - Imports `@invoicey/invoice-core` + `@invoicey/db` directly — no HTTP shim
 - Schema parity with the UI is automatic because both consume `InvoiceSchema`
 
-### Plan 13 — Slack bot (`apps/slack`)
+### Plan 13b — Slack bot, DB-persisted drafts (`apps/slack`)
 
-**Status:** Post-MVP backlog  
+**Status:** Post-MVP backlog
 
 - Slack app with slash command + `@Invoicey` mention parsing
 - Backed by the same domain layer; Slack identity becomes a workspace member when auth lands
 - Until auth, Slack maps to the single default workspace
+- Promotes Plan 13a's stateless demo into real drafts: persists invoices, assigns numbers via `nextInvoiceNumber`, and adds an "Issue" interactivity button
+- Ideally consumes the Plan 12 MCP tool surface so Cursor / Claude Desktop / Slack share one toolkit
 
 ### Plan 14 — Authentication + multi-user
 
-**Status:** Post-MVP backlog  
+**Status:** Post-MVP backlog
 
 - Clerk integration (Vercel Marketplace) — see [`decisions/0006-no-auth-mvp-multi-tenant-ready.md`](./decisions/0006-no-auth-mvp-multi-tenant-ready.md)
 - New tables: `users`, `workspace_memberships`

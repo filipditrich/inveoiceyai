@@ -14,7 +14,7 @@ Sorted by Czech name (or original abbreviation).
 
 ### DIČ
 
-**Daňové identifikační číslo** — VAT identification number. For Czech entities the format is `CZ` + the IČO (or, for natural persons, `CZ` + birth number). An entity has a DIČ only if it's registered as a *plátce DPH* or *identifikovaná osoba*. Used as the VAT ID in invoices.
+**Daňové identifikační číslo** — VAT identification number. For Czech entities the format is `CZ` + the IČO (or, for natural persons, `CZ` + birth number). An entity has a DIČ only if it's registered as a _plátce DPH_ or _identifikovaná osoba_. Used as the VAT ID in invoices.
 
 > Example: `CZ28288390`
 
@@ -50,7 +50,7 @@ Sorted by Czech name (or original abbreviation).
 
 ### Neplátce DPH
 
-**Non-VAT-payer** — entity below the threshold (or not registered). Issues simpler invoices without VAT lines. May still have a DIČ if they're an *identifikovaná osoba* (see below).
+**Non-VAT-payer** — entity below the threshold (or not registered). Issues simpler invoices without VAT lines. May still have a DIČ if they're an _identifikovaná osoba_ (see below).
 
 ### Identifikovaná osoba
 
@@ -62,11 +62,11 @@ Sorted by Czech name (or original abbreviation).
 
 ### Přenesená daňová povinnost
 
-**Reverse-charge mechanism** — for certain B2B Czech services (construction, scrap, …) and most cross-border B2B EU services, VAT is accounted for by the *recipient*, not the supplier. The invoice shows a 0 amount in the VAT column and a legal note like "Daň odvede zákazník dle § 92a zákona o DPH". Modeled as `vat.mode = 'reverse_charge'`.
+**Reverse-charge mechanism** — for certain B2B Czech services (construction, scrap, …) and most cross-border B2B EU services, VAT is accounted for by the _recipient_, not the supplier. The invoice shows a 0 amount in the VAT column and a legal note like "Daň odvede zákazník dle § 92a zákona o DPH". Modeled as `vat.mode = 'reverse_charge'`.
 
 ### OSS
 
-**One-Stop Shop** — EU-wide simplification for B2C cross-border digital/services/goods supplies. The supplier charges the *destination* country's VAT rate but reports it via a single OSS return in their home country. Modeled as `vat.mode = 'oss'`. Out of MVP UX scope but the schema accommodates it.
+**One-Stop Shop** — EU-wide simplification for B2C cross-border digital/services/goods supplies. The supplier charges the _destination_ country's VAT rate but reports it via a single OSS return in their home country. Modeled as `vat.mode = 'oss'`. Out of MVP UX scope but the schema accommodates it.
 
 ### VIES
 
@@ -110,11 +110,11 @@ Sorted by Czech name (or original abbreviation).
 
 ### Zálohová faktura
 
-**Advance invoice** / **proforma for an advance payment** — request for an advance payment before the work is done. Not a tax document on its own; the corresponding tax document is a *daňový doklad k přijaté platbě* issued after the advance is received. We model this as `docType = 'advance'` and (post-MVP) generate the follow-up tax document automatically.
+**Advance invoice** / **proforma for an advance payment** — request for an advance payment before the work is done. Not a tax document on its own; the corresponding tax document is a _daňový doklad k přijaté platbě_ issued after the advance is received. We model this as `docType = 'advance'` and (post-MVP) generate the follow-up tax document automatically.
 
 ### Proforma
 
-**Proforma invoice** — a non-tax document used as a payment request. Similar to *zálohová faktura* in everyday speech but with subtler legal differences. Modeled as `docType = 'proforma'`.
+**Proforma invoice** — a non-tax document used as a payment request. Similar to _zálohová faktura_ in everyday speech but with subtler legal differences. Modeled as `docType = 'proforma'`.
 
 ### Dobropis
 
@@ -122,7 +122,7 @@ Sorted by Czech name (or original abbreviation).
 
 ### Daňový doklad
 
-**Tax document** — a document with full VAT particulars (issuer DIČ, recipient DIČ if applicable, DUZP, VAT breakdown). A *faktura* issued by a *plátce DPH* is automatically a *daňový doklad*.
+**Tax document** — a document with full VAT particulars (issuer DIČ, recipient DIČ if applicable, DUZP, VAT breakdown). A _faktura_ issued by a _plátce DPH_ is automatically a _daňový doklad_.
 
 ### Číslo faktury
 
@@ -142,6 +142,32 @@ ISDOC packaged together with attachments (typically the PDF rendering of the sam
 
 **Česká národní banka** — Czech National Bank. Source of official daily exchange rates. Not used in CZK-only MVP; future multi-currency work will hit `https://www.cnb.cz/cs/financni-trhy/devizovy-trh/kurzy-devizoveho-trhu/`.
 
+## Automation surfaces
+
+### MCP
+
+**Model Context Protocol** — open protocol from Anthropic for exposing tools and resources to LLM clients (Cursor, Claude Desktop, …). Roadmap [Plan 12](./roadmap.md#plan-12--mcp-server-appsmcp) introduces an `apps/mcp` server that exposes `create_invoice`, `lookup_business`, etc. directly on top of `@invoicey/invoice-core` + `@invoicey/db`. The Slack bot's tool surface is intentionally MCP-shaped so it can be lifted unchanged.
+
+### Slack slash command
+
+Slack's `/command argument…` syntax. The user types it in any channel; Slack POSTs an `application/x-www-form-urlencoded` body (`command`, `text`, `user_id`, `team_id`, `channel_id`, `response_url`) to a configured URL and expects a `200` within **3 seconds**. We use `/invoice <free-text>` for the Plan 13a demo bot — see [`specs/slack-bot.md`](./specs/slack-bot.md).
+
+### `response_url`
+
+The webhook URL Slack provides on every slash-command and interactive payload. Our worker POSTs to it after the initial 3-second ack to deliver the real result (or a follow-up failure message) without holding the original HTTP connection open.
+
+### AI SDK
+
+[Vercel AI SDK](https://ai-sdk.dev/) — TypeScript SDK that abstracts LLM providers behind one `generateText` / `streamText` API and provides first-class tool calling via `tool({ description, parameters: ZodSchema, execute })`. The Plan 13a worker uses `generateText({ tools, maxSteps })` for the loop.
+
+### AI Gateway
+
+[Vercel AI Gateway](https://vercel.com/docs/ai-gateway) — provider-agnostic router with one API key (`AI_GATEWAY_API_KEY`) that forwards to OpenAI / Anthropic / Google / etc. Lets us swap models via env (`INVOICEY_AI_MODEL`) without code changes.
+
+### Tool calling
+
+Pattern where an LLM is given typed function descriptions and replies with structured calls instead of free text. The model emits `{ name, arguments }`; the runtime executes the function and feeds the result back into the conversation. We rely on this so the LLM never invents IDs, totals, or ISDOC XML — it only picks fields and asks our deterministic functions to compute / render.
+
 ## Other terms
 
 ### Splatnost
@@ -150,7 +176,7 @@ ISDOC packaged together with attachments (typically the PDF rendering of the sam
 
 ### Účetní doklad
 
-**Accounting document** — any document that triggers an accounting entry (invoice, receipt, cash voucher, internal voucher, …). Wider category than *daňový doklad*.
+**Accounting document** — any document that triggers an accounting entry (invoice, receipt, cash voucher, internal voucher, …). Wider category than _daňový doklad_.
 
 ### Konsolidovaný balíček
 
