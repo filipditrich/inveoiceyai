@@ -1,12 +1,19 @@
+import { ChartAreaInteractive } from "@/components/chart-area-interactive";
+import { DataTable } from "@/components/data-table";
+import { SectionCards } from "@/components/section-cards";
+
+import data from "./data.json";
+
 export default function DashboardPage() {
-  return (
-    <div className="border-border bg-card text-card-foreground space-y-2 rounded-xl border p-8 shadow-sm">
-      <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">Overview</p>
-      <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-      <p className="text-muted-foreground max-w-xl text-[0.9375rem] leading-relaxed">
-        Invoicey admin shell — workspace packages resolve from{" "}
-        <code className="bg-muted text-foreground rounded px-1.5 py-0.5 font-mono text-xs">@invoicey/*</code>.
-      </p>
-    </div>
-  );
+	return (
+		<div className="@container/main flex flex-1 flex-col gap-2">
+			<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+				<SectionCards />
+				<div className="px-4 lg:px-6">
+					<ChartAreaInteractive />
+				</div>
+				<DataTable data={data} />
+			</div>
+		</div>
+	);
 }

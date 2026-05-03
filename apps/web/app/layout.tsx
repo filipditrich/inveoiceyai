@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
-import { TooltipProvider } from "@/components/ui/tooltip";
+import Providers from "./providers";
 
 import "./globals.css";
 
@@ -26,9 +26,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="cs" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="bg-background font-sans text-foreground antialiased">
-        <TooltipProvider delay={0}>{children}</TooltipProvider>
+    <html lang="cs" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+      <body className="bg-background font-sans text-foreground antialiased" suppressHydrationWarning>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
