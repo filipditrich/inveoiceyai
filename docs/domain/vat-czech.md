@@ -253,9 +253,9 @@ Mode: `reverse_charge`, supplies abroad: `eu`. Item has `vatRate = 0`. Legal not
 
 We hard-code the default reverse-charge legal note text per scenario. Make these editable per issuer (so a contractor can pick the §92e wording always) — Plan 5 issuer settings.
 
-### TODO(plan-2): rounding in `vatBreakdown`
+### Resolved (Plan 2): rounding in `vatBreakdown`
 
-When multiple lines have the same rate, do we (a) sum then round, or (b) round each line then sum? We default to (a) — sum the un-rounded `lineSubtotal`s for the rate, then round once. This avoids the cascading-error footgun. Confirmed during Plan 2 with property-based tests.
+Per rate: **`base = sum(lineSubtotal)`** for lines at that rate (each `lineSubtotal` is already `round2(quantity × unitPrice)`), then **`vat = round2(base × rate / 100)`**. See `calcTotals` in `packages/invoice-core`; line-level VAT is reconciled to the bucket when rounded line sums differ (last line per rate absorbs the penny).
 
 ### TODO(plan-9): identifikovaná osoba edge case
 

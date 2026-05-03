@@ -3,7 +3,7 @@
 <h4 align="center">Czech-first invoicing — schema-first data, PDF + ISDOC + SPAYD QR</h4>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-Plan%201%20bootstrap%20done-brightgreen?style=for-the-badge" alt="Plan 1 bootstrap done" />
+  <img src="https://img.shields.io/badge/status-Plan%202%20invoice--core%20done-brightgreen?style=for-the-badge" alt="Plan 2 invoice-core done" />
   <img src="https://img.shields.io/badge/commits-conventional%20Commits-ff69b4?style=for-the-badge&logo=conventionalcommits&logoColor=white" alt="Conventional Commits" />
   <img src="https://img.shields.io/badge/stack-Next.js%2016%20%7C%20Neon-111111?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 16 | Neon" />
 </p>
@@ -29,7 +29,7 @@ Invoicey is a modern invoicing tool for Czech freelancers and small teams. It tr
 
 The same payload should eventually flow through the UI builder, JSON/MCP tools, or Slack — without duplicate types or drift.
 
-**Current phase:** Plan 1 shipped — Turborepo + Next.js 16 admin shell, Drizzle wiring, shadcn/ReUI registry, commitlint. **Next:** Plan 2 (`invoice-core`). See [Roadmap](#roadmap).
+**Current phase:** Plan 2 shipped — `@invoicey/invoice-core` (Zod contract, `calcTotals`, numbering, status, Vitest). **Next:** Plan 3 (PDF + SPAYD + ISDOC). See [Roadmap](#roadmap).
 
 ## Why this project
 
@@ -167,8 +167,9 @@ Per-feature specs under [`docs/specs/`](docs/specs/README.md) and UX flows under
 | --- | --- | --- |
 | Plan 0 | Documentation scaffold | Done |
 | Plan 1 | Monorepo bootstrap (Next.js, Drizzle, ReUI, commitlint) | Done |
-| Plan 2 | `invoice-core` domain package | Next |
-| Plans 3–9 | PDF stack + ARES + issuer/client UI + polish (**MVP**) | Planned |
+| Plan 2 | `invoice-core` domain package | Done |
+| Plan 3 | PDF + QR + ISDOC | Next |
+| Plans 4–9 | ARES + issuers + builder + list + dashboard + polish (**MVP**) | Planned |
 | Plans 10–14 | Recurring, email, MCP, Slack, auth | Post-MVP |
 
 High-level diagram:
@@ -177,8 +178,9 @@ High-level diagram:
 flowchart LR
     P0["Plan 0<br/>docs"] --> P1["Plan 1<br/>bootstrap"]
     P1 --> P2["Plan 2<br/>invoice-core"]
-    P2 --> P3["Plans 3–9<br/>MVP UI"]
-    P3 -.-> Post["Post-MVP"]
+    P2 --> P3["Plan 3<br/>PDF / QR / ISDOC"]
+    P3 --> PM["Plans 4–9<br/>MVP UI"]
+    PM -.-> Post["Post-MVP"]
 ```
 
 Full table: [`docs/roadmap.md`](docs/roadmap.md).

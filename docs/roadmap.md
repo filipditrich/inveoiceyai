@@ -7,8 +7,8 @@ Phased delivery plan. Each phase corresponds to one entry in `.cursor/plans/`. P
 ```mermaid
 flowchart LR
     P0["Plan 0<br/>docs<br/>done"] --> P1["Plan 1<br/>bootstrap<br/>done"]
-    P1 --> P2["Plan 2<br/>invoice-core<br/>next"]
-    P2 --> P3["Plan 3<br/>PDF / QR / ISDOC"]
+    P1 --> P2["Plan 2<br/>invoice-core<br/>done"]
+    P2 --> P3["Plan 3<br/>PDF / QR / ISDOC<br/>next"]
     P3 --> P4["Plan 4<br/>ARES + clients"]
     P4 --> P5["Plan 5<br/>issuers"]
     P5 --> P6["Plan 6<br/>invoice builder"]
@@ -57,17 +57,18 @@ flowchart LR
 
 ### Plan 2 — `invoice-core` domain package
 
-**Status:** Next  
+**Status:** Done  
+**Completed:** 2026-05-03  
 
 **Goal:** Land the contract — Zod schema, totals calculation, numbering, status engine — fully unit-tested. No UI, no PDF, no DB. Pure domain.
 
 **Exit criteria:**
-- `packages/invoice-core/src/schema.ts` exports `InvoiceSchema`, `IssuerSnapshotSchema`, `ClientSnapshotSchema`, `InvoiceItemSchema`, `TotalsSchema`
-- `calcTotals(items, vat)` is implemented with line-level + per-rate + grand totals
-- `nextInvoiceNumber(scheme, now)` is implemented as a pure function with template tokens
-- `deriveStatus(invoice, now)` is implemented as a pure function
-- Unit tests cover: every VAT mode, both supplies-abroad cases, every status transition, every numbering token, edge cases (zero-amount lines, mixed VAT rates)
-- Vitest runs in CI
+- [x] `packages/invoice-core/src/schema.ts` exports `InvoiceSchema`, `IssuerSnapshotSchema`, `ClientSnapshotSchema`, `InvoiceItemSchema`, `TotalsSchema`
+- [x] `calcTotals(items, vat, issuerVatPayer)` is implemented with line-level + per-rate + grand totals (third argument required for neplátce / effective rate rules)
+- [x] `nextInvoiceNumber(scheme, issueDate)` is implemented as a pure function with template tokens
+- [x] `deriveStatus(facts, now)` is implemented as a pure function over persisted invoice facts (`issuedAt`, `dueDate`, `paidAt`, `cancelledAt`); alias `deriveStatusFromInvoiceRow`
+- [x] Unit tests cover: every VAT mode, both supplies-abroad cases, status branches, numbering tokens + yearly reset, edge cases (zero-amount lines, mixed VAT rates, credit notes)
+- [x] Vitest runs via `bun run test` (Turbo `test` task); no GitHub Actions required for solo workflow
 
 **Doc inputs:** [`domain/invoice-schema.md`](./domain/invoice-schema.md), [`domain/vat-czech.md`](./domain/vat-czech.md), [`domain/numbering.md`](./domain/numbering.md), [`domain/status-engine.md`](./domain/status-engine.md)
 

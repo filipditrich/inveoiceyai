@@ -2,7 +2,7 @@
 
 `InvoiceSchema` is the **single source of truth** for what an invoice is in Invoicey. Every code path that produces or consumes an invoice — the UI builder, server actions, the future MCP tool, the future Slack handler, the PDF renderer, the ISDOC generator — parses or constructs values that pass `InvoiceSchema.safeParse`.
 
-This doc is the contract. The Zod implementation in `packages/invoice-core/src/schema.ts` (Plan 2) is its concrete form. If they disagree, the doc wins until a new ADR is filed.
+This doc is the contract. The Zod implementation in `packages/invoice-core/src/schema.ts` is its concrete form. If they disagree, the doc wins until a new ADR is filed.
 
 See also: [`vat-czech.md`](./vat-czech.md), [`numbering.md`](./numbering.md), [`status-engine.md`](./status-engine.md), [`snapshots.md`](./snapshots.md).
 
@@ -475,13 +475,13 @@ Full mapping lives in `specs/isdoc.md` (written before Plan 3).
 
 ## Open schema questions
 
-### TODO(plan-2): credit-note sign convention
+### Resolved (Plan 2): credit-note sign convention
 
-Above we model credit notes with **negative line/totals values**. Alternative: positive values with a `sign: -1` flag on the invoice. Negatives are simpler for ISDOC and PDF; the flag is more typesafe. Final call lands when `calcTotals` is implemented.
+**Decision:** Credit notes use **negative** `quantity`, line amounts, and aggregate totals where the corrected document reduces amounts. `InvoiceSchema` refines `docType === 'credit_note'` accordingly. `calcTotals` supports negative quantities for the same math.
 
-### TODO(plan-2): rounding policy
+### Resolved (Plan 2): rounding policy
 
-We use banker's rounding to 2 decimal places per line. Czech accounting allows alternate strategies (round at totals only, round-half-up). Decision lands when `calcTotals` ships.
+**Decision:** **`round2(n) = Math.round(n * 100) / 100`** (half away from zero at 2 dp in typical JS float use). Per-rate VAT in totals uses the same `round2` on the aggregated base per [`vat-czech.md`](./vat-czech.md); line VAT may be penny-adjusted to match the bucket on the last line of each rate group in `calcTotals`.
 
 ### TODO(plan-3): proforma vs advance distinction
 
