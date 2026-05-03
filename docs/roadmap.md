@@ -9,8 +9,8 @@ flowchart LR
     P0["Plan 0<br/>docs<br/>done"] --> P1["Plan 1<br/>bootstrap<br/>done"]
     P1 --> P2["Plan 2<br/>invoice-core<br/>done"]
     P2 --> P3["Plan 3<br/>PDF / QR / ISDOC<br/>done"]
-    P3 --> P4["Plan 4<br/>ARES + clients<br/>next"]
-    P4 --> P5["Plan 5<br/>issuers"]
+    P3 --> P4["Plan 4<br/>ARES + clients<br/>done"]
+    P4 --> P5["Plan 5<br/>issuers<br/>next"]
     P5 --> P6["Plan 6<br/>invoice builder"]
     P6 --> P7["Plan 7<br/>invoice list"]
     P7 --> P8["Plan 8<br/>dashboard"]
@@ -94,17 +94,18 @@ flowchart LR
 
 ### Plan 4 — ARES client + client (customer) management
 
-**Status:** Planned  
+**Status:** Done  
+**Completed:** 2026-05-03  
 
 **Goal:** Lookup any Czech business by IČO, save it as a client, list/edit/delete clients.
 
 **Exit criteria:**
-- `packages/ares/src/client.ts` calls `https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/{ico}` and parses the response with a Zod schema
-- 24h `unstable_cache` per-IČO
-- `apps/web/app/(app)/clients/page.tsx` lists clients in a table
-- `clients/new` has an IČO-first form: type IČO → click Lookup → form prefills from ARES → save
-- Manual entry fallback works when ARES returns 404
-- Spec doc `specs/ares.md` is written before implementation
+- [x] `packages/ares/src/client.ts` calls `https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/{ico}` and parses the response with a Zod schema
+- [x] 24h `unstable_cache` per-IČO
+- [x] `apps/web/app/(app)/clients/page.tsx` lists clients in a table
+- [x] `clients/new` has an IČO-first form: type IČO → click Lookup → form prefills from ARES → save
+- [x] Manual entry fallback works when ARES returns 404
+- [x] Spec doc `specs/ares.md` is written before implementation
 
 **Doc inputs:** [`specs/ares.md`](./specs/ares.md), [`domain/invoice-schema.md`](./domain/invoice-schema.md) (snapshot shape)
 
