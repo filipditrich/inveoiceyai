@@ -9,7 +9,7 @@ import type { PublicEnv } from "@invoicey/env/schema";
 function parseClientEnv(): PublicEnv {
   try {
     const nodeEnvRaw = process.env.NODE_ENV;
-    /** Bundlers occasionally omit NODE_ENV until define passes; coerce for Zod enum. */
+    /** bundlers occasionally omit NODE_ENV until define passes */
     const nodeEnv =
       nodeEnvRaw === APP_ENV.PRODUCTION ||
       nodeEnvRaw === APP_ENV.TEST ||
