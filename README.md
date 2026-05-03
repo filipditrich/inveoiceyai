@@ -1,197 +1,227 @@
-# Invoicey
+<h1 align="center">Invoicey</h1>
 
-A modern, Czech-first invoicing tool that treats invoices as **structured data first** and **rendered documents second**. Built so the same invoice can be created from a UI, a JSON document, an MCP tool, or a Slack command — all going through one schema, one validator, one renderer.
+<h4 align="center">Czech-first invoicing — schema-first data, PDF + ISDOC + SPAYD QR</h4>
 
-> **Status:** Phase 0 — docs and architecture only. No code yet. See [`docs/roadmap.md`](docs/roadmap.md) for what ships when.
+<p align="center">
+  <img src="https://img.shields.io/badge/status-phase%200%20docs-slategray?style=for-the-badge" alt="Phase 0 docs" />
+  <img src="https://img.shields.io/badge/commits-conventional%20Commits-ff69b4?style=for-the-badge&logo=conventionalcommits&logoColor=white" alt="Conventional Commits" />
+  <img src="https://img.shields.io/badge/stack-Next.js%2015%20%7C%20Neon-111111?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 15 | Neon" />
+</p>
 
-## Why
+<p align="center">
+  <a href="#overview">Overview</a> ·
+  <a href="#why-this-project">Why</a> ·
+  <a href="#mvp-scope">MVP scope</a> ·
+  <a href="#use-cases">Use cases</a> ·
+  <a href="#architecture-at-a-glance">Architecture</a> ·
+  <a href="#tech-stack">Tech stack</a> ·
+  <a href="#prerequisites">Prerequisites</a> ·
+  <a href="#getting-started">Getting started</a> ·
+  <a href="#project-structure">Project structure</a> ·
+  <a href="#documentation">Documentation</a> ·
+  <a href="#roadmap">Roadmap</a> ·
+  <a href="#contributing">Contributing</a>
+</p>
 
-Czech freelancers and small teams want a tool that:
+## Overview
 
-1. Looks like a 2026 finance product, not a 2012 admin panel
-2. Speaks fluent Czech VAT (rates, reverse charge, OSS, DUZP, supplies abroad)
-3. Plays nice with the registry (ARES lookup by IČO)
-4. Generates a PDF that any Czech bank's QR scanner reads correctly (SPAYD)
-5. Exports ISDOC so accounting tools can import without retyping
-6. Doesn't lock data into a vendor — every invoice is structured, exportable, scriptable
+Invoicey is a modern invoicing tool for Czech freelancers and small teams. It treats each invoice as **structured data first** (one Zod schema, validated everywhere) and **rendered documents second** (PDF via `@react-pdf/renderer`, ISDOC XML, SPAYD QR for bank apps).
 
-Inspired by [Midday.ai](https://midday.ai) (UX polish, finance-grade feel) and [fakturaonline.cz](https://fakturaonline.cz) (Czech tax compliance, ARES integration). Differentiated by: schema-first architecture, MCP/Slack automation as first-class concerns from day 1 (even if not built in MVP), multi-issuer-business support without a "company switcher" footgun.
+The same payload should eventually flow through the UI builder, JSON/MCP tools, or Slack — without duplicate types or drift.
 
-## What it does (MVP)
+**Current phase:** Phase 0 — in-repo docs, PRD, architecture, domain contracts, and ADRs. **No application code yet.** Implementation starts at Plan 1 (see [Roadmap](#roadmap)).
 
-- **Issue invoices** — invoices, proformas, advances, credit notes — with full Czech VAT compliance and a polished PDF template (logo, optional stamp, optional signature, accent color)
-- **Manage businesses** — multiple issuer businesses (the "from" side) and a shared client registry, both populated via ARES IČO lookup
-- **Per-issuer numbering** — configurable templates with `{YYYY}{####}` etc., yearly reset, per-doc-type counters, atomic increment
-- **Track status** — `draft → issued → paid` (or `overdue` / `cancelled`), derived from facts not stored — no clock-tick jobs
-- **Find anything** — ReUI Data Grid with filters (status, issuer, client, dates), sort, search, row actions
-- **See the pulse** — dashboard with counts and totals per status, recent invoices, monthly issued-vs-paid chart
-- **Download** — every invoice as PDF (with embedded SPAYD QR for bank-app payment) and as ISDOC 6.0.2 XML
-- **Upload assets** — UploadThing-backed logo / stamp / signature per issuer
+## Why this project
 
-Out of MVP, on the roadmap: recurring invoices, email delivery, MCP server, Slack bot, auth + multi-user, multi-currency, bilingual rendering. See [`docs/roadmap.md`](docs/roadmap.md).
+1. UX that feels like a 2026 finance product, not a legacy admin panel.
+2. Czech VAT baked in: rates, reverse charge (přenesená daňová povinnost), OSS, DUZP, supplies abroad.
+3. **ARES** lookup by IČO for issuer and client parties.
+4. **SPAYD** QR so Czech banking apps pre-fill payment fields.
+5. **ISDOC** export so accounting tools (Pohoda, Money S3, iDoklad, …) can import without retyping.
+6. Multi–issuer-business support (invoice “from” ŽL vs s.r.o. with separate numbering and banks).
+
+Inspired by [Midday.ai](https://midday.ai) (polish, finance UX) and [fakturaonline.cz](https://fakturaonline.cz) (Czech compliance). Differentiators: schema-first design, automation-ready surfaces (MCP/Slack on the roadmap), snapshots so historical invoices stay legally stable after registry edits.
+
+## MVP scope
+
+| Area | What ships |
+| --- | --- |
+| **Documents** | Invoice, proforma, advance, credit note — Czech VAT modes and DUZP |
+| **Parties** | Multiple issuer businesses; shared client registry; ARES prefetch |
+| **Numbers** | Per-issuer, per-doc-type templates (`{YYYY}{####}`, yearly reset, atomic counters) |
+| **Lifecycle** | Draft → issue → paid / overdue / cancelled (status **derived**, not cron-ticked) |
+| **UI** | Next.js 15, shadcn + [ReUI Data Grid](https://reui.io/components/data-grid), dashboard |
+| **Exports** | PDF + embedded QR; ISDOC 6.0.2 |
+| **Assets** | UploadThing for logo / stamp / signature |
+
+Post-MVP (Plans 10–14): recurring invoices, email, MCP server, Slack bot, Clerk auth, multi-currency, bilingual PDFs. Details: [`docs/roadmap.md`](docs/roadmap.md).
 
 ## Use cases
 
-The product targets three concrete scenarios. Every feature must serve at least one of them.
+**UC1 — Personal invoicing across issuer businesses** — Same operator invoices from ŽL or s.r.o.; each issuer has its own bank, numbering, VAT profile.
 
-### UC1 — Personal invoicing across multiple issuer businesses
+**UC2 — OBO / self-billing** — Buyer issues the invoice to the supplier; schema treats issuer and client symmetrically.
 
-> "I invoice 2–3 clients each month. Sometimes from my freelance trade license (ŽL), sometimes from my s.r.o. Each entity has its own bank account, numbering scheme, and possibly a different VAT registration status."
+**UC3 — Slack-driven invoicing (post-MVP)** — e.g. `@Invoicey invoice NFCtron monthly standard rate` → draft aligned with `InvoiceSchema`.
 
-### UC2 — OBO / self-billing
+Full narrative and non-goals: [`docs/PRD.md`](docs/PRD.md).
 
-> "Sometimes I issue an invoice in the name of my client to myself (self-billing model — the buyer issues the invoice). The document is legally identical to a normal invoice, but the issuer is the client and the recipient is me."
-
-### UC3 — Intra-company invoicing from Slack (post-MVP)
-
-> "My team should be able to type `@Invoicey invoice NFCtron monthly standard rate` in Slack and have a draft invoice appear, ready to issue."
-
-Full discussion in [`docs/PRD.md`](docs/PRD.md).
-
-## How it works (one picture)
+## Architecture at a glance
 
 ```mermaid
 flowchart LR
     subgraph Surfaces [Input surfaces]
         UI["UI builder<br/>RHF + Zod"]
-        MCP["MCP tool<br/>(Plan 12)"]
-        Slack["Slack bot<br/>(Plan 13)"]
+        MCP["MCP<br/>(Plan 12)"]
+        Slack["Slack<br/>(Plan 13)"]
     end
 
-    Surfaces -->|"InvoiceSchema.parse()"| SA["Server actions<br/>(@invoicey/db + invoice-core)"]
+    Surfaces -->|"InvoiceSchema.parse()"| SA["Server actions<br/>invoice-core + db"]
     SA -->|"snapshot at issue"| DB[("Neon Postgres")]
 
-    SA --> PDF["renderInvoicePdf<br/>(react-pdf)"]
-    SA --> QR["renderSpaydQr<br/>(qrcode)"]
-    SA --> ISDOC["renderIsdoc<br/>(xmlbuilder2)"]
+    SA --> PDF["renderInvoicePdf"]
+    SA --> QR["renderSpaydQr"]
+    SA --> ISDOC["renderIsdoc"]
 
-    Ares["@invoicey/ares<br/>(ARES REST v3)"] -.lookup.-> Surfaces
-    UT["UploadThing<br/>(logos/stamps/sigs)"] -.assets.-> Surfaces
+    Ares["@invoicey/ares"] -.lookup.-> Surfaces
+    UT["UploadThing"] -.assets.-> Surfaces
 ```
 
-The architecture is **schema-first**: a single Zod `InvoiceSchema` defines what an invoice *is*. Every code path that produces or consumes an invoice — UI, server actions, MCP, Slack, PDF, ISDOC — parses or constructs values that pass that schema. There is no parallel "DTO" type to drift.
+ADRs explain each stack choice: [`docs/decisions/README.md`](docs/decisions/README.md).
 
 ## Tech stack
 
 | Layer | Choice |
 | --- | --- |
-| Repo | Turborepo monorepo, bun workspaces |
+| Repo | Turborepo + [Bun](https://bun.sh) workspaces |
 | Web | Next.js 15 App Router (RSC + Server Actions) |
-| UI | shadcn/ui + ReUI registry (Data Grid, Autocomplete, …), Tailwind v4 |
+| UI | shadcn/ui + [ReUI](https://reui.io/docs/get-started) registry, Tailwind v4 |
 | Forms | React Hook Form + `@hookform/resolvers/zod` |
 | Domain | TypeScript + Zod (`@invoicey/invoice-core`) |
 | DB | Neon Postgres + Drizzle ORM |
-| PDF | `@react-pdf/renderer` |
-| QR | `qrcode` (SPAYD format) |
-| ISDOC | `xmlbuilder2` (ISDOC 6.0.2) |
+| PDF / QR / ISDOC | `@react-pdf/renderer`, `qrcode`, `xmlbuilder2` |
 | Files | UploadThing |
 | Hosting | Vercel |
-| Auth | _none in MVP_; Clerk later (Plan 14) |
 
-Every choice has an [ADR in `docs/decisions/`](docs/decisions/README.md) explaining the *why*.
+## Prerequisites
 
-## Project layout
+What you need **today** (docs-only repo):
 
+| Tool | Role |
+| --- | --- |
+| Git | Clone and branch |
+| Markdown viewer / IDE | Read [`docs/`](docs/) |
+
+What you need **after Plan 1** (when `package.json` lands):
+
+| Tool | Role |
+| --- | --- |
+| [Bun](https://bun.sh) ≥ 1.x | Install deps, run scripts (repo standard; no npm/yarn) |
+| Node.js | Matches Next.js / tooling engines once declared in `package.json` |
+
+Optional later: Neon account + Vercel project for deploy (documented in [`docs/architecture.md`](docs/architecture.md)).
+
+## Getting started
+
+**Phase 0 — read the docs**
+
+```bash
+git clone <repository-url>
+cd inveoiceyai
 ```
-inveoiceyai/
+
+Then open [`docs/README.md`](docs/README.md) for the reading order (PRD → glossary → architecture → `invoice-schema` → ADRs).
+
+**After Plan 1 — bootstrap the monorepo** (commands will match `package.json`; illustrative):
+
+```bash
+bun install
+bun dev        # apps/web dev server (once scaffold exists)
+```
+
+Until Plan 1 merges, those scripts do not exist in this repository.
+
+## Project structure
+
+**Today (Phase 0):**
+
+```text
+├── README.md                 # this file — product intro + navigation
+├── inveoiceyai.code-workspace
+└── docs/                     # source of truth: PRD, architecture, domain, ADRs
+    ├── README.md             # docs index + lifecycle rules
+    ├── PRD.md
+    ├── roadmap.md
+    ├── architecture.md
+    ├── glossary.md
+    ├── domain/
+    ├── decisions/
+    ├── specs/                # JIT specs per implementation plan
+    └── ui/
+```
+
+**Target layout after Plan 1+:**
+
+```text
 ├── apps/
-│   └── web/                    Next.js 15 admin app (the MVP UI)
+│   └── web/                  # Next.js 15 admin UI
 ├── packages/
-│   ├── invoice-core/           Zod schema, totals, numbering, status, PDF, QR, ISDOC
-│   ├── db/                     Drizzle schema + migrations + connection helper
-│   ├── ares/                   ARES REST v3 client
+│   ├── invoice-core/         # Zod schema, totals, PDF, QR, ISDOC
+│   ├── db/                   # Drizzle + migrations
+│   ├── ares/                 # ARES REST client
 │   ├── config-eslint/
 │   └── config-ts/
-├── docs/                       PRD, architecture, domain, ADRs (this is the source of truth)
-└── .cursor/plans/              per-phase implementation plans
+├── turbo.json
+├── package.json              # Bun workspaces
+└── docs/
 ```
 
-`apps/mcp` and `apps/slack` are roadmap items (Plans 12 & 13). They will share `invoice-core` and `db` directly — no HTTP shim, no schema duplication.
+`apps/mcp` and `apps/slack` are planned (Plans 12–13); they reuse `invoice-core` and `db` without duplicating schema types.
 
-## Key concepts (and where to read about them)
+## Documentation
 
-| Concept | TL;DR | Doc |
-| --- | --- | --- |
-| **Invoice schema** | One Zod schema is the contract for every input/output | [`docs/domain/invoice-schema.md`](docs/domain/invoice-schema.md) |
-| **Czech VAT** | Modes (regular / reverse-charge / OSS), supplies abroad, DUZP, plátce vs neplátce | [`docs/domain/vat-czech.md`](docs/domain/vat-czech.md) |
-| **Numbering** | Per-issuer, per-doc-type templates with `{YYYY}{####}` tokens; yearly reset; atomic | [`docs/domain/numbering.md`](docs/domain/numbering.md) |
-| **Status engine** | `draft / issued / paid / overdue / cancelled` is **derived** from facts at read time | [`docs/domain/status-engine.md`](docs/domain/status-engine.md) |
-| **Snapshots** | Issuer + client are frozen onto each invoice at issue time so history stays correct | [`docs/domain/snapshots.md`](docs/domain/snapshots.md) |
+| Doc | Purpose |
+| --- | --- |
+| [`docs/README.md`](docs/README.md) | Docs hub — conventions, lifecycle, ADR rules |
+| [`docs/PRD.md`](docs/PRD.md) | Requirements, MVP vs non-goals, success criteria |
+| [`docs/roadmap.md`](docs/roadmap.md) | Plan 0–14 goals and exit criteria |
+| [`docs/architecture.md`](docs/architecture.md) | Runtime boundaries, env vars, diagrams |
+| [`docs/glossary.md`](docs/glossary.md) | Czech ↔ English invoicing terms |
+| [`docs/domain/invoice-schema.md`](docs/domain/invoice-schema.md) | Central Zod contract + JSON examples |
+| [`docs/decisions/`](docs/decisions/README.md) | Architectural Decision Records |
 
-## Where we are (roadmap)
+Per-feature specs under [`docs/specs/`](docs/specs/README.md) and UX flows under [`docs/ui/`](docs/ui/README.md) are filled **just-in-time** before each build plan.
 
-```mermaid
-flowchart LR
-    P0["Plan 0<br/>docs<br/>(done)"] --> P1["Plan 1<br/>repo bootstrap"]
-    P1 --> P2["invoice-core"]
-    P2 --> P3["PDF / QR / ISDOC"]
-    P3 --> P4["ARES + clients"]
-    P4 --> P5["issuers"]
-    P5 --> P6["builder"]
-    P6 --> P7["list + actions"]
-    P7 --> P8["dashboard"]
-    P8 --> P9["polish"]
-    P9 -.MVP.-> Post["post-MVP:<br/>recurring · email · MCP · Slack · auth"]
-```
+## Roadmap
 
 | Phase | Goal | Status |
 | --- | --- | --- |
-| Plan 0 | Docs scaffold | Done |
-| Plan 1 | Repo bootstrap (Turborepo, Next.js, Drizzle, ReUI, commitlint) | Next |
-| Plans 2–3 | `invoice-core` domain + PDF/QR/ISDOC rendering | Pending |
-| Plans 4–5 | ARES + clients + issuers UI | Pending |
-| Plans 6–9 | Builder, list, dashboard, polish (= MVP) | Pending |
+| Plan 0 | Documentation scaffold | Done |
+| Plan 1 | Monorepo bootstrap (Next.js, Drizzle, ReUI, commitlint) | Next |
+| Plans 2–3 | `invoice-core` + PDF / QR / ISDOC | Planned |
+| Plans 4–9 | ARES, issuers & clients UI, builder, grid, dashboard, polish (**MVP**) | Planned |
 | Plans 10–14 | Recurring, email, MCP, Slack, auth | Post-MVP |
 
-Full table with exit criteria per phase: [`docs/roadmap.md`](docs/roadmap.md).
+High-level diagram:
 
-## Out of scope (explicitly)
-
-- Bank-statement reconciliation / payment matching
-- Client-side payment portal (pay-by-link)
-- Tax-period reporting (kontrolní hlášení / DPH přiznání) — adjacent product
-- Custom PDF templates / template editor (one good template > ten mediocre)
-- Multi-currency / bilingual invoices in MVP (post-MVP)
-
-The full out-of-scope table with rationale: [`docs/PRD.md`](docs/PRD.md#out-of-scope-mvp).
-
-## Czech terminology
-
-If you're new to Czech invoicing, [`docs/glossary.md`](docs/glossary.md) explains: IČO, DIČ, ARES, DUZP, VS/KS/SS, plátce DPH, přenesená daňová povinnost, OSS, VIES, dobropis, zálohová faktura, ISDOC, SPAYD, …
-
-## Where to start reading
-
-If you're picking this up cold:
-
-1. Start with this README
-2. [`docs/PRD.md`](docs/PRD.md) — what we're building and why
-3. [`docs/glossary.md`](docs/glossary.md) — vocabulary
-4. [`docs/architecture.md`](docs/architecture.md) — how it fits together
-5. [`docs/domain/invoice-schema.md`](docs/domain/invoice-schema.md) — the central contract
-6. [`docs/decisions/`](docs/decisions/README.md) — why each foundational call was made
-
-If you're going to implement a phase:
-
-1. Read the plan in `.cursor/plans/`
-2. Read the docs the plan cites
-3. Implement; if a decision changes, write a new ADR and supersede the old one
-4. Update relevant living docs in the same PR
-
-## Documentation map
-
+```mermaid
+flowchart LR
+    P0["Plan 0<br/>docs"] --> P1["Plan 1<br/>bootstrap"]
+    P1 --> P2["invoice-core"]
+    P2 --> P3["PDF / QR / ISDOC"]
+    P3 --> P9["Plans 4–9<br/>MVP UI"]
+    P9 -.-> Post["Post-MVP"]
 ```
-docs/
-├── README.md                     index + lifecycle + conventions
-├── PRD.md                        product requirements
-├── roadmap.md                    Plan 0..N with goals + exit criteria
-├── architecture.md               stack, monorepo, dataflow, runtime, envs
-├── glossary.md                   Czech ↔ English tax/invoice terms
-├── domain/                       contracts (schema, VAT, numbering, status, snapshots)
-├── decisions/                    16 ADRs in Michael Nygard format
-├── specs/                        per-feature specs (written just-in-time)
-└── ui/                           per-flow UX specs (written just-in-time)
-```
+
+Full table: [`docs/roadmap.md`](docs/roadmap.md).
+
+## Contributing
+
+1. **Docs-first:** Product and domain contracts live under [`docs/`](docs/). If behavior changes, update the relevant doc and add or supersede an ADR ([`docs/decisions/`](docs/decisions/README.md)).
+2. **Commits:** Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat`, `fix`, `docs`, …). If commitlint is added in Plan 1, follow the repo config.
+3. **Plans:** Implementation should trace to `.cursor/plans/` or equivalent tracked plans; cross-link PRs to the docs they implement.
+4. **Secrets:** Never commit `.env`, API tokens, or UploadThing keys.
 
 ## License
 
-TBD. Likely a permissive open-source license once the MVP ships.
+TBD — likely permissive OSS once MVP ships.
