@@ -96,12 +96,13 @@ import { GripVerticalIcon, CircleCheckIcon, LoaderIcon, EllipsisVerticalIcon, Co
 
 export const schema = z.object({
   id: z.number(),
-  header: z.string(),
-  type: z.string(),
+  number: z.string(),
+  buyer: z.string(),
+  docType: z.string(),
   status: z.string(),
-  target: z.string(),
-  limit: z.string(),
-  reviewer: z.string(),
+  total: z.string(),
+  dueDate: z.string(),
+  issuer: z.string(),
 })
 
 // Create a separate component for the drag handle
@@ -156,20 +157,27 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "header",
-    header: "Header",
+    accessorKey: "number",
+    header: "Invoice",
     cell: ({ row }) => {
       return <TableCellViewer item={row.original} />
     },
     enableHiding: false,
   },
   {
-    accessorKey: "type",
-    header: "Section Type",
+    accessorKey: "buyer",
+    header: "Customer",
+    cell: ({ row }) => (
+      <span className="max-w-[10rem] truncate font-medium">{row.original.buyer}</span>
+    ),
+  },
+  {
+    accessorKey: "docType",
+    header: "Doc type",
     cell: ({ row }) => (
       <div className="w-32">
         <Badge variant="outline" className="px-1.5 text-muted-foreground">
-          {row.original.type}
+          {row.original.docType}
         </Badge>
       </div>
     ),
@@ -179,7 +187,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Status",
     cell: ({ row }) => (
       <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        {row.original.status === "Done" ? (
+        {row.original.status === "Paid" ? (
           <CircleCheckIcon className="fill-green-500 dark:fill-green-400" />
         ) : (
           <LoaderIcon
@@ -190,93 +198,59 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     ),
   },
   {
-    accessorKey: "target",
-    header: () => <div className="w-full text-right">Target</div>,
+    accessorKey: "total",
+    header: () => <div className="w-full text-right">Total (Kč)</div>,
     cell: ({ row }) => (
       <form
         onSubmit={(e) => {
           e.preventDefault()
           toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.header}`,
+            loading: `Saving ${row.original.number}`,
             success: "Done",
             error: "Error",
           })
         }}
       >
-        <Label htmlFor={`${row.original.id}-target`} className="sr-only">
-          Target
+        <Label htmlFor={`${row.original.id}-total`} className="sr-only">
+          Total
         </Label>
         <Input
-          className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
-          defaultValue={row.original.target}
-          id={`${row.original.id}-target`}
+          className="hover:bg-input/30 h-8 w-24 border-transparent bg-transparent text-right shadow-none focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
+          defaultValue={row.original.total}
+          id={`${row.original.id}-total`}
         />
       </form>
     ),
   },
   {
-    accessorKey: "limit",
-    header: () => <div className="w-full text-right">Limit</div>,
+    accessorKey: "dueDate",
+    header: () => <div className="w-full text-right">Due</div>,
     cell: ({ row }) => (
       <form
         onSubmit={(e) => {
           e.preventDefault()
           toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.header}`,
+            loading: `Saving ${row.original.number}`,
             success: "Done",
             error: "Error",
           })
         }}
       >
-        <Label htmlFor={`${row.original.id}-limit`} className="sr-only">
-          Limit
+        <Label htmlFor={`${row.original.id}-due`} className="sr-only">
+          Due date
         </Label>
         <Input
-          className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
-          defaultValue={row.original.limit}
-          id={`${row.original.id}-limit`}
+          className="hover:bg-input/30 h-8 w-28 border-transparent bg-transparent text-right text-sm shadow-none focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
+          defaultValue={row.original.dueDate}
+          id={`${row.original.id}-due`}
         />
       </form>
     ),
   },
   {
-    accessorKey: "reviewer",
-    header: "Reviewer",
-    cell: ({ row }) => {
-      const isAssigned = row.original.reviewer !== "Assign reviewer"
-      if (isAssigned) {
-        return row.original.reviewer
-      }
-      return (
-        <>
-          <Label htmlFor={`${row.original.id}-reviewer`} className="sr-only">
-            Reviewer
-          </Label>
-          <Select
-            items={[
-              { label: "Eddie Lake", value: "Eddie Lake" },
-              { label: "Jamik Tashpulatov", value: "Jamik Tashpulatov" },
-            ]}
-          >
-            <SelectTrigger
-              className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
-              size="sm"
-              id={`${row.original.id}-reviewer`}
-            >
-              <SelectValue placeholder="Assign reviewer" />
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectGroup>
-                <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-                <SelectItem value="Jamik Tashpulatov">
-                  Jamik Tashpulatov
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </>
-      )
-    },
+    accessorKey: "issuer",
+    header: "Issuer",
+    cell: ({ row }) => <span>{row.original.issuer}</span>,
   },
   {
     id: "actions",
@@ -392,7 +366,7 @@ export function DataTable({
   }
   return (
     <Tabs
-      defaultValue="outline"
+      defaultValue="invoices"
       className="w-full flex-col justify-start gap-6"
     >
       <div className="flex items-center justify-between px-4 lg:px-6">
@@ -400,12 +374,12 @@ export function DataTable({
           View
         </Label>
         <Select
-          defaultValue="outline"
+          defaultValue="invoices"
           items={[
-            { label: "Outline", value: "outline" },
-            { label: "Past Performance", value: "past-performance" },
-            { label: "Key Personnel", value: "key-personnel" },
-            { label: "Focus Documents", value: "focus-documents" },
+            { label: "All invoices", value: "invoices" },
+            { label: "Overdue", value: "overdue-queue" },
+            { label: "Drafts", value: "drafts" },
+            { label: "Export queue", value: "exports" },
           ]}
         >
           <SelectTrigger
@@ -417,22 +391,22 @@ export function DataTable({
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="outline">Outline</SelectItem>
-              <SelectItem value="past-performance">Past Performance</SelectItem>
-              <SelectItem value="key-personnel">Key Personnel</SelectItem>
-              <SelectItem value="focus-documents">Focus Documents</SelectItem>
+              <SelectItem value="invoices">All invoices</SelectItem>
+              <SelectItem value="overdue-queue">Overdue</SelectItem>
+              <SelectItem value="drafts">Drafts</SelectItem>
+              <SelectItem value="exports">Export queue</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
         <TabsList className="hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:px-1 @4xl/main:flex">
-          <TabsTrigger value="outline">Outline</TabsTrigger>
-          <TabsTrigger value="past-performance">
-            Past Performance <Badge variant="secondary">3</Badge>
+          <TabsTrigger value="invoices">All invoices</TabsTrigger>
+          <TabsTrigger value="overdue-queue">
+            Overdue <Badge variant="secondary">3</Badge>
           </TabsTrigger>
-          <TabsTrigger value="key-personnel">
-            Key Personnel <Badge variant="secondary">2</Badge>
+          <TabsTrigger value="drafts">
+            Drafts <Badge variant="secondary">2</Badge>
           </TabsTrigger>
-          <TabsTrigger value="focus-documents">Focus Documents</TabsTrigger>
+          <TabsTrigger value="exports">Export queue</TabsTrigger>
         </TabsList>
         <div className="flex items-center gap-2">
           <DropdownMenu>
@@ -470,12 +444,12 @@ export function DataTable({
           <Button variant="outline" size="sm">
             <PlusIcon
             />
-            <span className="hidden lg:inline">Add Section</span>
+            <span className="hidden lg:inline">Add invoice</span>
           </Button>
         </div>
       </div>
       <TabsContent
-        value="outline"
+        value="invoices"
         className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
       >
         <div className="overflow-hidden rounded-lg border">
@@ -618,16 +592,16 @@ export function DataTable({
         </div>
       </TabsContent>
       <TabsContent
-        value="past-performance"
+        value="overdue-queue"
         className="flex flex-col px-4 lg:px-6"
       >
         <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
       </TabsContent>
-      <TabsContent value="key-personnel" className="flex flex-col px-4 lg:px-6">
+      <TabsContent value="drafts" className="flex flex-col px-4 lg:px-6">
         <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
       </TabsContent>
       <TabsContent
-        value="focus-documents"
+        value="exports"
         className="flex flex-col px-4 lg:px-6"
       >
         <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
@@ -636,44 +610,20 @@ export function DataTable({
   )
 }
 const chartData = [
-  {
-    month: "January",
-    desktop: 186,
-    mobile: 80,
-  },
-  {
-    month: "February",
-    desktop: 305,
-    mobile: 200,
-  },
-  {
-    month: "March",
-    desktop: 237,
-    mobile: 120,
-  },
-  {
-    month: "April",
-    desktop: 73,
-    mobile: 190,
-  },
-  {
-    month: "May",
-    desktop: 209,
-    mobile: 130,
-  },
-  {
-    month: "June",
-    desktop: 214,
-    mobile: 140,
-  },
+  { month: "January", desktop: 24, mobile: 8 },
+  { month: "February", desktop: 31, mobile: 14 },
+  { month: "March", desktop: 28, mobile: 11 },
+  { month: "April", desktop: 37, mobile: 16 },
+  { month: "May", desktop: 33, mobile: 13 },
+  { month: "June", desktop: 41, mobile: 19 },
 ]
 const chartConfig = {
   desktop: {
-    label: "Desktop",
+    label: "Issued",
     color: "var(--primary)",
   },
   mobile: {
-    label: "Mobile",
+    label: "Exported",
     color: "var(--primary)",
   },
 } satisfies ChartConfig
@@ -683,14 +633,14 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
     <Drawer direction={isMobile ? "bottom" : "right"}>
       <DrawerTrigger asChild>
         <Button variant="link" className="text-foreground w-fit px-0 text-left">
-          {item.header}
+          {item.number}
         </Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="gap-1">
-          <DrawerTitle>{item.header}</DrawerTitle>
+          <DrawerTitle>{item.number}</DrawerTitle>
           <DrawerDescription>
-            Showing total visitors for the last 6 months
+            Demo drawer — invoicing preview (Invoicey)
           </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
@@ -739,13 +689,11 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
               <Separator />
               <div className="grid gap-2">
                 <div className="flex gap-2 leading-none font-medium">
-                  Trending up by 5.2% this month{" "}
+                  Issued invoices up versus prior month{" "}
                   <TrendingUpIcon className="size-4" />
                 </div>
                 <div className="text-muted-foreground">
-                  Showing total visitors for the last 6 months. This is just
-                  some random text to test the layout. It spans multiple lines
-                  and should wrap around.
+                  Synthetic chart for layout preview only.
                 </div>
               </div>
               <Separator />
@@ -753,49 +701,34 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
           )}
           <form className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
-              <Label htmlFor="header">Header</Label>
-              <Input id="header" defaultValue={item.header} />
+              <Label htmlFor="number">Document number</Label>
+              <Input id="number" defaultValue={item.number} />
+            </div>
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="buyer">Customer</Label>
+              <Input id="buyer" defaultValue={item.buyer} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="type">Type</Label>
+                <Label htmlFor="docType">Document type</Label>
                 <Select
-                  defaultValue={item.type}
+                  defaultValue={item.docType}
                   items={[
-                    { label: "Table of Contents", value: "Table of Contents" },
-                    { label: "Executive Summary", value: "Executive Summary" },
-                    {
-                      label: "Technical Approach",
-                      value: "Technical Approach",
-                    },
-                    { label: "Design", value: "Design" },
-                    { label: "Capabilities", value: "Capabilities" },
-                    { label: "Focus Documents", value: "Focus Documents" },
-                    { label: "Narrative", value: "Narrative" },
-                    { label: "Cover Page", value: "Cover Page" },
+                    { label: "Invoice", value: "Invoice" },
+                    { label: "Proforma", value: "Proforma" },
+                    { label: "Credit note", value: "Credit note" },
+                    { label: "Advance", value: "Advance" },
                   ]}
                 >
-                  <SelectTrigger id="type" className="w-full">
-                    <SelectValue placeholder="Select a type" />
+                  <SelectTrigger id="docType" className="w-full">
+                    <SelectValue placeholder="Select document type" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="Table of Contents">
-                        Table of Contents
-                      </SelectItem>
-                      <SelectItem value="Executive Summary">
-                        Executive Summary
-                      </SelectItem>
-                      <SelectItem value="Technical Approach">
-                        Technical Approach
-                      </SelectItem>
-                      <SelectItem value="Design">Design</SelectItem>
-                      <SelectItem value="Capabilities">Capabilities</SelectItem>
-                      <SelectItem value="Focus Documents">
-                        Focus Documents
-                      </SelectItem>
-                      <SelectItem value="Narrative">Narrative</SelectItem>
-                      <SelectItem value="Cover Page">Cover Page</SelectItem>
+                      <SelectItem value="Invoice">Invoice</SelectItem>
+                      <SelectItem value="Proforma">Proforma</SelectItem>
+                      <SelectItem value="Credit note">Credit note</SelectItem>
+                      <SelectItem value="Advance">Advance</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -805,19 +738,21 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                 <Select
                   defaultValue={item.status}
                   items={[
-                    { label: "Done", value: "Done" },
-                    { label: "In Progress", value: "In Progress" },
-                    { label: "Not Started", value: "Not Started" },
+                    { label: "Paid", value: "Paid" },
+                    { label: "Pending", value: "Pending" },
+                    { label: "Overdue", value: "Overdue" },
+                    { label: "Draft", value: "Draft" },
                   ]}
                 >
                   <SelectTrigger id="status" className="w-full">
-                    <SelectValue placeholder="Select a status" />
+                    <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="Done">Done</SelectItem>
-                      <SelectItem value="In Progress">In Progress</SelectItem>
-                      <SelectItem value="Not Started">Not Started</SelectItem>
+                      <SelectItem value="Paid">Paid</SelectItem>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Overdue">Overdue</SelectItem>
+                      <SelectItem value="Draft">Draft</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -825,37 +760,17 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="target">Target</Label>
-                <Input id="target" defaultValue={item.target} />
+                <Label htmlFor="total">Total (Kč)</Label>
+                <Input id="total" defaultValue={item.total} />
               </div>
               <div className="flex flex-col gap-3">
-                <Label htmlFor="limit">Limit</Label>
-                <Input id="limit" defaultValue={item.limit} />
+                <Label htmlFor="dueDate">Due date</Label>
+                <Input id="dueDate" defaultValue={item.dueDate} />
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              <Label htmlFor="reviewer">Reviewer</Label>
-              <Select
-                defaultValue={item.reviewer}
-                items={[
-                  { label: "Eddie Lake", value: "Eddie Lake" },
-                  { label: "Jamik Tashpulatov", value: "Jamik Tashpulatov" },
-                  { label: "Emily Whalen", value: "Emily Whalen" },
-                ]}
-              >
-                <SelectTrigger id="reviewer" className="w-full">
-                  <SelectValue placeholder="Select a reviewer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-                    <SelectItem value="Jamik Tashpulatov">
-                      Jamik Tashpulatov
-                    </SelectItem>
-                    <SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="issuer">Issuer</Label>
+              <Input id="issuer" defaultValue={item.issuer} />
             </div>
           </form>
         </div>

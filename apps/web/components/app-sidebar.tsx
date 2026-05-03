@@ -1,7 +1,6 @@
 "use client";
 
 import { NavMain } from "@/components/nav-main";
-import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import {
 	Sidebar,
@@ -13,11 +12,9 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import {
-	BookMarkedIcon,
 	Building2Icon,
 	FileTextIcon,
 	LayoutDashboardIcon,
-	LifeBuoyIcon,
 	ReceiptIcon,
 	SettingsIcon,
 	UsersIcon,
@@ -75,19 +72,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		},
 	];
 
-	const navSecondary = [
-		{
-			title: "shadcn docs",
-			url: "https://ui.shadcn.com/docs/installation",
-			icon: <BookMarkedIcon />,
-		},
-		{
-			title: "Support",
-			url: "mailto:faktura@invoicey.demo",
-			icon: <LifeBuoyIcon />,
-		},
-	];
-
 	return (
 		<Sidebar
 			className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
@@ -110,7 +94,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			</SidebarHeader>
 			<SidebarContent>
 				<NavMain items={navMain} groupLabel="Navigate" />
-				<NavSecondary items={navSecondary} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={demoUser} />
