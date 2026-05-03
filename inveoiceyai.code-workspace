@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../NFCtron/nfctron-agents"
+		},
+		{
+			"path": "../NFCtron/nfctron-tickets"
 		}
 	],
 	"settings": {}
