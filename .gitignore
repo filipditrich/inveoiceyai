@@ -29,3 +29,7 @@ npm-debug.log*
 
 # cursor local hook state (machine-specific)
 .cursor/hooks/
+.cursor/mcp.json
+
+# local MCP presets (Plan 12a)
+.invoicey/

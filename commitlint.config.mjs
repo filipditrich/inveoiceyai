@@ -2,6 +2,8 @@ const scopes = [
   "docs",
   "web",
   "invoice-core",
+  "invoice-tools",
+  "mcp",
   "db",
   "env",
   "ares",
