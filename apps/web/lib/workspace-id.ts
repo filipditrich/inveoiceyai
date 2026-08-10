@@ -26,6 +26,8 @@ export async function ensureDefaultWorkspace(): Promise<string> {
 		await db.insert(workspaces).values({
 			id,
 			name: "Default workspace",
+			// Required since Plan 14; this file is deleted in stage 5.
+			slug: `ws-${id.slice(0, 8)}`,
 		});
 	}
 	return id;
