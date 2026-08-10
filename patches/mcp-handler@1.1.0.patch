@@ -1,0 +1,44 @@
+diff --git a/dist/index.js b/dist/index.js
+index 11072f724e74ff9e0b4c3bfec04a6fafa1b0a7bd..19b486d387293debfcadb717232a956b794f365a 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -749,14 +749,11 @@ function createServerResponseAdapter(signal, fn) {
+       if (encoding) {
+         throw new Error("Encoding not supported");
+       }
+-      if (chunk instanceof Buffer) {
+-        throw new Error("Buffer not supported");
+-      }
+       let data;
+-      if (chunk instanceof Uint8Array) {
+-        data = chunk;
+-      } else if (typeof chunk === "string") {
++      if (typeof chunk === "string") {
+         data = new TextEncoder().encode(chunk);
++      } else if (chunk instanceof Uint8Array) {
++        data = chunk;
+       } else {
+         throw new Error("Unexpected chunk type: " + typeof chunk);
+       }
+diff --git a/dist/index.mjs b/dist/index.mjs
+index c1110409315d81bd1d440dc5910ba720c17f3722..03f93191bd426e139e52527c110db074992fab57 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -743,14 +743,11 @@ function createServerResponseAdapter(signal, fn) {
+       if (encoding) {
+         throw new Error("Encoding not supported");
+       }
+-      if (chunk instanceof Buffer) {
+-        throw new Error("Buffer not supported");
+-      }
+       let data;
+-      if (chunk instanceof Uint8Array) {
+-        data = chunk;
+-      } else if (typeof chunk === "string") {
++      if (typeof chunk === "string") {
+         data = new TextEncoder().encode(chunk);
++      } else if (chunk instanceof Uint8Array) {
++        data = chunk;
+       } else {
+         throw new Error("Unexpected chunk type: " + typeof chunk);
+       }

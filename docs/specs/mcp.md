@@ -56,7 +56,7 @@ flowchart LR
 ```json
 {
   "mcpServers": {
-    "invoicey": {
+    "invoicey-local": {
       "command": "bun",
       "args": [
         "run",
@@ -65,7 +65,13 @@ flowchart LR
         "src/stdio.ts"
       ],
       "env": {
-        "INVOICEY_PRESETS_PATH": "/ABS/PATH/.invoicey/presets.json"
+        "INVOICEY_PRESETS_PATH": "/ABS/PATH/inveoiceyai/.invoicey/presets.json"
+      }
+    },
+    "invoicey-server": {
+      "url": "https://<your-web>.vercel.app/api/mcp",
+      "headers": {
+        "Authorization": "Bearer <MCP_API_KEY>"
       }
     }
   }
@@ -82,7 +88,7 @@ flowchart LR
 ```json
 {
   "mcpServers": {
-    "invoicey-remote": {
+    "invoicey-server": {
       "url": "https://<your-web>.vercel.app/api/mcp",
       "headers": {
         "Authorization": "Bearer <MCP_API_KEY>"
