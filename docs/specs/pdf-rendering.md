@@ -8,7 +8,9 @@ Produce Czech-language invoice PDFs from a validated [`Invoice`](../../packages/
 
 | Name | Type | Notes |
 | --- | --- | --- |
-| `renderInvoicePdf(invoice)` | `Promise<Uint8Array>` | Assumes `InvoiceSchema` already satisfied; no re-parse in hot path (optional `parse` in tests only). |
+| `renderInvoicePdf(invoice)` | `Promise<Uint8Array>` | ISDOC.PDF (visual page + embedded `invoice.isdoc`). Assumes `InvoiceSchema` already satisfied. |
+| `renderVisualInvoicePdf(invoice)` | `Promise<Uint8Array>` | Visual page only (no ISDOC attachment). |
+| `embedIsdocInPdf(pdf, xml)` | `Promise<Uint8Array>` | Post-process helper used by `renderInvoicePdf`. |
 
 ## Stack
 
@@ -47,6 +49,18 @@ Produce Czech-language invoice PDFs from a validated [`Invoice`](../../packages/
 ## Assets: SVG logos
 
 MVP renderer supports **PNG and JPEG** from URLs reliably. **SVG:** optional post-MVP; if hit, log-friendly skip or omit image (ADR [0010](../decisions/0010-uploadthing-for-files.md) allows future `sharp` rasterization).
+
+## ISDOC.PDF packaging
+
+`renderInvoicePdf` returns an **ISDOC.PDF**: the visual page from `@react-pdf/renderer`, then a `pdf-lib` post-process that embeds `invoice.isdoc` per ISDOC 6.0.2:
+
+- Filename of the embedded file: exactly `invoice.isdoc`
+- MIME `/Subtype`: `text/xml`
+- Catalog `/AF` + `/Names/EmbeddedFiles`
+- `/AFRelationship` = `/Alternative` (PDF and XML generated independently from `Invoice`)
+- PDF/A-3**b** scaffolding (XMP `pdfaid` part 3 / conformance B + sRGB OutputIntent)
+
+**Non-goal while on react-pdf:** veraPDF PDF/A-3**a** (tagged structure tree). Download names should end with `-isdoc.pdf`. Standalone `renderIsdoc` remains available for raw XML.
 
 ## Determinism & golden PDF tests
 

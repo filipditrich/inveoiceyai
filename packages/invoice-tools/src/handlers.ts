@@ -127,7 +127,7 @@ export async function createAndRenderInvoice(options: {
     invoice,
     pdfBase64: Buffer.from(pdfBytes).toString("base64"),
     isdocXml,
-    filenamePdf: `faktura-${safeName}.pdf`,
-    filenameIsdoc: `faktura-${safeName}.isdoc.xml`,
+    filenamePdf: `faktura-${safeName}-isdoc.pdf`,
+    filenameIsdoc: `faktura-${safeName}.isdoc`,
   };
 }

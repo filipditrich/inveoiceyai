@@ -1,9 +1,11 @@
 /** @jsxImportSource react */
 import { pdf } from "@react-pdf/renderer";
 
+import { renderIsdoc } from "../isdoc/render-isdoc";
 import type { Invoice } from "../schema";
 import { renderSpaydQr } from "../spayd/render-spayd-qr";
 
+import { embedIsdocInPdf } from "./embed-isdoc-in-pdf";
 import type { InvoicePdfAssets } from "./InvoicePdfDocument";
 import { InvoicePdfDocument } from "./InvoicePdfDocument";
 import { loadImageForPdf } from "./load-image";
@@ -23,7 +25,10 @@ async function streamToUint8Array(
 	return Uint8Array.from(Buffer.concat(parts));
 }
 
-export async function renderInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
+/** Visual page only (react-pdf). Prefer {@link renderInvoicePdf} for ISDOC.PDF. */
+export async function renderVisualInvoicePdf(
+	invoice: Invoice,
+): Promise<Uint8Array> {
 	registerInvoiceFonts();
 
 	const qrDataUrl = await renderSpaydQr(invoice);
@@ -47,8 +52,40 @@ export async function renderInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
 		signature,
 	};
 
-	const pdfStream = await pdf(<InvoicePdfDocument invoice={invoice} assets={assets} />).toBuffer();
+	const pdfStream = await pdf(
+		<InvoicePdfDocument invoice={invoice} assets={assets} />,
+	).toBuffer();
 	return streamToUint8Array(pdfStream);
+}
+
+/**
+ * Render invoice as ISDOC.PDF: visual page + embedded `invoice.isdoc`
+ * (Catalog `/AF` + EmbeddedFiles, AFRelationship Alternative).
+ */
+export async function renderInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
+	const visual = await renderVisualInvoicePdf(invoice);
+	const isdocXml = renderIsdoc(invoice);
+	return embedIsdocInPdf(visual, isdocXml, {
+		title: `${documentLabel(invoice)} ${invoice.meta.number}`,
+		author: invoice.issuer.name,
+	});
+}
+
+function documentLabel(invoice: Invoice): string {
+	switch (invoice.meta.docType) {
+		case "invoice":
+			return "Faktura";
+		case "proforma":
+			return "Proforma";
+		case "advance":
+			return "Zálohová faktura";
+		case "credit_note":
+			return "Dobropis";
+		default: {
+			const _exhaustive: never = invoice.meta.docType;
+			return _exhaustive;
+		}
+	}
 }
 
 function customizationAllows(
