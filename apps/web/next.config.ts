@@ -19,7 +19,15 @@ const nextConfig: NextConfig = {
     "@invoicey/db",
     "@invoicey/env",
     "@invoicey/invoice-core",
+    "@invoicey/invoice-tools",
   ],
+  /** include invoice-core fonts/xsd in serverless traces */
+  outputFileTracingIncludes: {
+    "/api/**": [
+      "../../packages/invoice-core/assets/fonts/**/*",
+      "../../packages/invoice-core/assets/schemas/**/*",
+    ],
+  },
 };
 
 export default nextConfig;

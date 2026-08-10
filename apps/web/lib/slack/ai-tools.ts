@@ -1,4 +1,3 @@
-import { fetchAresEkonomickySubjekt } from "@invoicey/ares";
 import {
   calcTotals,
   renderInvoicePdf,
@@ -8,19 +7,27 @@ import {
   InvoiceSchema,
   type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
-import { tool } from "ai";
-import { z } from "zod";
-
 import {
   addCalendarDaysYmd,
+  lookupBusiness,
   normalizeDraftToInvoice,
-} from "./normalize-draft-invoice";
-import { parseAmountCz } from "./parse-amount-cz";
+  parseAmountCz,
+} from "@invoicey/invoice-tools";
+import { tool } from "ai";
+import { z } from "zod";
 
 const vatInputSchema = z.object({
   mode: z.enum(["regular", "reverse_charge", "oss"]),
   suppliesAbroad: z.enum(["none", "eu", "non_eu"]),
   legalNote: z.string().max(500).optional(),
+  localReverseChargeCode: z
+    .string()
+    .min(1)
+    .max(10)
+    .optional()
+    .describe(
+      "ISDOC LocalReverseChargeCode when mode is reverse_charge. Common: 1 gold, 2 emission allowances, 4 construction/assembly, 5 waste.",
+    ),
 });
 
 const lineInputSchema = z.object({
@@ -33,8 +40,8 @@ const lineInputSchema = z.object({
 });
 
 /**
- * Tool surface for the Slack invoice agent (portable to MCP in Plan 12).
- * Issuer is injected server-side; the model cannot override bank / identity for the "from" party.
+ * Slack AI tool wrappers over `@invoicey/invoice-tools`.
+ * Issuer is injected server-side; the model cannot override the "from" party.
  */
 export function createInvoiceSlackTools(issuer: IssuerSnapshot) {
   return {
@@ -44,17 +51,7 @@ export function createInvoiceSlackTools(issuer: IssuerSnapshot) {
       inputSchema: z.object({
         ico: z.string().describe("Eight-digit IČO"),
       }),
-      execute: async ({ ico }) => {
-        const r = await fetchAresEkonomickySubjekt(ico);
-        if (!r.ok) {
-          return {
-            ok: false as const,
-            kind: r.kind,
-            message: r.message,
-          };
-        }
-        return { ok: true as const, draft: r.draft };
-      },
+      execute: async ({ ico }) => lookupBusiness(ico),
     }),
 
     parse_amount_cz: tool({
