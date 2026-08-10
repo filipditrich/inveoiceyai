@@ -106,7 +106,9 @@ export function InvoiceBuilderForm({
 	const watched = form.watch();
 	const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
 	const previewUrlRef = React.useRef<string | null>(null);
+	const lastPreviewKeyRef = React.useRef<string | null>(null);
 	const [previewError, setPreviewError] = React.useState<string | null>(null);
+	const [previewUpdating, setPreviewUpdating] = React.useState(false);
 	const [numberPreview, setNumberPreview] = React.useState(
 		initial?.numberPreview ?? "—",
 	);
@@ -160,22 +162,18 @@ export function InvoiceBuilderForm({
 				},
 				new Date(`${watched.issueDate}T12:00:00.000Z`),
 			);
-			setNumberPreview(n);
+			setNumberPreview((prev) => (prev === n ? prev : n));
 		} catch {
 			setNumberPreview("—");
 		}
-	}, [
-		issuers,
-		watched.issuerId,
-		watched.docType,
-		watched.issueDate,
-	]);
+	}, [issuers, watched.issuerId, watched.docType, watched.issueDate]);
 
-	React.useEffect(() => {
+	/** stable key — `form.watch()` returns a new object every render */
+	const previewBuild = React.useMemo(() => {
 		const issuer = issuers.find((i) => i.id === watched.issuerId)?.snapshot;
 		const client = clients.find((c) => c.id === watched.clientId)?.snapshot;
 		if (!issuer || !client) {
-			return;
+			return { invoice: null as Invoice | null, error: null as string | null };
 		}
 		const lines: BuilderLineInput[] = watched.items.map((it) => ({
 			description: it.description || "—",
@@ -186,9 +184,10 @@ export function InvoiceBuilderForm({
 		}));
 		const built = tryBuildInvoicePayload({
 			docType: watched.docType,
-			number: numberPreview !== "—" && !numberPreview.startsWith("(")
-				? numberPreview
-				: "DRAFT",
+			number:
+				numberPreview !== "—" && !numberPreview.startsWith("(")
+					? numberPreview
+					: "DRAFT",
 			issueDate: watched.issueDate,
 			dueDate: watched.dueDate,
 			duzp: watched.duzp,
@@ -203,27 +202,84 @@ export function InvoiceBuilderForm({
 			notes: watched.notes || undefined,
 		});
 		if (!built.ok) {
-			setPreviewError(built.message);
+			return { invoice: null, error: built.message };
+		}
+		return { invoice: built.invoice, error: null };
+	}, [
+		issuers,
+		clients,
+		numberPreview,
+		watched.issuerId,
+		watched.clientId,
+		watched.docType,
+		watched.issueDate,
+		watched.dueDate,
+		watched.duzp,
+		watched.vatMode,
+		watched.suppliesAbroad,
+		watched.legalNote,
+		watched.localReverseChargeCode,
+		watched.correctedInvoiceNumber,
+		watched.notes,
+		watched.items,
+	]);
+
+	const previewKey = previewBuild.invoice
+		? JSON.stringify(previewBuild.invoice)
+		: null;
+
+	React.useEffect(() => {
+		if (previewBuild.error) {
+			setPreviewError(previewBuild.error);
 			return;
 		}
-		setPreviewError(null);
+		if (!previewKey || !previewBuild.invoice) {
+			return;
+		}
+		if (previewKey === lastPreviewKeyRef.current) {
+			return;
+		}
+
+		const invoice = previewBuild.invoice;
+		const controller = new AbortController();
 		const handle = window.setTimeout(() => {
-			void refreshPreview(
-				built.invoice,
-				(next) => {
-					if (previewUrlRef.current && previewUrlRef.current !== next) {
+			setPreviewUpdating(true);
+			void refreshPreview(invoice, controller.signal)
+				.then((url) => {
+					if (controller.signal.aborted || !url) {
+						return;
+					}
+					lastPreviewKeyRef.current = previewKey;
+					if (previewUrlRef.current && previewUrlRef.current !== url) {
 						URL.revokeObjectURL(previewUrlRef.current);
 					}
-					previewUrlRef.current = next;
-					setPreviewUrl(next);
-				},
-				setPreviewError,
-			);
-		}, 450);
+					previewUrlRef.current = url;
+					setPreviewUrl(url);
+					setPreviewError(null);
+				})
+				.catch((e: unknown) => {
+					if (controller.signal.aborted) {
+						return;
+					}
+					if (e instanceof Error && e.name === "AbortError") {
+						return;
+					}
+					setPreviewError(
+						e instanceof Error ? e.message : "preview failed",
+					);
+				})
+				.finally(() => {
+					if (!controller.signal.aborted) {
+						setPreviewUpdating(false);
+					}
+				});
+		}, 700);
+
 		return () => {
 			window.clearTimeout(handle);
+			controller.abort();
 		};
-	}, [watched, issuers, clients, numberPreview]);
+	}, [previewKey, previewBuild.error, previewBuild.invoice]);
 
 	const totalsPreview = React.useMemo(() => {
 		const issuer = issuers.find((i) => i.id === watched.issuerId)?.snapshot;
@@ -566,7 +622,12 @@ export function InvoiceBuilderForm({
 			</form>
 
 			<div className="space-y-2">
-				<h2 className="font-medium">Náhled PDF</h2>
+				<div className="flex items-center justify-between gap-2">
+					<h2 className="font-medium">Náhled PDF</h2>
+					{previewUpdating ? (
+						<span className="text-muted-foreground text-xs">Updating…</span>
+					) : null}
+				</div>
 				{previewError ? (
 					<p className="text-destructive text-xs">{previewError}</p>
 				) : null}
@@ -588,29 +649,22 @@ export function InvoiceBuilderForm({
 
 async function refreshPreview(
 	invoice: Invoice,
-	setUrl: (u: string | null) => void,
-	setError: (e: string | null) => void,
-) {
-	try {
-		const res = await fetch("/api/demo/invoice-pdf", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(invoice),
-		});
-		if (!res.ok) {
-			const body = (await res.json().catch(() => null)) as {
-				error?: string;
-			} | null;
-			setError(body?.error ?? `preview ${res.status}`);
-			return;
-		}
-		const blob = await res.blob();
-		const url = URL.createObjectURL(blob);
-		setUrl(url);
-		setError(null);
-	} catch (e) {
-		setError(e instanceof Error ? e.message : "preview failed");
+	signal: AbortSignal,
+): Promise<string | null> {
+	const res = await fetch("/api/demo/invoice-pdf", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(invoice),
+		signal,
+	});
+	if (!res.ok) {
+		const body = (await res.json().catch(() => null)) as {
+			error?: string;
+		} | null;
+		throw new Error(body?.error ?? `preview ${res.status}`);
 	}
+	const blob = await res.blob();
+	return URL.createObjectURL(blob);
 }
 
 function humanInvalid(code: string): string {

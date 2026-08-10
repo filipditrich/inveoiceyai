@@ -23,12 +23,19 @@ const mcpHandler = createMcpHandler(
   },
 );
 
-/** Require `Authorization: Bearer` matching validated `MCP_API_KEY`. */
+/**
+ * Require `Authorization: Bearer` matching validated `MCP_API_KEY`.
+ * Fails closed when the key is unset — no key configured means no access.
+ */
 async function verifyMcpApiKey(
   _req: Request,
   bearerToken?: string,
 ): Promise<AuthInfo | undefined> {
-  if (bearerToken === env.MCP_API_KEY) {
+  const expected = env.MCP_API_KEY;
+  if (!expected) {
+    return undefined;
+  }
+  if (bearerToken === expected) {
     return {
       token: bearerToken,
       clientId: "api-key",

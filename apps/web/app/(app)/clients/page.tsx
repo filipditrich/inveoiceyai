@@ -51,7 +51,7 @@ export default async function ClientsPage() {
 				<div>
 					<h1 className="text-2xl font-semibold tracking-tight">Clients</h1>
 					<p className="text-muted-foreground">
-						Odběratelé — ARES Lookup nebo ruční záznam.
+						Customers — ARES lookup or manual entry.
 					</p>
 				</div>
 				<Button render={<Link href="/clients/new" prefetch />} size="sm">
@@ -60,13 +60,14 @@ export default async function ClientsPage() {
 			</div>
 
 			{items.length === 0 ? (
-				<p className="text-muted-foreground">
-					Zatím žádní klienti.{" "}
-					<Link className="text-primary underline-offset-4 hover:underline" href="/clients/new">
-						Založ první
-					</Link>
-					.
-				</p>
+				<div className="rounded-md border border-dashed p-8 text-center">
+					<p className="text-muted-foreground mb-3 text-sm">
+						No clients yet. Add a customer via ARES or manually.
+					</p>
+					<Button render={<Link href="/clients/new" prefetch />} size="sm">
+						Create your first client
+					</Button>
+				</div>
 			) : (
 				<div className="rounded-md border">
 					<Table>

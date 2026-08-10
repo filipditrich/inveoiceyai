@@ -165,7 +165,7 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 | `INVOICEY_AI_MODEL` | Gateway model id for Eve (`agent/agent.ts`) | Vercel + `.env.local` | Plan 13b |
 | `INVOICEY_DEMO_ISSUER_JSON` | Optional JSON override for demo `IssuerSnapshot` | Vercel + `.env.local` | Plan 12a / 13b |
 | `INVOICEY_PRESETS_PATH` | Absolute path to local MCP presets JSON | local MCP / optional | Plan 12a |
-| `MCP_API_KEY` | Bearer token for `/api/mcp` (required); also Eve HTTP fallback | Vercel + `.env` / `.env.local` | Plan 12a |
+| `MCP_API_KEY` | Bearer token for `/api/mcp` (optional in schema; route fails closed when unset); also Eve HTTP fallback | Vercel + `.env` / `.env.local` | Plan 12a |
 | `EVE_API_KEY` | Optional Bearer for `/eve/v1/*` HTTP (else `MCP_API_KEY`) | Vercel + `.env.local` | Plan 13b |
 | ~~`SLACK_BOT_TOKEN` / `SLACK_SIGNING_SECRET`~~ | Hand-managed Slack secrets — **deprecated** for Eve; use Vercel Connect | — | Plan 13a only |
 
@@ -177,7 +177,7 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 - **Neon** for Postgres — wired via Vercel Marketplace (auto-injects `DATABASE_URL`); schema in [`docs/specs/db-schema.md`](./specs/db-schema.md)
 - **UploadThing** for files — configured per-app
 - **Plan 13b (Eve Slack):** `apps/web/agent/` mounted with `withEve()`; Connect trigger → `/eve/v1/slack`; Node 24+. Spec: [`specs/slack-eve.md`](./specs/slack-eve.md). Plan 13a `/api/slack/*` retired.
-- **Plan 12a (MCP):** local stdio via `apps/mcp`; remote Streamable HTTP via `apps/web` `/api/mcp` (`mcp-handler`, Node runtime, required `MCP_API_KEY`). Shared tool logic in `@invoicey/invoice-tools` (+ `/ops` for issue/paid).
+- **Plan 12a (MCP):** local stdio via `apps/mcp`; remote Streamable HTTP via `apps/web` `/api/mcp` (`mcp-handler`, Node runtime, `MCP_API_KEY` bearer, fail-closed when unset). Shared tool logic in `@invoicey/invoice-tools` (+ `/ops` for issue/paid).
 
 ## Tooling
 

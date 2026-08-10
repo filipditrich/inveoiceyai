@@ -58,6 +58,18 @@ const STATUS_VALUES: InvoiceStatus[] = [
 	"cancelled",
 ];
 
+const STATUS_LABELS: Record<InvoiceStatus, string> = {
+	draft: "Draft",
+	issued: "Issued",
+	overdue: "Overdue",
+	paid: "Paid",
+	cancelled: "Cancelled",
+};
+
+function recordsLabel(n: number): string {
+	return n === 1 ? "1 record" : `${n} records`;
+}
+
 export default async function InvoicesPage({
 	searchParams,
 }: {
@@ -152,7 +164,7 @@ export default async function InvoicesPage({
 				<div>
 					<h1 className="text-2xl font-semibold tracking-tight">Invoices</h1>
 					<p className="text-muted-foreground">
-						Seznam faktur — filtr, PDF / ISDOC, stavy.
+						Filter, PDF / ISDOC, and status actions.
 					</p>
 				</div>
 				<div className="flex gap-2">
@@ -175,19 +187,19 @@ export default async function InvoicesPage({
 
 			<form className="flex flex-wrap items-end gap-3 rounded-md border p-3">
 				<FilterField label="Status" name="status" defaultValue={sp.status}>
-					<option value="">Vše</option>
+					<option value="">All</option>
 					{STATUS_VALUES.map((s) => (
 						<option key={s} value={s}>
-							{s}
+							{STATUS_LABELS[s]}
 						</option>
 					))}
 				</FilterField>
 				<FilterField
-					label="Vystavovatel"
+					label="Issuer"
 					name="issuerId"
 					defaultValue={sp.issuerId}
 				>
-					<option value="">Vše</option>
+					<option value="">All</option>
 					{issuers.map((i) => (
 						<option key={i.id} value={i.id}>
 							{i.snapshot.name}
@@ -195,11 +207,11 @@ export default async function InvoicesPage({
 					))}
 				</FilterField>
 				<FilterField
-					label="Odběratel"
+					label="Client"
 					name="clientId"
 					defaultValue={sp.clientId}
 				>
-					<option value="">Vše</option>
+					<option value="">All</option>
 					{clients.map((c) => (
 						<option key={c.id} value={c.id}>
 							{c.snapshot.name}
@@ -207,7 +219,7 @@ export default async function InvoicesPage({
 					))}
 				</FilterField>
 				<label className="space-y-1 text-xs">
-					<span className="text-muted-foreground">Od</span>
+					<span className="text-muted-foreground">From</span>
 					<input
 						className="border-input bg-background block h-9 rounded-md border px-2 text-sm"
 						defaultValue={sp.from ?? ""}
@@ -216,7 +228,7 @@ export default async function InvoicesPage({
 					/>
 				</label>
 				<label className="space-y-1 text-xs">
-					<span className="text-muted-foreground">Do</span>
+					<span className="text-muted-foreground">To</span>
 					<input
 						className="border-input bg-background block h-9 rounded-md border px-2 text-sm"
 						defaultValue={sp.to ?? ""}
@@ -225,38 +237,38 @@ export default async function InvoicesPage({
 					/>
 				</label>
 				<label className="space-y-1 text-xs">
-					<span className="text-muted-foreground">Hledat</span>
+					<span className="text-muted-foreground">Search</span>
 					<input
 						className="border-input bg-background block h-9 rounded-md border px-2 text-sm"
 						defaultValue={sp.q ?? ""}
 						name="q"
-						placeholder="číslo, klient…"
+						placeholder="number, client…"
 					/>
 				</label>
 				<label className="space-y-1 text-xs">
-					<span className="text-muted-foreground">Řazení</span>
+					<span className="text-muted-foreground">Sort</span>
 					<select
 						className="border-input bg-background block h-9 rounded-md border px-2 text-sm"
 						defaultValue={sort}
 						name="sort"
 					>
-						<option value="date_desc">Datum ↓</option>
-						<option value="date_asc">Datum ↑</option>
+						<option value="date_desc">Date ↓</option>
+						<option value="date_asc">Date ↑</option>
 					</select>
 				</label>
 				<Button size="sm" type="submit" variant="secondary">
-					Filtrovat
+					Filter
 				</Button>
 			</form>
 
 			{pageItems.length === 0 ? (
 				<p className="text-muted-foreground">
-					Žádné faktury.{" "}
+					No invoices yet.{" "}
 					<Link
 						className="text-primary underline-offset-4 hover:underline"
 						href="/invoices/new"
 					>
-						Vytvoř první
+						Create your first invoice
 					</Link>
 					.
 				</p>
@@ -379,7 +391,7 @@ export default async function InvoicesPage({
 
 			{pageCount > 1 || total > 0 ? (
 				<p className="text-muted-foreground text-sm">
-					Strana {safePage} / {pageCount} ({total} záznamů)
+					Page {safePage} / {pageCount} ({recordsLabel(total)})
 					{safePage > 1 ? (
 						<>
 							{" "}

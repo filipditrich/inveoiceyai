@@ -348,7 +348,8 @@ export async function saveInvoiceDraft(formData: FormData): Promise<void> {
 	}
 
 	revalidatePath("/invoices");
-	redirect(`/invoices/${id}/edit`);
+	revalidatePath("/dashboard");
+	redirect(`/invoices/${id}/edit?toast=invoice_saved`);
 }
 
 /** Issue: lock numbering, assign number, freeze snapshots. */
@@ -523,7 +524,8 @@ export async function issueInvoice(formData: FormData): Promise<void> {
 	}
 
 	revalidatePath("/invoices");
-	redirect(`/invoices/${invoiceId}`);
+	revalidatePath("/dashboard");
+	redirect(`/invoices/${invoiceId}?toast=invoice_issued`);
 }
 
 export async function markInvoicePaid(formData: FormData): Promise<void> {
@@ -536,8 +538,9 @@ export async function markInvoicePaid(formData: FormData): Promise<void> {
 		redirect(`/invoices?invalid=${encodeURIComponent("cannot_mark_paid")}`);
 	}
 	revalidatePath("/invoices");
+	revalidatePath("/dashboard");
 	revalidatePath(`/invoices/${id}`);
-	redirect(`/invoices/${id}`);
+	redirect(`/invoices/${id}?toast=invoice_paid`);
 }
 
 /** Cancel an issued (unpaid) invoice. */
@@ -551,8 +554,9 @@ export async function cancelInvoice(formData: FormData): Promise<void> {
 		redirect(`/invoices?invalid=${encodeURIComponent("cannot_cancel")}`);
 	}
 	revalidatePath("/invoices");
+	revalidatePath("/dashboard");
 	revalidatePath(`/invoices/${id}`);
-	redirect(`/invoices/${id}`);
+	redirect(`/invoices/${id}?toast=invoice_cancelled`);
 }
 
 export async function deleteInvoice(formData: FormData): Promise<void> {
@@ -574,7 +578,8 @@ export async function deleteInvoice(formData: FormData): Promise<void> {
 	}
 	await db.delete(invoices).where(eq(invoices.id, id));
 	revalidatePath("/invoices");
-	redirect("/invoices");
+	revalidatePath("/dashboard");
+	redirect("/invoices?toast=invoice_deleted");
 }
 
 /** Duplicate issued or draft into a new draft. */
@@ -618,5 +623,6 @@ export async function duplicateInvoice(formData: FormData): Promise<void> {
 		await replaceItems(tx, newId, draft);
 	});
 	revalidatePath("/invoices");
-	redirect(`/invoices/${newId}/edit`);
+	revalidatePath("/dashboard");
+	redirect(`/invoices/${newId}/edit?toast=invoice_duplicated`);
 }

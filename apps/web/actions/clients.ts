@@ -131,7 +131,8 @@ export async function saveClient(formData: FormData): Promise<void> {
 	});
 
 	revalidatePath("/clients");
-	redirect("/clients");
+	revalidatePath("/invoices/new");
+	redirect("/clients?toast=client_saved");
 }
 
 export async function deleteClient(formData: FormData): Promise<void> {
@@ -144,5 +145,5 @@ export async function deleteClient(formData: FormData): Promise<void> {
 		.delete(clients)
 		.where(and(eq(clients.id, id), eq(clients.workspaceId, workspaceId)));
 	revalidatePath("/clients");
-	redirect("/clients");
+	redirect("/clients?toast=client_deleted");
 }

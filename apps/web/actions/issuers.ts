@@ -1,6 +1,11 @@
 "use server";
 
 import {
+	DEFAULT_NUMBERING_TEMPLATES,
+	ISSUER_DOC_TYPES,
+	type IssuerDocType,
+} from "@/lib/issuer-numbering";
+import {
 	ensureDefaultWorkspace,
 	getDefaultWorkspaceId,
 } from "@/lib/workspace-id";
@@ -15,17 +20,6 @@ import { withDbTransaction } from "@invoicey/db/transaction";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
-const DOC_TYPES = ["invoice", "proforma", "advance", "credit_note"] as const;
-
-type DocType = (typeof DOC_TYPES)[number];
-
-const DEFAULT_TEMPLATES: Record<DocType, string> = {
-	invoice: "{YYYY}{####}",
-	proforma: "PF-{YYYY}-{####}",
-	advance: "ZF-{YYYY}-{####}",
-	credit_note: "DOB-{YYYY}-{####}",
-};
 
 function optionalTrim(value: FormDataEntryValue | null): string | undefined {
 	if (typeof value !== "string") {
@@ -53,6 +47,84 @@ function templateWithPadding(base: string, padding: number): string {
 		return base.replace(/\{#+\}/, hashes);
 	}
 	return `${base}${hashes}`;
+}
+
+async function upsertNumberingScheme(
+	tx: Parameters<Parameters<typeof withDbTransaction>[0]>[0],
+	opts: {
+		workspaceId: string;
+		issuerId: string;
+		docType: IssuerDocType;
+		formData: FormData;
+	},
+): Promise<void> {
+	const { workspaceId, issuerId, docType, formData } = opts;
+	const templateRaw =
+		optionalTrim(formData.get(`scheme_${docType}_template`)) ??
+		DEFAULT_NUMBERING_TEMPLATES[docType];
+	const resetPeriodRaw =
+		optionalTrim(formData.get(`scheme_${docType}_resetPeriod`)) ?? "yearly";
+	const resetPeriod = resetPeriodRaw === "never" ? "never" : "yearly";
+	const paddingRaw = Number(
+		optionalTrim(formData.get(`scheme_${docType}_padding`)) ?? "4",
+	);
+	const padding =
+		Number.isFinite(paddingRaw) && paddingRaw >= 1 && paddingRaw <= 10
+			? Math.floor(paddingRaw)
+			: 4;
+	const counterRaw = Number(
+		optionalTrim(formData.get(`scheme_${docType}_counter`)) ?? "0",
+	);
+	const counter =
+		Number.isFinite(counterRaw) && counterRaw >= 0
+			? Math.floor(counterRaw)
+			: 0;
+	const counterYearRaw = optionalTrim(
+		formData.get(`scheme_${docType}_counterYear`),
+	);
+	const counterYear =
+		resetPeriod === "yearly"
+			? Number(counterYearRaw ?? String(new Date().getFullYear()))
+			: null;
+	const template = templateWithPadding(templateRaw, padding);
+
+	const existingScheme = await tx
+		.select()
+		.from(issuerNumberingSchemes)
+		.where(
+			and(
+				eq(issuerNumberingSchemes.issuerId, issuerId),
+				eq(issuerNumberingSchemes.docType, docType),
+			),
+		)
+		.limit(1);
+
+	if (existingScheme[0]) {
+		await tx
+			.update(issuerNumberingSchemes)
+			.set({
+				template,
+				resetPeriod,
+				counter,
+				counterYear: counterYear ?? null,
+				padding,
+				updatedAt: new Date(),
+			})
+			.where(eq(issuerNumberingSchemes.id, existingScheme[0].id));
+		return;
+	}
+
+	await tx.insert(issuerNumberingSchemes).values({
+		id: crypto.randomUUID(),
+		workspaceId,
+		issuerId,
+		docType,
+		template,
+		resetPeriod,
+		counter,
+		counterYear: counterYear ?? null,
+		padding,
+	});
 }
 
 /** UPSERT validated IssuerSnapshot + numbering schemes in default workspace. */
@@ -184,81 +256,24 @@ export async function saveIssuer(formData: FormData): Promise<void> {
 				});
 			}
 
-			for (const docType of DOC_TYPES) {
-				const templateRaw =
-					optionalTrim(formData.get(`scheme_${docType}_template`)) ??
-					DEFAULT_TEMPLATES[docType];
-				const resetPeriodRaw =
-					optionalTrim(formData.get(`scheme_${docType}_resetPeriod`)) ??
-					"yearly";
-				const resetPeriod = resetPeriodRaw === "never" ? "never" : "yearly";
-				const paddingRaw = Number(
-					optionalTrim(formData.get(`scheme_${docType}_padding`)) ?? "4",
-				);
-				const padding =
-					Number.isFinite(paddingRaw) && paddingRaw >= 1 && paddingRaw <= 10
-						? Math.floor(paddingRaw)
-						: 4;
-				const counterRaw = Number(
-					optionalTrim(formData.get(`scheme_${docType}_counter`)) ?? "0",
-				);
-				const counter =
-					Number.isFinite(counterRaw) && counterRaw >= 0
-						? Math.floor(counterRaw)
-						: 0;
-				const counterYearRaw = optionalTrim(
-					formData.get(`scheme_${docType}_counterYear`),
-				);
-				const counterYear =
-					resetPeriod === "yearly"
-						? Number(counterYearRaw ?? String(new Date().getFullYear()))
-						: null;
-				const template = templateWithPadding(templateRaw, padding);
-
-				const existingScheme = await tx
-					.select()
-					.from(issuerNumberingSchemes)
-					.where(
-						and(
-							eq(issuerNumberingSchemes.issuerId, issuerId),
-							eq(issuerNumberingSchemes.docType, docType),
-						),
-					)
-					.limit(1);
-
-				if (existingScheme[0]) {
-					await tx
-						.update(issuerNumberingSchemes)
-						.set({
-							template,
-							resetPeriod,
-							counter,
-							counterYear: counterYear ?? null,
-							padding,
-							updatedAt: new Date(),
-						})
-						.where(eq(issuerNumberingSchemes.id, existingScheme[0].id));
-				} else {
-					await tx.insert(issuerNumberingSchemes).values({
-						id: crypto.randomUUID(),
-						workspaceId,
-						issuerId,
-						docType,
-						template,
-						resetPeriod,
-						counter,
-						counterYear: counterYear ?? null,
-						padding,
-					});
-				}
+			for (const docType of ISSUER_DOC_TYPES) {
+				await upsertNumberingScheme(tx, {
+					workspaceId,
+					issuerId,
+					docType,
+					formData,
+				});
 			}
 		});
-	} catch {
+	} catch (err) {
+		console.error("[saveIssuer] failed", err);
 		redirect(`${errBase}?invalid=${encodeURIComponent("save_failed")}`);
 	}
 
 	revalidatePath("/issuers");
-	redirect("/issuers");
+	revalidatePath("/dashboard");
+	revalidatePath("/invoices/new");
+	redirect("/issuers?toast=issuer_saved");
 }
 
 /** Delete issuer when it has no invoices; cascades numbering schemes. */
@@ -296,5 +311,6 @@ export async function deleteIssuer(formData: FormData): Promise<void> {
 	}
 
 	revalidatePath("/issuers");
-	redirect("/issuers");
+	revalidatePath("/dashboard");
+	redirect("/issuers?toast=issuer_deleted");
 }

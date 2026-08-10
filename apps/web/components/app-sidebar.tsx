@@ -1,6 +1,5 @@
 "use client";
 
-import { NavDocuments } from "@/components/nav-documents";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -14,9 +13,7 @@ import {
 	SidebarRail,
 } from "@/components/ui/sidebar";
 import {
-	BracesIcon,
 	Building2Icon,
-	FilePlusIcon,
 	FileTextIcon,
 	LayoutDashboardIcon,
 	ReceiptIcon,
@@ -27,35 +24,16 @@ import { usePathname } from "next/navigation";
 import * as React from "react";
 
 const demoUser = {
-	name: "Invoicey Demo",
+	name: "Invoicey",
 	email: "demo@invoicey.demo",
 	avatar: "",
 };
-
-const documentItems = [
-	{
-		name: "Invoices overview",
-		url: "/invoices",
-		icon: FileTextIcon,
-	},
-	{
-		name: "New invoice",
-		url: "/invoices/new",
-		icon: FilePlusIcon,
-	},
-	{
-		name: "From JSON",
-		url: "/invoices/from-json",
-		icon: BracesIcon,
-	},
-];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const pathname = usePathname();
 
 	const invoicesOpen =
-		pathname === "/invoices" ||
-		pathname.startsWith("/invoices/");
+		pathname === "/invoices" || pathname.startsWith("/invoices/");
 
 	const navMain = [
 		{
@@ -103,7 +81,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 							</div>
 							<div className="grid flex-1 text-left text-sm leading-tight">
 								<span className="truncate font-medium">Invoicey</span>
-								<span className="truncate text-xs opacity-75">Demo shell</span>
+								<span className="truncate text-xs opacity-75">
+									Czech invoicing
+								</span>
 							</div>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
@@ -111,7 +91,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			</SidebarHeader>
 			<SidebarContent>
 				<NavMain items={navMain} groupLabel="Navigate" />
-				<NavDocuments items={documentItems} />
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={demoUser} />

@@ -1,4 +1,5 @@
 import type { ClientOption, IssuerOption } from "@/lib/invoice-party-types";
+import { ensureAllIssuerNumberingSchemes } from "@/lib/issuer-numbering";
 import { getDefaultWorkspaceId } from "@/lib/workspace-id";
 import {
 	ClientSnapshotSchema,
@@ -14,6 +15,13 @@ export async function loadIssuerOptions(): Promise<IssuerOption[]> {
 		.select()
 		.from(issuerBusinesses)
 		.where(eq(issuerBusinesses.workspaceId, workspaceId));
+
+	/** backfill defaults for issuers created before schemes were persisted */
+	await ensureAllIssuerNumberingSchemes(
+		workspaceId,
+		rows.map((r) => r.id),
+	);
+
 	const schemes = await db
 		.select()
 		.from(issuerNumberingSchemes)

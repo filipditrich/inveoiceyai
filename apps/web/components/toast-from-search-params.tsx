@@ -1,0 +1,55 @@
+"use client";
+
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect } from "react";
+import { toast } from "sonner";
+
+const TOAST_MESSAGES: Record<
+	string,
+	{ type: "success" | "error"; text: string }
+> = {
+	issuer_saved: { type: "success", text: "Issuer saved" },
+	issuer_deleted: { type: "success", text: "Issuer deleted" },
+	client_saved: { type: "success", text: "Client saved" },
+	client_deleted: { type: "success", text: "Client deleted" },
+	invoice_saved: { type: "success", text: "Draft saved" },
+	invoice_issued: { type: "success", text: "Invoice issued" },
+	invoice_paid: { type: "success", text: "Marked as paid" },
+	invoice_cancelled: { type: "success", text: "Invoice cancelled" },
+	invoice_deleted: { type: "success", text: "Draft deleted" },
+	invoice_duplicated: { type: "success", text: "Invoice duplicated" },
+};
+
+function ToastFromSearchParamsInner() {
+	const searchParams = useSearchParams();
+	const router = useRouter();
+	const toastKey = searchParams.get("toast");
+
+	useEffect(() => {
+		if (!toastKey) {
+			return;
+		}
+		const msg = TOAST_MESSAGES[toastKey];
+		if (msg) {
+			if (msg.type === "success") {
+				toast.success(msg.text);
+			} else {
+				toast.error(msg.text);
+			}
+		}
+		const url = new URL(window.location.href);
+		url.searchParams.delete("toast");
+		router.replace(`${url.pathname}${url.search}${url.hash}`, { scroll: false });
+	}, [toastKey, router]);
+
+	return null;
+}
+
+/** Shows a one-shot toast from `?toast=` then strips the query param. */
+export function ToastFromSearchParams() {
+	return (
+		<Suspense fallback={null}>
+			<ToastFromSearchParamsInner />
+		</Suspense>
+	);
+}

@@ -66,11 +66,11 @@ export const privateEnvSchema = z.object({
   INVOICEY_DEFAULT_WORKSPACE_ID: z.preprocess(emptyEnvToUndefined, z.uuid().optional()),
   UPLOADTHING_TOKEN: z.preprocess(emptyEnvToUndefined, z.string().optional()),
   UPLOADTHING_APP_ID: z.preprocess(emptyEnvToUndefined, z.string().optional()),
-  /** Bearer gate for `/api/mcp` — required everywhere `@invoicey/env/server` loads. */
-  MCP_API_KEY: z
-    .string()
-    .transform((s) => s.trim())
-    .pipe(z.string().min(1)),
+  /**
+   * Legacy bearer gate for `/api/mcp`. Optional: the route fails closed when
+   * unset, so the app boots without it. Removed once MCP moves to OAuth (Plan 14).
+   */
+  MCP_API_KEY: z.preprocess(emptyEnvToUndefined, z.string().min(1).optional()),
 });
 
 /** Vercel-only system vars (subset). @see https://vercel.com/docs/environment-variables/system-environment-variables */

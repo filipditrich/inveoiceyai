@@ -2,6 +2,7 @@ import {
 	IssuerEditorForm,
 	type NumberingSchemeDraft,
 } from "@/components/issuers/issuer-editor-form";
+import { ensureIssuerNumberingSchemes } from "@/lib/issuer-numbering";
 import { getDefaultWorkspaceId } from "@/lib/workspace-id";
 import { IssuerSnapshotSchema } from "@invoicey/invoice-core/schema";
 import { issuerBusinesses, issuerNumberingSchemes } from "@invoicey/db";
@@ -44,6 +45,8 @@ export default async function IssuerEditPage({
 	if (!snapshot.success) {
 		notFound();
 	}
+
+	await ensureIssuerNumberingSchemes(db, { workspaceId, issuerId: id });
 
 	const schemeRows = await db
 		.select()

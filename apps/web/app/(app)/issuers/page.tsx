@@ -65,7 +65,7 @@ export default async function IssuersPage({
 				<div>
 					<h1 className="text-2xl font-semibold tracking-tight">Issuers</h1>
 					<p className="text-muted-foreground">
-						Vystavovatelé — ARES, banka, DPH, číslování, logo.
+						Your businesses — ARES, bank, VAT, numbering, logo.
 					</p>
 				</div>
 				<Button render={<Link href="/issuers/new" prefetch />} size="sm">
@@ -76,16 +76,14 @@ export default async function IssuersPage({
 			{err ? <p className="text-destructive text-sm">{err}</p> : null}
 
 			{items.length === 0 ? (
-				<p className="text-muted-foreground">
-					Zatím žádní vystavovatelé.{" "}
-					<Link
-						className="text-primary underline-offset-4 hover:underline"
-						href="/issuers/new"
-					>
-						Založ první
-					</Link>
-					.
-				</p>
+				<div className="rounded-md border border-dashed p-8 text-center">
+					<p className="text-muted-foreground mb-3 text-sm">
+						No issuers yet. Add your business to start invoicing.
+					</p>
+					<Button render={<Link href="/issuers/new" prefetch />} size="sm">
+						Create your first issuer
+					</Button>
+				</div>
 			) : (
 				<div className="rounded-md border">
 					<Table>

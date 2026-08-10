@@ -13,8 +13,8 @@ flowchart LR
     P4 --> P5["Plan 5<br/>issuers<br/>done"]
     P5 --> P6["Plan 6<br/>invoice builder<br/>done"]
     P6 --> P7["Plan 7<br/>invoice list<br/>done"]
-    P7 --> P8["Plan 8<br/>dashboard<br/>next"]
-    P8 --> P9["Plan 9<br/>polish"]
+    P7 --> P8["Plan 8<br/>dashboard<br/>done"]
+    P8 --> P9["Plan 9<br/>polish<br/>done"]
     P3 -.parallel.-> P13a["Plan 13a<br/>Slack bot<br/>done"]
     P3 -.parallel.-> P12a["Plan 12a<br/>MCP local<br/>done"]
     P9 -.MVP.-> Post["post-MVP"]
@@ -174,31 +174,33 @@ flowchart LR
 
 ### Plan 8 — Dashboard
 
-**Status:** Planned (next)
+**Status:** Done  
+**Completed:** 2026-08-10
 
 **Goal:** Single page showing the invoicing pulse at a glance.
 
 **Exit criteria:**
 
-- Cards: count + total amount per status (draft, issued, paid, overdue, upcoming due ≤ 14 days)
-- Chart: monthly issued vs. paid for the last 12 months (basic, ReUI/shadcn chart)
-- Recent invoices table (last 10)
-- Issuer filter that re-scopes everything on the page
+- [x] Cards: count + total amount per status (draft, issued, paid, overdue, upcoming due ≤ 14 days)
+- [x] Chart: monthly issued vs. paid for the last 12 months (basic, ReUI/shadcn chart)
+- [x] Recent invoices table (last 10)
+- [x] Issuer filter that re-scopes everything on the page
 
 ### Plan 9 — Polish
 
-**Status:** Planned
+**Status:** Done  
+**Completed:** 2026-08-10
 
 **Goal:** Make it feel finished.
 
 **Exit criteria:**
 
-- Empty states everywhere (no invoices, no clients, no issuers — each with a CTA)
-- Loading skeletons via React Suspense
-- Error boundaries with actionable messages
-- Onboarding seed: when there are zero issuers, dashboard shows a "Create your first issuer" guided flow
-- Toasts for every mutation (success + error)
-- Mobile-acceptable layout (it's a desktop tool, but doesn't break on phone)
+- [x] Empty states everywhere (no invoices, no clients, no issuers — each with a CTA)
+- [x] Loading skeletons via React Suspense
+- [x] Error boundaries with actionable messages
+- [x] Onboarding seed: when there are zero issuers, dashboard shows a "Create your first issuer" guided flow
+- [x] Toasts for every mutation (success + error)
+- [x] Mobile-acceptable layout (it's a desktop tool, but doesn't break on phone)
 
 ## MVP boundary
 
