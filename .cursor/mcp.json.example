@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "invoicey": {
+      "command": "bun",
+      "args": [
+        "run",
+        "--cwd",
+        "/ABS/PATH/inveoiceyai/apps/mcp",
+        "src/stdio.ts"
+      ],
+      "env": {
+        "INVOICEY_PRESETS_PATH": "/ABS/PATH/.invoicey/presets.json"
+      }
+    }
+  }
+}

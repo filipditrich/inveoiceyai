@@ -57,7 +57,7 @@ inveoiceyai/
 └── bun.lockb
 ```
 
-The empty `apps/mcp` and `apps/slack` are *not* added in MVP; they're roadmap items (Plans 12 and 13). Adding them later requires no restructuring because `invoice-core` and `db` are already independent packages.
+`apps/mcp` (Plan 12a stdio) is present; a future `apps/slack` split remains optional (Plan 13b). Shared domain stays in `invoice-core` / `invoice-tools` / `db`.
 
 ## Runtime boundaries (Next.js 16)
 
@@ -156,7 +156,9 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 | `AI_GATEWAY_API_KEY` | Vercel AI Gateway API key | Vercel + `.env.local` | Plan 13a |
 | `INVOICEY_AI_MODEL` | Gateway model id (e.g. `openai/gpt-4o-mini`) | Vercel + `.env.local` | Plan 13a |
 | `INVOICEY_AI_FALLBACK_MODEL` | Fallback gateway model id | Vercel + `.env.local` | Plan 13a |
-| `INVOICEY_DEMO_ISSUER_JSON` | Optional JSON override for demo `IssuerSnapshot` | Vercel + `.env.local` | Plan 13a |
+| `INVOICEY_DEMO_ISSUER_JSON` | Optional JSON override for demo `IssuerSnapshot` | Vercel + `.env.local` | Plan 13a / 12a |
+| `INVOICEY_PRESETS_PATH` | Absolute path to local MCP presets JSON | local MCP / optional | Plan 12a |
+| `MCP_API_KEY` | Bearer token for `/api/mcp` (required when set) | Vercel + `.env.local` | Plan 12a |
 
 `.env.example` lives at repo root with every var commented; `.env.local` is git-ignored.
 
@@ -166,7 +168,7 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 - **Neon** for Postgres — wired via Vercel Marketplace (auto-injects `DATABASE_URL`)
 - **UploadThing** for files — configured per-app
 - **Plan 13a (Slack demo):** slash command → `apps/web/app/api/slack/commands/route.ts`; Events API `app_mention` → `apps/web/app/api/slack/events/route.ts` (same `SLACK_SIGNING_SECRET` / bot token). A future `apps/slack` split remains optional.
-- **Future:** `apps/mcp` runs as a separate Vercel deployment (or self-hosted box) when introduced.
+- **Plan 12a (MCP):** local stdio via `apps/mcp`; remote Streamable HTTP via `apps/web` `/api/mcp` (`mcp-handler`, Node runtime, optional `MCP_API_KEY`). Shared tool logic in `@invoicey/invoice-tools`.
 
 ## Tooling
 
@@ -180,7 +182,9 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 
 ```mermaid
 flowchart LR
-    Core["@invoicey/invoice-core"] --> MCP["apps/mcp<br/>(Plan 12)"]
+    Core["@invoicey/invoice-core"] --> Tools["@invoicey/invoice-tools"]
+    Tools --> MCP["apps/mcp stdio<br/>(Plan 12a)"]
+    Tools --> WebMcp["apps/web /api/mcp<br/>(Plan 12a)"]
     Core --> Slack["apps/slack<br/>(Plan 13)"]
     DB[("@invoicey/db")] --> Cron["Vercel Cron<br/>(Plan 10)"]
     DB --> Email["Resend job<br/>(Plan 11)"]
@@ -190,7 +194,7 @@ flowchart LR
     WS -.consumed by.-> Slack
 ```
 
-Each post-MVP plan reuses `invoice-core` and `db` directly — no HTTP shim, no protobuf, no schema duplication. The Zod `InvoiceSchema` is the inter-app contract.
+Each post-MVP plan reuses `invoice-core` (and `invoice-tools` / `db` where needed) directly — no HTTP shim, no protobuf, no schema duplication. The Zod `InvoiceSchema` is the inter-app contract.
 
 ## Open architectural questions
 

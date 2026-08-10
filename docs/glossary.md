@@ -146,7 +146,7 @@ ISDOC packaged together with attachments (typically the PDF rendering of the sam
 
 ### MCP
 
-**Model Context Protocol** — open protocol from Anthropic for exposing tools and resources to LLM clients (Cursor, Claude Desktop, …). Roadmap [Plan 12](./roadmap.md#plan-12--mcp-server-appsmcp) introduces an `apps/mcp` server that exposes `create_invoice`, `lookup_business`, etc. directly on top of `@invoicey/invoice-core` + `@invoicey/db`. The Slack bot's tool surface is intentionally MCP-shaped so it can be lifted unchanged.
+**Model Context Protocol** — open protocol from Anthropic for exposing tools and resources to LLM clients (Cursor, Claude Desktop, …). [Plan 12a](./roadmap.md#plan-12a--mcp-server-local--vercel-http-prep-appsmcp) ships `apps/mcp` (stdio) + `apps/web` `/api/mcp` over `@invoicey/invoice-tools` / `@invoicey/invoice-core` (+ ARES). Plan 12b adds DB-backed tools.
 
 ### Slack slash command
 

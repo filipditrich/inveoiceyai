@@ -4,6 +4,7 @@
 - When executing an attached Cursor plan: do not modify the plan file; use existing todos only, mark items in progress, avoid creating duplicate todo lists.
 - README and top-level docs should match the bar set by strong internal reference repos (clear structure, badges/navigation where appropriate).
 - Solo workflow: no formal PR process; verify locally (e.g. `typecheck`, `lint`, `test`, `build`) then commit; prefer logically scoped conventional commits over one bulk “finalize” commit when splitting is natural.
+- Prefer AI/MCP-driven invoice creation (validated `InvoiceSchema` JSON → PDF/ISDOC) over investing in a heavy invoice customization/builder UI; treat schema + tools as the primary create path.
 
 ## Learned Workspace Facts
 
@@ -14,5 +15,6 @@
 - `apps/web` targets Next.js 16 and TypeScript 6 in living docs; some ADR titles may still say Next.js 15.
 - Domain package `@invoicey/invoice-core`: subpath `@invoicey/invoice-core/schema` maps to `src/schema.ts` for client-safe Zod types; full package entry includes PDF/ISDOC/render code paths.
 - `IssuerSnapshotSchema` requires `contactEmail` (trimmed valid email).
-- Conventional-commit scopes are enforced via `commitlint.config.mjs` (includes `invoice-core`, `web`, `docs`, `db`, `env`, `ares`, `deps`, `ci`, `config`, `release`).
-- Stateless Slack POC (Plan 13a): HTTP routes live under `apps/web/app/api/slack/` and shared Slack code under `apps/web/lib/slack/` (`apps/slack` is future if the integration is promoted out of `@invoicey/web`).
+- Conventional-commit scopes are enforced via `commitlint.config.mjs` (includes `invoice-core`, `invoice-tools`, `mcp`, `web`, `docs`, `db`, `env`, `ares`, `deps`, `ci`, `config`, `release`).
+- Stateless Slack POC (Plan 13a): slash command under `apps/web/app/api/slack/commands/` and `app_mention` Events API under `apps/web/app/api/slack/events/`; handlers live in `@invoicey/invoice-tools` (web wraps with AI SDK tools) and parse free-text NL via AI Gateway (`AI_GATEWAY_API_KEY`).
+- MCP (Plan 12a): local stdio `@invoicey/mcp` (`apps/mcp`); shared registration `@invoicey/invoice-tools/mcp`; remote prep at `apps/web` `/api/mcp` via `mcp-handler` + optional `MCP_API_KEY`. Presets file via `INVOICEY_PRESETS_PATH` (default `~/.invoicey/presets.json`). See `docs/specs/mcp.md` and `.cursor/mcp.json.example`.

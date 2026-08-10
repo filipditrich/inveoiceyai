@@ -19,10 +19,11 @@ flowchart LR
     P9 -.MVP.-> Post["post-MVP"]
     Post --> P10["Plan 10<br/>recurring"]
     Post --> P11["Plan 11<br/>email"]
-    Post --> P12["Plan 12<br/>MCP"]
+    Post --> P12a["Plan 12a<br/>MCP local<br/>done"]
+    P12a --> P12b["Plan 12b<br/>MCP + DB"]
     Post --> P13b["Plan 13b<br/>Slack bot<br/>DB-persisted"]
     Post --> P14["Plan 14<br/>auth"]
-    P12 -.feeds.-> P13b
+    P12b -.feeds.-> P13b
     P13a -.upgrades to.-> P13b
 ```
 
@@ -239,13 +240,30 @@ Plans listed here do not block the MVP and can be picked up in parallel with Pla
 - "Send" action on issued invoices: PDF + ISDOC attached, customizable cover text
 - Email log per invoice (sent, delivered, bounced)
 
-### Plan 12 — MCP server (`apps/mcp`)
+### Plan 12a — MCP server, local + Vercel HTTP prep (`apps/mcp`)
+
+**Status:** Done (implementation)  
+**Completed:** 2026-08-10  
+**Plan file:** [`.cursor/plans/plan-12-mcp-local.md`](../.cursor/plans/plan-12-mcp-local.md)  
+**Spec:** [`specs/mcp.md`](./specs/mcp.md)
+
+**Goal:** Cursor-ready stdio MCP with create/render + ARES + local presets; prepare Streamable HTTP on `apps/web` `/api/mcp` (API-key gated) for later go-live. No DB.
+
+**Exit criteria:**
+
+- [x] `@invoicey/invoice-tools` shared handlers (normalize, presets, create/render, ARES)
+- [x] `apps/mcp` stdio MCP exposes `create_invoice`, `lookup_business`, preset CRUD
+- [x] Slack tools import `@invoicey/invoice-tools`
+- [x] `mcp-handler` route at `/api/mcp` with optional `MCP_API_KEY`
+- [x] Spec + Cursor/`mcp.json` + Vercel go-live checklist documented
+
+### Plan 12b — MCP server, DB-backed tools
 
 **Status:** Post-MVP backlog
 
-- Tools: `create_invoice`, `list_invoices`, `lookup_business`, `get_invoice`, `mark_paid`
-- Imports `@invoicey/invoice-core` + `@invoicey/db` directly — no HTTP shim
-- Schema parity with the UI is automatic because both consume `InvoiceSchema`
+- Tools: `list_invoices`, `get_invoice`, `mark_paid` (+ durable presets)
+- Imports `@invoicey/invoice-core` + `@invoicey/db` — no HTTP shim
+- Schema parity with the UI via `InvoiceSchema`
 
 ### Plan 13b — Slack bot, DB-persisted drafts (`apps/slack`)
 
