@@ -4,7 +4,18 @@
 
 Expose invoice create/render, ARES lookup, and local presets as MCP tools so Cursor (and later remote clients) can drive `InvoiceSchema` → PDF/ISDOC without a heavy builder UI.
 
-## Inputs / outputs
+## Package map
+
+| Piece | Role |
+| --- | --- |
+| [`packages/invoice-tools`](../../packages/invoice-tools/) | Handlers: `lookupBusiness`, `createAndRenderInvoice`, preset CRUD, `normalizeDraftToInvoice` |
+| [`packages/invoice-tools/src/register-mcp-tools.ts`](../../packages/invoice-tools/src/register-mcp-tools.ts) | Registers tools on an MCP `McpServer` (`@invoicey/invoice-tools/mcp`) |
+| [`apps/mcp`](../../apps/mcp/) | Local **stdio** entry (`bun run --cwd apps/mcp src/stdio.ts`) |
+| [`apps/web/app/api/[transport]/route.ts`](../../apps/web/app/api/[transport]/route.ts) | Remote **Streamable HTTP** via `mcp-handler` → `/api/mcp` |
+
+Slack reuses the same handlers through AI SDK wrappers in `apps/web/lib/slack/` — see [`slack-bot.md`](./slack-bot.md).
+
+## Tools
 
 | Tool | Input | Output |
 | --- | --- | --- |
@@ -12,7 +23,10 @@ Expose invoice create/render, ARES lookup, and local presets as MCP tools so Cur
 | `create_invoice` | `{ draft?, issuerPresetId?, templatePresetId? }` | Validated invoice + PDF base64 + ISDOC XML, or issues |
 | `list_presets` / `get_preset` / `save_preset` / `delete_preset` | preset ids / kind / data | Preset records on disk |
 
-Shared logic: [`@invoicey/invoice-tools`](../../packages/invoice-tools/). Registration: [`registerInvoiceyMcpTools`](../../packages/invoice-tools/src/register-mcp-tools.ts).
+### Preset kinds
+
+- **`issuer`** — full `IssuerSnapshot` (locked “from” party; model cannot invent bank/IČO).
+- **`invoice_template`** — partial draft (`meta` / `vat` / `payment` / `items`); merged under `create_invoice` draft overlay.
 
 ## Approach
 
@@ -27,14 +41,17 @@ flowchart LR
   Tools --> Presets["presets.json"]
 ```
 
-- **Local:** `apps/mcp` + `@modelcontextprotocol/sdk` stdio (`bun run --cwd apps/mcp src/stdio.ts`).
-- **Remote (prepared):** `mcp-handler` on [`apps/web/app/api/[transport]/route.ts`](../../apps/web/app/api/[transport]/route.ts) → URL `/api/mcp`. Node runtime, `maxDuration` 120. When `MCP_API_KEY` is set, require `Authorization: Bearer <key>`.
+- **Local:** `@modelcontextprotocol/sdk` stdio.
+- **Remote (prepared):** `mcp-handler`, Node runtime, `maxDuration` 120. When `MCP_API_KEY` is set, require `Authorization: Bearer <key>`.
 - **Issuer lock:** `create_invoice` injects issuer from preset or `getDemoIssuer()` / `INVOICEY_DEMO_ISSUER_JSON`.
-- **Presets file:** `INVOICEY_PRESETS_PATH` or `~/.invoicey/presets.json` (on Vercel: `/tmp/invoicey-presets.json` — ephemeral).
+- **Presets file:** `INVOICEY_PRESETS_PATH` or `~/.invoicey/presets.json` (on Vercel: `/tmp/…` — ephemeral until Plan 12b).
 
 ## Cursor local setup
 
-Project or user MCP config:
+1. Copy [`.cursor/mcp.json.example`](../../.cursor/mcp.json.example) → `.cursor/mcp.json` and replace `/ABS/PATH/…`.
+2. Optional seed: `cp apps/mcp/presets.example.json` to your presets path.
+3. Reload MCP in Cursor; confirm tools list.
+4. Prompt with issuer preset + client IČO + line items (see root README).
 
 ```json
 {
@@ -55,16 +72,12 @@ Project or user MCP config:
 }
 ```
 
-Optional seed: copy [`apps/mcp/presets.example.json`](../../apps/mcp/presets.example.json) to your presets path.
+## Vercel go-live checklist (wait for explicit go)
 
-Example also lives at [`.cursor/mcp.json.example`](../../.cursor/mcp.json.example).
-
-## Vercel go-live checklist (do not deploy until asked)
-
-1. Deploy `apps/web` (includes `/api/mcp` via `[transport]` route).
-2. Set Vercel env: `MCP_API_KEY` (required in prod), optional `INVOICEY_DEMO_ISSUER_JSON`.
+1. Deploy `apps/web` (includes `/api/mcp`).
+2. Set `MCP_API_KEY` (required in prod), optional `INVOICEY_DEMO_ISSUER_JSON`.
 3. Confirm Node runtime + font tracing (`outputFileTracingIncludes` in `next.config.ts`).
-4. Cursor remote config:
+4. Cursor remote:
 
 ```json
 {
@@ -79,7 +92,7 @@ Example also lives at [`.cursor/mcp.json.example`](../../.cursor/mcp.json.exampl
 }
 ```
 
-5. Smoke: `lookup_business` with a real IČO, then `create_invoice` with a minimal draft.
+5. Smoke: `lookup_business` + `create_invoice`.
 
 ## Env
 
@@ -89,7 +102,7 @@ Example also lives at [`.cursor/mcp.json.example`](../../.cursor/mcp.json.exampl
 | `INVOICEY_PRESETS_PATH` | no | Absolute path to presets JSON |
 | `MCP_API_KEY` | remote yes | Bearer gate for `/api/mcp` |
 
-## Out of scope (later Plan 12b)
+## Out of scope (Plan 12b)
 
 - DB-backed `list_invoices` / `get_invoice` / `mark_paid`
 - Durable remote presets (Blob/DB)
@@ -99,6 +112,6 @@ Example also lives at [`.cursor/mcp.json.example`](../../.cursor/mcp.json.exampl
 
 - [`docs/roadmap.md`](../roadmap.md) Plan 12a
 - [`.cursor/plans/plan-12-mcp-local.md`](../../.cursor/plans/plan-12-mcp-local.md)
-- Slack tool surface (same handlers): [`docs/specs/slack-bot.md`](./slack-bot.md)
-- [Vercel MCP deploy docs](https://vercel.com/docs/mcp/deploy-mcp-servers-to-vercel)
+- [`slack-bot.md`](./slack-bot.md)
+- [Vercel MCP docs](https://vercel.com/docs/mcp/deploy-mcp-servers-to-vercel)
 - [`mcp-handler`](https://github.com/vercel/mcp-handler)

@@ -22,7 +22,7 @@ This is the **stateless demo** track — see also [`docs/roadmap.md`](../roadmap
 - DB writes, real numbering (`nextInvoiceNumber`), draft persistence.
 - "Issue" / "Mark paid" / "Send by email" follow-up actions.
 - Multi-issuer disambiguation or workspace lookup.
-- MCP server (Plan 12) — tools are designed to be portable but **not** exposed as MCP yet.
+- MCP server — lifted in Plan 12a (`apps/mcp` + `/api/mcp`); Slack and MCP share `@invoicey/invoice-tools` (see [`mcp.md`](./mcp.md)).
 - Auth / Slack-user → Invoicey-user mapping (Plan 14).
 
 ## References
@@ -245,4 +245,4 @@ Interactivity stays disabled for 13a — no buttons, no modals. 13b adds `intera
 - `TODO(plan-13a-impl):` add `slack` to the `commitlint` `scope-enum` only if/when we extract `apps/slack`. Until then, all 13a commits use scope `web` or `docs`.
 - `TODO(plan-13a-impl):` decide if the slash command should run on Vercel **Edge** runtime for the ack and hand off to a Node Function for the worker, or stay all-Node with `after()`. Default plan: all-Node with `after()` for simplicity.
 - `TODO(plan-13b):` introduce DB persistence; replace `DRAFT-…` placeholder with `nextInvoiceNumber`; gate "Issue" behind a Slack interactivity button.
-- `TODO(plan-12):` lift this exact tool surface into an MCP server (`apps/mcp`) so Cursor / Claude Desktop can use the same toolkit.
+- ~~`TODO(plan-12):` lift tool surface into MCP~~ — done in Plan 12a (`@invoicey/invoice-tools` + `apps/mcp`).

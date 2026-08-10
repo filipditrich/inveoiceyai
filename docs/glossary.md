@@ -146,7 +146,11 @@ ISDOC packaged together with attachments (typically the PDF rendering of the sam
 
 ### MCP
 
-**Model Context Protocol** — open protocol from Anthropic for exposing tools and resources to LLM clients (Cursor, Claude Desktop, …). [Plan 12a](./roadmap.md#plan-12a--mcp-server-local--vercel-http-prep-appsmcp) ships `apps/mcp` (stdio) + `apps/web` `/api/mcp` over `@invoicey/invoice-tools` / `@invoicey/invoice-core` (+ ARES). Plan 12b adds DB-backed tools.
+**Model Context Protocol** — open protocol from Anthropic for exposing tools and resources to LLM clients (Cursor, Claude Desktop, …). [Plan 12a](./roadmap.md#plan-12a--mcp-server-local--vercel-http-prep-appsmcp) ships `apps/mcp` (stdio) + `apps/web` `/api/mcp` over `@invoicey/invoice-tools` / `@invoicey/invoice-core` (+ ARES). Plan 12b adds DB-backed tools. Spec: [`specs/mcp.md`](./specs/mcp.md).
+
+### invoice-tools
+
+**`@invoicey/invoice-tools`** — shared package for draft normalize, ARES lookup, create/render (PDF + ISDOC), file-backed presets, and MCP tool registration (`@invoicey/invoice-tools/mcp`). Used by `apps/mcp` and Slack AI wrappers in `apps/web`.
 
 ### Slack slash command
 

@@ -8,9 +8,9 @@ Accepted (Phase 0, 2026-05-03)
 
 Invoicey will eventually grow several deployable apps that share domain logic:
 
-- `apps/web` — the Next.js admin app (MVP)
-- `apps/mcp` — an MCP server (post-MVP, Plan 12)
-- `apps/slack` — a Slack bot (post-MVP, Plan 13)
+- `apps/web` — the Next.js admin app (MVP; also hosts Slack demo + MCP HTTP)
+- `apps/mcp` — local stdio MCP server (Plan 12a; DB tools later in 12b)
+- `apps/slack` — optional extract of Slack bot (Plan 13b; 13a lives in `apps/web`)
 
 All three need to call the same invoice domain logic (`InvoiceSchema`, `calcTotals`, PDF/QR/ISDOC rendering) and the same DB layer. The choice is between:
 

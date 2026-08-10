@@ -28,63 +28,72 @@ How the pieces fit together. Cross-references the ADRs that justify each choice.
 ```
 inveoiceyai/
 ├── apps/
-│   └── web/                    Next.js 16 App Router app
-│       ├── app/
-│       │   ├── (app)/          authed-style group, sidebar layout
-│       │   │   ├── dashboard/
-│       │   │   ├── invoices/
-│       │   │   ├── clients/
-│       │   │   ├── issuers/
-│       │   │   └── settings/
-│       │   └── api/
-│       │       ├── ares/[ico]/route.ts        (proxy + cache)
-│       │       ├── uploadthing/route.ts       (UT route)
-│       │       └── invoices/[id]/{pdf,isdoc}/route.ts
-│       ├── actions/            server actions (mutations)
-│       └── components/         app-specific UI (forms, data grid, …)
+│   ├── web/                    Next.js 16 App Router (@invoicey/web)
+│   │   ├── app/
+│   │   │   ├── (app)/          sidebar shell
+│   │   │   │   ├── dashboard/
+│   │   │   │   ├── invoices/   # incl. /from-json demo
+│   │   │   │   ├── clients/
+│   │   │   │   ├── issuers/
+│   │   │   │   └── settings/
+│   │   │   └── api/
+│   │   │       ├── ares/[ico]/
+│   │   │       ├── demo/invoice-pdf/
+│   │   │       ├── [transport]/   # MCP Streamable HTTP (/api/mcp)
+│   │   │       └── slack/{commands,events}/
+│   │   ├── actions/            server actions (mutations)
+│   │   └── lib/slack/          AI SDK wrappers → invoice-tools
+│   └── mcp/                    local stdio MCP (@invoicey/mcp)
 ├── packages/
-│   ├── invoice-core/           domain: Zod schema, totals, numbering, status, PDF, QR, ISDOC
-│   ├── db/                     Drizzle schema + migrations + connection helper
+│   ├── invoice-core/           Zod schema, totals, numbering, status, PDF, QR, ISDOC
+│   ├── invoice-tools/          normalize, presets, create/render, MCP registration
+│   ├── db/                     Drizzle schema + Neon client
 │   ├── ares/                   ARES REST v3 client
-│   ├── ui/                     shared UI primitives (post-MVP, kept empty for now)
+│   ├── env/                    env schema helpers
 │   ├── config-eslint/
 │   └── config-ts/
 ├── docs/                       (this folder)
 ├── .cursor/
-│   └── plans/                  per-phase implementation plans
+│   ├── plans/                  per-phase implementation plans
+│   └── mcp.json.example
 ├── turbo.json
 ├── package.json                workspaces
-└── bun.lockb
+└── bun.lock
 ```
 
-`apps/mcp` (Plan 12a stdio) is present; a future `apps/slack` split remains optional (Plan 13b). Shared domain stays in `invoice-core` / `invoice-tools` / `db`.
+Shared domain: `invoice-core` + `invoice-tools` + `ares` + `db`. Slack stays in `apps/web` for Plan 13a; optional `apps/slack` split is Plan 13b.
 
-## Runtime boundaries (Next.js 16)
+## Runtime boundaries (Next.js 16 + MCP)
 
 ```mermaid
 flowchart TD
-    Browser["Browser<br/>(React 19 client components)"] -->|RSC payload| RSC["React Server Components<br/>(read-only data fetch)"]
-    Browser -->|form submit| SA["Server Actions<br/>(mutations, Zod-validated)"]
-    Browser -->|GET| RH_PDF["Route handler<br/>/api/invoices/:id/pdf"]
-    Browser -->|GET| RH_ISDOC["Route handler<br/>/api/invoices/:id/isdoc"]
-    Browser -->|GET| RH_ARES["Route handler<br/>/api/ares/:ico"]
-    Browser -->|POST| RH_UT["Route handler<br/>/api/uploadthing"]
+    Browser["Browser"] -->|RSC| RSC["React Server Components"]
+    Browser -->|form submit| SA["Server Actions"]
+    Browser -->|GET| RH_ARES["/api/ares/:ico"]
+    Browser -->|POST| RH_Demo["/api/demo/invoice-pdf"]
+    CursorLocal["Cursor stdio"] --> McpApp["apps/mcp"]
+    CursorRemote["Cursor HTTP"] --> RH_Mcp["/api/mcp"]
+    SlackAPI["Slack"] --> RH_Slack["/api/slack/*"]
 
-    SA --> Core["@invoicey/invoice-core<br/>(Zod, calcTotals, status)"]
-    SA --> DB[("Neon Postgres<br/>(via @invoicey/db)")]
+    SA --> DB[("Neon via @invoicey/db")]
     RSC --> DB
-    RH_PDF --> Core
-    RH_ISDOC --> Core
-    RH_ARES --> Ares["@invoicey/ares<br/>(REST v3 + cache)"]
-    RH_UT --> UT["UploadThing"]
+    RH_ARES --> Ares["@invoicey/ares"]
+    RH_Demo --> Tools["@invoicey/invoice-tools"]
+    RH_Mcp --> Tools
+    McpApp --> Tools
+    RH_Slack --> Tools
+    Tools --> Core["@invoicey/invoice-core"]
+    Tools --> Ares
 ```
 
 ### What runs where
 
-- **React Server Components** — read-only fetches via `@invoicey/db`. No mutations. No client-side bundle cost. Default for every page in `apps/web`.
-- **Server Actions** — *all* mutations. Each action parses input through the relevant Zod schema before touching the DB. This is the same surface a future MCP tool calls. See [ADR 0016](./decisions/0016-server-actions-as-mutation-surface.md).
-- **Route handlers** — only used when streaming binaries (PDF, ISDOC) or proxying external APIs (ARES, UploadThing). Never used for app mutations.
-- **Client components** — RHF-driven forms (the invoice builder, the issuer/client editors). Marked `'use client'` only where needed.
+- **React Server Components** — read-only fetches via `@invoicey/db`. Default for app pages.
+- **Server Actions** — DB mutations; each parses input through Zod first. See [ADR 0016](./decisions/0016-server-actions-as-mutation-surface.md).
+- **Route handlers** — binaries (PDF/ISDOC), ARES proxy, demo PDF, Slack receivers, MCP HTTP (`mcp-handler`). Node runtime required for PDF (`Buffer` / fonts).
+- **`@invoicey/invoice-tools`** — framework-agnostic create/render, ARES lookup, file presets; consumed by MCP and Slack (and demo paths).
+- **`apps/mcp`** — stdio MCP for local Cursor / Claude Desktop.
+- **Client components** — forms and interactive UI only where needed (`'use client'`).
 
 ## Data flow: creating an invoice
 
@@ -110,7 +119,7 @@ sequenceDiagram
     F->>U: redirect /invoices/:id
 ```
 
-Every mutation goes Zod-first. The DB never sees data that wasn't validated by the same schema the UI/MCP/Slack will use.
+Every mutation goes Zod-first. The DB never sees data that wasn't validated by the same `InvoiceSchema` the UI / MCP / Slack use. Stateless MCP/Slack create paths validate and render without writing the DB (Plan 12a / 13a).
 
 ## Data flow: rendering a PDF
 
@@ -178,27 +187,24 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 - **Format:** Prettier + `prettier-plugin-tailwindcss`
 - **Commit hygiene:** `commitlint` + Husky `commit-msg` hook, scope enum derived from package names
 
-## Future hooks (designed-in, not built)
+## Package / app dependency map
 
 ```mermaid
 flowchart LR
     Core["@invoicey/invoice-core"] --> Tools["@invoicey/invoice-tools"]
-    Tools --> MCP["apps/mcp stdio<br/>(Plan 12a)"]
-    Tools --> WebMcp["apps/web /api/mcp<br/>(Plan 12a)"]
-    Core --> Slack["apps/slack<br/>(Plan 13)"]
-    DB[("@invoicey/db")] --> Cron["Vercel Cron<br/>(Plan 10)"]
-    DB --> Email["Resend job<br/>(Plan 11)"]
-    Auth["Clerk<br/>(Plan 14)"] -.adds.-> WS["workspace_memberships,<br/>users"]
-    WS -.consumed by.-> Web["apps/web"]
-    WS -.consumed by.-> MCP
-    WS -.consumed by.-> Slack
+    Ares["@invoicey/ares"] --> Tools
+    Tools --> MCP["apps/mcp stdio"]
+    Tools --> Web["apps/web<br/>/api/mcp + Slack + demo"]
+    DB[("@invoicey/db")] --> Web
+    Core --> Web
+    Ares --> Web
 ```
 
-Each post-MVP plan reuses `invoice-core` (and `invoice-tools` / `db` where needed) directly — no HTTP shim, no protobuf, no schema duplication. The Zod `InvoiceSchema` is the inter-app contract.
+Post-MVP still designed-in: Vercel Cron (Plan 10), Resend (Plan 11), MCP+DB tools (Plan 12b), Slack persistence (Plan 13b), Clerk (Plan 14). Those reuse the same Zod contract — no HTTP shim between apps.
 
 ## Open architectural questions
 
-### TODO(plan-1): Tailwind v4 + ReUI base-nova style compatibility
+### TODO(plan-5): issuer asset uploads vs demo PDF slots
 
-ReUI ships `base-nova` style on Tailwind v4 ([reui.io/docs/get-started](https://reui.io/docs/get-started)). Confirm the registry config plays nicely with Next.js 16's app-dir CSS handling and that `base-nova` does not conflict with shadcn defaults we override.
+UploadThing for logo/stamp/signature lands with issuers. Confirm font/image tracing on Vercel stays green for MCP + Slack PDF paths (`outputFileTracingIncludes` already covers invoice-core assets).
 

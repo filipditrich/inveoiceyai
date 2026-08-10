@@ -15,11 +15,11 @@ flowchart LR
     P6 --> P7["Plan 7<br/>invoice list"]
     P7 --> P8["Plan 8<br/>dashboard"]
     P8 --> P9["Plan 9<br/>polish"]
-    P3 -.parallel.-> P13a["Plan 13a<br/>Slack bot<br/>stateless demo"]
+    P3 -.parallel.-> P13a["Plan 13a<br/>Slack bot<br/>done"]
+    P3 -.parallel.-> P12a["Plan 12a<br/>MCP local<br/>done"]
     P9 -.MVP.-> Post["post-MVP"]
     Post --> P10["Plan 10<br/>recurring"]
     Post --> P11["Plan 11<br/>email"]
-    Post --> P12a["Plan 12a<br/>MCP local<br/>done"]
     P12a --> P12b["Plan 12b<br/>MCP + DB"]
     Post --> P13b["Plan 13b<br/>Slack bot<br/>DB-persisted"]
     Post --> P14["Plan 14<br/>auth"]
@@ -207,18 +207,20 @@ Plans listed here do not block the MVP and can be picked up in parallel with Pla
 
 ### Plan 13a — Slack bot, stateless demo (in `apps/web`)
 
-**Status:** Planned
+**Status:** Done  
+**Completed:** 2026-05-03 (implementation; tools later shared via `@invoicey/invoice-tools`)
 
-**Goal:** Let a user post `/invoice <free-text>` in Slack and receive a rendered Czech invoice PDF + ISDOC XML in-thread, with no DB writes. Vercel AI SDK aggregates the message into an `InvoiceSchema`-valid payload via tool calls; the deterministic core renders.
+**Goal:** Let a user post `/invoice <free-text>` (or `@bot …`) in Slack and receive a rendered Czech invoice PDF + ISDOC XML in-thread, with no DB writes. Vercel AI SDK aggregates the message into an `InvoiceSchema`-valid payload via tool calls; the deterministic core renders.
 
 **Exit criteria:**
 
-- Slack route handler at `apps/web/app/api/slack/commands/route.ts` verifies signatures and acks within Slack's 3s window
-- AI tool surface (`lookup_business`, `parse_amount_cz`, `compute_due_date`, `compute_totals`, `assemble_and_validate`, `render_pdf`, `render_isdoc`) wraps existing functions in `@invoicey/invoice-core` + `@invoicey/ares` — no new domain logic
-- Worker uses `generateText({ tools, maxSteps: 8 })` against Vercel AI Gateway; iterates `assemble_and_validate` failures until valid
-- Successful runs reply in-thread with PDF + ISDOC via `files.uploadV2`; failures post a Czech-language ephemeral message listing offending fields
-- Single demo issuer comes from `INVOICEY_DEMO_ISSUER_JSON` or a hard-coded sample — no DB
-- Spec doc [`specs/slack-bot.md`](./specs/slack-bot.md) is written before implementation
+- [x] Slack route handler at `apps/web/app/api/slack/commands/route.ts` verifies signatures and acks within Slack's 3s window
+- [x] Events API `app_mention` at `apps/web/app/api/slack/events/route.ts`
+- [x] AI tool surface wraps `@invoicey/invoice-core` + `@invoicey/ares` (now via `@invoicey/invoice-tools`)
+- [x] Worker uses `generateText({ tools, maxSteps })` against Vercel AI Gateway
+- [x] Successful runs reply with PDF + ISDOC via `files.uploadV2`
+- [x] Single demo issuer from `INVOICEY_DEMO_ISSUER_JSON` or hard-coded sample — no DB
+- [x] Spec doc [`specs/slack-bot.md`](./specs/slack-bot.md)
 
 **Doc inputs:** [`specs/slack-bot.md`](./specs/slack-bot.md), [`specs/ares.md`](./specs/ares.md), [`specs/isdoc.md`](./specs/isdoc.md), [`specs/pdf-rendering.md`](./specs/pdf-rendering.md)
 

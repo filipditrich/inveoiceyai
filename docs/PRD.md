@@ -4,7 +4,7 @@
 
 A modern, Czech-first invoicing tool that treats invoices as **structured data first** and **rendered documents second**. Built so that the same invoice can be created via a UI, a JSON document, an MCP tool, or a Slack command — all going through one schema, one validator, one renderer.
 
-Inspired by [Midday.ai](https://midday.ai) (UX polish, finance-grade feel) and [fakturaonline.cz](https://fakturaonline.cz) (Czech tax compliance, ARES integration). Differentiated by: schema-first architecture, MCP/Slack automation as first-class concerns from day 1 (even if not built in MVP), multi-issuer-business support without a "company switcher" footgun.
+Inspired by [Midday.ai](https://midday.ai) (UX polish, finance-grade feel) and [fakturaonline.cz](https://fakturaonline.cz) (Czech tax compliance, ARES integration). Differentiated by: schema-first architecture, MCP/Slack automation as first-class create surfaces (local MCP + Slack demo already ship), multi-issuer-business support without a "company switcher" footgun.
 
 ## Use cases
 
@@ -27,13 +27,14 @@ The product targets three concrete scenarios. Every feature must serve at least 
 - Any saved business entity (whether normally an issuer or a client) can play either role
 - The numbering scheme used belongs to whoever is the issuer on the document — even if that's the legal client of the underlying service
 
-### UC3 — Intra-company invoicing from Slack (post-MVP)
+### UC3 — AI / Slack / MCP-driven invoicing
 
-> "My team should be able to type `@Invoicey invoice NFCtron monthly standard rate` in Slack and have a draft invoice appear, ready to issue."
+> "I want to type `@Invoicey invoice NFCtron monthly…` in Slack, or prompt Cursor via MCP, and get a validated Czech invoice PDF — without fighting a 40-control form."
 
-- Schema is the contract: a Slack handler parses the message into the same `InvoiceSchema` that the UI builder produces
-- Workspace concept exists from day 1 in the data model so multi-user-per-workspace works without a migration later
-- MVP is single-user no-auth, but the workspace_id + future user/membership tables are the seam where Slack/MCP plug in
+- Schema is the contract: Slack and MCP assemble the same `InvoiceSchema` the UI will use
+- **Shipped (stateless):** local MCP create/render + presets ([Plan 12a](./roadmap.md#plan-12a--mcp-server-local--vercel-http-prep-appsmcp)); Slack `/invoice` + `app_mention` ([Plan 13a](./roadmap.md#plan-13a--slack-bot-stateless-demo-in-appsweb))
+- **Later:** DB-backed drafts, numbering, mark paid (Plans 12b / 13b); workspace membership via Clerk (Plan 14)
+- MVP UI remains single-user no-auth; `workspace_id` is the seam for multi-user later
 
 ## In-scope (MVP)
 
@@ -86,8 +87,8 @@ These are explicitly deferred. They are *not* prohibited future work — they're
 | --- | --- | --- |
 | Recurring invoices / scheduled issuance | Needs cron + tracking + lifecycle UI | Plan 10 |
 | Email delivery to clients | Needs Resend wiring + bounce handling + audit trail | Plan 11 |
-| MCP server | Needs schema to be stable first | Plan 12 |
-| Slack bot | Needs MCP foundation + workspace/membership | Plan 13 |
+| MCP + DB (list/mark paid, durable presets) | Local MCP already ships; persistence next | Plan 12b |
+| Slack bot (DB-persisted drafts) | Stateless demo already ships in `apps/web` | Plan 13b |
 | Authentication / multi-user | Single user is enough for personal use; Clerk integrates cleanly later | Plan 14 |
 | Multi-currency (EUR, USD) | CZK-only is sufficient for the personal use case; ARES is CZ-only anyway | Post-MVP |
 | Multi-language invoice render (CZ + EN) | Needed for invoicing abroad; Czech-only covers UC1 + UC2 | Post-MVP |

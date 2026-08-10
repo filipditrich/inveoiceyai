@@ -3,20 +3,21 @@
 <h4 align="center">Czech-first invoicing — schema-first data, PDF + ISDOC + SPAYD QR</h4>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-Plan%202%20invoice--core%20done-brightgreen?style=for-the-badge" alt="Plan 2 invoice-core done" />
+  <img src="https://img.shields.io/badge/status-Plan%205%20issuers%20next-0ea5e9?style=for-the-badge" alt="Plan 5 issuers next" />
+  <img src="https://img.shields.io/badge/MCP-local%20ready-brightgreen?style=for-the-badge" alt="MCP local ready" />
   <img src="https://img.shields.io/badge/commits-conventional%20Commits-ff69b4?style=for-the-badge&logo=conventionalcommits&logoColor=white" alt="Conventional Commits" />
-  <img src="https://img.shields.io/badge/stack-Next.js%2016%20%7C%20Neon-111111?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 16 | Neon" />
+  <img src="https://img.shields.io/badge/stack-Next.js%2016%20%7C%20Bun%20%7C%20Neon-111111?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 16 | Bun | Neon" />
 </p>
 
 <p align="center">
   <a href="#overview">Overview</a> ·
+  <a href="#whats-working-now">What's working</a> ·
   <a href="#why-this-project">Why</a> ·
   <a href="#mvp-scope">MVP scope</a> ·
-  <a href="#use-cases">Use cases</a> ·
   <a href="#architecture-at-a-glance">Architecture</a> ·
   <a href="#tech-stack">Tech stack</a> ·
-  <a href="#prerequisites">Prerequisites</a> ·
   <a href="#getting-started">Getting started</a> ·
+  <a href="#mcp-local-cursor">MCP (Cursor)</a> ·
   <a href="#project-structure">Project structure</a> ·
   <a href="#documentation">Documentation</a> ·
   <a href="#roadmap">Roadmap</a> ·
@@ -25,22 +26,36 @@
 
 ## Overview
 
-Invoicey is a modern invoicing tool for Czech freelancers and small teams. It treats each invoice as **structured data first** (one Zod schema, validated everywhere) and **rendered documents second** (PDF via `@react-pdf/renderer`, ISDOC XML, SPAYD QR for bank apps).
+Invoicey is a modern invoicing tool for Czech freelancers and small teams. It treats each invoice as **structured data first** (one Zod `InvoiceSchema`, validated everywhere) and **rendered documents second** (PDF via `@react-pdf/renderer`, ISDOC XML, SPAYD QR for bank apps).
 
-The same payload should eventually flow through the UI builder, JSON/MCP tools, or Slack — without duplicate types or drift.
+The same payload flows through the web app, **MCP tools** (Cursor / Claude), and the **Slack** demo — without duplicate types.
 
-**Current phase:** Plan 2 shipped — `@invoicey/invoice-core` (Zod contract, `calcTotals`, numbering, status, Vitest). **Next:** Plan 3 (PDF + SPAYD + ISDOC). See [Roadmap](#roadmap).
+**Current focus:** MVP UI continues with **Plan 5 (issuers)**. Automation is already usable: local MCP create/render + ARES + presets (Plan 12a), Slack slash/`@mention` demo (Plan 13a). Full checklist: [`docs/roadmap.md`](docs/roadmap.md).
+
+## What's working now
+
+| Surface | Status |
+| --- | --- |
+| Domain + PDF / SPAYD / ISDOC (`@invoicey/invoice-core`) | Done |
+| ARES + clients UI (`@invoicey/ares`, `apps/web`) | Done |
+| JSON → PDF demo (`/invoices/from-json`, `POST /api/demo/invoice-pdf`) | Done |
+| Shared tool handlers (`@invoicey/invoice-tools`) | Done |
+| Local MCP stdio (`apps/mcp`) — create, ARES, presets | Done |
+| Remote MCP prep (`/api/mcp` + optional `MCP_API_KEY`) | Code ready, deploy on demand |
+| Slack `/invoice` + `app_mention` (stateless AI loop) | Done (demo issuer) |
+| Issuer management UI / full invoice builder / list | Planned (Plans 5–7) |
 
 ## Why this project
 
 1. UX that feels like a 2026 finance product, not a legacy admin panel.
-2. Czech VAT baked in: rates, reverse charge (přenesená daňová povinnost), OSS, DUZP, supplies abroad.
+2. Czech VAT baked in: rates, reverse charge, OSS, DUZP, supplies abroad.
 3. **ARES** lookup by IČO for issuer and client parties.
 4. **SPAYD** QR so Czech banking apps pre-fill payment fields.
-5. **ISDOC** export so accounting tools (Pohoda, Money S3, iDoklad, …) can import without retyping.
-6. Multi–issuer-business support (invoice “from” ŽL vs s.r.o. with separate numbering and banks).
+5. **ISDOC** export so accounting tools can import without retyping.
+6. Multi–issuer-business support (separate numbering and banks).
+7. **AI-first create path** — prompt + validated JSON beats a control-heavy builder for day-to-day use.
 
-Inspired by [Midday.ai](https://midday.ai) (polish, finance UX) and [fakturaonline.cz](https://fakturaonline.cz) (Czech compliance). Differentiators: schema-first design, automation-ready surfaces (MCP/Slack on the roadmap), snapshots so historical invoices stay legally stable after registry edits.
+Inspired by [Midday.ai](https://midday.ai) and [fakturaonline.cz](https://fakturaonline.cz). Differentiators: schema-first design, MCP/Slack as first-class surfaces, snapshots so historical invoices stay stable after registry edits.
 
 ## MVP scope
 
@@ -48,46 +63,32 @@ Inspired by [Midday.ai](https://midday.ai) (polish, finance UX) and [fakturaonli
 | --- | --- |
 | **Documents** | Invoice, proforma, advance, credit note — Czech VAT modes and DUZP |
 | **Parties** | Multiple issuer businesses; shared client registry; ARES prefetch |
-| **Numbers** | Per-issuer, per-doc-type templates (`{YYYY}{####}`, yearly reset, atomic counters) |
-| **Lifecycle** | Draft → issue → paid / overdue / cancelled (status **derived**, not cron-ticked) |
-| **UI** | Next.js 16, shadcn + [ReUI Data Grid](https://reui.io/components/data-grid), dashboard |
+| **Numbers** | Per-issuer, per-doc-type templates (`{YYYY}{####}`, yearly reset) |
+| **Lifecycle** | Draft → issue → paid / overdue / cancelled (status **derived**) |
+| **UI** | Next.js 16, shadcn + ReUI, dashboard |
 | **Exports** | PDF + embedded QR; ISDOC 6.0.2 |
-| **Assets** | UploadThing for logo / stamp / signature |
+| **Automation** | Local MCP + Slack demo (stateless); DB-backed tools post-MVP |
 
-Post-MVP (Plans 10–14): recurring invoices, email, MCP server, Slack bot, Clerk auth, multi-currency, bilingual PDFs. Details: [`docs/roadmap.md`](docs/roadmap.md).
-
-## Use cases
-
-**UC1 — Personal invoicing across issuer businesses** — Same operator invoices from ŽL or s.r.o.; each issuer has its own bank, numbering, VAT profile.
-
-**UC2 — OBO / self-billing** — Buyer issues the invoice to the supplier; schema treats issuer and client symmetrically.
-
-**UC3 — Slack-driven invoicing (post-MVP)** — e.g. `@Invoicey invoice NFCtron monthly standard rate` → draft aligned with `InvoiceSchema`.
-
-Full narrative and non-goals: [`docs/PRD.md`](docs/PRD.md).
+Post-MVP: recurring, email, MCP+DB, Slack persistence, Clerk auth, multi-currency. Details: [`docs/roadmap.md`](docs/roadmap.md).
 
 ## Architecture at a glance
 
 ```mermaid
 flowchart LR
     subgraph Surfaces [Input surfaces]
-        UI["UI builder<br/>RHF + Zod"]
-        MCP["MCP<br/>(Plan 12)"]
-        Slack["Slack<br/>(Plan 13)"]
+        UI["Web UI<br/>RHF + Zod"]
+        MCP["MCP<br/>apps/mcp + /api/mcp"]
+        Slack["Slack<br/>/invoice + mention"]
     end
 
-    Surfaces -->|"InvoiceSchema.parse()"| SA["Server actions<br/>invoice-core + db"]
-    SA -->|"snapshot at issue"| DB[("Neon Postgres")]
-
-    SA --> PDF["renderInvoicePdf"]
-    SA --> QR["renderSpaydQr"]
-    SA --> ISDOC["renderIsdoc"]
-
-    Ares["@invoicey/ares"] -.lookup.-> Surfaces
-    UT["UploadThing"] -.assets.-> Surfaces
+    Surfaces --> Tools["@invoicey/invoice-tools"]
+    Tools --> Core["@invoicey/invoice-core<br/>InvoiceSchema + render"]
+    Tools --> Ares["@invoicey/ares"]
+    UI --> SA["Server actions + @invoicey/db"]
+    Core --> PDF["PDF / SPAYD / ISDOC"]
 ```
 
-ADRs explain each stack choice: [`docs/decisions/README.md`](docs/decisions/README.md).
+ADRs: [`docs/decisions/README.md`](docs/decisions/README.md). Runtime detail: [`docs/architecture.md`](docs/architecture.md).
 
 ## Tech stack
 
@@ -95,102 +96,116 @@ ADRs explain each stack choice: [`docs/decisions/README.md`](docs/decisions/READ
 | --- | --- |
 | Repo | Turborepo + [Bun](https://bun.sh) workspaces |
 | Web | Next.js 16 App Router (RSC + Server Actions) |
-| UI | shadcn/ui + [ReUI](https://reui.io/docs/get-started) registry, Tailwind v4 |
-| Forms | React Hook Form + `@hookform/resolvers/zod` |
+| UI | shadcn/ui + [ReUI](https://reui.io/docs/get-started), Tailwind v4 |
 | Domain | TypeScript 6 + Zod (`@invoicey/invoice-core`) |
+| Tools | `@invoicey/invoice-tools` (normalize, presets, MCP registration) |
+| MCP | `@modelcontextprotocol/sdk` + [`mcp-handler`](https://github.com/vercel/mcp-handler) |
 | DB | Neon Postgres + Drizzle ORM |
 | PDF / QR / ISDOC | `@react-pdf/renderer`, `qrcode`, `xmlbuilder2` |
-| Files | UploadThing |
-| Hosting | Vercel |
+| Hosting | Vercel (`apps/web`) |
 
 ## Prerequisites
 
 | Tool | Role |
 | --- | --- |
-| Git | Clone and branch |
-| [Bun](https://bun.sh) ≥ 1.x | Install deps and run scripts |
-| Node.js | Matches the engines declared by Next.js / ESLint |
-| Neon (or any Postgres URL) | Required before `bun db:push` — copy `.env.example` to `.env.local` |
-
-Optional for deploy: Vercel project linked to this repo (see [`docs/architecture.md`](docs/architecture.md)).
+| Git | Clone |
+| [Bun](https://bun.sh) ≥ 1.x | Install + scripts |
+| Node.js | Next.js / ESLint engines |
+| Neon (or Postgres URL) | Before `bun db:push` — copy `.env.example` → `.env` / `.env.local` |
 
 ## Getting started
 
 ```bash
 git clone <repository-url>
 cd inveoiceyai
-cp .env.example .env.local   # fill DATABASE_URL (+ optional Neon URLs)
+cp .env.example .env.local   # fill DATABASE_URL (+ optional vars)
 bun install
-bun dev                     # Next.js dev server (@invoicey/web)
+bun dev                      # Next.js @invoicey/web
 ```
 
-Other useful scripts: `bun run build`, `bun run lint`, `bun run typecheck`, `bun db:push`.
+Useful scripts:
+
+| Script | What it does |
+| --- | --- |
+| `bun dev` | Web app (Turbo filter `@invoicey/web`) |
+| `bun run typecheck` / `lint` / `test` / `build` | Monorepo checks |
+| `bun db:push` | Drizzle push (`@invoicey/db`) |
+| `bun run --cwd apps/mcp src/stdio.ts` | Local MCP server (stdio) |
+
+Web env loading: repo-root `.env` then `.env.local` (see `apps/web/next.config.ts` and `AGENTS.md`).
+
+## MCP (local Cursor)
+
+1. Copy [`.cursor/mcp.json.example`](.cursor/mcp.json.example) → `.cursor/mcp.json` and set absolute paths.
+2. Optional: `cp apps/mcp/presets.example.json ~/.invoicey/presets.json` (or set `INVOICEY_PRESETS_PATH`).
+3. Reload MCP in Cursor — tools: `create_invoice`, `lookup_business`, preset CRUD.
+4. Prompt example: *lookup NFCtron IČO, use issuer preset X, create invoice with these lines, return PDF*.
+
+Full guide: [`docs/specs/mcp.md`](docs/specs/mcp.md). Remote go-live (Vercel `/api/mcp` + `MCP_API_KEY`) is documented there; not required for local use.
 
 ## Project structure
 
 ```text
 ├── apps/
-│   └── web/                     # Next.js 16 admin UI (@invoicey/web)
+│   ├── web/                 # Next.js 16 — UI, Slack routes, /api/mcp, demo PDF
+│   └── mcp/                 # Local stdio MCP server (@invoicey/mcp)
 ├── packages/
-│   ├── invoice-core/            # domain layer (Plan 2+)
-│   ├── db/                      # Drizzle schema + Neon client
-│   ├── ares/                    # ARES REST client (Plan 4+)
+│   ├── invoice-core/        # Zod schema, totals, numbering, status, PDF/QR/ISDOC
+│   ├── invoice-tools/       # Shared handlers + presets + MCP tool registration
+│   ├── ares/                # ARES REST client
+│   ├── db/                  # Drizzle + Neon
+│   ├── env/                 # Env schema helpers
 │   ├── config-eslint/
 │   └── config-ts/
-├── docs/                        # PRD, architecture, domain, ADRs
+├── docs/                    # PRD, architecture, domain, ADRs, specs
+├── .cursor/
+│   ├── plans/               # Per-phase plans
+│   └── mcp.json.example     # Cursor MCP snippet
 ├── turbo.json
-├── package.json                 # Bun workspaces + shared tooling
+├── package.json
 ├── commitlint.config.mjs
 ├── .env.example
 └── bun.lock
 ```
 
-`apps/mcp` and `apps/slack` remain roadmap-only (Plans 12–13).
-
 ## Documentation
 
 | Doc | Purpose |
 | --- | --- |
-| [`docs/README.md`](docs/README.md) | Docs hub — conventions, lifecycle, ADR rules |
-| [`docs/PRD.md`](docs/PRD.md) | Requirements, MVP vs non-goals, success criteria |
-| [`docs/roadmap.md`](docs/roadmap.md) | Plan 0–14 goals and exit criteria |
-| [`docs/architecture.md`](docs/architecture.md) | Runtime boundaries, env vars, diagrams |
-| [`docs/glossary.md`](docs/glossary.md) | Czech ↔ English invoicing terms |
-| [`docs/domain/invoice-schema.md`](docs/domain/invoice-schema.md) | Central Zod contract + JSON examples |
-| [`docs/decisions/`](docs/decisions/README.md) | Architectural Decision Records |
-
-Per-feature specs under [`docs/specs/`](docs/specs/README.md) and UX flows under [`docs/ui/`](docs/ui/README.md) are filled **just-in-time** before each build plan.
+| [`docs/README.md`](docs/README.md) | Docs hub |
+| [`docs/PRD.md`](docs/PRD.md) | Requirements, MVP vs non-goals |
+| [`docs/roadmap.md`](docs/roadmap.md) | Plans 0–14 + exit criteria |
+| [`docs/architecture.md`](docs/architecture.md) | Runtime, env vars, diagrams |
+| [`docs/specs/mcp.md`](docs/specs/mcp.md) | MCP tools, Cursor + Vercel |
+| [`docs/specs/slack-bot.md`](docs/specs/slack-bot.md) | Slack stateless demo |
+| [`docs/domain/invoice-schema.md`](docs/domain/invoice-schema.md) | Central Zod contract |
+| [`docs/decisions/`](docs/decisions/README.md) | ADRs |
 
 ## Roadmap
 
 | Phase | Goal | Status |
 | --- | --- | --- |
-| Plan 0 | Documentation scaffold | Done |
-| Plan 1 | Monorepo bootstrap (Next.js, Drizzle, ReUI, commitlint) | Done |
-| Plan 2 | `invoice-core` domain package | Done |
-| Plan 3 | PDF + QR + ISDOC | Next |
-| Plans 4–9 | ARES + issuers + builder + list + dashboard + polish (**MVP**) | Planned |
-| Plans 10–14 | Recurring, email, MCP, Slack, auth | Post-MVP |
-
-High-level diagram:
+| Plans 0–4 | Docs, bootstrap, invoice-core, PDF/QR/ISDOC, ARES + clients | Done |
+| Plan 5 | Issuers (my businesses) | **Next** |
+| Plans 6–9 | Builder, list, dashboard, polish (**MVP**) | Planned |
+| Plan 12a | Local MCP + `/api/mcp` prep | Done |
+| Plan 13a | Slack bot (stateless) | Done |
+| Plans 10–11, 12b, 13b, 14 | Recurring, email, MCP+DB, Slack+DB, auth | Post-MVP |
 
 ```mermaid
 flowchart LR
-    P0["Plan 0<br/>docs"] --> P1["Plan 1<br/>bootstrap"]
-    P1 --> P2["Plan 2<br/>invoice-core"]
-    P2 --> P3["Plan 3<br/>PDF / QR / ISDOC"]
-    P3 --> PM["Plans 4–9<br/>MVP UI"]
-    PM -.-> Post["Post-MVP"]
+    Done["Plans 0–4<br/>done"] --> P5["Plan 5<br/>issuers"]
+    P5 --> MVP["Plans 6–9<br/>MVP UI"]
+    Done -.parallel.-> Auto["12a MCP + 13a Slack<br/>done"]
+    MVP -.-> Post["Post-MVP"]
 ```
-
-Full table: [`docs/roadmap.md`](docs/roadmap.md).
 
 ## Contributing
 
-1. **Docs-first:** Product and domain contracts live under [`docs/`](docs/). If behavior changes, update the relevant doc and add or supersede an ADR ([`docs/decisions/`](docs/decisions/README.md)).
-2. **Commits:** Conventional commits are enforced via `commitlint` + Husky — match [`commitlint.config.mjs`](commitlint.config.mjs).
-3. **Plans:** Implementation should trace to `.cursor/plans/` or equivalent tracked plans; cross-link PRs to the docs they implement.
-4. **Secrets:** Never commit `.env`, API tokens, or UploadThing keys.
+1. **Docs-first:** Contracts live under [`docs/`](docs/). Behavior changes update the doc and/or an ADR.
+2. **Commits:** Conventional commits via `commitlint` — see [`commitlint.config.mjs`](commitlint.config.mjs) (scopes include `invoice-core`, `invoice-tools`, `mcp`, `web`, `docs`, …).
+3. **Plans:** Trace work to [`.cursor/plans/`](.cursor/plans/) and roadmap exit criteria.
+4. **Secrets:** Never commit `.env`, `.cursor/mcp.json` (local paths), or API keys. Prefer `.env.example` + gitignored locals.
 
 ## License
 

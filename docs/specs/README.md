@@ -6,8 +6,9 @@ Per-feature implementation specs. Written **just-in-time** before the plan that 
 
 **Plan 3 specs:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md).
 
-**Plan 4 spec:** [`ares.md`](./ares.md).  
-**Plan 12a spec:** [`mcp.md`](./mcp.md). Earlier phases left this folder empty by design until each plan ([`core_plus_lazy_specs`](../README.md#lifecycle-conventions)).
+**Shipped specs:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md), [`ares.md`](./ares.md), [`slack-bot.md`](./slack-bot.md), [`mcp.md`](./mcp.md).
+
+Just-in-time convention: write the remaining specs before the plan that consumes them ([lifecycle](../README.md#lifecycle-conventions)).
 
 ## Expected specs (with the plan that authors them)
 
