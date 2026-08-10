@@ -21,15 +21,8 @@ export function ClientEditorForm({
 	invalidQuery,
 	snapshot,
 }: ClientEditorFormProps) {
-	const newIdSeed = React.useRef<string | undefined>(undefined);
-	if (!newIdSeed.current) {
-		newIdSeed.current = crypto.randomUUID();
-	}
-
-	const persistedId =
-		mode === "edit"
-			? (snapshot?.id ?? "")
-			: (newIdSeed.current ?? "");
+	const [createdId] = React.useState(() => crypto.randomUUID());
+	const persistedId = mode === "edit" ? (snapshot?.id ?? "") : createdId;
 
 	if (mode === "edit" && persistedId.length === 0) {
 		throw new Error("ClientEditorForm(edit) requires snapshot.id");

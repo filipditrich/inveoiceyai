@@ -16,10 +16,10 @@ import {
 import {
 	BracesIcon,
 	Building2Icon,
+	FilePlusIcon,
 	FileTextIcon,
 	LayoutDashboardIcon,
 	ReceiptIcon,
-	SettingsIcon,
 	UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -39,6 +39,11 @@ const documentItems = [
 		icon: FileTextIcon,
 	},
 	{
+		name: "New invoice",
+		url: "/invoices/new",
+		icon: FilePlusIcon,
+	},
+	{
 		name: "From JSON",
 		url: "/invoices/from-json",
 		icon: BracesIcon,
@@ -49,7 +54,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const pathname = usePathname();
 
 	const invoicesOpen =
-		pathname === "/invoices" || pathname === "/invoices/from-json";
+		pathname === "/invoices" ||
+		pathname.startsWith("/invoices/");
 
 	const navMain = [
 		{
@@ -65,6 +71,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			isActive: invoicesOpen,
 			items: [
 				{ title: "Overview", url: "/invoices" },
+				{ title: "New", url: "/invoices/new" },
 				{ title: "From JSON", url: "/invoices/from-json" },
 			],
 		},
@@ -72,19 +79,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			title: "Clients",
 			url: "/clients",
 			icon: <UsersIcon />,
-			isActive: pathname === "/clients",
+			isActive: pathname === "/clients" || pathname.startsWith("/clients/"),
 		},
 		{
 			title: "Issuers",
 			url: "/issuers",
 			icon: <Building2Icon />,
-			isActive: pathname === "/issuers",
-		},
-		{
-			title: "Settings",
-			url: "/settings",
-			icon: <SettingsIcon />,
-			isActive: pathname === "/settings",
+			isActive: pathname === "/issuers" || pathname.startsWith("/issuers/"),
 		},
 	];
 
@@ -93,7 +94,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			<SidebarHeader>
 				<SidebarMenu>
 					<SidebarMenuItem>
-						<SidebarMenuButton size="lg" render={<Link href="/dashboard" prefetch />}>
+						<SidebarMenuButton
+							size="lg"
+							render={<Link href="/dashboard" prefetch />}
+						>
 							<div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
 								<ReceiptIcon className="size-4" />
 							</div>

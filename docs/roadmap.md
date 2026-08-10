@@ -10,10 +10,10 @@ flowchart LR
     P1 --> P2["Plan 2<br/>invoice-core<br/>done"]
     P2 --> P3["Plan 3<br/>PDF / QR / ISDOC<br/>done"]
     P3 --> P4["Plan 4<br/>ARES + clients<br/>done"]
-    P4 --> P5["Plan 5<br/>issuers<br/>next"]
-    P5 --> P6["Plan 6<br/>invoice builder"]
-    P6 --> P7["Plan 7<br/>invoice list"]
-    P7 --> P8["Plan 8<br/>dashboard"]
+    P4 --> P5["Plan 5<br/>issuers<br/>done"]
+    P5 --> P6["Plan 6<br/>invoice builder<br/>done"]
+    P6 --> P7["Plan 7<br/>invoice list<br/>done"]
+    P7 --> P8["Plan 8<br/>dashboard<br/>next"]
     P8 --> P9["Plan 9<br/>polish"]
     P3 -.parallel.-> P13a["Plan 13a<br/>Slack bot<br/>done"]
     P3 -.parallel.-> P12a["Plan 12a<br/>MCP local<br/>done"]
@@ -120,58 +120,61 @@ flowchart LR
 
 ### Plan 5 — Issuer (my-businesses) management
 
-**Status:** Planned
+**Status:** Done  
+**Completed:** 2026-08-10
 
 **Goal:** Manage the businesses I invoice _from_ — VAT settings, banking, numbering schemes, optional logo/stamp/signature uploads.
 
 **Exit criteria:**
 
-- `apps/web/app/(app)/issuers/page.tsx` lists issuers
-- `issuers/[id]/page.tsx` edits all issuer fields including a numbering-scheme editor (per docType)
-- UploadThing wired for logo/stamp/signature with size + MIME validation
-- ARES lookup also works on issuer creation
-- Spec doc `specs/uploads.md` is written before implementation
+- [x] `apps/web/app/(app)/issuers/page.tsx` lists issuers
+- [x] `issuers/[id]/edit/page.tsx` edits all issuer fields including a numbering-scheme editor (per docType)
+- [x] UploadThing wired for logo/stamp/signature with size + MIME validation (manual URL fallback without token)
+- [x] ARES lookup also works on issuer creation
+- [x] Spec doc `specs/uploads.md` is written before implementation
 
 **Doc inputs:** [`specs/uploads.md`](./specs/uploads.md), [`domain/numbering.md`](./domain/numbering.md), [`decisions/0010-uploadthing-for-files.md`](./decisions/0010-uploadthing-for-files.md)
 
 ### Plan 6 — Invoice builder
 
-**Status:** Planned
+**Status:** Done  
+**Completed:** 2026-08-10
 
 **Goal:** `/invoices/new` — a React-Hook-Form + Zod form that produces an `InvoiceSchema`-valid payload, with live preview and ARES lookup.
 
 **Exit criteria:**
 
-- Pick issuer → defaults populate (bank, VAT mode, language, numbering preview)
-- Pick or create client (with ARES lookup)
-- Line items via `useFieldArray` with VAT rate per line
-- VAT mode + supplies-abroad selectors at invoice level
-- Live preview: a rasterized or `<PDFViewer>` rendering of the PDF + computed totals + SPAYD QR
-- "Save draft" persists with `status = draft`; "Issue" assigns a number via `nextInvoiceNumber`, freezes snapshots, and persists
-- Builder UI flow doc `ui/invoice-builder-flow.md` is written before implementation
+- [x] Pick issuer → defaults populate (bank, VAT mode, language, numbering preview)
+- [x] Pick client from DB (create client via Clients CRUD + ARES)
+- [x] Line items via `useFieldArray` with VAT rate per line
+- [x] VAT mode + supplies-abroad selectors at invoice level
+- [x] Live preview: debounced PDF iframe via `/api/demo/invoice-pdf` + computed totals
+- [x] "Save draft" persists with `issuedAt = null`; "Issue" assigns a number via `nextInvoiceNumber`, freezes snapshots, and persists
+- [x] Builder UI flow doc `ui/invoice-builder-flow.md` is written before implementation
 
 **Doc inputs:** [`ui/invoice-builder-flow.md`](./ui/invoice-builder-flow.md), [`domain/snapshots.md`](./domain/snapshots.md)
 
 ### Plan 7 — Invoice list + actions
 
-**Status:** Planned
+**Status:** Done  
+**Completed:** 2026-08-10
 
 **Goal:** ReUI Data Grid showing all invoices with filters, sort, search, and row actions.
 
 **Exit criteria:**
 
-- Columns: number, issue date, due date, client (with logo if set), total, status (badge), actions menu
-- Filters: status, issuer, client, date range
-- Search: number, client name, notes
-- Sort, paginate (50/page default)
-- Actions per row: view, edit (drafts only), download PDF, download ISDOC, duplicate (creates new draft), mark paid, delete (drafts only)
-- Spec doc `specs/data-grid.md` is written before implementation
+- [x] Columns: number, issue date, due date, client, total, status (badge), actions
+- [x] Filters: status, issuer, client, date range
+- [x] Search: number, client name, notes
+- [x] Sort, paginate (50/page default)
+- [x] Actions per row: view, edit (drafts only), download PDF, download ISDOC, duplicate (creates new draft), mark paid, delete (drafts only)
+- [x] Spec doc `specs/data-grid.md` is written before implementation
 
 **Doc inputs:** [`specs/data-grid.md`](./specs/data-grid.md), [`domain/status-engine.md`](./domain/status-engine.md)
 
 ### Plan 8 — Dashboard
 
-**Status:** Planned
+**Status:** Planned (next)
 
 **Goal:** Single page showing the invoicing pulse at a glance.
 

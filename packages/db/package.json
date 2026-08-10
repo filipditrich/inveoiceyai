@@ -14,10 +14,12 @@
   "dependencies": {
     "@invoicey/env": "workspace:*",
     "@neondatabase/serverless": "^1.0.1",
-    "drizzle-orm": "^0.44.3"
+    "drizzle-orm": "^0.44.3",
+    "ws": "8.21.3"
   },
   "devDependencies": {
     "@types/node": "^22.15.21",
+    "@types/ws": "8.18.1",
     "dotenv": "17.4.2",
     "drizzle-kit": "^0.31.4",
     "typescript": "6.0.3"
