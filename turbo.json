@@ -2,7 +2,22 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "build": {
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "DATABASE_URL",
+        "DATABASE_URL_UNPOOLED",
+        "INVOICEY_DEFAULT_WORKSPACE_ID",
+        "INVOICEY_DEMO_ISSUER_JSON",
+        "INVOICEY_PRESETS_PATH",
+        "MCP_API_KEY",
+        "UPLOADTHING_TOKEN",
+        "UPLOADTHING_APP_ID",
+        "SLACK_BOT_TOKEN",
+        "SLACK_SIGNING_SECRET",
+        "AI_GATEWAY_API_KEY",
+        "INVOICEY_AI_MODEL",
+        "INVOICEY_AI_FALLBACK_MODEL"
+      ]
     },
     "dev": {
       "cache": false,
@@ -14,7 +29,8 @@
       "outputs": []
     },
     "db:push": {
-      "cache": false
+      "cache": false,
+      "env": ["DATABASE_URL", "DATABASE_URL_UNPOOLED"]
     }
   }
 }
