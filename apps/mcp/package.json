@@ -1,0 +1,23 @@
+{
+  "name": "@invoicey/mcp",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run src/stdio.ts",
+    "start": "bun run src/stdio.ts",
+    "lint": "echo \"skip: eslint not wired for mcp yet\"",
+    "typecheck": "NODE_OPTIONS=--max-old-space-size=8192 tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@invoicey/invoice-tools": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.26.0",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/node": "25.6.0",
+    "typescript": "6.0.3",
+    "vitest": "^3.2.4"
+  }
+}
