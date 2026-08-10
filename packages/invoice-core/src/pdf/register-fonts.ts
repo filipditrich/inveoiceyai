@@ -49,12 +49,14 @@ export function registerInvoiceFonts(): void {
 	}
 	const interR = resolveVendoredFontFile("Inter-Regular.ttf");
 	const interB = resolveVendoredFontFile("Inter-Bold.ttf");
+	const interI = resolveVendoredFontFile("Inter-Italic.ttf");
 
 	Font.register({
 		family: "Inter",
 		fonts: [
 			{ src: interR, fontWeight: 400 },
 			{ src: interB, fontWeight: 700 },
+			{ src: interI, fontWeight: 400, fontStyle: "italic" },
 		],
 	});
 	registeredFonts = true;

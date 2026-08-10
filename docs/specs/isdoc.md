@@ -102,7 +102,7 @@ If `payment.method === 'transfer'` and `bankAccount`: `PaymentDueDate` = `meta.d
 
 ## Notes
 
-- Concatenate `vat.legalNote`, `notes`, credit reference `correctedInvoiceNumber` into `Note` where useful (separate `Note` elements or single block with newlines — MVP: one `Note` with sections).
+- Concatenate `vat.legalNote`, stripped `payment.instructionsBefore` / `payment.instructionsAfter`, `notes`, credit reference `correctedInvoiceNumber` into `Note` where useful (separate `Note` elements or single block with newlines — MVP: one `Note` with sections).
 - **Reverse charge / OSS:** ensure `TaxSubtotal` + `Note` carry legal text from `vat.legalNote` or defaults from [vat-czech.md](../domain/vat-czech.md).
 
 ## MVP limitations

@@ -2,6 +2,7 @@
 import {
 	Document,
 	Image,
+	Link,
 	Page,
 	StyleSheet,
 	Text,
@@ -10,6 +11,9 @@ import {
 import React from "react";
 
 import type { Invoice, InvoiceItem } from "../schema";
+import { parseInlineMarkdown } from "./inline-markdown";
+
+const INVOICEY_SITE_URL = "https://ditrich.me/";
 
 const F_SANS = "Inter";
 
@@ -296,6 +300,10 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "flex-start",
 	},
+	paymentOuterAfterInstructions: {
+		marginTop: 0,
+		borderTopWidth: 0,
+	},
 	/** Fixed column + flex sibling with flexBasis:0 prevents QR/text overlap under Yoga */
 	paymentQrCol: {
 		width: 104,
@@ -323,6 +331,20 @@ const styles = StyleSheet.create({
 		color: MUTED,
 		marginTop: 8,
 		lineHeight: 1.4,
+	},
+	paymentInstructions: {
+		fontFamily: F_SANS,
+		fontSize: 8,
+		fontWeight: 400,
+		color: BODY,
+		lineHeight: 1.4,
+	},
+	paymentInstructionsBefore: {
+		marginTop: 14,
+		marginBottom: 8,
+	},
+	paymentInstructionsAfter: {
+		marginTop: 10,
 	},
 	paySectionHeading: {
 		fontFamily: F_SANS,
@@ -356,8 +378,13 @@ const styles = StyleSheet.create({
 		fontSize: 7,
 		color: MUTED,
 		textAlign: "right",
+		textDecoration: "none",
 	},
-	footerBrandStrong: { fontWeight: 700, color: BODY },
+	footerBrandStrong: {
+		fontWeight: 700,
+		color: BODY,
+		textDecoration: "none",
+	},
 	stampSigRow: {
 		marginTop: 14,
 		flexDirection: "row",
@@ -525,6 +552,38 @@ function PdfPaymentKv({
 	);
 }
 
+function PdfMarkdownText({
+	source,
+}: Readonly<{
+	source: string;
+}>) {
+	const lines = source.replace(/\r\n/g, "\n").split("\n");
+	return (
+		<View>
+			{lines.map((line, i) => {
+				const spans = parseInlineMarkdown(line);
+				return (
+					<Text key={i} style={styles.paymentInstructions}>
+						{spans.length === 0
+							? " "
+							: spans.map((span, j) => (
+									<Text
+										key={j}
+										style={{
+											fontWeight: span.bold ? 700 : 400,
+											fontStyle: span.italic ? "italic" : "normal",
+										}}
+									>
+										{span.text}
+									</Text>
+								))}
+					</Text>
+				);
+			})}
+		</View>
+	);
+}
+
 function PdfInvoiceLineRow({ item }: Readonly<{ item: InvoiceItem }>) {
 	const { title, detail } = splitDescription(item.description);
 	return (
@@ -571,6 +630,8 @@ export function InvoicePdfDocument({
 	const transfer =
 		inv.payment.method === "transfer" && inv.payment.bankAccount;
 	const hasQr = Boolean(assets.qrDataUrl);
+	const instructionsBefore = inv.payment.instructionsBefore?.trim() || null;
+	const instructionsAfter = inv.payment.instructionsAfter?.trim() || null;
 	const showClientIdentifiers =
 		Boolean(inv.client.ico)
 		|| Boolean(inv.client.dic)
@@ -782,7 +843,19 @@ export function InvoicePdfDocument({
 						</View>
 					) : null}
 
-					<View style={styles.paymentOuter}>
+					{instructionsBefore ? (
+						<View style={styles.paymentInstructionsBefore}>
+							<PdfMarkdownText source={instructionsBefore} />
+						</View>
+					) : null}
+
+					<View
+						style={
+							instructionsBefore
+								? [styles.paymentOuter, styles.paymentOuterAfterInstructions]
+								: styles.paymentOuter
+						}
+					>
 						{hasQr && assets.qrDataUrl ? (
 							<View style={styles.paymentQrCol}>
 								<Image style={styles.qr} src={assets.qrDataUrl} />
@@ -846,6 +919,12 @@ export function InvoicePdfDocument({
 						</View>
 					</View>
 
+					{instructionsAfter ? (
+						<View style={styles.paymentInstructionsAfter}>
+							<PdfMarkdownText source={instructionsAfter} />
+						</View>
+					) : null}
+
 					{inv.notes ? (
 						<View style={{ marginTop: 10 }}>
 							<Text style={styles.asideTitle}>Poznámka</Text>
@@ -870,10 +949,10 @@ export function InvoicePdfDocument({
 				</View>
 
 				<View fixed style={styles.footerRow} wrap={false}>
-					<Text style={styles.footerBrand}>
+					<Link src={INVOICEY_SITE_URL} style={styles.footerBrand}>
 						Vystaveno přes{" "}
 						<Text style={styles.footerBrandStrong}>Invoicey</Text>
-					</Text>
+					</Link>
 				</View>
 			</Page>
 		</Document>

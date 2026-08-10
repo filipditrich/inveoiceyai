@@ -171,6 +171,10 @@ const PaymentSchema = z.object({
 	variableSymbol: z.string().regex(/^\d{1,10}$/).optional(),
 	constantSymbol: z.string().regex(/^\d{1,4}$/).optional(),
 	specificSymbol: z.string().regex(/^\d{1,10}$/).optional(),
+	/** Multi-line text above the payment block. Markdown: `**bold**`, `*italic*`, `_italic_`. */
+	instructionsBefore: z.string().max(2000).optional(),
+	/** Multi-line text below the payment block (above `notes`). Same markdown subset. */
+	instructionsAfter: z.string().max(2000).optional(),
 });
 ```
 
@@ -179,6 +183,8 @@ Validation:
 - `method = 'transfer'` requires `bankAccount` (else PDF can't render the payment block / SPAYD QR)
 - `method = 'cash'` or `'card'` allows `bankAccount` to be absent
 - `bankAccount` is typically copied from `issuer.bank` at issue time (server-side default), but the schema allows overriding (e.g. an issuer with multiple bank accounts)
+- `instructionsBefore` / `instructionsAfter` support basic markdown (`**bold**`, `*italic*`, `_italic_`); ISDOC includes them (markers stripped) in `Note` when set
+- They do not replace `notes` — `notes` still renders as „Poznámka“ below the payment section
 
 ## `items` — line items
 

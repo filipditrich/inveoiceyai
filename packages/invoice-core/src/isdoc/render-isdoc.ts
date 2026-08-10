@@ -5,6 +5,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
 import type { Invoice } from "../schema";
+import { stripInlineMarkdown } from "../pdf/inline-markdown";
 import { create } from "xmlbuilder2";
 import { v5 as uuidv5 } from "uuid";
 
@@ -95,6 +96,12 @@ function headerNote(inv: Invoice): string {
 	const parts: string[] = [];
 	if (inv.vat.legalNote?.trim()) {
 		parts.push(inv.vat.legalNote.trim());
+	}
+	if (inv.payment.instructionsBefore?.trim()) {
+		parts.push(stripInlineMarkdown(inv.payment.instructionsBefore.trim()));
+	}
+	if (inv.payment.instructionsAfter?.trim()) {
+		parts.push(stripInlineMarkdown(inv.payment.instructionsAfter.trim()));
 	}
 	if (inv.notes?.trim()) {
 		parts.push(inv.notes.trim());

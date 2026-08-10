@@ -117,6 +117,8 @@ export const PaymentSchema = z
 		variableSymbol: z.string().regex(/^\d{1,10}$/).optional(),
 		constantSymbol: z.string().regex(/^\d{1,4}$/).optional(),
 		specificSymbol: z.string().regex(/^\d{1,10}$/).optional(),
+		instructionsBefore: z.string().max(2000).optional(),
+		instructionsAfter: z.string().max(2000).optional(),
 	})
 	.superRefine((pay, ctx) => {
 		if (pay.method === "transfer" && !pay.bankAccount) {

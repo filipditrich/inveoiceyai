@@ -18,10 +18,10 @@ Produce Czech-language invoice PDFs from a validated [`Invoice`](../../packages/
 
 ## Typography (Czech diacritics)
 
-- **Family:** DejaVu Sans (Bitstream Vera derivative; permissive license; Latin + Czech coverage).
-- **Pin:** **vendored TTF copies** under `packages/invoice-core/assets/fonts/` — `DejaVuSans.ttf`, `DejaVuSans-Bold.ttf` (from upstream DejaVu **2.37** distribution; **`LICENSE-dejavu`** bundled alongside files). Fonts are repo contents, **not** read from npm at runtime (`node_modules`/Bun `.bun` layouts are unreliable inside Next/route handlers).
-- **Rationale:** TTF avoids fontkit/layout issues observed with bundled WOFF from some font NPM packages under `@react-pdf/renderer`.
-- **Registration:** Resolve absolute filesystem paths to those vendored files (module-relative `import.meta.url` + fallbacks); then `Font.register({ family: 'DejaVu Sans', fonts: [...] })` once per process before `pdf()`.
+- **Family:** Inter (SIL OFL; Latin + Czech coverage).
+- **Pin:** **vendored TTF copies** under `packages/invoice-core/assets/fonts/` — `Inter-Regular.ttf`, `Inter-Bold.ttf`, `Inter-Italic.ttf` (**`LICENSE-inter.txt`** bundled alongside). Fonts are repo contents, **not** read from npm at runtime (`node_modules`/Bun `.bun` layouts are unreliable inside Next/route handlers).
+- **Rationale:** TTF avoids fontkit/layout issues observed with bundled WOFF from some font NPM packages under `@react-pdf/renderer`. Italic faces enable basic markdown italic in payment instruction free-text.
+- **Registration:** Resolve absolute filesystem paths to those vendored files (module-relative `import.meta.url` + fallbacks); then `Font.register({ family: 'Inter', fonts: [...] })` once per process before `pdf()`.
 
 ## Layout (A4, default margins)
 
@@ -33,10 +33,11 @@ Produce Czech-language invoice PDFs from a validated [`Invoice`](../../packages/
 6. **VAT recap:** „Rekapitulace DPH“ — one row per `totals.vatBreakdown[]` **only if** issuer is VAT payer **and** `vat.mode === 'regular'` **and** not effectively zero-rated-only display edge case; if `issuer.vatPayer === false`, show prose **„Nejsem plátce DPH.“** instead of recap table.
 7. **`vat.mode === 'reverse_charge'`:** omit standard recap row table; print `vat.legalNote` prominently.
 8. **`vat.mode === 'oss'`:** print recap by rate as for regular VAT where amounts exist; prepend/append OSS explanation line (Česky); destination context from `client.address.country` (`TODO(plan-later): explicit per-line OSS country once schema grows).
-9. **Payment block:** for `payment.method === 'transfer'`, show domestic account (`bankAccount.accountNumber`), IBAN, BIC optional, VS/KS/SS if present. For cash/card show method label only (no QR — see SPAYD spec).
+9. **Payment block:** for `payment.method === 'transfer'`, show domestic account (`bankAccount.accountNumber`), IBAN, BIC optional, VS/KS/SS if present. For cash/card show method label only (no QR — see SPAYD spec). Optional `payment.instructionsBefore` / `payment.instructionsAfter` render as multi-line text (basic markdown: bold/italic) immediately above / below this block.
 10. **QR:** payment block adjacent or below — raster from `renderSpaydQr` (`width`/`height` per SPAYD spec).
 11. **Stamp / signature:** if `issuer.stampUrl` and `customization.showStamp`, render stamp (e.g. lower-left). If `issuer.signatureUrl` and `customization.showSignature`, render signature strip. Respect `accentColor` as subtle stripe or heading tint (mapping table minimal: neutral=blue-gray, blue=accent blue, …).
 12. **`notes`:** footer section „Poznámka“.
+13. **Brand footer:** fixed page footer „Vystaveno přes Invoicey“ links to `https://ditrich.me/`.
 
 ## DUZP and non-tax documents
 
