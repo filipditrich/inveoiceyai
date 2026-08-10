@@ -41,7 +41,9 @@ export const publicEnvSchema = z.object({
   NODE_ENV: z.enum(NODE_ENV_VALUES),
   /** Public origin (SPAYD, links, callbacks). */
   NEXT_PUBLIC_APP_URL: z.url(),
-  NEXT_PUBLIC_APP_STAGE: z.enum(APP_STAGE_VALUES).default(APP_STAGE.DEVELOPMENT),
+  NEXT_PUBLIC_APP_STAGE: z
+    .enum(APP_STAGE_VALUES)
+    .default(APP_STAGE.DEVELOPMENT),
 });
 
 /** Normalize missing / blank `.env` values to `undefined` for optional fields. */
@@ -63,7 +65,10 @@ export const privateEnvSchema = z.object({
     z.string().min(1).optional(),
   ),
   /** Default workspace until auth (multi-tenant schema). Optional until callers require it. */
-  INVOICEY_DEFAULT_WORKSPACE_ID: z.preprocess(emptyEnvToUndefined, z.uuid().optional()),
+  INVOICEY_DEFAULT_WORKSPACE_ID: z.preprocess(
+    emptyEnvToUndefined,
+    z.uuid().optional(),
+  ),
   UPLOADTHING_TOKEN: z.preprocess(emptyEnvToUndefined, z.string().optional()),
   UPLOADTHING_APP_ID: z.preprocess(emptyEnvToUndefined, z.string().optional()),
   /**
@@ -71,14 +76,33 @@ export const privateEnvSchema = z.object({
    * unset, so the app boots without it. Removed once MCP moves to OAuth (Plan 14).
    */
   MCP_API_KEY: z.preprocess(emptyEnvToUndefined, z.string().min(1).optional()),
+
+  /**
+   * Better Auth (Plan 14). Optional here so the app still boots mid-migration;
+   * tightened to required once sign-in is the only way in.
+   * `BETTER_AUTH_URL` falls back to `NEXT_PUBLIC_APP_URL` when unset.
+   */
+  BETTER_AUTH_SECRET: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(32).optional(),
+  ),
+  BETTER_AUTH_URL: z.preprocess(emptyEnvToUndefined, z.url().optional()),
+  GOOGLE_CLIENT_ID: z.preprocess(emptyEnvToUndefined, z.string().optional()),
+  GOOGLE_CLIENT_SECRET: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().optional(),
+  ),
+  GITHUB_CLIENT_ID: z.preprocess(emptyEnvToUndefined, z.string().optional()),
+  GITHUB_CLIENT_SECRET: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().optional(),
+  ),
 });
 
 /** Vercel-only system vars (subset). @see https://vercel.com/docs/environment-variables/system-environment-variables */
 export const vercelEnvSchema = z.object({
   VERCEL: z.enum(["1"]).optional(),
-  VERCEL_ENV: z
-    .enum(["production", "preview", "development"])
-    .optional(),
+  VERCEL_ENV: z.enum(["production", "preview", "development"]).optional(),
   VERCEL_URL: z.string().optional(),
   VERCEL_BRANCH_URL: z.string().optional(),
   VERCEL_PROJECT_PRODUCTION_URL: z.string().optional(),
