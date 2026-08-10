@@ -41,7 +41,8 @@
 	"vat": {
 		"mode": "reverse_charge",
 		"suppliesAbroad": "none",
-		"legalNote": "Daň odvede zákazník dle § 92a zákona č. 235/2004 Sb."
+		"localReverseChargeCode": "4",
+		"legalNote": "Daň odvede zákazník dle § 92e zákona č. 235/2004 Sb."
 	},
 	"payment": {
 		"method": "transfer",

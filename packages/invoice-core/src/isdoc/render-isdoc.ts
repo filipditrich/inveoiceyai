@@ -76,7 +76,7 @@ export function parseCzAccountNumber(canonical: string): {
 } {
 	const m = /^(?:(\d{1,6})-)?(\d{1,10})\/(\d{4})$/u.exec(canonical.trim());
 	if (!m) {
-		return { number: canonical, bankCode: "0000" };
+		throw new Error(`invalid Czech account number: ${canonical}`);
 	}
 	const prefix = m[1];
 	const num = m[2]!;
@@ -188,8 +188,7 @@ function appendAccountingCustomerParty(root: Xm, invoice: Invoice) {
 	const party = acp.ele(NSDOC, "Party");
 
 	const pid = party.ele(NSDOC, "PartyIdentification");
-	const icoFallback = invoice.client.ico?.trim() ?? "99999998";
-	pid.ele(NSDOC, "ID").txt(icoFallback).up();
+	pid.ele(NSDOC, "ID").txt(invoice.client.ico?.trim() ?? "").up();
 	pid.up();
 
 	party.ele(NSDOC, "PartyName").ele(NSDOC, "Name").txt(invoice.client.name).up().up();
@@ -246,7 +245,10 @@ function appendClassifiedTaxCategory(
 
 	if (isReverseCharge(invoice)) {
 		const lrc = bucket.ele(NSDOC, "LocalReverseCharge");
-		lrc.ele(NSDOC, "LocalReverseChargeCode").txt("92a").up();
+		lrc
+			.ele(NSDOC, "LocalReverseChargeCode")
+			.txt(invoice.vat.localReverseChargeCode!.trim())
+			.up();
 		lrc.up();
 	}
 }

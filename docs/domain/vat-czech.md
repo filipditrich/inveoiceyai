@@ -59,8 +59,9 @@ Effects:
   - "Daň odvede zákazník dle § 92e zákona č. 235/2004 Sb." (construction, more specific)
   - "Reverse charge — VAT to be accounted for by the recipient." (English form, optional)
 - Both issuer and client must be VAT payers (the schema requires `issuer.vatPayer && client.dic`)
+- `vat.localReverseChargeCode` is **required** — ISDOC `LocalReverseChargeCode` from the PDP číselník (e.g. `4` = stavební/montážní práce). Do **not** put a §92x paragraph here
 - DUZP is required as for regular
-- ISDOC: `<TaxScheme>` element marks reverse-charge per rate
+- ISDOC: line `ClassifiedTaxCategory/LocalReverseCharge` + tax total `LocalReverseChargeFlag`
 
 ### `oss` (One-Stop Shop)
 

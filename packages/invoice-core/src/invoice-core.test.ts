@@ -401,7 +401,11 @@ describe("InvoiceSchema", () => {
 			meta: metaBase,
 			issuer: issuerBase,
 			client: { ...clientBase, dic: "DE123456789" },
-			vat: { mode: "reverse_charge", suppliesAbroad: "eu" },
+			vat: {
+				mode: "reverse_charge",
+				suppliesAbroad: "eu",
+				localReverseChargeCode: "4",
+			},
 			payment: paymentBase,
 			items: [
 				{
@@ -424,6 +428,68 @@ describe("InvoiceSchema", () => {
 			},
 		});
 		expect(res.success).toBe(false);
+	});
+
+	it("rejects reverse_charge without localReverseChargeCode", () => {
+		const res = InvoiceSchema.safeParse({
+			meta: metaBase,
+			issuer: issuerBase,
+			client: { ...clientBase, dic: "CZ07654321" },
+			vat: { mode: "reverse_charge", suppliesAbroad: "none" },
+			payment: paymentBase,
+			items: [
+				{
+					position: 1,
+					description: "RC",
+					quantity: 1,
+					unit: "ks",
+					unitPriceWithoutVat: 1000,
+					vatRate: 0,
+					lineSubtotal: 1000,
+					lineVat: 0,
+					lineTotal: 1000,
+				},
+			],
+			totals: {
+				subtotal: 1000,
+				vatBreakdown: [{ rate: 0, base: 1000, vat: 0 }],
+				vatTotal: 0,
+				total: 1000,
+			},
+		});
+		expect(res.success).toBe(false);
+	});
+
+	it("accepts reverse_charge with localReverseChargeCode", () => {
+		const inv = buildInvoice({
+			vat: {
+				mode: "reverse_charge",
+				suppliesAbroad: "none",
+				localReverseChargeCode: "4",
+				legalNote: "Daň odvede zákazník dle § 92e zákona č. 235/2004 Sb.",
+			},
+			client: { ...clientBase, dic: "CZ07654321" },
+			items: [
+				{
+					position: 1,
+					description: "Stavební práce",
+					quantity: 1,
+					unit: "ks",
+					unitPriceWithoutVat: 1000,
+					vatRate: 0,
+					lineSubtotal: 1000,
+					lineVat: 0,
+					lineTotal: 1000,
+				},
+			],
+			totals: {
+				subtotal: 1000,
+				vatBreakdown: [{ rate: 0, base: 1000, vat: 0 }],
+				vatTotal: 0,
+				total: 1000,
+			},
+		});
+		expect(inv.vat.localReverseChargeCode).toBe("4");
 	});
 
 	it("rejects non–VAT-payer with nonzero vatRate", () => {

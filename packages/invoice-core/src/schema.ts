@@ -50,6 +50,7 @@ export const InvoiceVatSchema = z.object({
 	mode: z.enum(["regular", "reverse_charge", "oss"]),
 	suppliesAbroad: z.enum(["none", "eu", "non_eu"]),
 	legalNote: z.string().max(500).optional(),
+	localReverseChargeCode: z.string().min(1).max(10).optional(),
 });
 
 export const InvoiceMetaSchema = z
@@ -221,6 +222,13 @@ export const InvoiceSchema = z
 					code: z.ZodIssueCode.custom,
 					message: "reverse_charge requires client DIČ / VAT ID",
 					path: ["client", "dic"],
+				});
+			}
+			if (!inv.vat.localReverseChargeCode?.trim()) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: "reverse_charge requires localReverseChargeCode",
+					path: ["vat", "localReverseChargeCode"],
 				});
 			}
 			for (const item of inv.items) {

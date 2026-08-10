@@ -149,6 +149,8 @@ const InvoiceVatSchema = z.object({
 	suppliesAbroad: z.enum(['none', 'eu', 'non_eu']),
 	/** Free-text legal note shown on the PDF, e.g. "Daň odvede zákazník dle § 92a..." */
 	legalNote: z.string().max(500).optional(),
+	/** ISDOC LocalReverseChargeCode (e.g. 4 = construction); required when reverse_charge. */
+	localReverseChargeCode: z.string().min(1).max(10).optional(),
 });
 ```
 
@@ -157,7 +159,7 @@ Refer to [`vat-czech.md`](./vat-czech.md) for the full semantics and per-mode wo
 ### Cross-field rules
 
 - `mode = 'regular' && suppliesAbroad = 'none'` → standard domestic invoice
-- `mode = 'reverse_charge'` → every line item must have `vatRate = 0` (the recipient computes VAT)
+- `mode = 'reverse_charge'` → every line item must have `vatRate = 0` (the recipient computes VAT); `localReverseChargeCode` is required
 - `mode = 'oss' && suppliesAbroad = 'none'` is invalid (OSS only applies to cross-border B2C)
 - `issuer.vatPayer = false` → `mode` must be `'regular'`, every line `vatRate = 0`, no DPH columns rendered
 
@@ -470,12 +472,13 @@ ISDOC 6.0.2 fields map roughly:
 | `meta.number` | `<ID>` |
 | `meta.issueDate` | `<IssueDate>` |
 | `meta.duzp` | `<TaxPointDate>` |
-| `meta.dueDate` | `<PaymentMeans><DueDate>` |
+| `meta.dueDate` | `<PaymentMeans>…<PaymentDueDate>` |
 | `issuer.*` | `<AccountingSupplierParty>` |
-| `client.*` | `<AccountingCustomerParty>` |
+| `client.*` | `<AccountingCustomerParty>` (`PartyIdentification/ID` empty when no IČO) |
 | `items[*]` | `<InvoiceLines><InvoiceLine>` |
 | `totals.*` | `<LegalMonetaryTotal>`, `<TaxTotal>` |
-| `vat.legalNote` | `<Note>` |
+| `vat.legalNote` | `<Note>` / line `<VATNote>` (reverse charge) |
+| `vat.localReverseChargeCode` | `<LocalReverseChargeCode>` |
 
 Full mapping lives in `specs/isdoc.md` (written before Plan 3).
 

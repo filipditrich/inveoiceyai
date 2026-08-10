@@ -51,11 +51,11 @@ Per XSD `Invoice` sequence (non-exhaustive — implementation fills all **requir
 | --- | --- |
 | `DocumentType` | Above mapping |
 | `ID` | `meta.number` |
-| `UUID` | Deterministic UUID **v5** from namespace URL + `issuer.id` + `meta.number` (stable across re-renders) |
+| `UUID` | Deterministic UUID **v5** from namespace URL + `issuer.id` + `meta.number` + `meta.issueDate` (stable across re-renders) |
 | `IssueDate` | `meta.issueDate` |
 | `TaxPointDate` | `meta.duzp` for doc types **1–3,5–6**; for `proforma` (4) **omit** `TaxPointDate` (`minOccurs=0`) |
 | `VATApplicable` | `issuer.vatPayer` mapped to XSD boolean lexical (`true` / `false`) |
-| `ElectronicPossibilityAgreementReference` | **Required** in XSD → emit empty string (`<ElectronicPossibilityAgreementReference></ElectronicPossibilityAgreementReference>` or self-closing with empty simple content avoided — use explicit empty body) |
+| `ElectronicPossibilityAgreementReference` | **Required** in XSD → emit empty string (`<ElectronicPossibilityAgreementReference></ElectronicPossibilityAgreementReference>`) |
 
 ## Monetary / currency defaults
 
@@ -71,43 +71,55 @@ For MVP invoices are **always CZK** (`meta.currency === 'CZK'`):
 
 ### `AccountingSupplierParty`
 
-Map from `issuer`: legal name (`PartyName`), `PostalAddress` (street, city, zip, country), `CompanyID` = IČO, `PartyTaxScheme` / `VATID` when `vatPayer && dic`, contact optional.
+Map from `issuer`: legal name (`PartyName`), `PostalAddress` (street, city, zip, country), `PartyIdentification/ID` = IČO, `PartyTaxScheme/CompanyID` = DIČ when `vatPayer && dic`, `Contact/ElectronicMail` = `contactEmail`.
 
 ### `AccountingCustomerParty`
 
-Map from `client`: name, address (country ISO-2 from schema), `CompanyID` when `ico`, tax ID when `dic` (support non-CZ VAT ID string shape).
+Map from `client`: name, address (country ISO-2 from schema), `PartyIdentification/ID` = IČO when present, otherwise **empty** `<ID></ID>` (do not invent a fake IČO). `PartyTaxScheme/CompanyID` when `dic` is set.
 
 ## Lines (`InvoiceLines` / `InvoiceLine`)
 
 For each `items[]` (sorted by `position`):
 
-- `ID` or line id: string of `position`
-- `InvoicedQuantity` = `quantity`
+- `ID`: string of `position`
+- `InvoicedQuantity` = `quantity`, `@unitCode` = `HUR` for hour-like units (`h` / `hod` / `hod.`), else `C62`
 - `LineExtensionAmount` = `lineSubtotal` (without VAT)
-- `TaxCategory` / `Percent` = `vatRate` with proper **TaxScheme**:
-  - **Standard domestic:** `VAT` category S (or schema-allowed code for standard rate)
-  - **Reverse charge:** category with `TaxExemptionReason` / scheme marking reverse charge (per XSD `TaxCategoryType` allowed values)
-  - **Neplátce:** zero percent, exemption reason text
-
-Line item description: `Item/Description` = `description`, unit `InvoicedQuantity/@unitCode` use free text mapping to `C62` (unit) or schema `unitCode` list — MVP use `C62` for generic pieces or map `unit` string to `HUR` for hours if `unit === 'h'`.
+- `LineExtensionAmountTaxInclusive` = `lineTotal`
+- `LineExtensionTaxAmount` = `lineVat`
+- `UnitPrice` / `UnitPriceTaxInclusive` from line amounts
+- `ClassifiedTaxCategory`:
+  - `Percent` = line `vatRate` (forced `0` when reverse charge)
+  - `VATCalculationMethod` = `0` (from the bottom)
+  - `VATApplicable` when issuer is a VAT payer (or reverse charge / OSS)
+  - **Reverse charge:** `LocalReverseCharge/LocalReverseChargeCode` = `vat.localReverseChargeCode` (ISDOC číselník, e.g. `4` = construction/assembly — **not** a §92x paragraph)
+  - Optional line `VATNote` from `vat.legalNote` on reverse-charge lines
+- `Item/Description` = `description`
 
 ## Totals
 
-- `TaxTotal`: one `TaxSubtotal` per `totals.vatBreakdown[]` with `TaxableAmount`, `TaxAmount`, `Percent`.
-- `LegalMonetaryTotal`: `LineExtensionAmount`, `TaxExclusiveAmount`, `TaxInclusiveAmount`, `PayableAmount` aligned with `totals` (negative for credit notes).
+- `TaxTotal`: one `TaxSubTotal` per `totals.vatBreakdown[]` with taxable / tax / inclusive amounts, already-claimed zeros, difference = current amounts, and `TaxCategory` (`Percent`, `TaxScheme` = `VAT`, plus `LocalReverseChargeFlag` when reverse charge).
+- `LegalMonetaryTotal`: `TaxExclusiveAmount`, `TaxInclusiveAmount`, already-claimed zeros, difference amounts, `PaidDepositsAmount` = `0`, `PayableAmount` = `totals.total` (negative for credit notes).
 
 ## `PaymentMeans`
 
-If `payment.method === 'transfer'` and `bankAccount`: `PaymentDueDate` = `meta.dueDate`, `PaymentMeansCode` = bank transfer, `ID` = variable symbol or empty, `FinancialAccount/ID` = IBAN, `FinancialInstitutionBranch/ID` = BIC if present.
+| `payment.method` | `PaymentMeansCode` | `Details` |
+| --- | --- | --- |
+| `transfer` | `42` | Transfer branch: `PaymentDueDate`, BankAccount group (`ID` = local account number, `BankCode`, `Name`, `IBAN`, `BIC` — empty string when BIC unknown; XSD requires the element), then optional `VariableSymbol` / `ConstantSymbol` / `SpecificSymbol` |
+| `cash` | `10` | Cash/card branch: stub `DocumentID` + `IssueDate` |
+| `card` | `48` | Same stub branch as cash |
+
+`parseCzAccountNumber` splits `accountNumber` (`prefix-num/bank` or `num/bank`); invalid input **throws** (validated invoices already match `BankAccountSchema`).
 
 ## Notes
 
-- Concatenate `vat.legalNote`, stripped `payment.instructionsBefore` / `payment.instructionsAfter`, `notes`, credit reference `correctedInvoiceNumber` into `Note` where useful (separate `Note` elements or single block with newlines — MVP: one `Note` with sections).
-- **Reverse charge / OSS:** ensure `TaxSubtotal` + `Note` carry legal text from `vat.legalNote` or defaults from [vat-czech.md](../domain/vat-czech.md).
+- Concatenate `vat.legalNote`, `notes`, credit reference `correctedInvoiceNumber` into one `Note` (newlines).
+- **Reverse charge / OSS:** `TaxSubTotal` + `Note` / `VATNote` carry legal text from `vat.legalNote` or defaults from [vat-czech.md](../domain/vat-czech.md).
 
 ## MVP limitations
 
 - **OSS:** until schema adds per-line destination country, ISDOC uses client country and line rates; `Note` states OSS.
+- **BuildingNumber:** always empty; street line may include the descriptive/orientational number.
+- **ISDOCX / PDF embedding:** out of MVP; ship XML and PDF separately.
 
 ## References
 

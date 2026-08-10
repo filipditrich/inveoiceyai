@@ -15,6 +15,7 @@ import {
 	buildSpaydPayload,
 	renderSpaydQr,
 	stableIsdocInvoiceUuid,
+	parseCzAccountNumber,
 	InvoiceSchema,
 } from ".";
 
@@ -48,6 +49,23 @@ describe("ISDOC XSD + snapshots", () => {
 		const invoice = parseInvoice(domesticFixture);
 		expect(stableIsdocInvoiceUuid(invoice)).toMatch(
 			/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu,
+		);
+	});
+
+	it("parseCzAccountNumber accepts prefix and plain forms", () => {
+		expect(parseCzAccountNumber("19-2000145399/0800")).toEqual({
+			number: "19-2000145399",
+			bankCode: "0800",
+		});
+		expect(parseCzAccountNumber("1920014539/0800")).toEqual({
+			number: "1920014539",
+			bankCode: "0800",
+		});
+	});
+
+	it("parseCzAccountNumber throws on invalid input", () => {
+		expect(() => parseCzAccountNumber("not-an-account")).toThrow(
+			/invalid Czech account number/u,
 		);
 	});
 
