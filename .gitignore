@@ -10,6 +10,10 @@ dist
 build
 .turbo
 .vercel
+.eve
+.output
+apps/web/.eve
+apps/web/.output
 
 # env
 .env
@@ -33,3 +37,4 @@ npm-debug.log*
 
 # local MCP presets (Plan 12a)
 .invoicey/
+.env*

@@ -13,7 +13,7 @@ Expose invoice create/render, ARES lookup, and local presets as MCP tools so Cur
 | [`apps/mcp`](../../apps/mcp/) | Local **stdio** entry (`bun run --cwd apps/mcp src/stdio.ts`) |
 | [`apps/web/app/api/[transport]/route.ts`](../../apps/web/app/api/[transport]/route.ts) | Remote **Streamable HTTP** via `mcp-handler` → `/api/mcp` |
 
-Slack reuses the same handlers through AI SDK wrappers in `apps/web/lib/slack/` — see [`slack-bot.md`](./slack-bot.md).
+Slack Eve reuses the same handlers in-process (`apps/web/agent/tools`) — see [`slack-eve.md`](./slack-eve.md). (Plan 13a wrappers under `lib/slack` are retired.)
 
 ## Tools
 

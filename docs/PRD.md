@@ -32,8 +32,8 @@ The product targets three concrete scenarios. Every feature must serve at least 
 > "I want to type `@Invoicey invoice NFCtron monthly…` in Slack, or prompt Cursor via MCP, and get a validated Czech invoice PDF — without fighting a 40-control form."
 
 - Schema is the contract: Slack and MCP assemble the same `InvoiceSchema` the UI will use
-- **Shipped (stateless):** local MCP create/render + presets ([Plan 12a](./roadmap.md#plan-12a--mcp-server-local--vercel-http-prep-appsmcp)); Slack `/invoice` + `app_mention` ([Plan 13a](./roadmap.md#plan-13a--slack-bot-stateless-demo-in-appsweb))
-- **Later:** DB-backed drafts, numbering, mark paid (Plans 12b / 13b); workspace membership via Clerk (Plan 14)
+- **Shipped:** local MCP create/render + presets ([Plan 12a](./roadmap.md#plan-12a--mcp-server-local--vercel-http-prep-appsmcp)); Eve Slack agent + Neon drafts/HITL ([Plan 13b](./roadmap.md#plan-13b--eve-slack-agent-db-backed-in-appsweb), [`specs/slack-eve.md`](./specs/slack-eve.md)); Plan 13a slash demo is historical
+- **Later:** MCP+DB tool expansion (Plan 12b); workspace membership via Clerk (Plan 14)
 - MVP UI remains single-user no-auth; `workspace_id` is the seam for multi-user later
 
 ## In-scope (MVP)
@@ -88,7 +88,7 @@ These are explicitly deferred. They are *not* prohibited future work — they're
 | Recurring invoices / scheduled issuance | Needs cron + tracking + lifecycle UI | Plan 10 |
 | Email delivery to clients | Needs Resend wiring + bounce handling + audit trail | Plan 11 |
 | MCP + DB (list/mark paid, durable presets) | Local MCP already ships; persistence next | Plan 12b |
-| Slack bot (DB-persisted drafts) | Stateless demo already ships in `apps/web` | Plan 13b |
+| Slack bot (DB-persisted drafts) | Eve agent in `apps/web/agent` ([slack-eve.md](./specs/slack-eve.md)) | Plan 13b |
 | Authentication / multi-user | Single user is enough for personal use; Clerk integrates cleanly later | Plan 14 |
 | Multi-currency (EUR, USD) | CZK-only is sufficient for the personal use case; ARES is CZ-only anyway | Post-MVP |
 | Multi-language invoice render (CZ + EN) | Needed for invoicing abroad; Czech-only covers UC1 + UC2 | Post-MVP |

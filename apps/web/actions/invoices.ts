@@ -17,6 +17,10 @@ import {
 	nextInvoiceNumber,
 	type Invoice,
 } from "@invoicey/invoice-core";
+import {
+	cancelInvoiceById,
+	markInvoicePaidById,
+} from "@invoicey/invoice-tools/ops";
 import { clients, invoiceItems, invoices, issuerBusinesses, issuerNumberingSchemes } from "@invoicey/db";
 import { withDbTransaction, type DbTransaction } from "@invoicey/db/transaction";
 import { db } from "@invoicey/db/client";
@@ -524,23 +528,13 @@ export async function issueInvoice(formData: FormData): Promise<void> {
 
 export async function markInvoicePaid(formData: FormData): Promise<void> {
 	const id = optionalTrim(formData.get("id"));
-	const workspaceId = getDefaultWorkspaceId();
 	if (!id) {
 		redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
 	}
-	const rows = await db
-		.select()
-		.from(invoices)
-		.where(and(eq(invoices.id, id), eq(invoices.workspaceId, workspaceId)))
-		.limit(1);
-	const row = rows[0];
-	if (!row || !row.issuedAt || row.cancelledAt) {
+	const result = await markInvoicePaidById({ id });
+	if (!result.ok) {
 		redirect(`/invoices?invalid=${encodeURIComponent("cannot_mark_paid")}`);
 	}
-	await db
-		.update(invoices)
-		.set({ paidAt: new Date(), updatedAt: new Date() })
-		.where(eq(invoices.id, id));
 	revalidatePath("/invoices");
 	revalidatePath(`/invoices/${id}`);
 	redirect(`/invoices/${id}`);
@@ -549,23 +543,13 @@ export async function markInvoicePaid(formData: FormData): Promise<void> {
 /** Cancel an issued (unpaid) invoice. */
 export async function cancelInvoice(formData: FormData): Promise<void> {
 	const id = optionalTrim(formData.get("id"));
-	const workspaceId = getDefaultWorkspaceId();
 	if (!id) {
 		redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
 	}
-	const rows = await db
-		.select()
-		.from(invoices)
-		.where(and(eq(invoices.id, id), eq(invoices.workspaceId, workspaceId)))
-		.limit(1);
-	const row = rows[0];
-	if (!row || !row.issuedAt || row.paidAt || row.cancelledAt) {
+	const result = await cancelInvoiceById({ id });
+	if (!result.ok) {
 		redirect(`/invoices?invalid=${encodeURIComponent("cannot_cancel")}`);
 	}
-	await db
-		.update(invoices)
-		.set({ cancelledAt: new Date(), updatedAt: new Date() })
-		.where(eq(invoices.id, id));
 	revalidatePath("/invoices");
 	revalidatePath(`/invoices/${id}`);
 	redirect(`/invoices/${id}`);
