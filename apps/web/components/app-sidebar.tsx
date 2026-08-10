@@ -1,22 +1,26 @@
 "use client";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
+import { ThemeModeSwitcher } from "@/components/theme-toggle";
 import {
 	Sidebar,
 	SidebarContent,
 	SidebarFooter,
+	SidebarGroup,
+	SidebarGroupLabel,
 	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
 	SidebarRail,
+	SidebarSeparator,
 } from "@/components/ui/sidebar";
 import {
 	Building2Icon,
 	FileTextIcon,
 	LayoutDashboardIcon,
-	ReceiptIcon,
 	UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -48,9 +52,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			icon: <FileTextIcon />,
 			isActive: invoicesOpen,
 			items: [
-				{ title: "Overview", url: "/invoices" },
-				{ title: "New", url: "/invoices/new" },
-				{ title: "From JSON", url: "/invoices/from-json" },
+				{
+					title: "Overview",
+					url: "/invoices",
+					isActive:
+						pathname === "/invoices" ||
+						(pathname.startsWith("/invoices/") &&
+							!pathname.startsWith("/invoices/new") &&
+							!pathname.startsWith("/invoices/from-json")),
+				},
+				{
+					title: "New",
+					url: "/invoices/new",
+					isActive: pathname === "/invoices/new",
+				},
+				{
+					title: "From JSON",
+					url: "/invoices/from-json",
+					isActive: pathname === "/invoices/from-json",
+				},
 			],
 		},
 		{
@@ -69,30 +89,41 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 	return (
 		<Sidebar collapsible="icon" variant="inset" {...props}>
-			<SidebarHeader>
+			<SidebarHeader className="gap-3 pb-1">
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton
 							size="lg"
+							className="hover:bg-sidebar-accent/70 data-[slot=sidebar-menu-button]:gap-3"
 							render={<Link href="/dashboard" prefetch />}
 						>
-							<div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-								<ReceiptIcon className="size-4" />
-							</div>
-							<div className="grid flex-1 text-left text-sm leading-tight">
-								<span className="truncate font-medium">Invoicey</span>
-								<span className="truncate text-xs opacity-75">
+							<BrandLogo
+								className="shadow-sm shadow-black/10 dark:shadow-black/40"
+								priority
+								size={32}
+							/>
+							<div className="grid flex-1 text-left leading-tight">
+								<span className="truncate text-sm font-semibold tracking-tight">
+									Invoicey
+								</span>
+								<span className="text-muted-foreground truncate text-[0.7rem]">
 									Czech invoicing
 								</span>
 							</div>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 				</SidebarMenu>
+				<div className="from-brand/25 via-brand/10 mx-2 hidden h-px bg-linear-to-r to-transparent group-data-[collapsible=icon]:hidden sm:block" />
 			</SidebarHeader>
-			<SidebarContent>
+			<SidebarContent className="pt-1">
 				<NavMain items={navMain} groupLabel="Navigate" />
 			</SidebarContent>
-			<SidebarFooter>
+			<SidebarFooter className="gap-3">
+				<SidebarGroup className="group-data-[collapsible=icon]:hidden p-0">
+					<SidebarGroupLabel className="px-2">Appearance</SidebarGroupLabel>
+					<ThemeModeSwitcher className="mx-1" />
+				</SidebarGroup>
+				<SidebarSeparator className="group-data-[collapsible=icon]:hidden mx-0" />
 				<NavUser user={demoUser} />
 			</SidebarFooter>
 			<SidebarRail />

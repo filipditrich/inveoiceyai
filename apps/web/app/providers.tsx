@@ -16,6 +16,7 @@ export default function Providers({ children }: PropsWithChildren) {
       defaultTheme="system"
       disableTransitionOnChange
       enableSystem
+      storageKey="invoicey-theme"
     >
       <TooltipProvider delay={0}>
         <ModalsProvider modals={registeredModals}>

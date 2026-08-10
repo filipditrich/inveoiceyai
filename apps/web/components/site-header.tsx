@@ -1,6 +1,7 @@
 "use client";
 
 import { SearchForm } from "@/components/search-form";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -69,7 +70,7 @@ export function SiteHeader() {
 	const lastIndex = crumbs.length - 1;
 
 	return (
-		<header className="bg-background sticky top-0 z-50 flex w-full shrink-0 border-b">
+		<header className="bg-background/80 sticky top-0 z-50 flex w-full shrink-0 border-b backdrop-blur-md">
 			<div className="flex h-(--header-height) w-full items-center gap-2 px-4 transition-[height] duration-200 ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
 				<SidebarTrigger
 					aria-label="Toggle sidebar"
@@ -83,7 +84,7 @@ export function SiteHeader() {
 				<Breadcrumb className="mr-auto hidden min-w-0 flex-1 sm:flex">
 					<BreadcrumbList className="min-w-0">
 						{crumbs.map((crumb, index) => (
-							<Fragment key={crumb.href}>
+							<Fragment key={`${index}:${crumb.href}`}>
 								<BreadcrumbItem className="min-w-0">
 									{index === lastIndex ? (
 										<BreadcrumbPage className="truncate font-normal">
@@ -100,7 +101,10 @@ export function SiteHeader() {
 						))}
 					</BreadcrumbList>
 				</Breadcrumb>
-				<SearchForm className="w-full sm:max-w-xs" />
+				<div className="flex items-center gap-1.5">
+					<SearchForm className="w-full sm:max-w-xs" />
+					<ThemeToggle />
+				</div>
 			</div>
 		</header>
 	);

@@ -19,6 +19,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Invoicey",
   description: "Czech-first invoicing — schema-first data, PDF + ISDOC + SPAYD QR",
+  icons: {
+    icon: [{ url: "/brand/invoicey-logo-192.png", type: "image/png" }],
+    apple: [{ url: "/apple-icon.png", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({
