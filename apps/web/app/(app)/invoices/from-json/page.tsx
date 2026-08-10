@@ -120,7 +120,8 @@ export default function InvoiceFromJsonDemoPage() {
 							<code className="bg-muted text-foreground rounded-md px-1.5 py-0.5 font-mono text-xs">
 								InvoiceSchema
 							</code>{" "}
-							payload and render server-side PDF for a quick sanity check.
+							payload and render a PDF. Includes presets with payment instruction
+							markdown.
 						</p>
 					</div>
 					<Link

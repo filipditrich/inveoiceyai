@@ -27,6 +27,10 @@ function makeRegularVatPayer(): Invoice {
 	invoice.client.name = "NFCtron a.s.";
 	invoice.client.contactEmail = "ucetnictvi@nfctron.com";
 	invoice.payment.variableSymbol = "20260023";
+	invoice.payment.instructionsBefore =
+		"Faktura za péči o rostliny za leden 2026.\nPlatbu prosím proveďte **do splatnosti**.";
+	invoice.payment.instructionsAfter =
+		"Děkujeme — v případě změn rozsahu služeb napište na _ucetnictvi@nfctron.com_.";
 	invoice.items = [
 		{
 			position: 1,
@@ -92,6 +96,10 @@ function makeRegularMixedVat(): Invoice {
 		vatTotal: 4500,
 		total: 28500,
 	};
+	invoice.payment.instructionsBefore =
+		"Shrnutí prací za únor — detail v položkách níže.";
+	invoice.payment.instructionsAfter =
+		"Po připsání platby vystavíme daňový doklad.\nKontakt: _finance@acme.example_.";
 	return invoice;
 }
 
@@ -107,6 +115,10 @@ function makeProforma(): Invoice {
 	invoice.payment.method = "card";
 	delete invoice.payment.bankAccount;
 	delete invoice.payment.variableSymbol;
+	invoice.payment.instructionsBefore =
+		"Proforma — **není daňový doklad**.\nÚhradu očekáváme **kartou**.";
+	invoice.payment.instructionsAfter =
+		"Po zaplacení vystavíme daňový doklad k přijaté platbě.";
 	invoice.items = [
 		{
 			position: 1,
@@ -141,6 +153,10 @@ function makeAdvance(): Invoice {
 	invoice.payment.method = "cash";
 	delete invoice.payment.bankAccount;
 	delete invoice.payment.variableSymbol;
+	invoice.payment.instructionsBefore =
+		"Zálohová faktura — úhrada **v hotovosti** při převzetí.";
+	invoice.payment.instructionsAfter =
+		"Potvrzení o přijetí zálohy vystavíme ihned po úhradě.";
 	invoice.items = [
 		{
 			position: 1,
@@ -177,7 +193,12 @@ function makeReverseCharge(): Invoice {
 	invoice.client.address.zip = "10115";
 	invoice.vat.mode = "reverse_charge";
 	invoice.vat.suppliesAbroad = "eu";
+	invoice.vat.localReverseChargeCode = "4";
 	invoice.vat.legalNote = "Daň odvede zákazník v režimu reverse charge.";
+	invoice.payment.instructionsBefore =
+		"Cross-border B2B supply — **reverse charge** applies.\nPlease pay the net amount below.";
+	invoice.payment.instructionsAfter =
+		"VAT is accounted for by the customer under reverse charge.";
 	invoice.items = [
 		{
 			position: 1,
@@ -215,6 +236,10 @@ function makeOss(): Invoice {
 	invoice.vat.mode = "oss";
 	invoice.vat.suppliesAbroad = "eu";
 	invoice.vat.legalNote = "Zdaněno v režimu OSS.";
+	invoice.payment.instructionsBefore =
+		"SaaS subscription billed under **OSS** (destination VAT).";
+	invoice.payment.instructionsAfter =
+		"Questions about this invoice: _billing@invoicey.demo_.";
 	invoice.items = [
 		{
 			position: 1,
@@ -247,6 +272,10 @@ function makeCreditNote(): Invoice {
 	invoice.meta.duzp = "2026-05-28";
 	invoice.issuer.vatPayer = true;
 	invoice.issuer.dic = "CZ09870113";
+	invoice.payment.instructionsBefore =
+		"Dobropis k faktuře **20260024** — částku **neplaťte**.";
+	invoice.payment.instructionsAfter =
+		"Částka bude vypořádána oproti původnímu dokladu, případně vrácena.";
 	invoice.items = [
 		{
 			position: 1,
@@ -269,6 +298,40 @@ function makeCreditNote(): Invoice {
 	return invoice;
 }
 
+function makePaymentInstructionsShowcase(): Invoice {
+	const invoice = cloneBaseInvoice();
+	invoice.meta.number = "20260055";
+	invoice.meta.issueDate = "2026-06-10";
+	invoice.meta.dueDate = "2026-06-24";
+	invoice.meta.duzp = "2026-06-10";
+	invoice.payment.variableSymbol = "20260055";
+	invoice.payment.instructionsBefore =
+		"Dobrý den,\n\nníže najdete platební údaje k faktuře.\nProsím o úhradu **do splatnosti** — děkuji.";
+	invoice.payment.instructionsAfter =
+		"Po připsání platby pošleme potvrzení.\n\n*Poznámka:* u firemních plateb uveďte VS.\nKontakt: _faktura@invoicey.demo_.";
+	invoice.notes = "Dodání: remote / e-mail. Fakturujeme měsíčně zpětně.";
+	invoice.items = [
+		{
+			position: 1,
+			description: "Konzultace invoice workflow",
+			quantity: 1,
+			unit: "ks",
+			unitPriceWithoutVat: 2500,
+			vatRate: 0,
+			lineSubtotal: 2500,
+			lineVat: 0,
+			lineTotal: 2500,
+		},
+	];
+	invoice.totals = {
+		subtotal: 2500,
+		vatBreakdown: [{ rate: 0, base: 2500, vat: 0 }],
+		vatTotal: 0,
+		total: 2500,
+	};
+	return invoice;
+}
+
 function makeNoBuyerIdsNoEmail(): Invoice {
 	const invoice = cloneBaseInvoice();
 	invoice.meta.number = "20260050";
@@ -283,6 +346,10 @@ function makeNoBuyerIdsNoEmail(): Invoice {
 	delete invoice.client.contactEmail;
 	invoice.payment.method = "transfer";
 	invoice.payment.variableSymbol = "20260050";
+	invoice.payment.instructionsBefore =
+		"Ahoj Martine,\nprosím o převod za konzultaci — účet a VS níže.";
+	invoice.payment.instructionsAfter =
+		"Díky! Stačí napsat, až bude odesláno.";
 	invoice.items = [
 		{
 			position: 1,
@@ -307,6 +374,11 @@ function makeNoBuyerIdsNoEmail(): Invoice {
 
 export const demoInvoiceExamples: InvoiceDemoExample[] = [
 	{ id: "basic-non-vat", label: "Neplátce · transfer · 0% DPH", invoice: cloneBaseInvoice() },
+	{
+		id: "payment-instructions",
+		label: "Platební texty · markdown before/after",
+		invoice: makePaymentInstructionsShowcase(),
+	},
 	{ id: "regular-vat-payer", label: "Plátce DPH · 21% · 1 položka", invoice: makeRegularVatPayer() },
 	{ id: "regular-mixed-vat", label: "Plátce DPH · mix 12% + 21%", invoice: makeRegularMixedVat() },
 	{ id: "proforma-card", label: "Proforma · platba kartou", invoice: makeProforma() },

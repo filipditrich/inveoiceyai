@@ -50,7 +50,9 @@
 			"iban": "CZ2501000001153743440297",
 			"bic": "KOMBCZPP"
 		},
-		"variableSymbol": "20260001"
+		"variableSymbol": "20260001",
+		"instructionsBefore": "Děkuji za spolupráci.\nÚhradu prosím proveďte **převodem** na účet níže.",
+		"instructionsAfter": "Při platbě uveďte variabilní symbol.\nDotazy: _faktura@invoicey.demo_."
 	},
 	"items": [
 		{
