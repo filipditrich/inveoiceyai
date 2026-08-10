@@ -2,8 +2,21 @@ import { and, eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
 import type { InvoiceyDb } from "./create-db";
-import { clients, invoices, issuerBusinesses } from "./schema";
+import { clients, invoiceItems, invoices, issuerBusinesses } from "./schema";
 import { ensureDefaultWorkspace, getDefaultWorkspaceId } from "./workspace";
+
+/** Line shape for denormalized `invoice_items` rows. */
+export interface PersistableInvoiceItem {
+  position: number;
+  description: string;
+  quantity: number;
+  unit: string;
+  unitPriceWithoutVat: number;
+  vatRate: number;
+  lineSubtotal: number;
+  lineVat: number;
+  lineTotal: number;
+}
 
 /** Subset of InvoiceSchema fields needed for draft persistence. */
 export interface PersistableInvoice {
@@ -27,6 +40,7 @@ export interface PersistableInvoice {
     ico?: string;
   } & Record<string, unknown>;
   totals: { total: number; subtotal?: number; vatTotal?: number };
+  items?: PersistableInvoiceItem[];
   notes?: string;
 }
 
@@ -36,11 +50,39 @@ export interface PersistDraftInvoiceResult {
   clientId: string;
 }
 
+async function replaceInvoiceItems(
+  database: InvoiceyDb,
+  invoiceId: string,
+  items: PersistableInvoiceItem[] | undefined,
+): Promise<void> {
+  await database
+    .delete(invoiceItems)
+    .where(eq(invoiceItems.invoiceId, invoiceId));
+  if (items == null || items.length === 0) {
+    return;
+  }
+  await database.insert(invoiceItems).values(
+    items.map((line) => ({
+      id: randomUUID(),
+      invoiceId,
+      position: line.position,
+      description: line.description,
+      quantity: String(line.quantity),
+      unit: line.unit,
+      unitPriceWithoutVat: String(line.unitPriceWithoutVat),
+      vatRate: String(line.vatRate),
+      lineSubtotal: String(line.lineSubtotal),
+      lineVat: String(line.lineVat),
+      lineTotal: String(line.lineTotal),
+    })),
+  );
+}
+
 /** Upsert issuer/client snapshots and insert/update draft by workspace+number. */
 export async function persistDraftInvoice(
   database: InvoiceyDb,
   invoice: PersistableInvoice,
-  options?: { workspaceId?: string },
+  options?: { workspaceId?: string; invoiceId?: string },
 ): Promise<PersistDraftInvoiceResult> {
   const workspaceId = options?.workspaceId ?? getDefaultWorkspaceId();
   await ensureDefaultWorkspace(database, { id: workspaceId });
@@ -125,6 +167,34 @@ export async function persistDraftInvoice(
     updatedAt: now,
   };
 
+  if (options?.invoiceId) {
+    const byId = await database
+      .select({ id: invoices.id, issuedAt: invoices.issuedAt })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.id, options.invoiceId),
+          eq(invoices.workspaceId, workspaceId),
+        ),
+      )
+      .limit(1);
+    if (byId[0]) {
+      if (byId[0].issuedAt != null) {
+        throw new Error("cannot update issued invoice as draft");
+      }
+      await database
+        .update(invoices)
+        .set(values)
+        .where(eq(invoices.id, byId[0].id));
+      await replaceInvoiceItems(database, byId[0].id, invoice.items);
+      return {
+        invoiceId: byId[0].id,
+        issuerId,
+        clientId,
+      };
+    }
+  }
+
   const existing = await database
     .select({ id: invoices.id })
     .from(invoices)
@@ -141,6 +211,7 @@ export async function persistDraftInvoice(
       .update(invoices)
       .set(values)
       .where(eq(invoices.id, existing[0].id));
+    await replaceInvoiceItems(database, existing[0].id, invoice.items);
     return {
       invoiceId: existing[0].id,
       issuerId,
@@ -148,12 +219,13 @@ export async function persistDraftInvoice(
     };
   }
 
-  const invoiceId = randomUUID();
+  const invoiceId = options?.invoiceId ?? randomUUID();
   await database.insert(invoices).values({
     id: invoiceId,
     ...values,
     createdAt: now,
   });
+  await replaceInvoiceItems(database, invoiceId, invoice.items);
 
   return { invoiceId, issuerId, clientId };
 }

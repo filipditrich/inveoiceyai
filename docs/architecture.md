@@ -39,10 +39,9 @@ inveoiceyai/
 │   │   │   └── api/
 │   │   │       ├── ares/[ico]/
 │   │   │       ├── demo/invoice-pdf/
-│   │   │       ├── [transport]/   # MCP Streamable HTTP (/api/mcp)
-│   │   │       └── slack/{commands,events}/
-│   │   ├── actions/            server actions (mutations)
-│   │   └── lib/slack/          AI SDK wrappers → invoice-tools
+│   │   │       └── [transport]/   # MCP Streamable HTTP (/api/mcp)
+│   │   ├── agent/              Eve Slack + HTTP channels (/eve/v1/*)
+│   │   └── actions/            server actions (mutations)
 │   └── mcp/                    local stdio MCP (@invoicey/mcp)
 ├── packages/
 │   ├── invoice-core/           Zod schema, totals, numbering, status, PDF, QR, ISDOC
@@ -61,7 +60,7 @@ inveoiceyai/
 └── bun.lock
 ```
 
-Shared domain: `invoice-core` + `invoice-tools` + `ares` + `db`. Slack stays in `apps/web` for Plan 13a; optional `apps/slack` split is Plan 13b.
+Shared domain: `invoice-core` + `invoice-tools` + `ares` + `db`. Slack Eve agent lives under `apps/web/agent/` (Plan 13b); see [`specs/slack-eve.md`](./specs/slack-eve.md).
 
 ## Runtime boundaries (Next.js 16 + MCP)
 
@@ -73,7 +72,8 @@ flowchart TD
     Browser -->|POST| RH_Demo["/api/demo/invoice-pdf"]
     CursorLocal["Cursor stdio"] --> McpApp["apps/mcp"]
     CursorRemote["Cursor HTTP"] --> RH_Mcp["/api/mcp"]
-    SlackAPI["Slack"] --> RH_Slack["/api/slack/*"]
+    SlackAPI["Slack"] --> Connect["Vercel Connect"]
+    Connect --> Eve["/eve/v1/slack"]
 
     SA --> DB[("Neon via @invoicey/db")]
     RSC --> DB
@@ -81,7 +81,7 @@ flowchart TD
     RH_Demo --> Tools["@invoicey/invoice-tools"]
     RH_Mcp --> Tools
     McpApp --> Tools
-    RH_Slack --> Tools
+    Eve --> Tools
     Tools --> Core["@invoicey/invoice-core"]
     Tools --> Ares
 ```
@@ -161,14 +161,13 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 | `RESEND_API_KEY` | Resend API key | Vercel | Plan 11 |
 | `CLERK_SECRET_KEY` | Clerk secret | Vercel | Plan 14 |
 | `CLERK_PUBLISHABLE_KEY` | Clerk publishable key | Vercel | Plan 14 |
-| `SLACK_BOT_TOKEN` | Slack bot OAuth token (`xoxb-…`) | Vercel + `.env.local` | Plan 13a |
-| `SLACK_SIGNING_SECRET` | Slack request-signing secret | Vercel + `.env.local` | Plan 13a |
-| `AI_GATEWAY_API_KEY` | Vercel AI Gateway API key | Vercel + `.env.local` | Plan 13a |
-| `INVOICEY_AI_MODEL` | Gateway model id (e.g. `openai/gpt-4o-mini`) | Vercel + `.env.local` | Plan 13a |
-| `INVOICEY_AI_FALLBACK_MODEL` | Fallback gateway model id | Vercel + `.env.local` | Plan 13a |
-| `INVOICEY_DEMO_ISSUER_JSON` | Optional JSON override for demo `IssuerSnapshot` | Vercel + `.env.local` | Plan 13a / 12a |
+| `AI_GATEWAY_API_KEY` | Vercel AI Gateway API key (Eve + MCP AI) | Vercel + `.env.local` | Plan 13a / 13b |
+| `INVOICEY_AI_MODEL` | Gateway model id for Eve (`agent/agent.ts`) | Vercel + `.env.local` | Plan 13b |
+| `INVOICEY_DEMO_ISSUER_JSON` | Optional JSON override for demo `IssuerSnapshot` | Vercel + `.env.local` | Plan 12a / 13b |
 | `INVOICEY_PRESETS_PATH` | Absolute path to local MCP presets JSON | local MCP / optional | Plan 12a |
-| `MCP_API_KEY` | Bearer token for `/api/mcp` (required) | Vercel + `.env` / `.env.local` | Plan 12a |
+| `MCP_API_KEY` | Bearer token for `/api/mcp` (required); also Eve HTTP fallback | Vercel + `.env` / `.env.local` | Plan 12a |
+| `EVE_API_KEY` | Optional Bearer for `/eve/v1/*` HTTP (else `MCP_API_KEY`) | Vercel + `.env.local` | Plan 13b |
+| ~~`SLACK_BOT_TOKEN` / `SLACK_SIGNING_SECRET`~~ | Hand-managed Slack secrets — **deprecated** for Eve; use Vercel Connect | — | Plan 13a only |
 
 `.env.example` lives at repo root with every var commented; `.env.local` is git-ignored.
 
@@ -177,8 +176,8 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 - **Vercel** for `apps/web` — Next.js 16 + Server Actions + route handlers run on Vercel Functions
 - **Neon** for Postgres — wired via Vercel Marketplace (auto-injects `DATABASE_URL`); schema in [`docs/specs/db-schema.md`](./specs/db-schema.md)
 - **UploadThing** for files — configured per-app
-- **Plan 13a (Slack demo):** slash command → `apps/web/app/api/slack/commands/route.ts`; Events API `app_mention` → `apps/web/app/api/slack/events/route.ts` (same `SLACK_SIGNING_SECRET` / bot token). A future `apps/slack` split remains optional.
-- **Plan 12a (MCP):** local stdio via `apps/mcp`; remote Streamable HTTP via `apps/web` `/api/mcp` (`mcp-handler`, Node runtime, required `MCP_API_KEY`). Shared tool logic in `@invoicey/invoice-tools`.
+- **Plan 13b (Eve Slack):** `apps/web/agent/` mounted with `withEve()`; Connect trigger → `/eve/v1/slack`; Node 24+. Spec: [`specs/slack-eve.md`](./specs/slack-eve.md). Plan 13a `/api/slack/*` retired.
+- **Plan 12a (MCP):** local stdio via `apps/mcp`; remote Streamable HTTP via `apps/web` `/api/mcp` (`mcp-handler`, Node runtime, required `MCP_API_KEY`). Shared tool logic in `@invoicey/invoice-tools` (+ `/ops` for issue/paid).
 
 ## Tooling
 
@@ -195,13 +194,13 @@ flowchart LR
     Core["@invoicey/invoice-core"] --> Tools["@invoicey/invoice-tools"]
     Ares["@invoicey/ares"] --> Tools
     Tools --> MCP["apps/mcp stdio"]
-    Tools --> Web["apps/web<br/>/api/mcp + Slack + demo"]
+    Tools --> Web["apps/web<br/>/api/mcp + Eve + demo"]
     DB[("@invoicey/db")] --> Web
     Core --> Web
     Ares --> Web
 ```
 
-Post-MVP still designed-in: Vercel Cron (Plan 10), Resend (Plan 11), MCP+DB tools (Plan 12b), Slack persistence (Plan 13b), Clerk (Plan 14). Those reuse the same Zod contract — no HTTP shim between apps.
+Post-MVP still designed-in: Vercel Cron (Plan 10), Resend (Plan 11), MCP+DB tools (Plan 12b), Clerk (Plan 14). Slack Eve (Plan 13b) shares the same Zod contract in-process — no HTTP shim between MCP and Slack.
 
 ## Open architectural questions
 

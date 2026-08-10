@@ -2,6 +2,9 @@
 	"name": "@invoicey/web",
 	"version": "0.1.0",
 	"private": true,
+	"engines": {
+		"node": ">=24"
+	},
 	"scripts": {
 		"dev": "next dev --turbopack",
 		"build": "next build --turbopack",
@@ -11,7 +14,7 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@ai-sdk/gateway": "3.0.109",
+		"@ai-sdk/gateway": "4.0.46",
 		"@base-ui/react": "1.4.1",
 		"@c15t/react": "2.0.3",
 		"@dnd-kit/core": "6.3.1",
@@ -26,17 +29,18 @@
 		"@invoicey/invoice-tools": "workspace:*",
 		"@modelcontextprotocol/sdk": "1.26.0",
 		"@react-pdf/renderer": "4.6.0",
-		"@slack/web-api": "7.15.1",
 		"@tanstack/react-table": "8.21.3",
 		"@uploadthing/react": "7.3.3",
 		"@vercel/analytics": "^2.0.1",
-		"ai": "6.0.174",
+		"@vercel/connect": "0.6.1",
+		"ai": "^7.0.38",
 		"class-variance-authority": "0.7.1",
 		"clsx": "2.1.1",
 		"cookie": "1.1.1",
 		"date-fns": "4.1.0",
 		"date-fns-tz": "3.2.0",
 		"drizzle-orm": "0.44.7",
+		"eve": "0.31.3",
 		"lucide-react": "1.14.0",
 		"mcp-handler": "1.1.0",
 		"next": "16.2.4",

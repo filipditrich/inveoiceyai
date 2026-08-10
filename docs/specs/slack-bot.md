@@ -1,10 +1,12 @@
-# Slack bot — stateless demo (Plan 13a)
+# Slack bot — stateless demo (Plan 13a, historical)
+
+> **Superseded by Plan 13b (Eve).** Production Slack path is the durable Eve agent — see [`slack-eve.md`](./slack-eve.md). The `/api/slack/commands` and `/api/slack/events` routes and `apps/web/lib/slack/*` AI loop have been removed. This doc remains as the historical 13a design record.
 
 ## Goal
 
 Let a user post a single Slack message and receive a rendered Czech invoice PDF + ISDOC XML in-thread, with **no** database persistence. The bot is a thin shell over [`@invoicey/invoice-core`](../../packages/invoice-core/) and [`@invoicey/ares`](../../packages/ares/); a Vercel AI SDK agent aggregates the message into an `InvoiceSchema`-valid payload via tool calls, and the deterministic core renders.
 
-This is the **stateless demo** track — see also [`docs/roadmap.md`](../roadmap.md) Plan 13a vs. 13b.
+This was the **stateless demo** track — see [`docs/roadmap.md`](../roadmap.md) Plan 13a vs. 13b ([`slack-eve.md`](./slack-eve.md)).
 
 ## Scope
 

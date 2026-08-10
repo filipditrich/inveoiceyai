@@ -62,8 +62,8 @@ Each plan in `.cursor/plans/` cites the docs it implements. Each ADR cites the p
 
 Implementation progress lives in [`roadmap.md`](./roadmap.md).
 
-- **Done:** Plans 0–4 (docs → ARES/clients), Plan 12a (local MCP), Plan 13a (Slack demo).
-- **Next (MVP track):** Plan 5 — issuers.
-- **Automation:** Prefer MCP / Slack over a heavy builder UI for day-to-day create ([`AGENTS.md`](../AGENTS.md)).
+- **Done:** Plans 0–7 (docs → list UI), Plan 12a (local MCP), Plan 13a (historical Slack demo).
+- **In progress:** Plan 13b — Eve Slack agent ([`specs/slack-eve.md`](./specs/slack-eve.md)).
+- **Automation:** Prefer MCP / Eve Slack over a heavy builder UI for day-to-day create ([`AGENTS.md`](../AGENTS.md)).
 
 Narrative plans: [`.cursor/plans/`](../.cursor/plans/).

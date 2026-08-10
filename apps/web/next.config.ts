@@ -1,4 +1,5 @@
 import { config as loadDotEnv } from "dotenv";
+import { withEve } from "eve/next";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
@@ -13,6 +14,13 @@ const repoRoot = path.resolve(
 loadDotEnv({ path: path.join(repoRoot, ".env") });
 loadDotEnv({ path: path.join(repoRoot, ".env.local"), override: true });
 
+/** invoice-core fonts/xsd/icc for PDF/ISDOC serverless traces */
+const invoiceCoreAssets = [
+  "../../packages/invoice-core/assets/fonts/**/*",
+  "../../packages/invoice-core/assets/schemas/**/*",
+  "../../packages/invoice-core/assets/icc/**/*",
+];
+
 const nextConfig: NextConfig = {
   transpilePackages: [
     "@invoicey/ares",
@@ -21,14 +29,10 @@ const nextConfig: NextConfig = {
     "@invoicey/invoice-core",
     "@invoicey/invoice-tools",
   ],
-  /** include invoice-core fonts/xsd/icc in serverless traces */
   outputFileTracingIncludes: {
-    "/api/**": [
-      "../../packages/invoice-core/assets/fonts/**/*",
-      "../../packages/invoice-core/assets/schemas/**/*",
-      "../../packages/invoice-core/assets/icc/**/*",
-    ],
+    "/api/**": invoiceCoreAssets,
+    "/eve/**": invoiceCoreAssets,
   },
 };
 
-export default nextConfig;
+export default withEve(nextConfig);

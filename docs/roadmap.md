@@ -21,9 +21,9 @@ flowchart LR
     Post --> P10["Plan 10<br/>recurring"]
     Post --> P11["Plan 11<br/>email"]
     P12a --> P12b["Plan 12b<br/>MCP + DB"]
-    Post --> P13b["Plan 13b<br/>Slack bot<br/>DB-persisted"]
+    P7 -.parallel.-> P13b["Plan 13b<br/>Eve Slack<br/>in progress"]
     Post --> P14["Plan 14<br/>auth"]
-    P12b -.feeds.-> P13b
+    P12a -.feeds.-> P13b
     P13a -.upgrades to.-> P13b
 ```
 
@@ -280,15 +280,24 @@ Plans listed here do not block the MVP and can be picked up in parallel with Pla
 - Imports `@invoicey/invoice-core` + `@invoicey/db` — no HTTP shim
 - Schema parity with the UI via `InvoiceSchema`
 
-### Plan 13b — Slack bot, DB-persisted drafts (`apps/slack`)
+### Plan 13b — Eve Slack agent (DB-backed, in `apps/web`)
 
-**Status:** Post-MVP backlog
+**Status:** In progress  
+**Spec:** [`specs/slack-eve.md`](./specs/slack-eve.md)
 
-- Slack app with slash command + `@Invoicey` mention parsing
-- Backed by the same domain layer; Slack identity becomes a workspace member when auth lands
-- Until auth, Slack maps to the single default workspace
-- Promotes Plan 13a's stateless demo into real drafts: persists invoices, assigns numbers via `nextInvoiceNumber`, and adds an "Issue" interactivity button
-- Ideally consumes the Plan 12 MCP tool surface so Cursor / Claude Desktop / Slack share one toolkit
+**Goal:** Replace Plan 13a’s hand-rolled Slack AI loop with a durable [Eve](https://eve.dev/docs) agent under `apps/web/agent/`, wired to Neon via `@invoicey/invoice-tools` (+ `/ops`). Single-tenant (no Clerk); Slack auth via Vercel Connect → `/eve/v1/slack`.
+
+**Exit criteria:**
+
+- [x] Domain APIs: `issueInvoiceById` / `markInvoicePaidById` / list/get; draft persist writes `invoice_items`
+- [x] `withEve` + `apps/web/agent` (Slack Connect + Bearer HTTP channel)
+- [x] Tools: create/upload/list/get/presets + HITL `issue_invoice` / `mark_invoice_paid`
+- [x] Spec + human Connect checklist in [`specs/slack-eve.md`](./specs/slack-eve.md)
+- [x] Retire Plan 13a `/api/slack/*` routes and `lib/slack` AI loop
+- [x] Prod deploy with `withEve` (`GET https://invoicey.ditrich.me/eve/v1/health` → ready)
+- [ ] Human: Connect create/attach `--trigger-path /eve/v1/slack`, invite bot, run E2E checklist in the spec
+
+**Out of v1:** slash `/invoice`, Clerk / per-user scoping, Eve calling remote `/api/mcp`.
 
 ### Plan 14 — Authentication + multi-user
 
