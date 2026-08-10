@@ -18,12 +18,11 @@ import {
  * uses, so there is one tenancy id and no translation step.
  *
  * `id` is text so it matches `workspace_id` columns (UUID strings).
- * `slug` is nullable until the backfill lands (see Plan 14 stage 3).
  */
 export const workspaces = pgTable("workspaces", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
-  slug: text("slug").unique(),
+  slug: text("slug").notNull().unique(),
   logo: text("logo"),
   metadata: text("metadata"),
   createdAt: timestamp("created_at", { withTimezone: true })

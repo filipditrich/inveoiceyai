@@ -36,6 +36,10 @@ export async function ensureDefaultWorkspace(
   await database.insert(workspaces).values({
     id,
     name: options?.name ?? "Default workspace",
+    // `slug` is required since Plan 14; derived from the id so lazily-created
+    // workspaces cannot collide. Whole function goes away in Plan 14 stage 6,
+    // once every caller resolves the workspace from the session instead.
+    slug: `ws-${id.slice(0, 8)}`,
   });
   return { id };
 }
