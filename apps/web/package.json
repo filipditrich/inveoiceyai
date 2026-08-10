@@ -29,6 +29,7 @@
 		"@slack/web-api": "7.15.1",
 		"@tanstack/react-table": "8.21.3",
 		"@uploadthing/react": "7.3.3",
+		"@vercel/analytics": "^2.0.1",
 		"ai": "6.0.174",
 		"class-variance-authority": "0.7.1",
 		"clsx": "2.1.1",
