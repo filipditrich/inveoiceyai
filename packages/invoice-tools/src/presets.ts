@@ -4,6 +4,13 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { IssuerSnapshotSchema } from "@invoicey/invoice-core/schema";
+import {
+  deletePresetDb,
+  getPresetDb,
+  listPresetsDb,
+  savePresetDb,
+  tryCreateDbFromEnv,
+} from "@invoicey/db";
 
 export const PresetKindSchema = z.enum(["issuer", "invoice_template"]);
 export type PresetKind = z.infer<typeof PresetKindSchema>;
@@ -43,6 +50,16 @@ export function resolvePresetsPath(override?: string): string {
     return override.trim();
   }
   return defaultPresetsPath();
+}
+
+function useDbStore(pathOverride?: string): boolean {
+  if (pathOverride != null && pathOverride.trim() !== "") {
+    return false;
+  }
+  if (process.env.INVOICEY_PRESETS_BACKEND?.trim() === "file") {
+    return false;
+  }
+  return Boolean(process.env.DATABASE_URL?.trim());
 }
 
 async function readStore(filePath: string): Promise<PresetFile> {
@@ -93,6 +110,14 @@ export async function listPresets(options?: {
   path?: string;
   kind?: PresetKind;
 }): Promise<{ ok: true; presets: PresetRecord[] }> {
+  if (useDbStore(options?.path)) {
+    const database = tryCreateDbFromEnv();
+    if (database) {
+      const presets = await listPresetsDb(database, { kind: options?.kind });
+      return { ok: true, presets };
+    }
+  }
+
   const filePath = resolvePresetsPath(options?.path);
   const store = await readStore(filePath);
   const presets =
@@ -108,6 +133,17 @@ export async function getPreset(options: {
 }): Promise<
   { ok: true; preset: PresetRecord } | { ok: false; error: string }
 > {
+  if (useDbStore(options.path)) {
+    const database = tryCreateDbFromEnv();
+    if (database) {
+      const preset = await getPresetDb(database, { id: options.id });
+      if (!preset) {
+        return { ok: false, error: `preset not found: ${options.id}` };
+      }
+      return { ok: true, preset };
+    }
+  }
+
   const filePath = resolvePresetsPath(options.path);
   const store = await readStore(filePath);
   const preset = store.presets.find((p) => p.id === options.id);
@@ -131,6 +167,26 @@ export async function savePreset(options: {
     return { ok: false, error: checked.message };
   }
 
+  const nameParsed = PresetRecordSchema.shape.name.safeParse(
+    options.name.trim(),
+  );
+  if (!nameParsed.success) {
+    return { ok: false, error: "invalid preset name" };
+  }
+
+  if (useDbStore(options.path)) {
+    const database = tryCreateDbFromEnv();
+    if (database) {
+      const preset = await savePresetDb(database, {
+        id: options.id,
+        kind: options.kind,
+        name: options.name,
+        data: checked.data,
+      });
+      return { ok: true, preset };
+    }
+  }
+
   const filePath = resolvePresetsPath(options.path);
   const store = await readStore(filePath);
   const id = options.id ?? randomUUID();
@@ -140,10 +196,6 @@ export async function savePreset(options: {
     name: options.name.trim(),
     data: checked.data,
   };
-  const nameParsed = PresetRecordSchema.shape.name.safeParse(record.name);
-  if (!nameParsed.success) {
-    return { ok: false, error: "invalid preset name" };
-  }
 
   const idx = store.presets.findIndex((p) => p.id === id);
   if (idx >= 0) {
@@ -159,6 +211,17 @@ export async function deletePreset(options: {
   id: string;
   path?: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (useDbStore(options.path)) {
+    const database = tryCreateDbFromEnv();
+    if (database) {
+      const ok = await deletePresetDb(database, { id: options.id });
+      if (!ok) {
+        return { ok: false, error: `preset not found: ${options.id}` };
+      }
+      return { ok: true };
+    }
+  }
+
   const filePath = resolvePresetsPath(options.path);
   const store = await readStore(filePath);
   const next = store.presets.filter((p) => p.id !== options.id);

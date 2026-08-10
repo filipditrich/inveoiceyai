@@ -164,6 +164,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@invoicey/ares": "workspace:*",
+        "@invoicey/db": "workspace:*",
         "@invoicey/invoice-core": "workspace:*",
         "@modelcontextprotocol/sdk": "1.26.0",
         "date-fns": "^4.1.0",

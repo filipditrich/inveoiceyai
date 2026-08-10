@@ -4,7 +4,8 @@ import {
 } from "@/components/issuers/issuer-editor-form";
 import { getDefaultWorkspaceId } from "@/lib/workspace-id";
 import { IssuerSnapshotSchema } from "@invoicey/invoice-core/schema";
-import { db, issuerBusinesses, issuerNumberingSchemes } from "@invoicey/db";
+import { issuerBusinesses, issuerNumberingSchemes } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 

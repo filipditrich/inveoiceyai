@@ -9,7 +9,9 @@ import {
 	ClientVatIdSchema,
 	IcoSchema,
 } from "@invoicey/invoice-core/schema";
-import { clients, db, withDbTransaction } from "@invoicey/db";
+import { clients } from "@invoicey/db";
+import { withDbTransaction } from "@invoicey/db/transaction";
+import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";

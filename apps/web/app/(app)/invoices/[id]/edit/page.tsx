@@ -2,7 +2,8 @@ import { InvoiceBuilderForm } from "@/components/invoices/invoice-builder-form";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import { getDefaultWorkspaceId } from "@/lib/workspace-id";
 import { InvoiceSchema } from "@invoicey/invoice-core/schema";
-import { db, invoices } from "@invoicey/db";
+import { invoices } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 

@@ -4,12 +4,8 @@ import {
 	ClientSnapshotSchema,
 	IssuerSnapshotSchema,
 } from "@invoicey/invoice-core/schema";
-import {
-	clients,
-	db,
-	issuerBusinesses,
-	issuerNumberingSchemes,
-} from "@invoicey/db";
+import { clients, issuerBusinesses, issuerNumberingSchemes } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import { eq } from "drizzle-orm";
 
 export async function loadIssuerOptions(): Promise<IssuerOption[]> {

@@ -1,6 +1,7 @@
 import { getDefaultWorkspaceId } from "@/lib/workspace-id";
 import { InvoiceSchema, renderIsdoc } from "@invoicey/invoice-core";
-import { db, invoices } from "@invoicey/db";
+import { invoices } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 

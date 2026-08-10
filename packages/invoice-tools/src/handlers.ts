@@ -1,4 +1,8 @@
 import { fetchAresEkonomickySubjekt } from "@invoicey/ares";
+import {
+  persistDraftInvoice,
+  tryCreateDbFromEnv,
+} from "@invoicey/db";
 import { renderInvoicePdf, renderIsdoc } from "@invoicey/invoice-core";
 import {
   IssuerSnapshotSchema,
@@ -54,6 +58,7 @@ export type CreateAndRenderResult =
       isdocXml: string;
       filenamePdf: string;
       filenameIsdoc: string;
+      invoiceId?: string;
     }
   | { ok: false; issues: NormalizedIssue[] }
   | { ok: false; error: string };
@@ -118,6 +123,19 @@ export async function createAndRenderInvoice(options: {
   }
 
   const invoice = normalized.invoice;
+
+  let invoiceId: string | undefined;
+  const database = tryCreateDbFromEnv();
+  if (database) {
+    try {
+      const persisted = await persistDraftInvoice(database, invoice);
+      invoiceId = persisted.invoiceId;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { ok: false, error: `failed to persist draft invoice: ${message}` };
+    }
+  }
+
   const pdfBytes = await renderInvoicePdf(invoice);
   const isdocXml = renderIsdoc(invoice);
   const safeName = invoice.meta.number.replace(/[^\w.-]+/g, "_");
@@ -129,5 +147,6 @@ export async function createAndRenderInvoice(options: {
     isdocXml,
     filenamePdf: `faktura-${safeName}-isdoc.pdf`,
     filenameIsdoc: `faktura-${safeName}.isdoc`,
+    invoiceId,
   };
 }

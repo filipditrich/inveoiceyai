@@ -10,12 +10,8 @@ import {
 	IcoSchema,
 	IssuerSnapshotSchema,
 } from "@invoicey/invoice-core/schema";
-import {
-	invoices,
-	issuerBusinesses,
-	issuerNumberingSchemes,
-	withDbTransaction,
-} from "@invoicey/db";
+import { invoices, issuerBusinesses, issuerNumberingSchemes } from "@invoicey/db";
+import { withDbTransaction } from "@invoicey/db/transaction";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";

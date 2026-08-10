@@ -20,7 +20,8 @@ import {
 	getDefaultWorkspaceId,
 } from "@/lib/workspace-id";
 import { deriveStatus, type InvoiceStatus } from "@invoicey/invoice-core/status";
-import { db, invoices } from "@invoicey/db";
+import { invoices } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import {
 	and,
 	asc,

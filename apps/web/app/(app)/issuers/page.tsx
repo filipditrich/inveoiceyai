@@ -13,7 +13,8 @@ import {
 	IssuerSnapshotSchema,
 	type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
-import { db, issuerBusinesses } from "@invoicey/db";
+import { issuerBusinesses } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 

@@ -17,16 +17,9 @@ import {
 	nextInvoiceNumber,
 	type Invoice,
 } from "@invoicey/invoice-core";
-import {
-	clients,
-	db,
-	invoiceItems,
-	invoices,
-	issuerBusinesses,
-	issuerNumberingSchemes,
-	withDbTransaction,
-	type DbTransaction,
-} from "@invoicey/db";
+import { clients, invoiceItems, invoices, issuerBusinesses, issuerNumberingSchemes } from "@invoicey/db";
+import { withDbTransaction, type DbTransaction } from "@invoicey/db/transaction";
+import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
