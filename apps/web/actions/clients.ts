@@ -6,8 +6,8 @@ import {
 	ClientVatIdSchema,
 	IcoSchema,
 } from "@invoicey/invoice-core/schema";
-import { db } from "@invoicey/db";
 import { clients } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";

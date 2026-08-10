@@ -259,11 +259,21 @@ Plans listed here do not block the MVP and can be picked up in parallel with Pla
 - [x] `mcp-handler` route at `/api/mcp` with required `MCP_API_KEY`
 - [x] Spec + Cursor/`mcp.json` + Vercel go-live checklist documented
 
+### DB foundation — durable schema (feeds Plan 5 / 6 / 12b)
+
+**Status:** Done  
+**Completed:** 2026-08-10  
+**Spec:** [`specs/db-schema.md`](./specs/db-schema.md)
+
+- Tables: `workspaces`, `issuers`, `issuer_numbering_schemes`, `clients`, `invoices`, `presets`
+- MCP presets + draft invoice persist when `DATABASE_URL` is set; file fallback otherwise
+- Still single-tenant via `INVOICEY_DEFAULT_WORKSPACE_ID` (seeded UUID; no Clerk)
+
 ### Plan 12b — MCP server, DB-backed tools
 
 **Status:** Post-MVP backlog
 
-- Tools: `list_invoices`, `get_invoice`, `mark_paid` (+ durable presets)
+- Tools: `list_invoices`, `get_invoice`, `mark_paid` (builds on DB foundation presets/invoices)
 - Imports `@invoicey/invoice-core` + `@invoicey/db` — no HTTP shim
 - Schema parity with the UI via `InvoiceSchema`
 
