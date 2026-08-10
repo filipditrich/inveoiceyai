@@ -256,7 +256,7 @@ Plans listed here do not block the MVP and can be picked up in parallel with Pla
 - [x] `@invoicey/invoice-tools` shared handlers (normalize, presets, create/render, ARES)
 - [x] `apps/mcp` stdio MCP exposes `create_invoice`, `lookup_business`, preset CRUD
 - [x] Slack tools import `@invoicey/invoice-tools`
-- [x] `mcp-handler` route at `/api/mcp` with optional `MCP_API_KEY`
+- [x] `mcp-handler` route at `/api/mcp` with required `MCP_API_KEY`
 - [x] Spec + Cursor/`mcp.json` + Vercel go-live checklist documented
 
 ### Plan 12b — MCP server, DB-backed tools

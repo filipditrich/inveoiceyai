@@ -42,7 +42,7 @@ flowchart LR
 ```
 
 - **Local:** `@modelcontextprotocol/sdk` stdio.
-- **Remote (prepared):** `mcp-handler`, Node runtime, `maxDuration` 120. When `MCP_API_KEY` is set, require `Authorization: Bearer <key>`.
+- **Remote:** `mcp-handler`, Node runtime, `maxDuration` 120. `MCP_API_KEY` is required (validated via `@invoicey/env`); `/api/mcp` always expects `Authorization: Bearer <key>`.
 - **Issuer lock:** `create_invoice` injects issuer from preset or `getDemoIssuer()` / `INVOICEY_DEMO_ISSUER_JSON`.
 - **Presets file:** `INVOICEY_PRESETS_PATH` or `~/.invoicey/presets.json` (on Vercel: `/tmp/…` — ephemeral until Plan 12b).
 
@@ -75,7 +75,7 @@ flowchart LR
 ## Vercel go-live checklist (wait for explicit go)
 
 1. Deploy `apps/web` (includes `/api/mcp`).
-2. Set `MCP_API_KEY` (required in prod), optional `INVOICEY_DEMO_ISSUER_JSON`.
+2. Set `MCP_API_KEY` (required — build fails without it), optional `INVOICEY_DEMO_ISSUER_JSON`.
 3. Confirm Node runtime + font tracing (`outputFileTracingIncludes` in `next.config.ts`).
 4. Cursor remote:
 
@@ -100,7 +100,7 @@ flowchart LR
 | --- | --- | --- |
 | `INVOICEY_DEMO_ISSUER_JSON` | no | Full `IssuerSnapshot` JSON override |
 | `INVOICEY_PRESETS_PATH` | no | Absolute path to presets JSON |
-| `MCP_API_KEY` | remote yes | Bearer gate for `/api/mcp` |
+| `MCP_API_KEY` | yes | Bearer gate for `/api/mcp`; build/runtime fail if missing |
 
 ## Out of scope (Plan 12b)
 

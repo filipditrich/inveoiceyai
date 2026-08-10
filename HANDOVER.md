@@ -16,7 +16,7 @@ Living ledger: [`docs/roadmap.md`](docs/roadmap.md). Repo overview: [`README.md`
 
 - **`@invoicey/invoice-tools`** — normalize draft, ARES lookup, create/render PDF+ISDOC, file presets, MCP registration (`@invoicey/invoice-tools/mcp`).
 - **`apps/mcp`** — stdio MCP for Cursor (`bun run --cwd apps/mcp src/stdio.ts`).
-- **`apps/web` `/api/mcp`** — `mcp-handler` + optional `MCP_API_KEY` (Node, `maxDuration` 120).
+- **`apps/web` `/api/mcp`** — `mcp-handler` + required `MCP_API_KEY` (Node, `maxDuration` 120).
 - **Slack** — `/invoice` + `app_mention` use shared handlers via AI SDK wrappers.
 - **Docs** — [`docs/specs/mcp.md`](docs/specs/mcp.md), README + architecture updated for new layout.
 - **Cursor** — [`.cursor/mcp.json.example`](.cursor/mcp.json.example); local `.cursor/mcp.json` and `.invoicey/` are gitignored.

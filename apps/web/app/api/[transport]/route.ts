@@ -1,3 +1,4 @@
+import { env } from "@invoicey/env/server";
 import { registerInvoiceyMcpTools } from "@invoicey/invoice-tools/mcp";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
@@ -22,20 +23,12 @@ const mcpHandler = createMcpHandler(
   },
 );
 
-/** Bearer gate when `MCP_API_KEY` is set; open when unset (local). */
+/** Require `Authorization: Bearer` matching validated `MCP_API_KEY`. */
 async function verifyMcpApiKey(
   _req: Request,
   bearerToken?: string,
 ): Promise<AuthInfo | undefined> {
-  const key = process.env.MCP_API_KEY?.trim();
-  if (key == null || key === "") {
-    return {
-      token: "anonymous",
-      clientId: "anonymous",
-      scopes: [],
-    };
-  }
-  if (bearerToken === key) {
+  if (bearerToken === env.MCP_API_KEY) {
     return {
       token: bearerToken,
       clientId: "api-key",
@@ -46,7 +39,7 @@ async function verifyMcpApiKey(
 }
 
 const handler = withMcpAuth(mcpHandler, verifyMcpApiKey, {
-  required: Boolean(process.env.MCP_API_KEY?.trim()),
+  required: true,
 });
 
 export { handler as GET, handler as POST, handler as DELETE };

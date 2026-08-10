@@ -41,7 +41,7 @@ The same payload flows through the web app, **MCP tools** (Cursor / Claude), and
 | JSON → PDF demo (`/invoices/from-json`, `POST /api/demo/invoice-pdf`) | Done |
 | Shared tool handlers (`@invoicey/invoice-tools`) | Done |
 | Local MCP stdio (`apps/mcp`) — create, ARES, presets | Done |
-| Remote MCP prep (`/api/mcp` + optional `MCP_API_KEY`) | Code ready, deploy on demand |
+| Remote MCP (`/api/mcp` + required `MCP_API_KEY`) | Deployed on Vercel |
 | Slack `/invoice` + `app_mention` (stateless AI loop) | Done (demo issuer) |
 | Issuer management UI / full invoice builder / list | Planned (Plans 5–7) |
 

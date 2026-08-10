@@ -167,7 +167,7 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 | `INVOICEY_AI_FALLBACK_MODEL` | Fallback gateway model id | Vercel + `.env.local` | Plan 13a |
 | `INVOICEY_DEMO_ISSUER_JSON` | Optional JSON override for demo `IssuerSnapshot` | Vercel + `.env.local` | Plan 13a / 12a |
 | `INVOICEY_PRESETS_PATH` | Absolute path to local MCP presets JSON | local MCP / optional | Plan 12a |
-| `MCP_API_KEY` | Bearer token for `/api/mcp` (required when set) | Vercel + `.env.local` | Plan 12a |
+| `MCP_API_KEY` | Bearer token for `/api/mcp` (required) | Vercel + `.env` / `.env.local` | Plan 12a |
 
 `.env.example` lives at repo root with every var commented; `.env.local` is git-ignored.
 
@@ -177,7 +177,7 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 - **Neon** for Postgres — wired via Vercel Marketplace (auto-injects `DATABASE_URL`)
 - **UploadThing** for files — configured per-app
 - **Plan 13a (Slack demo):** slash command → `apps/web/app/api/slack/commands/route.ts`; Events API `app_mention` → `apps/web/app/api/slack/events/route.ts` (same `SLACK_SIGNING_SECRET` / bot token). A future `apps/slack` split remains optional.
-- **Plan 12a (MCP):** local stdio via `apps/mcp`; remote Streamable HTTP via `apps/web` `/api/mcp` (`mcp-handler`, Node runtime, optional `MCP_API_KEY`). Shared tool logic in `@invoicey/invoice-tools`.
+- **Plan 12a (MCP):** local stdio via `apps/mcp`; remote Streamable HTTP via `apps/web` `/api/mcp` (`mcp-handler`, Node runtime, required `MCP_API_KEY`). Shared tool logic in `@invoicey/invoice-tools`.
 
 ## Tooling
 
