@@ -5,6 +5,13 @@ export {
 export {
 	formatCzPostcodeFromNumber,
 	mapSidloToClientAddressParts,
+	parseCzAddressText,
 } from "./format-address";
-export type { AresSidloLike } from "./format-address";
-export type { ClientDraft, LookupAresResult } from "./types";
+export type { AresSidloLike, ClientAddressParts } from "./format-address";
+export { searchAresByObchodniJmeno } from "./search";
+export type {
+	ClientDraft,
+	LookupAresResult,
+	SearchAresMatch,
+	SearchAresResult,
+} from "./types";

@@ -20,6 +20,7 @@ Slack Eve reuses the same handlers in-process (`apps/web/agent/tools`) — see [
 | Tool | Input | Output |
 | --- | --- | --- |
 | `lookup_business` | `{ ico }` | ARES draft client fields or error |
+| `search_business` | `{ query, limit? }` | ARES name search → matches with IČO + address |
 | `create_invoice` | `{ draft?, issuerPresetId?, templatePresetId? }` | Validated invoice + PDF base64 + ISDOC XML, or issues |
 | `list_presets` / `get_preset` / `save_preset` / `delete_preset` | preset ids / kind / data | Preset records on disk |
 

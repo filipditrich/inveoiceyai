@@ -39,7 +39,8 @@ flowchart TB
 
 | Tool | Notes |
 | --- | --- |
-| `lookup_business` | ARES by IČO |
+| `search_business` | ARES by company name → matches with IČO + address |
+| `lookup_business` | ARES by IČO → full client draft |
 | `list_presets` / `get_preset` / `save_preset` | Neon when `DATABASE_URL` set |
 | `create_invoice` | Draft persist + render; auto-uploads PDF/ISDOC in Slack threads |
 | `upload_invoice_files` | Explicit upload (by `invoiceId` or base64) |

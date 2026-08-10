@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { parseCzAddressText } from "@invoicey/ares";
 import { addDays, format, parseISO } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import { calcTotals } from "@invoicey/invoice-core";
@@ -98,6 +99,29 @@ export function normalizeDraftToInvoice(
   const clientObj = { ...clientRaw };
   if (typeof clientObj.id !== "string" || clientObj.id.length === 0) {
     clientObj.id = randomUUID();
+  }
+
+  /** Coerce Slack / model flat address strings into snapshot fields. */
+  if (typeof clientObj.address === "string") {
+    const parsedAddress = parseCzAddressText(clientObj.address);
+    if (parsedAddress) {
+      clientObj.address = parsedAddress;
+    }
+  } else if (isRecord(clientObj.address)) {
+    const addr = { ...clientObj.address };
+    if (typeof addr.country === "string") {
+      const c = addr.country.trim();
+      const lower = c.toLocaleLowerCase("cs");
+      if (
+        lower === "česká republika" ||
+        lower === "ceska republika" ||
+        lower === "czech republic" ||
+        lower === "czechia"
+      ) {
+        addr.country = "CZ";
+      }
+    }
+    clientObj.address = addr;
   }
 
   const clientParsed = ClientSnapshotSchema.safeParse(clientObj);

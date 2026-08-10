@@ -18,6 +18,13 @@ export interface AresSidloLike {
 	readonly textovaAdresa?: string;
 }
 
+export interface ClientAddressParts {
+	street: string;
+	city: string;
+	zip: string;
+	country: string;
+}
+
 function buildStreetLine(sidlo: AresSidloLike): string | undefined {
 	const street = sidlo.nazevUlice?.trim();
 	const no = sidlo.cisloDomovni;
@@ -32,10 +39,84 @@ function buildStreetLine(sidlo: AresSidloLike): string | undefined {
 			: "";
 	return `${street} ${no}${orient}`.trim();
 }
+
+function normalizeCountry(raw?: string): string {
+	const t = raw?.trim();
+	if (!t) return "CZ";
+	if (/^[A-Z]{2}$/u.test(t)) return t;
+	const lower = t.toLocaleLowerCase("cs");
+	if (
+		lower === "česká republika" ||
+		lower === "ceska republika" ||
+		lower === "czech republic" ||
+		lower === "czechia"
+	) {
+		return "CZ";
+	}
+	return "CZ";
+}
+
+/**
+ * Parse a free-text Czech address into snapshot fields.
+ * Supports ARES `textovaAdresa` and Slack flat strings like
+ * `Opletalova 1410, Praha 1, 110 00`.
+ */
+export function parseCzAddressText(raw: string): ClientAddressParts | null {
+	const segments = raw
+		.split(",")
+		.map((s) => s.trim())
+		.filter(Boolean);
+	if (segments.length === 0) return null;
+
+	const street = segments[0] ?? "";
+	if (!street) return null;
+
+	const rest = segments.slice(1);
+	let zip = "";
+	let city = "";
+
+	const pureZipIdx = rest.findIndex((s) => /^\d{3}\s?\d{2}$/u.test(s));
+	if (pureZipIdx >= 0) {
+		const m = rest[pureZipIdx]!.match(/^(\d{3})\s?(\d{2})$/u)!;
+		zip = `${m[1]} ${m[2]}`;
+		city =
+			rest.slice(0, pureZipIdx).join(", ") ||
+			rest.slice(pureZipIdx + 1).join(", ");
+	} else {
+		for (const seg of rest) {
+			/** ARES style: `11000 Praha 1` */
+			const start = seg.match(/^(\d{3})\s?(\d{2})\s+(.+)$/u);
+			if (start) {
+				zip = `${start[1]} ${start[2]}`;
+				city = start[3]!.trim();
+				break;
+			}
+		}
+		if (!zip) {
+			const joined = rest.join(", ");
+			const any = joined.match(/\b(\d{3})\s?(\d{2})\b/u);
+			if (any) {
+				zip = `${any[1]} ${any[2]}`;
+				city = joined
+					.replace(/\s*\d{3}\s?\d{2}\s*/u, " ")
+					.replace(/^,\s*|,\s*$/gu, "")
+					.replace(/\s+/gu, " ")
+					.trim();
+			} else {
+				city = joined;
+			}
+		}
+	}
+
+	city = city.replace(/^,\s*|,\s*$/gu, "").trim();
+	if (!street || !city || !zip) return null;
+	return { street, city, zip, country: "CZ" };
+}
+
 /** Map primary seat from ARES to `ClientAddressSchema`-compatible fields. */
 export function mapSidloToClientAddressParts(
 	sidlo: AresSidloLike,
-): { street: string; city: string; zip: string; country: string } | null {
+): ClientAddressParts | null {
 	const structuredStreet = buildStreetLine(sidlo);
 	const postal =
 		sidlo.psc !== undefined &&
@@ -55,28 +136,16 @@ export function mapSidloToClientAddressParts(
 	if (!street || !city || !zip) {
 		const tv = sidlo.textovaAdresa?.trim();
 		if (tv) {
-			const segments = tv.split(",").map((s) => s.trim()).filter(Boolean);
-			street ||= segments[0] ?? "";
-			/** Typical: "... , Michle , 14000 Praha 4" */
-			const locality = segments.slice(1).join(", ");
-			const zipGuess = locality.match(/\b(\d{3})\s?(\d{2})\b/);
-			if (zipGuess) {
-				zip ||= `${zipGuess[1]} ${zipGuess[2]}`;
-			}
-			if (structuredCityInitial === "") {
-				const afterZip =
-					locality.replace(/\s*\d{3}\s?\d{2}\s*/, "").trim() ||
-					segments[segments.length - 1] ||
-					"";
-				city ||= afterZip;
+			const parsed = parseCzAddressText(tv);
+			if (parsed) {
+				street ||= parsed.street;
+				city ||= parsed.city;
+				zip ||= parsed.zip;
 			}
 		}
 	}
 
-	const country =
-		sidlo.kodStatu && /^[A-Z]{2}$/u.test(sidlo.kodStatu)
-			? sidlo.kodStatu
-			: "CZ";
+	const country = normalizeCountry(sidlo.kodStatu);
 
 	if (!street || !city || !zip || !country) {
 		return null;

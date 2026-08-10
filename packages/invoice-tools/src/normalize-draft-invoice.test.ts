@@ -40,4 +40,60 @@ describe("normalizeDraftToInvoice", () => {
       expect(r.invoice.totals.total).toBeCloseTo(12_100, 5);
     }
   });
+
+  it("coerces flat Czech address string and human country name", () => {
+    const issuer = getDemoIssuer();
+    const draft = {
+      meta: { docType: "invoice" as const },
+      client: {
+        name: "NFCtron a.s.",
+        ico: "07283539",
+        address: "Opletalova 1410, Praha 1, 110 00",
+      },
+      vat: { mode: "regular" as const, suppliesAbroad: "none" as const },
+      payment: { method: "transfer" as const, variableSymbol: "1" },
+      items: [
+        {
+          position: 1,
+          description: "Vývoj",
+          quantity: 1,
+          unit: "ks",
+          unitPriceWithoutVat: 40_000,
+          vatRate: 0,
+        },
+      ],
+    };
+
+    const r = normalizeDraftToInvoice(draft, issuer);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.invoice.client.address).toEqual({
+        street: "Opletalova 1410",
+        city: "Praha 1",
+        zip: "110 00",
+        country: "CZ",
+      });
+    }
+
+    const withCountryName = normalizeDraftToInvoice(
+      {
+        ...draft,
+        client: {
+          name: "NFCtron a.s.",
+          ico: "07283539",
+          address: {
+            street: "Opletalova 1525/39",
+            city: "Praha",
+            zip: "110 00",
+            country: "Česká republika",
+          },
+        },
+      },
+      issuer,
+    );
+    expect(withCountryName.ok).toBe(true);
+    if (withCountryName.ok) {
+      expect(withCountryName.invoice.client.address.country).toBe("CZ");
+    }
+  });
 });

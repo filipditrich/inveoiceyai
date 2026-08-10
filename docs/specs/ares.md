@@ -9,6 +9,7 @@ Call the public ARES **ekonomické subjekty** REST endpoint by IČO, parse the J
 - Swagger: [ares.gov.cz/swagger-ui](https://ares.gov.cz/swagger-ui/)
 - Base path: `https://ares.gov.cz/ekonomicke-subjekty-v-be/rest`
 - Documented lookup: `GET …/ekonomicke-subjekty/{ico}` where `{ico}` is **8 digits**
+- Documented search: `POST …/ekonomicke-subjekty/vyhledat` with `{ obchodniJmeno, pocet }`
 
 ## Inputs / outputs
 

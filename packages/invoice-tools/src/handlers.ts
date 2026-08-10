@@ -1,4 +1,7 @@
-import { fetchAresEkonomickySubjekt } from "@invoicey/ares";
+import {
+  fetchAresEkonomickySubjekt,
+  searchAresByObchodniJmeno,
+} from "@invoicey/ares";
 import {
   persistDraftInvoice,
   tryCreateDbFromEnv,
@@ -48,6 +51,29 @@ export async function lookupBusiness(ico: string) {
     };
   }
   return { ok: true as const, draft: r.draft };
+}
+
+/** ARES search by obchodní jméno (company name). */
+export async function searchBusiness(
+  query: string,
+  options?: { limit?: number },
+) {
+  const r = await searchAresByObchodniJmeno(query, {
+    limit: options?.limit,
+  });
+  if (!r.ok) {
+    return {
+      ok: false as const,
+      kind: r.kind,
+      message: r.message,
+    };
+  }
+  return {
+    ok: true as const,
+    query: r.query,
+    total: r.total,
+    matches: r.matches,
+  };
 }
 
 export type CreateAndRenderResult =

@@ -8,13 +8,16 @@
   },
   "scripts": {
     "lint": "echo \"skip: eslint not wired for ares yet\"",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@invoicey/invoice-core": "workspace:*",
     "zod": "^3.24.4"
   },
   "devDependencies": {
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "^3.2.4"
   }
 }

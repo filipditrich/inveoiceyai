@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export default defineTool({
   description:
-    "Look up a Czech economic subject by IČO (8 digits) via ARES. Returns draft client fields (no id).",
+    "Look up a Czech economic subject by IČO (8 digits) via ARES. Returns draft client fields including structured address {street,city,zip,country}. Prefer after search_business or when IČO is known. Never invent address fields.",
   inputSchema: z.object({
     ico: z.string().describe("Eight-digit Czech IČO"),
   }),

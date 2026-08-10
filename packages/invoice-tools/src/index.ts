@@ -9,6 +9,7 @@ export { parseAmountCz } from "./parse-amount-cz";
 export {
   createAndRenderInvoice,
   lookupBusiness,
+  searchBusiness,
   type CreateAndRenderResult,
 } from "./handlers";
 export {

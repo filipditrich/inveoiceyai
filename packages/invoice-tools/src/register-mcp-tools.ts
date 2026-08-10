@@ -1,7 +1,11 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
-import { createAndRenderInvoice, lookupBusiness } from "./handlers";
+import {
+  createAndRenderInvoice,
+  lookupBusiness,
+  searchBusiness,
+} from "./handlers";
 import { jsonToolResult } from "./mcp-json-result";
 import {
   deletePreset,
@@ -33,11 +37,35 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
 
   s.tool(
     "lookup_business",
-    "Look up a Czech economic subject by IČO (8 digits) via ARES. Returns draft client fields (no `id`).",
+    "Look up a Czech economic subject by IČO (8 digits) via ARES. Returns draft client fields (no `id`). Prefer this once IČO is known.",
     { ico: z.string().describe("Eight-digit IČO") },
     async (args) => {
       const ico = String(args.ico ?? "");
       const r = await lookupBusiness(ico);
+      return jsonToolResult(r, !r.ok);
+    },
+  );
+
+  s.tool(
+    "search_business",
+    "Search Czech economic subjects by company name (obchodní jméno) via ARES. Returns matches with IČO + structured address when available. Then call lookup_business with the chosen IČO.",
+    {
+      query: z.string().describe("Company name fragment, e.g. NFCtron a.s."),
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(20)
+        .optional()
+        .describe("Max matches (default 5)"),
+    },
+    async (args) => {
+      const query = String(args.query ?? "");
+      const limit =
+        typeof args.limit === "number" && Number.isFinite(args.limit)
+          ? args.limit
+          : undefined;
+      const r = await searchBusiness(query, { limit });
       return jsonToolResult(r, !r.ok);
     },
   );
