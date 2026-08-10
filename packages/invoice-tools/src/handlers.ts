@@ -1,0 +1,133 @@
+import { fetchAresEkonomickySubjekt } from "@invoicey/ares";
+import { renderInvoicePdf, renderIsdoc } from "@invoicey/invoice-core";
+import {
+  IssuerSnapshotSchema,
+  type Invoice,
+  type IssuerSnapshot,
+} from "@invoicey/invoice-core/schema";
+
+import { getDemoIssuer } from "./demo-issuer";
+import {
+  normalizeDraftToInvoice,
+  type NormalizedIssue,
+} from "./normalize-draft-invoice";
+import { getPreset } from "./presets";
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+
+function deepMergeDraft(
+  base: Record<string, unknown>,
+  overlay: Record<string, unknown>,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...base };
+  for (const [key, value] of Object.entries(overlay)) {
+    const prev = out[key];
+    if (isRecord(prev) && isRecord(value)) {
+      out[key] = deepMergeDraft(prev, value);
+    } else {
+      out[key] = value;
+    }
+  }
+  return out;
+}
+
+/** ARES lookup by IČO. */
+export async function lookupBusiness(ico: string) {
+  const r = await fetchAresEkonomickySubjekt(ico);
+  if (!r.ok) {
+    return {
+      ok: false as const,
+      kind: r.kind,
+      message: r.message,
+    };
+  }
+  return { ok: true as const, draft: r.draft };
+}
+
+export type CreateAndRenderResult =
+  | {
+      ok: true;
+      invoice: Invoice;
+      pdfBase64: string;
+      isdocXml: string;
+      filenamePdf: string;
+      filenameIsdoc: string;
+    }
+  | { ok: false; issues: NormalizedIssue[] }
+  | { ok: false; error: string };
+
+/** Resolve issuer/template presets, normalize draft, render PDF + ISDOC. */
+export async function createAndRenderInvoice(options: {
+  draft?: unknown;
+  issuerPresetId?: string;
+  templatePresetId?: string;
+  issuer?: IssuerSnapshot;
+  presetsPath?: string;
+}): Promise<CreateAndRenderResult> {
+  let issuer = options.issuer ?? getDemoIssuer();
+
+  if (options.issuerPresetId) {
+    const loaded = await getPreset({
+      id: options.issuerPresetId,
+      path: options.presetsPath,
+    });
+    if (!loaded.ok) {
+      return { ok: false, error: loaded.error };
+    }
+    if (loaded.preset.kind !== "issuer") {
+      return {
+        ok: false,
+        error: `preset ${options.issuerPresetId} is not kind issuer`,
+      };
+    }
+    const parsed = IssuerSnapshotSchema.safeParse(loaded.preset.data);
+    if (!parsed.success) {
+      return { ok: false, error: "issuer preset data failed validation" };
+    }
+    issuer = parsed.data;
+  }
+
+  let draft: unknown = options.draft ?? {};
+  if (options.templatePresetId) {
+    const loaded = await getPreset({
+      id: options.templatePresetId,
+      path: options.presetsPath,
+    });
+    if (!loaded.ok) {
+      return { ok: false, error: loaded.error };
+    }
+    if (loaded.preset.kind !== "invoice_template") {
+      return {
+        ok: false,
+        error: `preset ${options.templatePresetId} is not kind invoice_template`,
+      };
+    }
+    const templateData = loaded.preset.data;
+    if (!isRecord(templateData)) {
+      return { ok: false, error: "invoice_template data must be an object" };
+    }
+    const overlay = isRecord(draft) ? draft : {};
+    draft = deepMergeDraft(templateData, overlay);
+  }
+
+  const normalized = normalizeDraftToInvoice(draft, issuer);
+  if (!normalized.ok) {
+    return { ok: false, issues: normalized.issues };
+  }
+
+  const invoice = normalized.invoice;
+  const pdfBytes = await renderInvoicePdf(invoice);
+  const isdocXml = renderIsdoc(invoice);
+  const safeName = invoice.meta.number.replace(/[^\w.-]+/g, "_");
+
+  return {
+    ok: true,
+    invoice,
+    pdfBase64: Buffer.from(pdfBytes).toString("base64"),
+    isdocXml,
+    filenamePdf: `faktura-${safeName}.pdf`,
+    filenameIsdoc: `faktura-${safeName}.isdoc.xml`,
+  };
+}

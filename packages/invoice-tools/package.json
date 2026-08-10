@@ -1,0 +1,29 @@
+{
+  "name": "@invoicey/invoice-tools",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./mcp": "./src/register-mcp-tools.ts"
+  },
+  "scripts": {
+    "lint": "echo \"skip: eslint not wired for invoice-tools yet\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@invoicey/ares": "workspace:*",
+    "@invoicey/invoice-core": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.26.0",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/node": "25.6.0",
+    "typescript": "6.0.3",
+    "vitest": "^3.2.4"
+  }
+}
