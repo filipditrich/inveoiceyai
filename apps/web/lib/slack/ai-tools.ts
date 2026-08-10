@@ -100,7 +100,7 @@ export function createInvoiceSlackTools(issuer: IssuerSnapshot) {
 
     render_pdf: tool({
       description:
-        "Render a validated invoice to PDF bytes (base64). Only call after assemble_and_validate returned ok:true.",
+        "Render a validated invoice to ISDOC.PDF (visual page + embedded invoice.isdoc). Only call after assemble_and_validate returned ok:true.",
       inputSchema: z.object({ invoice: z.unknown() }),
       execute: async ({ invoice }) => {
         const p = InvoiceSchema.safeParse(invoice);
@@ -112,7 +112,7 @@ export function createInvoiceSlackTools(issuer: IssuerSnapshot) {
         return {
           ok: true as const,
           base64: Buffer.from(pdfBytes).toString("base64"),
-          filename: `faktura-${safeName}.pdf`,
+          filename: `faktura-${safeName}-isdoc.pdf`,
         };
       },
     }),
@@ -131,7 +131,7 @@ export function createInvoiceSlackTools(issuer: IssuerSnapshot) {
         return {
           ok: true as const,
           xml,
-          filename: `faktura-${safeName}.isdoc.xml`,
+          filename: `faktura-${safeName}.isdoc`,
         };
       },
     }),

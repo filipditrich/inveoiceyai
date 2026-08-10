@@ -114,15 +114,15 @@ async function postSummaryAndUploadFiles(options: {
       channel_id: channelId,
       thread_ts: summaryTs,
       file: pdfBuf,
-      filename: `faktura-${safeName}.pdf`,
-      title: "PDF",
-      initial_comment: "PDF faktura",
+      filename: `faktura-${safeName}-isdoc.pdf`,
+      title: "PDF (ISDOC)",
+      initial_comment: "PDF faktura s vloženým ISDOC",
     });
     await client.filesUploadV2({
       channel_id: channelId,
       thread_ts: summaryTs,
       file: xmlBuf,
-      filename: `faktura-${safeName}.isdoc.xml`,
+      filename: `faktura-${safeName}.isdoc`,
       title: "ISDOC",
       initial_comment: "ISDOC 6.0.2 XML",
     });
