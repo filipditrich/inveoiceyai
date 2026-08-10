@@ -22,6 +22,8 @@ const invoiceCoreAssets = [
 ];
 
 const nextConfig: NextConfig = {
+  /** so NFT can follow `../../packages/invoice-core/assets/**` outside apps/web */
+  outputFileTracingRoot: repoRoot,
   transpilePackages: [
     "@invoicey/ares",
     "@invoicey/db",
@@ -32,6 +34,8 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/**": invoiceCoreAssets,
     "/eve/**": invoiceCoreAssets,
+    /** Eve durable tools run here — was missing; caused missing Inter.ttf on create_invoice */
+    "/.well-known/workflow/**": invoiceCoreAssets,
   },
 };
 

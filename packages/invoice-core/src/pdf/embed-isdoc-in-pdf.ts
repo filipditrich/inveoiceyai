@@ -1,6 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
 
 import {
 	AFRelationship,
@@ -13,6 +11,8 @@ import {
 	PDFString,
 	decodePDFRawStream,
 } from "pdf-lib";
+
+import { resolveInvoiceCoreAsset } from "./resolve-invoice-core-asset";
 
 /** ISDOC 6.0.2 requires this exact embedded filename for ISDOC.PDF. */
 export const ISDOC_EMBEDDED_FILENAME = "invoice.isdoc" as const;
@@ -27,31 +27,7 @@ export interface EmbedIsdocInPdfOptions {
 let cachedIcc: Uint8Array | undefined;
 
 function resolveVendoredIccPath(): string {
-	const candidates = [
-		path.join(
-			path.dirname(fileURLToPath(import.meta.url)),
-			"../../assets/icc",
-			"sRGB-v2-micro.icc",
-		),
-		path.join(
-			process.cwd(),
-			"packages/invoice-core/assets/icc",
-			"sRGB-v2-micro.icc",
-		),
-		path.join(
-			process.cwd(),
-			"../../packages/invoice-core/assets/icc",
-			"sRGB-v2-micro.icc",
-		),
-	];
-	for (const candidate of candidates) {
-		if (existsSync(candidate)) {
-			return candidate;
-		}
-	}
-	throw new Error(
-		`Missing vendored sRGB ICC — tried ${candidates.join(", ")}`,
-	);
+	return resolveInvoiceCoreAsset("icc", "sRGB-v2-micro.icc");
 }
 
 function readSrgbIcc(): Uint8Array {

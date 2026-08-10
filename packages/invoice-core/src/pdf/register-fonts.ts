@@ -1,7 +1,6 @@
 import { Font } from "@react-pdf/renderer";
-import { existsSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+
+import { resolveInvoiceCoreAsset } from "./resolve-invoice-core-asset";
 
 /**
  * Vendored under `packages/invoice-core/assets/fonts/`:
@@ -9,36 +8,7 @@ import { fileURLToPath } from "node:url";
  * See LICENSE-inter.txt in that folder.
  */
 function resolveVendoredFontFile(fontFileName: string): string {
-	const nextToModule = path.join(
-		path.dirname(fileURLToPath(import.meta.url)),
-		"../../assets/fonts",
-		fontFileName,
-	);
-	if (existsSync(nextToModule)) {
-		return nextToModule;
-	}
-
-	const repoPackageFonts = path.join(
-		process.cwd(),
-		"packages/invoice-core/assets/fonts",
-		fontFileName,
-	);
-	if (existsSync(repoPackageFonts)) {
-		return repoPackageFonts;
-	}
-
-	const fromAppsWebAncestor = path.join(
-		process.cwd(),
-		"../../packages/invoice-core/assets/fonts",
-		fontFileName,
-	);
-	if (existsSync(fromAppsWebAncestor)) {
-		return fromAppsWebAncestor;
-	}
-
-	throw new Error(
-		`Missing vendored invoice font '${fontFileName}' — tried ${nextToModule}, ${repoPackageFonts}, ${fromAppsWebAncestor}`,
-	);
+	return resolveInvoiceCoreAsset("fonts", fontFileName);
 }
 
 let registeredFonts = false;
