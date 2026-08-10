@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -27,10 +27,30 @@ export interface EmbedIsdocInPdfOptions {
 let cachedIcc: Uint8Array | undefined;
 
 function resolveVendoredIccPath(): string {
-	return path.join(
-		path.dirname(fileURLToPath(import.meta.url)),
-		"../../assets/icc",
-		"sRGB-v2-micro.icc",
+	const candidates = [
+		path.join(
+			path.dirname(fileURLToPath(import.meta.url)),
+			"../../assets/icc",
+			"sRGB-v2-micro.icc",
+		),
+		path.join(
+			process.cwd(),
+			"packages/invoice-core/assets/icc",
+			"sRGB-v2-micro.icc",
+		),
+		path.join(
+			process.cwd(),
+			"../../packages/invoice-core/assets/icc",
+			"sRGB-v2-micro.icc",
+		),
+	];
+	for (const candidate of candidates) {
+		if (existsSync(candidate)) {
+			return candidate;
+		}
+	}
+	throw new Error(
+		`Missing vendored sRGB ICC — tried ${candidates.join(", ")}`,
 	);
 }
 
