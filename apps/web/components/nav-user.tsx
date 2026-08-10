@@ -20,8 +20,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { SettingsIcon, LogOutIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { LogOutIcon } from "lucide-react"
 
 function initialsFromName(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -45,7 +44,6 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const initials = initialsFromName(user.name)
-  const router = useRouter()
 
   return (
     <SidebarMenu>
@@ -91,13 +89,6 @@ export function NavUser({
                   </div>
                 </div>
               </DropdownMenuLabel>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => router.push("/settings")}>
-                <SettingsIcon />
-                Settings
-              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>

@@ -13,8 +13,8 @@ import {
 	ClientSnapshotSchema,
 	type ClientSnapshot,
 } from "@invoicey/invoice-core/schema";
-import { db } from "@invoicey/db";
 import { clients } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 

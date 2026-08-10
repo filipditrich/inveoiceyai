@@ -151,8 +151,9 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 
 | Var | Purpose | Where set | When introduced |
 | --- | --- | --- | --- |
-| `DATABASE_URL` | Neon Postgres connection string | Vercel + `.env.local` | Plan 1 |
+| `DATABASE_URL` | Neon Postgres connection string (also enables durable MCP presets + draft invoices) | Vercel + `.env.local` | Plan 1 / DB foundation |
 | `DATABASE_URL_UNPOOLED` | Neon direct (non-pooled) URL for migrations | Vercel + `.env.local` | Plan 1 |
+| `INVOICEY_PRESETS_BACKEND` | Set `file` to force JSON presets even with `DATABASE_URL` | local / optional | DB foundation |
 | `UPLOADTHING_TOKEN` | UploadThing API token | Vercel + `.env.local` | Plan 5 |
 | `UPLOADTHING_APP_ID` | UploadThing app ID | Vercel + `.env.local` | Plan 5 |
 | `NEXT_PUBLIC_APP_URL` | Public origin (used by SPAYD message templates, future emails) | Vercel + `.env.local` | Plan 1 |
@@ -174,7 +175,7 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 ## Hosting & deploy
 
 - **Vercel** for `apps/web` — Next.js 16 + Server Actions + route handlers run on Vercel Functions
-- **Neon** for Postgres — wired via Vercel Marketplace (auto-injects `DATABASE_URL`)
+- **Neon** for Postgres — wired via Vercel Marketplace (auto-injects `DATABASE_URL`); schema in [`docs/specs/db-schema.md`](./specs/db-schema.md)
 - **UploadThing** for files — configured per-app
 - **Plan 13a (Slack demo):** slash command → `apps/web/app/api/slack/commands/route.ts`; Events API `app_mention` → `apps/web/app/api/slack/events/route.ts` (same `SLACK_SIGNING_SECRET` / bot token). A future `apps/slack` split remains optional.
 - **Plan 12a (MCP):** local stdio via `apps/mcp`; remote Streamable HTTP via `apps/web` `/api/mcp` (`mcp-handler`, Node runtime, required `MCP_API_KEY`). Shared tool logic in `@invoicey/invoice-tools`.

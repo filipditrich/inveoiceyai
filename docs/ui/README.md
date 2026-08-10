@@ -2,9 +2,9 @@
 
 Information architecture, page intents, and per-flow UX specs. Written **just-in-time** before the plan that consumes them lands (per the [`core_plus_lazy_specs`](../README.md#lifecycle-conventions) strategy).
 
-## Status (Phase 0)
+## Status
 
-This folder is intentionally empty as of Phase 0. UI specs land alongside their implementing plans.
+Shipped: [`invoice-builder-flow.md`](./invoice-builder-flow.md) (Plan 6), [`data-grid-ux.md`](./data-grid-ux.md) (Plan 7). Remaining docs land with their plans.
 
 ## Expected UI docs (with the plan that authors them)
 

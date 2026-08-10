@@ -5,7 +5,10 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/schema.ts"
+    "./schema": "./src/schema.ts",
+    "./numbering": "./src/numbering.ts",
+    "./status": "./src/status.ts",
+    "./totals": "./src/totals.ts"
   },
   "scripts": {
     "lint": "echo \"skip: eslint not wired for invoice-core yet\"",
