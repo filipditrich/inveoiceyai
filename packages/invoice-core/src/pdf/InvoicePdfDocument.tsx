@@ -589,7 +589,7 @@ function PdfInvoiceLineRow({ item }: Readonly<{ item: InvoiceItem }>) {
 	return (
 		<View style={styles.lineRow}>
 			<View style={styles.descCol}>
-				<Text style={styles.cellFigStrong}>{title}</Text>
+				<Text style={styles.cellFig}>{title}</Text>
 				{detail ? <Text style={styles.lineSub}>{detail}</Text> : null}
 			</View>
 			<Text style={[styles.thQty, styles.cellFig, styles.cellRight]}>{fmtQty(item.quantity)}</Text>
