@@ -205,6 +205,8 @@ flowchart LR
 - [x] Toasts for every mutation (success + error)
 - [x] Mobile-acceptable layout (it's a desktop tool, but doesn't break on phone)
 
+**Follow-up (post Plan 9):** `/welcome` first-issuer wizard (ARES → bank, skippable) + sectioned issuer edit routes — see [`ui/onboarding.md`](./ui/onboarding.md).
+
 ## MVP boundary
 
 End of Plan 9 = MVP. Anything past this is post-MVP and lives below.

@@ -10,8 +10,14 @@ import { NextResponse, type NextRequest } from "next/server";
  * remembering to exempt it here.
  */
 export default function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", pathname);
+
   if (getSessionCookie(request)) {
-    return NextResponse.next();
+    return NextResponse.next({
+      request: { headers: requestHeaders },
+    });
   }
 
   const url = new URL("/sign-in", request.url);
@@ -33,5 +39,7 @@ export const config = {
     "/clients/:path*",
     "/issuers/:path*",
     "/settings/:path*",
+    "/welcome",
+    "/welcome/:path*",
   ],
 };

@@ -112,12 +112,15 @@ export function IssuersDataGrid({ items }: { items: IssuerTableItem[] }) {
           <div className="flex justify-end gap-2">
             <Button
               render={
-                <Link href={`/issuers/${row.original.rowId}/edit`} prefetch />
+                <Link
+                  href={`/issuers/${row.original.rowId}/edit/identity`}
+                  prefetch
+                />
               }
               size="sm"
               variant="outline"
             >
-              Edit
+              Upravit
             </Button>
             <form action={deleteIssuer}>
               <input name="id" type="hidden" value={row.original.rowId} />

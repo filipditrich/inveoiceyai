@@ -5,12 +5,14 @@ import {
   ISSUER_DOC_TYPES,
   type IssuerDocType,
 } from "@/lib/issuer-numbering";
+import { dismissIssuerWelcomeForWorkspace } from "@/lib/issuer-welcome";
 import { requireWorkspace } from "@/lib/auth/session";
 import {
   BankAccountSchema,
   DicSchema,
   IcoSchema,
   IssuerSnapshotSchema,
+  type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
 import {
   invoices,
@@ -18,6 +20,7 @@ import {
   issuerNumberingSchemes,
   type IssuerEmailSettings,
 } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import { withDbTransaction } from "@invoicey/db/transaction";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -29,6 +32,19 @@ function optionalTrim(value: FormDataEntryValue | null): string | undefined {
   }
   const s = value.trim();
   return s.length > 0 ? s : undefined;
+}
+
+function defaultEmailSettings(): IssuerEmailSettings {
+  return {
+    defaultSubject: "Faktura {number} — {issuerName}",
+    defaultCoverText:
+      "Dobrý den,\n\nv příloze zasílám fakturu {number}.\n\nS pozdravem",
+    displayNameTemplate: "{issuerName} via Invoicey",
+    attachIsdocByDefault: true,
+    overdueRemindersEnabled: false,
+    overdueReminderIntervalDays: 7,
+    sendPaymentReceivedEmail: false,
+  };
 }
 
 function parseEmailSettings(formData: FormData): IssuerEmailSettings {
@@ -154,48 +170,93 @@ async function upsertNumberingScheme(
   });
 }
 
-/** UPSERT validated IssuerSnapshot + numbering schemes in default workspace. */
-export async function saveIssuer(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
-  const rowId = optionalTrim(formData.get("id")) ?? crypto.randomUUID();
-  const hadId = optionalTrim(formData.get("id")) !== undefined;
-  const errBase = hadId ? `/issuers/${rowId}/edit` : "/issuers/new";
+async function loadIssuerSnapshot(
+  workspaceId: string,
+  issuerId: string,
+): Promise<{
+  snapshot: IssuerSnapshot;
+  source: string;
+  emailSettings: IssuerEmailSettings;
+} | null> {
+  const rows = await db
+    .select()
+    .from(issuerBusinesses)
+    .where(
+      and(
+        eq(issuerBusinesses.id, issuerId),
+        eq(issuerBusinesses.workspaceId, workspaceId),
+      ),
+    )
+    .limit(1);
+  const row = rows[0];
+  if (!row) {
+    return null;
+  }
+  const parsed = IssuerSnapshotSchema.safeParse(row.snapshot);
+  if (!parsed.success) {
+    return null;
+  }
+  return {
+    snapshot: parsed.data,
+    source: row.source,
+    emailSettings: row.emailSettings ?? {},
+  };
+}
 
+function sectionErr(issuerId: string, section: string, code: string): never {
+  redirect(
+    `/issuers/${issuerId}/edit/${section}?invalid=${encodeURIComponent(code)}`,
+  );
+}
+
+function revalidateIssuerPaths(issuerId?: string): void {
+  revalidatePath("/issuers");
+  revalidatePath("/dashboard");
+  revalidatePath("/invoices/new");
+  revalidatePath("/welcome");
+  if (issuerId) {
+    revalidatePath(`/issuers/${issuerId}/edit`);
+  }
+}
+
+function parseIdentityFromForm(formData: FormData):
+  | {
+      ok: true;
+      name: string;
+      ico: string;
+      dic?: string;
+      street: string;
+      city: string;
+      zip: string;
+      contactEmail: string;
+      vatPayer: boolean;
+      registryNote?: string;
+      source: "ares" | "manual";
+    }
+  | { ok: false; code: string } {
   const name = optionalTrim(formData.get("name")) ?? null;
   const street = optionalTrim(formData.get("street")) ?? null;
   const city = optionalTrim(formData.get("city")) ?? null;
   const zipNorm = optionalTrim(formData.get("zip"));
   const zipResolved = zipNorm ? normalizeZip(zipNorm) : null;
   const contactEmail = optionalTrim(formData.get("contactEmail")) ?? null;
-  const accountNumber = optionalTrim(formData.get("accountNumber")) ?? null;
-  const iban = optionalTrim(formData.get("iban")) ?? null;
-  const bic = optionalTrim(formData.get("bic"));
-  const registryNote = optionalTrim(formData.get("registryNote"));
-  const logoUrl = optionalTrim(formData.get("logoUrl"));
-  const stampUrl = optionalTrim(formData.get("stampUrl"));
-  const signatureUrl = optionalTrim(formData.get("signatureUrl"));
   const vatPayer =
     formData.get("vatPayer") === "on" || formData.get("vatPayer") === "true";
+  const registryNote = optionalTrim(formData.get("registryNote"));
+  const sourceLabelRaw = formData.get("source")?.toString();
+  const source = sourceLabelRaw === "ares" ? "ares" : "manual";
 
-  if (
-    !name ||
-    !street ||
-    !city ||
-    !zipResolved ||
-    !contactEmail ||
-    !accountNumber ||
-    !iban
-  ) {
-    redirect(`${errBase}?invalid=${encodeURIComponent("required_fields")}`);
+  if (!name || !street || !city || !zipResolved || !contactEmail) {
+    return { ok: false, code: "required_fields" };
   }
 
   const icoRaw = optionalTrim(formData.get("ico"));
   if (!icoRaw) {
-    redirect(`${errBase}?invalid=${encodeURIComponent("bad_ico")}`);
+    return { ok: false, code: "bad_ico" };
   }
   const icoParsed = IcoSchema.safeParse(icoRaw.replace(/\s/g, ""));
   if (!icoParsed.success) {
-    redirect(`${errBase}?invalid=${encodeURIComponent("bad_ico")}`);
+    return { ok: false, code: "bad_ico" };
   }
 
   let dicParsed: string | undefined;
@@ -203,41 +264,82 @@ export async function saveIssuer(formData: FormData): Promise<void> {
   if (dicRaw) {
     const d = DicSchema.safeParse(dicRaw);
     if (!d.success) {
-      redirect(`${errBase}?invalid=${encodeURIComponent("bad_dic")}`);
+      return { ok: false, code: "bad_dic" };
     }
     dicParsed = d.data;
   }
 
+  return {
+    ok: true,
+    name,
+    ico: icoParsed.data,
+    ...(dicParsed !== undefined ? { dic: dicParsed } : {}),
+    street,
+    city,
+    zip: zipResolved,
+    contactEmail,
+    vatPayer,
+    ...(registryNote !== undefined ? { registryNote } : {}),
+    source,
+  };
+}
+
+function parseBankFromForm(
+  formData: FormData,
+): { ok: true; bank: IssuerSnapshot["bank"] } | { ok: false; code: string } {
+  const accountNumber = optionalTrim(formData.get("accountNumber")) ?? null;
+  const iban = optionalTrim(formData.get("iban")) ?? null;
+  const bic = optionalTrim(formData.get("bic"));
+  if (!accountNumber || !iban) {
+    return { ok: false, code: "required_fields" };
+  }
   const bankParsed = BankAccountSchema.safeParse({
     accountNumber,
     iban: iban.replace(/\s/g, "").toUpperCase(),
     ...(bic !== undefined ? { bic: bic.toUpperCase() } : {}),
   });
   if (!bankParsed.success) {
-    redirect(`${errBase}?invalid=${encodeURIComponent("bad_bank")}`);
+    return { ok: false, code: "bad_bank" };
   }
+  return { ok: true, bank: bankParsed.data };
+}
 
-  const sourceLabelRaw = formData.get("source")?.toString();
-  const sourceLabel = sourceLabelRaw === "ares" ? "ares" : "manual";
+/**
+ * Create issuer with identity + bank; numbering and email get defaults.
+ * Redirects to edit identity (or welcome done when `next=welcome`).
+ */
+export async function createIssuer(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
+  const rowId = optionalTrim(formData.get("id")) ?? crypto.randomUUID();
+  const next = optionalTrim(formData.get("next"));
+  const errBase = next === "welcome" ? "/welcome" : "/issuers/new";
+
+  const identity = parseIdentityFromForm(formData);
+  if (!identity.ok) {
+    redirect(`${errBase}?invalid=${encodeURIComponent(identity.code)}`);
+  }
+  const bank = parseBankFromForm(formData);
+  if (!bank.ok) {
+    redirect(`${errBase}?invalid=${encodeURIComponent(bank.code)}`);
+  }
 
   const snapshotCandidate = IssuerSnapshotSchema.safeParse({
     id: rowId,
-    name,
-    ico: icoParsed.data,
-    ...(dicParsed !== undefined ? { dic: dicParsed } : {}),
+    name: identity.name,
+    ico: identity.ico,
+    ...(identity.dic !== undefined ? { dic: identity.dic } : {}),
     address: {
-      street,
-      city,
-      zip: zipResolved,
+      street: identity.street,
+      city: identity.city,
+      zip: identity.zip,
       country: "CZ",
     },
-    bank: bankParsed.data,
-    vatPayer,
-    contactEmail,
-    ...(registryNote !== undefined ? { registryNote } : {}),
-    ...(logoUrl !== undefined ? { logoUrl } : {}),
-    ...(stampUrl !== undefined ? { stampUrl } : {}),
-    ...(signatureUrl !== undefined ? { signatureUrl } : {}),
+    bank: bank.bank,
+    vatPayer: identity.vatPayer,
+    contactEmail: identity.contactEmail,
+    ...(identity.registryNote !== undefined
+      ? { registryNote: identity.registryNote }
+      : {}),
   });
 
   if (!snapshotCandidate.success) {
@@ -245,46 +347,249 @@ export async function saveIssuer(formData: FormData): Promise<void> {
   }
 
   const snapshot = snapshotCandidate.data;
-  const issuerId = snapshot.id;
+  const emptyFd = new FormData();
 
   try {
     await withDbTransaction(async (tx) => {
-      const existing = await tx
-        .select({ id: issuerBusinesses.id })
-        .from(issuerBusinesses)
+      await tx.insert(issuerBusinesses).values({
+        id: snapshot.id,
+        workspaceId,
+        source: identity.source,
+        snapshot: snapshot as Record<string, unknown>,
+        emailSettings: defaultEmailSettings(),
+      });
+
+      for (const docType of ISSUER_DOC_TYPES) {
+        await upsertNumberingScheme(tx, {
+          workspaceId,
+          issuerId: snapshot.id,
+          docType,
+          formData: emptyFd,
+        });
+      }
+    });
+  } catch (err) {
+    console.error("[createIssuer] failed", err);
+    redirect(`${errBase}?invalid=${encodeURIComponent("save_failed")}`);
+  }
+
+  revalidateIssuerPaths(snapshot.id);
+  if (next === "welcome") {
+    redirect(`/welcome?done=${encodeURIComponent(snapshot.id)}`);
+  }
+  redirect(`/issuers/${snapshot.id}/edit/identity?toast=issuer_saved`);
+}
+
+/** Update identity fields; keeps bank / assets intact. */
+export async function saveIssuerIdentity(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
+  const issuerId = optionalTrim(formData.get("id"));
+  if (!issuerId) {
+    redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
+  }
+
+  const existing = await loadIssuerSnapshot(workspaceId, issuerId);
+  if (!existing) {
+    sectionErr(issuerId, "identity", "missing_row");
+  }
+
+  const identity = parseIdentityFromForm(formData);
+  if (!identity.ok) {
+    sectionErr(issuerId, "identity", identity.code);
+  }
+
+  const candidate: Record<string, unknown> = {
+    id: existing.snapshot.id,
+    name: identity.name,
+    ico: identity.ico,
+    address: {
+      street: identity.street,
+      city: identity.city,
+      zip: identity.zip,
+      country: "CZ",
+    },
+    bank: existing.snapshot.bank,
+    vatPayer: identity.vatPayer,
+    contactEmail: identity.contactEmail,
+  };
+  if (identity.dic !== undefined) {
+    candidate.dic = identity.dic;
+  }
+  if (identity.registryNote !== undefined) {
+    candidate.registryNote = identity.registryNote;
+  }
+  if (existing.snapshot.logoUrl) {
+    candidate.logoUrl = existing.snapshot.logoUrl;
+  }
+  if (existing.snapshot.stampUrl) {
+    candidate.stampUrl = existing.snapshot.stampUrl;
+  }
+  if (existing.snapshot.signatureUrl) {
+    candidate.signatureUrl = existing.snapshot.signatureUrl;
+  }
+
+  const finalSnap = IssuerSnapshotSchema.safeParse(candidate);
+  if (!finalSnap.success) {
+    sectionErr(issuerId, "identity", "snapshot_validation");
+  }
+
+  try {
+    await withDbTransaction(async (tx) => {
+      await tx
+        .update(issuerBusinesses)
+        .set({
+          snapshot: finalSnap.data as Record<string, unknown>,
+          source: identity.source,
+          updatedAt: new Date(),
+        })
         .where(
           and(
             eq(issuerBusinesses.id, issuerId),
             eq(issuerBusinesses.workspaceId, workspaceId),
           ),
-        )
-        .limit(1);
+        );
+    });
+  } catch (err) {
+    console.error("[saveIssuerIdentity] failed", err);
+    sectionErr(issuerId, "identity", "save_failed");
+  }
 
-      if (existing[0]) {
-        await tx
-          .update(issuerBusinesses)
-          .set({
-            snapshot: snapshot as Record<string, unknown>,
-            source: sourceLabel,
-            emailSettings: parseEmailSettings(formData),
-            updatedAt: new Date(),
-          })
-          .where(
-            and(
-              eq(issuerBusinesses.id, issuerId),
-              eq(issuerBusinesses.workspaceId, workspaceId),
-            ),
-          );
-      } else {
-        await tx.insert(issuerBusinesses).values({
-          id: issuerId,
-          workspaceId,
-          source: sourceLabel,
-          snapshot: snapshot as Record<string, unknown>,
-          emailSettings: parseEmailSettings(formData),
-        });
-      }
+  revalidateIssuerPaths(issuerId);
+  redirect(`/issuers/${issuerId}/edit/identity?toast=issuer_saved`);
+}
 
+/** Update bank fields only. */
+export async function saveIssuerBank(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
+  const issuerId = optionalTrim(formData.get("id"));
+  if (!issuerId) {
+    redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
+  }
+
+  const existing = await loadIssuerSnapshot(workspaceId, issuerId);
+  if (!existing) {
+    sectionErr(issuerId, "bank", "missing_row");
+  }
+
+  const bank = parseBankFromForm(formData);
+  if (!bank.ok) {
+    sectionErr(issuerId, "bank", bank.code);
+  }
+
+  const nextSnapshot = IssuerSnapshotSchema.safeParse({
+    ...existing.snapshot,
+    bank: bank.bank,
+  });
+  if (!nextSnapshot.success) {
+    sectionErr(issuerId, "bank", "snapshot_validation");
+  }
+
+  try {
+    await withDbTransaction(async (tx) => {
+      await tx
+        .update(issuerBusinesses)
+        .set({
+          snapshot: nextSnapshot.data as Record<string, unknown>,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(issuerBusinesses.id, issuerId),
+            eq(issuerBusinesses.workspaceId, workspaceId),
+          ),
+        );
+    });
+  } catch (err) {
+    console.error("[saveIssuerBank] failed", err);
+    sectionErr(issuerId, "bank", "save_failed");
+  }
+
+  revalidateIssuerPaths(issuerId);
+  redirect(`/issuers/${issuerId}/edit/bank?toast=issuer_saved`);
+}
+
+/** Update logo / stamp / signature URLs. */
+export async function saveIssuerAssets(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
+  const issuerId = optionalTrim(formData.get("id"));
+  if (!issuerId) {
+    redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
+  }
+
+  const existing = await loadIssuerSnapshot(workspaceId, issuerId);
+  if (!existing) {
+    sectionErr(issuerId, "assets", "missing_row");
+  }
+
+  const logoUrl = optionalTrim(formData.get("logoUrl"));
+  const stampUrl = optionalTrim(formData.get("stampUrl"));
+  const signatureUrl = optionalTrim(formData.get("signatureUrl"));
+
+  const base = { ...existing.snapshot } as IssuerSnapshot & {
+    logoUrl?: string;
+    stampUrl?: string;
+    signatureUrl?: string;
+  };
+  if (logoUrl) {
+    base.logoUrl = logoUrl;
+  } else {
+    delete base.logoUrl;
+  }
+  if (stampUrl) {
+    base.stampUrl = stampUrl;
+  } else {
+    delete base.stampUrl;
+  }
+  if (signatureUrl) {
+    base.signatureUrl = signatureUrl;
+  } else {
+    delete base.signatureUrl;
+  }
+
+  const nextSnapshot = IssuerSnapshotSchema.safeParse(base);
+  if (!nextSnapshot.success) {
+    sectionErr(issuerId, "assets", "snapshot_validation");
+  }
+
+  try {
+    await withDbTransaction(async (tx) => {
+      await tx
+        .update(issuerBusinesses)
+        .set({
+          snapshot: nextSnapshot.data as Record<string, unknown>,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(issuerBusinesses.id, issuerId),
+            eq(issuerBusinesses.workspaceId, workspaceId),
+          ),
+        );
+    });
+  } catch (err) {
+    console.error("[saveIssuerAssets] failed", err);
+    sectionErr(issuerId, "assets", "save_failed");
+  }
+
+  revalidateIssuerPaths(issuerId);
+  redirect(`/issuers/${issuerId}/edit/assets?toast=issuer_saved`);
+}
+
+/** Update numbering schemes for all doc types. */
+export async function saveIssuerNumbering(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
+  const issuerId = optionalTrim(formData.get("id"));
+  if (!issuerId) {
+    redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
+  }
+
+  const existing = await loadIssuerSnapshot(workspaceId, issuerId);
+  if (!existing) {
+    sectionErr(issuerId, "numbering", "missing_row");
+  }
+
+  try {
+    await withDbTransaction(async (tx) => {
       for (const docType of ISSUER_DOC_TYPES) {
         await upsertNumberingScheme(tx, {
           workspaceId,
@@ -293,16 +598,71 @@ export async function saveIssuer(formData: FormData): Promise<void> {
           formData,
         });
       }
+      await tx
+        .update(issuerBusinesses)
+        .set({ updatedAt: new Date() })
+        .where(
+          and(
+            eq(issuerBusinesses.id, issuerId),
+            eq(issuerBusinesses.workspaceId, workspaceId),
+          ),
+        );
     });
   } catch (err) {
-    console.error("[saveIssuer] failed", err);
-    redirect(`${errBase}?invalid=${encodeURIComponent("save_failed")}`);
+    console.error("[saveIssuerNumbering] failed", err);
+    sectionErr(issuerId, "numbering", "save_failed");
   }
 
-  revalidatePath("/issuers");
+  revalidateIssuerPaths(issuerId);
+  redirect(`/issuers/${issuerId}/edit/numbering?toast=issuer_saved`);
+}
+
+/** Update issuer email defaults (fixes prior FormData wiring gap). */
+export async function saveIssuerEmail(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
+  const issuerId = optionalTrim(formData.get("id"));
+  if (!issuerId) {
+    redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
+  }
+
+  const existing = await loadIssuerSnapshot(workspaceId, issuerId);
+  if (!existing) {
+    sectionErr(issuerId, "email", "missing_row");
+  }
+
+  const emailSettings = parseEmailSettings(formData);
+
+  try {
+    await withDbTransaction(async (tx) => {
+      await tx
+        .update(issuerBusinesses)
+        .set({
+          emailSettings,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(issuerBusinesses.id, issuerId),
+            eq(issuerBusinesses.workspaceId, workspaceId),
+          ),
+        );
+    });
+  } catch (err) {
+    console.error("[saveIssuerEmail] failed", err);
+    sectionErr(issuerId, "email", "save_failed");
+  }
+
+  revalidateIssuerPaths(issuerId);
+  redirect(`/issuers/${issuerId}/edit/email?toast=issuer_saved`);
+}
+
+/** Skip first-issuer welcome for this workspace. */
+export async function dismissIssuerWelcome(): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
+  await dismissIssuerWelcomeForWorkspace(workspaceId);
   revalidatePath("/dashboard");
-  revalidatePath("/invoices/new");
-  redirect("/issuers?toast=issuer_saved");
+  revalidatePath("/welcome");
+  redirect("/dashboard");
 }
 
 /** Delete issuer when it has no invoices; cascades numbering schemes. */
@@ -339,7 +699,6 @@ export async function deleteIssuer(formData: FormData): Promise<void> {
     redirect(`/issuers?invalid=${encodeURIComponent("has_invoices")}`);
   }
 
-  revalidatePath("/issuers");
-  revalidatePath("/dashboard");
+  revalidateIssuerPaths();
   redirect("/issuers?toast=issuer_deleted");
 }

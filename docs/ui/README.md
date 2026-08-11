@@ -4,17 +4,17 @@ Information architecture, page intents, and per-flow UX specs. Written **just-in
 
 ## Status
 
-Shipped: [`invoice-builder-flow.md`](./invoice-builder-flow.md) (Plan 6), [`data-grid-ux.md`](./data-grid-ux.md) (Plan 7). Remaining docs land with their plans.
+Shipped: [`invoice-builder-flow.md`](./invoice-builder-flow.md) (Plan 6), [`data-grid-ux.md`](./data-grid-ux.md) (Plan 7), [`onboarding.md`](./onboarding.md) (first-issuer `/welcome` + sectioned issuer edit). Remaining docs land with their plans.
 
 ## Expected UI docs (with the plan that authors them)
 
-| Doc | Plan that creates it | Purpose |
-| --- | --- | --- |
-| `information-architecture.md` | Plan 1 | Sidebar nav, route map, page intents, where each entity is created/edited/deleted |
-| `invoice-builder-flow.md` | Plan 6 | Step-by-step UX for creating an invoice (issuer pick → client pick/create → items → VAT → preview → save/issue) |
-| `data-grid-ux.md` | Plan 7 | Filter/sort/search interactions, row-action menu, empty/loading states |
-| `dashboard-layout.md` | Plan 8 | Cards, chart, recent invoices arrangement; issuer-filter behavior |
-| `onboarding.md` | Plan 9 | First-run experience, "Create your first issuer" guided flow |
+| Doc                           | Plan that creates it | Purpose                                                                                                         |
+| ----------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `information-architecture.md` | Plan 1               | Sidebar nav, route map, page intents, where each entity is created/edited/deleted                               |
+| `invoice-builder-flow.md`     | Plan 6               | Step-by-step UX for creating an invoice (issuer pick → client pick/create → items → VAT → preview → save/issue) |
+| `data-grid-ux.md`             | Plan 7               | Filter/sort/search interactions, row-action menu, empty/loading states                                          |
+| `dashboard-layout.md`         | Plan 8               | Cards, chart, recent invoices arrangement; issuer-filter behavior                                               |
+| `onboarding.md`               | Plan 9               | First-run experience, "Create your first issuer" guided flow                                                    |
 
 ## Format conventions
 

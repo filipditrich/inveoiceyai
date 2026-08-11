@@ -61,7 +61,7 @@ export default async function IssuersPage({
           </p>
         </div>
         <Button render={<Link href="/issuers/new" prefetch />} size="sm">
-          New issuer
+          Nový vystavovatel
         </Button>
       </div>
 
@@ -72,8 +72,8 @@ export default async function IssuersPage({
           <p className="text-muted-foreground mb-3 text-sm">
             No issuers yet. Add your business to start invoicing.
           </p>
-          <Button render={<Link href="/issuers/new" prefetch />} size="sm">
-            Create your first issuer
+          <Button render={<Link href="/welcome" prefetch />} size="sm">
+            Vytvořit prvního vystavovatele
           </Button>
         </div>
       ) : (

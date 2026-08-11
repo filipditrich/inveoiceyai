@@ -8,8 +8,8 @@ const TOAST_MESSAGES: Record<
   string,
   { type: "success" | "error"; text: string }
 > = {
-  issuer_saved: { type: "success", text: "Issuer saved" },
-  issuer_deleted: { type: "success", text: "Issuer deleted" },
+  issuer_saved: { type: "success", text: "Vystavovatel uložen" },
+  issuer_deleted: { type: "success", text: "Vystavovatel smazán" },
   client_saved: { type: "success", text: "Client saved" },
   client_deleted: { type: "success", text: "Client deleted" },
   clients_merged: { type: "success", text: "Duplicitní klienti sloučeni" },
