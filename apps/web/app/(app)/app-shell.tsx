@@ -6,7 +6,16 @@ import { ToastFromSearchParams } from "@/components/toast-from-search-params";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import type { CSSProperties, ReactNode } from "react";
 
-export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
+export interface AppShellUser {
+	name: string;
+	email: string;
+	avatar: string;
+}
+
+export function AppShell({
+	children,
+	user,
+}: Readonly<{ children: ReactNode; user: AppShellUser }>) {
 	return (
 		<SidebarProvider
 			style={
@@ -16,7 +25,7 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
 				} as CSSProperties
 			}
 		>
-			<AppSidebar />
+			<AppSidebar user={user} />
 			<SidebarInset className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
 				<SiteHeader />
 				<ToastFromSearchParams />

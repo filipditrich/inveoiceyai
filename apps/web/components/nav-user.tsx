@@ -20,7 +20,9 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth/client";
 import { LogOutIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 function initialsFromName(name: string): string {
 	const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -43,6 +45,7 @@ export function NavUser({
 	};
 }) {
 	const { isMobile } = useSidebar();
+	const router = useRouter();
 	const initials = initialsFromName(user.name);
 
 	return (
@@ -100,9 +103,17 @@ export function NavUser({
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
-							<DropdownMenuItem disabled>
+							<DropdownMenuItem
+								onClick={() =>
+									authClient.signOut({
+										fetchOptions: {
+											onSuccess: () => router.push("/sign-in"),
+										},
+									})
+								}
+							>
 								<LogOutIcon />
-								Log out (demo)
+								Log out
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 					</DropdownMenuContent>
