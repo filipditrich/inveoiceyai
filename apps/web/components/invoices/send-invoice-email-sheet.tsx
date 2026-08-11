@@ -12,6 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { SubmitButton } from "@/components/ui/submit-button";
 import * as React from "react";
 
 export type SendInvoiceEmailSheetProps = {
@@ -124,9 +125,12 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
               <strong>Reply-To:</strong> {props.replyTo}
             </p>
           </div>
-          <Button disabled={!props.emailConfigured} type="submit">
+          <SubmitButton
+            disabled={!props.emailConfigured}
+            pendingLabel="Odesílám…"
+          >
             Odeslat
-          </Button>
+          </SubmitButton>
         </form>
       </SheetContent>
     </Sheet>

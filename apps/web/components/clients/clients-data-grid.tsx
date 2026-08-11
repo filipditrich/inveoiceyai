@@ -14,6 +14,7 @@ import {
 } from "@/components/reui/data-grid/data-grid";
 import { DataGridColumnHeader } from "@/components/reui/data-grid/data-grid-column-header";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import type { ClientSnapshot } from "@invoicey/invoice-core/schema";
 import {
   useTable,
@@ -123,9 +124,13 @@ export function ClientsDataGrid({ items }: { items: ClientTableItem[] }) {
             </Button>
             <form action={deleteClient}>
               <input name="id" type="hidden" value={row.original.rowId} />
-              <Button size="sm" type="submit" variant="destructive">
+              <SubmitButton
+                pendingLabel="Mazání…"
+                size="sm"
+                variant="destructive"
+              >
                 Delete
-              </Button>
+              </SubmitButton>
             </form>
           </div>
         ),

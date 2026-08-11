@@ -90,6 +90,7 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
   const [name, setName] = useState("");
   const [createdRaw, setCreatedRaw] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [busyKey, setBusyKey] = useState<string | null>(null);
 
   const configSnippet = useMemo(
     () => buildMcpConfig(mcpUrl, createdRaw ?? "YOUR_API_KEY"),
@@ -112,22 +113,27 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
   }, []);
 
   const create = () => {
+    setBusyKey("create");
     startTransition(async () => {
-      const label = name.trim() || "Remote MCP";
-      const res = await authClient.apiKey.create({ name: label });
-      if (res.error) {
-        toast.error(res.error.message || "Vytvoření selhalo");
-        return;
+      try {
+        const label = name.trim() || "Remote MCP";
+        const res = await authClient.apiKey.create({ name: label });
+        if (res.error) {
+          toast.error(res.error.message || "Vytvoření selhalo");
+          return;
+        }
+        const created = createdKeyFields(res.data);
+        if (created.key) setCreatedRaw(created.key);
+        await recordAccountSecurityEventAction({
+          type: "api_key_create",
+          metadata: { keyId: created.id ?? null, name: label },
+        });
+        setName("");
+        toast.success("Klíč vytvořen — zkopírujte ho teď");
+        reload();
+      } finally {
+        setBusyKey(null);
       }
-      const created = createdKeyFields(res.data);
-      if (created.key) setCreatedRaw(created.key);
-      await recordAccountSecurityEventAction({
-        type: "api_key_create",
-        metadata: { keyId: created.id ?? null, name: label },
-      });
-      setName("");
-      toast.success("Klíč vytvořen — zkopírujte ho teď");
-      reload();
     });
   };
 
@@ -135,18 +141,23 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
     if (!window.confirm("Opravdu odvolat tento API klíč? Nelze vrátit.")) {
       return;
     }
+    setBusyKey(`revoke:${keyId}`);
     startTransition(async () => {
-      const res = await authClient.apiKey.delete({ keyId });
-      if (res.error) {
-        toast.error(res.error.message || "Odvolání selhalo");
-        return;
+      try {
+        const res = await authClient.apiKey.delete({ keyId });
+        if (res.error) {
+          toast.error(res.error.message || "Odvolání selhalo");
+          return;
+        }
+        await recordAccountSecurityEventAction({
+          type: "api_key_revoke",
+          metadata: { keyId },
+        });
+        toast.success("Klíč odvolán");
+        reload();
+      } finally {
+        setBusyKey(null);
       }
-      await recordAccountSecurityEventAction({
-        type: "api_key_revoke",
-        metadata: { keyId },
-      });
-      toast.success("Klíč odvolán");
-      reload();
     });
   };
 
@@ -208,8 +219,12 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
               onChange={(e) => setName(e.target.value)}
               className="max-w-xs"
             />
-            <Button disabled={pending} onClick={create}>
-              Vytvořit klíč
+            <Button
+              disabled={pending}
+              loading={busyKey === "create"}
+              onClick={create}
+            >
+              {busyKey === "create" ? "Vytvářím…" : "Vytvořit klíč"}
             </Button>
           </div>
 
@@ -240,9 +255,10 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
                     variant="outline"
                     size="sm"
                     disabled={pending}
+                    loading={busyKey === `revoke:${k.id}`}
                     onClick={() => revoke(k.id)}
                   >
-                    Odvolat
+                    {busyKey === `revoke:${k.id}` ? "Odvolávám…" : "Odvolat"}
                   </Button>
                 </div>
               ))

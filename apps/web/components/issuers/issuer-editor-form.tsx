@@ -114,6 +114,8 @@ export function IssuerEditorForm({
   const [lookupMsg, setLookupMsg] = React.useState<string | null>(() =>
     lookupMessageFromInvalid(invalidQuery),
   );
+  const [lookingUp, setLookingUp] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
 
   const [schemeState, setSchemeState] = React.useState(() => {
     const map = new Map(schemes?.map((s) => [s.docType, s]));
@@ -131,6 +133,9 @@ export function IssuerEditorForm({
   });
 
   async function onLookupFromAres() {
+    if (lookingUp || saving) {
+      return;
+    }
     setLookupMsg(null);
     const raw = (icoInput ?? "").replace(/\s/g, "");
     const parsed = IcoSchema.safeParse(raw);
@@ -138,42 +143,50 @@ export function IssuerEditorForm({
       setLookupMsg("Zadejte platné osmimístné IČO.");
       return;
     }
-    const res = await fetch(`/api/ares/${parsed.data}`);
-    let payload: unknown;
+    setLookingUp(true);
     try {
-      payload = await res.json();
-    } catch {
-      setLookupMsg("ARES nevrátila JSON.");
-      return;
-    }
-    if (
-      payload &&
-      typeof payload === "object" &&
-      "ok" in payload &&
-      payload.ok === true &&
-      "draft" in payload
-    ) {
-      const draft = (payload as { draft: ClientDraft }).draft;
-      setSource("ares");
-      setName(draft.name);
-      setDic(draft.dic ?? "");
-      setStreet(draft.address.street);
-      setCity(draft.address.city);
-      setZip(draft.address.zip);
-      setCountry(draft.address.country);
-      if (draft.contactEmail) {
-        setContactEmail(draft.contactEmail);
+      const res = await fetch(`/api/ares/${parsed.data}`);
+      let payload: unknown;
+      try {
+        payload = await res.json();
+      } catch {
+        setLookupMsg("ARES nevrátila JSON.");
+        return;
       }
-      if (draft.ico) {
-        setIcoInput(draft.ico);
+      if (
+        payload &&
+        typeof payload === "object" &&
+        "ok" in payload &&
+        payload.ok === true &&
+        "draft" in payload
+      ) {
+        const draft = (payload as { draft: ClientDraft }).draft;
+        setSource("ares");
+        setName(draft.name);
+        setDic(draft.dic ?? "");
+        setStreet(draft.address.street);
+        setCity(draft.address.city);
+        setZip(draft.address.zip);
+        setCountry(draft.address.country);
+        if (draft.contactEmail) {
+          setContactEmail(draft.contactEmail);
+        }
+        if (draft.ico) {
+          setIcoInput(draft.ico);
+        }
+        return;
       }
-      return;
+      setLookupMsg(aresErrorHuman(payload));
+    } finally {
+      setLookingUp(false);
     }
-    setLookupMsg(aresErrorHuman(payload));
   }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (saving || lookingUp) {
+      return;
+    }
     const fd = new FormData();
     fd.set("id", persistedId);
     fd.set("source", source);
@@ -214,7 +227,12 @@ export function IssuerEditorForm({
         fd.set(`scheme_${s.docType}_counterYear`, String(s.counterYear));
       }
     }
-    await saveIssuer(fd);
+    setSaving(true);
+    try {
+      await saveIssuer(fd);
+    } finally {
+      setSaving(false);
+    }
   }
 
   const userMsg =
@@ -242,11 +260,13 @@ export function IssuerEditorForm({
               value={icoInput}
             />
             <Button
+              disabled={saving}
+              loading={lookingUp}
               onClick={() => void onLookupFromAres()}
               type="button"
               variant="secondary"
             >
-              Lookup
+              {lookingUp ? "Hledám…" : "Lookup"}
             </Button>
           </div>
         </div>
@@ -665,7 +685,9 @@ export function IssuerEditorForm({
       </section>
 
       <div className="flex gap-2">
-        <Button type="submit">Save</Button>
+        <Button disabled={lookingUp} loading={saving} type="submit">
+          {saving ? "Ukládám…" : "Save"}
+        </Button>
         <span className="text-muted-foreground flex items-center text-xs">
           Zdroj: {source === "ares" ? "ARES" : "Ručně"}
         </span>

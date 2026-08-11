@@ -1,5 +1,5 @@
 import { AuthShell } from "@/components/auth/auth-shell";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getOptionalWorkspace, requireSession } from "@/lib/auth/session";
 import { Building2Icon, CheckCircle2Icon } from "lucide-react";
 import type { Metadata } from "next";
@@ -51,9 +51,9 @@ export default async function OnboardingPage() {
           ))}
         </div>
         <form action={createFirstWorkspace} className="mt-7">
-          <Button type="submit" className="h-11 w-full">
+          <SubmitButton className="h-11 w-full" pendingLabel="Vytvářím…">
             Vytvořit můj pracovní prostor
-          </Button>
+          </SubmitButton>
         </form>
       </div>
     </AuthShell>

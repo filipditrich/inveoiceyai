@@ -130,6 +130,7 @@ export function LinkedAccountsPanel({
 }) {
   const [accounts, setAccounts] = useState<AccountRow[]>([]);
   const [pending, startTransition] = useTransition();
+  const [busyKey, setBusyKey] = useState<string | null>(null);
 
   const reload = () => {
     startTransition(async () => {
@@ -153,27 +154,37 @@ export function LinkedAccountsPanel({
       toast.error("Nelze odpojit poslední způsob přihlášení");
       return;
     }
+    setBusyKey(`unlink:${providerId}`);
     startTransition(async () => {
-      const res = await authClient.unlinkAccount({ providerId });
-      if (res.error) {
-        toast.error(res.error.message || "Odpojení selhalo");
-        return;
+      try {
+        const res = await authClient.unlinkAccount({ providerId });
+        if (res.error) {
+          toast.error(res.error.message || "Odpojení selhalo");
+          return;
+        }
+        await recordAccountSecurityEventAction({
+          type: "account_unlink",
+          metadata: { providerId },
+        });
+        toast.success("Poskytovatel odpojen");
+        reload();
+      } finally {
+        setBusyKey(null);
       }
-      await recordAccountSecurityEventAction({
-        type: "account_unlink",
-        metadata: { providerId },
-      });
-      toast.success("Poskytovatel odpojen");
-      reload();
     });
   };
 
   const link = (provider: "google" | "github") => {
+    setBusyKey(`link:${provider}`);
     startTransition(async () => {
-      await authClient.linkSocial({
-        provider,
-        callbackURL: "/settings/security?linked=1",
-      });
+      try {
+        await authClient.linkSocial({
+          provider,
+          callbackURL: "/settings/security?linked=1",
+        });
+      } finally {
+        setBusyKey(null);
+      }
     });
   };
 
@@ -217,18 +228,24 @@ export function LinkedAccountsPanel({
                       variant="outline"
                       size="sm"
                       disabled={pending || accounts.length <= 1}
+                      loading={busyKey === `unlink:${provider}`}
                       onClick={() => unlink(provider)}
                     >
-                      Odpojit
+                      {busyKey === `unlink:${provider}`
+                        ? "Odpojuji…"
+                        : "Odpojit"}
                     </Button>
                   </div>
                 ) : (
                   <Button
                     size="sm"
                     disabled={pending}
+                    loading={busyKey === `link:${provider}`}
                     onClick={() => link(provider)}
                   >
-                    Propojit
+                    {busyKey === `link:${provider}`
+                      ? "Přesměrovávám…"
+                      : "Propojit"}
                   </Button>
                 )}
               </div>
@@ -249,6 +266,7 @@ export function SessionsPanel({
 }) {
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [pending, startTransition] = useTransition();
+  const [busyKey, setBusyKey] = useState<string | null>(null);
 
   const reload = () => {
     startTransition(async () => {
@@ -288,34 +306,44 @@ export function SessionsPanel({
   }, [revokeOthersOnMount]);
 
   const revoke = (token: string) => {
+    setBusyKey(`revoke:${token}`);
     startTransition(async () => {
-      const res = await authClient.revokeSession({ token });
-      if (res.error) {
-        toast.error(res.error.message || "Odvolání selhalo");
-        return;
+      try {
+        const res = await authClient.revokeSession({ token });
+        if (res.error) {
+          toast.error(res.error.message || "Odvolání selhalo");
+          return;
+        }
+        await recordAccountSecurityEventAction({
+          type: "session_revoke",
+          metadata: { scope: "one" },
+        });
+        toast.success("Relace odvolána");
+        reload();
+      } finally {
+        setBusyKey(null);
       }
-      await recordAccountSecurityEventAction({
-        type: "session_revoke",
-        metadata: { scope: "one" },
-      });
-      toast.success("Relace odvolána");
-      reload();
     });
   };
 
   const revokeOthers = () => {
+    setBusyKey("revoke-others");
     startTransition(async () => {
-      const res = await authClient.revokeOtherSessions();
-      if (res.error) {
-        toast.error(res.error.message || "Odvolání selhalo");
-        return;
+      try {
+        const res = await authClient.revokeOtherSessions();
+        if (res.error) {
+          toast.error(res.error.message || "Odvolání selhalo");
+          return;
+        }
+        await recordAccountSecurityEventAction({
+          type: "session_revoke",
+          metadata: { scope: "others" },
+        });
+        toast.success("Ostatní relace odvolány");
+        reload();
+      } finally {
+        setBusyKey(null);
       }
-      await recordAccountSecurityEventAction({
-        type: "session_revoke",
-        metadata: { scope: "others" },
-      });
-      toast.success("Ostatní relace odvolány");
-      reload();
     });
   };
 
@@ -332,9 +360,10 @@ export function SessionsPanel({
           variant="outline"
           size="sm"
           disabled={pending || sessions.length <= 1}
+          loading={busyKey === "revoke-others"}
           onClick={revokeOthers}
         >
-          Odvolat ostatní
+          {busyKey === "revoke-others" ? "Odvolávám…" : "Odvolat ostatní"}
         </Button>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -371,9 +400,10 @@ export function SessionsPanel({
                     variant="outline"
                     size="sm"
                     disabled={pending}
+                    loading={busyKey === `revoke:${s.token}`}
                     onClick={() => revoke(s.token)}
                   >
-                    Odvolat
+                    {busyKey === `revoke:${s.token}` ? "Odvolávám…" : "Odvolat"}
                   </Button>
                 ) : null}
               </div>
@@ -390,6 +420,7 @@ export function TrustedDevicesPanel() {
     Awaited<ReturnType<typeof getTrustedDevicesAction>>
   >([]);
   const [pending, startTransition] = useTransition();
+  const [busyKey, setBusyKey] = useState<string | null>(null);
 
   const reload = () => {
     startTransition(async () => {
@@ -402,14 +433,19 @@ export function TrustedDevicesPanel() {
   }, []);
 
   const revoke = (deviceId: string) => {
+    setBusyKey(`revoke:${deviceId}`);
     startTransition(async () => {
-      const res = await revokeTrustedDeviceAction(deviceId);
-      if (!res.ok) {
-        toast.error("Odvolání zařízení selhalo");
-        return;
+      try {
+        const res = await revokeTrustedDeviceAction(deviceId);
+        if (!res.ok) {
+          toast.error("Odvolání zařízení selhalo");
+          return;
+        }
+        toast.success("Zařízení odvoláno");
+        reload();
+      } finally {
+        setBusyKey(null);
       }
-      toast.success("Zařízení odvoláno");
-      reload();
     });
   };
 
@@ -450,9 +486,10 @@ export function TrustedDevicesPanel() {
                 variant="outline"
                 size="sm"
                 disabled={pending}
+                loading={busyKey === `revoke:${d.id}`}
                 onClick={() => revoke(d.id)}
               >
-                Odvolat
+                {busyKey === `revoke:${d.id}` ? "Odvolávám…" : "Odvolat"}
               </Button>
             </div>
           ))

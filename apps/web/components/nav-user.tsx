@@ -17,9 +17,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth/client";
-import { LogOutIcon, SettingsIcon } from "lucide-react";
+import { LoaderCircleIcon, LogOutIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 function initialsFromName(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -44,6 +45,23 @@ export function NavUser({
   const { isMobile } = useSidebar();
   const router = useRouter();
   const initials = initialsFromName(user.name);
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function signOut() {
+    if (signingOut) {
+      return;
+    }
+    setSigningOut(true);
+    try {
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => router.push("/sign-in"),
+        },
+      });
+    } catch {
+      setSigningOut(false);
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -105,16 +123,15 @@ export function NavUser({
                 Nastavení
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() =>
-                  authClient.signOut({
-                    fetchOptions: {
-                      onSuccess: () => router.push("/sign-in"),
-                    },
-                  })
-                }
+                disabled={signingOut}
+                onClick={() => void signOut()}
               >
-                <LogOutIcon />
-                Log out
+                {signingOut ? (
+                  <LoaderCircleIcon className="animate-spin" />
+                ) : (
+                  <LogOutIcon />
+                )}
+                {signingOut ? "Odhlašuji…" : "Log out"}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

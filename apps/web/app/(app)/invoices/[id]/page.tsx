@@ -10,6 +10,7 @@ import { InvoiceEmailTimeline } from "@/components/invoices/invoice-email-timeli
 import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
 import { SendInvoiceEmailSheet } from "@/components/invoices/send-invoice-email-sheet";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { formatDateCs, formatMoney } from "@/lib/format";
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
 import { requireWorkspace } from "@/lib/auth/session";
@@ -170,9 +171,9 @@ export default async function InvoiceDetailPage({
             <>
               <form action={issueSavedInvoice}>
                 <input name="id" type="hidden" value={id} />
-                <Button size="sm" type="submit">
+                <SubmitButton pendingLabel="Vystavuji…" size="sm">
                   Vystavit
-                </Button>
+                </SubmitButton>
               </form>
               <Button
                 render={<Link href={`/invoices/${id}/edit`} prefetch />}
@@ -201,9 +202,13 @@ export default async function InvoiceDetailPage({
           ) : null}
           <form action={duplicateInvoice}>
             <input name="id" type="hidden" value={id} />
-            <Button size="sm" type="submit" variant="secondary">
+            <SubmitButton
+              pendingLabel="Duplikuji…"
+              size="sm"
+              variant="secondary"
+            >
               Duplikovat
-            </Button>
+            </SubmitButton>
           </form>
           {canEmail ? (
             <SendInvoiceEmailSheet
@@ -224,32 +229,44 @@ export default async function InvoiceDetailPage({
             <>
               <form action={markInvoicePaid}>
                 <input name="id" type="hidden" value={id} />
-                <Button size="sm" type="submit">
+                <SubmitButton pendingLabel="Ukládám…" size="sm">
                   Označit zaplaceno
-                </Button>
+                </SubmitButton>
               </form>
               <form action={cancelInvoice}>
                 <input name="id" type="hidden" value={id} />
-                <Button size="sm" type="submit" variant="secondary">
+                <SubmitButton
+                  pendingLabel="Stornuji…"
+                  size="sm"
+                  variant="secondary"
+                >
                   Stornovat
-                </Button>
+                </SubmitButton>
               </form>
             </>
           ) : null}
           {displayStatus === "paid" ? (
             <form action={unmarkInvoicePaid}>
               <input name="id" type="hidden" value={id} />
-              <Button size="sm" type="submit" variant="secondary">
+              <SubmitButton
+                pendingLabel="Ukládám…"
+                size="sm"
+                variant="secondary"
+              >
                 Zrušit zaplaceno
-              </Button>
+              </SubmitButton>
             </form>
           ) : null}
           {displayStatus === "draft" ? (
             <form action={deleteInvoice}>
               <input name="id" type="hidden" value={id} />
-              <Button size="sm" type="submit" variant="destructive">
+              <SubmitButton
+                pendingLabel="Mazání…"
+                size="sm"
+                variant="destructive"
+              >
                 Smazat
-              </Button>
+              </SubmitButton>
             </form>
           ) : null}
         </div>

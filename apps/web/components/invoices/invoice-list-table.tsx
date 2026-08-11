@@ -29,6 +29,7 @@ import {
   DataGridTableRowSelectAll,
 } from "@/components/reui/data-grid/data-grid-table";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { formatDateCs, formatMoney } from "@/lib/format";
 import {
   INVOICE_SORT_KEYS,
@@ -82,6 +83,8 @@ function sortParamFromSorting(sorting: SortingState): string {
   });
 }
 
+type BulkKey = "issue" | "paid" | "unpaid" | "cancel" | "delete" | null;
+
 type InvoiceListTableProps = {
   rows: InvoiceListRow[];
   total: number;
@@ -122,6 +125,7 @@ export function InvoiceListTable({
   const [columnVisibility, setColumnVisibility] =
     useState<ColumnVisibilityState>({});
   const [pending, startTransition] = useTransition();
+  const [bulkKey, setBulkKey] = useState<BulkKey>(null);
 
   const onFiltersChange = useCallback(
     (next: {
@@ -307,13 +311,21 @@ export function InvoiceListTable({
     (r) => r.displayStatus === "draft",
   ).length;
 
-  const runBulk = (action: (fd: FormData) => Promise<void>) => {
+  const runBulk = (
+    key: Exclude<BulkKey, null>,
+    action: (fd: FormData) => Promise<void>,
+  ) => {
     const fd = new FormData();
     for (const id of selectedIds) {
       fd.append("ids", id);
     }
+    setBulkKey(key);
     startTransition(async () => {
-      await action(fd);
+      try {
+        await action(fd);
+      } finally {
+        setBulkKey(null);
+      }
     });
   };
 
@@ -369,47 +381,54 @@ export function InvoiceListTable({
             <div className="flex flex-wrap gap-2">
               <Button
                 disabled={pending || selectedDrafts === 0}
-                onClick={() => runBulk(bulkIssueInvoice)}
+                loading={pending && bulkKey === "issue"}
+                onClick={() => runBulk("issue", bulkIssueInvoice)}
                 size="sm"
                 type="button"
               >
-                Vystavit
+                {pending && bulkKey === "issue" ? "Vystavuji…" : "Vystavit"}
               </Button>
               <Button
                 disabled={pending}
-                onClick={() => runBulk(bulkMarkInvoicePaid)}
-                size="sm"
-                type="button"
-                variant="secondary"
-              >
-                Zaplaceno
-              </Button>
-              <Button
-                disabled={pending}
-                onClick={() => runBulk(bulkUnmarkInvoicePaid)}
+                loading={pending && bulkKey === "paid"}
+                onClick={() => runBulk("paid", bulkMarkInvoicePaid)}
                 size="sm"
                 type="button"
                 variant="secondary"
               >
-                Zrušit zaplaceno
+                {pending && bulkKey === "paid" ? "Ukládám…" : "Zaplaceno"}
               </Button>
               <Button
                 disabled={pending}
-                onClick={() => runBulk(bulkCancelInvoice)}
+                loading={pending && bulkKey === "unpaid"}
+                onClick={() => runBulk("unpaid", bulkUnmarkInvoicePaid)}
                 size="sm"
                 type="button"
                 variant="secondary"
               >
-                Stornovat
+                {pending && bulkKey === "unpaid"
+                  ? "Ukládám…"
+                  : "Zrušit zaplaceno"}
               </Button>
               <Button
                 disabled={pending}
-                onClick={() => runBulk(bulkDeleteInvoice)}
+                loading={pending && bulkKey === "cancel"}
+                onClick={() => runBulk("cancel", bulkCancelInvoice)}
+                size="sm"
+                type="button"
+                variant="secondary"
+              >
+                {pending && bulkKey === "cancel" ? "Stornuji…" : "Stornovat"}
+              </Button>
+              <Button
+                disabled={pending}
+                loading={pending && bulkKey === "delete"}
+                onClick={() => runBulk("delete", bulkDeleteInvoice)}
                 size="sm"
                 type="button"
                 variant="destructive"
               >
-                Smazat návrhy
+                {pending && bulkKey === "delete" ? "Mazání…" : "Smazat návrhy"}
               </Button>
               <Button
                 disabled={pending}
@@ -447,9 +466,9 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
         <>
           <form action={issueSavedInvoice}>
             <input name="id" type="hidden" value={row.id} />
-            <Button size="sm" type="submit">
+            <SubmitButton pendingLabel="Vystavuji…" size="sm">
               Vystavit
-            </Button>
+            </SubmitButton>
           </form>
           <Button
             render={<Link href={`/invoices/${row.id}/edit`} prefetch />}
@@ -469,9 +488,9 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
       </Button>
       <form action={duplicateInvoice}>
         <input name="id" type="hidden" value={row.id} />
-        <Button size="sm" type="submit" variant="ghost">
+        <SubmitButton pendingLabel="Dup…" size="sm" variant="ghost">
           Dup
-        </Button>
+        </SubmitButton>
       </form>
       {row.displayStatus === "unpaid" ||
       row.displayStatus === "overdue" ||
@@ -479,32 +498,32 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
         <>
           <form action={markInvoicePaid}>
             <input name="id" type="hidden" value={row.id} />
-            <Button size="sm" type="submit" variant="ghost">
+            <SubmitButton pendingLabel="…" size="sm" variant="ghost">
               Zaplaceno
-            </Button>
+            </SubmitButton>
           </form>
           <form action={cancelInvoice}>
             <input name="id" type="hidden" value={row.id} />
-            <Button size="sm" type="submit" variant="ghost">
+            <SubmitButton pendingLabel="…" size="sm" variant="ghost">
               Storno
-            </Button>
+            </SubmitButton>
           </form>
         </>
       ) : null}
       {row.displayStatus === "paid" ? (
         <form action={unmarkInvoicePaid}>
           <input name="id" type="hidden" value={row.id} />
-          <Button size="sm" type="submit" variant="ghost">
+          <SubmitButton pendingLabel="…" size="sm" variant="ghost">
             Zrušit zapl.
-          </Button>
+          </SubmitButton>
         </form>
       ) : null}
       {row.displayStatus === "draft" ? (
         <form action={deleteInvoice}>
           <input name="id" type="hidden" value={row.id} />
-          <Button size="sm" type="submit" variant="destructive">
+          <SubmitButton pendingLabel="Mazání…" size="sm" variant="destructive">
             Smazat
-          </Button>
+          </SubmitButton>
         </form>
       ) : null}
     </div>

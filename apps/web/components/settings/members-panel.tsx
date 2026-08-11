@@ -43,6 +43,7 @@ export function MembersPanel({
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("member");
   const [pending, startTransition] = useTransition();
+  const [busyKey, setBusyKey] = useState<string | null>(null);
 
   const reload = () => {
     startTransition(async () => {
@@ -73,42 +74,52 @@ export function MembersPanel({
 
   const invite = () => {
     if (!email.trim()) return;
+    setBusyKey("invite");
     startTransition(async () => {
-      const res = await authClient.organization.inviteMember({
-        email: email.trim(),
-        role: role as "member" | "admin" | "owner",
-        organizationId: workspaceId,
-      });
-      if (res.error) {
-        toast.error(res.error.message || "Pozvánka selhala");
-        return;
+      try {
+        const res = await authClient.organization.inviteMember({
+          email: email.trim(),
+          role: role as "member" | "admin" | "owner",
+          organizationId: workspaceId,
+        });
+        if (res.error) {
+          toast.error(res.error.message || "Pozvánka selhala");
+          return;
+        }
+        await recordAccountSecurityEventAction({
+          type: "invite_create",
+          metadata: { email: email.trim(), role },
+        });
+        toast.success("Pozvánka vytvořena");
+        setEmail("");
+        reload();
+      } finally {
+        setBusyKey(null);
       }
-      await recordAccountSecurityEventAction({
-        type: "invite_create",
-        metadata: { email: email.trim(), role },
-      });
-      toast.success("Pozvánka vytvořena");
-      setEmail("");
-      reload();
     });
   };
 
   const removeMember = (memberIdOrEmail: string) => {
+    setBusyKey(`remove:${memberIdOrEmail}`);
     startTransition(async () => {
-      const res = await authClient.organization.removeMember({
-        memberIdOrEmail,
-        organizationId: workspaceId,
-      });
-      if (res.error) {
-        toast.error(res.error.message || "Odebrání selhalo");
-        return;
+      try {
+        const res = await authClient.organization.removeMember({
+          memberIdOrEmail,
+          organizationId: workspaceId,
+        });
+        if (res.error) {
+          toast.error(res.error.message || "Odebrání selhalo");
+          return;
+        }
+        await recordAccountSecurityEventAction({
+          type: "member_remove",
+          metadata: { memberIdOrEmail },
+        });
+        toast.success("Člen odebrán");
+        reload();
+      } finally {
+        setBusyKey(null);
       }
-      await recordAccountSecurityEventAction({
-        type: "member_remove",
-        metadata: { memberIdOrEmail },
-      });
-      toast.success("Člen odebrán");
-      reload();
     });
   };
 
@@ -175,9 +186,10 @@ export function MembersPanel({
                     variant="outline"
                     size="sm"
                     disabled={pending}
+                    loading={busyKey === `remove:${m.id}`}
                     onClick={() => removeMember(m.id)}
                   >
-                    Odebrat
+                    {busyKey === `remove:${m.id}` ? "Odebírám…" : "Odebrat"}
                   </Button>
                 </div>
               ) : null}
@@ -211,8 +223,12 @@ export function MembersPanel({
                 <option value="member">member</option>
                 <option value="admin">admin</option>
               </select>
-              <Button disabled={pending} onClick={invite}>
-                Pozvat
+              <Button
+                disabled={pending}
+                loading={busyKey === "invite"}
+                onClick={invite}
+              >
+                {busyKey === "invite" ? "Zvu…" : "Pozvat"}
               </Button>
             </div>
             <div className="space-y-2">

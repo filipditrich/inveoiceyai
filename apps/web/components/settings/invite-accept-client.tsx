@@ -29,8 +29,13 @@ export function InviteAcceptClient({ invitationId }: { invitationId: string }) {
   };
 
   return (
-    <Button disabled={pending || done} onClick={accept} className="w-full">
-      {done ? "Přijato" : "Přijmout pozvánku"}
+    <Button
+      className="w-full"
+      disabled={done}
+      loading={pending}
+      onClick={accept}
+    >
+      {done ? "Přijato" : pending ? "Přijímám…" : "Přijmout pozvánku"}
     </Button>
   );
 }

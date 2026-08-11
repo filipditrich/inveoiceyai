@@ -14,6 +14,7 @@ import {
 } from "@/components/reui/data-grid/data-grid";
 import { DataGridColumnHeader } from "@/components/reui/data-grid/data-grid-column-header";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import type { IssuerSnapshot } from "@invoicey/invoice-core/schema";
 import {
   useTable,
@@ -120,9 +121,13 @@ export function IssuersDataGrid({ items }: { items: IssuerTableItem[] }) {
             </Button>
             <form action={deleteIssuer}>
               <input name="id" type="hidden" value={row.original.rowId} />
-              <Button size="sm" type="submit" variant="destructive">
+              <SubmitButton
+                pendingLabel="Mazání…"
+                size="sm"
+                variant="destructive"
+              >
                 Delete
-              </Button>
+              </SubmitButton>
             </form>
           </div>
         ),
