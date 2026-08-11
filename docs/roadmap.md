@@ -23,7 +23,11 @@ flowchart LR
     P12a --> P12b["Plan 12b<br/>MCP + DB<br/>done"]
     P7 -.parallel.-> P13b["Plan 13b<br/>Eve Slack<br/>in progress"]
     Post --> P14["Plan 14<br/>auth<br/>done"]
+<<<<<<< HEAD
     P14 --> P16["Plan 16<br/>account security"]
+=======
+    P14 --> P17["Plan 17<br/>public shell<br/>done"]
+>>>>>>> 57f4634 (feat(web): add public product and consent shell)
     P12a -.feeds.-> P13b
     P13a -.upgrades to.-> P13b
 ```
@@ -371,9 +375,9 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 
 ### Plan 14 — Authentication + multi-user
 
-**Status:** Done (implementation; docs catch-up)  
+**Status:** Done  
 **Completed:** 2026-08-11  
-**Supersedes:** Clerk path in [`decisions/0006-no-auth-mvp-multi-tenant-ready.md`](./decisions/0006-no-auth-mvp-multi-tenant-ready.md) — shipped **Better Auth** (OAuth Google/GitHub, DB sessions, workspaces = organizations per [ADR 0019](./decisions/0019-workspaces-are-better-auth-organizations.md)).
+**Supersedes:** Clerk path in [`decisions/0006-no-auth-mvp-multi-tenant-ready.md`](./decisions/0006-no-auth-mvp-multi-tenant-ready.md) — shipped **Better Auth** (OAuth Google/GitHub, DB sessions, workspaces = organizations per [ADR 0019](./decisions/0019-workspaces-are-better-auth-organizations.md) / [ADR 0018](./decisions/0018-better-auth-oauth-only.md)).
 
 **Exit criteria:**
 
@@ -381,7 +385,7 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 - [x] `users` / `sessions` / `accounts` / `members` / `invitations` (+ MCP OIDC + `api_keys` tables)
 - [x] Personal workspace bootstrap on user create; `session.activeOrganizationId`
 - [x] ADR 0018 written ([`decisions/0018-better-auth-oauth-only.md`](./decisions/0018-better-auth-oauth-only.md))
-- [ ] Members / invite accept UI (Plan 16)
+- [x] Members / invite accept UI (Plan 16)
 
 ### Plan 15 — Historical issued-invoice import
 
@@ -402,22 +406,43 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 
 ### Plan 16 — Account security & settings
 
-**Status:** In progress  
+**Status:** Done  
+**Completed:** 2026-08-11  
 **Spec:** [`specs/account-security.md`](./specs/account-security.md) · [ADR 0023](./decisions/0023-account-security-soft-devices.md) · [plan](../.cursor/plans/plan-16-account-security.md)
 
 **Goal:** Settings security (linked OAuth, sessions, soft trusted devices + new-sign-in email), members/invites UI, API keys UI with MCP/Eve PAT cutover, audit log, auth rate limits.
 
 **Exit criteria:**
 
-- [ ] Settings subnav + nav entry (Appearance / Security / Members / API keys)
-- [ ] Link/unlink providers with last-provider guard
-- [ ] List/revoke sessions + revoke others; IP headers configured
-- [ ] Soft trusted devices + `new_sign_in` email + trust link
-- [ ] Security audit feed
-- [ ] Members invite/list/role/remove + `/invite/[id]`
-- [ ] API keys UI; MCP + Eve accept user PAT or env ops key; workspace threading
-- [ ] BA DB rate limit + BotID on auth surfaces
-- [ ] Spec + ADR 0023 + this roadmap section
+- [x] Settings subnav + nav entry (Appearance / Security / Members / API keys)
+- [x] Link/unlink providers with last-provider guard
+- [x] List/revoke sessions + revoke others; IP headers configured
+- [x] Soft trusted devices + `new_sign_in` email + trust link
+- [x] Security audit feed
+- [x] Members invite/list/role/remove + `/invite/[id]`
+- [x] API keys UI; MCP + Eve accept user PAT or env ops key; workspace threading
+- [x] BA DB rate limit + BotID on auth surfaces
+- [x] Spec + ADR 0023 + this roadmap section
+- [x] Plan 16 SQL applied on Neon (`rate_limits`, `trusted_devices`, `security_audit_events`)
+
+### Plan 17 — Public website and entry shell
+
+**Status:** In progress  
+**Completed:** —  
+**Spec:** [`specs/public-shell.md`](./specs/public-shell.md) · [plan](../.cursor/plans/plan-17-public-shell.md)
+
+**Goal:** Wrap the authenticated product in a compact public website: one substantial Czech homepage, polished OAuth/onboarding entry, essential legal routes, launch metadata, and an Invoicey-native consent experience.
+
+**Exit criteria:**
+
+- [x] Public `/` with shared header/footer and anchored product sections
+- [x] Cohesive `/sign-in` and `/onboarding` entry screens
+- [x] `/privacy`, `/terms`, and `/cookies`
+- [x] First-party consent bar/preferences sheet; analytics gated by measurement consent
+- [x] Metadata, sitemap, robots, social preview, responsive and accessibility QA
+- [ ] Merged to `main` + production smoke
+
+**Out of scope:** separate product/feature/AI/pricing pages, blog/CMS, billing, or new marketing trackers.
 
 ## Plans not yet promised
 

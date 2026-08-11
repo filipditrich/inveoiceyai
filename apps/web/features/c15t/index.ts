@@ -3,3 +3,5 @@ export { C15tProvider } from "./c15t-provider";
 export { C15tBanner } from "./c15t-banner";
 export { C15tDialog } from "./c15t-dialog";
 export { C15tDevControls } from "./c15t-dev-controls";
+export { C15tSettingsLink } from "./c15t-settings-link";
+export { ConsentAwareAnalytics } from "./consent-aware-analytics";

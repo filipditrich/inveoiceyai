@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
+
+import { env } from "@/env.config.server";
 
 import Providers from "./providers";
 
@@ -21,8 +22,27 @@ const geistMono = Geist_Mono({
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("App.meta");
   return {
-    title: t("title"),
+    metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
+    title: {
+      default: t("title"),
+      template: `%s — ${t("title")}`,
+    },
     description: t("description"),
+    applicationName: t("title"),
+    category: "business",
+    openGraph: {
+      type: "website",
+      locale: "cs_CZ",
+      siteName: t("title"),
+      title: t("title"),
+      description: t("description"),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("title"),
+      description: t("description"),
+    },
+    manifest: "/manifest.webmanifest",
     icons: {
       icon: [{ url: "/brand/invoicey-logo-192.png", type: "image/png" }],
       apple: [{ url: "/apple-icon.png", type: "image/png" }],
@@ -51,7 +71,6 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
-        <Analytics />
       </body>
     </html>
   );

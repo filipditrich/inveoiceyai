@@ -29,13 +29,24 @@ export function C15tProvider({ children }: PropsWithChildren) {
     <ConsentManagerProvider
       options={{
         mode: "offline",
-        consentCategories: [
-          "necessary",
-          "experience",
-          "functionality",
-          "marketing",
-          "measurement",
-        ],
+        consentCategories: ["necessary", "measurement"],
+        legalLinks: {
+          privacyPolicy: {
+            href: "/privacy",
+            target: "_self",
+            label: "Ochrana soukromí",
+          },
+          cookiePolicy: {
+            href: "/cookies",
+            target: "_self",
+            label: "Cookies",
+          },
+          termsOfService: {
+            href: "/terms",
+            target: "_self",
+            label: "Podmínky",
+          },
+        },
         storageConfig: {
           storageKey: C15T_CONSENT_STORAGE_KEY,
         },

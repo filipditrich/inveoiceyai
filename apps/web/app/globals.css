@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@c15t/react/styles.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -152,5 +151,73 @@
   /** peach accent bar on active nav items */
   [data-slot="sidebar-menu-button"][data-active] {
     box-shadow: inset 3px 0 0 0 var(--sidebar-primary);
+  }
+
+  .marketing-grid {
+    background-image:
+      linear-gradient(
+        to right,
+        color-mix(in oklab, var(--border) 48%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in oklab, var(--border) 48%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 48px 48px;
+    mask-image: linear-gradient(to bottom, black, transparent 88%);
+  }
+
+  .legal-copy {
+    color: var(--foreground);
+  }
+
+  .legal-copy h2 {
+    margin-top: 2.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .legal-copy p,
+  .legal-copy ul {
+    margin-top: 1rem;
+    color: var(--muted-foreground);
+    font-size: 0.9375rem;
+    line-height: 1.75;
+  }
+
+  .legal-copy ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+
+  .legal-copy li + li {
+    margin-top: 0.45rem;
+  }
+
+  .legal-copy code {
+    border-radius: 0.375rem;
+    background: var(--muted);
+    padding: 0.125rem 0.35rem;
+    color: var(--foreground);
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+  }
+
+  .legal-copy > aside {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--radius-lg);
+    background: color-mix(in oklab, var(--muted) 55%, transparent);
+    padding: 1rem 1.15rem;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+
+  .legal-copy > aside strong {
+    color: var(--foreground);
   }
 }
