@@ -1,0 +1,90 @@
+"use client";
+
+import {
+  DataGrid,
+  DataGridContainer,
+} from "@/components/reui/data-grid/data-grid";
+import type { DataGridTableInstance } from "@/components/reui/data-grid/data-grid";
+import { DataGridColumnVisibility } from "@/components/reui/data-grid/data-grid-column-visibility";
+import { DataGridPagination } from "@/components/reui/data-grid/data-grid-pagination";
+import { DataGridScrollArea } from "@/components/reui/data-grid/data-grid-scroll-area";
+import { DataGridTable } from "@/components/reui/data-grid/data-grid-table";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Columns3Icon } from "lucide-react";
+import type { ReactNode } from "react";
+
+type AppDataGridProps<TData extends object> = {
+  table: DataGridTableInstance<TData>;
+  recordCount: number;
+  toolbar?: ReactNode;
+  emptyMessage?: ReactNode;
+  className?: string;
+  showColumnVisibility?: boolean;
+  showPagination?: boolean;
+};
+
+/**
+ * Shared ReUI Data Grid shell: sticky dense header, optional toolbar,
+ * column visibility, scroll area, Czech pagination labels.
+ */
+export function AppDataGrid<TData extends object>({
+  table,
+  recordCount,
+  toolbar,
+  emptyMessage = "Žádné záznamy.",
+  className,
+  showColumnVisibility = true,
+  showPagination = true,
+}: AppDataGridProps<TData>) {
+  return (
+    <DataGrid
+      emptyMessage={emptyMessage}
+      recordCount={recordCount}
+      table={table}
+      tableLayout={{
+        dense: true,
+        headerSticky: true,
+        rowBorder: true,
+        headerBackground: true,
+        columnsVisibility: showColumnVisibility,
+        width: "fixed",
+      }}
+    >
+      <div className={cn("space-y-3", className)}>
+        {toolbar || showColumnVisibility ? (
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">{toolbar}</div>
+            {showColumnVisibility ? (
+              <DataGridColumnVisibility
+                table={table}
+                trigger={
+                  <Button size="sm" variant="outline">
+                    <Columns3Icon className="size-4" />
+                    Sloupce
+                  </Button>
+                }
+              />
+            ) : null}
+          </div>
+        ) : null}
+
+        <DataGridContainer className="rounded-md border">
+          <DataGridScrollArea className="max-h-[min(70vh,720px)]">
+            <DataGridTable />
+          </DataGridScrollArea>
+        </DataGridContainer>
+
+        {showPagination ? (
+          <DataGridPagination
+            info="{from} – {to} z {count}"
+            nextPageLabel="Další stránka"
+            previousPageLabel="Předchozí stránka"
+            rowsPerPageLabel="Řádků na stránku"
+            sizes={[25, 50, 100]}
+          />
+        ) : null}
+      </div>
+    </DataGrid>
+  );
+}

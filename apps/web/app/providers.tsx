@@ -13,27 +13,30 @@ import {
 import { ModalsProvider } from "@/features/modals-manager/modals-provider";
 import { registeredModals } from "@/features/modals-manager/registered-modals";
 import { ThemeProvider } from "next-themes";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 export default function Providers({ children }: PropsWithChildren) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      disableTransitionOnChange
-      enableSystem
-      storageKey="invoicey-theme"
-    >
-      <TooltipProvider delay={0}>
-        <ModalsProvider modals={registeredModals}>
-          <C15tProvider>
-            {children}
-            <ConsentAwareAnalytics />
-            <C15tBanner />
-            <C15tDialog />
-          </C15tProvider>
-        </ModalsProvider>
-        <Toaster position="bottom-right" />
-      </TooltipProvider>
-    </ThemeProvider>
+    <NuqsAdapter>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        disableTransitionOnChange
+        enableSystem
+        storageKey="invoicey-theme"
+      >
+        <TooltipProvider delay={0}>
+          <ModalsProvider modals={registeredModals}>
+            <C15tProvider>
+              {children}
+              <ConsentAwareAnalytics />
+              <C15tBanner />
+              <C15tDialog />
+            </C15tProvider>
+          </ModalsProvider>
+          <Toaster position="bottom-right" />
+        </TooltipProvider>
+      </ThemeProvider>
+    </NuqsAdapter>
   );
 }

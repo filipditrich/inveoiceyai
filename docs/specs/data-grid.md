@@ -4,27 +4,31 @@
 
 List invoices with filters, search, sort, pagination, and row actions (view, edit draft, PDF, ISDOC, duplicate, mark paid, delete draft).
 
-## Implementation note (Plan 7)
+## Implementation
 
-MVP uses the shadcn `Table` + query-param filters with **SQL** `WHERE` / `LIMIT` / `OFFSET` (not an in-memory filter). A full ReUI Data Grid can replace the presentation layer later without changing the query helpers in `lib/invoice-status-sql.ts`.
+Presentation uses **ReUI Data Grid** + **ReUI Filters** (`apps/web/components/reui/…`) via shared wrappers in `apps/web/components/data-grid/`. Invoice list stays **server-driven**: SQL `WHERE` / `ORDER BY` / `LIMIT` / `OFFSET` in [`lib/invoices/list-query.ts`](../../apps/web/lib/invoices/list-query.ts) + [`lib/invoice-status-sql.ts`](../../apps/web/lib/invoice-status-sql.ts). TanStack Table runs in **manual** mode; URL state is typed with **nuqs**.
+
+Clients and issuers use the same Data Grid shell with **client-side** filter/sort/pagination (small workspace datasets).
 
 ## Columns
 
-| Column | Source |
-| --- | --- |
-| Number | `invoices.number` or `DRAFT` |
-| Issue date | `issue_date` |
-| Due date | `due_date` |
-| Client | `client_name` |
-| Total | `total` + currency |
-| Status | `deriveStatus(facts)` badge |
-| Actions | menu / buttons |
+| Column     | Source                       |
+| ---------- | ---------------------------- |
+| Number     | `invoices.number` or `DRAFT` |
+| Issue date | `issue_date`                 |
+| Due date   | `due_date`                   |
+| Client     | `client_name`                |
+| Total      | `total` + currency           |
+| Status     | `resolveDisplayStatus` badge |
+| Actions    | menu / buttons               |
 
-## Filters / search
+## Filters / search / sort / pagination
 
-- Query params: `status`, `issuerId`, `clientId`, `q`, `from`, `to`, `page`
+- Query params: `status`, `issuerId`, `clientId`, `q`, `from`, `to`, `page`, `pageSize`, `sort`
 - Search `q` matches number, client_name, notes (ILIKE)
-- Page size 50
+- Sort: `issueDate|dueDate|clientName|total|number`.`asc|desc` (legacy `date_asc` / `date_desc` still accepted)
+- Default page size 50; allowed sizes 25 / 50 / 100
+- Column visibility is client-local (not in the URL)
 
 ## Row actions
 
@@ -35,7 +39,10 @@ MVP uses the shadcn `Table` + query-param filters with **SQL** `WHERE` / `LIMIT`
 - Duplicate → `duplicateInvoice`
 - Mark paid → `markInvoicePaid` (issued, not cancelled)
 - Delete → `deleteInvoice` (drafts only)
+- Bulk bar: issue / paid / unmark / cancel / delete drafts
 
 ## References
 
 - [`domain/status-engine.md`](../domain/status-engine.md)
+- [ReUI Data Grid](https://reui.io/components/data-grid)
+- [ReUI Filters](https://reui.io/components/filters)

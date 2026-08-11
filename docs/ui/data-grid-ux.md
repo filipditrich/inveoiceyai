@@ -8,8 +8,8 @@ Scan and act on invoices quickly: filter by display status/parties, open PDF/ISD
 
 1. Title + primary CTA (**+ Vystavit fakturu**)
 2. **Status summary strip** — Paid / Draft / Unpaid / Overdue / Future / Cancelled with CZK totals + counts; click sets `?status=`
-3. Filter toolbar (status, issuer, client, date range, search, sort)
-4. Table with color-coded left accent + status pills + row actions (including **Vystavit** on drafts)
+3. **ReUI Filters** toolbar (search, status, issuer, client) + date range inputs; shareable via URL (nuqs)
+4. **ReUI Data Grid** — sortable columns, column visibility, page size, dense sticky header, status pills, row actions (including **Vystavit** on drafts)
 5. When rows are selected: **fixed bottom floating bar** with selection count, sum of selected totals (`formatMoney`), and actions — Vystavit / Zaplaceno / Zrušit zaplaceno / Stornovat / Smazat návrhy / Zrušit výběr
 
 ## Status presentation

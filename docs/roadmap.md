@@ -171,6 +171,7 @@ flowchart LR
 - [x] Sort, paginate (50/page default)
 - [x] Actions per row: view, edit (drafts only), download PDF, download ISDOC, duplicate (creates new draft), mark paid, delete (drafts only)
 - [x] Spec doc `specs/data-grid.md` is written before implementation
+- [x] Presentation upgraded to ReUI Data Grid + Filters + nuqs (server SQL retained; clients/issuers share the grid shell)
 
 **Doc inputs:** [`specs/data-grid.md`](./specs/data-grid.md), [`domain/status-engine.md`](./domain/status-engine.md)
 
