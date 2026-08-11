@@ -187,6 +187,8 @@ export default async function InvoicesPage({
 			},
 			todayIso,
 		),
+		importCompleteness: row.importCompleteness,
+		originProvider: row.originProvider,
 	}));
 
 	const filterBase = {
@@ -212,6 +214,13 @@ export default async function InvoicesPage({
 				<div className="flex gap-2">
 					<Button render={<Link href="/invoices/new" prefetch />} size="sm">
 						+ Vystavit fakturu
+					</Button>
+					<Button
+						render={<Link href="/invoices/import" prefetch />}
+						size="sm"
+						variant="outline"
+					>
+						Import
 					</Button>
 					<Button
 						render={<Link href="/invoices/from-json" prefetch />}

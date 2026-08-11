@@ -136,6 +136,22 @@ export const invoices = pgTable(
     /** Standalone ISDOC XML URL — set at issue / lazy backfill. */
     isdocUrl: text("isdoc_url"),
     pdfGeneratedAt: timestamp("pdf_generated_at", { withTimezone: true }),
+    /**
+     * Provenance for imported invoices.
+     * `invoicey` | `fakturaonline` | `idoklad` | `fakturoid` | `pohoda` |
+     * `money_s3` | `vyfakturuj` | `superfaktura` | `custom`
+     */
+    originProvider: text("origin_provider"),
+    originLabel: text("origin_label"),
+    originVersion: text("origin_version"),
+    /** `full` | `archive` — null means native Invoicey-issued. */
+    importCompleteness: text("import_completeness"),
+    importBatchId: uuid("import_batch_id"),
+    importedAt: timestamp("imported_at", { withTimezone: true }),
+    /** Idempotency key (ISDOC UUID or provider+number+issueDate). */
+    externalKey: text("external_key"),
+    /** When true, never regenerate PDF/ISDOC over stored originals. */
+    artifactsImmutable: integer("artifacts_immutable").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -149,6 +165,33 @@ export const invoices = pgTable(
     index("invoices_workspace_issuer_idx").on(t.workspaceId, t.issuerId),
     index("invoices_workspace_client_idx").on(t.workspaceId, t.clientId),
     index("invoices_workspace_due_date_idx").on(t.workspaceId, t.dueDate),
+    index("invoices_workspace_batch_idx").on(t.workspaceId, t.importBatchId),
+    index("invoices_workspace_external_key_idx").on(t.workspaceId, t.externalKey),
+  ],
+);
+
+/** Bulk import run metadata (web historical import). */
+export const invoiceImportBatches = pgTable(
+  "invoice_import_batches",
+  {
+    id: uuid("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    issuerId: uuid("issuer_id")
+      .notNull()
+      .references(() => issuerBusinesses.id),
+    originProvider: text("origin_provider").notNull(),
+    originLabel: text("origin_label"),
+    originVersion: text("origin_version"),
+    defaultPaid: integer("default_paid").notNull().default(0),
+    createdCount: integer("created_count").notNull().default(0),
+    skippedCount: integer("skipped_count").notNull().default(0),
+    failedCount: integer("failed_count").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("invoice_import_batches_workspace_idx").on(t.workspaceId, t.createdAt),
   ],
 );
 

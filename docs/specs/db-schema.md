@@ -105,8 +105,9 @@ erDiagram
 | `issuer_businesses` | Live issuer; snapshot is IssuerSnapshot JSON (ADR 0008) |
 | `issuer_numbering_schemes` | Per `(issuer, docType)`; `counter` / `reset_period` / `padding` (numbering.md) |
 | `clients` | Plan 4 |
-| `invoices` | Drafts: `number` + `issued_at` null; unique `(issuer_id, number)`. Issued artifacts: `pdf_url`, `isdoc_url`, `pdf_generated_at` (UploadThing; set at issue / lazy backfill) |
+| `invoices` | Drafts: `number` + `issued_at` null; unique `(issuer_id, number)`. Issued artifacts: `pdf_url`, `isdoc_url`, `pdf_generated_at`. Import provenance: `origin_*`, `import_completeness`, `import_batch_id`, `imported_at`, `external_key`, `artifacts_immutable` |
 | `invoice_items` | Denormalized lines; canonical lines also in `payload_json` |
+| `invoice_import_batches` | Bulk import run counters / defaults |
 | `presets` | MCP/Slack `issuer` \| `invoice_template`; unique `(workspace_id, kind, name)` |
 
 ## Backend selection (presets)

@@ -1,5 +1,10 @@
 import { ensureInvoiceArtifacts } from "@invoicey/invoice-tools/artifacts";
-import { InvoiceSchema, renderInvoicePdf, renderIsdoc } from "@invoicey/invoice-core";
+import {
+	InvoiceSchema,
+	isArchivePayload,
+	renderInvoicePdf,
+	renderIsdoc,
+} from "@invoicey/invoice-core";
 import type { invoices } from "@invoicey/db";
 import { NextResponse } from "next/server";
 
@@ -24,20 +29,52 @@ async function proxyStoredFile(
 	});
 }
 
-/** Serve issued artifact from storage, with lazy backfill; drafts always regenerate. */
+function displayNumber(row: InvoiceRow): string {
+	if (row.number) {
+		return row.number;
+	}
+	if (isArchivePayload(row.payloadJson)) {
+		return row.payloadJson.meta.number;
+	}
+	const parsed = InvoiceSchema.safeParse(row.payloadJson);
+	if (parsed.success) {
+		return parsed.data.meta.number;
+	}
+	return "invoice";
+}
+
+function isImmutableImport(row: InvoiceRow): boolean {
+	return row.artifactsImmutable === 1 || Boolean(row.importCompleteness);
+}
+
 export async function serveInvoicePdf(row: InvoiceRow): Promise<NextResponse> {
+	const filename = `${displayNumber(row)}-isdoc.pdf`;
+
+	if (isImmutableImport(row)) {
+		if (!row.pdfUrl) {
+			return NextResponse.json({ error: "imported_pdf_missing" }, { status: 404 });
+		}
+		try {
+			return await proxyStoredFile(row.pdfUrl, filename, "application/pdf");
+		} catch {
+			return NextResponse.json(
+				{ error: "imported_pdf_unavailable" },
+				{ status: 502 },
+			);
+		}
+	}
+
 	const parsed = InvoiceSchema.safeParse(row.payloadJson);
 	if (!parsed.success) {
 		return NextResponse.json({ error: "invalid payload" }, { status: 500 });
 	}
-	const filename = `${parsed.data.meta.number || "draft"}-isdoc.pdf`;
 
 	if (row.issuedAt) {
 		if (row.pdfUrl) {
 			try {
 				return await proxyStoredFile(row.pdfUrl, filename, "application/pdf");
 			} catch {
-				/** fall through to regenerate + re-persist */
+				/** regenerate below */
 			}
 		}
 		const artifacts = await ensureInvoiceArtifacts({
@@ -49,7 +86,7 @@ export async function serveInvoicePdf(row: InvoiceRow): Promise<NextResponse> {
 			try {
 				return await proxyStoredFile(artifacts.pdfUrl, filename, "application/pdf");
 			} catch {
-				/** fall through to live render */
+				/** live render below */
 			}
 		}
 	}
@@ -60,19 +97,39 @@ export async function serveInvoicePdf(row: InvoiceRow): Promise<NextResponse> {
 		headers: {
 			"Content-Type": "application/pdf",
 			"Content-Disposition": `attachment; filename="${filename}"`,
-			"Cache-Control": row.issuedAt
-				? "private, max-age=300"
-				: "no-store",
+			"Cache-Control": row.issuedAt ? "private, max-age=300" : "no-store",
 		},
 	});
 }
 
 export async function serveInvoiceIsdoc(row: InvoiceRow): Promise<NextResponse> {
+	const filename = `${displayNumber(row)}.isdoc`;
+
+	if (isImmutableImport(row)) {
+		if (!row.isdocUrl) {
+			return NextResponse.json(
+				{ error: "imported_isdoc_missing" },
+				{ status: 404 },
+			);
+		}
+		try {
+			return await proxyStoredFile(
+				row.isdocUrl,
+				filename,
+				"application/xml; charset=utf-8",
+			);
+		} catch {
+			return NextResponse.json(
+				{ error: "imported_isdoc_unavailable" },
+				{ status: 502 },
+			);
+		}
+	}
+
 	const parsed = InvoiceSchema.safeParse(row.payloadJson);
 	if (!parsed.success) {
 		return NextResponse.json({ error: "invalid payload" }, { status: 500 });
 	}
-	const filename = `${parsed.data.meta.number || "draft"}.isdoc`;
 
 	if (row.issuedAt) {
 		if (row.isdocUrl) {
@@ -83,7 +140,7 @@ export async function serveInvoiceIsdoc(row: InvoiceRow): Promise<NextResponse> 
 					"application/xml; charset=utf-8",
 				);
 			} catch {
-				/** fall through */
+				/** regenerate below */
 			}
 		}
 		const artifacts = await ensureInvoiceArtifacts({
@@ -99,7 +156,7 @@ export async function serveInvoiceIsdoc(row: InvoiceRow): Promise<NextResponse> 
 					"application/xml; charset=utf-8",
 				);
 			} catch {
-				/** fall through */
+				/** live render below */
 			}
 		}
 	}

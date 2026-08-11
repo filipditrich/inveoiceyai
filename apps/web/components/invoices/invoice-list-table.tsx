@@ -40,6 +40,8 @@ export type InvoiceListRow = {
 	total: string;
 	currency: string;
 	displayStatus: InvoiceDisplayStatus;
+	importCompleteness?: string | null;
+	originProvider?: string | null;
 };
 
 export function InvoiceListTable({ rows }: { rows: InvoiceListRow[] }) {
@@ -132,6 +134,16 @@ export function InvoiceListTable({ rows }: { rows: InvoiceListRow[] }) {
 									>
 										{row.number ?? "DRAFT"}
 									</Link>
+									{row.importCompleteness === "archive" ? (
+										<span className="text-muted-foreground ml-2 text-[0.65rem] uppercase tracking-wide">
+											archiv
+										</span>
+									) : null}
+									{row.originProvider ? (
+										<span className="text-muted-foreground ml-2 text-[0.65rem]">
+											· {row.originProvider}
+										</span>
+									) : null}
 								</TableCell>
 								<TableCell className="tabular-nums">
 									{formatDateCs(row.issueDate)}

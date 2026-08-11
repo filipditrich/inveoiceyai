@@ -30,3 +30,5 @@ When a decision changes:
 | [0015](./0015-rhf-plus-zod-resolver-builder.md) | RHF + zodResolver for the invoice builder | Accepted |
 | [0016](./0016-server-actions-as-mutation-surface.md) | Server Actions as the only mutation surface | Accepted |
 | [0017](./0017-tailwind-v4-tooling-baseline.md) | Tailwind CSS v4 tooling baseline for web app | Accepted |
+| [0019](./0019-workspaces-are-better-auth-organizations.md) | Workspaces are Better Auth organizations | Accepted |
+| [0021](./0021-immutable-imported-invoice-artifacts.md) | Immutable imported invoice artifacts + provenance | Accepted |

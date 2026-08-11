@@ -58,12 +58,18 @@ export function AppSidebar({
 						pathname === "/invoices" ||
 						(pathname.startsWith("/invoices/") &&
 							!pathname.startsWith("/invoices/new") &&
-							!pathname.startsWith("/invoices/from-json")),
+							!pathname.startsWith("/invoices/from-json") &&
+							!pathname.startsWith("/invoices/import")),
 				},
 				{
 					title: "New",
 					url: "/invoices/new",
 					isActive: pathname === "/invoices/new",
+				},
+				{
+					title: "Import",
+					url: "/invoices/import",
+					isActive: pathname === "/invoices/import",
 				},
 				{
 					title: "From JSON",

@@ -318,6 +318,23 @@ Plans listed here do not block the MVP and can be picked up in parallel with Pla
 - All existing data already has `workspace_id` so this is additive, not migration-heavy
 - Slack/MCP gain proper user attribution
 
+### Plan 15 — Historical issued-invoice import
+
+**Status:** In progress  
+**Spec:** [`specs/invoice-import.md`](./specs/invoice-import.md) · [ADR 0021](./decisions/0021-immutable-imported-invoice-artifacts.md)
+
+**Goal:** Bulk-import historical PDFs (ISDOC → full; no ISDOC → archive + original PDF) with provenance and immutable artifacts.
+
+**Exit criteria:**
+
+- [x] Provenance columns + `insertIssuedImport` + `artifacts_immutable` guard
+- [x] `extractIsdocFromPdf` + `parseIsdoc` + round-trip tests
+- [x] UploadThing import endpoints + `/invoices/import` review UI
+- [x] Archive mode + paid-at-import + origin badges
+- [x] Numbering counter sync after import
+- [ ] `bun db:push` applied on target Neon
+- [ ] Manual smoke: import FO PDF with ISDOC + one without
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:

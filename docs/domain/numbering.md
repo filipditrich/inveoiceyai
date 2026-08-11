@@ -228,7 +228,7 @@ The unique constraint guarantees one scheme per `(issuer, docType)`. Concurrency
 
 ### TODO(plan-7): renumber-from-N for imports
 
-When importing historical invoices (CSV, ISDOC, …), we need to set the counter to the highest imported number and continue from there. UI surface lands during Plan 7's import work (which is itself post-MVP).
+**Resolved (historical import):** after a bulk import, `syncNumberingCounterAfterImport` raises `issuer_numbering_schemes.counter` (and `counterYear` when yearly) to the highest numeric hint parsed from existing issued numbers for that issuer/docType. UI: [`/invoices/import`](../specs/invoice-import.md).
 
 ### TODO(plan-3): variable-symbol synthesis from `meta.number`
 

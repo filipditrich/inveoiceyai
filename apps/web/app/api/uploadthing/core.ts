@@ -42,6 +42,22 @@ export const ourFileRouter = {
 		.onUploadComplete(async ({ file }) => {
 			return { url: file.ufsUrl };
 		}),
+	/** Bulk PDF import — stored as immutable invoice artifacts. */
+	importedInvoicePdf: f({
+		"application/pdf": { maxFileSize: "16MB", maxFileCount: 40 },
+	})
+		.middleware(authedMiddleware)
+		.onUploadComplete(async ({ file }) => {
+			return { url: file.ufsUrl, name: file.name };
+		}),
+	importedInvoiceIsdoc: f({
+		"application/xml": { maxFileSize: "2MB", maxFileCount: 40 },
+		"text/xml": { maxFileSize: "2MB", maxFileCount: 40 },
+	})
+		.middleware(authedMiddleware)
+		.onUploadComplete(async ({ file }) => {
+			return { url: file.ufsUrl, name: file.name };
+		}),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

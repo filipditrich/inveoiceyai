@@ -26,6 +26,15 @@ Client receives `file.ufsUrl` (or `file.url`) from `onUploadComplete` and writes
 
 Canonical PDF (ISDOC.PDF) and standalone `.isdoc` XML are uploaded with **`UTApi.uploadFiles`** from `@invoicey/invoice-tools/artifacts` after issue (and on lazy backfill). Requires `UPLOADTHING_TOKEN`. URLs land on `invoices.pdf_url` / `invoices.isdoc_url`.
 
+## Historical import (client upload)
+
+| Endpoint | MIME | Max size | Count |
+| --- | --- | --- | --- |
+| `importedInvoicePdf` | PDF | 16 MB | 40 |
+| `importedInvoiceIsdoc` | XML | 2 MB | 40 |
+
+Authenticated via workspace session middleware. Spec: [`invoice-import.md`](./invoice-import.md).
+
 ## Open questions / TODOs
 
 - `TODO(plan-9):` GC unreferenced UploadThing files (issuer assets + orphaned invoice artifacts)

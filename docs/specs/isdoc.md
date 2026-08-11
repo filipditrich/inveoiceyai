@@ -125,6 +125,16 @@ For each `items[]` (sorted by `position`):
 
 Recommended download suffix: `-isdoc.pdf`. Standalone `.isdoc` via `renderIsdoc` remains available.
 
+## Import (parse)
+
+| API | Role |
+| --- | --- |
+| `extractIsdocFromPdf(bytes)` | Read EmbeddedFiles / AF attachment named `invoice.isdoc` (or `*.isdoc`) |
+| `parseIsdoc(xml, { issuer })` | Map ISDOC 6.0.x → `InvoiceSchema` (issuer locked from workspace) |
+| `readPdfOriginHints(bytes)` | Producer/Creator/Keywords for origin heuristics |
+
+Round-trip tests: Invoicey fixtures `renderIsdoc` → `parseIsdoc`. Product flow: [`invoice-import.md`](./invoice-import.md).
+
 Not claimed: full official ISDOC.PDF / PDF/A-3a (tagged PDF, XMP `pdfaid`, ICC OutputIntent, Filespec `/AFRelationship`). Public-admin `metadata-invoice-nsessl.xml` and `.isdocx` are out of scope.
 
 ## MVP limitations

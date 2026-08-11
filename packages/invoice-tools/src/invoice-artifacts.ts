@@ -77,6 +77,17 @@ export async function ensureInvoiceArtifacts(options: {
     };
   }
 
+  if (row.artifactsImmutable === 1 || row.importCompleteness) {
+    if (row.pdfUrl) {
+      return {
+        pdfUrl: row.pdfUrl,
+        isdocUrl: row.isdocUrl ?? row.pdfUrl,
+        pdfGeneratedAt: row.pdfGeneratedAt ?? row.issuedAt,
+      };
+    }
+    return null;
+  }
+
   if (!hasUploadToken()) {
     return null;
   }

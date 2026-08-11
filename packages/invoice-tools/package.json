@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./mcp": "./src/register-mcp-tools.ts",
     "./ops": "./src/invoice-ops.ts",
-    "./artifacts": "./src/invoice-artifacts.ts"
+    "./artifacts": "./src/invoice-artifacts.ts",
+    "./import": "./src/invoice-import.ts"
   },
   "scripts": {
     "lint": "echo \"skip: eslint not wired for invoice-tools yet\"",

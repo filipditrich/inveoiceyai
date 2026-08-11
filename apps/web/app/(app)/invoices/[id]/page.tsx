@@ -11,6 +11,11 @@ import { Button } from "@/components/ui/button";
 import { formatDateCs, formatMoney } from "@/lib/format";
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
 import { requireWorkspace } from "@/lib/auth/session";
+import {
+	isArchivePayload,
+	ORIGIN_PROVIDER_LABELS,
+	type InvoiceOriginProvider,
+} from "@invoicey/invoice-core";
 import { InvoiceSchema } from "@invoicey/invoice-core/schema";
 import { resolveDisplayStatus } from "@invoicey/invoice-core/status-display";
 import { invoices } from "@invoicey/db";
@@ -42,7 +47,8 @@ export default async function InvoiceDetailPage({
 		notFound();
 	}
 
-	const payload = InvoiceSchema.safeParse(row.payloadJson);
+	const archive = isArchivePayload(row.payloadJson) ? row.payloadJson : null;
+	const payload = archive ? null : InvoiceSchema.safeParse(row.payloadJson);
 	const displayStatus = resolveDisplayStatus(
 		{
 			issuedAt: row.issuedAt,
@@ -53,6 +59,11 @@ export default async function InvoiceDetailPage({
 		},
 		pragueTodayIso(),
 	);
+	const originProvider = row.originProvider as InvoiceOriginProvider | null;
+	const originLabel =
+		originProvider && originProvider in ORIGIN_PROVIDER_LABELS
+			? ORIGIN_PROVIDER_LABELS[originProvider]
+			: row.originLabel;
 
 	return (
 		<div className="space-y-6 px-4 py-6 lg:px-6">
@@ -64,6 +75,22 @@ export default async function InvoiceDetailPage({
 					<p className="text-muted-foreground flex flex-wrap items-center gap-2">
 						<span>{row.clientName}</span>
 						<InvoiceStatusBadge status={displayStatus} />
+						{row.importCompleteness === "archive" ? (
+							<span className="rounded border px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide">
+								Archiv
+							</span>
+						) : null}
+						{row.importCompleteness === "full" ? (
+							<span className="rounded border px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide">
+								Import
+							</span>
+						) : null}
+						{originLabel ? (
+							<span className="text-xs">
+								{originLabel}
+								{row.originVersion ? ` @${row.originVersion}` : ""}
+							</span>
+						) : null}
 					</p>
 				</div>
 				<div className="flex flex-wrap gap-2">
@@ -91,13 +118,15 @@ export default async function InvoiceDetailPage({
 					>
 						PDF
 					</Button>
-					<Button
-						render={<a href={`/api/invoices/${id}/isdoc`} download />}
-						size="sm"
-						variant="outline"
-					>
-						ISDOC
-					</Button>
+					{row.isdocUrl || (!row.importCompleteness && payload?.success) ? (
+						<Button
+							render={<a href={`/api/invoices/${id}/isdoc`} download />}
+							size="sm"
+							variant="outline"
+						>
+							ISDOC
+						</Button>
+					) : null}
 					<form action={duplicateInvoice}>
 						<input name="id" type="hidden" value={id} />
 						<Button size="sm" type="submit" variant="secondary">
@@ -174,7 +203,13 @@ export default async function InvoiceDetailPage({
 				</div>
 			</dl>
 
-			{payload.success ? (
+			{archive ? (
+				<p className="text-muted-foreground rounded-md border p-3 text-sm">
+					Archivní import — položky nejsou k dispozici. Stáhněte originální PDF.
+				</p>
+			) : null}
+
+			{payload?.success ? (
 				<div className="rounded-md border">
 					<table className="w-full text-sm">
 						<thead>
@@ -205,9 +240,11 @@ export default async function InvoiceDetailPage({
 						</tbody>
 					</table>
 				</div>
-			) : (
+			) : null}
+
+			{!archive && payload && !payload.success ? (
 				<p className="text-destructive text-sm">Neplatný payload v DB.</p>
-			)}
+			) : null}
 
 			<p>
 				<Link className="text-sm underline" href="/invoices">

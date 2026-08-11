@@ -60,6 +60,7 @@ At **issue** time (and lazily on first download if missing), Invoicey uploads th
 
 - **Drafts / live preview:** still generate on demand (`/api/demo/invoice-pdf`); not persisted.
 - **Issued downloads** (`/api/invoices/[id]/pdf`, `/isdoc`): prefer stored URLs (proxied with immutable cache); if missing or `UPLOADTHING_TOKEN` unset, regenerate (and backfill when token is available).
+- **Imported invoices** (`artifacts_immutable` / `import_completeness`): never regenerate; always serve the stored original (see [`invoice-import.md`](./invoice-import.md), [ADR 0021](../decisions/0021-immutable-imported-invoice-artifacts.md)).
 - Helpers: `@invoicey/invoice-tools/artifacts` (`ensureInvoiceArtifacts` / `tryPersistInvoiceArtifacts`).
 
 ## Determinism & golden PDF tests

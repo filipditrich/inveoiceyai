@@ -9,8 +9,10 @@
     "./numbering": "./src/numbering.ts",
     "./status": "./src/status.ts",
     "./status-display": "./src/status-display.ts",
-    "./totals": "./src/totals.ts"
+    "./totals": "./src/totals.ts",
+    "./import": "./src/import/index.ts"
   },
+
   "scripts": {
     "lint": "echo \"skip: eslint not wired for invoice-core yet\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
