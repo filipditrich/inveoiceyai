@@ -41,7 +41,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 	const navMain = [
 		{
-			title: "Dashboard",
+			title: "Přehled",
 			url: "/dashboard",
 			icon: <LayoutDashboardIcon />,
 			isActive: pathname === "/dashboard",
@@ -53,7 +53,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			isActive: invoicesOpen,
 			items: [
 				{
-					title: "Overview",
+					title: "Faktury",
 					url: "/invoices",
 					isActive:
 						pathname === "/invoices" ||

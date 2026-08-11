@@ -22,6 +22,9 @@ Slack Eve reuses the same handlers in-process (`apps/web/agent/tools`) — see [
 | `lookup_business` | `{ ico }` | ARES draft client fields or error |
 | `search_business` | `{ query, limit? }` | ARES name search → matches with IČO + address |
 | `create_invoice` | `{ draft?, issuerPresetId?, templatePresetId? }` | Validated invoice + PDF base64 + ISDOC XML, or issues |
+| `list_invoices` | `{ limit?, unpaidOnly? }` | Summaries with `status` + `displayStatus` (needs `DATABASE_URL`) |
+| `get_invoice` | `{ id }` | Summary + validated payload when present (needs DB) |
+| `mark_invoice_paid` | `{ id }` | Sets `paidAt` (needs DB) |
 | `list_presets` / `get_preset` / `save_preset` / `delete_preset` | preset ids / kind / data | Preset records on disk |
 
 ### Preset kinds
@@ -109,10 +112,15 @@ flowchart LR
 | `INVOICEY_PRESETS_PATH` | no | Absolute path to presets JSON |
 | `MCP_API_KEY` | to use `/api/mcp` | Bearer gate. Optional in the env schema (the app boots without it); the route fails closed when unset |
 
-## Out of scope (Plan 12b)
+## Plan 12b (shipped)
 
-- DB-backed `list_invoices` / `get_invoice` / `mark_paid`
+- DB-backed `list_invoices` / `get_invoice` / `mark_invoice_paid` via `@invoicey/invoice-tools/ops`
+- Summaries include domain `status` and FO `displayStatus`
+
+## Still out of scope
+
 - Durable remote presets (Blob/DB)
+- MCP `unmark_invoice_paid` (web-only for now)
 - OAuth / Clerk (Plan 14)
 
 ## References

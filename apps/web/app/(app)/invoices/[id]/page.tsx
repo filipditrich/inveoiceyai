@@ -3,11 +3,14 @@ import {
 	deleteInvoice,
 	duplicateInvoice,
 	markInvoicePaid,
+	unmarkInvoicePaid,
 } from "@/actions/invoices";
+import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
 import { Button } from "@/components/ui/button";
+import { pragueTodayIso } from "@/lib/invoice-status-sql";
 import { getDefaultWorkspaceId } from "@/lib/workspace-id";
 import { InvoiceSchema } from "@invoicey/invoice-core/schema";
-import { deriveStatus } from "@invoicey/invoice-core/status";
+import { resolveDisplayStatus } from "@invoicey/invoice-core/status-display";
 import { invoices } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
@@ -38,14 +41,15 @@ export default async function InvoiceDetailPage({
 	}
 
 	const payload = InvoiceSchema.safeParse(row.payloadJson);
-	const status = deriveStatus(
+	const displayStatus = resolveDisplayStatus(
 		{
 			issuedAt: row.issuedAt,
-			dueDate: new Date(`${row.dueDate}T12:00:00.000Z`),
+			dueDate: row.dueDate,
 			paidAt: row.paidAt,
 			cancelledAt: row.cancelledAt,
+			issueDate: row.issueDate,
 		},
-		new Date(),
+		pragueTodayIso(),
 	);
 
 	return (
@@ -55,13 +59,13 @@ export default async function InvoiceDetailPage({
 					<h1 className="text-2xl font-semibold tracking-tight tabular-nums">
 						{row.number ?? "DRAFT"}
 					</h1>
-					<p className="text-muted-foreground">
-						{row.clientName} ·{" "}
-						<span className="capitalize">{status}</span>
+					<p className="text-muted-foreground flex flex-wrap items-center gap-2">
+						<span>{row.clientName}</span>
+						<InvoiceStatusBadge status={displayStatus} />
 					</p>
 				</div>
 				<div className="flex flex-wrap gap-2">
-					{status === "draft" ? (
+					{displayStatus === "draft" ? (
 						<Button
 							render={<Link href={`/invoices/${id}/edit`} prefetch />}
 							size="sm"
@@ -89,7 +93,9 @@ export default async function InvoiceDetailPage({
 							Duplicate
 						</Button>
 					</form>
-					{status === "issued" || status === "overdue" ? (
+					{displayStatus === "unpaid" ||
+					displayStatus === "overdue" ||
+					displayStatus === "future" ? (
 						<>
 							<form action={markInvoicePaid}>
 								<input name="id" type="hidden" value={id} />
@@ -105,7 +111,15 @@ export default async function InvoiceDetailPage({
 							</form>
 						</>
 					) : null}
-					{status === "draft" ? (
+					{displayStatus === "paid" ? (
+						<form action={unmarkInvoicePaid}>
+							<input name="id" type="hidden" value={id} />
+							<Button size="sm" type="submit" variant="secondary">
+								Unmark paid
+							</Button>
+						</form>
+					) : null}
+					{displayStatus === "draft" ? (
 						<form action={deleteInvoice}>
 							<input name="id" type="hidden" value={id} />
 							<Button size="sm" type="submit" variant="destructive">

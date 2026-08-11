@@ -1,12 +1,15 @@
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
 import { getDefaultWorkspaceId } from "@/lib/workspace-id";
-import { deriveStatus, type InvoiceStatus } from "@invoicey/invoice-core/status";
+import {
+	resolveDisplayStatus,
+	type InvoiceDisplayStatus,
+} from "@invoicey/invoice-core/status-display";
 import { issuerBusinesses, invoices } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { and, desc, eq } from "drizzle-orm";
 
 export type StatusBucket = {
-	status: InvoiceStatus | "upcoming";
+	status: InvoiceDisplayStatus;
 	count: number;
 	total: number;
 };
@@ -25,14 +28,15 @@ export type RecentInvoice = {
 	currency: string;
 	issueDate: string;
 	dueDate: string;
-	status: InvoiceStatus;
+	displayStatus: InvoiceDisplayStatus;
 };
 
-function addDaysIso(iso: string, days: number): string {
-	const d = new Date(`${iso}T12:00:00.000Z`);
-	d.setUTCDate(d.getUTCDate() + days);
-	return d.toISOString().slice(0, 10);
-}
+export type DashboardBalance = {
+	issuedVolume12m: number;
+	issuedCount12m: number;
+	outstanding: number;
+	outstandingCount: number;
+};
 
 function monthKey(d: Date): string {
 	return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
@@ -47,11 +51,11 @@ export async function loadDashboardMetrics(opts?: {
 	buckets: StatusBucket[];
 	monthly: MonthPoint[];
 	recent: RecentInvoice[];
+	balance: DashboardBalance;
 	issuerCount: number;
 }> {
 	const workspaceId = getDefaultWorkspaceId();
 	const todayIso = pragueTodayIso();
-	const upcomingEnd = addDaysIso(todayIso, 14);
 
 	const base = [eq(invoices.workspaceId, workspaceId)];
 	if (opts?.issuerId) {
@@ -64,68 +68,77 @@ export async function loadDashboardMetrics(opts?: {
 		.where(and(...base));
 
 	const now = new Date();
-	const tally: Record<InvoiceStatus, { count: number; total: number }> = {
-		draft: { count: 0, total: 0 },
-		issued: { count: 0, total: 0 },
-		overdue: { count: 0, total: 0 },
-		paid: { count: 0, total: 0 },
-		cancelled: { count: 0, total: 0 },
-	};
-	let upcoming = { count: 0, total: 0 };
+	const tally: Record<InvoiceDisplayStatus, { count: number; total: number }> =
+		{
+			draft: { count: 0, total: 0 },
+			unpaid: { count: 0, total: 0 },
+			overdue: { count: 0, total: 0 },
+			paid: { count: 0, total: 0 },
+			future: { count: 0, total: 0 },
+			cancelled: { count: 0, total: 0 },
+		};
 
 	for (const row of rows) {
-		const status = deriveStatus(
+		const status = resolveDisplayStatus(
 			{
 				issuedAt: row.issuedAt,
-				dueDate: new Date(`${row.dueDate}T12:00:00.000Z`),
+				dueDate: row.dueDate,
 				paidAt: row.paidAt,
 				cancelledAt: row.cancelledAt,
+				issueDate: row.issueDate,
 			},
-			now,
+			todayIso,
 		);
 		const amount = Number(row.total) || 0;
 		tally[status].count += 1;
 		tally[status].total += amount;
-
-		if (
-			status === "issued" &&
-			row.dueDate >= todayIso &&
-			row.dueDate <= upcomingEnd
-		) {
-			upcoming.count += 1;
-			upcoming.total += amount;
-		}
 	}
 
-	const buckets: StatusBucket[] = (
-		["draft", "issued", "paid", "overdue"] as const
-	).map((status) => ({
+	const primary: InvoiceDisplayStatus[] = [
+		"paid",
+		"draft",
+		"unpaid",
+		"overdue",
+		"future",
+	];
+	const buckets: StatusBucket[] = primary.map((status) => ({
 		status,
 		count: tally[status].count,
 		total: tally[status].total,
 	}));
-	buckets.push({
-		status: "upcoming",
-		count: upcoming.count,
-		total: upcoming.total,
-	});
+	if (tally.cancelled.count > 0) {
+		buckets.push({
+			status: "cancelled",
+			count: tally.cancelled.count,
+			total: tally.cancelled.total,
+		});
+	}
 
 	const monthlyMap = new Map<string, MonthPoint>();
 	const cursor = new Date(
 		Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1),
 	);
+	const windowStart = new Date(cursor);
 	for (let i = 0; i < 12; i++) {
 		const key = monthKey(cursor);
 		monthlyMap.set(key, { month: key, issued: 0, paid: 0 });
 		cursor.setUTCMonth(cursor.getUTCMonth() + 1);
 	}
 
+	let issuedVolume12m = 0;
+	let issuedCount12m = 0;
 	for (const row of rows) {
 		if (row.issuedAt) {
-			const key = monthKey(new Date(row.issuedAt));
+			const issuedAt = new Date(row.issuedAt);
+			const key = monthKey(issuedAt);
 			const point = monthlyMap.get(key);
+			const amount = Number(row.total) || 0;
 			if (point) {
-				point.issued += Number(row.total) || 0;
+				point.issued += amount;
+			}
+			if (issuedAt >= windowStart) {
+				issuedVolume12m += amount;
+				issuedCount12m += 1;
 			}
 		}
 		if (row.paidAt) {
@@ -136,6 +149,11 @@ export async function loadDashboardMetrics(opts?: {
 			}
 		}
 	}
+
+	const outstanding =
+		tally.unpaid.total + tally.overdue.total + tally.future.total;
+	const outstandingCount =
+		tally.unpaid.count + tally.overdue.count + tally.future.count;
 
 	const recentRows = await db
 		.select()
@@ -152,14 +170,15 @@ export async function loadDashboardMetrics(opts?: {
 		currency: row.currency,
 		issueDate: row.issueDate,
 		dueDate: row.dueDate,
-		status: deriveStatus(
+		displayStatus: resolveDisplayStatus(
 			{
 				issuedAt: row.issuedAt,
-				dueDate: new Date(`${row.dueDate}T12:00:00.000Z`),
+				dueDate: row.dueDate,
 				paidAt: row.paidAt,
 				cancelledAt: row.cancelledAt,
+				issueDate: row.issueDate,
 			},
-			now,
+			todayIso,
 		),
 	}));
 
@@ -172,6 +191,12 @@ export async function loadDashboardMetrics(opts?: {
 		buckets,
 		monthly: [...monthlyMap.values()],
 		recent,
+		balance: {
+			issuedVolume12m,
+			issuedCount12m,
+			outstanding,
+			outstandingCount,
+		},
 		issuerCount: issuerRows.length,
 	};
 }

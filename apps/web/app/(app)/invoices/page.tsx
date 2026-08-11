@@ -1,25 +1,22 @@
-import {
-	cancelInvoice,
-	deleteInvoice,
-	duplicateInvoice,
-	markInvoicePaid,
-} from "@/actions/invoices";
+import { InvoiceListTable } from "@/components/invoices/invoice-list-table";
+import { InvoiceStatusSummary } from "@/components/invoices/invoice-status-summary";
 import { Button } from "@/components/ui/button";
 import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
-import { pragueTodayIso, statusWhere } from "@/lib/invoice-status-sql";
+	displayStatusWhere,
+	pragueTodayIso,
+} from "@/lib/invoice-status-sql";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import {
 	ensureDefaultWorkspace,
 	getDefaultWorkspaceId,
 } from "@/lib/workspace-id";
-import { deriveStatus, type InvoiceStatus } from "@invoicey/invoice-core/status";
+import {
+	DISPLAY_STATUS_LABELS,
+	INVOICE_DISPLAY_STATUSES,
+	normalizeDisplayStatusParam,
+	resolveDisplayStatus,
+	type InvoiceDisplayStatus,
+} from "@invoicey/invoice-core/status-display";
 import { invoices } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import {
@@ -32,6 +29,7 @@ import {
 	ilike,
 	lte,
 	or,
+	type SQL,
 } from "drizzle-orm";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -40,6 +38,10 @@ const PAGE_SIZE = 50;
 
 type Search = Promise<{
 	invalid?: string;
+	toast?: string;
+	ok?: string;
+	skipped?: string;
+	failed?: string;
 	status?: string;
 	issuerId?: string;
 	clientId?: string;
@@ -50,39 +52,21 @@ type Search = Promise<{
 	sort?: string;
 }>;
 
-const STATUS_VALUES: InvoiceStatus[] = [
-	"draft",
-	"issued",
-	"overdue",
-	"paid",
-	"cancelled",
-];
-
-const STATUS_LABELS: Record<InvoiceStatus, string> = {
-	draft: "Draft",
-	issued: "Issued",
-	overdue: "Overdue",
-	paid: "Paid",
-	cancelled: "Cancelled",
-};
-
 function recordsLabel(n: number): string {
-	return n === 1 ? "1 record" : `${n} records`;
+	return n === 1 ? "1 záznam" : `${n} záznamů`;
 }
 
-export default async function InvoicesPage({
-	searchParams,
-}: {
-	searchParams: Search;
-}) {
-	await ensureDefaultWorkspace();
-	const sp = await searchParams;
-	const workspaceId = getDefaultWorkspaceId();
-	const page = Math.max(1, Number(sp.page ?? "1") || 1);
-	const sort = sp.sort === "date_asc" ? "date_asc" : "date_desc";
-	const todayIso = pragueTodayIso();
-
-	const conditions = [eq(invoices.workspaceId, workspaceId)];
+function buildBaseConditions(
+	workspaceId: string,
+	sp: {
+		issuerId?: string;
+		clientId?: string;
+		q?: string;
+		from?: string;
+		to?: string;
+	},
+): SQL[] {
+	const conditions: SQL[] = [eq(invoices.workspaceId, workspaceId)];
 	if (sp.issuerId) {
 		conditions.push(eq(invoices.issuerId, sp.issuerId));
 	}
@@ -105,19 +89,33 @@ export default async function InvoicesPage({
 			)!,
 		);
 	}
+	return conditions;
+}
 
-	const statusFilter =
-		sp.status && STATUS_VALUES.includes(sp.status as InvoiceStatus)
-			? (sp.status as InvoiceStatus)
-			: null;
+export default async function InvoicesPage({
+	searchParams,
+}: {
+	searchParams: Search;
+}) {
+	await ensureDefaultWorkspace();
+	const sp = await searchParams;
+	const workspaceId = getDefaultWorkspaceId();
+	const page = Math.max(1, Number(sp.page ?? "1") || 1);
+	const sort = sp.sort === "date_asc" ? "date_asc" : "date_desc";
+	const todayIso = pragueTodayIso();
+	const statusFilter = normalizeDisplayStatusParam(sp.status);
+
+	const baseConditions = buildBaseConditions(workspaceId, sp);
+	const listConditions = [...baseConditions];
 	if (statusFilter) {
-		const pred = statusWhere(statusFilter, todayIso);
+		const pred = displayStatusWhere(statusFilter, todayIso);
 		if (pred) {
-			conditions.push(pred);
+			listConditions.push(pred);
 		}
 	}
 
-	const whereClause = and(...conditions);
+	const whereClause = and(...listConditions);
+	const summaryWhere = and(...baseConditions);
 
 	const [totalRow] = await db
 		.select({ value: count() })
@@ -128,48 +126,96 @@ export default async function InvoicesPage({
 	const safePage = Math.min(page, pageCount);
 	const offset = (safePage - 1) * PAGE_SIZE;
 
-	const rows = await db
-		.select()
-		.from(invoices)
-		.where(whereClause)
-		.orderBy(
-			sort === "date_asc" ? asc(invoices.issueDate) : desc(invoices.issueDate),
-			desc(invoices.createdAt),
-		)
-		.limit(PAGE_SIZE)
-		.offset(offset);
-
-	const now = new Date();
-	const pageItems = rows.map((row) => ({
-		row,
-		status: deriveStatus(
-			{
-				issuedAt: row.issuedAt,
-				dueDate: new Date(`${row.dueDate}T12:00:00.000Z`),
-				paidAt: row.paidAt,
-				cancelledAt: row.cancelledAt,
-			},
-			now,
-		),
-	}));
-
-	const [issuers, clients] = await Promise.all([
+	const [rows, summaryRows, issuers, clients] = await Promise.all([
+		db
+			.select()
+			.from(invoices)
+			.where(whereClause)
+			.orderBy(
+				sort === "date_asc" ? asc(invoices.issueDate) : desc(invoices.issueDate),
+				desc(invoices.createdAt),
+			)
+			.limit(PAGE_SIZE)
+			.offset(offset),
+		db.select().from(invoices).where(summaryWhere),
 		loadIssuerOptions(),
 		loadClientOptions(),
 	]);
 
+	const tally: Record<
+		InvoiceDisplayStatus,
+		{ count: number; total: number }
+	> = {
+		draft: { count: 0, total: 0 },
+		unpaid: { count: 0, total: 0 },
+		overdue: { count: 0, total: 0 },
+		paid: { count: 0, total: 0 },
+		future: { count: 0, total: 0 },
+		cancelled: { count: 0, total: 0 },
+	};
+	for (const row of summaryRows) {
+		const display = resolveDisplayStatus(
+			{
+				issuedAt: row.issuedAt,
+				dueDate: row.dueDate,
+				paidAt: row.paidAt,
+				cancelledAt: row.cancelledAt,
+				issueDate: row.issueDate,
+			},
+			todayIso,
+		);
+		tally[display].count += 1;
+		tally[display].total += Number(row.total) || 0;
+	}
+	const summaryBuckets = INVOICE_DISPLAY_STATUSES.map((status) => ({
+		status,
+		count: tally[status].count,
+		total: tally[status].total,
+	}));
+
+	const pageItems = rows.map((row) => ({
+		id: row.id,
+		number: row.number,
+		issueDate: row.issueDate,
+		dueDate: row.dueDate,
+		clientName: row.clientName,
+		total: String(row.total),
+		currency: row.currency,
+		displayStatus: resolveDisplayStatus(
+			{
+				issuedAt: row.issuedAt,
+				dueDate: row.dueDate,
+				paidAt: row.paidAt,
+				cancelledAt: row.cancelledAt,
+				issueDate: row.issueDate,
+			},
+			todayIso,
+		),
+	}));
+
+	const filterBase = {
+		issuerId: sp.issuerId,
+		clientId: sp.clientId,
+		q: sp.q,
+		from: sp.from,
+		to: sp.to,
+		sort: sp.sort,
+	};
+
 	return (
-		<div className="space-y-4 px-4 py-6 lg:px-6">
+		<div className="@container/main space-y-4 px-4 py-6 lg:px-6">
 			<div className="flex flex-wrap items-center justify-between gap-2">
 				<div>
-					<h1 className="text-2xl font-semibold tracking-tight">Invoices</h1>
+					<h1 className="text-2xl font-semibold tracking-tight">
+						Vystavené faktury
+					</h1>
 					<p className="text-muted-foreground">
-						Filter, PDF / ISDOC, and status actions.
+						Stavy, filtry a akce nad fakturami.
 					</p>
 				</div>
 				<div className="flex gap-2">
 					<Button render={<Link href="/invoices/new" prefetch />} size="sm">
-						New invoice
+						+ Vystavit fakturu
 					</Button>
 					<Button
 						render={<Link href="/invoices/from-json" prefetch />}
@@ -184,22 +230,38 @@ export default async function InvoicesPage({
 			{sp.invalid ? (
 				<p className="text-destructive text-sm">Chyba: {sp.invalid}</p>
 			) : null}
+			{sp.toast?.startsWith("bulk_") ? (
+				<p className="text-muted-foreground text-sm">
+					Hromadná akce: {sp.ok ?? "0"} ok, {sp.skipped ?? "0"} přeskočeno,{" "}
+					{sp.failed ?? "0"} chyb.
+				</p>
+			) : null}
+
+			<InvoiceStatusSummary
+				activeStatus={statusFilter}
+				buckets={summaryBuckets}
+				filterBase={filterBase}
+			/>
 
 			<form className="flex flex-wrap items-end gap-3 rounded-md border p-3">
-				<FilterField label="Status" name="status" defaultValue={sp.status}>
-					<option value="">All</option>
-					{STATUS_VALUES.map((s) => (
+				<FilterField
+					defaultValue={statusFilter ?? ""}
+					label="Stav"
+					name="status"
+				>
+					<option value="">Vše</option>
+					{INVOICE_DISPLAY_STATUSES.map((s) => (
 						<option key={s} value={s}>
-							{STATUS_LABELS[s]}
+							{DISPLAY_STATUS_LABELS[s]}
 						</option>
 					))}
 				</FilterField>
 				<FilterField
-					label="Issuer"
-					name="issuerId"
 					defaultValue={sp.issuerId}
+					label="Dodavatel"
+					name="issuerId"
 				>
-					<option value="">All</option>
+					<option value="">Vše</option>
 					{issuers.map((i) => (
 						<option key={i.id} value={i.id}>
 							{i.snapshot.name}
@@ -207,11 +269,11 @@ export default async function InvoicesPage({
 					))}
 				</FilterField>
 				<FilterField
-					label="Client"
-					name="clientId"
 					defaultValue={sp.clientId}
+					label="Odběratel"
+					name="clientId"
 				>
-					<option value="">All</option>
+					<option value="">Vše</option>
 					{clients.map((c) => (
 						<option key={c.id} value={c.id}>
 							{c.snapshot.name}
@@ -219,7 +281,7 @@ export default async function InvoicesPage({
 					))}
 				</FilterField>
 				<label className="space-y-1 text-xs">
-					<span className="text-muted-foreground">From</span>
+					<span className="text-muted-foreground">Od</span>
 					<input
 						className="border-input bg-background block h-9 rounded-md border px-2 text-sm"
 						defaultValue={sp.from ?? ""}
@@ -228,7 +290,7 @@ export default async function InvoicesPage({
 					/>
 				</label>
 				<label className="space-y-1 text-xs">
-					<span className="text-muted-foreground">To</span>
+					<span className="text-muted-foreground">Do</span>
 					<input
 						className="border-input bg-background block h-9 rounded-md border px-2 text-sm"
 						defaultValue={sp.to ?? ""}
@@ -237,167 +299,54 @@ export default async function InvoicesPage({
 					/>
 				</label>
 				<label className="space-y-1 text-xs">
-					<span className="text-muted-foreground">Search</span>
+					<span className="text-muted-foreground">Hledat</span>
 					<input
 						className="border-input bg-background block h-9 rounded-md border px-2 text-sm"
 						defaultValue={sp.q ?? ""}
 						name="q"
-						placeholder="number, client…"
+						placeholder="číslo, klient…"
 					/>
 				</label>
 				<label className="space-y-1 text-xs">
-					<span className="text-muted-foreground">Sort</span>
+					<span className="text-muted-foreground">Řazení</span>
 					<select
 						className="border-input bg-background block h-9 rounded-md border px-2 text-sm"
 						defaultValue={sort}
 						name="sort"
 					>
-						<option value="date_desc">Date ↓</option>
-						<option value="date_asc">Date ↑</option>
+						<option value="date_desc">Datum ↓</option>
+						<option value="date_asc">Datum ↑</option>
 					</select>
 				</label>
 				<Button size="sm" type="submit" variant="secondary">
-					Filter
+					Filtrovat
 				</Button>
 			</form>
 
 			{pageItems.length === 0 ? (
 				<p className="text-muted-foreground">
-					No invoices yet.{" "}
+					Žádné faktury.{" "}
 					<Link
 						className="text-primary underline-offset-4 hover:underline"
 						href="/invoices/new"
 					>
-						Create your first invoice
+						Vytvořit první fakturu
 					</Link>
 					.
 				</p>
 			) : (
-				<div className="rounded-md border">
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Číslo</TableHead>
-								<TableHead>Vystaveno</TableHead>
-								<TableHead>Splatnost</TableHead>
-								<TableHead>Klient</TableHead>
-								<TableHead>Celkem</TableHead>
-								<TableHead>Stav</TableHead>
-								<TableHead className="text-right">Akce</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{pageItems.map(({ row, status }) => (
-								<TableRow key={row.id}>
-									<TableCell className="font-medium tabular-nums">
-										<Link
-											className="underline-offset-4 hover:underline"
-											href={`/invoices/${row.id}`}
-										>
-											{row.number ?? "DRAFT"}
-										</Link>
-									</TableCell>
-									<TableCell>{row.issueDate}</TableCell>
-									<TableCell>{row.dueDate}</TableCell>
-									<TableCell>{row.clientName}</TableCell>
-									<TableCell className="tabular-nums">
-										{Number(row.total).toFixed(2)} {row.currency}
-									</TableCell>
-									<TableCell>
-										<span className="bg-muted rounded px-2 py-0.5 text-xs capitalize">
-											{status}
-										</span>
-									</TableCell>
-									<TableCell className="text-right">
-										<div className="flex flex-wrap justify-end gap-1">
-											<Button
-												render={<Link href={`/invoices/${row.id}`} prefetch />}
-												size="sm"
-												variant="ghost"
-											>
-												View
-											</Button>
-											{status === "draft" ? (
-												<Button
-													render={
-														<Link href={`/invoices/${row.id}/edit`} prefetch />
-													}
-													size="sm"
-													variant="outline"
-												>
-													Edit
-												</Button>
-											) : null}
-											<Button
-												render={
-													<a href={`/api/invoices/${row.id}/pdf`} download />
-												}
-												size="sm"
-												variant="ghost"
-											>
-												PDF
-											</Button>
-											<Button
-												render={
-													<a href={`/api/invoices/${row.id}/isdoc`} download />
-												}
-												size="sm"
-												variant="ghost"
-											>
-												ISDOC
-											</Button>
-											<form action={duplicateInvoice}>
-												<input name="id" type="hidden" value={row.id} />
-												<Button size="sm" type="submit" variant="ghost">
-													Dup
-												</Button>
-											</form>
-											{status === "issued" || status === "overdue" ? (
-												<>
-													<form action={markInvoicePaid}>
-														<input name="id" type="hidden" value={row.id} />
-														<Button size="sm" type="submit" variant="ghost">
-															Paid
-														</Button>
-													</form>
-													<form action={cancelInvoice}>
-														<input name="id" type="hidden" value={row.id} />
-														<Button size="sm" type="submit" variant="ghost">
-															Cancel
-														</Button>
-													</form>
-												</>
-											) : null}
-											{status === "draft" ? (
-												<form action={deleteInvoice}>
-													<input name="id" type="hidden" value={row.id} />
-													<Button
-														size="sm"
-														type="submit"
-														variant="destructive"
-													>
-														Del
-													</Button>
-												</form>
-											) : null}
-										</div>
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</div>
+				<InvoiceListTable rows={pageItems} />
 			)}
 
 			{pageCount > 1 || total > 0 ? (
 				<p className="text-muted-foreground text-sm">
-					Page {safePage} / {pageCount} ({recordsLabel(total)})
+					Strana {safePage} / {pageCount} ({recordsLabel(total)})
 					{safePage > 1 ? (
 						<>
 							{" "}
 							·{" "}
 							<Link className="underline" href={withPage(sp, safePage - 1)}>
-								prev
+								předchozí
 							</Link>
 						</>
 					) : null}
@@ -406,7 +355,7 @@ export default async function InvoicesPage({
 							{" "}
 							·{" "}
 							<Link className="underline" href={withPage(sp, safePage + 1)}>
-								next
+								další
 							</Link>
 						</>
 					) : null}
@@ -426,7 +375,7 @@ function FilterField(props: {
 		<label className="space-y-1 text-xs">
 			<span className="text-muted-foreground">{props.label}</span>
 			<select
-				className="border-input bg-background block h-9 min-w-[8rem] rounded-md border px-2 text-sm"
+				className="border-input bg-background block h-9 min-w-32 rounded-md border px-2 text-sm"
 				defaultValue={props.defaultValue ?? ""}
 				name={props.name}
 			>
@@ -449,8 +398,9 @@ function withPage(
 	page: number,
 ): string {
 	const params = new URLSearchParams();
-	if (sp.status) {
-		params.set("status", sp.status);
+	const status = normalizeDisplayStatusParam(sp.status);
+	if (status) {
+		params.set("status", status);
 	}
 	if (sp.issuerId) {
 		params.set("issuerId", sp.issuerId);

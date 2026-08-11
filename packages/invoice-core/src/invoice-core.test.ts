@@ -3,6 +3,8 @@ import type { z } from "zod";
 import {
 	calcTotals,
 	deriveStatus,
+	normalizeDisplayStatusParam,
+	resolveDisplayStatus,
 	slugifyIssuerName,
 	nextInvoiceNumber,
 	ClientSnapshotSchema,
@@ -672,5 +674,102 @@ describe("deriveStatus", () => {
 				new Date(end.getTime() + 1),
 			),
 		).toBe("overdue");
+	});
+});
+
+describe("resolveDisplayStatus", () => {
+	const issuedAt = new Date("2026-05-01T12:00:00.000Z");
+
+	it("draft when not issued", () => {
+		expect(
+			resolveDisplayStatus(
+				{
+					issuedAt: null,
+					dueDate: "2026-05-17",
+					paidAt: null,
+					cancelledAt: null,
+					issueDate: "2026-05-03",
+				},
+				"2026-05-10",
+			),
+		).toBe("draft");
+	});
+
+	it("unpaid when issued today or earlier and not due", () => {
+		expect(
+			resolveDisplayStatus(
+				{
+					issuedAt,
+					dueDate: "2026-05-17",
+					paidAt: null,
+					cancelledAt: null,
+					issueDate: "2026-05-03",
+				},
+				"2026-05-10",
+			),
+		).toBe("unpaid");
+	});
+
+	it("overdue when due date before today", () => {
+		expect(
+			resolveDisplayStatus(
+				{
+					issuedAt,
+					dueDate: "2026-05-01",
+					paidAt: null,
+					cancelledAt: null,
+					issueDate: "2026-04-20",
+				},
+				"2026-05-10",
+			),
+		).toBe("overdue");
+	});
+
+	it("future wins over overdue when issueDate is after today", () => {
+		expect(
+			resolveDisplayStatus(
+				{
+					issuedAt,
+					dueDate: "2026-05-01",
+					paidAt: null,
+					cancelledAt: null,
+					issueDate: "2026-06-01",
+				},
+				"2026-05-10",
+			),
+		).toBe("future");
+	});
+
+	it("paid and cancelled take priority", () => {
+		expect(
+			resolveDisplayStatus(
+				{
+					issuedAt,
+					dueDate: "2026-05-17",
+					paidAt: new Date(),
+					cancelledAt: null,
+					issueDate: "2026-06-01",
+				},
+				"2026-05-10",
+			),
+		).toBe("paid");
+		expect(
+			resolveDisplayStatus(
+				{
+					issuedAt,
+					dueDate: "2026-05-17",
+					paidAt: new Date(),
+					cancelledAt: new Date(),
+					issueDate: "2026-06-01",
+				},
+				"2026-05-10",
+			),
+		).toBe("cancelled");
+	});
+
+	it("normalizeDisplayStatusParam maps issued to unpaid", () => {
+		expect(normalizeDisplayStatusParam("issued")).toBe("unpaid");
+		expect(normalizeDisplayStatusParam("future")).toBe("future");
+		expect(normalizeDisplayStatusParam("nope")).toBeNull();
 	});
 });

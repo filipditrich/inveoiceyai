@@ -16,7 +16,12 @@ import {
   type Invoice,
   type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { deriveStatus, type InvoiceStatus } from "@invoicey/invoice-core/status";
+import {
+  resolveDisplayStatus,
+  type InvoiceDisplayStatus,
+} from "@invoicey/invoice-core/status-display";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { getDemoIssuer } from "./demo-issuer";
 
@@ -32,6 +37,17 @@ export interface InvoiceSummary {
   issuedAt: string | null;
   paidAt: string | null;
   cancelledAt: string | null;
+  status: InvoiceStatus;
+  displayStatus: InvoiceDisplayStatus;
+}
+
+function pragueTodayIso(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Prague",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
 }
 
 function requireDb(): InvoiceyDb {
@@ -43,6 +59,27 @@ function requireDb(): InvoiceyDb {
 }
 
 function rowToSummary(row: typeof invoices.$inferSelect): InvoiceSummary {
+  const now = new Date();
+  const todayIso = pragueTodayIso();
+  const status = deriveStatus(
+    {
+      issuedAt: row.issuedAt,
+      dueDate: new Date(`${row.dueDate}T12:00:00.000Z`),
+      paidAt: row.paidAt,
+      cancelledAt: row.cancelledAt,
+    },
+    now,
+  );
+  const displayStatus = resolveDisplayStatus(
+    {
+      issuedAt: row.issuedAt,
+      dueDate: row.dueDate,
+      paidAt: row.paidAt,
+      cancelledAt: row.cancelledAt,
+      issueDate: row.issueDate,
+    },
+    todayIso,
+  );
   return {
     id: row.id,
     number: row.number,
@@ -55,6 +92,8 @@ function rowToSummary(row: typeof invoices.$inferSelect): InvoiceSummary {
     issuedAt: row.issuedAt?.toISOString() ?? null,
     paidAt: row.paidAt?.toISOString() ?? null,
     cancelledAt: row.cancelledAt?.toISOString() ?? null,
+    status,
+    displayStatus,
   };
 }
 
@@ -203,6 +242,200 @@ export async function cancelInvoiceById(options: {
     ok: true,
     summary: rowToSummary({ ...row, cancelledAt: now, updatedAt: now }),
   };
+}
+
+/** Clear `paidAt` (no grace window). */
+export async function unmarkInvoicePaidById(options: {
+  id: string;
+  workspaceId?: string;
+}): Promise<
+  { ok: true; summary: InvoiceSummary } | { ok: false; error: string }
+> {
+  const database = requireDb();
+  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const rows = await database
+    .select()
+    .from(invoices)
+    .where(
+      and(eq(invoices.id, options.id), eq(invoices.workspaceId, workspaceId)),
+    )
+    .limit(1);
+  const row = rows[0];
+  if (!row) {
+    return { ok: false, error: `invoice not found: ${options.id}` };
+  }
+  if (!row.paidAt || row.cancelledAt) {
+    return { ok: false, error: "cannot_unmark_paid" };
+  }
+  const now = new Date();
+  await database
+    .update(invoices)
+    .set({ paidAt: null, updatedAt: now })
+    .where(eq(invoices.id, options.id));
+  return {
+    ok: true,
+    summary: rowToSummary({ ...row, paidAt: null, updatedAt: now }),
+  };
+}
+
+export type BulkOpResult = {
+  ok: number;
+  skipped: number;
+  failed: number;
+};
+
+async function loadWorkspaceInvoicesByIds(
+  database: InvoiceyDb,
+  workspaceId: string,
+  ids: string[],
+): Promise<(typeof invoices.$inferSelect)[]> {
+  if (ids.length === 0) {
+    return [];
+  }
+  return database
+    .select()
+    .from(invoices)
+    .where(and(eq(invoices.workspaceId, workspaceId), inArray(invoices.id, ids)));
+}
+
+export async function bulkMarkInvoicesPaid(options: {
+  ids: string[];
+  workspaceId?: string;
+}): Promise<BulkOpResult> {
+  const database = requireDb();
+  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const rows = await loadWorkspaceInvoicesByIds(
+    database,
+    workspaceId,
+    options.ids,
+  );
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  let ok = 0;
+  let skipped = 0;
+  let failed = 0;
+  const now = new Date();
+  for (const id of options.ids) {
+    const row = byId.get(id);
+    if (!row) {
+      failed += 1;
+      continue;
+    }
+    if (!row.issuedAt || row.cancelledAt) {
+      skipped += 1;
+      continue;
+    }
+    if (row.paidAt) {
+      skipped += 1;
+      continue;
+    }
+    await database
+      .update(invoices)
+      .set({ paidAt: now, updatedAt: now })
+      .where(eq(invoices.id, id));
+    ok += 1;
+  }
+  return { ok, skipped, failed };
+}
+
+export async function bulkUnmarkInvoicesPaid(options: {
+  ids: string[];
+  workspaceId?: string;
+}): Promise<BulkOpResult> {
+  const database = requireDb();
+  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const rows = await loadWorkspaceInvoicesByIds(
+    database,
+    workspaceId,
+    options.ids,
+  );
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  let ok = 0;
+  let skipped = 0;
+  let failed = 0;
+  const now = new Date();
+  for (const id of options.ids) {
+    const row = byId.get(id);
+    if (!row) {
+      failed += 1;
+      continue;
+    }
+    if (!row.paidAt || row.cancelledAt) {
+      skipped += 1;
+      continue;
+    }
+    await database
+      .update(invoices)
+      .set({ paidAt: null, updatedAt: now })
+      .where(eq(invoices.id, id));
+    ok += 1;
+  }
+  return { ok, skipped, failed };
+}
+
+export async function bulkCancelInvoices(options: {
+  ids: string[];
+  workspaceId?: string;
+}): Promise<BulkOpResult> {
+  const database = requireDb();
+  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const rows = await loadWorkspaceInvoicesByIds(
+    database,
+    workspaceId,
+    options.ids,
+  );
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  let ok = 0;
+  let skipped = 0;
+  let failed = 0;
+  const now = new Date();
+  for (const id of options.ids) {
+    const row = byId.get(id);
+    if (!row) {
+      failed += 1;
+      continue;
+    }
+    if (!row.issuedAt || row.paidAt || row.cancelledAt) {
+      skipped += 1;
+      continue;
+    }
+    await database
+      .update(invoices)
+      .set({ cancelledAt: now, updatedAt: now })
+      .where(eq(invoices.id, id));
+    ok += 1;
+  }
+  return { ok, skipped, failed };
+}
+
+export async function bulkDeleteDraftInvoices(options: {
+  ids: string[];
+  workspaceId?: string;
+}): Promise<BulkOpResult> {
+  const database = requireDb();
+  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const rows = await loadWorkspaceInvoicesByIds(
+    database,
+    workspaceId,
+    options.ids,
+  );
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  let ok = 0;
+  let skipped = 0;
+  let failed = 0;
+  for (const id of options.ids) {
+    const row = byId.get(id);
+    if (!row) {
+      failed += 1;
+      continue;
+    }
+    if (row.issuedAt) {
+      skipped += 1;
+      continue;
+    }
+    await database.delete(invoices).where(eq(invoices.id, id));
+    ok += 1;
+  }
+  return { ok, skipped, failed };
 }
 
 /**

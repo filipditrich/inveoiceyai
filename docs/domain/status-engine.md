@@ -75,7 +75,7 @@ stateDiagram-v2
     end note
 ```
 
-Note: `paid → issued` transitions are not allowed. Marking an already-paid invoice as unpaid would be an unmark-paid action, modeled as a separate "Unmark paid" verb available only inside a small grace window (TBD).
+Note: `paid → unpaid/overdue/future` is via the separate `unmarkPaid` verb (clears `paidAt`; no grace window).
 
 ## Allowed transitions per UI action
 
@@ -136,19 +136,22 @@ function endOfDayUTC(d: Date): Date {
 
 This avoids "your invoice became overdue at 2:00 a.m. while you slept" on shaky timezone handling.
 
-## Upcoming-due (UI-only state)
+## Display status (UI / filters)
 
-For the dashboard, we further classify `issued` invoices that are due within the next 14 days as "upcoming". This is purely a *display* state — `deriveStatus` still returns `issued`. The dashboard adds:
+Domain `deriveStatus` stays as above. The web UI and MCP summaries also expose a **display** bucket via `resolveDisplayStatus` in `@invoicey/invoice-core/status-display`:
 
-```ts
-function isUpcoming(facts: InvoiceFacts, now: Date): boolean {
-	if (deriveStatus(facts, now) !== 'issued') return false;
-	const days = (facts.dueDate.getTime() - now.getTime()) / 86_400_000;
-	return days >= 0 && days <= 14;
-}
-```
+| Display | Czech | Rule |
+| --- | --- | --- |
+| `draft` | Návrh | `issuedAt == null` |
+| `paid` | Zaplaceno | `paidAt != null` |
+| `future` | Budoucí | unpaid ∧ `issueDate > today` (Prague calendar) |
+| `overdue` | Po splatnosti | unpaid ∧ `issueDate <= today` ∧ `dueDate < today` |
+| `unpaid` | Nezaplaceno | unpaid ∧ `issueDate <= today` ∧ `dueDate >= today` |
+| `cancelled` | Stornováno | `cancelledAt != null` |
 
-The threshold is a constant in `invoice-core` and may become configurable per workspace (post-MVP).
+Priority: cancelled → draft → paid → **future** → overdue → unpaid. Domain still returns `issued` for both `future` and `unpaid`. List/dashboard filters use `displayStatusWhere`; URL keys are display names (`unpaid`, not `issued`). Legacy `?status=issued` maps to `unpaid`.
+
+The former dashboard-only “upcoming ≤ 14 days” overlay was removed in favor of FO-style Future / Unpaid / Overdue cards.
 
 ## Why derive instead of store
 
@@ -185,7 +188,7 @@ WHERE cancelled_at IS NULL
 -- etc.
 ```
 
-Centralized in a query helper `whereStatusIs(status)` so filters stay consistent.
+Centralized in `apps/web/lib/invoice-status-sql.ts` as `statusWhere` (domain) and `displayStatusWhere` (FO filter keys).
 
 ### Index strategy (Plan 7)
 
@@ -209,6 +212,6 @@ Czech practice allows partial payment (the client pays half, you mark the partia
 
 Some businesses give a grace period (e.g. 3 days after `dueDate`) before something is considered "overdue" in the dashboard. Not in MVP — `dueDate` is the cutoff.
 
-### TODO(plan-2): unmark-paid window
+### Unmark paid
 
-`unmarkPaid` is allowed at the schema level. The UI may restrict it to recent payments (e.g. ≤ 7 days since `paidAt`) to discourage book-cooking. Decision lands when Plan 2 ships.
+`unmarkPaid` clears `paidAt` with **no grace window** (solo demo). Implemented in `@invoicey/invoice-tools/ops` (`unmarkInvoicePaidById`) and web actions (single + bulk). Not exposed on MCP/Eve in this pass.

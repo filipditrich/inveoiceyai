@@ -8,6 +8,7 @@
     "./schema": "./src/schema.ts",
     "./numbering": "./src/numbering.ts",
     "./status": "./src/status.ts",
+    "./status-display": "./src/status-display.ts",
     "./totals": "./src/totals.ts"
   },
   "scripts": {

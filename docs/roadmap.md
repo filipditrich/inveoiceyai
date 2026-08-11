@@ -20,7 +20,7 @@ flowchart LR
     P9 -.MVP.-> Post["post-MVP"]
     Post --> P10["Plan 10<br/>recurring"]
     Post --> P11["Plan 11<br/>email"]
-    P12a --> P12b["Plan 12b<br/>MCP + DB"]
+    P12a --> P12b["Plan 12b<br/>MCP + DB<br/>done"]
     P7 -.parallel.-> P13b["Plan 13b<br/>Eve Slack<br/>in progress"]
     Post --> P14["Plan 14<br/>auth"]
     P12a -.feeds.-> P13b
@@ -276,11 +276,19 @@ Plans listed here do not block the MVP and can be picked up in parallel with Pla
 
 ### Plan 12b — MCP server, DB-backed tools
 
-**Status:** Post-MVP backlog
+**Status:** Done  
+**Completed:** 2026-08-11
 
-- Tools: `list_invoices`, `get_invoice`, `mark_paid` (builds on DB foundation presets/invoices)
-- Imports `@invoicey/invoice-core` + `@invoicey/db` — no HTTP shim
-- Schema parity with the UI via `InvoiceSchema`
+- [x] Tools: `list_invoices`, `get_invoice`, `mark_invoice_paid` (Neon via `@invoicey/invoice-tools/ops`)
+- [x] Summaries include domain `status` + FO `displayStatus`
+- [x] Spec updated in [`specs/mcp.md`](./specs/mcp.md)
+
+### Lifecycle visibility polish (Plans 7/8 follow-up)
+
+**Status:** Done  
+**Completed:** 2026-08-11
+
+- FO-style display statuses (Unpaid / Future / …), list summary cards, color pills, bulk + unmark paid, dashboard Přehled balance row
 
 ### Plan 13b — Eve Slack agent (DB-backed, in `apps/web`)
 

@@ -1,6 +1,7 @@
 import { invoices } from "@invoicey/db";
+import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
 import type { InvoiceStatus } from "@invoicey/invoice-core/status";
-import { and, gte, isNotNull, isNull, lt, type SQL } from "drizzle-orm";
+import { and, gte, gt, isNotNull, isNull, lt, lte, type SQL } from "drizzle-orm";
 
 /** Prague calendar "today" as YYYY-MM-DD for due-date text compare. */
 export function pragueTodayIso(): string {
@@ -12,7 +13,7 @@ export function pragueTodayIso(): string {
 	}).format(new Date());
 }
 
-/** SQL predicate matching `deriveStatus` facts (ADR 0014). */
+/** SQL predicate matching domain `deriveStatus` facts (ADR 0014). */
 export function statusWhere(
 	status: InvoiceStatus,
 	todayIso: string,
@@ -36,6 +37,48 @@ export function statusWhere(
 				isNotNull(invoices.issuedAt),
 				isNull(invoices.paidAt),
 				isNull(invoices.cancelledAt),
+				gte(invoices.dueDate, todayIso),
+			);
+		default: {
+			const _exhaustive: never = status;
+			return _exhaustive;
+		}
+	}
+}
+
+/** SQL predicate matching `resolveDisplayStatus` (FO filter keys). */
+export function displayStatusWhere(
+	status: InvoiceDisplayStatus,
+	todayIso: string,
+): SQL | undefined {
+	switch (status) {
+		case "draft":
+			return and(isNull(invoices.issuedAt), isNull(invoices.cancelledAt));
+		case "cancelled":
+			return isNotNull(invoices.cancelledAt);
+		case "paid":
+			return and(isNotNull(invoices.paidAt), isNull(invoices.cancelledAt));
+		case "future":
+			return and(
+				isNotNull(invoices.issuedAt),
+				isNull(invoices.paidAt),
+				isNull(invoices.cancelledAt),
+				gt(invoices.issueDate, todayIso),
+			);
+		case "overdue":
+			return and(
+				isNotNull(invoices.issuedAt),
+				isNull(invoices.paidAt),
+				isNull(invoices.cancelledAt),
+				lte(invoices.issueDate, todayIso),
+				lt(invoices.dueDate, todayIso),
+			);
+		case "unpaid":
+			return and(
+				isNotNull(invoices.issuedAt),
+				isNull(invoices.paidAt),
+				isNull(invoices.cancelledAt),
+				lte(invoices.issueDate, todayIso),
 				gte(invoices.dueDate, todayIso),
 			);
 		default: {

@@ -1,4 +1,5 @@
 import type { RecentInvoice } from "@/lib/dashboard-metrics";
+import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
 import {
 	Table,
 	TableBody,
@@ -7,6 +8,8 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { DISPLAY_STATUS_ROW_ACCENT } from "@/lib/invoice-status-ui";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 export function DashboardRecentInvoices({ rows }: { rows: RecentInvoice[] }) {
@@ -50,7 +53,10 @@ export function DashboardRecentInvoices({ rows }: { rows: RecentInvoice[] }) {
 					</TableHeader>
 					<TableBody>
 						{rows.map((row) => (
-							<TableRow key={row.id}>
+							<TableRow
+								className={cn(DISPLAY_STATUS_ROW_ACCENT[row.displayStatus])}
+								key={row.id}
+							>
 								<TableCell className="font-medium tabular-nums">
 									<Link
 										className="underline-offset-4 hover:underline"
@@ -66,9 +72,7 @@ export function DashboardRecentInvoices({ rows }: { rows: RecentInvoice[] }) {
 									{Number(row.total).toFixed(2)} {row.currency}
 								</TableCell>
 								<TableCell>
-									<span className="bg-muted rounded px-2 py-0.5 text-xs capitalize">
-										{row.status}
-									</span>
+									<InvoiceStatusBadge status={row.displayStatus} />
 								</TableCell>
 							</TableRow>
 						))}

@@ -6,6 +6,11 @@ import {
   lookupBusiness,
   searchBusiness,
 } from "./handlers";
+import {
+  getInvoice,
+  listInvoices,
+  markInvoicePaidById,
+} from "./invoice-ops";
 import { jsonToolResult } from "./mcp-json-result";
 import {
   deletePreset,
@@ -103,6 +108,69 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
             : undefined,
       });
       return jsonToolResult(r, !r.ok);
+    },
+  );
+
+  s.tool(
+    "list_invoices",
+    "List workspace invoices from Neon (requires DATABASE_URL). Returns summaries with domain status + displayStatus.",
+    {
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe("Max rows (default 25)"),
+      unpaidOnly: z
+        .boolean()
+        .optional()
+        .describe("Only open issued invoices (unpaid / overdue / future)"),
+    },
+    async (args) => {
+      try {
+        const limit =
+          typeof args.limit === "number" && Number.isFinite(args.limit)
+            ? args.limit
+            : undefined;
+        const unpaidOnly =
+          typeof args.unpaidOnly === "boolean" ? args.unpaidOnly : undefined;
+        const rows = await listInvoices({ limit, unpaidOnly });
+        return jsonToolResult({ ok: true as const, invoices: rows });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return jsonToolResult({ ok: false as const, error: message }, true);
+      }
+    },
+  );
+
+  s.tool(
+    "get_invoice",
+    "Get one invoice by id from Neon (requires DATABASE_URL). Includes summary with status/displayStatus and validated payload when present.",
+    { id: z.string().uuid().describe("Invoice row id") },
+    async (args) => {
+      try {
+        const r = await getInvoice({ id: String(args.id ?? "") });
+        return jsonToolResult(r, !r.ok);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return jsonToolResult({ ok: false as const, error: message }, true);
+      }
+    },
+  );
+
+  s.tool(
+    "mark_invoice_paid",
+    "Mark an issued unpaid invoice as paid (requires DATABASE_URL). Sets paidAt.",
+    { id: z.string().uuid().describe("Invoice row id") },
+    async (args) => {
+      try {
+        const r = await markInvoicePaidById({ id: String(args.id ?? "") });
+        return jsonToolResult(r, !r.ok);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return jsonToolResult({ ok: false as const, error: message }, true);
+      }
     },
   );
 

@@ -1,3 +1,4 @@
+import { DashboardBalanceRow } from "@/components/dashboard/dashboard-balance";
 import { DashboardIssuerFilter } from "@/components/dashboard/dashboard-issuer-filter";
 import { DashboardMonthlyChart } from "@/components/dashboard/dashboard-monthly-chart";
 import { DashboardRecentInvoices } from "@/components/dashboard/dashboard-recent-invoices";
@@ -42,17 +43,23 @@ export default async function DashboardPage({
 		<div className="@container/main flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
 			<div className="flex flex-wrap items-end justify-between gap-3 px-4 lg:px-6">
 				<div>
-					<h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+					<h1 className="text-2xl font-semibold tracking-tight">Přehled</h1>
 					<p className="text-muted-foreground text-sm">
-						Invoicing pulse for the default workspace.
+						Stavy faktur a obrat za posledních 12 měsíců.
 					</p>
 				</div>
-				<Button render={<Link href="/invoices/new" prefetch />} size="sm">
-					New invoice
-				</Button>
+				<div className="flex flex-wrap gap-2">
+					<Button render={<Link href="/invoices" prefetch />} size="sm" variant="outline">
+						Přejít na faktury
+					</Button>
+					<Button render={<Link href="/invoices/new" prefetch />} size="sm">
+						New invoice
+					</Button>
+				</div>
 			</div>
 			<DashboardIssuerFilter issuers={issuers} selectedId={issuerId} />
-			<DashboardStatusCards buckets={metrics.buckets} />
+			<DashboardStatusCards buckets={metrics.buckets} issuerId={issuerId} />
+			<DashboardBalanceRow balance={metrics.balance} />
 			<div className="px-4 lg:px-6">
 				<DashboardMonthlyChart data={metrics.monthly} />
 			</div>

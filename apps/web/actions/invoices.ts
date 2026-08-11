@@ -18,8 +18,13 @@ import {
 	type Invoice,
 } from "@invoicey/invoice-core";
 import {
+	bulkCancelInvoices,
+	bulkDeleteDraftInvoices,
+	bulkMarkInvoicesPaid,
+	bulkUnmarkInvoicesPaid,
 	cancelInvoiceById,
 	markInvoicePaidById,
+	unmarkInvoicePaidById,
 } from "@invoicey/invoice-tools/ops";
 import { clients, invoiceItems, invoices, issuerBusinesses, issuerNumberingSchemes } from "@invoicey/db";
 import { withDbTransaction, type DbTransaction } from "@invoicey/db/transaction";
@@ -541,6 +546,75 @@ export async function markInvoicePaid(formData: FormData): Promise<void> {
 	revalidatePath("/dashboard");
 	revalidatePath(`/invoices/${id}`);
 	redirect(`/invoices/${id}?toast=invoice_paid`);
+}
+
+export async function unmarkInvoicePaid(formData: FormData): Promise<void> {
+	const id = optionalTrim(formData.get("id"));
+	if (!id) {
+		redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
+	}
+	const result = await unmarkInvoicePaidById({ id });
+	if (!result.ok) {
+		redirect(`/invoices?invalid=${encodeURIComponent("cannot_unmark_paid")}`);
+	}
+	revalidatePath("/invoices");
+	revalidatePath("/dashboard");
+	revalidatePath(`/invoices/${id}`);
+	redirect(`/invoices/${id}?toast=invoice_unpaid`);
+}
+
+function collectIds(formData: FormData): string[] {
+	return formData
+		.getAll("ids")
+		.filter((v): v is string => typeof v === "string" && v.trim().length > 0)
+		.map((v) => v.trim());
+}
+
+function bulkRedirect(
+	result: { ok: number; skipped: number; failed: number },
+	op: string,
+): never {
+	revalidatePath("/invoices");
+	revalidatePath("/dashboard");
+	const q = new URLSearchParams({
+		toast: `bulk_${op}`,
+		ok: String(result.ok),
+		skipped: String(result.skipped),
+		failed: String(result.failed),
+	});
+	redirect(`/invoices?${q.toString()}`);
+}
+
+export async function bulkMarkInvoicePaid(formData: FormData): Promise<void> {
+	const ids = collectIds(formData);
+	if (ids.length === 0) {
+		redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
+	}
+	bulkRedirect(await bulkMarkInvoicesPaid({ ids }), "paid");
+}
+
+export async function bulkUnmarkInvoicePaid(formData: FormData): Promise<void> {
+	const ids = collectIds(formData);
+	if (ids.length === 0) {
+		redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
+	}
+	bulkRedirect(await bulkUnmarkInvoicesPaid({ ids }), "unpaid");
+}
+
+export async function bulkCancelInvoice(formData: FormData): Promise<void> {
+	const ids = collectIds(formData);
+	if (ids.length === 0) {
+		redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
+	}
+	bulkRedirect(await bulkCancelInvoices({ ids }), "cancel");
+}
+
+export async function bulkDeleteInvoice(formData: FormData): Promise<void> {
+	const ids = collectIds(formData);
+	if (ids.length === 0) {
+		redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
+	}
+	bulkRedirect(await bulkDeleteDraftInvoices({ ids }), "delete");
 }
 
 /** Cancel an issued (unpaid) invoice. */
