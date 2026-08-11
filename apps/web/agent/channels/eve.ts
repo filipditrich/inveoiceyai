@@ -1,4 +1,3 @@
-import { getDefaultWorkspaceId } from "@invoicey/db";
 import {
   extractBearerToken,
   localDev,
@@ -9,55 +8,32 @@ import {
 import { eveChannel } from "eve/channels/eve";
 
 /**
- * Ops env key inline (channel graph must stay free of `server-only`).
- * User PAT via dynamic import so Eve authored-module evaluate does not pull
- * `@/lib/auth/auth` into a client boundary.
+ * Eve authored-module evaluate treats this file as a client boundary, so it
+ * must not import `server-only` (or anything that does). Ops bearer only here;
+ * user PATs stay on remote MCP via `machine-bearer`.
  */
 function apiKeyAuth(): AuthFn<Request> {
   return withAuthChallenges(
-    async (request) => {
+    (request) => {
+      const expected =
+        process.env.EVE_API_KEY?.trim() || process.env.MCP_API_KEY?.trim();
+      if (!expected) return null;
       const token = extractBearerToken(request.headers.get("authorization"));
-      if (!token) return null;
+      if (!token || token !== expected) return null;
 
-      const opsKeys = [
-        process.env.EVE_API_KEY?.trim(),
-        process.env.MCP_API_KEY?.trim(),
-      ].filter((k): k is string => Boolean(k));
+      const workspaceId =
+        process.env.INVOICEY_DEFAULT_WORKSPACE_ID?.trim() ||
+        "00000000-0000-4000-8000-000000000001";
 
-      for (const key of opsKeys) {
-        if (token === key) {
-          const attributes: Record<string, string> = {
-            workspaceId: getDefaultWorkspaceId(),
-            kind: "ops",
-          };
-          return {
-            authenticator: "api-key",
-            principalId: "eve:ops-api-key",
-            principalType: "service",
-            attributes,
-          };
-        }
-      }
-
-      try {
-        const { resolveMachineBearer } =
-          await import("@/lib/auth/machine-bearer");
-        const identity = await resolveMachineBearer(token, { opsKeys: [] });
-        if (!identity || identity.kind !== "user") return null;
-        const attributes: Record<string, string> = {
-          workspaceId: identity.workspaceId,
-          kind: "user",
-          userId: identity.userId,
-        };
-        return {
-          authenticator: "api-key",
-          principalId: identity.userId,
-          principalType: "user",
-          attributes,
-        };
-      } catch {
-        return null;
-      }
+      return {
+        authenticator: "api-key",
+        principalId: "eve:ops-api-key",
+        principalType: "service",
+        attributes: {
+          workspaceId,
+          kind: "ops",
+        },
+      };
     },
     [{ scheme: "Bearer" }],
   );
