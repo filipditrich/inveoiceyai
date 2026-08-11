@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/#automatizace", label: "Automatizace" },
   { href: "/#prehled", label: "Co umí" },
   { href: "/#faq", label: "Otázky" },
+  { href: "/docs", label: "Dokumentace" },
 ] as const;
 
 export function MarketingHeader() {

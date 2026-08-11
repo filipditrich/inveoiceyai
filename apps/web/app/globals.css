@@ -1,7 +1,20 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+/**
+ * Fumadocs UI for `/docs`. The `shadcn` preset maps every `--color-fd-*` onto
+ * the brand tokens defined below, so the docs inherit the peach/chocolate theme
+ * instead of shipping a second one.
+ */
+@import "fumadocs-ui/css/shadcn.css";
+@import "fumadocs-ui/css/preset.css";
 
+/**
+ * Must stay after the Fumadocs imports: `preset.css` declares its own
+ * `@variant dark (&:where(.dark, .dark *))`, and `:where()` has zero
+ * specificity — adopting it would silently weaken every existing `dark:`
+ * utility in the app. Re-declaring here restores our `:is()` version.
+ */
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -133,7 +146,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background font-sans text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
 }
 
@@ -144,8 +157,16 @@
     border-radius: var(--radius-xl);
     box-shadow: 0 0 0 1px var(--sidebar-border);
     background-image:
-      radial-gradient(ellipse 120% 55% at 0% -10%, var(--sidebar-glow), transparent 55%),
-      radial-gradient(ellipse 80% 40% at 100% 100%, var(--sidebar-glow), transparent 50%);
+      radial-gradient(
+        ellipse 120% 55% at 0% -10%,
+        var(--sidebar-glow),
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 80% 40% at 100% 100%,
+        var(--sidebar-glow),
+        transparent 50%
+      );
   }
 
   /** peach accent bar on active nav items */

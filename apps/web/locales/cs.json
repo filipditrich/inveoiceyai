@@ -16,7 +16,9 @@
       "invoicesImport": "Import",
       "invoicesFromJson": "Z JSON",
       "clients": "Klienti",
-      "issuers": "Dodavatelé"
+      "issuers": "Dodavatelé",
+      "resourcesGroup": "Zdroje",
+      "docs": "Dokumentace"
     },
     "breadcrumb": {
       "dashboard": "Přehled",

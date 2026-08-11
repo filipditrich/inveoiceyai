@@ -46,6 +46,9 @@
     "date-fns-tz": "3.2.0",
     "drizzle-orm": "0.44.7",
     "eve": "0.31.3",
+    "fumadocs-core": "16.14.3",
+    "fumadocs-mdx": "15.2.3",
+    "fumadocs-ui": "16.14.3",
     "lucide-react": "1.14.0",
     "mcp-handler": "1.1.0",
     "next": "16.2.4",
@@ -69,6 +72,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/cookie": "1.0.0",
+    "@types/mdx": "2.0.14",
     "@types/node": "25.6.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",

@@ -20,6 +20,8 @@ declare const messages: {
       invoicesFromJson: "Z JSON";
       clients: "Klienti";
       issuers: "Dodavatelé";
+      resourcesGroup: "Zdroje";
+      docs: "Dokumentace";
     };
     breadcrumb: {
       dashboard: "Přehled";
