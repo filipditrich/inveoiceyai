@@ -17,6 +17,7 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { APP_GIT_SHA, APP_VERSION } from "@/lib/app-build-info";
 import {
   Building2Icon,
   FileTextIcon,
@@ -132,6 +133,16 @@ export function AppSidebar({
         </SidebarGroup>
         <SidebarSeparator className="mx-0 group-data-[collapsible=icon]:hidden" />
         <NavUser user={user} />
+        <p
+          className="text-muted-foreground group-data-[collapsible=icon]:hidden px-2 pb-1 font-mono text-[0.65rem] tabular-nums tracking-wide"
+          title={`${t("meta.title")} v${APP_VERSION} (${APP_GIT_SHA})`}
+        >
+          v{APP_VERSION}
+          <span className="mx-1.5 opacity-40" aria-hidden>
+            ·
+          </span>
+          {APP_GIT_SHA}
+        </p>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

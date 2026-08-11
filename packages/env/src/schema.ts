@@ -109,6 +109,8 @@ export const vercelEnvSchema = z.object({
   VERCEL_REGION: z.string().optional(),
   VERCEL_DEPLOYMENT_ID: z.string().optional(),
   VERCEL_PROJECT_ID: z.string().optional(),
+  /** Full git SHA of the deployment commit (Vercel system env). */
+  VERCEL_GIT_COMMIT_SHA: z.string().optional(),
   NEXT_RUNTIME: z.enum(["nodejs", "edge"]).optional(),
   npm_package_version: z.string().optional(),
 });

@@ -1,9 +1,11 @@
+import { execSync } from "node:child_process";
+import { createRequire } from "node:module";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { config as loadDotEnv } from "dotenv";
 import { withEve } from "eve/next";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 /** Monorepo root — same `.env` as Drizzle (@invoicey/db); Next only reads `apps/web` by default. */
 const repoRoot = path.resolve(
@@ -14,6 +16,26 @@ const repoRoot = path.resolve(
 
 loadDotEnv({ path: path.join(repoRoot, ".env") });
 loadDotEnv({ path: path.join(repoRoot, ".env.local"), override: true });
+
+const require = createRequire(import.meta.url);
+const webPackage = require("./package.json") as { version: string };
+
+/** Prefer Vercel system SHA; fall back to local git for `bun dev` / local builds. */
+function resolveGitCommitSha(): string {
+  const fromVercel = process.env.VERCEL_GIT_COMMIT_SHA?.trim();
+  if (fromVercel) {
+    return fromVercel.slice(0, 7);
+  }
+  try {
+    return execSync("git rev-parse --short HEAD", {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "dev";
+  }
+}
 
 /** invoice-core fonts/xsd/icc for PDF/ISDOC serverless traces */
 const invoiceCoreAssets = [
@@ -33,6 +55,10 @@ const withNextIntl = createNextIntlPlugin({
 const nextConfig: NextConfig = {
   /** so NFT can follow `../../packages/invoice-core/assets/**` outside apps/web */
   outputFileTracingRoot: repoRoot,
+  env: {
+    NEXT_PUBLIC_APP_VERSION: webPackage.version,
+    NEXT_PUBLIC_GIT_COMMIT_SHA: resolveGitCommitSha(),
+  },
   transpilePackages: [
     "@invoicey/ares",
     "@invoicey/db",
