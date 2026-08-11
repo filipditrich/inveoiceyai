@@ -23,7 +23,7 @@ import {
 	ORIGIN_PROVIDER_LABELS,
 	buildExternalKey,
 	type InvoiceOriginProvider,
-} from "@invoicey/invoice-core";
+} from "@invoicey/invoice-core/import";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";

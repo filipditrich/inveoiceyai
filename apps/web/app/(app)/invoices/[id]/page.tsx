@@ -15,7 +15,7 @@ import {
 	isArchivePayload,
 	ORIGIN_PROVIDER_LABELS,
 	type InvoiceOriginProvider,
-} from "@invoicey/invoice-core";
+} from "@invoicey/invoice-core/import";
 import { InvoiceSchema } from "@invoicey/invoice-core/schema";
 import { resolveDisplayStatus } from "@invoicey/invoice-core/status-display";
 import { invoices } from "@invoicey/db";
