@@ -27,11 +27,11 @@ flowchart TB
 
 **Auth policy**
 
-| Surface                      | Gate                                                     |
-| ---------------------------- | -------------------------------------------------------- |
-| Slack                        | Vercel Connect (no hand-managed `SLACK_*` once attached) |
-| HTTP `/eve/v1/*` (non-Slack) | Bearer ops key or Better Auth user PAT (Plan 16)         |
-| Invoice data                 | Single tenant: `INVOICEY_DEFAULT_WORKSPACE_ID`           |
+| Surface                      | Gate                                                                                                                              |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Slack                        | Vercel Connect (no hand-managed `SLACK_*` once attached)                                                                          |
+| HTTP `/eve/v1/*` (non-Slack) | Bearer ops key (`EVE_API_KEY` / `MCP_API_KEY`) — Eve channel cannot import server-only PAT verify; user PATs remain on remote MCP |
+| Invoice data                 | Single tenant: `INVOICEY_DEFAULT_WORKSPACE_ID`                                                                                    |
 
 **Out of v1:** per-Slack-user workspace scoping, slash `/invoice`, calling remote `/api/mcp` from Eve. (Human auth is Better Auth OAuth — ADR 0018; HTTP machine auth is ops key or user PAT — ADR 0023.)
 
