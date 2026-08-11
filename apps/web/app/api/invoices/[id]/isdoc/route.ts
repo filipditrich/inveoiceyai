@@ -1,4 +1,4 @@
-import { getDefaultWorkspaceId } from "@/lib/workspace-id";
+import { requireWorkspaceForRoute } from "@/lib/auth/api";
 import { InvoiceSchema, renderIsdoc } from "@invoicey/invoice-core";
 import { invoices } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
@@ -7,9 +7,13 @@ import { type NextRequest, NextResponse } from "next/server";
 
 type Params = Promise<{ id: string }>;
 
-export async function GET(_request: NextRequest, ctx: { params: Params }) {
+export async function GET(request: NextRequest, ctx: { params: Params }) {
 	const { id } = await ctx.params;
-	const workspaceId = getDefaultWorkspaceId();
+	const gate = await requireWorkspaceForRoute(request);
+	if ("response" in gate) {
+		return gate.response;
+	}
+	const { workspaceId } = gate.context;
 	const rows = await db
 		.select()
 		.from(invoices)

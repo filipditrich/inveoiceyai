@@ -1,7 +1,7 @@
 import { deleteClient } from "@/actions/clients";
 import { ClientEditorForm } from "@/components/clients/client-editor-form";
 import { Button } from "@/components/ui/button";
-import { getDefaultWorkspaceId } from "@/lib/workspace-id";
+import { requireWorkspace } from "@/lib/auth/session";
 import { ClientSnapshotSchema } from "@invoicey/invoice-core/schema";
 import { clients } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
@@ -21,7 +21,7 @@ export default async function ClientEditPage({
 	searchParams: Search;
 }) {
 	const { id } = await params;
-	const workspaceId = getDefaultWorkspaceId();
+	const { workspaceId } = await requireWorkspace();
 	const sp = await searchParams;
 
 	const hit = await db

@@ -1,9 +1,6 @@
 "use server";
 
-import {
-	ensureDefaultWorkspace,
-	getDefaultWorkspaceId,
-} from "@/lib/workspace-id";
+import { requireWorkspace } from "@/lib/auth/session";
 import {
 	ClientSnapshotSchema,
 	ClientVatIdSchema,
@@ -34,7 +31,7 @@ function normalizeZip(zipRaw: string): string {
 
 /** UPSERT validated `ClientSnapshot` in default workspace. */
 export async function saveClient(formData: FormData): Promise<void> {
-	const workspaceId = await ensureDefaultWorkspace();
+	const { workspaceId } = await requireWorkspace();
 	const rowId = optionalTrim(formData.get("id")) ?? crypto.randomUUID();
 	const errBase = `/clients/${rowId}/edit`;
 	const createBase = "/clients/new";
@@ -137,7 +134,7 @@ export async function saveClient(formData: FormData): Promise<void> {
 
 export async function deleteClient(formData: FormData): Promise<void> {
 	const id = optionalTrim(formData.get("id"));
-	const workspaceId = getDefaultWorkspaceId();
+	const { workspaceId } = await requireWorkspace();
 	if (!id) {
 		redirect(`/clients?invalid=${encodeURIComponent("missing_id")}`);
 	}

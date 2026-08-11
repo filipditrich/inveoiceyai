@@ -1,4 +1,5 @@
 import { InvoiceBuilderForm } from "@/components/invoices/invoice-builder-form";
+import { requireWorkspace } from "@/lib/auth/session";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 
 type Search = Promise<{ invalid?: string }>;
@@ -8,10 +9,11 @@ export default async function InvoiceNewPage({
 }: {
 	searchParams: Search;
 }) {
+	const { workspaceId } = await requireWorkspace();
 	const sp = await searchParams;
 	const [issuers, clients] = await Promise.all([
-		loadIssuerOptions(),
-		loadClientOptions(),
+		loadIssuerOptions(workspaceId),
+		loadClientOptions(workspaceId),
 	]);
 
 	return (

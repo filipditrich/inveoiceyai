@@ -1,6 +1,6 @@
 import { InvoiceBuilderForm } from "@/components/invoices/invoice-builder-form";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
-import { getDefaultWorkspaceId } from "@/lib/workspace-id";
+import { requireWorkspace } from "@/lib/auth/session";
 import { InvoiceSchema } from "@invoicey/invoice-core/schema";
 import { invoices } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
@@ -19,7 +19,7 @@ export default async function InvoiceEditPage({
 }) {
 	const { id } = await params;
 	const sp = await searchParams;
-	const workspaceId = getDefaultWorkspaceId();
+	const { workspaceId } = await requireWorkspace();
 	const rows = await db
 		.select()
 		.from(invoices)
@@ -39,8 +39,8 @@ export default async function InvoiceEditPage({
 	}
 
 	const [issuers, clients] = await Promise.all([
-		loadIssuerOptions(),
-		loadClientOptions(),
+		loadIssuerOptions(workspaceId),
+		loadClientOptions(workspaceId),
 	]);
 
 	const inv = payload.data;

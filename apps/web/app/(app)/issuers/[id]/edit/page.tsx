@@ -3,7 +3,7 @@ import {
 	type NumberingSchemeDraft,
 } from "@/components/issuers/issuer-editor-form";
 import { ensureIssuerNumberingSchemes } from "@/lib/issuer-numbering";
-import { getDefaultWorkspaceId } from "@/lib/workspace-id";
+import { requireWorkspace } from "@/lib/auth/session";
 import { IssuerSnapshotSchema } from "@invoicey/invoice-core/schema";
 import { issuerBusinesses, issuerNumberingSchemes } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
@@ -22,7 +22,7 @@ export default async function IssuerEditPage({
 }) {
 	const { id } = await params;
 	const sp = await searchParams;
-	const workspaceId = getDefaultWorkspaceId();
+	const { workspaceId } = await requireWorkspace();
 	const uploadConfigured = Boolean(process.env.UPLOADTHING_TOKEN?.trim());
 
 	const rows = await db

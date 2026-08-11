@@ -5,10 +5,7 @@ import {
 	ISSUER_DOC_TYPES,
 	type IssuerDocType,
 } from "@/lib/issuer-numbering";
-import {
-	ensureDefaultWorkspace,
-	getDefaultWorkspaceId,
-} from "@/lib/workspace-id";
+import { requireWorkspace } from "@/lib/auth/session";
 import {
 	BankAccountSchema,
 	DicSchema,
@@ -129,7 +126,7 @@ async function upsertNumberingScheme(
 
 /** UPSERT validated IssuerSnapshot + numbering schemes in default workspace. */
 export async function saveIssuer(formData: FormData): Promise<void> {
-	const workspaceId = await ensureDefaultWorkspace();
+	const { workspaceId } = await requireWorkspace();
 	const rowId = optionalTrim(formData.get("id")) ?? crypto.randomUUID();
 	const hadId = optionalTrim(formData.get("id")) !== undefined;
 	const errBase = hadId ? `/issuers/${rowId}/edit` : "/issuers/new";
@@ -279,7 +276,7 @@ export async function saveIssuer(formData: FormData): Promise<void> {
 /** Delete issuer when it has no invoices; cascades numbering schemes. */
 export async function deleteIssuer(formData: FormData): Promise<void> {
 	const id = optionalTrim(formData.get("id"));
-	const workspaceId = getDefaultWorkspaceId();
+	const { workspaceId } = await requireWorkspace();
 	if (!id) {
 		redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
 	}

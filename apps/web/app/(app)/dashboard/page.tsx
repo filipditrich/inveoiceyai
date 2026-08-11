@@ -6,7 +6,7 @@ import { DashboardStatusCards } from "@/components/dashboard/dashboard-status-ca
 import { Button } from "@/components/ui/button";
 import { loadDashboardMetrics } from "@/lib/dashboard-metrics";
 import { loadIssuerOptions } from "@/lib/load-parties";
-import { ensureDefaultWorkspace } from "@/lib/workspace-id";
+import { requireWorkspace } from "@/lib/auth/session";
 import Link from "next/link";
 
 type Search = Promise<{ issuerId?: string }>;
@@ -16,12 +16,12 @@ export default async function DashboardPage({
 }: {
 	searchParams: Search;
 }) {
-	await ensureDefaultWorkspace();
+	const { workspaceId } = await requireWorkspace();
 	const sp = await searchParams;
 	const issuerId = sp.issuerId?.trim() || undefined;
 	const [issuers, metrics] = await Promise.all([
-		loadIssuerOptions(),
-		loadDashboardMetrics({ issuerId }),
+		loadIssuerOptions(workspaceId),
+		loadDashboardMetrics(workspaceId, { issuerId }),
 	]);
 
 	if (metrics.issuerCount === 0) {

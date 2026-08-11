@@ -8,7 +8,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { getDefaultWorkspaceId } from "@/lib/workspace-id";
+import { requireWorkspace } from "@/lib/auth/session";
 import {
 	ClientSnapshotSchema,
 	type ClientSnapshot,
@@ -25,7 +25,7 @@ type ClientTableItem = {
 };
 
 export default async function ClientsPage() {
-	const workspaceId = getDefaultWorkspaceId();
+	const { workspaceId } = await requireWorkspace();
 	const rows = await db
 		.select()
 		.from(clients)

@@ -1,5 +1,4 @@
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
-import { getDefaultWorkspaceId } from "@/lib/workspace-id";
 import {
 	resolveDisplayStatus,
 	type InvoiceDisplayStatus,
@@ -45,16 +44,18 @@ function monthKey(d: Date): string {
 /**
  * Aggregates workspace invoices for the dashboard (optional issuer filter).
  */
-export async function loadDashboardMetrics(opts?: {
-	issuerId?: string;
-}): Promise<{
+export async function loadDashboardMetrics(
+	workspaceId: string,
+	opts?: {
+		issuerId?: string;
+	},
+): Promise<{
 	buckets: StatusBucket[];
 	monthly: MonthPoint[];
 	recent: RecentInvoice[];
 	balance: DashboardBalance;
 	issuerCount: number;
 }> {
-	const workspaceId = getDefaultWorkspaceId();
 	const todayIso = pragueTodayIso();
 
 	const base = [eq(invoices.workspaceId, workspaceId)];
