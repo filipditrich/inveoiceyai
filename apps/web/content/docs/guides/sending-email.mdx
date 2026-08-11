@@ -1,0 +1,109 @@
+---
+title: Sending invoices by email
+description: Delivery, attachments, tracking and reminders.
+---
+
+Invoicey sends transactional email through [Resend](https://resend.com). Five kinds:
+
+| Email            | When                                                               |
+| ---------------- | ------------------------------------------------------------------ |
+| Invoice          | You (or an assistant) send an issued invoice                       |
+| Workspace invite | You invite someone to the workspace                                |
+| New sign-in      | A soft alert when your account is used from an unrecognised device |
+| Overdue reminder | Daily cron, if enabled per issuer                                  |
+| Payment received | Optional, on mark-paid                                             |
+
+## Sending an invoice
+
+From the invoice detail, **Send email**. The dialog offers recipient, Cc, subject, cover text and an
+ISDOC toggle.
+
+Defaults come from the issuer's [email settings](/docs/guides/issuers#email-settings) — subject
+template, cover text, whether ISDOC is attached — and are read live at send time, so improving a
+default immediately improves future sends of old invoices.
+
+**Attachments:** the PDF always; the ISDOC by default, toggleable per send. Both are taken from the
+stored copies made at issue rather than re-rendered.
+
+## Addressing
+
+You do not control the From address, and that is a feature.
+
+| Part         | Value                                                                              |
+| ------------ | ---------------------------------------------------------------------------------- |
+| From address | The deployment's verified sending domain, e.g. `invoices@mail.invoicey.ditrich.me` |
+| From display | `{Issuer name} via Invoicey`                                                       |
+| Reply-To     | The issuer's contact email                                                         |
+
+Sending _as_ an arbitrary address would fail SPF and DKIM and land in spam. The `via Invoicey`
+display name plus a real `Reply-To` gets you recognisable, deliverable mail — replies go to you, not
+to the server.
+
+## Tracking
+
+Every send is logged and its status updated by webhook:
+
+```text
+queued → sent → delivered
+                    ├→ delayed
+                    ├→ bounced
+                    ├→ failed
+                    └→ complained
+```
+
+Opens and clicks are recorded as soft signals and never move the delivery status backwards. Terminal
+outcomes — bounced, failed, complained — win over `delivered`.
+
+The full history appears on the invoice timeline.
+
+## Suppression
+
+Addresses that hard-bounce or file a spam complaint are added to a suppression list per workspace.
+
+**Automated** sends — reminders, payment-received — skip suppressed addresses silently. **Manual**
+sends are still allowed but warn you first: sometimes you know the bounce was a temporary mailbox
+problem, and that judgement is yours.
+
+## Overdue reminders
+
+Off by default, per issuer. When enabled, a daily cron finds overdue unpaid invoices for that issuer
+and emails the client every _N_ days (7 by default).
+
+Enable them in the issuer's email settings. They need the deployment cron to actually be scheduled.
+
+## Deployment setup
+
+Self-hosting? Four steps, none automatable:
+
+<Steps>
+  <Step>
+    ### Verify a sending domain Add and verify a domain in Resend and set its
+    DNS records. Sending from an unverified domain will not survive contact with
+    real inboxes.
+  </Step>
+  <Step>
+    ### Set the environment `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET` and
+    `EMAIL_FROM`. Sending and the webhook both **fail closed** when their
+    variable is unset — no silent no-op.
+  </Step>
+  <Step>
+    ### Point the webhook `https://your-host/api/webhooks/resend`, subscribed to
+    `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`,
+    `email.failed`, `email.complained`, `email.opened` and `email.clicked`.
+    Signatures are verified with Svix and events deduplicated by ID.
+  </Step>
+  <Step>
+    ### Schedule the reminder cron Set `CRON_SECRET` and schedule a daily
+    request to `/api/cron/overdue-reminders` with it as a bearer token. Without
+    this, per-issuer reminders can be enabled in the UI but nothing will ever
+    fire.
+  </Step>
+</Steps>
+
+Templates live in the `@invoicey/emails` package and can be previewed locally:
+
+```bash
+bun run email:dev
+```
+
+Copy is Czech, matching the app UI.

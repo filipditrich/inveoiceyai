@@ -1,0 +1,75 @@
+---
+title: Workspaces and accounts
+description: How sign-in, workspaces, members and invitations fit together.
+---
+
+## Sign-in is OAuth only
+
+Invoicey supports **Google** and **GitHub**. There is no email-and-password option and no plan to
+add one — the reasoning is that password storage, reset flows and breach handling are meaningful
+liabilities for a small invoicing tool, and both providers already do it better.
+
+A provider only appears on the sign-in screen if the deployment has credentials configured for it.
+If you see one button where you expected two, that deployment has not set up the other provider.
+
+Because both providers verify email addresses, **account linking is on**: signing in with GitHub
+using an address that already signed in with Google attaches to the same account. Linking across
+_different_ addresses is deliberately not allowed.
+
+## Workspaces are the tenancy boundary
+
+Everything you create — issuers, clients, invoices, presets, uploaded files, email history — belongs
+to exactly one **workspace**. Nothing is shared across workspaces, and no query returns rows from a
+workspace you are not a member of.
+
+Your first sign-in creates a personal workspace automatically, so you never start on an empty
+setup screen.
+
+<Callout title="Workspace, not company">
+  A workspace is not the same thing as an *issuer*. One workspace can hold
+  several issuer businesses — your OSVČ trade and your s.r.o., each with
+  independent numbering and bank accounts. Use separate workspaces only when
+  different **people** need separate access.
+</Callout>
+
+## Members and roles
+
+| Role       | Can do                                                                            |
+| ---------- | --------------------------------------------------------------------------------- |
+| **owner**  | Everything, including managing members. Assigned to whoever created the workspace |
+| **admin**  | Everything except transferring ownership                                          |
+| **member** | Day-to-day work: issuers, clients, invoices, sending                              |
+
+Invite someone by email address. They get an email with a link; accepting adds them to the
+workspace with the role you chose. If the invitation email fails to send — for example on a
+deployment with no mail configured — the invitation row is still created and the link stays
+copyable from settings, so you can pass it along yourself.
+
+## Active workspace
+
+Your session carries one **active workspace**, resolved when the session is created. Every page,
+server action and tool call independently re-checks it — the redirect you see when signed out is a
+convenience, not the security boundary.
+
+A personal [API key](/docs/integrations/api-keys) binds to your **default** workspace instead — not
+to whichever one a browser session has active, since a key has no session. If you belong to several
+workspaces, check which one that is before pointing an automation at it.
+
+## Security settings
+
+**Settings → Security** covers the account itself:
+
+- **Linked accounts** — connect or disconnect Google and GitHub.
+- **Sessions** — see where you are signed in, and revoke any of them.
+- **Trusted devices** — mark a device as known. Signing in from an unrecognised one triggers a soft
+  alert email.
+- **Audit log** — a record of security-relevant events, including API key creation and revocation.
+
+## Deleting things
+
+- **Draft invoices** can be deleted outright.
+- **Issued invoices** cannot. Cancel them instead — the number stays consumed, which is what Czech
+  accounting expects. A gap in your invoice sequence is a question you do not want to answer during
+  an audit.
+- **Clients and issuers** referenced by issued invoices stay resolvable, because those invoices hold
+  frozen [snapshots](/docs/concepts/snapshots) rather than live references.

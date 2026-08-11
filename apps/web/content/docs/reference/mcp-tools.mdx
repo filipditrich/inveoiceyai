@@ -1,0 +1,207 @@
+---
+title: MCP tool reference
+description: Every tool exposed over MCP, with its exact inputs.
+---
+
+Setup: [MCP](/docs/integrations/mcp) · [Cursor](/docs/integrations/cursor) ·
+[Claude Code](/docs/integrations/claude-code).
+
+Tools marked **DB** need `DATABASE_URL` and are only registered when it is set. The
+[hosted endpoint](/docs/integrations/mcp) always has them; a local stdio server without a database
+does not.
+
+Every tool returns a JSON result with an `ok` boolean. Failures carry a message rather than throwing.
+
+---
+
+## lookup_business
+
+Look up a Czech economic subject by IČO via ARES. Returns draft client fields — without an `id`,
+which is assigned when saved.
+
+<TypeTable
+  type={{
+    ico: { type: "string", description: "Eight-digit IČO", required: true },
+  }}
+/>
+
+Prefer this over `search_business` once the IČO is known.
+
+## search_business
+
+Search by company name (obchodní jméno). Returns matches with IČO and structured address; follow up
+with `lookup_business` on the chosen IČO.
+
+<TypeTable
+  type={{
+    query: {
+      type: "string",
+      description: 'Company name fragment, e.g. "NFCtron a.s."',
+      required: true,
+    },
+    limit: { type: "number", description: "1–20. Default 5" },
+  }}
+/>
+
+---
+
+## create_invoice
+
+Assemble a draft, validate it against the schema, and render the PDF and ISDOC. Returns the validated
+invoice, base64 PDF and ISDOC XML — or the list of validation issues.
+
+<TypeTable
+  type={{
+    draft: {
+      type: "object",
+      description: "Partial invoice: meta, client, vat, payment, items",
+    },
+    issuerPresetId: { type: "string", description: "UUID of an issuer preset" },
+    templatePresetId: {
+      type: "string",
+      description: "UUID of an invoice_template preset",
+    },
+  }}
+/>
+
+<Callout type="warn" title="The issuer is locked server-side">
+  Any `issuer` inside `draft` is **ignored**. The issuer comes from
+  `issuerPresetId`, or from a demo issuer when none is given. A model cannot put
+  a bank account or IČO on your invoice.
+</Callout>
+
+Merge order: template preset → your `draft` on top → issuer injected last.
+
+Nothing is silently defaulted. Omitting `duzp` is an error, not an invoice dated today. Field rules:
+[invoice schema](/docs/reference/invoice-schema).
+
+---
+
+## list_invoices <span data-badge>DB</span>
+
+Workspace invoices as summaries, each with both the domain `status` and the UI `displayStatus`.
+
+<TypeTable
+  type={{
+    limit: { type: "number", description: "1–100. Default 25" },
+    unpaidOnly: {
+      type: "boolean",
+      description: "Only open issued invoices — unpaid, overdue or future",
+    },
+  }}
+/>
+
+## get_invoice <span data-badge>DB</span>
+
+One invoice: summary with status, plus the validated payload when present.
+
+<TypeTable
+  type={{
+    id: { type: "string", description: "Invoice row UUID", required: true },
+  }}
+/>
+
+## mark_invoice_paid <span data-badge>DB</span>
+
+Sets `paidAt` on an issued, unpaid invoice.
+
+<TypeTable
+  type={{
+    id: { type: "string", description: "Invoice row UUID", required: true },
+  }}
+/>
+
+There is no `unmark_invoice_paid` over MCP — that one is web-only.
+
+## send_invoice_email <span data-badge>DB</span>
+
+Emails an issued invoice with the PDF and, by default, the ISDOC. Needs `RESEND_API_KEY` as well as a
+database.
+
+<TypeTable
+  type={{
+    id: { type: "string", description: "Invoice row UUID", required: true },
+    to: {
+      type: "string",
+      description: "Recipient. Defaults to the client contact email when set",
+    },
+    cc: { type: "string[]", description: "Additional recipients" },
+    subject: { type: "string", description: "Overrides the issuer default" },
+    coverText: { type: "string", description: "Custom cover body" },
+    attachIsdoc: {
+      type: "boolean",
+      description: "Defaults to the issuer setting, normally true",
+    },
+  }}
+/>
+
+<Callout type="warn">
+  Pass `to` explicitly when the client has no contact email. Do not let an
+  assistant guess an address — this tool sends real mail to real people.
+</Callout>
+
+---
+
+## Presets
+
+### list_presets
+
+<TypeTable
+  type={{
+    kind: {
+      type: "'issuer' | 'invoice_template'",
+      description: "Optional filter",
+    },
+  }}
+/>
+
+### get_preset
+
+<TypeTable
+  type={{ id: { type: "string", description: "Preset UUID", required: true } }}
+/>
+
+### save_preset
+
+Creates or updates. Omit `id` to create.
+
+<TypeTable
+  type={{
+    id: { type: "string", description: "Omit to create a new preset" },
+    kind: { type: "'issuer' | 'invoice_template'", required: true },
+    name: { type: "string", description: "1–120 chars", required: true },
+    data: {
+      type: "object",
+      description: "An IssuerSnapshot, or a partial invoice draft",
+      required: true,
+    },
+  }}
+/>
+
+For `kind: "issuer"`, `data` must be a complete issuer snapshot — name, IČO, address, bank account,
+VAT flag, contact email. For `kind: "invoice_template"`, any partial draft: `meta`, `vat`, `payment`,
+`items`.
+
+### delete_preset
+
+<TypeTable
+  type={{ id: { type: "string", description: "Preset UUID", required: true } }}
+/>
+
+---
+
+## Storage
+
+Presets live in Postgres when `DATABASE_URL` is set, otherwise in a JSON file at
+`INVOICEY_PRESETS_PATH` or `~/.invoicey/presets.json`. Force the file backend with
+`INVOICEY_PRESETS_BACKEND=file`.
+
+File-backed presets on a serverless deployment land in `/tmp` and do not survive between
+invocations. Use the database in production.
+
+## Not available over MCP
+
+- Creating issuers or clients — web UI only; MCP consumes them via presets
+- [Historical import](/docs/guides/importing-history) — web only, by design
+- Unmarking an invoice as paid
+- Cancelling an invoice

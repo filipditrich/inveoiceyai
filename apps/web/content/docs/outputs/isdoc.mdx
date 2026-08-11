@@ -1,0 +1,61 @@
+---
+title: ISDOC export
+description: Structured XML your accountant's software imports without retyping.
+---
+
+**ISDOC** is the Czech standard for electronic invoice exchange, supported by essentially every
+Czech accounting package — Pohoda, Money, iDoklad and others. Invoicey emits **ISDOC 6.0.2**.
+
+The point is simple: your accountant imports the file instead of retyping your invoice, and typos
+stop being a category of problem.
+
+## Two ways to get it
+
+1. **Embedded in the PDF.** Every generated PDF carries `invoice.isdoc` as an attachment. Send one
+   file; software that understands ISDOC finds it, software that does not still shows an invoice.
+2. **Standalone `.isdoc`.** Downloadable separately from the invoice detail, and attachable to
+   [invoice emails](/docs/guides/sending-email) — on by default.
+
+## What it contains
+
+The complete invoice: both parties with IČO and DIČ, all dates including DUZP, every line item with
+its VAT rate, per-rate tax totals, the grand total, and payment details.
+
+Document type maps to the ISDOC integer:
+
+| Invoicey      | ISDOC `DocumentType`         |
+| ------------- | ---------------------------- |
+| `invoice`     | `1`                          |
+| `credit_note` | `2` — dobropis               |
+| `proforma`    | `4` — nedaňový zálohový list |
+| `advance`     | `5` — daňový zálohový list   |
+
+[Reverse charge](/docs/concepts/czech-vat) invoices carry `LocalReverseCharge` on each line plus the
+`LocalReverseChargeFlag` on the tax total — which is why the `localReverseChargeCode` field is
+required in that mode. That code is a PDP číselník value, not a §-paragraph number; putting `92e`
+there produces an ISDOC importers reject.
+
+## Validated against the official XSD
+
+The generated XML is checked against the official ISDOC 6.0.2 schema **in the test suite**, using a
+vendored copy of the XSD from the Ministry of the Interior distribution. Validation runs with
+`xmllint-wasm`, so it needs no system binary and cannot silently skip in CI.
+
+This matters more than it sounds. An importer that rejects your file gives your accountant an error
+dialog, not a useful message — so the schema conformance has to be established before the file
+leaves the building.
+
+## Deterministic output
+
+The same invoice always produces byte-identical XML: fixed element order matching the XSD content
+model, ISO dates, `.` decimal separators, two fractional digits on money, UTF-8, LF line endings, no
+BOM, and no generation timestamp anywhere in the document.
+
+## Imported invoices
+
+Invoices [imported](/docs/guides/importing-history) with an ISDOC keep the **original** file rather
+than a regenerated one.
+
+Archive-mode imports — PDFs that had no ISDOC — have no ISDOC download at all. Invoicey will not
+synthesise one from a synthetic single-line payload, because that would produce an official-looking
+tax document asserting line items nobody ever recorded.

@@ -1,0 +1,72 @@
+---
+title: Clients
+description: The client registry and ARES lookup.
+---
+
+Clients are the businesses you invoice. They live in a shared registry per workspace, so you enter
+each one once and reuse it.
+
+## ARES lookup
+
+[ARES](https://ares.gov.cz) is the Czech public business registry. Invoicey queries it directly, so
+you rarely type a client's details by hand.
+
+**By IČO** — enter 8 digits and Invoicey fetches the subject and maps:
+
+| ARES field      | Becomes                                   |
+| --------------- | ----------------------------------------- |
+| `obchodniJmeno` | Name                                      |
+| `ico`           | IČO                                       |
+| `dic`           | DIČ, only if it is well-formed            |
+| `sidlo`         | Address — street, house number, city, PSČ |
+
+**By name** — if you do not have the IČO, search by company name and pick from the matches, each
+shown with its IČO and address.
+
+Successful lookups are cached for 24 hours per IČO. Repeatedly opening the same client does not
+hammer a public government API.
+
+<Callout title="ARES never supplies an email">
+  The registry has no contact email, so that field is always yours to fill. It
+  is worth doing: without it, every invoice send requires typing the recipient
+  manually.
+</Callout>
+
+### When lookup fails
+
+Four distinct outcomes, all reported plainly rather than as a generic failure:
+
+| Outcome          | Meaning                                                           |
+| ---------------- | ----------------------------------------------------------------- |
+| Not found        | No subject with that IČO — check the digits                       |
+| Invalid response | ARES answered with something unparseable. Rare; usually transient |
+| HTTP error       | ARES is down or rate-limiting                                     |
+| Invalid IČO      | Not 8 digits — rejected before any request is made                |
+
+Every path falls back to manual entry. ARES being unavailable never blocks you from invoicing.
+
+## Required fields
+
+The same validation as everywhere else: IČO exactly 8 digits, DIČ `CZ` + 8–10 digits if present, PSČ
+five digits, complete address.
+
+DIČ is optional in general but **required** when you invoice that client under
+[reverse charge](/docs/concepts/czech-vat) — the schema enforces it at issue time, so a missing DIČ
+surfaces as a blocked issue rather than an invalid invoice in the wild.
+
+## Foreign clients
+
+Partially supported. The address schema targets Czech addresses, and the invoice currency is fixed
+to CZK.
+
+What works today is the [OSS mode](/docs/concepts/czech-vat) for EU B2C, where you charge the
+destination country's rate while still invoicing in koruna. What does not work is invoicing a foreign
+client in their own currency.
+
+## Editing and deleting
+
+Edits affect **future** invoices only. Invoices already issued to a client carry a frozen
+[snapshot](/docs/concepts/snapshots) of how they looked at issue time.
+
+That also makes deleting a client safe — every invoice you ever sent them still renders in full,
+because it no longer depends on the record existing.

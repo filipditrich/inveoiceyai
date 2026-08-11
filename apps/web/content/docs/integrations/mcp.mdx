@@ -1,0 +1,141 @@
+---
+title: MCP
+description: Drive Invoicey from any MCP-capable assistant.
+---
+
+Invoicey exposes its invoicing tools over the
+[Model Context Protocol](https://modelcontextprotocol.io), so an assistant that speaks MCP can look
+up companies, build invoices, issue them, mark them paid and email them.
+
+This is not a bolt-on. The MCP tools call the _same_ handlers the web UI calls, and produce payloads
+against the _same_ [schema](/docs/concepts/invoice-as-data). There is no second implementation to
+drift out of sync, and no set of fields the API accepts but the UI does not.
+
+## Two ways to connect
+
+<Tabs items={['Hosted endpoint', 'Local stdio']}>
+
+<Tab value="Hosted endpoint">
+
+Streamable HTTP at `/api/mcp` on your deployment. Create a personal key under
+**Settings → API keys** — see [API keys](/docs/integrations/api-keys).
+
+```json
+{
+  "mcpServers": {
+    "invoicey": {
+      "url": "https://your-host/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+This is the useful one: it reaches your real database, so `list_invoices`, `get_invoice`,
+`mark_invoice_paid` and `send_invoice_email` all work, and invoices you create are actually saved.
+
+Your key resolves to your user and binds every tool call to **your default workspace**. The
+deployment-wide `MCP_API_KEY` is also accepted, operating against the configured default workspace
+instead.
+
+</Tab>
+
+<Tab value="Local stdio">
+
+A local server process, for development against a checkout of the repository.
+
+```json
+{
+  "mcpServers": {
+    "invoicey-local": {
+      "command": "bun",
+      "args": [
+        "run",
+        "--cwd",
+        "/abs/path/to/inveoiceyai/apps/mcp",
+        "src/stdio.ts"
+      ],
+      "env": {
+        "INVOICEY_PRESETS_PATH": "/abs/path/to/inveoiceyai/.invoicey/presets.json"
+      }
+    }
+  }
+}
+```
+
+Paths must be absolute. Without a `DATABASE_URL` in the environment this runs in file-backed mode:
+you get ARES lookup, invoice creation, rendering and presets, but none of the database-backed tools.
+
+</Tab>
+
+</Tabs>
+
+Client-specific setup: [Cursor](/docs/integrations/cursor) · [Claude Code](/docs/integrations/claude-code).
+
+## The tools
+
+| Tool                                                            | Needs a database | Purpose                                      |
+| --------------------------------------------------------------- | ---------------- | -------------------------------------------- |
+| `lookup_business`                                               | no               | ARES lookup by IČO                           |
+| `search_business`                                               | no               | ARES search by company name                  |
+| `create_invoice`                                                | no               | Build, validate and render an invoice        |
+| `list_invoices`                                                 | yes              | Summaries, with `status` and `displayStatus` |
+| `get_invoice`                                                   | yes              | One invoice with its full payload            |
+| `mark_invoice_paid`                                             | yes              | Record payment                               |
+| `send_invoice_email`                                            | yes              | Email the PDF and ISDOC                      |
+| `list_presets` · `get_preset` · `save_preset` · `delete_preset` | no               | Manage presets                               |
+
+Full input and output shapes: [MCP tool reference](/docs/reference/mcp-tools).
+
+## Presets
+
+Presets are what make this safe enough to use.
+
+**Issuer presets** hold a complete issuer — name, IČO, DIČ, address, bank account, VAT status.
+`create_invoice` takes a preset _ID_ and injects the issuer server-side. The model never supplies the
+"from" party, so it cannot hallucinate your bank account onto an invoice.
+
+**Invoice template presets** hold a partial draft — standard line items, VAT settings, payment
+defaults — merged underneath whatever the assistant specifies. Useful for a monthly retainer where
+only the period changes.
+
+Storage follows the environment: Postgres when `DATABASE_URL` is set, otherwise a JSON file at
+`INVOICEY_PRESETS_PATH` or `~/.invoicey/presets.json`.
+
+<Callout type="warn" title="File presets do not survive on serverless">
+  On a Vercel deployment without a database, presets land in `/tmp` and vanish
+  between invocations. Use the database-backed path in production.
+</Callout>
+
+## A realistic session
+
+> Look up NFCtron by IČO. Using my "s.r.o." issuer preset, invoice them 40 hours of consulting at
+> 1 800 CZK and 12 000 CZK for the integration work, due in 14 days.
+
+The assistant calls `lookup_business`, then `create_invoice` with the preset ID and the line items.
+It gets back a validated invoice plus a rendered PDF, or a list of validation issues to fix and
+retry.
+
+Then, later:
+
+> Which invoices are unpaid? Mark the NFCtron one paid and email them a receipt.
+
+`list_invoices` with `unpaidOnly`, `mark_invoice_paid`, `send_invoice_email`.
+
+<Callout type="warn" title="Validation is not verification">
+  The schema guarantees an invoice is well-formed, not that it is right. It
+  cannot tell that the model billed 40 hours when you worked 4. Read what it
+  produced — issuing and sending are the irreversible steps.
+</Callout>
+
+## Limitations
+
+- **One workspace per key.** A personal key binds to your default workspace; there is no way to
+  target a different one per call.
+- **No scopes.** A key is full access to that workspace, including sending email.
+- **No import tool.** [Historical import](/docs/guides/importing-history) is web-only by design.
+- **No `unmark_invoice_paid`.** Web only.
+- **The remote endpoint does not create issuers or clients.** Those are managed in the web UI; MCP
+  consumes them through presets.

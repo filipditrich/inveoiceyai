@@ -1,0 +1,82 @@
+---
+title: The PDF
+description: What is on the invoice, and what makes it more than a picture.
+---
+
+The PDF is a Czech-language A4 invoice with the ISDOC XML **embedded inside it as an attachment**.
+One file that a human reads and an accounting system parses.
+
+## Layout
+
+From top to bottom:
+
+1. **Issuer block** — name, address, IČO, DIČ (when you are a VAT payer), registry note, and your
+   logo if you uploaded one.
+2. **Title band** — the document label (_Faktura_ / _Proforma faktura_ / _Zálohová faktura_ /
+   _Dobropis_), the number, issue date, due date and DUZP.
+3. **Client block** — name, address, IČO and DIČ.
+4. **Line items** — popis, množství, jednotka, cena bez DPH, DPH %, DPH, částka.
+5. **Totals** — _Celkem bez DPH_, _DPH celkem_, _Celkem k úhradě_, formatted with Czech number
+   spacing.
+6. **VAT recap** (_Rekapitulace DPH_) — one row per rate. Replaced by _Nejsem plátce DPH_ for
+   non-payers, and by the legal note under [reverse charge](/docs/concepts/czech-vat).
+7. **Payment block** — account number, IBAN, BIC, and the variable, constant and specific symbols.
+8. **Payment QR** — see [payment QR](/docs/outputs/payment-qr).
+9. **Stamp and signature** — if uploaded and enabled.
+10. **Notes** and a footer.
+
+DUZP is printed on invoices and credit notes. It is **omitted** on proformas and advances, since
+neither is a tax document and showing a tax-supply date on one invites confusion.
+
+## Czech typography
+
+Fonts are the boring detail that ruins invoices. Invoicey vendors **Inter** TTF files directly into
+the repository rather than resolving them from `node_modules` at runtime — serverless bundlers move
+package files around unpredictably, and the failure mode is a PDF where every _ě_, _š_, _č_, _ř_ and
+_ž_ renders as a box. On an invoice sent to a client.
+
+Numbers use Czech formatting: space as the thousands separator, comma as the decimal separator,
+`Kč` as the currency.
+
+## Embedded ISDOC
+
+Every generated PDF carries `invoice.isdoc` as an embedded file attachment. Your client's accountant
+can import the PDF directly and get structured data; if their software does not support it, the PDF
+is still just a PDF.
+
+The standalone `.isdoc` XML is also downloadable separately. See [ISDOC](/docs/outputs/isdoc).
+
+## Stored, not regenerated
+
+At issue time the PDF is rendered once, uploaded, and its URL stored on the invoice. Downloads serve
+that stored file.
+
+So the PDF your client received and the one you download two years later are the same bytes. If the
+file is missing — an older invoice, or a deployment without upload storage configured — it is
+regenerated from the frozen [snapshot](/docs/concepts/snapshots) and backfilled, producing an
+identical document because every input is still on the row.
+
+<Callout title="Imported invoices are never re-rendered">
+  Invoices [imported](/docs/guides/importing-history) from another tool always
+  serve their **original** PDF. Re-rendering someone else's invoice in
+  Invoicey's layout would produce a document that never existed and does not
+  match the one your client holds.
+</Callout>
+
+Drafts render on demand and are not stored — a draft has no number and no frozen snapshot, so there
+is nothing stable to keep.
+
+## Customisation
+
+Deliberately limited: an accent colour, and toggles for the stamp and signature.
+
+There is no template editor. Building one is a large surface for a small payoff on documents whose
+job is to be unambiguous and legally complete, and effort went into the
+[automation surfaces](/docs/integrations/mcp) instead. If your invoices must look a particular way,
+this is the wrong tool.
+
+## Known limits
+
+- **SVG logos** are not rasterised reliably. Upload PNG or JPEG.
+- Layout is A4 only.
+- The document language is Czech.
