@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 import type { FullEnv } from "./schema";
 import { fullEnvSchema } from "./schema";
 

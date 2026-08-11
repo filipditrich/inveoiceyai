@@ -9,7 +9,7 @@
     "./load": "./src/load.ts"
   },
   "scripts": {
-    "lint": "echo \"skip: eslint not wired for env yet\"",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
@@ -18,6 +18,8 @@
   },
   "devDependencies": {
     "@types/node": "25.6.0",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "@invoicey/eslint-config": "workspace:*",
+    "eslint": "^9"
   }
 }

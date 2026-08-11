@@ -1,8 +1,9 @@
 import { config as loadDotEnv } from "dotenv";
 import { withEve } from "eve/next";
+import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { NextConfig } from "next";
 
 /** Monorepo root — same `.env` as Drizzle (@invoicey/db); Next only reads `apps/web` by default. */
 const repoRoot = path.resolve(
@@ -20,6 +21,14 @@ const invoiceCoreAssets = [
   "../../packages/invoice-core/assets/schemas/**/*",
   "../../packages/invoice-core/assets/icc/**/*",
 ];
+
+const withNextIntl = createNextIntlPlugin({
+  requestConfig: "./i18n/request.ts",
+  experimental: {
+    /** typed message keys from the Czech catalog (ADR 0012) */
+    createMessagesDeclaration: ["./locales/cs.json"],
+  },
+});
 
 const nextConfig: NextConfig = {
   /** so NFT can follow `../../packages/invoice-core/assets/**` outside apps/web */
@@ -39,4 +48,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withEve(nextConfig);
+export default withEve(withNextIntl(nextConfig));

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "bun run src/stdio.ts",
     "start": "bun run src/stdio.ts",
-    "lint": "echo \"skip: eslint not wired for mcp yet\"",
+    "lint": "eslint .",
     "typecheck": "NODE_OPTIONS=--max-old-space-size=8192 tsc --noEmit -p tsconfig.json",
     "test": "vitest run"
   },
@@ -18,6 +18,8 @@
   "devDependencies": {
     "@types/node": "25.6.0",
     "typescript": "6.0.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@invoicey/eslint-config": "workspace:*",
+    "eslint": "^9"
   }
 }

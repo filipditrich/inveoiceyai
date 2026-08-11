@@ -14,7 +14,7 @@
   },
 
   "scripts": {
-    "lint": "echo \"skip: eslint not wired for invoice-core yet\"",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -38,6 +38,8 @@
     "@types/react-dom": "19.2.3",
     "typescript": "6.0.3",
     "vitest": "^3.2.4",
-    "xmllint-wasm": "5.2.0"
+    "xmllint-wasm": "5.2.0",
+    "@invoicey/eslint-config": "workspace:*",
+    "eslint": "^9"
   }
 }
