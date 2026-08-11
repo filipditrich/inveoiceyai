@@ -241,11 +241,70 @@ Plans listed here do not block the MVP and can be picked up in parallel with Pla
 
 ### Plan 11 — Email delivery
 
-**Status:** Post-MVP backlog
+**Status:** Done (implementation; operator smoke pending)  
+**Completed:** 2026-08-11  
+**Spec:** [`specs/email.md`](./specs/email.md) · [ADR 0022](./decisions/0022-resend-and-react-email.md)
 
-- Resend wiring with verified sending domain
-- "Send" action on issued invoices: PDF + ISDOC attached, customizable cover text
-- Email log per invoice (sent, delivered, bounced)
+Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still needed:** verify `mail.invoicey.ditrich.me`, set Resend/webhook/`CRON_SECRET` on Vercel, run one real send + webhook check.
+
+#### Plan 11a — Email engine
+
+**Status:** Done (implementation)  
+**Completed:** 2026-08-11  
+**Plan file:** [`.cursor/plans/plan-11a-email-engine.md`](../.cursor/plans/plan-11a-email-engine.md)
+
+**Goal:** Templates package, Resend client, `email_messages` / `email_events`, webhook tracking, Better Auth invite send.
+
+**Exit criteria:**
+
+- [x] Spec + ADR + this roadmap section
+- [x] `@invoicey/emails` with invoice-sent + workspace-invite (+ stub templates)
+- [x] Drizzle tables + schema applied
+- [x] Resend client + webhook route + env schema
+- [x] Auth invite sends via Resend when key set
+- [x] Vitest for render + from-display + webhook status mapping
+
+#### Plan 11b — Invoice send UI
+
+**Status:** Done (implementation)  
+**Completed:** 2026-08-11  
+**Plan file:** [`.cursor/plans/plan-11b-invoice-send.md`](../.cursor/plans/plan-11b-invoice-send.md)
+
+**Goal:** Send issued invoices from the web app with customizable cover, PDF (+ ISDOC), issuer defaults, delivery timeline.
+
+**Exit criteria:**
+
+- [x] Send action + dialog + issuer `email_settings`
+- [x] PDF (+ ISDOC) attached correctly
+- [x] Timeline on invoice detail
+- [x] Tests for ops defaults / missing email / cancelled guard
+
+#### Plan 11c — Agent surfaces
+
+**Status:** Done (implementation)  
+**Completed:** 2026-08-11  
+**Plan file:** [`.cursor/plans/plan-11c-email-agents.md`](../.cursor/plans/plan-11c-email-agents.md)
+
+**Goal:** MCP + Eve `send_invoice_email` (HITL) on the same ops path.
+
+**Exit criteria:**
+
+- [x] MCP + Eve tools registered and tested
+- [x] Specs (`mcp.md`, `slack-eve.md`) updated
+
+#### Plan 11d — Lifecycle emails
+
+**Status:** Done (implementation)  
+**Completed:** 2026-08-11  
+**Plan file:** [`.cursor/plans/plan-11d-email-lifecycle.md`](../.cursor/plans/plan-11d-email-lifecycle.md)
+
+**Goal:** Overdue reminders (cron), optional payment-received mail, bounce/complaint suppression.
+
+**Exit criteria:**
+
+- [x] Cron reminder job + payment-received hook
+- [x] Suppression list honored
+- [x] Eligibility + suppression tests
 
 ### Plan 12a — MCP server, local + Vercel HTTP prep (`apps/mcp`)
 

@@ -21,6 +21,10 @@ erDiagram
   clients ||--o{ invoices : to
   issuer_businesses ||--o{ issuer_numbering_schemes : has
   invoices ||--o{ invoice_items : has
+  workspaces ||--o{ email_messages : has
+  invoices ||--o{ email_messages : optional
+  email_messages ||--o{ email_events : has
+  workspaces ||--o{ email_suppressions : has
 
   workspaces {
     text id PK
@@ -33,6 +37,7 @@ erDiagram
     text workspace_id
     text source
     jsonb snapshot
+    jsonb email_settings
     timestamptz created_at
     timestamptz updated_at
   }
@@ -95,26 +100,53 @@ erDiagram
     text name
     jsonb data
   }
+
+  email_messages {
+    uuid id PK
+    text workspace_id
+    uuid invoice_id FK
+    text template
+    text to_email
+    text status
+    text provider_message_id
+  }
+
+  email_events {
+    uuid id PK
+    uuid message_id FK
+    text type
+    text provider_event_id
+  }
+
+  email_suppressions {
+    uuid id PK
+    text workspace_id
+    text email
+    text reason
+  }
 ```
 
 ## Tables
 
-| Table | Notes |
-| --- | --- |
-| `workspaces` | Seeded default UUID workspace |
-| `issuer_businesses` | Live issuer; snapshot is IssuerSnapshot JSON (ADR 0008) |
-| `issuer_numbering_schemes` | Per `(issuer, docType)`; `counter` / `reset_period` / `padding` (numbering.md) |
-| `clients` | Plan 4 |
-| `invoices` | Drafts: `number` + `issued_at` null; unique `(issuer_id, number)`. Issued artifacts: `pdf_url`, `isdoc_url`, `pdf_generated_at`. Import provenance: `origin_*`, `import_completeness`, `import_batch_id`, `imported_at`, `external_key`, `artifacts_immutable` |
-| `invoice_items` | Denormalized lines; canonical lines also in `payload_json` |
-| `invoice_import_batches` | Bulk import run counters / defaults |
-| `presets` | MCP/Slack `issuer` \| `invoice_template`; unique `(workspace_id, kind, name)` |
+| Table                      | Notes                                                                                                                                                                                                                                                          |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `workspaces`               | Seeded default UUID workspace                                                                                                                                                                                                                                  |
+| `issuer_businesses`        | Live issuer; snapshot is IssuerSnapshot JSON (ADR 0008); `email_settings` jsonb (Plan 11)                                                                                                                                                                      |
+| `issuer_numbering_schemes` | Per `(issuer, docType)`; `counter` / `reset_period` / `padding` (numbering.md)                                                                                                                                                                                 |
+| `clients`                  | Plan 4                                                                                                                                                                                                                                                         |
+| `invoices`                 | Drafts: `number` + `issued_at` null; unique `(issuer_id, number)`. Issued artifacts: `pdf_url`, `isdoc_url`, `pdf_generated_at`. Import provenance: `origin_*`, `import_completeness`, `import_batch_id`, `imported_at`, `external_key`, `artifacts_immutable` |
+| `invoice_items`            | Denormalized lines; canonical lines also in `payload_json`                                                                                                                                                                                                     |
+| `invoice_import_batches`   | Bulk import run counters / defaults                                                                                                                                                                                                                            |
+| `presets`                  | MCP/Slack `issuer` \| `invoice_template`; unique `(workspace_id, kind, name)`                                                                                                                                                                                  |
+| `email_messages`           | One row per send; Resend id + latest delivery status (Plan 11)                                                                                                                                                                                                 |
+| `email_events`             | Append-only webhook events; unique `provider_event_id`                                                                                                                                                                                                         |
+| `email_suppressions`       | Bounce/complaint suppressions for automated sends (Plan 11d)                                                                                                                                                                                                   |
 
 ## Backend selection (presets)
 
-| Condition | Store |
-| --- | --- |
-| `DATABASE_URL` set and no `path` override | Neon `presets` |
+| Condition                                          | Store                                                            |
+| -------------------------------------------------- | ---------------------------------------------------------------- |
+| `DATABASE_URL` set and no `path` override          | Neon `presets`                                                   |
 | `INVOICEY_PRESETS_BACKEND=file` or explicit `path` | JSON file (`INVOICEY_PRESETS_PATH` / `~/.invoicey/presets.json`) |
 
 `create_invoice` (MCP) persists a draft invoice row when `DATABASE_URL` is set.

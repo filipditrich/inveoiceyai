@@ -16,7 +16,10 @@ import {
   type Invoice,
   type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
-import { deriveStatus, type InvoiceStatus } from "@invoicey/invoice-core/status";
+import {
+  deriveStatus,
+  type InvoiceStatus,
+} from "@invoicey/invoice-core/status";
 import {
   resolveDisplayStatus,
   type InvoiceDisplayStatus,
@@ -25,6 +28,7 @@ import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { getDemoIssuer } from "./demo-issuer";
 import { tryPersistInvoiceArtifacts } from "./invoice-artifacts";
+import { sendPaymentReceivedEmailIfEnabled } from "./send-invoice-email";
 
 export interface InvoiceSummary {
   id: string;
@@ -206,6 +210,15 @@ export async function markInvoicePaidById(options: {
     .update(invoices)
     .set({ paidAt: now, updatedAt: now })
     .where(eq(invoices.id, options.id));
+  try {
+    await sendPaymentReceivedEmailIfEnabled({
+      db: database,
+      workspaceId,
+      invoiceId: options.id,
+    });
+  } catch (err) {
+    console.error("[markInvoicePaidById] payment-received email failed", err);
+  }
   return {
     ok: true,
     summary: rowToSummary({ ...row, paidAt: now, updatedAt: now }),
@@ -296,7 +309,9 @@ async function loadWorkspaceInvoicesByIds(
   return database
     .select()
     .from(invoices)
-    .where(and(eq(invoices.workspaceId, workspaceId), inArray(invoices.id, ids)));
+    .where(
+      and(eq(invoices.workspaceId, workspaceId), inArray(invoices.id, ids)),
+    );
 }
 
 export async function bulkMarkInvoicesPaid(options: {
@@ -333,6 +348,18 @@ export async function bulkMarkInvoicesPaid(options: {
       .update(invoices)
       .set({ paidAt: now, updatedAt: now })
       .where(eq(invoices.id, id));
+    try {
+      await sendPaymentReceivedEmailIfEnabled({
+        db: database,
+        workspaceId,
+        invoiceId: id,
+      });
+    } catch (err) {
+      console.error(
+        "[bulkMarkInvoicesPaid] payment-received email failed",
+        err,
+      );
+    }
     ok += 1;
   }
   return { ok, skipped, failed };
@@ -447,7 +474,12 @@ export async function issueInvoiceById(options: {
   id: string;
   workspaceId?: string;
 }): Promise<
-  | { ok: true; summary: InvoiceSummary; invoice: Invoice; alreadyIssued: boolean }
+  | {
+      ok: true;
+      summary: InvoiceSummary;
+      invoice: Invoice;
+      alreadyIssued: boolean;
+    }
   | { ok: false; error: string }
 > {
   const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
@@ -458,7 +490,10 @@ export async function issueInvoiceById(options: {
         .select()
         .from(invoices)
         .where(
-          and(eq(invoices.id, options.id), eq(invoices.workspaceId, workspaceId)),
+          and(
+            eq(invoices.id, options.id),
+            eq(invoices.workspaceId, workspaceId),
+          ),
         )
         .limit(1);
       const row = rows[0];

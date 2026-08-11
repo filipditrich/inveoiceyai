@@ -6,26 +6,27 @@ Expose invoice create/render, ARES lookup, and local presets as MCP tools so Cur
 
 ## Package map
 
-| Piece | Role |
-| --- | --- |
-| [`packages/invoice-tools`](../../packages/invoice-tools/) | Handlers: `lookupBusiness`, `createAndRenderInvoice`, preset CRUD, `normalizeDraftToInvoice` |
-| [`packages/invoice-tools/src/register-mcp-tools.ts`](../../packages/invoice-tools/src/register-mcp-tools.ts) | Registers tools on an MCP `McpServer` (`@invoicey/invoice-tools/mcp`) |
-| [`apps/mcp`](../../apps/mcp/) | Local **stdio** entry (`bun run --cwd apps/mcp src/stdio.ts`) |
-| [`apps/web/app/api/[transport]/route.ts`](../../apps/web/app/api/[transport]/route.ts) | Remote **Streamable HTTP** via `mcp-handler` → `/api/mcp` |
+| Piece                                                                                                        | Role                                                                                         |
+| ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| [`packages/invoice-tools`](../../packages/invoice-tools/)                                                    | Handlers: `lookupBusiness`, `createAndRenderInvoice`, preset CRUD, `normalizeDraftToInvoice` |
+| [`packages/invoice-tools/src/register-mcp-tools.ts`](../../packages/invoice-tools/src/register-mcp-tools.ts) | Registers tools on an MCP `McpServer` (`@invoicey/invoice-tools/mcp`)                        |
+| [`apps/mcp`](../../apps/mcp/)                                                                                | Local **stdio** entry (`bun run --cwd apps/mcp src/stdio.ts`)                                |
+| [`apps/web/app/api/[transport]/route.ts`](../../apps/web/app/api/[transport]/route.ts)                       | Remote **Streamable HTTP** via `mcp-handler` → `/api/mcp`                                    |
 
 Slack Eve reuses the same handlers in-process (`apps/web/agent/tools`) — see [`slack-eve.md`](./slack-eve.md). (Plan 13a wrappers under `lib/slack` are retired.)
 
 ## Tools
 
-| Tool | Input | Output |
-| --- | --- | --- |
-| `lookup_business` | `{ ico }` | ARES draft client fields or error |
-| `search_business` | `{ query, limit? }` | ARES name search → matches with IČO + address |
-| `create_invoice` | `{ draft?, issuerPresetId?, templatePresetId? }` | Validated invoice + PDF base64 + ISDOC XML, or issues |
-| `list_invoices` | `{ limit?, unpaidOnly? }` | Summaries with `status` + `displayStatus` (needs `DATABASE_URL`) |
-| `get_invoice` | `{ id }` | Summary + validated payload when present (needs DB) |
-| `mark_invoice_paid` | `{ id }` | Sets `paidAt` (needs DB) |
-| `list_presets` / `get_preset` / `save_preset` / `delete_preset` | preset ids / kind / data | Preset records on disk |
+| Tool                                                            | Input                                                  | Output                                                                                          |
+| --------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `lookup_business`                                               | `{ ico }`                                              | ARES draft client fields or error                                                               |
+| `search_business`                                               | `{ query, limit? }`                                    | ARES name search → matches with IČO + address                                                   |
+| `create_invoice`                                                | `{ draft?, issuerPresetId?, templatePresetId? }`       | Validated invoice + PDF base64 + ISDOC XML, or issues                                           |
+| `list_invoices`                                                 | `{ limit?, unpaidOnly? }`                              | Summaries with `status` + `displayStatus` (needs `DATABASE_URL`)                                |
+| `get_invoice`                                                   | `{ id }`                                               | Summary + validated payload when present (needs DB)                                             |
+| `mark_invoice_paid`                                             | `{ id }`                                               | Sets `paidAt` (needs DB)                                                                        |
+| `send_invoice_email`                                            | `{ id, to?, cc?, coverText?, attachIsdoc?, subject? }` | Emails PDF (+ ISDOC); needs DB + `RESEND_API_KEY`. Pass `to` when client has no `contactEmail`. |
+| `list_presets` / `get_preset` / `save_preset` / `delete_preset` | preset ids / kind / data                               | Preset records on disk                                                                          |
 
 ### Preset kinds
 
@@ -106,11 +107,11 @@ flowchart LR
 
 ## Env
 
-| Var | Required | Notes |
-| --- | --- | --- |
-| `INVOICEY_DEMO_ISSUER_JSON` | no | Full `IssuerSnapshot` JSON override |
-| `INVOICEY_PRESETS_PATH` | no | Absolute path to presets JSON |
-| `MCP_API_KEY` | to use `/api/mcp` | Bearer gate. Optional in the env schema (the app boots without it); the route fails closed when unset |
+| Var                         | Required          | Notes                                                                                                 |
+| --------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------- |
+| `INVOICEY_DEMO_ISSUER_JSON` | no                | Full `IssuerSnapshot` JSON override                                                                   |
+| `INVOICEY_PRESETS_PATH`     | no                | Absolute path to presets JSON                                                                         |
+| `MCP_API_KEY`               | to use `/api/mcp` | Bearer gate. Optional in the env schema (the app boots without it); the route fails closed when unset |
 
 ## Plan 12b (shipped)
 

@@ -22,3 +22,4 @@ description: Step-by-step Czech invoice creation via ARES, draft render, Slack u
 5. Tell the user the draft `invoiceId`, web URL, and that Issue / Mark paid need button confirmation.
 6. When they ask to issue: `issue_invoice` → wait for approval → `upload_invoice_files` again.
 7. When they ask to mark paid: `mark_invoice_paid` → wait for approval.
+8. When they ask to email the invoice: `send_invoice_email` → wait for approval. Pass `to` if the client has no `contactEmail`.

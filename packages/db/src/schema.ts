@@ -1,4 +1,5 @@
 import {
+  boolean,
   index,
   integer,
   jsonb,
@@ -38,6 +39,17 @@ export const clients = pgTable(
   ],
 );
 
+/** Issuer email defaults — applied at send time. */
+export type IssuerEmailSettings = {
+  defaultSubject?: string;
+  defaultCoverText?: string;
+  attachIsdocByDefault?: boolean;
+  displayNameTemplate?: string;
+  overdueRemindersEnabled?: boolean;
+  overdueReminderIntervalDays?: number;
+  sendPaymentReceivedEmail?: boolean;
+};
+
 /** Issuer (my-business) row — `snapshot` holds validated IssuerSnapshot JSON (Plan 5). */
 export const issuerBusinesses = pgTable(
   "issuer_businesses",
@@ -47,6 +59,10 @@ export const issuerBusinesses = pgTable(
     /** `"ares"` | `"manual"` */
     source: text("source").notNull(),
     snapshot: jsonb("snapshot").notNull().$type<Record<string, unknown>>(),
+    emailSettings: jsonb("email_settings")
+      .$type<IssuerEmailSettings>()
+      .default({})
+      .notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -166,7 +182,10 @@ export const invoices = pgTable(
     index("invoices_workspace_client_idx").on(t.workspaceId, t.clientId),
     index("invoices_workspace_due_date_idx").on(t.workspaceId, t.dueDate),
     index("invoices_workspace_batch_idx").on(t.workspaceId, t.importBatchId),
-    index("invoices_workspace_external_key_idx").on(t.workspaceId, t.externalKey),
+    index("invoices_workspace_external_key_idx").on(
+      t.workspaceId,
+      t.externalKey,
+    ),
   ],
 );
 
@@ -191,7 +210,10 @@ export const invoiceImportBatches = pgTable(
       .notNull(),
   },
   (t) => [
-    index("invoice_import_batches_workspace_idx").on(t.workspaceId, t.createdAt),
+    index("invoice_import_batches_workspace_idx").on(
+      t.workspaceId,
+      t.createdAt,
+    ),
   ],
 );
 
@@ -299,6 +321,110 @@ export const presets = pgTable(
       t.workspaceId,
       t.kind,
       t.name,
+    ),
+  ],
+);
+
+/** Delivery status for email_messages (opens/clicks are soft signals). */
+export type EmailMessageStatus =
+  | "queued"
+  | "sent"
+  | "delivered"
+  | "delayed"
+  | "bounced"
+  | "failed"
+  | "complained";
+
+/** Outbound transactional email. */
+export const emailMessages = pgTable(
+  "email_messages",
+  {
+    id: uuid("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    invoiceId: uuid("invoice_id").references(() => invoices.id, {
+      onDelete: "set null",
+    }),
+    /** invoice_sent | workspace_invite | overdue_reminder | payment_received */
+    template: text("template").notNull(),
+    toEmail: text("to_email").notNull(),
+    ccEmails: jsonb("cc_emails").$type<string[]>().default([]).notNull(),
+    replyTo: text("reply_to"),
+    fromDisplay: text("from_display").notNull(),
+    fromAddress: text("from_address").notNull(),
+    subject: text("subject").notNull(),
+    coverText: text("cover_text"),
+    attachPdf: boolean("attach_pdf").notNull().default(false),
+    attachIsdoc: boolean("attach_isdoc").notNull().default(false),
+    provider: text("provider").notNull().default("resend"),
+    providerMessageId: text("provider_message_id"),
+    status: text("status")
+      .notNull()
+      .$type<EmailMessageStatus>()
+      .default("queued"),
+    openedAt: timestamp("opened_at", { withTimezone: true }),
+    clickedAt: timestamp("clicked_at", { withTimezone: true }),
+    lastEventAt: timestamp("last_event_at", { withTimezone: true }),
+    createdBy: text("created_by"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("email_messages_workspace_invoice_idx").on(
+      t.workspaceId,
+      t.invoiceId,
+    ),
+    index("email_messages_provider_message_idx").on(t.providerMessageId),
+    index("email_messages_workspace_created_idx").on(
+      t.workspaceId,
+      t.createdAt,
+    ),
+  ],
+);
+
+/** Append-only provider webhook events. */
+export const emailEvents = pgTable(
+  "email_events",
+  {
+    id: uuid("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    messageId: uuid("message_id")
+      .notNull()
+      .references(() => emailMessages.id, { onDelete: "cascade" }),
+    /** sent | delivered | delivery_delayed | bounced | failed | complained | opened | clicked */
+    type: text("type").notNull(),
+    providerEventId: text("provider_event_id").notNull(),
+    payloadJson: jsonb("payload_json")
+      .$type<Record<string, unknown>>()
+      .notNull(),
+    occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("email_events_provider_event_uidx").on(t.providerEventId),
+    index("email_events_message_idx").on(t.messageId, t.occurredAt),
+  ],
+);
+
+/** Bounce/complaint suppressions for automated sends. */
+export const emailSuppressions = pgTable(
+  "email_suppressions",
+  {
+    id: uuid("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    email: text("email").notNull(),
+    /** bounce | complaint */
+    reason: text("reason").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("email_suppressions_workspace_email_uidx").on(
+      t.workspaceId,
+      t.email,
     ),
   ],
 );

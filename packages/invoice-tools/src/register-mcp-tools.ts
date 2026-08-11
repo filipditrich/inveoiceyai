@@ -6,11 +6,7 @@ import {
   lookupBusiness,
   searchBusiness,
 } from "./handlers";
-import {
-  getInvoice,
-  listInvoices,
-  markInvoicePaidById,
-} from "./invoice-ops";
+import { getInvoice, listInvoices, markInvoicePaidById } from "./invoice-ops";
 import { jsonToolResult } from "./mcp-json-result";
 import {
   deletePreset,
@@ -19,6 +15,7 @@ import {
   savePreset,
   type PresetKind,
 } from "./presets";
+import { sendInvoiceEmailById } from "./send-invoice-email";
 
 const presetKindSchema = z.enum(["issuer", "invoice_template"]);
 const jsonObjectSchema = z.record(z.string(), z.any());
@@ -166,6 +163,51 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
     async (args) => {
       try {
         const r = await markInvoicePaidById({ id: String(args.id ?? "") });
+        return jsonToolResult(r, !r.ok);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return jsonToolResult({ ok: false as const, error: message }, true);
+      }
+    },
+  );
+
+  s.tool(
+    "send_invoice_email",
+    "Email an issued invoice (PDF + optional ISDOC) via Resend. Requires DATABASE_URL + RESEND_API_KEY. Pass `to` when the client has no contactEmail — do not invent an address.",
+    {
+      id: z.string().uuid().describe("Invoice row id"),
+      to: z
+        .string()
+        .email()
+        .optional()
+        .describe("Recipient; defaults to client.contactEmail when set"),
+      cc: z
+        .array(z.string().email())
+        .optional()
+        .describe("Optional CC recipients"),
+      coverText: z.string().optional().describe("Custom cover body"),
+      attachIsdoc: z
+        .boolean()
+        .optional()
+        .describe("Attach ISDOC (default from issuer settings / true)"),
+      subject: z.string().optional(),
+    },
+    async (args) => {
+      try {
+        const r = await sendInvoiceEmailById({
+          id: String(args.id ?? ""),
+          to: typeof args.to === "string" ? args.to : undefined,
+          cc: Array.isArray(args.cc)
+            ? args.cc.filter((x): x is string => typeof x === "string")
+            : undefined,
+          coverText:
+            typeof args.coverText === "string" ? args.coverText : undefined,
+          subject: typeof args.subject === "string" ? args.subject : undefined,
+          attachIsdoc:
+            typeof args.attachIsdoc === "boolean"
+              ? args.attachIsdoc
+              : undefined,
+        });
         return jsonToolResult(r, !r.ok);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);

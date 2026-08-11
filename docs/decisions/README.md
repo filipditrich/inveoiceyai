@@ -11,24 +11,25 @@ When a decision changes:
 
 ## Index
 
-| # | Title | Status |
-| --- | --- | --- |
-| [0001](./0001-monorepo-turborepo-bun.md) | Monorepo with Turborepo + bun workspaces | Accepted |
-| [0002](./0002-nextjs15-app-router.md) | Next.js 15 with App Router, RSC, Server Actions | Accepted |
-| [0003](./0003-shadcn-plus-reui-registry.md) | shadcn/ui base + ReUI registry | Accepted |
-| [0004](./0004-pdf-react-pdf-renderer.md) | PDF rendering via @react-pdf/renderer | Accepted |
-| [0005](./0005-zod-as-source-of-truth.md) | Zod as the single source of truth for the invoice contract | Accepted |
-| [0006](./0006-no-auth-mvp-multi-tenant-ready.md) | No auth in MVP, multi-tenant-ready schema | Accepted |
-| [0007](./0007-workspace-scoped-data-model.md) | Workspace-scoped data model (`workspace_id` everywhere) | Accepted |
-| [0008](./0008-snapshot-issuer-client-at-issue-time.md) | Snapshot issuer + client at issue time | Accepted |
-| [0009](./0009-drizzle-neon-postgres.md) | Drizzle ORM + Neon Postgres | Accepted |
-| [0010](./0010-uploadthing-for-files.md) | UploadThing for file uploads | Accepted |
-| [0011](./0011-full-czech-vat-from-day-one.md) | Full Czech VAT compliance from day one | Accepted |
-| [0012](./0012-czk-and-czech-only-mvp.md) | CZK + Czech-only invoices in MVP | Accepted |
-| [0013](./0013-configurable-per-issuer-numbering.md) | Configurable per-issuer numbering schemes | Accepted |
-| [0014](./0014-status-derived-not-stored.md) | Invoice status is derived, not stored | Accepted |
-| [0015](./0015-rhf-plus-zod-resolver-builder.md) | RHF + zodResolver for the invoice builder | Accepted |
-| [0016](./0016-server-actions-as-mutation-surface.md) | Server Actions as the only mutation surface | Accepted |
-| [0017](./0017-tailwind-v4-tooling-baseline.md) | Tailwind CSS v4 tooling baseline for web app | Accepted |
-| [0019](./0019-workspaces-are-better-auth-organizations.md) | Workspaces are Better Auth organizations | Accepted |
-| [0021](./0021-immutable-imported-invoice-artifacts.md) | Immutable imported invoice artifacts + provenance | Accepted |
+| #                                                          | Title                                                      | Status   |
+| ---------------------------------------------------------- | ---------------------------------------------------------- | -------- |
+| [0001](./0001-monorepo-turborepo-bun.md)                   | Monorepo with Turborepo + bun workspaces                   | Accepted |
+| [0002](./0002-nextjs15-app-router.md)                      | Next.js 15 with App Router, RSC, Server Actions            | Accepted |
+| [0003](./0003-shadcn-plus-reui-registry.md)                | shadcn/ui base + ReUI registry                             | Accepted |
+| [0004](./0004-pdf-react-pdf-renderer.md)                   | PDF rendering via @react-pdf/renderer                      | Accepted |
+| [0005](./0005-zod-as-source-of-truth.md)                   | Zod as the single source of truth for the invoice contract | Accepted |
+| [0006](./0006-no-auth-mvp-multi-tenant-ready.md)           | No auth in MVP, multi-tenant-ready schema                  | Accepted |
+| [0007](./0007-workspace-scoped-data-model.md)              | Workspace-scoped data model (`workspace_id` everywhere)    | Accepted |
+| [0008](./0008-snapshot-issuer-client-at-issue-time.md)     | Snapshot issuer + client at issue time                     | Accepted |
+| [0009](./0009-drizzle-neon-postgres.md)                    | Drizzle ORM + Neon Postgres                                | Accepted |
+| [0010](./0010-uploadthing-for-files.md)                    | UploadThing for file uploads                               | Accepted |
+| [0011](./0011-full-czech-vat-from-day-one.md)              | Full Czech VAT compliance from day one                     | Accepted |
+| [0012](./0012-czk-and-czech-only-mvp.md)                   | CZK + Czech-only invoices in MVP                           | Accepted |
+| [0013](./0013-configurable-per-issuer-numbering.md)        | Configurable per-issuer numbering schemes                  | Accepted |
+| [0014](./0014-status-derived-not-stored.md)                | Invoice status is derived, not stored                      | Accepted |
+| [0015](./0015-rhf-plus-zod-resolver-builder.md)            | RHF + zodResolver for the invoice builder                  | Accepted |
+| [0016](./0016-server-actions-as-mutation-surface.md)       | Server Actions as the only mutation surface                | Accepted |
+| [0017](./0017-tailwind-v4-tooling-baseline.md)             | Tailwind CSS v4 tooling baseline for web app               | Accepted |
+| [0019](./0019-workspaces-are-better-auth-organizations.md) | Workspaces are Better Auth organizations                   | Accepted |
+| [0021](./0021-immutable-imported-invoice-artifacts.md)     | Immutable imported invoice artifacts + provenance          | Accepted |
+| [0022](./0022-resend-and-react-email.md)                   | Resend + react-email for transactional mail                | Accepted |

@@ -4,24 +4,24 @@ How the pieces fit together. Cross-references the ADRs that justify each choice.
 
 ## Stack at a glance
 
-| Layer | Choice | ADR |
-| --- | --- | --- |
-| Monorepo | Turborepo + bun workspaces | [0001](./decisions/0001-monorepo-turborepo-bun.md) |
-| Web framework | Next.js 16 (App Router, RSC, Server Actions) | [0002](./decisions/0002-nextjs15-app-router.md) |
-| UI primitives | shadcn/ui base + ReUI registry (`@reui`, `base-nova` style) | [0003](./decisions/0003-shadcn-plus-reui-registry.md) |
-| Styling | Tailwind v4 | inherited from shadcn/ReUI |
-| PDF rendering | `@react-pdf/renderer` | [0004](./decisions/0004-pdf-react-pdf-renderer.md) |
-| Schema / validation | Zod (single source of truth) | [0005](./decisions/0005-zod-as-source-of-truth.md) |
-| Form runtime | React Hook Form + `@hookform/resolvers/zod` | [0015](./decisions/0015-rhf-plus-zod-resolver-builder.md) |
-| Database | Neon Postgres (Vercel Marketplace) | [0009](./decisions/0009-drizzle-neon-postgres.md) |
-| ORM | Drizzle | [0009](./decisions/0009-drizzle-neon-postgres.md) |
-| File uploads | UploadThing | [0010](./decisions/0010-uploadthing-for-files.md) |
-| QR generation | `qrcode` | inherited from [0004](./decisions/0004-pdf-react-pdf-renderer.md) (PDF-side) |
-| ISDOC XML | `xmlbuilder2` | (lazy, finalized in `specs/isdoc.md`) |
-| Auth | _none in MVP_ | [0006](./decisions/0006-no-auth-mvp-multi-tenant-ready.md) |
-| Hosting | Vercel | inherited from Next.js choice |
-| Tests | Vitest (unit) + golden-file fixtures (PDF/ISDOC) | (decided in Plan 2/3) |
-| Lint / format | ESLint + Prettier + `commitlint` | (decided in Plan 1) |
+| Layer               | Choice                                                      | ADR                                                                          |
+| ------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Monorepo            | Turborepo + bun workspaces                                  | [0001](./decisions/0001-monorepo-turborepo-bun.md)                           |
+| Web framework       | Next.js 16 (App Router, RSC, Server Actions)                | [0002](./decisions/0002-nextjs15-app-router.md)                              |
+| UI primitives       | shadcn/ui base + ReUI registry (`@reui`, `base-nova` style) | [0003](./decisions/0003-shadcn-plus-reui-registry.md)                        |
+| Styling             | Tailwind v4                                                 | inherited from shadcn/ReUI                                                   |
+| PDF rendering       | `@react-pdf/renderer`                                       | [0004](./decisions/0004-pdf-react-pdf-renderer.md)                           |
+| Schema / validation | Zod (single source of truth)                                | [0005](./decisions/0005-zod-as-source-of-truth.md)                           |
+| Form runtime        | React Hook Form + `@hookform/resolvers/zod`                 | [0015](./decisions/0015-rhf-plus-zod-resolver-builder.md)                    |
+| Database            | Neon Postgres (Vercel Marketplace)                          | [0009](./decisions/0009-drizzle-neon-postgres.md)                            |
+| ORM                 | Drizzle                                                     | [0009](./decisions/0009-drizzle-neon-postgres.md)                            |
+| File uploads        | UploadThing                                                 | [0010](./decisions/0010-uploadthing-for-files.md)                            |
+| QR generation       | `qrcode`                                                    | inherited from [0004](./decisions/0004-pdf-react-pdf-renderer.md) (PDF-side) |
+| ISDOC XML           | `xmlbuilder2`                                               | (lazy, finalized in `specs/isdoc.md`)                                        |
+| Auth                | _none in MVP_                                               | [0006](./decisions/0006-no-auth-mvp-multi-tenant-ready.md)                   |
+| Hosting             | Vercel                                                      | inherited from Next.js choice                                                |
+| Tests               | Vitest (unit) + golden-file fixtures (PDF/ISDOC)            | (decided in Plan 2/3)                                                        |
+| Lint / format       | ESLint + Prettier + `commitlint`                            | (decided in Plan 1)                                                          |
 
 ## Monorepo layout
 
@@ -137,7 +137,7 @@ sequenceDiagram
     RH-->>U: 200 application/pdf
 ```
 
-The PDF is *not* cached — it's cheap to render and we want it to reflect the latest snapshot/QR. Reconsider if perf becomes an issue.
+The PDF is _not_ cached — it's cheap to render and we want it to reflect the latest snapshot/QR. Reconsider if perf becomes an issue.
 
 ## Multi-tenancy seam (workspace_id everywhere)
 
@@ -149,25 +149,26 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 
 ## Environment variables
 
-| Var | Purpose | Where set | When introduced |
-| --- | --- | --- | --- |
-| `DATABASE_URL` | Neon Postgres connection string (also enables durable MCP presets + draft invoices) | Vercel + `.env.local` | Plan 1 / DB foundation |
-| `DATABASE_URL_UNPOOLED` | Neon direct (non-pooled) URL for migrations | Vercel + `.env.local` | Plan 1 |
-| `INVOICEY_PRESETS_BACKEND` | Set `file` to force JSON presets even with `DATABASE_URL` | local / optional | DB foundation |
-| `UPLOADTHING_TOKEN` | UploadThing API token | Vercel + `.env.local` | Plan 5 |
-| `UPLOADTHING_APP_ID` | UploadThing app ID | Vercel + `.env.local` | Plan 5 |
-| `NEXT_PUBLIC_APP_URL` | Public origin (used by SPAYD message templates, future emails) | Vercel + `.env.local` | Plan 1 |
-| `INVOICEY_DEFAULT_WORKSPACE_ID` | UUID of the seeded default workspace; until auth, every server action loads this | Vercel + `.env.local` | Plan 1 |
-| `RESEND_API_KEY` | Resend API key | Vercel | Plan 11 |
-| `CLERK_SECRET_KEY` | Clerk secret | Vercel | Plan 14 |
-| `CLERK_PUBLISHABLE_KEY` | Clerk publishable key | Vercel | Plan 14 |
-| `AI_GATEWAY_API_KEY` | Vercel AI Gateway API key (Eve + MCP AI) | Vercel + `.env.local` | Plan 13a / 13b |
-| `INVOICEY_AI_MODEL` | Gateway model id for Eve (`agent/agent.ts`) | Vercel + `.env.local` | Plan 13b |
-| `INVOICEY_DEMO_ISSUER_JSON` | Optional JSON override for demo `IssuerSnapshot` | Vercel + `.env.local` | Plan 12a / 13b |
-| `INVOICEY_PRESETS_PATH` | Absolute path to local MCP presets JSON | local MCP / optional | Plan 12a |
-| `MCP_API_KEY` | Bearer token for `/api/mcp` (optional in schema; route fails closed when unset); also Eve HTTP fallback | Vercel + `.env` / `.env.local` | Plan 12a |
-| `EVE_API_KEY` | Optional Bearer for `/eve/v1/*` HTTP (else `MCP_API_KEY`) | Vercel + `.env.local` | Plan 13b |
-| ~~`SLACK_BOT_TOKEN` / `SLACK_SIGNING_SECRET`~~ | Hand-managed Slack secrets — **deprecated** for Eve; use Vercel Connect | — | Plan 13a only |
+| Var                                            | Purpose                                                                                                 | Where set                      | When introduced        |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------ | ---------------------- |
+| `DATABASE_URL`                                 | Neon Postgres connection string (also enables durable MCP presets + draft invoices)                     | Vercel + `.env.local`          | Plan 1 / DB foundation |
+| `DATABASE_URL_UNPOOLED`                        | Neon direct (non-pooled) URL for migrations                                                             | Vercel + `.env.local`          | Plan 1                 |
+| `INVOICEY_PRESETS_BACKEND`                     | Set `file` to force JSON presets even with `DATABASE_URL`                                               | local / optional               | DB foundation          |
+| `UPLOADTHING_TOKEN`                            | UploadThing API token                                                                                   | Vercel + `.env.local`          | Plan 5                 |
+| `UPLOADTHING_APP_ID`                           | UploadThing app ID                                                                                      | Vercel + `.env.local`          | Plan 5                 |
+| `NEXT_PUBLIC_APP_URL`                          | Public origin (used by SPAYD message templates, future emails)                                          | Vercel + `.env.local`          | Plan 1                 |
+| `INVOICEY_DEFAULT_WORKSPACE_ID`                | UUID of the seeded default workspace; until auth, every server action loads this                        | Vercel + `.env.local`          | Plan 1                 |
+| `RESEND_API_KEY`                               | Resend API key (optional in schema; send fails closed when unset)                                       | Vercel + `.env.local`          | Plan 11                |
+| `RESEND_WEBHOOK_SECRET`                        | Svix signing secret for `/api/webhooks/resend`                                                          | Vercel + `.env.local`          | Plan 11                |
+| `EMAIL_FROM`                                   | Default From header (`Invoicey <invoices@mail.invoicey.ditrich.me>`)                                    | Vercel + `.env.local`          | Plan 11                |
+| `CRON_SECRET`                                  | Bearer for `/api/cron/overdue-reminders`                                                                | Vercel + `.env.local`          | Plan 11d               |
+| `AI_GATEWAY_API_KEY`                           | Vercel AI Gateway API key (Eve + MCP AI)                                                                | Vercel + `.env.local`          | Plan 13a / 13b         |
+| `INVOICEY_AI_MODEL`                            | Gateway model id for Eve (`agent/agent.ts`)                                                             | Vercel + `.env.local`          | Plan 13b               |
+| `INVOICEY_DEMO_ISSUER_JSON`                    | Optional JSON override for demo `IssuerSnapshot`                                                        | Vercel + `.env.local`          | Plan 12a / 13b         |
+| `INVOICEY_PRESETS_PATH`                        | Absolute path to local MCP presets JSON                                                                 | local MCP / optional           | Plan 12a               |
+| `MCP_API_KEY`                                  | Bearer token for `/api/mcp` (optional in schema; route fails closed when unset); also Eve HTTP fallback | Vercel + `.env` / `.env.local` | Plan 12a               |
+| `EVE_API_KEY`                                  | Optional Bearer for `/eve/v1/*` HTTP (else `MCP_API_KEY`)                                               | Vercel + `.env.local`          | Plan 13b               |
+| ~~`SLACK_BOT_TOKEN` / `SLACK_SIGNING_SECRET`~~ | Hand-managed Slack secrets — **deprecated** for Eve; use Vercel Connect                                 | —                              | Plan 13a only          |
 
 `.env.example` lives at repo root with every var commented; `.env.local` is git-ignored.
 
@@ -200,11 +201,10 @@ flowchart LR
     Ares --> Web
 ```
 
-Post-MVP still designed-in: Vercel Cron (Plan 10), Resend (Plan 11), MCP+DB tools (Plan 12b), Clerk (Plan 14). Slack Eve (Plan 13b) shares the same Zod contract in-process — no HTTP shim between MCP and Slack.
+Post-MVP still designed-in: Vercel Cron (Plan 10 / 11d), Resend (Plan 11), MCP+DB tools (Plan 12b), Better Auth (Plan 14). Slack Eve (Plan 13b) shares the same Zod contract in-process — no HTTP shim between MCP and Slack. Email: [`specs/email.md`](./specs/email.md).
 
 ## Open architectural questions
 
 ### TODO(plan-5): issuer asset uploads vs demo PDF slots
 
 UploadThing for logo/stamp/signature lands with issuers. Confirm font/image tracing on Vercel stays green for MCP + Slack PDF paths (`outputFileTracingIncludes` already covers invoice-core assets).
-

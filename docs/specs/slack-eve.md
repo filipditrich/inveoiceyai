@@ -16,37 +16,38 @@ flowchart TB
   Cursor["Cursor"] -->|"stdio or /api/mcp"| InvoiceTools
 ```
 
-| Piece | Location |
-| --- | --- |
-| Agent root | [`apps/web/agent/`](../../apps/web/agent/) |
-| Mount | [`apps/web/next.config.ts`](../../apps/web/next.config.ts) — `withEve(nextConfig)` → `/eve/v1/*` |
-| Slack channel | `agent/channels/slack.ts` — `connectSlackCredentials("slack/invoicey")` |
-| HTTP channel | `agent/channels/eve.ts` — Bearer `EVE_API_KEY` or `MCP_API_KEY` + OIDC + `localDev` |
-| Domain ops | `@invoicey/invoice-tools/ops` (`issueInvoiceById`, `markInvoicePaidById`, list/get) |
-| Create/render | `@invoicey/invoice-tools` (`createAndRenderInvoice`, presets, ARES) |
+| Piece         | Location                                                                                         |
+| ------------- | ------------------------------------------------------------------------------------------------ |
+| Agent root    | [`apps/web/agent/`](../../apps/web/agent/)                                                       |
+| Mount         | [`apps/web/next.config.ts`](../../apps/web/next.config.ts) — `withEve(nextConfig)` → `/eve/v1/*` |
+| Slack channel | `agent/channels/slack.ts` — `connectSlackCredentials("slack/invoicey")`                          |
+| HTTP channel  | `agent/channels/eve.ts` — Bearer `EVE_API_KEY` or `MCP_API_KEY` + OIDC + `localDev`              |
+| Domain ops    | `@invoicey/invoice-tools/ops` (`issueInvoiceById`, `markInvoicePaidById`, list/get)              |
+| Create/render | `@invoicey/invoice-tools` (`createAndRenderInvoice`, presets, ARES)                              |
 
 **Auth policy**
 
-| Surface | Gate |
-| --- | --- |
-| Slack | Vercel Connect (no hand-managed `SLACK_*` once attached) |
-| HTTP `/eve/v1/*` (non-Slack) | Bearer `EVE_API_KEY` or `MCP_API_KEY` |
-| Invoice data | Single tenant: `INVOICEY_DEFAULT_WORKSPACE_ID` |
+| Surface                      | Gate                                                     |
+| ---------------------------- | -------------------------------------------------------- |
+| Slack                        | Vercel Connect (no hand-managed `SLACK_*` once attached) |
+| HTTP `/eve/v1/*` (non-Slack) | Bearer `EVE_API_KEY` or `MCP_API_KEY`                    |
+| Invoice data                 | Single tenant: `INVOICEY_DEFAULT_WORKSPACE_ID`           |
 
 **Out of v1:** Clerk, per-Slack-user scoping, slash `/invoice`, calling remote `/api/mcp` from Eve.
 
 ## Tools
 
-| Tool | Notes |
-| --- | --- |
-| `search_business` | ARES by company name → matches with IČO + address |
-| `lookup_business` | ARES by IČO → full client draft |
-| `list_presets` / `get_preset` / `save_preset` | Neon when `DATABASE_URL` set |
-| `create_invoice` | Draft persist + render; auto-uploads PDF/ISDOC in Slack threads |
-| `upload_invoice_files` | Explicit upload (by `invoiceId` or base64) |
-| `list_invoices` / `get_invoice` | Workspace-scoped follow-ups |
-| `issue_invoice` | `approval: always()` HITL; numbering + re-upload |
-| `mark_invoice_paid` | `approval: always()` HITL |
+| Tool                                          | Notes                                                           |
+| --------------------------------------------- | --------------------------------------------------------------- |
+| `search_business`                             | ARES by company name → matches with IČO + address               |
+| `lookup_business`                             | ARES by IČO → full client draft                                 |
+| `list_presets` / `get_preset` / `save_preset` | Neon when `DATABASE_URL` set                                    |
+| `create_invoice`                              | Draft persist + render; auto-uploads PDF/ISDOC in Slack threads |
+| `upload_invoice_files`                        | Explicit upload (by `invoiceId` or base64)                      |
+| `list_invoices` / `get_invoice`               | Workspace-scoped follow-ups                                     |
+| `issue_invoice`                               | `approval: always()` HITL; numbering + re-upload                |
+| `mark_invoice_paid`                           | `approval: always()` HITL                                       |
+| `send_invoice_email`                          | `approval: always()` HITL; PDF + optional ISDOC via Resend      |
 
 Skill: `skills/create-czech-invoice.md`.
 
@@ -80,16 +81,16 @@ The agent cannot complete these steps:
 
 ## E2E checklist
 
-| # | Scenario | Pass |
-| --- | --- | --- |
-| 1 | `@Invoicey` + NL invoice + IČO | Draft in Neon; PDF+ISDOC in thread; reply has `invoiceId` + `/invoices/{id}` |
-| 2 | Thread follow-up without `@` | Session continues |
-| 3 | HITL **Issue** | Number from scheme; `issued_at`; new PDF |
-| 4 | HITL **Mark paid** | `paid_at` set |
-| 5 | Unpaid list | `list_invoices` / `get_invoice` answer from Neon |
-| 6 | Presets | `save_preset` / `list_presets` hit Neon |
-| 7 | Deploy | `GET /eve/v1/health` OK; Connect hits `/eve/v1/slack` |
-| 8 | Regression | Cursor MCP `create_invoice` + web Issue UI still work |
+| #   | Scenario                       | Pass                                                                         |
+| --- | ------------------------------ | ---------------------------------------------------------------------------- |
+| 1   | `@Invoicey` + NL invoice + IČO | Draft in Neon; PDF+ISDOC in thread; reply has `invoiceId` + `/invoices/{id}` |
+| 2   | Thread follow-up without `@`   | Session continues                                                            |
+| 3   | HITL **Issue**                 | Number from scheme; `issued_at`; new PDF                                     |
+| 4   | HITL **Mark paid**             | `paid_at` set                                                                |
+| 5   | Unpaid list                    | `list_invoices` / `get_invoice` answer from Neon                             |
+| 6   | Presets                        | `save_preset` / `list_presets` hit Neon                                      |
+| 7   | Deploy                         | `GET /eve/v1/health` OK; Connect hits `/eve/v1/slack`                        |
+| 8   | Regression                     | Cursor MCP `create_invoice` + web Issue UI still work                        |
 
 ## Deploy note
 

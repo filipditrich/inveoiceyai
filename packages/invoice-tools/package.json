@@ -8,7 +8,8 @@
     "./mcp": "./src/register-mcp-tools.ts",
     "./ops": "./src/invoice-ops.ts",
     "./artifacts": "./src/invoice-artifacts.ts",
-    "./import": "./src/invoice-import.ts"
+    "./import": "./src/invoice-import.ts",
+    "./email": "./src/send-invoice-email.ts"
   },
   "scripts": {
     "lint": "eslint .",
@@ -19,11 +20,13 @@
   "dependencies": {
     "@invoicey/ares": "workspace:*",
     "@invoicey/db": "workspace:*",
+    "@invoicey/emails": "workspace:*",
     "@invoicey/invoice-core": "workspace:*",
     "@modelcontextprotocol/sdk": "1.26.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "drizzle-orm": "^0.44.3",
+    "resend": "6.19.0",
     "uploadthing": "7.7.4",
     "zod": "^3.24.4"
   },

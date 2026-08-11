@@ -97,6 +97,22 @@ export const privateEnvSchema = z.object({
     emptyEnvToUndefined,
     z.string().optional(),
   ),
+
+  /**
+   * Resend (Plan 11). Optional so the app boots without mail configured;
+   * send / webhook fail closed when unset.
+   */
+  RESEND_API_KEY: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
+  RESEND_WEBHOOK_SECRET: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
+  EMAIL_FROM: z.preprocess(emptyEnvToUndefined, z.string().min(1).optional()),
+  /** Bearer for `/api/cron/overdue-reminders`. */
+  CRON_SECRET: z.preprocess(emptyEnvToUndefined, z.string().min(1).optional()),
 });
 
 /** Vercel-only system vars (subset). @see https://vercel.com/docs/environment-variables/system-environment-variables */

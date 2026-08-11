@@ -9,6 +9,8 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { mcp, organization } from "better-auth/plugins";
 
+import { sendWorkspaceInviteEmail } from "@/lib/email/invite";
+
 import {
   createPersonalWorkspace,
   resolveInitialWorkspaceId,
@@ -117,13 +119,26 @@ export const auth = betterAuth({
       // custom access control.
       creatorRole: "owner",
       async sendInvitationEmail(data) {
-        // No email provider yet (Plan 14 ships copyable invite links instead).
-        // Settings -> Members renders `/invite/<id>` for the inviter to share.
-        console.info("[invoicey] invitation created", {
-          invitationId: data.id,
-          email: data.email,
-          organizationId: data.organization.id,
-        });
+        const inviteUrl = `${baseURL.replace(/\/$/, "")}/invite/${data.id}`;
+        try {
+          await sendWorkspaceInviteEmail({
+            workspaceId: data.organization.id,
+            workspaceName: data.organization.name,
+            to: data.email,
+            inviterName: data.inviter.user.name || data.inviter.user.email,
+            inviterEmail: data.inviter.user.email,
+            role: data.role,
+            inviteUrl,
+          });
+        } catch (err) {
+          /** keep invite row; Settings still shows copyable link */
+          console.error("[invoicey] invitation email failed", err);
+          console.info("[invoicey] invitation created (email skipped)", {
+            invitationId: data.id,
+            email: data.email,
+            inviteUrl,
+          });
+        }
       },
     }),
     mcp({ loginPage: "/sign-in" }),
