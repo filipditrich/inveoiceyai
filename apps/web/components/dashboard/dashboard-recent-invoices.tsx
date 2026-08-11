@@ -8,6 +8,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { formatDateCs, formatMoney } from "@/lib/format";
 import { DISPLAY_STATUS_ROW_ACCENT } from "@/lib/invoice-status-ui";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -66,10 +67,14 @@ export function DashboardRecentInvoices({ rows }: { rows: RecentInvoice[] }) {
 									</Link>
 								</TableCell>
 								<TableCell>{row.clientName}</TableCell>
-								<TableCell>{row.issueDate}</TableCell>
-								<TableCell>{row.dueDate}</TableCell>
 								<TableCell className="tabular-nums">
-									{Number(row.total).toFixed(2)} {row.currency}
+									{formatDateCs(row.issueDate)}
+								</TableCell>
+								<TableCell className="tabular-nums">
+									{formatDateCs(row.dueDate)}
+								</TableCell>
+								<TableCell className="tabular-nums">
+									{formatMoney(Number(row.total) || 0, row.currency || "CZK")}
 								</TableCell>
 								<TableCell>
 									<InvoiceStatusBadge status={row.displayStatus} />

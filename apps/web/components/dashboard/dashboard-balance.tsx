@@ -1,12 +1,5 @@
 import type { DashboardBalance } from "@/lib/dashboard-metrics";
-
-function formatCzk(amount: number): string {
-	return new Intl.NumberFormat("cs-CZ", {
-		style: "currency",
-		currency: "CZK",
-		maximumFractionDigits: 0,
-	}).format(amount);
-}
+import { formatMoney } from "@/lib/format";
 
 export function DashboardBalanceRow({ balance }: { balance: DashboardBalance }) {
 	return (
@@ -16,7 +9,7 @@ export function DashboardBalanceRow({ balance }: { balance: DashboardBalance }) 
 					Vystavené faktury (12 měsíců)
 				</div>
 				<div className="mt-1 text-2xl font-semibold tabular-nums">
-					{formatCzk(balance.issuedVolume12m)}
+					{formatMoney(balance.issuedVolume12m)}
 				</div>
 				<div className="text-muted-foreground text-xs tabular-nums">
 					{balance.issuedCount12m} faktur
@@ -27,7 +20,7 @@ export function DashboardBalanceRow({ balance }: { balance: DashboardBalance }) 
 					Neuhrazeno (včetně po splatnosti a budoucích)
 				</div>
 				<div className="mt-1 text-2xl font-semibold tabular-nums text-orange-700 dark:text-orange-400">
-					{formatCzk(balance.outstanding)}
+					{formatMoney(balance.outstanding)}
 				</div>
 				<div className="text-muted-foreground text-xs tabular-nums">
 					{balance.outstandingCount} faktur

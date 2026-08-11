@@ -7,17 +7,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { formatMoney } from "@/lib/format";
 import { DISPLAY_STATUS_LABELS } from "@invoicey/invoice-core/status-display";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-
-function formatCzk(amount: number): string {
-	return new Intl.NumberFormat("cs-CZ", {
-		style: "currency",
-		currency: "CZK",
-		maximumFractionDigits: 0,
-	}).format(amount);
-}
 
 function hrefFor(status: StatusBucket["status"], issuerId?: string): string {
 	const params = new URLSearchParams({ status });
@@ -50,7 +43,7 @@ export function DashboardStatusCards({
 								{DISPLAY_STATUS_LABELS[b.status]}
 							</CardDescription>
 							<CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-								{formatCzk(b.total)}
+								{formatMoney(b.total)}
 							</CardTitle>
 						</CardHeader>
 						<CardFooter className="text-muted-foreground text-sm tabular-nums">

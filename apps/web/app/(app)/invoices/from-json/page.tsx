@@ -1,5 +1,6 @@
 "use client";
 
+import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import demoSampleInvoice from "@/lib/demo-sample-invoice.json";
@@ -198,26 +199,13 @@ export default function InvoiceFromJsonDemoPage() {
 					)}
 				</div>
 
-				<div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
-					<div className="flex items-center gap-2">
-						<h2 className="text-base font-semibold tracking-tight">Preview</h2>
-						<span className="text-muted-foreground text-xs font-normal tabular-nums">
-							server-rendered PDF
-						</span>
-					</div>
-					{pdfUrl ? (
-						<iframe
-							title="Invoice PDF preview"
-							src={`${pdfUrl}#toolbar=1`}
-							className="border-input bg-muted/40 block min-h-[min(88vh,52rem)] w-full flex-1 rounded-xl border shadow-sm"
-						/>
-					) : (
-						<div className="border-input bg-muted/25 text-muted-foreground flex min-h-[min(88vh,52rem)] flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-6 py-16 text-center text-sm leading-relaxed">
-							<span className="text-foreground font-medium">No preview yet</span>
-							Run <strong className="font-normal">&quot;Render PDF&quot;</strong> — the iframe embeds the
-							returned blob.
-						</div>
-					)}
+				<div className="flex min-h-0 min-w-0 flex-1 flex-col">
+					<InvoicePdfPreview
+						className="min-h-[min(88vh,52rem)] [&_[data-slot=pdf-frame]]:!h-[min(88vh,52rem)]"
+						emptyLabel='Spusť „Render PDF“ pro náhled…'
+						updating={busy}
+						url={pdfUrl}
+					/>
 				</div>
 			</div>
 		</div>

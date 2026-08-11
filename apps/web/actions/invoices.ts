@@ -20,9 +20,11 @@ import {
 import {
 	bulkCancelInvoices,
 	bulkDeleteDraftInvoices,
+	bulkIssueInvoices,
 	bulkMarkInvoicesPaid,
 	bulkUnmarkInvoicesPaid,
 	cancelInvoiceById,
+	issueInvoiceById,
 	markInvoicePaidById,
 	unmarkInvoicePaidById,
 } from "@invoicey/invoice-tools/ops";
@@ -531,6 +533,32 @@ export async function issueInvoice(formData: FormData): Promise<void> {
 	revalidatePath("/invoices");
 	revalidatePath("/dashboard");
 	redirect(`/invoices/${invoiceId}?toast=invoice_issued`);
+}
+
+/** Issue a saved draft by id (detail / list / bulk). */
+export async function issueSavedInvoice(formData: FormData): Promise<void> {
+	const id = optionalTrim(formData.get("id"));
+	if (!id) {
+		redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
+	}
+	const result = await issueInvoiceById({ id });
+	if (!result.ok) {
+		redirect(
+			`/invoices/${id}?invalid=${encodeURIComponent(result.error || "cannot_issue")}`,
+		);
+	}
+	revalidatePath("/invoices");
+	revalidatePath("/dashboard");
+	revalidatePath(`/invoices/${id}`);
+	redirect(`/invoices/${id}?toast=invoice_issued`);
+}
+
+export async function bulkIssueInvoice(formData: FormData): Promise<void> {
+	const ids = collectIds(formData);
+	if (ids.length === 0) {
+		redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
+	}
+	bulkRedirect(await bulkIssueInvoices({ ids }), "issue");
 }
 
 export async function markInvoicePaid(formData: FormData): Promise<void> {

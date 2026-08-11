@@ -2,11 +2,13 @@ import {
 	cancelInvoice,
 	deleteInvoice,
 	duplicateInvoice,
+	issueSavedInvoice,
 	markInvoicePaid,
 	unmarkInvoicePaid,
 } from "@/actions/invoices";
 import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
 import { Button } from "@/components/ui/button";
+import { formatDateCs, formatMoney } from "@/lib/format";
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
 import { getDefaultWorkspaceId } from "@/lib/workspace-id";
 import { InvoiceSchema } from "@invoicey/invoice-core/schema";
@@ -66,31 +68,40 @@ export default async function InvoiceDetailPage({
 				</div>
 				<div className="flex flex-wrap gap-2">
 					{displayStatus === "draft" ? (
-						<Button
-							render={<Link href={`/invoices/${id}/edit`} prefetch />}
-							size="sm"
-						>
-							Edit
-						</Button>
+						<>
+							<form action={issueSavedInvoice}>
+								<input name="id" type="hidden" value={id} />
+								<Button size="sm" type="submit">
+									Vystavit
+								</Button>
+							</form>
+							<Button
+								render={<Link href={`/invoices/${id}/edit`} prefetch />}
+								size="sm"
+								variant="outline"
+							>
+								Upravit
+							</Button>
+						</>
 					) : null}
 					<Button
 						render={<a href={`/api/invoices/${id}/pdf`} download />}
 						size="sm"
 						variant="outline"
 					>
-						Download PDF
+						PDF
 					</Button>
 					<Button
 						render={<a href={`/api/invoices/${id}/isdoc`} download />}
 						size="sm"
 						variant="outline"
 					>
-						Download ISDOC
+						ISDOC
 					</Button>
 					<form action={duplicateInvoice}>
 						<input name="id" type="hidden" value={id} />
 						<Button size="sm" type="submit" variant="secondary">
-							Duplicate
+							Duplikovat
 						</Button>
 					</form>
 					{displayStatus === "unpaid" ||
@@ -100,13 +111,13 @@ export default async function InvoiceDetailPage({
 							<form action={markInvoicePaid}>
 								<input name="id" type="hidden" value={id} />
 								<Button size="sm" type="submit">
-									Mark paid
+									Označit zaplaceno
 								</Button>
 							</form>
 							<form action={cancelInvoice}>
 								<input name="id" type="hidden" value={id} />
 								<Button size="sm" type="submit" variant="secondary">
-									Cancel
+									Stornovat
 								</Button>
 							</form>
 						</>
@@ -115,7 +126,7 @@ export default async function InvoiceDetailPage({
 						<form action={unmarkInvoicePaid}>
 							<input name="id" type="hidden" value={id} />
 							<Button size="sm" type="submit" variant="secondary">
-								Unmark paid
+								Zrušit zaplaceno
 							</Button>
 						</form>
 					) : null}
@@ -123,7 +134,7 @@ export default async function InvoiceDetailPage({
 						<form action={deleteInvoice}>
 							<input name="id" type="hidden" value={id} />
 							<Button size="sm" type="submit" variant="destructive">
-								Delete
+								Smazat
 							</Button>
 						</form>
 					) : null}
@@ -137,25 +148,25 @@ export default async function InvoiceDetailPage({
 			<dl className="grid gap-3 text-sm sm:grid-cols-2">
 				<div>
 					<dt className="text-muted-foreground">Datum vystavení</dt>
-					<dd>{row.issueDate}</dd>
+					<dd className="tabular-nums">{formatDateCs(row.issueDate)}</dd>
 				</div>
 				<div>
 					<dt className="text-muted-foreground">Splatnost</dt>
-					<dd>{row.dueDate}</dd>
+					<dd className="tabular-nums">{formatDateCs(row.dueDate)}</dd>
 				</div>
 				<div>
 					<dt className="text-muted-foreground">DUZP</dt>
-					<dd>{row.duzp ?? "—"}</dd>
+					<dd className="tabular-nums">{formatDateCs(row.duzp)}</dd>
+				</div>
+				<div>
+					<dt className="text-muted-foreground">Měna</dt>
+					<dd className="tabular-nums">{row.currency} (MVP pouze CZK)</dd>
 				</div>
 				<div>
 					<dt className="text-muted-foreground">Celkem</dt>
 					<dd className="tabular-nums">
-						{Number(row.total).toFixed(2)} {row.currency}
+						{formatMoney(Number(row.total) || 0, row.currency || "CZK")}
 					</dd>
-				</div>
-				<div>
-					<dt className="text-muted-foreground">Vystaveno (timestamp)</dt>
-					<dd>{row.issuedAt?.toISOString() ?? "—"}</dd>
 				</div>
 				<div>
 					<dt className="text-muted-foreground">Zaplaceno</dt>
@@ -184,10 +195,10 @@ export default async function InvoiceDetailPage({
 										{it.quantity} {it.unit}
 									</td>
 									<td className="p-2 tabular-nums">
-										{it.unitPriceWithoutVat.toFixed(2)}
+										{formatMoney(it.unitPriceWithoutVat)}
 									</td>
 									<td className="p-2 tabular-nums">
-										{it.lineTotal.toFixed(2)}
+										{formatMoney(it.lineTotal)}
 									</td>
 								</tr>
 							))}

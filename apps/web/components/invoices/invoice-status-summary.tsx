@@ -1,6 +1,7 @@
 import {
 	DISPLAY_STATUS_CARD_ACCENT,
 } from "@/lib/invoice-status-ui";
+import { formatMoney } from "@/lib/format";
 import {
 	DISPLAY_STATUS_LABELS,
 	type InvoiceDisplayStatus,
@@ -13,14 +14,6 @@ export type StatusSummaryBucket = {
 	count: number;
 	total: number;
 };
-
-function formatCzk(amount: number): string {
-	return new Intl.NumberFormat("cs-CZ", {
-		style: "currency",
-		currency: "CZK",
-		maximumFractionDigits: 0,
-	}).format(amount);
-}
 
 function hrefFor(
 	status: InvoiceDisplayStatus,
@@ -69,7 +62,7 @@ export function InvoiceStatusSummary({
 							{DISPLAY_STATUS_LABELS[b.status]}
 						</div>
 						<div className="mt-1 text-xl font-semibold tabular-nums">
-							{formatCzk(b.total)}
+							{formatMoney(b.total)}
 						</div>
 						<div className="text-muted-foreground text-xs tabular-nums">
 							{b.count}{" "}

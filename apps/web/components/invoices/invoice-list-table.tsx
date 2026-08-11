@@ -3,11 +3,13 @@
 import {
 	bulkCancelInvoice,
 	bulkDeleteInvoice,
+	bulkIssueInvoice,
 	bulkMarkInvoicePaid,
 	bulkUnmarkInvoicePaid,
 	cancelInvoice,
 	deleteInvoice,
 	duplicateInvoice,
+	issueSavedInvoice,
 	markInvoicePaid,
 	unmarkInvoicePaid,
 } from "@/actions/invoices";
@@ -22,11 +24,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { formatDateCs, formatMoney } from "@/lib/format";
 import { DISPLAY_STATUS_ROW_ACCENT } from "@/lib/invoice-status-ui";
 import { cn } from "@/lib/utils";
 import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 
 export type InvoiceListRow = {
 	id: string;
@@ -44,6 +47,18 @@ export function InvoiceListTable({ rows }: { rows: InvoiceListRow[] }) {
 	const [pending, startTransition] = useTransition();
 	const ids = rows.map((r) => r.id);
 	const allSelected = ids.length > 0 && selected.size === ids.length;
+
+	const selectedRows = useMemo(
+		() => rows.filter((r) => selected.has(r.id)),
+		[rows, selected],
+	);
+	const selectedTotal = selectedRows.reduce(
+		(sum, r) => sum + (Number(r.total) || 0),
+		0,
+	);
+	const selectedDrafts = selectedRows.filter(
+		(r) => r.displayStatus === "draft",
+	).length;
 
 	const toggle = (id: string) => {
 		setSelected((prev) => {
@@ -73,49 +88,10 @@ export function InvoiceListTable({ rows }: { rows: InvoiceListRow[] }) {
 		});
 	};
 
+	const barVisible = selected.size > 0;
+
 	return (
-		<div className="space-y-3">
-			{selected.size > 0 ? (
-				<div className="bg-muted/40 flex flex-wrap items-center gap-2 rounded-md border px-3 py-2 text-sm">
-					<span className="tabular-nums">{selected.size} vybraných</span>
-					<Button
-						disabled={pending}
-						onClick={() => runBulk(bulkMarkInvoicePaid)}
-						size="sm"
-						type="button"
-						variant="secondary"
-					>
-						Označit zaplaceno
-					</Button>
-					<Button
-						disabled={pending}
-						onClick={() => runBulk(bulkUnmarkInvoicePaid)}
-						size="sm"
-						type="button"
-						variant="secondary"
-					>
-						Zrušit zaplaceno
-					</Button>
-					<Button
-						disabled={pending}
-						onClick={() => runBulk(bulkCancelInvoice)}
-						size="sm"
-						type="button"
-						variant="secondary"
-					>
-						Stornovat
-					</Button>
-					<Button
-						disabled={pending}
-						onClick={() => runBulk(bulkDeleteInvoice)}
-						size="sm"
-						type="button"
-						variant="destructive"
-					>
-						Smazat návrhy
-					</Button>
-				</div>
-			) : null}
+		<div className={cn("space-y-3", barVisible && "pb-24")}>
 			<div className="rounded-md border">
 				<Table>
 					<TableHeader>
@@ -157,11 +133,15 @@ export function InvoiceListTable({ rows }: { rows: InvoiceListRow[] }) {
 										{row.number ?? "DRAFT"}
 									</Link>
 								</TableCell>
-								<TableCell>{row.issueDate}</TableCell>
-								<TableCell>{row.dueDate}</TableCell>
+								<TableCell className="tabular-nums">
+									{formatDateCs(row.issueDate)}
+								</TableCell>
+								<TableCell className="tabular-nums">
+									{formatDateCs(row.dueDate)}
+								</TableCell>
 								<TableCell>{row.clientName}</TableCell>
 								<TableCell className="tabular-nums">
-									{Number(row.total).toFixed(2)} {row.currency}
+									{formatMoney(Number(row.total) || 0, row.currency || "CZK")}
 								</TableCell>
 								<TableCell>
 									<InvoiceStatusBadge status={row.displayStatus} />
@@ -173,18 +153,26 @@ export function InvoiceListTable({ rows }: { rows: InvoiceListRow[] }) {
 											size="sm"
 											variant="ghost"
 										>
-											View
+											Detail
 										</Button>
 										{row.displayStatus === "draft" ? (
-											<Button
-												render={
-													<Link href={`/invoices/${row.id}/edit`} prefetch />
-												}
-												size="sm"
-												variant="outline"
-											>
-												Edit
-											</Button>
+											<>
+												<form action={issueSavedInvoice}>
+													<input name="id" type="hidden" value={row.id} />
+													<Button size="sm" type="submit">
+														Vystavit
+													</Button>
+												</form>
+												<Button
+													render={
+														<Link href={`/invoices/${row.id}/edit`} prefetch />
+													}
+													size="sm"
+													variant="outline"
+												>
+													Upravit
+												</Button>
+											</>
 										) : null}
 										<Button
 											render={
@@ -208,13 +196,13 @@ export function InvoiceListTable({ rows }: { rows: InvoiceListRow[] }) {
 												<form action={markInvoicePaid}>
 													<input name="id" type="hidden" value={row.id} />
 													<Button size="sm" type="submit" variant="ghost">
-														Paid
+														Zaplaceno
 													</Button>
 												</form>
 												<form action={cancelInvoice}>
 													<input name="id" type="hidden" value={row.id} />
 													<Button size="sm" type="submit" variant="ghost">
-														Cancel
+														Storno
 													</Button>
 												</form>
 											</>
@@ -223,7 +211,7 @@ export function InvoiceListTable({ rows }: { rows: InvoiceListRow[] }) {
 											<form action={unmarkInvoicePaid}>
 												<input name="id" type="hidden" value={row.id} />
 												<Button size="sm" type="submit" variant="ghost">
-													Unmark
+													Zrušit zapl.
 												</Button>
 											</form>
 										) : null}
@@ -231,7 +219,7 @@ export function InvoiceListTable({ rows }: { rows: InvoiceListRow[] }) {
 											<form action={deleteInvoice}>
 												<input name="id" type="hidden" value={row.id} />
 												<Button size="sm" type="submit" variant="destructive">
-													Del
+													Smazat
 												</Button>
 											</form>
 										) : null}
@@ -242,6 +230,80 @@ export function InvoiceListTable({ rows }: { rows: InvoiceListRow[] }) {
 					</TableBody>
 				</Table>
 			</div>
+
+			{barVisible ? (
+				<div className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed inset-x-0 bottom-0 z-40 border-t px-4 py-3 shadow-lg backdrop-blur">
+					<div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3">
+						<div className="min-w-0 flex-1 text-sm">
+							<span className="font-medium tabular-nums">
+								{selected.size} vybraných
+							</span>
+							<span className="text-muted-foreground">
+								{" "}
+								· {formatMoney(selectedTotal)}
+								{selectedDrafts > 0
+									? ` · ${selectedDrafts} draft${selectedDrafts === 1 ? "" : "y"}`
+									: null}
+							</span>
+						</div>
+						<div className="flex flex-wrap gap-2">
+							<Button
+								disabled={pending || selectedDrafts === 0}
+								onClick={() => runBulk(bulkIssueInvoice)}
+								size="sm"
+								type="button"
+							>
+								Vystavit
+							</Button>
+							<Button
+								disabled={pending}
+								onClick={() => runBulk(bulkMarkInvoicePaid)}
+								size="sm"
+								type="button"
+								variant="secondary"
+							>
+								Zaplaceno
+							</Button>
+							<Button
+								disabled={pending}
+								onClick={() => runBulk(bulkUnmarkInvoicePaid)}
+								size="sm"
+								type="button"
+								variant="secondary"
+							>
+								Zrušit zaplaceno
+							</Button>
+							<Button
+								disabled={pending}
+								onClick={() => runBulk(bulkCancelInvoice)}
+								size="sm"
+								type="button"
+								variant="secondary"
+							>
+								Stornovat
+							</Button>
+							<Button
+								disabled={pending}
+								onClick={() => runBulk(bulkDeleteInvoice)}
+								size="sm"
+								type="button"
+								variant="destructive"
+							>
+								Smazat návrhy
+							</Button>
+							<Button
+								disabled={pending}
+								onClick={() => setSelected(new Set())}
+								size="sm"
+								type="button"
+								variant="ghost"
+							>
+								Zrušit výběr
+							</Button>
+						</div>
+					</div>
+				</div>
+			) : null}
 		</div>
 	);
 }

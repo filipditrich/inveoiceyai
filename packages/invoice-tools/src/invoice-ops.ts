@@ -635,3 +635,30 @@ export async function issueInvoiceById(options: {
     return { ok: false, error: message };
   }
 }
+
+export async function bulkIssueInvoices(options: {
+  ids: string[];
+  workspaceId?: string;
+}): Promise<BulkOpResult> {
+  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  let ok = 0;
+  let skipped = 0;
+  let failed = 0;
+  for (const id of options.ids) {
+    const result = await issueInvoiceById({ id, workspaceId });
+    if (!result.ok) {
+      if (result.error.startsWith("invoice not found")) {
+        failed += 1;
+      } else {
+        skipped += 1;
+      }
+      continue;
+    }
+    if (result.alreadyIssued) {
+      skipped += 1;
+      continue;
+    }
+    ok += 1;
+  }
+  return { ok, skipped, failed };
+}
