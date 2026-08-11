@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { CheckCircle2Icon, TriangleAlertIcon } from "lucide-react";
 
 import {
   LinkedAccountsPanel,
@@ -26,16 +27,45 @@ export default async function SettingsSecurityPage({
 
   return (
     <div className="flex flex-col gap-6">
-      {sp.trust === "ok" ? (
-        <p className="text-sm text-emerald-700 dark:text-emerald-400">
-          Zařízení bylo označeno jako důvěryhodné.
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold tracking-tight">Zabezpečení</h2>
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          Správa přihlášení, aktivních relací, důvěryhodných zařízení a auditu.
+          Hesla Invoicey nepoužívá — jen OAuth.
         </p>
+      </div>
+
+      {sp.trust === "ok" ? (
+        <div
+          role="status"
+          className="flex items-start gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5 text-sm text-emerald-800 dark:text-emerald-300"
+        >
+          <CheckCircle2Icon className="mt-0.5 size-4 shrink-0" />
+          <p>Zařízení bylo označeno jako důvěryhodné.</p>
+        </div>
       ) : null}
       {sp.trust === "invalid" ? (
-        <p className="text-destructive text-sm">
-          Odkaz pro důvěru zařízení je neplatný nebo vypršel.
-        </p>
+        <div
+          role="alert"
+          className="border-destructive/25 bg-destructive/5 text-destructive flex items-start gap-2 rounded-lg border px-3 py-2.5 text-sm"
+        >
+          <TriangleAlertIcon className="mt-0.5 size-4 shrink-0" />
+          <p>Odkaz pro důvěru zařízení je neplatný nebo vypršel.</p>
+        </div>
       ) : null}
+      {sp.linked === "1" ? (
+        <div
+          role="status"
+          className="flex items-start gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5 text-sm text-emerald-800 dark:text-emerald-300"
+        >
+          <CheckCircle2Icon className="mt-0.5 size-4 shrink-0" />
+          <p>
+            Poskytovatel propojen. Ostatní relace se odvolávají kvůli
+            bezpečnosti.
+          </p>
+        </div>
+      ) : null}
+
       <LinkedAccountsPanel configuredProviders={configuredProviders} />
       <SessionsPanel
         currentToken={session?.session.token}

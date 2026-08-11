@@ -40,18 +40,20 @@ declare const messages: {
       security: "Zabezpečení";
       members: "Členové";
       "api-keys": "API klíče";
+      integrations: "Integrace";
     };
     a11y: {
       toggleSidebar: "Přepnout postranní panel";
     };
     settings: {
       title: "Nastavení";
-      subtitle: "Vzhled, zabezpečení účtu, členové workspace a API klíče.";
+      subtitle: "Vzhled, zabezpečení, členové, API klíče a integrace (MCP, Slack).";
       nav: {
         appearance: "Vzhled";
         security: "Zabezpečení";
         members: "Členové";
         apiKeys: "API klíče";
+        integrations: "Integrace";
       };
       appearance: {
         title: "Vzhled";

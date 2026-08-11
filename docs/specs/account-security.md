@@ -4,12 +4,13 @@ Plan 16. ADR [0023](../decisions/0023-account-security-soft-devices.md).
 
 ## Settings IA
 
-| Route                | Purpose                                                  |
-| -------------------- | -------------------------------------------------------- |
-| `/settings`          | Appearance (theme)                                       |
-| `/settings/security` | Sign-in methods, sessions, trusted devices, recent audit |
-| `/settings/members`  | Workspace members + invites                              |
-| `/settings/api-keys` | Personal access tokens                                   |
+| Route                    | Purpose                                                  |
+| ------------------------ | -------------------------------------------------------- |
+| `/settings`              | Appearance (theme)                                       |
+| `/settings/security`     | Sign-in methods, sessions, trusted devices, recent audit |
+| `/settings/members`      | Workspace members + invites                              |
+| `/settings/api-keys`     | Personal access tokens + interactive remote MCP setup    |
+| `/settings/integrations` | Slack (use + operator) and MCP entry points              |
 
 Nav: user menu → Settings. Invite accept: `/invite/[id]` (public, requires sign-in).
 
@@ -41,12 +42,16 @@ Nav: user menu → Settings. Invite accept: `/invite/[id]` (public, requires sig
 
 ## API keys / machine auth
 
-Verify order:
+**Remote MCP** (`/api/mcp`) verify order:
 
-1. Env ops key (`MCP_API_KEY` or `EVE_API_KEY` for Eve) → ops workspace.
+1. Env ops key (`MCP_API_KEY`) → ops workspace.
 2. Else `auth.api.verifyApiKey({ key })` → user `defaultWorkspaceId`.
 
-MCP HTTP and Eve HTTP both use this. Tools resolve workspace via request ALS (MCP) or Eve session `attributes.workspaceId`.
+**Eve HTTP** (`/eve/v1/*`, non-Slack): ops `EVE_API_KEY` or `MCP_API_KEY` (or OIDC / localDev). User PATs are **not** accepted.
+
+**Slack Eve**: Vercel Connect → `/eve/v1/slack` (deployment identity, ops workspace). Not Settings PATs.
+
+MCP tools resolve workspace via request ALS; Eve Slack via ops default workspace.
 
 ## Members
 

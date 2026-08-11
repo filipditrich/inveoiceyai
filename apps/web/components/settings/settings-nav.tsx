@@ -11,6 +11,11 @@ const LINKS = [
   { href: "/settings/security", key: "security" as const, exact: false },
   { href: "/settings/members", key: "members" as const, exact: false },
   { href: "/settings/api-keys", key: "apiKeys" as const, exact: false },
+  {
+    href: "/settings/integrations",
+    key: "integrations" as const,
+    exact: false,
+  },
 ];
 
 export function SettingsNav() {

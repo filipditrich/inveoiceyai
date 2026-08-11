@@ -33,6 +33,7 @@ export function SiteHeader() {
     security: t("breadcrumb.security"),
     members: t("breadcrumb.members"),
     "api-keys": t("breadcrumb.api-keys"),
+    integrations: t("breadcrumb.integrations"),
     "from-json": t("breadcrumb.fromJson"),
     import: t("breadcrumb.import"),
     new: t("breadcrumb.new"),
