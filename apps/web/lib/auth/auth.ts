@@ -1,7 +1,7 @@
 import "server-only";
 
 import { apiKey } from "@better-auth/api-key";
-import * as schema from "@invoicey/db";
+import { authSchema } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
 import { betterAuth } from "better-auth";
@@ -17,6 +17,40 @@ import {
 const baseURL = env.BETTER_AUTH_URL ?? env.NEXT_PUBLIC_APP_URL;
 
 /**
+ * Only register a provider when it is fully configured. A half-configured
+ * provider would otherwise be a sign-in button that fails after the redirect,
+ * with an opaque error from the provider rather than a missing-env one.
+ */
+const socialProviders = {
+  ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+    ? {
+        google: {
+          clientId: env.GOOGLE_CLIENT_ID,
+          clientSecret: env.GOOGLE_CLIENT_SECRET,
+        },
+      }
+    : {}),
+  ...(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET
+    ? {
+        github: {
+          clientId: env.GITHUB_CLIENT_ID,
+          clientSecret: env.GITHUB_CLIENT_SECRET,
+          // Users with a private primary email otherwise resolve to none.
+          scope: ["user:email"],
+        },
+      }
+    : {}),
+};
+
+if (process.env.NODE_ENV === "production" && !env.BETTER_AUTH_SECRET) {
+  // Better Auth silently falls back to a built-in dev secret otherwise, which
+  // would sign production session cookies with a publicly known key.
+  throw new Error(
+    "BETTER_AUTH_SECRET is required in production. Generate one with `openssl rand -base64 32`.",
+  );
+}
+
+/**
  * Better Auth server instance (Plan 14, ADR 0018).
  *
  * `organization` is remapped onto our existing `workspaces` table (ADR 0019) so
@@ -30,25 +64,11 @@ export const auth = betterAuth({
   appName: "Invoicey",
   baseURL,
   secret: env.BETTER_AUTH_SECRET,
-  database: drizzleAdapter(db, {
-    provider: "pg",
-    schema: { ...schema, organization: schema.workspaces },
-  }),
+  database: drizzleAdapter(db, { provider: "pg", schema: authSchema }),
 
   // OAuth only — no email+password (ADR 0018).
   emailAndPassword: { enabled: false },
-  socialProviders: {
-    google: {
-      clientId: env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: env.GOOGLE_CLIENT_SECRET ?? "",
-    },
-    github: {
-      clientId: env.GITHUB_CLIENT_ID ?? "",
-      clientSecret: env.GITHUB_CLIENT_SECRET ?? "",
-      // Required so users with a private primary email still resolve one.
-      scope: ["user:email"],
-    },
-  },
+  socialProviders,
 
   /**
    * Both providers verify email addresses, so linking the same person's Google

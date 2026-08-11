@@ -1,34 +1,19 @@
-import { DEFAULT_WORKSPACE_ID, workspaces } from "@invoicey/db";
+import {
+  ensureDefaultWorkspace as ensureDefaultWorkspaceDb,
+  getDefaultWorkspaceId,
+} from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { eq } from "drizzle-orm";
 
 /**
- * Workspace scope until Clerk (Plan 14).
- * Prefers `INVOICEY_DEFAULT_WORKSPACE_ID`; falls back to the seeded demo UUID.
+ * Workspace scope until auth lands (Plan 14 stage 5 deletes this file).
+ *
+ * Thin wrappers over `@invoicey/db` so there is one implementation — these were
+ * a second copy that had already drifted from it.
  */
-export function getDefaultWorkspaceId(): string {
-	const v = process.env.INVOICEY_DEFAULT_WORKSPACE_ID?.trim();
-	if (v && v.length > 0) {
-		return v;
-	}
-	return DEFAULT_WORKSPACE_ID;
-}
+export { getDefaultWorkspaceId };
 
 /** Ensures the default workspace row exists (idempotent). */
 export async function ensureDefaultWorkspace(): Promise<string> {
-	const id = getDefaultWorkspaceId();
-	const existing = await db
-		.select({ id: workspaces.id })
-		.from(workspaces)
-		.where(eq(workspaces.id, id))
-		.limit(1);
-	if (!existing[0]) {
-		await db.insert(workspaces).values({
-			id,
-			name: "Default workspace",
-			// Required since Plan 14; this file is deleted in stage 5.
-			slug: `ws-${id.slice(0, 8)}`,
-		});
-	}
-	return id;
+  const { id } = await ensureDefaultWorkspaceDb(db);
+  return id;
 }

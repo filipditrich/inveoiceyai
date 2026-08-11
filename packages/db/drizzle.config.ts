@@ -1,13 +1,9 @@
-import { config as loadEnv } from "dotenv";
+import { loadRepoEnv } from "@invoicey/env/load";
 import { defineConfig } from "drizzle-kit";
-import { dirname, resolve } from "path";
-import { fileURLToPath } from "url";
+import { resolve } from "path";
 
-/** Repo root — drizzle-kit runs with cwd `packages/db`, so Bun/Next root `.env` is not loaded automatically */
-const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-
-loadEnv({ path: resolve(repoRoot, ".env") });
-loadEnv({ path: resolve(repoRoot, ".env.local"), override: true });
+/** drizzle-kit runs with cwd `packages/db`, so root `.env` is not automatic. */
+const repoRoot = loadRepoEnv();
 
 const databaseUrl = process.env.DATABASE_URL?.trim();
 if (!databaseUrl) {

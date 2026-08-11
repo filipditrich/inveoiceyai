@@ -8,7 +8,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
-import { workspaces } from "./schema";
+import { workspaces } from "./workspaces";
 
 /**
  * Better Auth tables (Plan 14, ADR 0018) for `better-auth@1.6.26`.
@@ -24,8 +24,8 @@ import { workspaces } from "./schema";
  * plural snake_case to match the rest of the schema — and because `user` is a
  * reserved word in Postgres.
  *
- * The `organization` model is NOT here: it is remapped onto `workspaces`
- * (ADR 0019) in the adapter config.
+ * There is no `organization` table: that model maps onto `workspaces`
+ * (ADR 0019). See `authSchema` at the bottom of this file.
  */
 
 export const user = pgTable("users", {
@@ -270,3 +270,25 @@ export const apikey = pgTable(
   },
   (t) => [index("api_keys_reference_idx").on(t.referenceId)],
 );
+
+/**
+ * Table map handed to `drizzleAdapter`. Keys are Better Auth model names.
+ *
+ * This is where `organization` becomes `workspaces` (ADR 0019) — the decision
+ * the whole tenancy model rests on. It lives here, beside the tables, so every
+ * consumer (the web auth server, scripts, a future seed) gets the same mapping
+ * instead of re-deriving it and drifting.
+ */
+export const authSchema = {
+  user,
+  session,
+  account,
+  verification,
+  organization: workspaces,
+  member,
+  invitation,
+  oauthApplication,
+  oauthAccessToken,
+  oauthConsent,
+  apikey,
+};
