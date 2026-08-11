@@ -35,8 +35,9 @@ const socialProviders = {
         github: {
           clientId: env.GITHUB_CLIENT_ID,
           clientSecret: env.GITHUB_CLIENT_SECRET,
-          // Users with a private primary email otherwise resolve to none.
-          scope: ["user:email"],
+          // No explicit `scope`: better-auth already requests
+          // `read:user user:email`, which is what lets users with a private
+          // primary email still resolve one. Setting it again just duplicates.
         },
       }
     : {}),

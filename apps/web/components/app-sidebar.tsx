@@ -27,13 +27,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
-const demoUser = {
-	name: "Invoicey",
-	email: "demo@invoicey.demo",
-	avatar: "",
-};
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+	user,
+	...props
+}: React.ComponentProps<typeof Sidebar> & {
+	user: { name: string; email: string; avatar: string };
+}) {
 	const pathname = usePathname();
 
 	const invoicesOpen =
@@ -41,7 +40,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 	const navMain = [
 		{
-			title: "Přehled",
+			title: "Dashboard",
 			url: "/dashboard",
 			icon: <LayoutDashboardIcon />,
 			isActive: pathname === "/dashboard",
@@ -53,7 +52,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			isActive: invoicesOpen,
 			items: [
 				{
-					title: "Faktury",
+					title: "Overview",
 					url: "/invoices",
 					isActive:
 						pathname === "/invoices" ||
@@ -124,7 +123,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					<ThemeModeSwitcher className="mx-1" />
 				</SidebarGroup>
 				<SidebarSeparator className="group-data-[collapsible=icon]:hidden mx-0" />
-				<NavUser user={demoUser} />
+				<NavUser user={user} />
 			</SidebarFooter>
 			<SidebarRail />
 		</Sidebar>
