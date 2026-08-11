@@ -1,0 +1,10 @@
+{
+  "title": "Core concepts",
+  "pages": [
+    "invoice-as-data",
+    "czech-vat",
+    "numbering",
+    "statuses",
+    "snapshots"
+  ]
+}

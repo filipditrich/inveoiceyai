@@ -1,0 +1,348 @@
+---
+title: Invoice schema reference
+description: Every field of the invoice payload, and the rules it must satisfy.
+---
+
+The contract every surface validates against. Useful when writing a payload by hand, debugging a
+rejected automated call, or working out what an error message means.
+
+Conceptual background: [an invoice is data](/docs/concepts/invoice-as-data).
+
+## Top level
+
+```ts
+{
+  meta:     InvoiceMeta,
+  issuer:   IssuerSnapshot,
+  client:   ClientSnapshot,
+  vat:      InvoiceVat,
+  payment:  Payment,
+  items:    InvoiceItem[],   // at least 1
+  totals:   Totals,
+  notes?:   string,          // max 2000
+  customization?: InvoiceCustomization,
+}
+```
+
+## meta
+
+<TypeTable
+  type={{
+    docType: {
+      type: "'invoice' | 'proforma' | 'advance' | 'credit_note'",
+      required: true,
+    },
+    number: {
+      type: "string",
+      description: "1–64 chars. Assigned at issue",
+      required: true,
+    },
+    issueDate: {
+      type: "string",
+      description: "ISO date, YYYY-MM-DD",
+      required: true,
+    },
+    dueDate: {
+      type: "string",
+      description: "ISO date. Must be >= issueDate",
+      required: true,
+    },
+    duzp: {
+      type: "string",
+      description: "Date of taxable supply. ISO date",
+      required: true,
+    },
+    language: { type: "'cs'", required: true },
+    currency: { type: "'CZK'", required: true },
+    correctedInvoiceNumber: {
+      type: "string",
+      description: "Required for credit_note",
+    },
+  }}
+/>
+
+Rules: `credit_note` requires `correctedInvoiceNumber`; `dueDate >= issueDate`; `duzp` may be before
+or after `issueDate`.
+
+## issuer
+
+Frozen at issue — see [snapshots](/docs/concepts/snapshots).
+
+<TypeTable
+  type={{
+    id: {
+      type: "string",
+      description: "UUID of the issuer business",
+      required: true,
+    },
+    name: { type: "string", description: "1–200 chars", required: true },
+    ico: { type: "string", description: "Exactly 8 digits", required: true },
+    dic: { type: "string", description: "CZ + 8–10 digits" },
+    address: { type: "Address", required: true },
+    bank: { type: "BankAccount", required: true },
+    vatPayer: { type: "boolean", required: true },
+    contactEmail: {
+      type: "string",
+      description: "Required. Used as Reply-To",
+      required: true,
+    },
+    logoUrl: { type: "string" },
+    stampUrl: { type: "string" },
+    signatureUrl: { type: "string" },
+    registryNote: { type: "string", description: "Max 500 chars" },
+  }}
+/>
+
+```ts
+Address = {
+  street:  string,  // 1–200
+  city:    string,  // 1–100
+  zip:     string,  // /^\d{3} ?\d{2}$/
+  country: 'CZ',
+}
+
+BankAccount = {
+  accountNumber: string,  // /^(?:\d{1,6}-)?\d{1,10}\/\d{4}$/
+  iban:          string,  // /^CZ\d{22}$/
+  bic?:          string,  // 8 or 11 chars
+}
+```
+
+## client
+
+<TypeTable
+  type={{
+    id: { type: "string", description: "UUID", required: true },
+    name: { type: "string", description: "1–200 chars", required: true },
+    ico: {
+      type: "string",
+      description:
+        "8 digits. Optional — foreign clients and natural persons may have none",
+    },
+    dic: { type: "string", description: "Required under reverse charge" },
+    address: { type: "ClientAddress", required: true },
+    contactEmail: {
+      type: "string",
+      description: "Needed to email without typing a recipient",
+    },
+  }}
+/>
+
+`ClientAddress` is looser than the issuer's: `country` is any ISO 3166-1 alpha-2 code and `zip`
+accepts non-Czech formats, so cross-border invoicing fits.
+
+## vat
+
+<TypeTable
+  type={{
+    mode: { type: "'regular' | 'reverse_charge' | 'oss'", required: true },
+    suppliesAbroad: { type: "'none' | 'eu' | 'non_eu'", required: true },
+    legalNote: {
+      type: "string",
+      description: "Printed on the PDF. Max 500 chars",
+    },
+    localReverseChargeCode: {
+      type: "string",
+      description: "PDP číselník code. Required when mode is reverse_charge",
+    },
+  }}
+/>
+
+Cross-field rules:
+
+- `reverse_charge` → every item's `vatRate` must be `0`, and `localReverseChargeCode` is required.
+- `oss` with `suppliesAbroad: 'none'` is invalid — OSS is cross-border by definition.
+- `issuer.vatPayer === false` → mode must be `regular` and every `vatRate` must be `0`.
+
+<Callout type="warn">
+  `localReverseChargeCode` is a číselník code such as `4`, not a paragraph
+  reference. `92e` here produces an ISDOC importers reject. The §-reference
+  belongs in `legalNote`.
+</Callout>
+
+## payment
+
+<TypeTable
+  type={{
+    method: { type: "'transfer' | 'cash' | 'card'", required: true },
+    bankAccount: {
+      type: "BankAccount",
+      description: "Required when method is transfer",
+    },
+    variableSymbol: { type: "string", description: "1–10 digits" },
+    constantSymbol: { type: "string", description: "1–4 digits" },
+    specificSymbol: { type: "string", description: "1–10 digits" },
+    instructionsBefore: {
+      type: "string",
+      description: "Max 2000. Basic markdown",
+    },
+    instructionsAfter: {
+      type: "string",
+      description: "Max 2000. Basic markdown",
+    },
+  }}
+/>
+
+`bankAccount` defaults from the issuer at issue time, but may be overridden — an issuer with several
+accounts can invoice from a different one per invoice.
+
+Only `transfer` with a bank account produces a [payment QR](/docs/outputs/payment-qr).
+
+## items
+
+At least one required.
+
+<TypeTable
+  type={{
+    position: {
+      type: "number",
+      description: "1-indexed, dense",
+      required: true,
+    },
+    description: { type: "string", description: "1–500 chars", required: true },
+    quantity: { type: "number", description: "Positive", required: true },
+    unit: {
+      type: "string",
+      description: "Free-form: 'ks', 'h', 'měs.'",
+      required: true,
+    },
+    unitPriceWithoutVat: {
+      type: "number",
+      description: "Non-negative",
+      required: true,
+    },
+    vatRate: {
+      type: "number",
+      description: "0, 12, 21, or any integer 0–100",
+      required: true,
+    },
+    lineSubtotal: { type: "number", required: true },
+    lineVat: { type: "number", required: true },
+    lineTotal: { type: "number", required: true },
+  }}
+/>
+
+Per-line invariants, recomputed server-side:
+
+```ts
+lineSubtotal === round2(quantity * unitPriceWithoutVat);
+lineVat === round2((lineSubtotal * vatRate) / 100);
+lineTotal === round2(lineSubtotal + lineVat);
+```
+
+## totals
+
+```ts
+Totals = {
+  subtotal:      number,
+  vatBreakdown:  { rate: number, base: number, vat: number }[],
+  vatTotal:      number,
+  total:         number,
+}
+```
+
+Invariants:
+
+- `subtotal === sum(items.lineSubtotal)`
+- one `vatBreakdown` entry per distinct rate, with `base` the sum of that rate's subtotals
+- `vatTotal === sum(vatBreakdown.vat)`
+- `total === subtotal + vatTotal`
+
+`vatBreakdown` is what the PDF prints as _Rekapitulace DPH_.
+
+<Callout>
+  You must supply totals — they are not optional — but the server recomputes and
+  compares them. A mismatch aborts the issue. Treat the values you send as a
+  checksum, not as the source of truth.
+</Callout>
+
+## customization
+
+```ts
+{
+  accentColor: 'neutral' | 'blue' | 'green' | 'amber' | 'rose' | 'violet',  // default 'neutral'
+  showStamp:     boolean,  // default false
+  showSignature: boolean,  // default false
+}
+```
+
+Deliberately narrow. There is one PDF template, not a template editor.
+
+## Complete example
+
+```json
+{
+  "meta": {
+    "docType": "invoice",
+    "number": "20260001",
+    "issueDate": "2026-05-03",
+    "dueDate": "2026-05-17",
+    "duzp": "2026-05-03",
+    "language": "cs",
+    "currency": "CZK"
+  },
+  "issuer": {
+    "id": "ca8b8d4e-2e7e-4f6a-9b7d-1f9c1234abcd",
+    "name": "Filip Ditrich",
+    "ico": "12345678",
+    "dic": "CZ12345678",
+    "address": {
+      "street": "Na Příkopě 14",
+      "city": "Praha",
+      "zip": "110 00",
+      "country": "CZ"
+    },
+    "bank": {
+      "accountNumber": "1920014539/0800",
+      "iban": "CZ6508000000192000145399",
+      "bic": "GIBACZPX"
+    },
+    "vatPayer": true,
+    "contactEmail": "faktury@example.cz"
+  },
+  "client": {
+    "id": "6f1d2b90-3c44-4a1e-8f0b-9d2e5c7a1b23",
+    "name": "NFCtron s.r.o.",
+    "ico": "27074358",
+    "dic": "CZ27074358",
+    "address": {
+      "street": "Budějovická 778/3a",
+      "city": "Praha 4",
+      "zip": "140 00",
+      "country": "CZ"
+    },
+    "contactEmail": "fakturace@nfctron.com"
+  },
+  "vat": { "mode": "regular", "suppliesAbroad": "none" },
+  "payment": {
+    "method": "transfer",
+    "bankAccount": {
+      "accountNumber": "1920014539/0800",
+      "iban": "CZ6508000000192000145399",
+      "bic": "GIBACZPX"
+    },
+    "variableSymbol": "20260001"
+  },
+  "items": [
+    {
+      "position": 1,
+      "description": "Konzultace a vývoj",
+      "quantity": 40,
+      "unit": "h",
+      "unitPriceWithoutVat": 1800,
+      "vatRate": 21,
+      "lineSubtotal": 72000,
+      "lineVat": 15120,
+      "lineTotal": 87120
+    }
+  ],
+  "totals": {
+    "subtotal": 72000,
+    "vatBreakdown": [{ "rate": 21, "base": 72000, "vat": 15120 }],
+    "vatTotal": 15120,
+    "total": 87120
+  }
+}
+```
+
+Paste it into **Invoices → From JSON** to see it render.

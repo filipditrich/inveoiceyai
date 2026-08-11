@@ -1,0 +1,11 @@
+{
+  "title": "Guides",
+  "pages": [
+    "issuers",
+    "clients",
+    "creating-invoices",
+    "issuing-and-payment",
+    "sending-email",
+    "importing-history"
+  ]
+}

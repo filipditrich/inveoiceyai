@@ -1,0 +1,156 @@
+---
+title: Slack
+description: An invoicing agent that lives in your Slack workspace.
+---
+
+Invoicey runs a durable agent in Slack. Mention it, or DM it, and describe the invoice you want — it
+looks the client up in ARES, builds the invoice, posts the PDF and ISDOC into the thread, and asks
+before doing anything irreversible.
+
+It is built on [Vercel Eve](https://eve.dev/docs) and runs inside the same deployment as the web app.
+
+## Using it
+
+Mention the bot in a channel it has been invited to, or send it a direct message:
+
+> @Invoicey invoice NFCtron (IČO 27074358) for 40 hours of consulting at 1 800 CZK, due in 14 days,
+> from my "s.r.o." preset
+
+It replies in a thread with the draft, the invoice ID, a link into the web app, and the rendered PDF
+and ISDOC as file attachments.
+
+**Follow-ups in the same thread do not need a mention.** The agent keeps session context, so you can
+just say:
+
+> issue it
+>
+> actually make it 45 hours first
+
+## Human approval on the dangerous parts
+
+Three actions always stop and ask, with an approve/reject prompt in the thread:
+
+| Tool                 | Why it asks                                               |
+| -------------------- | --------------------------------------------------------- |
+| `issue_invoice`      | Irreversible — allocates a number and freezes the invoice |
+| `mark_invoice_paid`  | Asserts money arrived                                     |
+| `send_invoice_email` | Reaches a real client's inbox                             |
+
+Creating and revising drafts does not ask. Drafts are cheap and deletable; the three above are not.
+
+<Callout type="warn" title="Anyone in the channel can drive it">
+  The agent authenticates as the deployment, not as the person typing. It does
+  not check whether the Slack user is entitled to invoice on your behalf. Keep
+  it in a private channel with the people who should have that power.
+</Callout>
+
+## Available tools
+
+`search_business` · `lookup_business` · `list_presets` · `get_preset` · `save_preset` ·
+`create_invoice` · `upload_invoice_files` · `list_invoices` · `get_invoice` · `issue_invoice` ·
+`mark_invoice_paid` · `send_invoice_email`
+
+The same handlers the [MCP tools](/docs/integrations/mcp) use, plus Slack-specific file upload.
+
+## Connecting Slack
+
+Operator setup. None of it can be automated.
+
+<Steps>
+
+<Step>
+### Deploy with the Eve flag
+
+```bash
+VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1 vercel deploy --prod
+```
+
+Without it the build succeeds but no `/eve/v1/*` routes are generated, and Slack silently never
+works. Requires Node 24+.
+
+</Step>
+
+<Step>
+### Create a Vercel Connect client
+
+```bash
+vercel connect create slack --triggers
+vercel connect detach <uid> --yes
+vercel connect attach <uid> --triggers --trigger-path /eve/v1/slack --yes
+```
+
+The UID must match the one the agent's Slack channel is configured with. Connect manages the Slack
+credentials, so there are no `SLACK_*` secrets to hold yourself.
+
+</Step>
+
+<Step>
+### Set scopes and events
+
+In Connect's advanced settings, subscribe to `message.channels` — plus `message.groups` for private
+channels — and grant at least `channels:history`, `groups:history`, `im:history`, `im:write`,
+`chat:write`, `app_mentions:read`, `files:write` and `files:read`.
+
+Then **reinstall** the Slack app. Scope changes do not apply until you do.
+
+</Step>
+
+<Step>
+### Set the environment
+
+`DATABASE_URL`, `AI_GATEWAY_API_KEY` (or Vercel OIDC), `NEXT_PUBLIC_APP_URL`, an
+[`EVE_API_KEY` or `MCP_API_KEY`](/docs/integrations/api-keys) for HTTP access, and
+`UPLOADTHING_TOKEN` if your issuers use logos.
+
+</Step>
+
+<Step>
+### Invite the bot
+
+Invite it to the target channel, then check the runtime is up:
+
+```bash
+curl -sS https://your-host/eve/v1/health
+# {"ok":true,"status":"ready",...}
+```
+
+</Step>
+
+</Steps>
+
+## Limitations
+
+- **One workspace.** The agent operates against a single configured Invoicey workspace.
+- **No per-Slack-user scoping.** Everyone in the channel has the same power.
+- **No slash commands.** Mentions and DMs only.
+- **No import.** [Historical import](/docs/guides/importing-history) stays web-only.
+
+## Troubleshooting
+
+<Accordions>
+
+<Accordion title="The bot never responds">
+  Check `/eve/v1/health`. If it does not answer, the deployment was probably
+  built without `VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1` and the Eve routes do not
+  exist. If it is healthy, the Connect trigger is likely not attached to
+  `/eve/v1/slack`.
+</Accordion>
+
+<Accordion title="It responds to mentions but ignores thread replies">
+  Missing history scopes. It needs `channels:history` — and `groups:history` for
+  private channels — plus the matching `message.*` event subscriptions, and a
+  reinstall afterwards.
+</Accordion>
+
+<Accordion title="No PDF appears in the thread">
+  `files:write` is missing, or the app was not reinstalled after it was added.
+  The invoice itself is still created — check the web app.
+</Accordion>
+
+<Accordion title="It invents issuer details">
+  No issuer preset. Save one and refer to it by name. Without a preset,
+  `create_invoice` falls back to a demo issuer. See
+  [presets](/docs/integrations/mcp#presets).
+</Accordion>
+
+</Accordions>

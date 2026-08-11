@@ -1,0 +1,96 @@
+---
+title: Creating invoices
+description: The three ways to get an invoice into Invoicey.
+---
+
+There are three create paths. They all end at the same
+[validated payload](/docs/concepts/invoice-as-data) — pick whichever suits the moment.
+
+<Cards>
+  <Card
+    title="The builder"
+    href="#the-builder"
+    description="Point and click. Best for your first few and for anything unusual."
+  />
+  <Card
+    title="From JSON"
+    href="#from-json"
+    description="Paste a payload, get a PDF. Best for testing and scripts."
+  />
+  <Card
+    title="From an assistant"
+    href="/docs/integrations/mcp"
+    description="Describe it in words. Best once your setup is stable."
+  />
+</Cards>
+
+## The builder
+
+**Invoices → New.**
+
+Pick the issuer and the client, then add lines. Each line has a description, quantity, unit, unit
+price and VAT rate. Totals recalculate as you type, grouped per rate.
+
+The header fields:
+
+| Field                      | Default                      | Notes                                                 |
+| -------------------------- | ---------------------------- | ----------------------------------------------------- |
+| Document type              | `invoice`                    | Also proforma, advance, credit note                   |
+| Issue date                 | Today                        |                                                       |
+| Due date                   | Issue date + issuer's terms  | Must not precede the issue date                       |
+| DUZP                       | Issue date                   | Required on invoices and credit notes. Can be earlier |
+| VAT mode                   | `regular`                    | Reverse charge and OSS are the alternatives           |
+| Variable symbol            | Digits of the invoice number | The payment reference your client quotes              |
+| Constant / specific symbol | —                            | Rarely needed                                         |
+| Notes                      | —                            | Free text, max 2000 chars, printed on the PDF         |
+
+A **credit note** additionally requires the number of the invoice it corrects.
+
+Saving produces a [draft](/docs/concepts/statuses): no number, fully editable, not a tax document.
+Drafts follow live edits to the issuer and client until you issue.
+
+## From JSON
+
+**Invoices → From JSON** takes a complete payload and renders it. Useful for checking exactly what
+the schema accepts, for debugging an automation that is producing rejected payloads, and for
+scripted one-offs.
+
+The page validates as you type and shows the specific failing path rather than a generic error, so
+it doubles as the fastest way to understand a validation message you hit elsewhere.
+
+Field reference: [invoice schema](/docs/reference/invoice-schema).
+
+## From an assistant
+
+With [MCP configured](/docs/integrations/mcp), you can describe the invoice instead of filling a
+form:
+
+> Look up NFCtron by IČO, use my "s.r.o." issuer preset, and invoice them 40 hours of consulting at
+> 1 800 CZK plus 12 000 CZK for the integration work. Due in 14 days.
+
+The assistant calls ARES for the client, pulls the locked issuer from your preset, builds the
+payload, and gets it validated. If it omits something required, it sees the error and corrects it.
+
+This is the fastest path once your issuer presets exist — and the one this product is really
+designed around. It is also the one with the sharpest edge:
+
+<Callout type="warn" title="Read what the assistant produced">
+  Validation guarantees an invoice is *well-formed*, not that it is *correct*.
+  The schema cannot detect that the model billed 40 hours when you worked 4, or
+  picked 21 % where 12 % applied. Review the draft before issuing — issuing is
+  the irreversible step, not creating.
+</Callout>
+
+## Templates
+
+Recurring shapes — a monthly retainer, a standard hourly rate — can be saved as **invoice template
+presets**: partial drafts holding items, VAT settings or payment defaults. An assistant merges the
+template and applies your specifics on top, so the repeated parts stay identical every month.
+
+## Duplicating
+
+Any invoice, in any state, can be duplicated. You get a fresh draft with the payload copied and the
+facts dropped — no number, no issue date, no payment, no snapshots.
+
+For most people this is the real "recurring invoice" workflow, since actual scheduled recurring
+invoices are not implemented.

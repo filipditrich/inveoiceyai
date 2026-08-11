@@ -1,0 +1,4 @@
+{
+  "title": "Integrations",
+  "pages": ["api-keys", "mcp", "cursor", "claude-code", "slack"]
+}

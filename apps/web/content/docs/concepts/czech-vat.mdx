@@ -1,0 +1,114 @@
+---
+title: Czech VAT (DPH)
+description: Rates, VAT modes, reverse charge, OSS and DUZP.
+---
+
+<Callout type="warn" title="This is documentation, not tax advice">
+  VAT errors have consequences with the tax authority. This page describes what
+  Invoicey does. It does not tell you which mode applies to your situation —
+  that is between you and your accountant, with reference to *zákon č. 235/2004
+  Sb.*
+</Callout>
+
+## Rates
+
+| Rate     | Czech                     | Typical use                                                                                                         |
+| -------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **21 %** | základní sazba            | Most goods and services — IT, consulting, legal, electronics, fuel, telecom                                         |
+| **12 %** | snížená sazba             | Accommodation, restaurant catering (not alcohol), passenger transport, residential construction, tap water, heating |
+| **0 %**  | nulová sazba / osvobození | Books and periodicals, exports outside the EU, intra-EU supplies to VAT payers                                      |
+
+The UI steers you toward 21 / 12 / 0, but any positive rate is accepted. This is intentional: a
+backdated invoice with a 2022 DUZP may legitimately need 15 % or 10 %, which no longer exist as
+current rates.
+
+## VAT modes
+
+`vat.mode` drives what appears on the PDF and how the ISDOC is tagged.
+
+<Tabs items={['regular', 'reverse_charge', 'oss']}>
+
+<Tab value="regular">
+
+The standard domestic invoice. You charge VAT per line; the recipient deducts input VAT if eligible.
+
+- Requires a DUZP.
+- The PDF prints a full VAT recap (_Rekapitulace DPH_) grouped by rate.
+- ISDOC emits standard `<TaxTotal>` blocks per rate.
+
+If the issuer is **not** a VAT payer, this is still the mode used — every line is forced to 0 % and
+the PDF prints _Nejsem plátce DPH_ where the breakdown would go.
+
+</Tab>
+
+<Tab value="reverse_charge">
+
+**Přenesená daňová povinnost (PDP).** The recipient accounts for the VAT, not you. Mandated by §92
+of the VAT Act for specific scenarios — construction and assembly work, scrap metal, mobile phones,
+integrated circuits, and most cross-border B2B services within the EU.
+
+What Invoicey does:
+
+- Forces `vatRate = 0` on every line, and a VAT total of 0.
+- Prints the legal note, defaulting to _"Daň odvede zákazník dle § 92a zákona č. 235/2004 Sb."_ —
+  or the §92e variant for construction.
+- Requires **both** parties to be VAT payers: the issuer must have `vatPayer = true` and the client
+  must have a DIČ.
+- Requires `vat.localReverseChargeCode`.
+
+<Callout type="warn" title="localReverseChargeCode is not a paragraph number">
+  This field takes a code from the PDP číselník — for example `4` for
+  construction and assembly work — which lands in the ISDOC
+  `LocalReverseChargeCode` element. Putting `92e` in it produces an ISDOC your
+  accountant's software will reject. The §-reference belongs in the printed
+  note, which Invoicey handles separately.
+</Callout>
+
+</Tab>
+
+<Tab value="oss">
+
+**One-Stop Shop.** The EU simplification for cross-border B2C: you charge the _destination
+country's_ VAT rate and report it through a single return at home, instead of registering for VAT in
+each country you sell into.
+
+- The client is in another EU country and `vat.suppliesAbroad = 'eu'`.
+- Line VAT rates are the destination country's, not Czech.
+- The PDF states the destination rate and notes _Zdaněno dle pravidel OSS_.
+
+OSS is in the schema and renders correctly, but the invoice builder keeps it behind an advanced
+toggle rather than offering it by default — it is a mode most users should not reach for casually.
+
+</Tab>
+
+</Tabs>
+
+## DUZP
+
+**Datum uskutečnění zdanitelného plnění** — the date of taxable supply. It determines which tax
+period the invoice belongs to, which is why it is a separate field from the issue date.
+
+- **Required** on `invoice` and `credit_note`.
+- May be earlier _or_ later than the issue date. Invoicing in March for work delivered in February
+  means a February DUZP, and that is correct.
+- On `proforma` and `advance` it may simply equal the issue date — neither is a tax document.
+
+## Document types
+
+| Type          | Czech                            | Tax document?                     |
+| ------------- | -------------------------------- | --------------------------------- |
+| `invoice`     | Faktura vystavená                | Yes                               |
+| `proforma`    | Proformová faktura               | No — a request for payment        |
+| `advance`     | Zálohová faktura                 | Yes, for the advance              |
+| `credit_note` | Dobropis (opravný daňový doklad) | Yes — corrects a previous invoice |
+
+A `credit_note` must reference the invoice it corrects via `meta.correctedInvoiceNumber`. The
+schema enforces this.
+
+Each type can have its own [numbering scheme](/docs/concepts/numbering) and counter.
+
+## Not a VAT payer?
+
+Set `vatPayer = false` on the issuer. Every line is forced to 0 %, the recap is replaced by
+_Nejsem plátce DPH_, and the ISDOC reflects the same. Nothing else changes — you still get numbering,
+QR codes, ISDOC and the full automation surface.

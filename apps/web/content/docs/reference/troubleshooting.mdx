@@ -1,0 +1,193 @@
+---
+title: Troubleshooting
+description: The things that actually go wrong, and what to check.
+---
+
+## Invoices
+
+<Accordions>
+
+<Accordion title="I cannot issue — validation fails">
+The error names the failing field path. Most common causes:
+
+- **Missing DUZP.** Required on invoices and credit notes. Nothing is silently defaulted.
+- **Due date before the issue date.** Not allowed.
+- **Client has no DIČ under reverse charge.** Both parties must be VAT payers in that mode.
+- **`localReverseChargeCode` missing.** Required whenever the mode is `reverse_charge`.
+- **Non-zero VAT rate under reverse charge.** Every line must be 0 %.
+- **Credit note with no `correctedInvoiceNumber`.**
+
+Field-by-field rules: [invoice schema](/docs/reference/invoice-schema).
+
+</Accordion>
+
+<Accordion title="Totals mismatch on issue">
+Totals are recomputed server-side and compared with what was submitted. A mismatch aborts the whole
+transaction.
+
+From the UI this should not happen. From automation it means the client computed totals differently —
+usually rounding per invoice instead of per line. Each line rounds to 2 decimals independently, then
+the sums are taken. See [the invariants](/docs/reference/invoice-schema#items).
+
+</Accordion>
+
+<Accordion title="I need to change an issued invoice">
+You cannot. Issued invoices are frozen — [deliberately](/docs/concepts/statuses#why-issued-invoices-are-frozen).
+
+Cancel and re-issue, or issue a credit note plus a corrected invoice, which is the standard path when
+the original is already in your client's books.
+
+</Accordion>
+
+<Accordion title="There is a gap in my invoice numbers">
+Check for a cancelled invoice at that number. Cancelling consumes the number permanently and does not
+release it — which is what you want during a tax inspection.
+
+A genuinely missing number, with no invoice at all, would mean a counter was edited manually. See
+[numbering](/docs/concepts/numbering).
+
+</Accordion>
+
+<Accordion title="Editing a client did not update an invoice I already sent">
+  Working as designed. Issued invoices hold frozen
+  [snapshots](/docs/concepts/snapshots), so edits only affect future invoices.
+  Cancel and re-issue if the issued document is wrong.
+</Accordion>
+
+</Accordions>
+
+## Documents
+
+<Accordions>
+
+<Accordion title="No payment QR on the PDF">
+All three must hold: payment method is `transfer`, the issuer has an **IBAN** (not just an account
+number), and the total is positive. Credit notes never get one.
+
+See [payment QR](/docs/outputs/payment-qr).
+
+</Accordion>
+
+<Accordion title="Czech characters render as boxes">
+  Should not happen — fonts are vendored into the repository precisely to avoid
+  this. If you see it on a self-hosted instance, the font assets are missing
+  from the deployment bundle. Check that `outputFileTracingIncludes` in
+  `next.config.ts` still covers the invoice-core assets for the route doing the
+  rendering.
+</Accordion>
+
+<Accordion title="My logo does not appear">
+  SVG is not rasterised reliably — upload PNG or JPEG. Also confirm
+  `UPLOADTHING_TOKEN` is set, or that the URL you pasted is publicly reachable
+  from the server.
+</Accordion>
+
+<Accordion title="No ISDOC download on an imported invoice">
+  That import was archive-mode: the PDF carried no ISDOC, and Invoicey will not
+  fabricate one from a synthetic payload. See [importing
+  history](/docs/guides/importing-history#full-versus-archive).
+</Accordion>
+
+</Accordions>
+
+## Email
+
+<Accordions>
+
+<Accordion title="Sending fails immediately">
+  `RESEND_API_KEY` is not set on the deployment. Sending fails closed rather
+  than pretending to work.
+</Accordion>
+
+<Accordion title="Delivery status never leaves 'sent'">
+  The webhook is not reaching you. Check it points at `/api/webhooks/resend`,
+  that `RESEND_WEBHOOK_SECRET` matches, and that the events are subscribed.
+  Signature verification fails closed. See [deployment
+  setup](/docs/guides/sending-email#deployment-setup).
+</Accordion>
+
+<Accordion title="Overdue reminders never fire">
+  Three things must all be true: enabled on the issuer, `CRON_SECRET` set, and a
+  daily request actually scheduled against `/api/cron/overdue-reminders`. The UI
+  toggle alone does nothing.
+</Accordion>
+
+<Accordion title="Emails land in spam">
+  Verify your sending domain in Resend and set its DNS records. The From address
+  is always the deployment's verified domain — sending as an arbitrary address
+  would fail SPF and DKIM, which is why it is not offered. See
+  [addressing](/docs/guides/sending-email#addressing).
+</Accordion>
+
+<Accordion title="A recipient is suppressed">
+  They hard-bounced or filed a complaint. Automated sends skip them; manual
+  sends warn and proceed. Confirm the address is right before overriding.
+</Accordion>
+
+</Accordions>
+
+## Automation
+
+<Accordions>
+
+<Accordion title="MCP returns unauthorized on everything">
+The key was revoked, mistyped, or truncated when copied. Personal keys are shown once, so create a
+fresh one under **Settings → API keys** if you are unsure. Test the endpoint directly before
+debugging the client:
+
+```bash
+curl -X POST https://your-host/api/mcp -H "Authorization: Bearer YOUR_API_KEY" -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
+</Accordion>
+
+<Accordion title="Only some MCP tools appear">
+  `list_invoices`, `get_invoice`, `mark_invoice_paid` and `send_invoice_email`
+  need `DATABASE_URL` and are not registered without it. Use the hosted
+  endpoint. See [MCP tools](/docs/reference/mcp-tools).
+</Accordion>
+
+<Accordion title="An assistant invented issuer details">
+  No issuer preset was passed, so `create_invoice` fell back to the demo issuer.
+  Save a preset and name it explicitly in your prompt — see
+  [presets](/docs/integrations/mcp#presets).
+</Accordion>
+
+<Accordion title="Presets vanish between calls">
+  File-backed presets on serverless land in `/tmp` and do not persist. Set
+  `DATABASE_URL` so presets go to Postgres.
+</Accordion>
+
+<Accordion title="The Slack bot never responds">
+  Check `https://your-host/eve/v1/health`. No answer usually means the
+  deployment was built without `VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1`, so the
+  agent routes were never generated. A healthy response points instead at the
+  Connect trigger not being attached to `/eve/v1/slack`. See
+  [Slack](/docs/integrations/slack#troubleshooting).
+</Accordion>
+
+</Accordions>
+
+## Deployment
+
+<Accordions>
+
+<Accordion title="Build fails on the auth secret">
+  `BETTER_AUTH_SECRET` must be present at **build** time, minimum 32 characters.
+  See [environment variables](/docs/reference/environment-variables#required).
+</Accordion>
+
+<Accordion title="ARES lookup returns nothing">
+  Distinguish the cases: an invalid IČO is rejected before any request;
+  not-found means no such subject; an HTTP error means ARES itself is down or
+  rate-limiting. Successful lookups cache for 24 hours. Manual entry always
+  works. See [clients](/docs/guides/clients#when-lookup-fails).
+</Accordion>
+
+<Accordion title="Only one sign-in provider appears">
+  A provider is registered only when both its ID and secret are set, so a
+  half-configured provider is hidden rather than shown as a button that fails
+  after redirect.
+</Accordion>
+
+</Accordions>

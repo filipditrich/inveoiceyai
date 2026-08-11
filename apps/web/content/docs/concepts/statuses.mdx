@@ -1,0 +1,102 @@
+---
+title: Invoice statuses
+description: Why status is computed rather than stored, and what each state means.
+---
+
+Invoicey never stores a status column. It stores **facts** — when an invoice was issued, paid or
+cancelled — and computes the status from them at read time.
+
+## The facts
+
+```ts
+interface InvoiceFacts {
+  issuedAt: Date | null; // null = still a draft
+  dueDate: Date; // always present
+  paidAt: Date | null; // null = unpaid
+  cancelledAt: Date | null; // null = not cancelled
+}
+```
+
+Four fields. Everything else is derived.
+
+## Derivation
+
+```ts
+function deriveStatus(facts, now) {
+  if (facts.cancelledAt !== null) return "cancelled";
+  if (facts.issuedAt === null) return "draft";
+  if (facts.paidAt !== null) return "paid";
+  return now > endOfDay(facts.dueDate) ? "overdue" : "issued";
+}
+```
+
+| Status      | Czech         | Meaning                                              |
+| ----------- | ------------- | ---------------------------------------------------- |
+| `draft`     | Rozpracováno  | Saved, no number, fully editable, not a tax document |
+| `issued`    | Vystaveno     | Numbered, snapshots frozen, not yet due, unpaid      |
+| `overdue`   | Po splatnosti | Issued, past due, still unpaid                       |
+| `paid`      | Uhrazeno      | Payment recorded                                     |
+| `cancelled` | Stornováno    | Cancelled after issue. Number stays consumed         |
+
+## Display statuses
+
+Lists, filters and dashboard cards use a slightly finer set that splits `issued` in two, matching
+what Czech users expect from tools like fakturaonline:
+
+| Display     | Czech         | Rule                                              |
+| ----------- | ------------- | ------------------------------------------------- |
+| `draft`     | Návrh         | Not issued                                        |
+| `paid`      | Zaplaceno     | Payment recorded                                  |
+| `future`    | Budoucí       | Unpaid, and the issue date is still in the future |
+| `overdue`   | Po splatnosti | Unpaid, already issued, past due                  |
+| `unpaid`    | Nezaplaceno   | Unpaid, already issued, not yet due               |
+| `cancelled` | Stornováno    | Cancelled                                         |
+
+Priority runs cancelled → draft → paid → future → overdue → unpaid. **Future wins over overdue**,
+so a backdated-due invoice you have not started yet does not show up screaming in red.
+
+The domain status stays `issued` for both `future` and `unpaid`. Both are exposed: automation tools
+return `status` _and_ `displayStatus`.
+
+## Overdue and timezones
+
+The due date is a calendar date, not a timestamp. An invoice due `2026-05-17` becomes overdue at the
+**end of that day in Europe/Prague** — not at midnight UTC, which would flip it two hours early and
+have invoices going overdue while you sleep.
+
+## Transitions
+
+| Action      | From                | To          |
+| ----------- | ------------------- | ----------- |
+| Save draft  | — / `draft`         | `draft`     |
+| Issue       | `draft`             | `issued`    |
+| Mark paid   | `issued`, `overdue` | `paid`      |
+| Unmark paid | `paid`              | re-derived  |
+| Cancel      | `issued`, `overdue` | `cancelled` |
+| Delete      | `draft` only        | gone        |
+| Duplicate   | any                 | new `draft` |
+
+`issued → overdue` is not a transition anyone performs. Time passes and the derivation changes.
+
+## Why issued invoices are frozen
+
+Once `issuedAt` is set, the payload is immutable. There is no edit affordance, and none is planned.
+
+An issued invoice has already left the building: a PDF is in your client's inbox, an ISDOC may be in
+their accounting system, a payment may be in flight against its variable symbol. Editing it in place
+would silently desync all three while looking, locally, like it worked.
+
+The honest paths when something is wrong:
+
+- **Wrong amount, wrong client, date typo** → cancel and re-issue.
+- **Missing a line** → cancel and re-issue, or issue a credit note plus a new invoice, which is
+  standard Czech practice for an invoice already in the client's books.
+
+## Why derive at all
+
+Storing a status column would mean a nightly job walking every invoice to ask "did this go overdue
+overnight?", clock-skew bugs between that job and request handlers producing visible
+inconsistencies, and status-filtered queries recomputing it anyway for correctness.
+
+Deriving costs nothing. The list view maps the same logic into SQL so filtering stays indexed and
+fast, and no cron exists purely to tick state forward.

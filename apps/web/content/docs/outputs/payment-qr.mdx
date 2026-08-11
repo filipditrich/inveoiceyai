@@ -1,0 +1,70 @@
+---
+title: Payment QR code
+description: SPAYD QR platba so Czech banking apps pre-fill the payment.
+---
+
+Czech banking apps read **QR platba**, a QR code encoding a
+[SPAYD](https://qr-platba.cz) payload. Your client scans the invoice, their app pre-fills account,
+amount, variable symbol and due date, and they confirm.
+
+No typing means no transposed account digits and no missing variable symbol — which is the actual
+reason payments go missing.
+
+## What is encoded
+
+| SPAYD key | From                                                      |
+| --------- | --------------------------------------------------------- |
+| `ACC`     | Issuer IBAN, plus BIC when present                        |
+| `AM`      | Total in koruna — major units, so `1210.50`, never haléře |
+| `CC`      | `CZK`                                                     |
+| `VS`      | Variable symbol                                           |
+| `KS`      | Constant symbol, when set                                 |
+| `SS`      | Specific symbol, when set                                 |
+| `MSG`     | Invoice number, plus a shortened client name when it fits |
+| `RN`      | Issuer name                                               |
+| `DT`      | Due date, `YYYYMMDD`                                      |
+
+Producing a payload like:
+
+```text
+SPD*1.0*ACC:CZ6508000000192000145399+GIBACZPX*AM:12100*CC:CZK*VS:20260007*...
+```
+
+Key order is fixed so the same invoice always produces the same code.
+
+## When the QR appears
+
+Only when all three hold:
+
+- The payment method is **bank transfer**. Cash and card payments get no QR — there is nothing to
+  transfer.
+- The issuer has a **bank account** configured.
+- The total is **positive**.
+
+<Callout title="Credit notes get no QR">
+  A dobropis has a negative total. Encoding a negative amount produces a code
+  that either fails to scan or — worse — scans as a payment *to* your client.
+  Invoicey omits it, and the refund is arranged the ordinary way.
+</Callout>
+
+## Rendering
+
+The QR is generated as a PNG and embedded in the PDF next to the payment block, at high error
+correction so it survives being printed, photocopied and scanned under office lighting.
+
+## If it does not appear
+
+Work down the list:
+
+1. Payment method is not `transfer`.
+2. The issuer has no IBAN — the account number alone is not enough, since SPAYD encodes IBAN.
+3. The total is zero or negative.
+4. The document is a credit note.
+
+## Verify it once
+
+Scan your first invoice with your own banking app before sending it to a client.
+
+The IBAN and the printed account number are two separate fields on the issuer, and **nothing checks
+that they describe the same account**. A mismatch means clients paying an account that is not yours —
+and the QR is the field they will trust.

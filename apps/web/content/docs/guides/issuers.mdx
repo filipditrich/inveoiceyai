@@ -1,0 +1,133 @@
+---
+title: Issuers
+description: Setting up the businesses that issue your invoices.
+---
+
+An **issuer** is a business that issues invoices. A workspace can hold several — your OSVČ trade and
+your s.r.o., or two companies you run — each with its own numbering, bank account and branding.
+
+## Creating one
+
+**Issuers → New.** Enter the IČO and Invoicey fills the legal name, address and DIČ from
+[ARES](/docs/guides/clients#ares-lookup).
+
+ARES cannot tell you everything, so these are yours to supply:
+
+<Steps>
+
+<Step>
+
+### Bank account
+
+Two fields, both required:
+
+| Field          | Format                     | Example                    |
+| -------------- | -------------------------- | -------------------------- |
+| Account number | `[prefix-]number/bankCode` | `19-2000145399/0800`       |
+| IBAN           | `CZ` + 22 digits           | `CZ6508000000192000145399` |
+| BIC            | Optional, 8 or 11 chars    | `GIBACZPX`                 |
+
+Both are validated. The account number is what prints on the PDF; the IBAN is what goes into the
+[payment QR code](/docs/outputs/payment-qr). They must describe the same account — nothing checks
+this for you, and a mismatch means clients scanning the QR pay a different account than the one
+printed above it.
+
+</Step>
+
+<Step>
+
+### VAT payer flag
+
+Whether you charge DPH. Turning it **off** forces every line on every invoice to 0 % and replaces the
+VAT recap on the PDF with _Nejsem plátce DPH_. See [Czech VAT](/docs/concepts/czech-vat).
+
+</Step>
+
+<Step>
+
+### Contact email
+
+Required. It becomes the `Reply-To` on every invoice email sent for this issuer, so client replies
+reach you rather than the sending domain.
+
+</Step>
+
+<Step>
+
+### Registry note
+
+The _zápis v obchodním rejstříku_ line Czech invoices carry:
+
+> Společnost zapsaná v obchodním rejstříku vedeném Krajským soudem v Brně, oddíl C, vložka 12345.
+
+Sole traders generally use:
+
+> Fyzická osoba zapsaná v živnostenském rejstříku.
+
+Optional, but if your company has one, it belongs on your invoices.
+
+</Step>
+
+<Step>
+
+### Numbering scheme
+
+Per document type. The default `{YYYY}{####}` gives `20260001`. Full token list and reset behaviour
+in [numbering](/docs/concepts/numbering).
+
+</Step>
+
+</Steps>
+
+## Logos, stamps and signatures
+
+Three optional images placed on the PDF:
+
+| Asset           | Formats        | Max size |
+| --------------- | -------------- | -------- |
+| Logo            | PNG, JPEG, SVG | 1 MB     |
+| Stamp (razítko) | PNG, JPEG      | 1 MB     |
+| Signature       | PNG, JPEG      | 1 MB     |
+
+Uploads go through UploadThing and need `UPLOADTHING_TOKEN` configured. Without it the fields still
+accept pasted URLs, so a self-hosted instance without an UploadThing account is not blocked — it just
+has to host the images somewhere itself.
+
+Replacing an asset uploads a new file and leaves the old URL alive. That is on purpose: invoices you
+issued last year hold the _old_ URL in their [snapshot](/docs/concepts/snapshots) and must keep
+rendering with the logo you had at the time.
+
+## Email settings
+
+Per issuer, used at send time:
+
+| Setting                 | Default                           |
+| ----------------------- | --------------------------------- |
+| Default subject         | `Faktura {number} — {issuerName}` |
+| Default cover text      | —                                 |
+| Attach ISDOC by default | on                                |
+| Display name template   | `{issuerName} via Invoicey`       |
+| Overdue reminders       | off                               |
+| Reminder interval       | 7 days                            |
+| Payment-received email  | off                               |
+
+These are read **live** when an email is sent, not frozen into snapshots — so fixing a bad default
+subject immediately improves future sends of invoices you issued months ago.
+
+## Editing an issuer
+
+Edits apply to **future** invoices only. Already-issued invoices hold frozen copies and will not
+change — see [snapshots](/docs/concepts/snapshots).
+
+This means rebranding, moving office or switching banks is a safe, ordinary edit. It also means
+correcting a mistake does not retroactively fix invoices that already went out with it.
+
+## Presets for automation
+
+Issuers can be saved as **presets** for the [MCP](/docs/integrations/mcp) and
+[Slack](/docs/integrations/slack) tools. A preset locks the "from" party so an assistant creating an
+invoice cannot invent an IČO or a bank account — it selects a preset by ID and the issuer block is
+injected server-side.
+
+Given that a hallucinated bank account on an invoice means a client wiring money to nobody, this is
+the part of the automation design worth understanding before you use it.

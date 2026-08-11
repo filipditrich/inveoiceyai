@@ -1,0 +1,85 @@
+---
+title: Issuing and payment
+description: Turning a draft into a tax document, then tracking payment.
+---
+
+## Issuing
+
+**Issue** is the one irreversible action in Invoicey. It happens in a single database transaction:
+
+<Steps>
+  <Step>
+    ### Validate The draft payload is parsed against the full schema. Anything
+    missing or malformed stops here.
+  </Step>
+  <Step>
+    ### Allocate a number The issuer's [numbering
+    scheme](/docs/concepts/numbering) row is locked, the next number computed,
+    and the counter incremented — with a yearly reset if the issue date crossed
+    into a new year.
+  </Step>
+  <Step>
+    ### Freeze snapshots The live issuer and client are copied onto the invoice.
+    From now on it is [immune to edits](/docs/concepts/snapshots) of those
+    records.
+  </Step>
+  <Step>
+    ### Recompute totals Totals are recalculated server-side and compared
+    against what was submitted. A mismatch aborts.
+  </Step>
+  <Step>
+    ### Render and store The PDF and ISDOC are generated and uploaded, and their
+    URLs stored on the invoice so they are served rather than re-rendered on
+    every download.
+  </Step>
+</Steps>
+
+If any step fails, everything rolls back — **including the counter**. A failed issue does not burn a
+number.
+
+<Callout type="warn" title="There is no edit after this">
+  Issued invoices are frozen. If something is wrong, cancel and re-issue, or
+  issue a credit note. See
+  [why](/docs/concepts/statuses#why-issued-invoices-are-frozen).
+</Callout>
+
+## Recording payment
+
+**Mark paid** stamps the payment date; the [status](/docs/concepts/statuses) derives to `paid` and
+the invoice leaves your overdue list.
+
+You can supply the actual date the money arrived rather than accepting today — worth doing, since the
+overdue reminder cron and your dashboard both read it.
+
+**Unmark paid** clears it if you mark the wrong invoice. The status re-derives from the remaining
+facts, which may land on `overdue` if the due date has since passed.
+
+<Callout>
+  Nothing marks invoices paid automatically. There is no bank connection and no
+  payment matching — you tell Invoicey when money arrives.
+</Callout>
+
+## Overdue
+
+An invoice goes overdue at the **end of its due date, Europe/Prague time** — not midnight UTC.
+
+Optional automated reminders exist per issuer, off by default, sending every 7 days by default to the
+client's contact email. Turn them on in the issuer's email settings. They require the deployment's
+reminder cron to be scheduled — see [sending email](/docs/guides/sending-email#deployment-setup).
+
+## Cancelling
+
+Cancelling stamps a cancellation date. The invoice stays in the system, keeps its number forever, and
+displays as `stornováno`.
+
+The number is deliberately not released. A gap in your invoice sequence is a question you have to
+answer during a tax inspection; a cancelled invoice sitting in the sequence answers it.
+
+## Downloading
+
+PDF and ISDOC are available from the invoice detail. Both are served from stored copies made at issue
+time rather than re-rendered, so the file a client received and the file you download later are
+byte-identical.
+
+Imported historical invoices are marked immutable and always serve the **original uploaded PDF** —
+Invoicey never regenerates over a document another system produced.

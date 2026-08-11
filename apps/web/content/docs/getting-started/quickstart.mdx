@@ -1,0 +1,158 @@
+---
+title: Quickstart
+description: From signing in to a sent invoice in about ten minutes.
+---
+
+This walks the whole path once: sign in, set up the business that issues invoices, add a client,
+create an invoice, issue it, and send it. Everything after this page goes deeper on one step.
+
+<Callout type="warn" title="You need a bank account and an IČO">
+  Invoicey validates hard. It will not let you issue an invoice without a valid
+  8-digit IČO, a Czech IBAN and a complete address — because an invoice missing
+  those is not a valid Czech tax document. Have them at hand before you start.
+</Callout>
+
+<Steps>
+
+<Step>
+
+### Sign in
+
+Invoicey uses OAuth only — **Google** or **GitHub**. There is no password to set and no
+email-confirmation step.
+
+Both providers verify email addresses, so signing in with Google and later with GitHub on the
+same address links to one account rather than creating a second one.
+
+First sign-in creates a personal [workspace](/docs/getting-started/workspaces) for you
+automatically. All your data lives inside it.
+
+</Step>
+
+<Step>
+
+### Create an issuer
+
+An **issuer** is a business that issues invoices — you, or your s.r.o. Go to **Issuers → New**.
+
+Type your **IČO** and Invoicey queries [ARES](/docs/guides/clients#ares-lookup), the Czech business
+registry, filling in the legal name, address and DIČ. Check what came back; ARES is authoritative
+for the registry, but it does not know your bank account or whether you want to be shown as a VAT
+payer.
+
+You must still supply:
+
+- **Bank account** — Czech format (`19-2000145399/0800`) and the matching **IBAN**. This is what
+  ends up in the [payment QR code](/docs/outputs/payment-qr).
+- **VAT payer** — whether you charge DPH. If off, every line is forced to 0 % and the PDF prints
+  _Nejsem plátce DPH_ instead of a VAT breakdown.
+- **Contact email** — required. It becomes the `Reply-To` on invoice emails.
+- **Numbering scheme** — how invoice numbers are generated. The default `{YYYY}{####}` produces
+  `20260001`. See [numbering](/docs/concepts/numbering).
+
+Optionally upload a **logo**, **stamp** and **signature** image; they are placed on the PDF.
+
+</Step>
+
+<Step>
+
+### Add a client
+
+**Clients → New**, then the same trick: enter the client's IČO and let ARES fill the rest. If you
+do not know the IČO, search by company name instead.
+
+For clients you will email invoices to, set **contact email** now. Without it, every send needs a
+manually typed recipient.
+
+</Step>
+
+<Step>
+
+### Create an invoice
+
+**Invoices → New**. Pick the issuer and client you just made, then add line items — description,
+quantity, unit price, VAT rate.
+
+The important fields, all of which Invoicey pre-fills with sane defaults:
+
+| Field                 | Meaning                                                                          |
+| --------------------- | -------------------------------------------------------------------------------- |
+| **Datum vystavení**   | Issue date                                                                       |
+| **Datum splatnosti**  | Due date — must be on or after the issue date                                    |
+| **DUZP**              | Date of taxable supply. Required on invoices and credit notes                    |
+| **VAT mode**          | `regular`, `reverse charge` or `OSS` — see [Czech VAT](/docs/concepts/czech-vat) |
+| **Variabilní symbol** | Payment reference. Defaults to the invoice number's digits                       |
+
+Totals recompute as you type, per VAT rate, and are checked again server-side when you issue.
+
+</Step>
+
+<Step>
+
+### Issue it
+
+A saved invoice is a **draft**: no number, fully editable, not a tax document.
+
+**Issue** turns it into a real one, in a single transaction: allocates the next number from your
+scheme, freezes [snapshots](/docs/concepts/snapshots) of the issuer and client, recomputes totals,
+renders the PDF and ISDOC, and stamps the issue date.
+
+<Callout type="warn">
+  Issuing is one-way. Issued invoices cannot be edited — only cancelled and
+  re-issued. This is deliberate; see
+  [statuses](/docs/concepts/statuses#why-issued-invoices-are-frozen).
+</Callout>
+
+</Step>
+
+<Step>
+
+### Send it
+
+From the invoice detail, **Send email**. Invoicey attaches the PDF (always) and the ISDOC (on by
+default) and sends via Resend.
+
+The email comes from your deployment's verified sending domain with a display name of
+`{Issuer name} via Invoicey`, and `Reply-To` set to the issuer's contact email — so replies reach
+you, not the server. Delivery status (sent, delivered, bounced, opened) appears on the invoice
+timeline.
+
+</Step>
+
+<Step>
+
+### Mark it paid
+
+When the money lands, **Mark paid**. Invoicey records the payment date; the status derives to
+`paid` and it drops out of your overdue list.
+
+Nothing marks invoices paid automatically — there is no bank integration.
+
+</Step>
+
+</Steps>
+
+## Next
+
+<Cards>
+  <Card
+    title="How invoices actually work"
+    href="/docs/concepts/invoice-as-data"
+    description="The schema every surface validates against."
+  />
+  <Card
+    title="Do this from Cursor instead"
+    href="/docs/integrations/cursor"
+    description="Create and issue invoices by asking an assistant."
+  />
+  <Card
+    title="Import your old invoices"
+    href="/docs/guides/importing-history"
+    description="Bulk-load PDFs from your previous tool."
+  />
+  <Card
+    title="Something went wrong"
+    href="/docs/reference/troubleshooting"
+    description="The usual suspects."
+  />
+</Cards>

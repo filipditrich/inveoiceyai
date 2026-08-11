@@ -1,0 +1,74 @@
+---
+title: Snapshots
+description: Why editing a client never changes invoices you already sent them.
+---
+
+When you issue an invoice, Invoicey copies the issuer and the client **into** the invoice. From then
+on the invoice holds its own frozen copy rather than pointing at the live records.
+
+## The problem this solves
+
+Without snapshots, an invoice is a set of foreign keys, and every edit to a business record rewrites
+history:
+
+- You rebrand → all your 2024 invoices retroactively show the new company name.
+- A client moves office → every invoice you ever sent them shows the new address, and re-importing
+  any of them into accounting software produces mismatches.
+- You switch banks → PDFs already in circulation show an IBAN that did not exist when they were
+  issued, and reconciling old bank statements stops working.
+- A client registers for VAT → historical invoices retroactively display a DIČ they legally must not
+  carry.
+
+None of these are hypothetical. A Czech tax authority expects an invoice to be a static legal
+document, and PDFs already sitting in your client's archive have to keep matching your database
+indefinitely.
+
+## When it happens
+
+Snapshots are taken **at issue**, not at draft creation.
+
+A draft references the live issuer and client by ID and follows their edits — which is what you want
+while you are still working on it. Fix a typo in a client's address and your open drafts pick it up.
+
+Issuing changes that. The server loads the live records, projects them down to the invoice-relevant
+fields, validates them, and writes them onto the invoice row.
+
+```text
+draft  ──references──▶  live issuer / live client   (follows edits)
+  │
+  │ issue
+  ▼
+issued ──contains────▶  frozen copies               (immune to edits)
+```
+
+## What is captured
+
+**Issuer:** name, IČO, DIČ, address, bank account, VAT-payer flag, and the URLs of the logo, stamp
+and signature images.
+
+**Client:** name, IČO, DIČ, address and contact details.
+
+The invoice keeps a back-reference to the original record IDs, so "show me every invoice from this
+issuer" still works — you just cannot use it to rewrite what those invoices say.
+
+## What is not captured
+
+- **The numbering scheme.** Only its output — the resolved number — is stored. You can change the
+  template freely afterwards without disturbing anything already issued.
+- **Issuer defaults** like standard payment terms. Those are already baked into the invoice's dates.
+- **Email settings.** These are read _live_ at send time, so fixing a bad default subject line
+  immediately affects future sends of old invoices rather than requiring a re-issue.
+
+## Consequences worth knowing
+
+<Callout title="Fixing a client record does not fix invoices already sent">
+  If you notice a wrong address on an issued invoice, correcting the client
+  record changes nothing on that invoice. Cancel and re-issue it — see
+  [statuses](/docs/concepts/statuses#why-issued-invoices-are-frozen).
+</Callout>
+
+You can also **delete or archive a client** without breaking anything. Every invoice you sent them
+still renders completely, because it no longer needs that record to exist.
+
+And re-rendering a PDF for an invoice from three years ago produces the same document it produced
+then — same address, same bank account, same logo — because every input is stored on the row.

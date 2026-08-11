@@ -1,0 +1,91 @@
+---
+title: Invoice numbering
+description: Templates, tokens, yearly resets and why numbers are never reused.
+---
+
+Every issuer defines a numbering scheme **per document type**. Invoices, proformas, advance invoices
+and credit notes each get their own template and their own counter — which matches Czech practice,
+where proformas usually run in a separate sequence from tax documents.
+
+## Templates
+
+A template is a string with `{TOKEN}` placeholders, resolved at issue time.
+
+| Token      | Becomes                                       | Example   |
+| ---------- | --------------------------------------------- | --------- |
+| `{YYYY}`   | 4-digit year of the issue date                | `2026`    |
+| `{YY}`     | 2-digit year                                  | `26`      |
+| `{MM}`     | 2-digit month                                 | `05`      |
+| `{DD}`     | 2-digit day                                   | `03`      |
+| `{####}`   | The counter, zero-padded to the number of `#` | `0007`    |
+| `{ISSUER}` | Issuer name, slugified, max 12 chars          | `nfctron` |
+| `{TYPE}`   | Document type abbreviation                    | `FV`      |
+
+Type abbreviations follow Czech accounting convention: `FV` (faktura vystavená), `PF` (proforma),
+`ZF` (zálohová), `DOB` (dobropis).
+
+```text
+{YYYY}{####}            →  20260007     most common
+F{YYYY}-{####}          →  F2026-0007
+{TYPE}-{YYYY}-{####}    →  FV-2026-0007  separate stream per type
+{YY}{MM}{####}          →  26050007
+```
+
+<Callout title="Avoid slashes">
+  `{YYYY}/{####}` produces `2026/0007`, which is valid but shows up in URLs, filenames and email
+  subjects. It works — it is just consistently mildly annoying.
+</Callout>
+
+The counter width comes from the number of `#` characters, not from a separate setting. `{#####}`
+pads to five digits.
+
+## Yearly reset
+
+`resetPeriod` is either `yearly` or `never`.
+
+With `yearly`, the counter returns to 1 the first time you issue in a new calendar year — decided by
+the **issue date**, not by the wall clock. Issuing a backdated December invoice in January uses
+December's sequence, which is what you want.
+
+With `never`, the counter simply keeps climbing.
+
+Most Czech businesses reset yearly. Combine it with `{YYYY}` in the template so numbers stay unique
+across years.
+
+## Allocation is atomic
+
+Numbers are allocated inside the same database transaction that issues the invoice:
+
+1. Lock the issuer's numbering scheme row.
+2. Compute the next number.
+3. Increment the counter (resetting the year if needed).
+4. Write the invoice with that number.
+5. Commit.
+
+If any later step fails — validation, totals mismatch, render error — the whole transaction rolls
+back and **the counter does not advance**. Two people issuing simultaneously cannot collide; there is
+also a uniqueness constraint on `(issuer, number)` as a second line of defence.
+
+## Previewing
+
+The next number is always shown before you issue, so you can catch a misconfigured template before
+it is committed rather than after.
+
+## Numbers are never reused
+
+Cancelling an invoice does **not** release its number. The invoice stays in the system as
+`cancelled`, holding its number forever.
+
+This is deliberate. A gap in an invoice sequence is a question you have to answer during a tax
+inspection; a cancelled invoice sitting in the sequence answers it by itself.
+
+## Changing a scheme later
+
+You can edit the template at any time — it is only read at issue time, so previously issued invoices
+keep the numbers they were given. Their numbers are part of frozen
+[snapshots](/docs/concepts/snapshots) and never re-render.
+
+Editing the **counter** directly is possible but risky: setting it below a value you have already
+issued will produce a duplicate-number error on the next issue. The one legitimate reason to touch
+it is aligning Invoicey with a sequence you were running in a previous tool, which the
+[import flow](/docs/guides/importing-history) does for you automatically.

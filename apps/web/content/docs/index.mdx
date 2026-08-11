@@ -1,0 +1,77 @@
+---
+title: What is Invoicey?
+description: Czech-first invoicing where every invoice is structured data first and a document second.
+---
+
+Invoicey is an invoicing tool for Czech freelancers and small teams. It is built around one
+idea that shapes everything else:
+
+<Callout title="An invoice is data, not a document">
+  Every invoice is a validated JSON payload first. The PDF, the ISDOC XML and
+  the payment QR code are all *renders* of that payload — never the source of
+  truth.
+</Callout>
+
+That choice is why Invoicey can offer surfaces a normal invoicing app cannot. The same
+validated payload is produced by the web UI, by an AI assistant in Cursor or Claude Code over
+[MCP](/docs/integrations/mcp), and by the [Slack agent](/docs/integrations/slack) — with no
+duplicated business logic and no "the API supports a different set of fields than the UI".
+
+## What you get
+
+| Capability           | Detail                                                             |
+| -------------------- | ------------------------------------------------------------------ |
+| **Czech VAT**        | Standard/reduced rates, reverse charge, OSS, exempt supplies, DUZP |
+| **ARES lookup**      | Type an IČO, get the legal name, address and DIČ filled in         |
+| **PDF**              | Branded invoice PDF with the payment QR embedded                   |
+| **ISDOC 6.0.2**      | XML your accountant's software imports without retyping            |
+| **SPAYD QR**         | Czech banking apps pre-fill amount, account, VS from a scan        |
+| **Multiple issuers** | Separate businesses, each with its own numbering and bank account  |
+| **Automation**       | Create and issue invoices from Cursor, Claude Code or Slack        |
+
+## How the pieces fit
+
+```text
+  Web UI  ─┐
+  MCP     ─┼─▶  shared tool layer  ─▶  InvoiceSchema  ─┬─▶  PDF · ISDOC · SPAYD QR
+  Slack   ─┘                          (validated)     └─▶  your workspace
+```
+
+Whichever surface you use, the payload has to satisfy the same schema before anything is
+rendered or stored. An assistant that omits a required field gets a validation error back and
+retries — it cannot write a half-formed invoice into your workspace.
+
+## Start here
+
+<Cards>
+  <Card
+    title="Quickstart"
+    href="/docs/getting-started/quickstart"
+    description="Sign in, create an issuer, send your first invoice."
+  />
+  <Card
+    title="Core concepts"
+    href="/docs/concepts/invoice-as-data"
+    description="The schema, VAT, numbering, statuses and snapshots."
+  />
+  <Card
+    title="Integrations"
+    href="/docs/integrations/api-keys"
+    description="API keys, MCP, Cursor, Claude Code and Slack."
+  />
+  <Card
+    title="Troubleshooting"
+    href="/docs/reference/troubleshooting"
+    description="What to check when something does not work."
+  />
+</Cards>
+
+## What is not here yet
+
+Invoicey is pre-1.0 and these docs describe only what actually ships today. Known gaps:
+
+- **Czech koruna only.** Multi-currency is not implemented.
+- **The app UI is Czech.** These docs are English.
+- **API keys have no scopes.** A key is full access to one workspace — see [API keys](/docs/integrations/api-keys).
+- **No public REST API.** Automation goes through MCP or the Slack agent.
+- **No recurring invoices.**

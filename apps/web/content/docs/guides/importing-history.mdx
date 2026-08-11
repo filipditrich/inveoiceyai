@@ -1,0 +1,111 @@
+---
+title: Importing your invoice history
+description: Bulk-loading previously issued invoices from another tool.
+---
+
+Switching to Invoicey mid-year leaves your history behind. The import flow at **Invoices → Import**
+bulk-loads previously issued invoices so your list, dashboard and totals cover the whole year rather
+than starting from zero.
+
+<Callout>
+  Web only. There is deliberately no import tool over MCP or Slack — a bulk
+  write of historical tax documents wants a human looking at a review grid, not
+  an assistant looping over a folder.
+</Callout>
+
+## How it works
+
+<Steps>
+  <Step>
+    ### Pick the issuer Which of your businesses issued these invoices.
+    Everything in one batch belongs to one issuer.
+  </Step>
+  <Step>
+    ### Set batch defaults The origin provider — `fakturaonline`, `idoklad`,
+    `fakturoid`, `pohoda`, `money_s3`, `vyfakturuj`, `superfaktura`, `custom` or
+    an older Invoicey — and whether they should land marked as paid.
+  </Step>
+  <Step>### Upload PDFs Up to 40 per drop, 16 MB each.</Step>
+  <Step>
+    ### Let Invoicey classify Each PDF is inspected for embedded or sidecar
+    ISDOC. This decides how much of the invoice is recoverable — see below.
+  </Step>
+  <Step>
+    ### Review A grid of everything found. Archive-mode rows have editable
+    header fields; paid state is togglable per row.
+  </Step>
+  <Step>
+    ### Commit Rows are written as issued invoices with their **historical**
+    issue dates. No numbers are allocated — they keep the numbers they already
+    had — and the numbering counter is synced afterwards so your next native
+    invoice continues the sequence rather than colliding with it.
+  </Step>
+</Steps>
+
+## Full versus archive
+
+This is the distinction that determines what you get.
+
+<Tabs items={['Full', 'Archive']}>
+
+<Tab value="Full">
+
+The PDF carried an ISDOC. Invoicey parses it into a complete, validated payload — line items, VAT
+breakdown, both parties, dates.
+
+These behave like natively issued invoices: filterable, searchable, correctly counted in VAT and
+revenue totals. Both the original PDF and the extracted ISDOC are stored.
+
+Most Czech invoicing tools embed ISDOC. If you are importing from one of them, expect this.
+
+</Tab>
+
+<Tab value="Archive">
+
+No ISDOC found. There is no reliable way to recover structured data from an arbitrary invoice PDF, so
+Invoicey does not pretend to.
+
+The row stores an archive payload with a synthetic single line item and the header fields you confirm
+in the review grid — number, dates, client name, total. The original PDF is kept and served.
+
+The invoice appears in your list with correct totals and dates. What you do **not** get is per-line
+detail or a real VAT breakdown, because that information was never machine-readable.
+
+There is no OCR or AI extraction. Guessing at tax-document line items is not a thing this product
+does.
+
+</Tab>
+
+</Tabs>
+
+## Duplicates
+
+Every imported row gets an idempotency key:
+
+- `isdoc:{uuid}` when the ISDOC carries a UUID.
+- `num:{provider}:{number}:{issueDate}` otherwise.
+
+Re-importing the same batch skips rows whose key already exists, or that collide on
+`(issuer, number)`. Skips are reported in the summary. Nothing is overwritten — there is no replace
+mode, so recovering from a bad import means deleting the rows, not re-running it on top.
+
+## Imported artifacts are immutable
+
+Imported invoices are flagged so Invoicey **never** regenerates their PDF. Downloads always serve the
+original file your previous tool produced.
+
+That is the honest behaviour: re-rendering someone else's invoice in Invoicey's layout would produce a
+document that never existed, differing from the one your client actually holds. Archive rows without
+an ISDOC simply have no ISDOC download.
+
+## Provenance
+
+Each imported invoice records where it came from — provider, label, version, batch ID, import
+timestamp — so a year later you can still tell which invoices Invoicey issued and which it inherited.
+
+## Not supported
+
+- OCR or AI extraction from non-ISDOC PDFs
+- Received (purchase) invoices — this is outbound only
+- Import over MCP or Slack
+- Automatic replace on number collision
