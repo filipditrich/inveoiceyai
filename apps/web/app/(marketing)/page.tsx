@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { ProductPreview } from "@/components/marketing/product-preview";
+import motionStyles from "@/components/marketing/marketing-motion.module.css";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -118,7 +119,7 @@ export default function HomePage() {
         <div className="marketing-grid absolute inset-0 -z-20 opacity-55" />
         <div className="bg-brand/20 absolute -top-48 left-1/2 -z-10 size-[38rem] -translate-x-1/2 rounded-full blur-3xl" />
         <div className="mx-auto grid max-w-7xl gap-14 px-4 pb-20 pt-16 sm:px-6 sm:pb-28 sm:pt-24 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16 lg:px-8 lg:pt-28">
-          <div className="max-w-2xl">
+          <div className={`${motionStyles.heroCopy} max-w-2xl`}>
             <Badge
               variant="outline"
               className="bg-background/70 h-7 gap-1.5 px-3 backdrop-blur"
@@ -177,7 +178,7 @@ export default function HomePage() {
           {TRUST_ITEMS.map((item) => (
             <div
               key={item.label}
-              className="md:border-border/60 flex items-center justify-center gap-2.5 border-x border-transparent px-3 py-5 text-sm font-medium"
+              className={`${motionStyles.trustItem} md:border-border/60 flex items-center justify-center gap-2.5 border-x border-transparent px-3 py-5 text-sm font-medium`}
             >
               <item.icon className="text-primary size-4" />
               {item.label}
@@ -196,7 +197,9 @@ export default function HomePage() {
             title="Méně ruční práce. Pořád máte kontrolu."
             description="Invoicey drží celý životní cyklus dokladu pohromadě a citlivé kroky nechává ve vašich rukou."
           />
-          <div className="mt-14 grid gap-5 lg:grid-cols-3">
+          <div
+            className={`${motionStyles.scrollReveal} mt-14 grid gap-5 lg:grid-cols-3`}
+          >
             <WorkflowStep
               number="01"
               icon={<SearchCheckIcon />}
@@ -229,9 +232,14 @@ export default function HomePage() {
             title="To podstatné je součást základu."
             description="Ne další vrstva kolem generátoru PDF. Invoicey staví na údajích, které český doklad skutečně potřebuje."
           />
-          <div className="bg-border mt-14 grid gap-px overflow-hidden rounded-3xl border md:grid-cols-2 lg:grid-cols-3">
+          <div
+            className={`${motionStyles.scrollReveal} bg-border mt-14 grid gap-px overflow-hidden rounded-3xl border md:grid-cols-2 lg:grid-cols-3`}
+          >
             {CAPABILITIES.map((capability) => (
-              <div key={capability.title} className="bg-background p-6 sm:p-8">
+              <div
+                key={capability.title}
+                className={`${motionStyles.liftCard} bg-background p-6 sm:p-8`}
+              >
                 <span className="bg-brand/12 grid size-10 place-items-center rounded-xl">
                   <capability.icon className="size-4.5" />
                 </span>
@@ -252,7 +260,7 @@ export default function HomePage() {
         className="scroll-mt-24 overflow-hidden px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2 lg:gap-20">
-          <div>
+          <div className={motionStyles.scrollReveal}>
             <Badge variant="secondary" className="h-7 gap-1.5 px-3">
               <BotIcon data-icon="inline-start" /> Automatizace · beta
             </Badge>
@@ -279,7 +287,9 @@ export default function HomePage() {
             </ul>
           </div>
 
-          <div className="bg-foreground text-background dark:bg-card dark:text-card-foreground relative overflow-hidden rounded-[2rem] p-4 shadow-2xl sm:p-6">
+          <div
+            className={`${motionStyles.scrollReveal} ${motionStyles.chatStage} bg-foreground text-background dark:bg-card dark:text-card-foreground relative overflow-hidden rounded-[2rem] p-4 shadow-2xl sm:p-6`}
+          >
             <div className="bg-brand/20 absolute -right-20 -top-20 size-64 rounded-full blur-3xl" />
             <div className="dark:border-border dark:bg-background/50 relative rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
               <div className="dark:border-border flex items-center gap-3 border-b border-white/10 pb-4">
@@ -323,7 +333,9 @@ export default function HomePage() {
       </section>
 
       <section className="bg-muted/25 border-y px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-2">
+        <div
+          className={`${motionStyles.scrollReveal} mx-auto grid max-w-7xl gap-5 lg:grid-cols-2`}
+        >
           <FeaturePanel
             icon={<Building2Icon />}
             eyebrow="Více dodavatelů"
@@ -360,7 +372,7 @@ export default function HomePage() {
             description="Stručně a bez produktové omáčky."
             align="left"
           />
-          <div className="divide-y border-y">
+          <div className={`${motionStyles.scrollReveal} divide-y border-y`}>
             {FAQ.map((item, index) => (
               <details key={item.question} className="group" open={index === 0}>
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-5 py-5 text-base font-medium marker:hidden">
@@ -377,7 +389,9 @@ export default function HomePage() {
       </section>
 
       <section className="px-4 pb-20 sm:px-6 sm:pb-28 lg:px-8">
-        <div className="from-brand/35 via-brand/15 bg-linear-to-br to-background relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] border p-8 sm:p-12 lg:p-16">
+        <div
+          className={`${motionStyles.scrollReveal} from-brand/35 via-brand/15 bg-linear-to-br to-background relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] border p-8 sm:p-12 lg:p-16`}
+        >
           <CircleDollarSignIcon className="text-primary/15 absolute -bottom-12 -right-8 size-64 -rotate-12" />
           <div className="relative max-w-2xl">
             <p className="text-primary text-sm font-semibold uppercase tracking-wide">
@@ -418,9 +432,9 @@ function SectionIntro({
 }>) {
   return (
     <div
-      className={
+      className={`${motionStyles.scrollReveal} ${
         align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-xl"
-      }
+      }`}
     >
       <p className="text-primary text-sm font-semibold uppercase tracking-wide">
         {eyebrow}
@@ -447,7 +461,9 @@ function WorkflowStep({
   title: string;
 }>) {
   return (
-    <div className="bg-card shadow-xs relative rounded-3xl border p-6 sm:p-8">
+    <div
+      className={`${motionStyles.liftCard} bg-card shadow-xs relative rounded-3xl border p-6 sm:p-8`}
+    >
       <span className="text-muted-foreground/35 absolute right-7 top-6 font-mono text-4xl font-semibold tracking-tighter">
         {number}
       </span>
@@ -485,7 +501,9 @@ function FeaturePanel({
   title: string;
 }>) {
   return (
-    <div className="bg-background rounded-[2rem] border p-7 sm:p-10">
+    <div
+      className={`${motionStyles.liftCard} bg-background rounded-[2rem] border p-7 sm:p-10`}
+    >
       <span className="bg-brand/12 grid size-11 place-items-center rounded-2xl [&_svg]:size-5">
         {icon}
       </span>

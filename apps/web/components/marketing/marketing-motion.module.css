@@ -1,0 +1,183 @@
+.heroCopy {
+  animation: hero-copy-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.heroDemo {
+  animation: hero-demo-in 850ms 120ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.productStage {
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--card) 92%, transparent),
+      color-mix(in oklab, var(--brand) 11%, var(--background))
+    ),
+    radial-gradient(
+      circle at 80% 12%,
+      color-mix(in oklab, var(--brand) 22%, transparent),
+      transparent 35%
+    );
+  box-shadow:
+    0 1px 2px rgb(45 38 28 / 0.04),
+    0 32px 90px rgb(45 38 28 / 0.12);
+}
+
+.productStage::before {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--border) 72%, transparent) 0.8px,
+    transparent 0.8px
+  );
+  background-size: 18px 18px;
+  content: "";
+  mask-image: linear-gradient(to bottom, black, transparent 76%);
+  pointer-events: none;
+}
+
+.promptCard {
+  transform: rotate(-0.7deg);
+  transform-origin: center;
+}
+
+.invoicePaper {
+  transform: rotate(0.65deg);
+  transform-origin: bottom center;
+}
+
+.invoiceRefresh {
+  animation: invoice-refresh 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.liftCard {
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 260ms ease,
+    box-shadow 260ms ease;
+}
+
+.liftCard:hover {
+  border-color: color-mix(in oklab, var(--primary) 28%, var(--border));
+  box-shadow: 0 18px 42px rgb(45 38 28 / 0.08);
+  transform: translateY(-4px);
+}
+
+.trustItem {
+  transition:
+    color 200ms ease,
+    background-color 200ms ease;
+}
+
+.trustItem:hover {
+  background: color-mix(in oklab, var(--brand) 8%, transparent);
+  color: var(--primary);
+}
+
+.scrollReveal {
+  opacity: 1;
+}
+
+.chatStage {
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms ease;
+}
+
+.chatStage:hover {
+  box-shadow: 0 34px 80px rgb(20 16 12 / 0.22);
+  transform: translateY(-3px) rotate(0.25deg);
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scrollReveal {
+      animation: section-reveal linear both;
+      animation-range: entry 5% cover 26%;
+      animation-timeline: view();
+    }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .promptCard {
+    animation: prompt-float 7s 1s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroCopy,
+  .heroDemo,
+  .invoiceRefresh,
+  .promptCard,
+  .scrollReveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .liftCard,
+  .chatStage,
+  .trustItem {
+    transition: none;
+  }
+}
+
+@keyframes hero-copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-demo-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes prompt-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.7deg);
+  }
+
+  50% {
+    transform: translateY(-5px) rotate(-0.25deg);
+  }
+}
+
+@keyframes invoice-refresh {
+  from {
+    opacity: 0.62;
+    transform: translateY(8px) rotate(0.65deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0.65deg);
+  }
+}
+
+@keyframes section-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

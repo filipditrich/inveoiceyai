@@ -23,11 +23,8 @@ flowchart LR
     P12a --> P12b["Plan 12b<br/>MCP + DB<br/>done"]
     P7 -.parallel.-> P13b["Plan 13b<br/>Eve Slack<br/>in progress"]
     Post --> P14["Plan 14<br/>auth<br/>done"]
-<<<<<<< HEAD
-    P14 --> P16["Plan 16<br/>account security"]
-=======
-    P14 --> P17["Plan 17<br/>public shell<br/>done"]
->>>>>>> 57f4634 (feat(web): add public product and consent shell)
+    P14 --> P16["Plan 16<br/>account security<br/>done"]
+    P16 --> P17["Plan 17<br/>public shell<br/>implementation done"]
     P12a -.feeds.-> P13b
     P13a -.upgrades to.-> P13b
 ```

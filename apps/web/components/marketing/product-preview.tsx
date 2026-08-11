@@ -1,209 +1,286 @@
-import {
-  ArrowDownRightIcon,
-  ArrowUpRightIcon,
-  CheckIcon,
-  Clock3Icon,
-  FileTextIcon,
-} from "lucide-react";
+"use client";
 
-const INVOICES = [
+import {
+  CheckIcon,
+  CornerDownLeftIcon,
+  QrCodeIcon,
+  ReceiptTextIcon,
+  SparklesIcon,
+} from "lucide-react";
+import type { FormEvent, KeyboardEvent } from "react";
+import { useRef, useState } from "react";
+
+import styles from "./marketing-motion.module.css";
+
+type InvoiceExample = {
+  label: string;
+  prompt: string;
+  customer: string;
+  companyId: string;
+  service: string;
+  baseAmount: number;
+  vatRate: number;
+  dueDays: number;
+};
+
+const EXAMPLES = [
   {
-    client: "Studio Sever",
-    number: "2026-0047",
-    amount: "42 350 Kč",
-    status: "Zaplaceno",
-    tone: "paid",
+    label: "Měsíční služby",
+    prompt:
+      "Vystav fakturu pro Studio Sever za měsíční služby, 35 000 Kč bez DPH, splatnost 14 dní.",
+    customer: "Studio Sever",
+    companyId: "IČO 087 54 321 · ARES ověřeno",
+    service: "Měsíční služby",
+    baseAmount: 35_000,
+    vatRate: 0,
+    dueDays: 14,
   },
   {
-    client: "Ateliér 21",
-    number: "2026-0046",
-    amount: "18 150 Kč",
-    status: "Čeká na úhradu",
-    tone: "open",
+    label: "Webdesign",
+    prompt:
+      "Vystav fakturu pro Ateliér 21 za návrh webu, 48 000 Kč + DPH, splatnost 10 dní.",
+    customer: "Ateliér 21",
+    companyId: "IČO 142 68 095 · ARES ověřeno",
+    service: "Návrh webu",
+    baseAmount: 48_000,
+    vatRate: 21,
+    dueDays: 10,
   },
   {
-    client: "Kavárna Místo",
-    number: "2026-0045",
-    amount: "9 680 Kč",
-    status: "Po splatnosti",
-    tone: "overdue",
+    label: "Konzultace",
+    prompt:
+      "Vystav fakturu pro Kavárnu Místo za konzultace, 18 500 Kč + DPH, splatnost 7 dní.",
+    customer: "Kavárna Místo",
+    companyId: "IČO 062 19 483 · ARES ověřeno",
+    service: "Produktové konzultace",
+    baseAmount: 18_500,
+    vatRate: 21,
+    dueDays: 7,
   },
-] as const;
+] as const satisfies readonly InvoiceExample[];
+
+const AMOUNT_PATTERN = /(\d[\d\s]*(?:[.,]\d+)?)\s*(?:Kč|CZK)/i;
+const DUE_PATTERN = /(\d+)\s*(?:dní|dnů|dny)/i;
+
+function parseAmount(value: string) {
+  return Number.parseFloat(value.replaceAll(" ", "").replace(",", "."));
+}
 
 export function ProductPreview() {
+  const [prompt, setPrompt] = useState<string>(EXAMPLES[0].prompt);
+  const [invoice, setInvoice] = useState<InvoiceExample>(EXAMPLES[0]);
+  const [revision, setRevision] = useState(0);
+  const [hasUpdated, setHasUpdated] = useState(false);
+  const promptRef = useRef<HTMLTextAreaElement>(null);
+
+  const chooseExample = (example: InvoiceExample) => {
+    setPrompt(example.prompt);
+    setInvoice(example);
+    setRevision((current) => current + 1);
+    setHasUpdated(true);
+  };
+
+  const updatePreview = (event?: FormEvent<HTMLFormElement>) => {
+    event?.preventDefault();
+    const activePrompt = promptRef.current?.value ?? prompt;
+    const normalizedPrompt = activePrompt.replaceAll(" ", " ");
+    const amountMatch = normalizedPrompt.match(AMOUNT_PATTERN);
+    const dueMatch = normalizedPrompt.match(DUE_PATTERN);
+    const matchedExample = EXAMPLES.find((example) =>
+      normalizedPrompt
+        .toLocaleLowerCase("cs")
+        .includes(example.customer.toLocaleLowerCase("cs")),
+    );
+    const basis = matchedExample ?? invoice;
+    const parsedAmount = amountMatch
+      ? parseAmount(amountMatch[1])
+      : basis.baseAmount;
+    const hasVat = /(?:\+\s*DPH|s\s+DPH)/i.test(normalizedPrompt);
+    const noVat = /bez\s+DPH/i.test(normalizedPrompt);
+
+    setInvoice({
+      ...basis,
+      prompt: activePrompt,
+      baseAmount: Number.isFinite(parsedAmount)
+        ? parsedAmount
+        : basis.baseAmount,
+      vatRate: noVat ? 0 : hasVat ? 21 : basis.vatRate,
+      dueDays: dueMatch ? Number.parseInt(dueMatch[1], 10) : basis.dueDays,
+    });
+    setRevision((current) => current + 1);
+    setHasUpdated(true);
+  };
+
+  const submitOnEnter = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      event.currentTarget.form?.requestSubmit();
+    }
+  };
+
+  const totalAmount = invoice.baseAmount * (1 + invoice.vatRate / 100);
+  const formatAmount = (amount: number) =>
+    new Intl.NumberFormat("cs-CZ", { maximumFractionDigits: 0 }).format(amount);
+
   return (
-    <div className="relative mx-auto w-full max-w-2xl lg:max-w-none">
-      <div className="from-brand/20 bg-radial absolute -inset-8 -z-10 rounded-[3rem] to-transparent blur-2xl" />
-      <div className="bg-card shadow-foreground/8 ring-foreground/5 overflow-hidden rounded-[1.65rem] border shadow-2xl ring-1">
-        <div className="bg-muted/50 flex items-center gap-2 border-b px-4 py-3">
-          <span className="size-2.5 rounded-full bg-[#ef8b70]" />
-          <span className="size-2.5 rounded-full bg-[#e9c46a]" />
-          <span className="size-2.5 rounded-full bg-[#79b48a]" />
-          <span className="text-muted-foreground ml-2 text-[0.65rem] font-medium tracking-wide">
-            invoicey.ditrich.me/dashboard
-          </span>
-        </div>
+    <div
+      className={`${styles.heroDemo} relative mx-auto w-full max-w-2xl lg:max-w-none`}
+    >
+      <div className="from-brand/25 bg-radial absolute -inset-8 -z-10 rounded-[3rem] to-transparent blur-2xl" />
+      <div
+        className={`${styles.productStage} relative min-h-[42rem] overflow-hidden rounded-[1.75rem] border p-3 shadow-2xl sm:min-h-[36rem] sm:p-5`}
+      >
+        <form
+          onSubmit={updatePreview}
+          className={`${styles.promptCard} bg-background/92 relative z-20 rounded-2xl border p-4 shadow-xl backdrop-blur-xl`}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-primary flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.15em]">
+              <SparklesIcon className="size-3.5" />
+              Zadejte fakturu přirozeně
+            </div>
+            <span className="text-muted-foreground hidden text-[0.6rem] sm:block">
+              Enter pro aktualizaci
+            </span>
+          </div>
+          <textarea
+            ref={promptRef}
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
+            onKeyDown={submitOnEnter}
+            rows={2}
+            className="placeholder:text-muted-foreground/60 mt-3 w-full resize-none bg-transparent text-sm leading-6 outline-none"
+            aria-label="Pokyn pro vytvoření faktury"
+          />
+          <div className="mt-3 flex flex-col gap-3 border-t pt-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap gap-1.5">
+              {EXAMPLES.map((example) => (
+                <button
+                  key={example.label}
+                  type="button"
+                  onClick={() => chooseExample(example)}
+                  className="bg-muted/65 hover:border-primary/35 hover:text-primary rounded-full border border-transparent px-2.5 py-1 text-[0.62rem] font-medium transition-[color,border-color,background-color,transform] duration-200 hover:-translate-y-0.5"
+                >
+                  {example.label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="submit"
+              className="bg-foreground text-background hover:bg-primary hover:text-primary-foreground group inline-flex shrink-0 items-center justify-center gap-2 rounded-full px-3.5 py-2 text-[0.68rem] font-medium transition-colors"
+            >
+              Připravit náhled
+              <CornerDownLeftIcon className="size-3.5 transition-transform duration-200 group-hover:translate-y-0.5" />
+            </button>
+          </div>
+          <p
+            className={`mt-2 text-[0.62rem] font-medium text-emerald-700 transition-opacity dark:text-emerald-300 ${hasUpdated ? "opacity-100" : "opacity-0"}`}
+            aria-live="polite"
+          >
+            Náhled aktualizován · povinné údaje ověřeny
+          </p>
+        </form>
 
-        <div className="grid min-h-[29rem] grid-cols-[4.5rem_1fr] sm:grid-cols-[10rem_1fr]">
-          <aside className="bg-sidebar border-r p-3">
-            <div className="flex items-center gap-2 px-1 py-2">
-              <div className="bg-brand text-brand-foreground grid size-7 place-items-center rounded-lg text-xs font-bold">
-                I
+        <div
+          key={revision}
+          className={`${styles.invoicePaper} ${styles.invoiceRefresh} bg-card absolute inset-x-5 bottom-[-3rem] top-[16.25rem] rounded-t-[1.4rem] border p-5 shadow-2xl sm:inset-x-10 sm:top-[15rem] sm:p-6`}
+        >
+          <div className="flex items-start justify-between border-b pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="bg-foreground text-background grid size-8 place-items-center rounded-lg">
+                  <ReceiptTextIcon className="size-4" strokeWidth={1.7} />
+                </span>
+                <span className="text-sm font-semibold">Invoicey</span>
               </div>
-              <span className="hidden text-xs font-semibold sm:block">
-                Invoicey
+              <p className="text-muted-foreground mt-4 text-[0.55rem] font-medium uppercase tracking-[0.18em]">
+                Dodavatel
+              </p>
+              <p className="mt-1 text-xs font-medium">Ditrich Labs</p>
+              <p className="text-muted-foreground mt-0.5 text-[0.62rem]">
+                IČO 123 45 678
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-xl font-semibold tracking-tight">Faktura</p>
+              <p className="text-muted-foreground mt-1 font-mono text-[0.62rem]">
+                2026-0048
+              </p>
+              <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-1 text-[0.58rem] font-medium text-emerald-700 dark:text-emerald-300">
+                <span className="size-1.5 rounded-full bg-emerald-500" />
+                Připraveno
               </span>
             </div>
-            <div className="mt-5 space-y-1.5">
-              {["Přehled", "Faktury", "Klienti", "Dodavatelé"].map(
-                (item, index) => (
-                  <div
-                    key={item}
-                    className={
-                      index === 0
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-xs flex items-center gap-2 rounded-lg px-2 py-2 text-[0.68rem] font-medium"
-                        : "text-muted-foreground flex items-center gap-2 rounded-lg px-2 py-2 text-[0.68rem]"
-                    }
-                  >
-                    {index === 0 ? (
-                      <span className="bg-brand h-3.5 w-0.5 rounded-full" />
-                    ) : (
-                      <span className="size-0.5 rounded-full bg-current" />
-                    )}
-                    <span className="hidden sm:block">{item}</span>
-                  </div>
-                ),
-              )}
-            </div>
-          </aside>
+          </div>
 
-          <div className="bg-background min-w-0 p-4 sm:p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-[0.65rem]">Přehled</p>
-                <p className="mt-1 text-sm font-semibold">Dobré odpoledne</p>
-              </div>
-              <div className="bg-primary text-primary-foreground rounded-lg px-2.5 py-1.5 text-[0.65rem] font-medium shadow-sm">
-                + Nová faktura
-              </div>
+          <div className="grid grid-cols-2 gap-5 border-b py-4">
+            <div>
+              <p className="text-muted-foreground text-[0.55rem] font-medium uppercase tracking-[0.16em]">
+                Odběratel
+              </p>
+              <p className="mt-1 text-xs font-medium">{invoice.customer}</p>
+              <p className="text-muted-foreground mt-0.5 text-[0.6rem]">
+                {invoice.companyId}
+              </p>
             </div>
-
-            <div className="mt-5 grid gap-2 sm:grid-cols-3">
-              <Metric
-                icon={<ArrowUpRightIcon />}
-                label="Uhrazeno"
-                value="126 400 Kč"
-                accent="bg-emerald-500/12 text-emerald-700 dark:text-emerald-300"
-              />
-              <Metric
-                icon={<Clock3Icon />}
-                label="K úhradě"
-                value="64 850 Kč"
-                accent="bg-brand/15 text-foreground"
-              />
-              <Metric
-                icon={<ArrowDownRightIcon />}
-                label="Po splatnosti"
-                value="9 680 Kč"
-                accent="bg-destructive/10 text-destructive"
-              />
+            <div>
+              <p className="text-muted-foreground text-[0.55rem] font-medium uppercase tracking-[0.16em]">
+                Splatnost
+              </p>
+              <p className="mt-1 text-xs font-medium">{invoice.dueDays} dní</p>
+              <p className="text-muted-foreground mt-0.5 text-[0.6rem]">
+                {invoice.vatRate > 0 ? `DPH ${invoice.vatRate} %` : "Bez DPH"}
+              </p>
             </div>
+          </div>
 
-            <div className="bg-card mt-4 overflow-hidden rounded-xl border">
-              <div className="flex items-center justify-between border-b px-3 py-3">
-                <div>
-                  <p className="text-xs font-medium">Poslední faktury</p>
-                  <p className="text-muted-foreground mt-0.5 text-[0.6rem]">
-                    Aktuální stav napříč firmami
-                  </p>
-                </div>
-                <FileTextIcon className="text-muted-foreground size-3.5" />
-              </div>
-              <div className="divide-y">
-                {INVOICES.map((invoice) => (
-                  <div
-                    key={invoice.number}
-                    className="grid grid-cols-[1fr_auto] gap-3 px-3 py-3 sm:grid-cols-[1fr_7rem_6.5rem] sm:items-center"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-[0.7rem] font-medium">
-                        {invoice.client}
-                      </p>
-                      <p className="text-muted-foreground mt-0.5 font-mono text-[0.58rem]">
-                        {invoice.number}
-                      </p>
-                    </div>
-                    <p className="text-right text-[0.68rem] font-semibold tabular-nums sm:text-left">
-                      {invoice.amount}
-                    </p>
-                    <Status tone={invoice.tone}>{invoice.status}</Status>
-                  </div>
-                ))}
-              </div>
+          <div className="py-4">
+            <div className="text-muted-foreground grid grid-cols-[1fr_auto] gap-4 text-[0.55rem] font-medium uppercase tracking-[0.14em]">
+              <span>Položka</span>
+              <span>Částka</span>
             </div>
+            <div className="mt-2.5 grid grid-cols-[1fr_auto] gap-4 text-xs">
+              <p className="font-medium">{invoice.service}</p>
+              <p className="font-mono font-medium">
+                {formatAmount(invoice.baseAmount)} Kč
+              </p>
+            </div>
+          </div>
 
-            <div className="bg-muted/35 mt-4 flex items-center gap-2 rounded-xl border border-dashed px-3 py-2.5">
-              <span className="bg-brand/15 grid size-7 place-items-center rounded-lg">
-                <CheckIcon className="size-3.5" />
+          <div className="flex items-end justify-between border-t pt-4">
+            <div className="flex items-center gap-2.5">
+              <span className="bg-background grid size-11 place-items-center rounded-lg border">
+                <QrCodeIcon className="size-8" strokeWidth={1.5} />
               </span>
-              <div>
-                <p className="text-[0.68rem] font-medium">
-                  PDF + ISDOC připraveny
+              <div className="hidden sm:block">
+                <p className="text-muted-foreground text-[0.55rem] font-medium uppercase tracking-[0.14em]">
+                  SPAYD
                 </p>
-                <p className="text-muted-foreground text-[0.58rem]">
-                  Jedna validovaná faktura, dva výstupy
-                </p>
+                <p className="mt-0.5 text-[0.6rem]">Platba mobilem</p>
               </div>
+            </div>
+            <div className="text-right">
+              <p className="text-muted-foreground text-[0.55rem] font-medium uppercase tracking-[0.16em]">
+                Celkem
+              </p>
+              <p className="mt-0.5 text-xl font-semibold tracking-tight">
+                {formatAmount(totalAmount)} Kč
+              </p>
             </div>
           </div>
         </div>
+
+        <div className="absolute bottom-4 right-4 z-20 flex gap-2 sm:right-7">
+          {["PDF", "ISDOC"].map((format) => (
+            <span
+              key={format}
+              className="bg-background/92 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[0.58rem] font-medium shadow-lg backdrop-blur"
+            >
+              {format} <CheckIcon className="size-3 text-emerald-600" />
+            </span>
+          ))}
+        </div>
       </div>
     </div>
-  );
-}
-
-function Metric({
-  accent,
-  icon,
-  label,
-  value,
-}: Readonly<{
-  accent: string;
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}>) {
-  return (
-    <div className="bg-card shadow-xs rounded-xl border p-3">
-      <div
-        className={`grid size-6 place-items-center rounded-lg [&_svg]:size-3 ${accent}`}
-      >
-        {icon}
-      </div>
-      <p className="text-muted-foreground mt-3 text-[0.58rem]">{label}</p>
-      <p className="mt-0.5 text-[0.7rem] font-semibold tabular-nums">{value}</p>
-    </div>
-  );
-}
-
-function Status({
-  children,
-  tone,
-}: Readonly<{
-  children: React.ReactNode;
-  tone: "paid" | "open" | "overdue";
-}>) {
-  const className = {
-    paid: "bg-emerald-500/12 text-emerald-700 dark:text-emerald-300",
-    open: "bg-brand/15 text-foreground",
-    overdue: "bg-destructive/10 text-destructive",
-  }[tone];
-
-  return (
-    <span
-      className={`${className} col-span-2 w-fit rounded-full px-2 py-1 text-[0.55rem] font-medium sm:col-span-1`}
-    >
-      {children}
-    </span>
   );
 }
