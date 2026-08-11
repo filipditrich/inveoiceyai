@@ -1,6 +1,7 @@
 export {
   EMAIL_TEMPLATES,
   renderInvoiceSentEmail,
+  renderNewSignInEmail,
   renderOverdueReminderEmail,
   renderPaymentReceivedEmail,
   renderWorkspaceInviteEmail,
@@ -11,6 +12,10 @@ export {
   InvoiceSentEmail,
   type InvoiceSentEmailProps,
 } from "./templates/invoice-sent";
+export {
+  NewSignInEmail,
+  type NewSignInEmailProps,
+} from "./templates/new-sign-in";
 export {
   OverdueReminderEmail,
   type OverdueReminderEmailProps,

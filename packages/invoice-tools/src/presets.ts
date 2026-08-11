@@ -12,6 +12,8 @@ import {
   tryCreateDbFromEnv,
 } from "@invoicey/db";
 
+import { resolveWorkspaceId } from "./workspace-context";
+
 export const PresetKindSchema = z.enum(["issuer", "invoice_template"]);
 export type PresetKind = z.infer<typeof PresetKindSchema>;
 
@@ -113,7 +115,10 @@ export async function listPresets(options?: {
   if (useDbStore(options?.path)) {
     const database = tryCreateDbFromEnv();
     if (database) {
-      const presets = await listPresetsDb(database, { kind: options?.kind });
+      const presets = await listPresetsDb(database, {
+        kind: options?.kind,
+        workspaceId: resolveWorkspaceId(),
+      });
       return { ok: true, presets };
     }
   }
@@ -130,13 +135,14 @@ export async function listPresets(options?: {
 export async function getPreset(options: {
   id: string;
   path?: string;
-}): Promise<
-  { ok: true; preset: PresetRecord } | { ok: false; error: string }
-> {
+}): Promise<{ ok: true; preset: PresetRecord } | { ok: false; error: string }> {
   if (useDbStore(options.path)) {
     const database = tryCreateDbFromEnv();
     if (database) {
-      const preset = await getPresetDb(database, { id: options.id });
+      const preset = await getPresetDb(database, {
+        id: options.id,
+        workspaceId: resolveWorkspaceId(),
+      });
       if (!preset) {
         return { ok: false, error: `preset not found: ${options.id}` };
       }
@@ -159,9 +165,7 @@ export async function savePreset(options: {
   name: string;
   data: unknown;
   path?: string;
-}): Promise<
-  { ok: true; preset: PresetRecord } | { ok: false; error: string }
-> {
+}): Promise<{ ok: true; preset: PresetRecord } | { ok: false; error: string }> {
   const checked = validatePresetData(options.kind, options.data);
   if (!checked.ok) {
     return { ok: false, error: checked.message };
@@ -182,6 +186,7 @@ export async function savePreset(options: {
         kind: options.kind,
         name: options.name,
         data: checked.data,
+        workspaceId: resolveWorkspaceId(),
       });
       return { ok: true, preset };
     }
@@ -214,7 +219,10 @@ export async function deletePreset(options: {
   if (useDbStore(options.path)) {
     const database = tryCreateDbFromEnv();
     if (database) {
-      const ok = await deletePresetDb(database, { id: options.id });
+      const ok = await deletePresetDb(database, {
+        id: options.id,
+        workspaceId: resolveWorkspaceId(),
+      });
       if (!ok) {
         return { ok: false, error: `preset not found: ${options.id}` };
       }

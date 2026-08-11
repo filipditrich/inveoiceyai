@@ -16,24 +16,24 @@ flowchart TB
   Cursor["Cursor"] -->|"stdio or /api/mcp"| InvoiceTools
 ```
 
-| Piece         | Location                                                                                         |
-| ------------- | ------------------------------------------------------------------------------------------------ |
-| Agent root    | [`apps/web/agent/`](../../apps/web/agent/)                                                       |
-| Mount         | [`apps/web/next.config.ts`](../../apps/web/next.config.ts) — `withEve(nextConfig)` → `/eve/v1/*` |
-| Slack channel | `agent/channels/slack.ts` — `connectSlackCredentials("slack/invoicey")`                          |
-| HTTP channel  | `agent/channels/eve.ts` — Bearer `EVE_API_KEY` or `MCP_API_KEY` + OIDC + `localDev`              |
-| Domain ops    | `@invoicey/invoice-tools/ops` (`issueInvoiceById`, `markInvoicePaidById`, list/get)              |
-| Create/render | `@invoicey/invoice-tools` (`createAndRenderInvoice`, presets, ARES)                              |
+| Piece         | Location                                                                                                     |
+| ------------- | ------------------------------------------------------------------------------------------------------------ |
+| Agent root    | [`apps/web/agent/`](../../apps/web/agent/)                                                                   |
+| Mount         | [`apps/web/next.config.ts`](../../apps/web/next.config.ts) — `withEve(nextConfig)` → `/eve/v1/*`             |
+| Slack channel | `agent/channels/slack.ts` — `connectSlackCredentials("slack/invoicey")`                                      |
+| HTTP channel  | `agent/channels/eve.ts` — Bearer ops key (`EVE_API_KEY` / `MCP_API_KEY`) **or** user PAT + OIDC + `localDev` |
+| Domain ops    | `@invoicey/invoice-tools/ops` (`issueInvoiceById`, `markInvoicePaidById`, list/get)                          |
+| Create/render | `@invoicey/invoice-tools` (`createAndRenderInvoice`, presets, ARES)                                          |
 
 **Auth policy**
 
 | Surface                      | Gate                                                     |
 | ---------------------------- | -------------------------------------------------------- |
 | Slack                        | Vercel Connect (no hand-managed `SLACK_*` once attached) |
-| HTTP `/eve/v1/*` (non-Slack) | Bearer `EVE_API_KEY` or `MCP_API_KEY`                    |
+| HTTP `/eve/v1/*` (non-Slack) | Bearer ops key or Better Auth user PAT (Plan 16)         |
 | Invoice data                 | Single tenant: `INVOICEY_DEFAULT_WORKSPACE_ID`           |
 
-**Out of v1:** Clerk, per-Slack-user scoping, slash `/invoice`, calling remote `/api/mcp` from Eve.
+**Out of v1:** per-Slack-user workspace scoping, slash `/invoice`, calling remote `/api/mcp` from Eve. (Human auth is Better Auth OAuth — ADR 0018; HTTP machine auth is ops key or user PAT — ADR 0023.)
 
 ## Tools
 

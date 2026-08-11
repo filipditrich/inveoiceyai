@@ -1,5 +1,6 @@
 "use client";
 
+import { apiKeyClient } from "@better-auth/api-key/client";
 import { organizationClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
@@ -8,7 +9,7 @@ import { createAuthClient } from "better-auth/react";
  * the current origin, which keeps preview deployments working.
  */
 export const authClient = createAuthClient({
-  plugins: [organizationClient()],
+  plugins: [organizationClient(), apiKeyClient()],
 });
 
 export const { signIn, signOut, useSession } = authClient;

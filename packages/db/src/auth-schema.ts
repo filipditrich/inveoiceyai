@@ -1,4 +1,5 @@
 import {
+  bigint,
   boolean,
   index,
   integer,
@@ -276,6 +277,17 @@ export const apikey = pgTable(
 );
 
 /**
+ * Better Auth rate-limit rows when `rateLimit.storage = "database"`.
+ * `lastRequest` must be bigint — epoch ms overflows postgres `integer`.
+ */
+export const rateLimit = pgTable("rate_limits", {
+  id: text("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  count: integer("count").notNull(),
+  lastRequest: bigint("last_request", { mode: "number" }).notNull(),
+});
+
+/**
  * Table map handed to `drizzleAdapter`. Keys are Better Auth model names.
  *
  * This is where `organization` becomes `workspaces` (ADR 0019) — the decision
@@ -295,4 +307,5 @@ export const authSchema = {
   oauthAccessToken,
   oauthConsent,
   apikey,
+  rateLimit,
 };

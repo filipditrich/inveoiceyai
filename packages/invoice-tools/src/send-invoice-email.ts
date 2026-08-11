@@ -1,7 +1,6 @@
 import {
   emailMessages,
   emailSuppressions,
-  getDefaultWorkspaceId,
   invoices,
   issuerBusinesses,
   tryCreateDbFromEnv,
@@ -22,6 +21,7 @@ import {
 import { and, desc, eq } from "drizzle-orm";
 
 import { isValidEmailAddress, sendTransactionalEmail } from "./email-transport";
+import { resolveWorkspaceId } from "./workspace-context";
 
 const DEFAULT_COVER =
   "Dobrý den,\n\nv příloze zasílám fakturu {number}.\n\nS pozdravem";
@@ -144,7 +144,7 @@ export async function sendInvoiceEmailById(
   if (!database) {
     return { ok: false, error: "DATABASE_URL is not set" };
   }
-  const workspaceId = input.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(input.workspaceId);
 
   const [row] = await database
     .select()
@@ -304,7 +304,7 @@ export async function sendPaymentReceivedEmailIfEnabled(opts: {
 }): Promise<void> {
   const database = opts.db ?? tryCreateDbFromEnv();
   if (!database) return;
-  const workspaceId = opts.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(opts.workspaceId);
 
   const [row] = await database
     .select()

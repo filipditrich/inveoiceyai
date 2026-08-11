@@ -3,19 +3,15 @@
 import { BrandLogo } from "@/components/brand-logo";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
-import { ThemeModeSwitcher } from "@/components/theme-toggle";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { APP_GIT_SHA, APP_VERSION } from "@/lib/app-build-info";
 import {
@@ -127,14 +123,9 @@ export function AppSidebar({
         <NavMain items={navMain} groupLabel={t("nav.group")} />
       </SidebarContent>
       <SidebarFooter className="gap-3">
-        <SidebarGroup className="p-0 group-data-[collapsible=icon]:hidden">
-          <SidebarGroupLabel className="px-2">Appearance</SidebarGroupLabel>
-          <ThemeModeSwitcher className="mx-1" />
-        </SidebarGroup>
-        <SidebarSeparator className="mx-0 group-data-[collapsible=icon]:hidden" />
         <NavUser user={user} />
         <p
-          className="text-muted-foreground group-data-[collapsible=icon]:hidden px-2 pb-1 font-mono text-[0.65rem] tabular-nums tracking-wide"
+          className="text-muted-foreground px-2 pb-1 font-mono text-[0.65rem] tabular-nums tracking-wide group-data-[collapsible=icon]:hidden"
           title={`${t("meta.title")} v${APP_VERSION} (${APP_GIT_SHA})`}
         >
           v{APP_VERSION}

@@ -31,10 +31,27 @@
       "invoice": "Faktura",
       "issuer": "Dodavatel",
       "client": "Klient",
-      "detail": "Detail"
+      "detail": "Detail",
+      "security": "Zabezpečení",
+      "members": "Členové",
+      "api-keys": "API klíče"
     },
     "a11y": {
       "toggleSidebar": "Přepnout postranní panel"
+    },
+    "settings": {
+      "title": "Nastavení",
+      "subtitle": "Vzhled, zabezpečení účtu, členové workspace a API klíče.",
+      "nav": {
+        "appearance": "Vzhled",
+        "security": "Zabezpečení",
+        "members": "Členové",
+        "apiKeys": "API klíče"
+      },
+      "appearance": {
+        "title": "Vzhled",
+        "description": "Světlý, tmavý, nebo podle systému. Preference se ukládá v tomto prohlížeči."
+      }
     }
   }
 }

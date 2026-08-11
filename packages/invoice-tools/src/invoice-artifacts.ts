@@ -1,8 +1,4 @@
-import {
-  getDefaultWorkspaceId,
-  invoices,
-  tryCreateDbFromEnv,
-} from "@invoicey/db";
+import { invoices, tryCreateDbFromEnv } from "@invoicey/db";
 import {
   InvoiceSchema,
   renderInvoicePdf,
@@ -11,6 +7,8 @@ import {
 } from "@invoicey/invoice-core";
 import { and, eq } from "drizzle-orm";
 import { UTApi, UTFile } from "uploadthing/server";
+
+import { resolveWorkspaceId } from "./workspace-context";
 
 export type InvoiceArtifactUrls = {
   pdfUrl: string;
@@ -29,15 +27,11 @@ async function uploadBytes(
 ): Promise<string> {
   const utapi = new UTApi();
   const body =
-    typeof bytes === "string"
-      ? Buffer.from(bytes, "utf8")
-      : Buffer.from(bytes);
+    typeof bytes === "string" ? Buffer.from(bytes, "utf8") : Buffer.from(bytes);
   const file = new UTFile([body], name, { type });
   const result = await utapi.uploadFiles(file);
   if (result.error || !result.data) {
-    throw new Error(
-      result.error?.message ?? `upload failed for ${name}`,
-    );
+    throw new Error(result.error?.message ?? `upload failed for ${name}`);
   }
   return result.data.ufsUrl ?? result.data.url;
 }
@@ -56,7 +50,7 @@ export async function ensureInvoiceArtifacts(options: {
   if (!database) {
     return null;
   }
-  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(options.workspaceId);
   const rows = await database
     .select()
     .from(invoices)
@@ -113,11 +107,7 @@ export async function ensureInvoiceArtifacts(options: {
   }
   if (!isdocUrl) {
     const xml = renderIsdoc(parsed.data);
-    isdocUrl = await uploadBytes(
-      xml,
-      `${number}.isdoc`,
-      "application/xml",
-    );
+    isdocUrl = await uploadBytes(xml, `${number}.isdoc`, "application/xml");
   }
 
   const pdfGeneratedAt = new Date();

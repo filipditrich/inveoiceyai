@@ -20,6 +20,7 @@ Transactional email for Invoicey: invoice delivery to clients (PDF + optional IS
 | ------------------ | -------------------------------------------- |
 | `invoice_sent`     | Manual / MCP / Eve send of an issued invoice |
 | `workspace_invite` | Better Auth organization invitation          |
+| `new_sign_in`      | Soft trusted-device alert (Plan 16)          |
 | `overdue_reminder` | Daily cron when due and unpaid (opt-in)      |
 | `payment_received` | Optional on mark-paid                        |
 

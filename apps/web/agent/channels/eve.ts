@@ -7,21 +7,39 @@ import {
 } from "eve/channels/auth";
 import { eveChannel } from "eve/channels/eve";
 
-/** Bearer `EVE_API_KEY` or `MCP_API_KEY` for HTTP `/eve/v1/*`. */
+import { resolveMachineBearer } from "@/lib/auth/machine-bearer";
+
+/** Ops env key or Better Auth user PAT; PAT sets workspaceId on principal attrs. */
 function apiKeyAuth(): AuthFn<Request> {
-  return withAuthChallenges((request) => {
-    const expected =
-      process.env.EVE_API_KEY?.trim() || process.env.MCP_API_KEY?.trim();
-    if (!expected) return null;
-    const token = extractBearerToken(request.headers.get("authorization"));
-    if (!token || token !== expected) return null;
-    return {
-      authenticator: "api-key",
-      principalId: "eve:api-key",
-      principalType: "service",
-      attributes: {},
-    };
-  }, [{ scheme: "Bearer" }]);
+  return withAuthChallenges(
+    async (request) => {
+      const token = extractBearerToken(request.headers.get("authorization"));
+      const identity = await resolveMachineBearer(token, {
+        opsKeys: [
+          process.env.EVE_API_KEY?.trim(),
+          process.env.MCP_API_KEY?.trim(),
+        ],
+      });
+      if (!identity) return null;
+
+      const attributes: Record<string, string> = {
+        workspaceId: identity.workspaceId,
+        kind: identity.kind,
+      };
+      if (identity.kind === "user") {
+        attributes.userId = identity.userId;
+      }
+
+      return {
+        authenticator: "api-key",
+        principalId:
+          identity.kind === "ops" ? "eve:ops-api-key" : identity.userId,
+        principalType: identity.kind === "ops" ? "service" : "user",
+        attributes,
+      };
+    },
+    [{ scheme: "Bearer" }],
+  );
 }
 
 export default eveChannel({

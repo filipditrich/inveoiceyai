@@ -2,6 +2,8 @@ import { savePreset } from "@invoicey/invoice-tools";
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import { withEveToolWorkspace } from "../lib/tool-workspace";
+
 export default defineTool({
   description:
     "Create or update a preset (issuer snapshot or invoice_template draft).",
@@ -13,7 +15,9 @@ export default defineTool({
       .record(z.string(), z.unknown())
       .describe("IssuerSnapshot or partial invoice draft object"),
   }),
-  async execute({ id, kind, name, data }) {
-    return savePreset({ id, kind, name, data });
+  async execute({ id, kind, name, data }, ctx) {
+    return withEveToolWorkspace(ctx, () =>
+      savePreset({ id, kind, name, data }),
+    );
   },
 });
