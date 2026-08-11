@@ -25,6 +25,7 @@ import {
 	markInvoicePaidById,
 	unmarkInvoicePaidById,
 } from "@invoicey/invoice-tools/ops";
+import { tryPersistInvoiceArtifacts } from "@invoicey/invoice-tools/artifacts";
 import { clients, invoiceItems, invoices, issuerBusinesses, issuerNumberingSchemes } from "@invoicey/db";
 import { withDbTransaction, type DbTransaction } from "@invoicey/db/transaction";
 import { db } from "@invoicey/db/client";
@@ -385,7 +386,7 @@ export async function issueInvoice(formData: FormData): Promise<void> {
 	const invoiceId = existingId ?? crypto.randomUUID();
 
 	try {
-		await withDbTransaction(async (tx) => {
+		const issuedInvoice = await withDbTransaction(async (tx) => {
 			const issuerRows = await tx
 				.select()
 				.from(issuerBusinesses)
@@ -521,7 +522,16 @@ export async function issueInvoice(formData: FormData): Promise<void> {
 					updatedAt: new Date(),
 				})
 				.where(eq(issuerNumberingSchemes.id, scheme.id));
+
+			return parsed.data;
 		});
+		if (issuedInvoice) {
+			await tryPersistInvoiceArtifacts({
+				id: invoiceId,
+				workspaceId,
+				invoice: issuedInvoice,
+			});
+		}
 	} catch (e) {
 		const msg = e instanceof Error ? e.message : "issue_failed";
 		redirect(`${errBase}?invalid=${encodeURIComponent(msg)}`);

@@ -131,6 +131,11 @@ export const invoices = pgTable(
     payloadJson: jsonb("payload_json")
       .notNull()
       .$type<Record<string, unknown>>(),
+    /** Canonical issued PDF (ISDOC.PDF) URL — set at issue / lazy backfill. */
+    pdfUrl: text("pdf_url"),
+    /** Standalone ISDOC XML URL — set at issue / lazy backfill. */
+    isdocUrl: text("isdoc_url"),
+    pdfGeneratedAt: timestamp("pdf_generated_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

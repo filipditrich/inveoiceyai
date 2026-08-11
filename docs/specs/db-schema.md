@@ -76,6 +76,9 @@ erDiagram
     numeric vat_total
     text client_name
     jsonb payload_json
+    text pdf_url
+    text isdoc_url
+    timestamptz pdf_generated_at
   }
 
   invoice_items {
@@ -102,7 +105,7 @@ erDiagram
 | `issuer_businesses` | Live issuer; snapshot is IssuerSnapshot JSON (ADR 0008) |
 | `issuer_numbering_schemes` | Per `(issuer, docType)`; `counter` / `reset_period` / `padding` (numbering.md) |
 | `clients` | Plan 4 |
-| `invoices` | Drafts: `number` + `issued_at` null; unique `(issuer_id, number)` |
+| `invoices` | Drafts: `number` + `issued_at` null; unique `(issuer_id, number)`. Issued artifacts: `pdf_url`, `isdoc_url`, `pdf_generated_at` (UploadThing; set at issue / lazy backfill) |
 | `invoice_items` | Denormalized lines; canonical lines also in `payload_json` |
 | `presets` | MCP/Slack `issuer` \| `invoice_template`; unique `(workspace_id, kind, name)` |
 

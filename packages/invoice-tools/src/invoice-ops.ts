@@ -24,6 +24,7 @@ import {
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { getDemoIssuer } from "./demo-issuer";
+import { tryPersistInvoiceArtifacts } from "./invoice-artifacts";
 
 export interface InvoiceSummary {
   id: string;
@@ -624,6 +625,12 @@ export async function issueInvoiceById(options: {
         invoice: parsed.data,
         alreadyIssued: false as const,
       };
+    });
+
+    await tryPersistInvoiceArtifacts({
+      id: options.id,
+      workspaceId,
+      invoice: result.invoice,
     });
 
     return { ok: true, ...result };

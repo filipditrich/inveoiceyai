@@ -54,6 +54,14 @@ MVP renderer supports **PNG and JPEG** from URLs reliably. **SVG:** optional pos
 
 `renderInvoicePdf` renders the page with `@react-pdf/renderer`, then `pdf-lib` `attach()` embeds `invoice.isdoc` (`application/xml`). Download names should end with `-isdoc.pdf`. Standalone `renderIsdoc` remains available for raw XML.
 
+## Issued artifact persistence
+
+At **issue** time (and lazily on first download if missing), Invoicey uploads the canonical PDF + standalone ISDOC to UploadThing (`UTApi`) and stores `invoices.pdf_url` / `isdoc_url` / `pdf_generated_at`.
+
+- **Drafts / live preview:** still generate on demand (`/api/demo/invoice-pdf`); not persisted.
+- **Issued downloads** (`/api/invoices/[id]/pdf`, `/isdoc`): prefer stored URLs (proxied with immutable cache); if missing or `UPLOADTHING_TOKEN` unset, regenerate (and backfill when token is available).
+- Helpers: `@invoicey/invoice-tools/artifacts` (`ensureInvoiceArtifacts` / `tryPersistInvoiceArtifacts`).
+
 ## Determinism & golden PDF tests
 
 - Pin `@react-pdf/renderer` via lockfile; avoid non-pinned `@latest`.

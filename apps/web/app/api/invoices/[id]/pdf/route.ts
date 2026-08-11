@@ -1,5 +1,5 @@
 import { requireWorkspaceForRoute } from "@/lib/auth/api";
-import { InvoiceSchema, renderInvoicePdf } from "@invoicey/invoice-core";
+import { serveInvoicePdf } from "@/lib/serve-invoice-file";
 import { invoices } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
@@ -24,22 +24,8 @@ export async function GET(request: NextRequest, ctx: { params: Params }) {
 		return NextResponse.json({ error: "not found" }, { status: 404 });
 	}
 
-	const parsed = InvoiceSchema.safeParse(row.payloadJson);
-	if (!parsed.success) {
-		return NextResponse.json({ error: "invalid payload" }, { status: 500 });
-	}
-
 	try {
-		const pdfBytes = await renderInvoicePdf(parsed.data);
-		const filename = `${parsed.data.meta.number || "draft"}.pdf`;
-		return new NextResponse(Buffer.from(pdfBytes), {
-			status: 200,
-			headers: {
-				"Content-Type": "application/pdf",
-				"Content-Disposition": `attachment; filename="${filename}"`,
-				"Cache-Control": "no-store",
-			},
-		});
+		return await serveInvoicePdf(row);
 	} catch (cause) {
 		const message =
 			cause instanceof Error ? cause.message : "pdf render failed";

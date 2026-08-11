@@ -1,5 +1,5 @@
 import { requireWorkspaceForRoute } from "@/lib/auth/api";
-import { InvoiceSchema, renderIsdoc } from "@invoicey/invoice-core";
+import { serveInvoiceIsdoc } from "@/lib/serve-invoice-file";
 import { invoices } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
@@ -24,22 +24,8 @@ export async function GET(request: NextRequest, ctx: { params: Params }) {
 		return NextResponse.json({ error: "not found" }, { status: 404 });
 	}
 
-	const parsed = InvoiceSchema.safeParse(row.payloadJson);
-	if (!parsed.success) {
-		return NextResponse.json({ error: "invalid payload" }, { status: 500 });
-	}
-
 	try {
-		const xml = renderIsdoc(parsed.data);
-		const filename = `${parsed.data.meta.number || "draft"}.isdoc`;
-		return new NextResponse(xml, {
-			status: 200,
-			headers: {
-				"Content-Type": "application/xml; charset=utf-8",
-				"Content-Disposition": `attachment; filename="${filename}"`,
-				"Cache-Control": "no-store",
-			},
-		});
+		return await serveInvoiceIsdoc(row);
 	} catch (cause) {
 		const message =
 			cause instanceof Error ? cause.message : "isdoc render failed";

@@ -22,9 +22,13 @@ Client receives `file.ufsUrl` (or `file.url`) from `onUploadComplete` and writes
 - **Replace-without-delete:** uploading a new asset creates a new file; old URLs remain valid for historical PDFs
 - Env: `UPLOADTHING_TOKEN` (required for live uploads). Without it, the UI still accepts pasted URLs.
 
+## Issued invoice artifacts (server upload)
+
+Canonical PDF (ISDOC.PDF) and standalone `.isdoc` XML are uploaded with **`UTApi.uploadFiles`** from `@invoicey/invoice-tools/artifacts` after issue (and on lazy backfill). Requires `UPLOADTHING_TOKEN`. URLs land on `invoices.pdf_url` / `invoices.isdoc_url`.
+
 ## Open questions / TODOs
 
-- `TODO(plan-9):` GC unreferenced UploadThing files
+- `TODO(plan-9):` GC unreferenced UploadThing files (issuer assets + orphaned invoice artifacts)
 - `TODO(plan-3-followup):` SVG logo rasterization at PDF render if not already handled
 
 ## References
