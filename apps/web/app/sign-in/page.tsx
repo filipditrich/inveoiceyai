@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import {
   Card,
   CardContent,
@@ -50,6 +51,7 @@ export default async function SignInPage({
     <main className="flex min-h-svh items-center justify-center p-6">
       <Card className="w-full max-w-sm">
         <CardHeader>
+          <BrandLogo size={40} priority className="mb-2" />
           <CardTitle>Sign in to Invoicey</CardTitle>
           <CardDescription>
             Use your Google or GitHub account. No password to remember.
