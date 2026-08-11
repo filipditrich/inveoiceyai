@@ -11,7 +11,7 @@ interface CreatedUser {
   email?: string | null;
 }
 
-/** `Filip Ditrich` -> `filip-ditrich`; falls back to the email local-part. */
+/** Email local-part, else the name: `ditrich@…` -> `ditrich`. Strips diacritics. */
 function slugBase(user: CreatedUser): string {
   const source = user.email?.split("@")[0] ?? user.name ?? "workspace";
   const slug = source
@@ -79,17 +79,19 @@ export async function createPersonalWorkspace(
 export async function resolveInitialWorkspaceId(
   userId: string,
 ): Promise<string | undefined> {
-  const [preferredRow] = await db
-    .select({ defaultWorkspaceId: userTable.defaultWorkspaceId })
-    .from(userTable)
-    .where(eq(userTable.id, userId))
-    .limit(1);
-
-  const memberships = await db
-    .select({ organizationId: member.organizationId })
-    .from(member)
-    .where(eq(member.userId, userId))
-    .orderBy(asc(member.createdAt));
+  // Independent reads, and neon-http makes each `await` its own round trip.
+  const [[preferredRow], memberships] = await Promise.all([
+    db
+      .select({ defaultWorkspaceId: userTable.defaultWorkspaceId })
+      .from(userTable)
+      .where(eq(userTable.id, userId))
+      .limit(1),
+    db
+      .select({ organizationId: member.organizationId })
+      .from(member)
+      .where(eq(member.userId, userId))
+      .orderBy(asc(member.createdAt)),
+  ]);
 
   const preferred = preferredRow?.defaultWorkspaceId;
   // Only honour the default if they are still a member of it.

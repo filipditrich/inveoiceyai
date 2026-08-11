@@ -11,24 +11,11 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-/**
- * Workspace registry (ADR 0007) — also the Better Auth `organization` model,
- * remapped in the adapter config rather than mirrored (ADR 0019). That makes
- * `session.activeOrganizationId` the exact value every `workspace_id` filter
- * uses, so there is one tenancy id and no translation step.
- *
- * `id` is text so it matches `workspace_id` columns (UUID strings).
- */
-export const workspaces = pgTable("workspaces", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  logo: text("logo"),
-  metadata: text("metadata"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+import { user } from "./auth-schema";
+import { workspaces } from "./workspaces";
+
+export * from "./auth-schema";
+export * from "./workspaces";
 
 /** Client row — `snapshot` holds validated ClientSnapshot JSON (Plan 4). */
 export const clients = pgTable(
@@ -198,8 +185,12 @@ export const slackIdentities = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     slackTeamId: text("slack_team_id").notNull(),
     slackUserId: text("slack_user_id").notNull(),
-    userId: text("user_id").notNull(),
-    workspaceId: text("workspace_id").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -263,10 +254,3 @@ export const presets = pgTable(
     ),
   ],
 );
-
-/**
- * Better Auth tables. Re-exported last so `workspaces` is initialised before
- * `auth-schema` (which references it) evaluates, and so `drizzle.config.ts`
- * still only needs to point at this one file.
- */
-export * from "./auth-schema";

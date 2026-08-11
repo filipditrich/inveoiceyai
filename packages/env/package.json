@@ -5,14 +5,16 @@
   "type": "module",
   "exports": {
     "./schema": "./src/schema.ts",
-    "./server": "./src/server.ts"
+    "./server": "./src/server.ts",
+    "./load": "./src/load.ts"
   },
   "scripts": {
     "lint": "echo \"skip: eslint not wired for env yet\"",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "zod": "4.4.2"
+    "zod": "4.4.2",
+    "dotenv": "17.4.2"
   },
   "devDependencies": {
     "@types/node": "25.6.0",

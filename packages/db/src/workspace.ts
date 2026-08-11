@@ -4,8 +4,7 @@ import type { InvoiceyDb } from "./create-db";
 import { workspaces } from "./schema";
 
 /** Seeded default workspace UUID (ADR 0006). */
-export const DEFAULT_WORKSPACE_ID =
-  "00000000-0000-4000-8000-000000000001";
+export const DEFAULT_WORKSPACE_ID = "00000000-0000-4000-8000-000000000001";
 
 export function getDefaultWorkspaceId(): string {
   const v = process.env.INVOICEY_DEFAULT_WORKSPACE_ID?.trim();

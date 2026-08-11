@@ -1,18 +1,13 @@
 /**
- * Prints row counts for every business table. Run before/after a schema push
- * to prove nothing was lost — the repo is push-only, so there is no migration
- * artifact to diff.
+ * Prints row counts for every business table. Run before/after a schema change
+ * to prove nothing was lost — the repo applies DDL by hand (see ../sql/README.md),
+ * so there is no migration tool tracking what happened.
  *
  *   bun run --cwd packages/db scripts/row-counts.ts
  */
-import { neon } from "@neondatabase/serverless";
-import { config as loadEnv } from "dotenv";
-import { dirname, resolve } from "path";
-import { fileURLToPath } from "url";
+import "@invoicey/env/load";
 
-const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-loadEnv({ path: resolve(repoRoot, ".env") });
-loadEnv({ path: resolve(repoRoot, ".env.local"), override: true });
+import { neon } from "@neondatabase/serverless";
 
 const url = process.env.DATABASE_URL?.trim();
 if (!url) throw new Error("DATABASE_URL is empty");
@@ -29,14 +24,14 @@ const tables = [
   "presets",
 ];
 
-for (const t of tables) {
-  const exists = await sql`
-    SELECT to_regclass(${`public.${t}`}) IS NOT NULL AS present
+for (const table of tables) {
+  const [{ present }] = await sql`
+    SELECT to_regclass(${`public.${table}`}) IS NOT NULL AS present
   `;
-  if (!exists[0]?.present) {
-    console.log(`${t.padEnd(28)} (table does not exist)`);
+  if (!present) {
+    console.log(`${table.padEnd(28)}(table does not exist)`);
     continue;
   }
-  const rows = await sql.query(`SELECT count(*)::int AS n FROM "${t}"`);
-  console.log(`${t.padEnd(28)}${rows[0]!.n}`);
+  const [{ n }] = await sql.query(`SELECT count(*)::int AS n FROM "${table}"`);
+  console.log(`${table.padEnd(28)}${n}`);
 }
