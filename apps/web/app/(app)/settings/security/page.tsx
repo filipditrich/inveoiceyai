@@ -1,5 +1,9 @@
 import { headers } from "next/headers";
-import { CheckCircle2Icon, TriangleAlertIcon } from "lucide-react";
+import {
+  CheckCircle2Icon,
+  ShieldCheckIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 
 import {
   LinkedAccountsPanel,
@@ -7,6 +11,7 @@ import {
   SessionsPanel,
   TrustedDevicesPanel,
 } from "@/components/settings/security-panels";
+import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { auth } from "@/lib/auth/auth";
 import { env } from "@invoicey/env/server";
 
@@ -27,13 +32,11 @@ export default async function SettingsSecurityPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">Zabezpečení</h2>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          Správa přihlášení, aktivních relací, důvěryhodných zařízení a auditu.
-          Hesla Invoicey nepoužívá — jen OAuth.
-        </p>
-      </div>
+      <SettingsPageHeader
+        description="Spravujte způsoby přihlášení, aktivní relace a důvěryhodná zařízení. Invoicey používá pouze OAuth — žádné další heslo."
+        icon={<ShieldCheckIcon />}
+        title="Zabezpečení účtu"
+      />
 
       {sp.trust === "ok" ? (
         <div

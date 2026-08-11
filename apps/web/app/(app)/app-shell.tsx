@@ -7,34 +7,39 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import type { CSSProperties, ReactNode } from "react";
 
 export interface AppShellUser {
-	name: string;
-	email: string;
-	avatar: string;
+  name: string;
+  email: string;
+  avatar: string;
 }
 
 export function AppShell({
-	children,
-	user,
-}: Readonly<{ children: ReactNode; user: AppShellUser }>) {
-	return (
-		<SidebarProvider
-			style={
-				{
-					"--sidebar-width": "calc(var(--spacing) * 72)",
-					"--header-height": "calc(var(--spacing) * 14)",
-				} as CSSProperties
-			}
-		>
-			<AppSidebar user={user} />
-			<SidebarInset className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
-				<SiteHeader />
-				<ToastFromSearchParams />
-				<div className="@container/main flex min-h-0 flex-1 flex-col gap-2 overflow-auto">
-					<div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col px-4 py-4 md:gap-6 md:px-6 md:py-6 lg:px-10">
-						{children}
-					</div>
-				</div>
-			</SidebarInset>
-		</SidebarProvider>
-	);
+  children,
+  user,
+  isPlatformAdmin = false,
+}: Readonly<{
+  children: ReactNode;
+  user: AppShellUser;
+  isPlatformAdmin?: boolean;
+}>) {
+  return (
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 14)",
+        } as CSSProperties
+      }
+    >
+      <AppSidebar isPlatformAdmin={isPlatformAdmin} user={user} />
+      <SidebarInset className="bg-background flex min-h-0 flex-1 flex-col overflow-hidden">
+        <SiteHeader />
+        <ToastFromSearchParams />
+        <div className="@container/main flex min-h-0 flex-1 flex-col gap-2 overflow-auto">
+          <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col px-4 py-4 md:gap-6 md:px-6 md:py-6 lg:px-10">
+            {children}
+          </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
 }

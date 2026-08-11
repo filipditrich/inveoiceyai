@@ -14,6 +14,7 @@ Plans complement [`docs/roadmap.md`](../docs/roadmap.md): roadmap owns phase goa
 | [`plan-12-mcp-local.md`](./plan-12-mcp-local.md)                     | Plan 12a — MCP local + Vercel HTTP prep      |
 | [`plan-13-slack-bot-stateless.md`](./plan-13-slack-bot-stateless.md) | Plan 13a — Slack bot (stateless demo)        |
 | [`plan-16-account-security.md`](./plan-16-account-security.md)       | Plan 16 — Account security & settings        |
+| [`plan-18-platform-admin.md`](./plan-18-platform-admin.md)           | Plan 18 — Global platform admin              |
 
 **Naming:** `plan-NN-short-slug.md` matching roadmap Plan N. When a roadmap phase splits into sub-phases (e.g. 13a / 13b), the file name keeps the parent number and the slug disambiguates.
 

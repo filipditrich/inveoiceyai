@@ -51,7 +51,11 @@
     "invoice_duplicated": "Faktura duplikována",
     "invoice_emailed": "Faktura odeslána e-mailem",
     "bulk_summary": "Dokončeno: {ok} úspěšně, {skipped} přeskočeno, {failed} se nezdařilo.",
-    "clients_merged": "Sloučeno {groups} skupin — odstraněno {removed} klientů, přesměrováno {repointed} faktur"
+    "clients_merged": "Sloučeno {groups} skupin — odstraněno {removed} klientů, přesměrováno {repointed} faktur",
+    "platform_admin_granted": "Platformní admin udělen",
+    "platform_admin_revoked": "Platformní admin odebrán",
+    "platform_admin_last": "Nelze odebrat posledního platformního admina",
+    "platform_admin_failed": "Platformní roli se nepodařilo změnit"
   },
   "Status": {
     "invoice": {
@@ -76,9 +80,9 @@
   },
   "Marketing": {
     "meta": {
-      "title": "České faktury bez zbytečného klikání",
-      "description": "Invoicey propojuje českou fakturaci, PDF, ISDOC, SPAYD QR a ARES s moderním webem a AI automatizací.",
-      "ogTitle": "Invoicey — české faktury bez zbytečného klikání",
+      "title": "Automatizace faktur bez zbytečného klikání",
+      "description": "Invoicey propojuje validovaná data, PDF, ISDOC, SPAYD QR a ARES s moderním webem a AI automatizací.",
+      "ogTitle": "Invoicey — automatizace faktur bez zbytečného klikání",
       "ogDescription": "Jedna validovaná faktura. Web, PDF, ISDOC, QR i AI automatizace."
     },
     "nav": {
@@ -93,7 +97,7 @@
       "ariaLabel": "Hlavní navigace"
     },
     "footer": {
-      "description": "České faktury jako strukturovaná data. Vytvořte je ve webu, přes JSON nebo s pomocí AI a pokaždé získejte stejný validovaný výstup.",
+      "description": "Faktury jako strukturovaná data. Vytvořte je ve webu, přes JSON nebo s pomocí AI a pokaždé získejte stejný validovaný výstup.",
       "docs": "Dokumentace",
       "privacy": "Soukromí",
       "terms": "Podmínky",
@@ -103,14 +107,14 @@
       "legalNav": "Právní informace"
     },
     "hero": {
-      "badge": "České faktury, připravené i pro AI",
+      "badge": "Připraveno pro web, JSON i AI",
       "titleLine1": "Fakturace, která začíná daty.",
       "titleLine2": "Ne formulářem.",
-      "subtitle": "Vystavujte správné české doklady ve webu, z JSONu nebo přes AI. Invoicey je pokaždé ověří a vytvoří stejné PDF, ISDOC i platební QR.",
+      "subtitle": "Vystavujte doklady ve webu, z JSONu nebo přes AI. Invoicey je pokaždé ověří a vytvoří stejné PDF, ISDOC i platební QR — včetně ARES, DPH a českých reálií.",
       "ctaPrimary": "Otevřít Invoicey",
       "ctaSecondary": "Jak to funguje",
       "noPassword": "Bez hesla",
-      "czechUi": "České rozhraní",
+      "czechUi": "Czech-first",
       "betaAccess": "Beta přístup"
     },
     "preview": {
@@ -162,10 +166,10 @@
       "step3Description": "Pošlete fakturu klientovi, sledujte doručení a splatnost a označte úhradu ve stejném přehledu."
     },
     "capabilities": {
-      "eyebrow": "České účetní reálie",
+      "eyebrow": "Doménová realita",
       "title": "To podstatné je součást základu.",
-      "description": "Ne další vrstva kolem generátoru PDF. Invoicey staví na údajích, které český doklad skutečně potřebuje.",
-      "docsTitle": "České doklady bez slepých míst",
+      "description": "Ne další vrstva kolem generátoru PDF. Invoicey staví na údajích, které doklad skutečně potřebuje — včetně ARES, DPH a ISDOC.",
+      "docsTitle": "Doklady bez slepých míst",
       "docsDescription": "Faktury, zálohy, proformy i dobropisy. DPH, DUZP, symboly, QR platba a ISDOC jsou součást stejného výstupu.",
       "issuersTitle": "Každá firma má vlastní pravidla",
       "issuersDescription": "Bankovní účet, číselná řada, plátcovství DPH i vizuální prvky zůstávají u správného dodavatele.",
@@ -317,8 +321,8 @@
     "continueWith": "Pokračovat přes {provider}",
     "consent": "Pokračováním potvrzujete, že jste se seznámili s podmínkami používání a zásadami ochrany soukromí.",
     "shell": {
-      "tagline": "Česká fakturace",
-      "eyebrow": "České faktury, jedno schéma",
+      "tagline": "Automatizace faktur",
+      "eyebrow": "Jedno schéma, všechny kanály",
       "title": "Od údajů k hotovému dokladu bez zbytečných odboček.",
       "description": "Web, PDF, ISDOC, SPAYD QR i agentní nástroje pracují se stejnou validovanou fakturou.",
       "oauthNote": "OAuth přihlášení · žádné další heslo",
@@ -361,10 +365,10 @@
   "App": {
     "meta": {
       "title": "Invoicey",
-      "description": "Česká fakturace založená na datech · PDF, ISDOC a SPAYD QR"
+      "description": "Automatizace faktur založená na datech · PDF, ISDOC a SPAYD QR"
     },
     "brand": {
-      "tagline": "Česká fakturace"
+      "tagline": "Automatizace faktur"
     },
     "nav": {
       "group": "Navigace",
@@ -407,7 +411,9 @@
     },
     "settings": {
       "title": "Nastavení",
-      "subtitle": "Vzhled, zabezpečení, členové, API klíče a integrace (MCP, Slack).",
+      "eyebrow": "Účet a pracovní prostor",
+      "subtitle": "Přizpůsobte rozhraní, zabezpečte účet a spravujte přístup lidí i připojených nástrojů.",
+      "navigationLabel": "Sekce nastavení",
       "nav": {
         "appearance": "Vzhled",
         "security": "Zabezpečení",
@@ -415,10 +421,20 @@
         "apiKeys": "API klíče",
         "integrations": "Integrace"
       },
+      "navDescriptions": {
+        "appearance": "Motiv a jazyk rozhraní",
+        "security": "Přihlášení, relace a zařízení",
+        "members": "Lidé a oprávnění",
+        "apiKeys": "Přístup pro automatizaci",
+        "integrations": "Slack, MCP a další nástroje"
+      },
       "appearance": {
+        "pageTitle": "Vzhled a jazyk",
+        "pageDescription": "Nastavte si Invoicey tak, aby se vám dobře používalo na tomto zařízení.",
         "title": "Vzhled",
         "description": "Světlý, tmavý, nebo podle systému. Preference se ukládá v tomto prohlížeči.",
-        "languageDescription": "Jazyk rozhraní pro tuto aplikaci. Dokumentace zůstává anglicky."
+        "languageDescription": "Zvolte jazyk ovládacích prvků a systémových zpráv. Dokumentace zůstává anglicky.",
+        "deviceNote": "Motiv a jazyk se ukládají v tomto prohlížeči. Na jiném zařízení je můžete nastavit nezávisle."
       }
     },
     "theme": {
@@ -429,6 +445,7 @@
     },
     "userMenu": {
       "settings": "Nastavení",
+      "platformAdmin": "Platformní admin",
       "logOut": "Odhlásit se",
       "signingOut": "Odhlašuji…"
     },
@@ -779,6 +796,157 @@
       "loadFailed": "Klíče se nenačetly"
     }
   },
+  "Admin": {
+    "brand": {
+      "title": "Invoicey Admin",
+      "tagline": "Platformní konzole"
+    },
+    "nav": {
+      "group": "Platforma",
+      "dashboard": "Přehled",
+      "users": "Uživatelé",
+      "workspaces": "Pracovní prostory",
+      "invoices": "Faktury",
+      "issuers": "Dodavatelé",
+      "backToApp": "Zpět do aplikace",
+      "productGroup": "Produkt",
+      "productDashboard": "Produktový přehled"
+    },
+    "breadcrumb": {
+      "root": "Admin",
+      "users": "Uživatelé",
+      "workspaces": "Pracovní prostory",
+      "invoices": "Faktury",
+      "issuers": "Dodavatelé"
+    },
+    "table": {
+      "search": "Hledat",
+      "copyId": "Kopírovat id",
+      "copied": "Zkopírováno",
+      "columns": "Sloupce",
+      "paginationInfo": "'{'from'}' – '{'to'}' z '{'count'}'",
+      "nextPage": "Další stránka",
+      "previousPage": "Předchozí stránka",
+      "rowsPerPage": "Řádků na stránku"
+    },
+    "dashboard": {
+      "title": "Platformní přehled",
+      "subtitle": "Souhrny napříč všemi pracovními prostory.",
+      "statusTitle": "Faktury podle stavu",
+      "recentTitle": "Nedávné faktury",
+      "recentEmpty": "Zatím žádné faktury.",
+      "cards": {
+        "users": "Uživatelé",
+        "workspaces": "Pracovní prostory",
+        "invoices": "Faktury",
+        "issuers": "Dodavatelé",
+        "adminsHint": "{count} platformních adminů",
+        "issuedHint": "{count} vystavených za 12 měs. · {volume}"
+      },
+      "recent": {
+        "number": "Číslo",
+        "client": "Klient",
+        "workspace": "Pracovní prostor",
+        "total": "Celkem",
+        "status": "Stav"
+      }
+    },
+    "users": {
+      "title": "Uživatelé",
+      "subtitle": "Všechny účty. Zde udělíte nebo odeberete platformního admina.",
+      "empty": "Žádní uživatelé.",
+      "count": "{count, plural, one {# uživatel} few {# uživatelé} other {# uživatelů}}",
+      "filters": {
+        "searchPlaceholder": "jméno, e-mail, id…"
+      },
+      "columns": {
+        "name": "Jméno",
+        "email": "E-mail",
+        "verified": "Ověření",
+        "role": "Platformní role",
+        "memberships": "Členství",
+        "defaultWorkspace": "Výchozí prostor",
+        "createdAt": "Vytvořeno",
+        "id": "ID uživatele",
+        "actions": "Akce"
+      },
+      "verified": {
+        "yes": "Ověřený",
+        "no": "Neověřený"
+      },
+      "role": {
+        "admin": "Admin",
+        "none": "Žádná"
+      },
+      "actions": {
+        "grant": "Udělit admina",
+        "revoke": "Odebrat"
+      }
+    },
+    "workspaces": {
+      "title": "Pracovní prostory",
+      "subtitle": "Všechny organizace s počty členů a faktur.",
+      "empty": "Žádné pracovní prostory.",
+      "count": "{count, plural, one {# prostor} few {# prostory} other {# prostorů}}",
+      "filters": {
+        "searchPlaceholder": "název, slug, id…"
+      },
+      "columns": {
+        "name": "Název",
+        "slug": "Slug",
+        "members": "Členové",
+        "invoices": "Faktury",
+        "issuers": "Dodavatelé",
+        "createdAt": "Vytvořeno",
+        "id": "ID prostoru"
+      }
+    },
+    "invoices": {
+      "title": "Faktury",
+      "subtitle": "Seznam faktur napříč tenanty (jen pro čtení).",
+      "empty": "Žádné faktury.",
+      "count": "{count, plural, one {# faktura} few {# faktury} other {# faktur}}",
+      "filters": {
+        "searchPlaceholder": "číslo, klient, prostor, dodavatel…"
+      },
+      "columns": {
+        "number": "Číslo",
+        "client": "Klient",
+        "workspace": "Pracovní prostor",
+        "issuer": "Dodavatel",
+        "total": "Celkem",
+        "issueDate": "Datum vystavení",
+        "dueDate": "Splatnost",
+        "status": "Stav",
+        "id": "ID faktury",
+        "workspaceId": "ID prostoru",
+        "issuerId": "ID dodavatele"
+      }
+    },
+    "issuers": {
+      "title": "Dodavatelé",
+      "subtitle": "Dodavatelé napříč tenanty (jen pro čtení).",
+      "empty": "Žádní dodavatelé.",
+      "count": "{count, plural, one {# dodavatel} few {# dodavatelé} other {# dodavatelů}}",
+      "filters": {
+        "searchPlaceholder": "název, IČO, DIČ, prostor…"
+      },
+      "source": {
+        "ares": "ARES",
+        "manual": "Ručně"
+      },
+      "columns": {
+        "name": "Název",
+        "ico": "IČO",
+        "dic": "DIČ",
+        "workspace": "Pracovní prostor",
+        "source": "Zdroj",
+        "updatedAt": "Aktualizováno",
+        "id": "ID dodavatele",
+        "workspaceId": "ID prostoru"
+      }
+    }
+  },
   "Consent": {
     "banner": {
       "title": "Vaše soukromí, vaše volba",
@@ -801,6 +969,6 @@
   "Pwa": {
     "name": "Invoicey",
     "shortName": "Invoicey",
-    "description": "Česká fakturace založená na datech"
+    "description": "Automatizace faktur založená na datech"
   }
 }

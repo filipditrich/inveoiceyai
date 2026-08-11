@@ -2,7 +2,11 @@ import {
   isIssuerWelcomeGatePath,
   shouldGateIssuerWelcome,
 } from "@/lib/issuer-welcome";
-import { requireSession, requireWorkspace } from "@/lib/auth/session";
+import {
+  isPlatformAdmin,
+  requireSession,
+  requireWorkspace,
+} from "@/lib/auth/session";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -18,6 +22,7 @@ export default async function AppShellLayout({
   // boundary, since route handlers and actions do not pass through it.
   const user = await requireSession();
   const { workspaceId } = await requireWorkspace();
+  const platformAdmin = await isPlatformAdmin();
 
   const pathname = (await headers()).get("x-pathname") ?? "";
   if (
@@ -29,6 +34,7 @@ export default async function AppShellLayout({
 
   return (
     <AppShell
+      isPlatformAdmin={platformAdmin}
       user={{
         name: user.name,
         email: user.email,

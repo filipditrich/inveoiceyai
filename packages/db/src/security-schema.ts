@@ -21,7 +21,9 @@ export type SecurityAuditEventType =
   | "api_key_revoke"
   | "invite_create"
   | "member_remove"
-  | "member_role_update";
+  | "member_role_update"
+  | "platform_admin_grant"
+  | "platform_admin_revoke";
 
 /** Soft-trusted browsers (Plan 16, ADR 0023). */
 export const trustedDevices = pgTable(

@@ -69,6 +69,14 @@ export const privateEnvSchema = z.object({
     emptyEnvToUndefined,
     z.uuid().optional(),
   ),
+  /**
+   * Comma-separated emails promoted to platform admin on session create (ADR 0024).
+   * Promote-only — never auto-demotes.
+   */
+  INVOICEY_PLATFORM_ADMIN_EMAILS: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
   UPLOADTHING_TOKEN: z.preprocess(emptyEnvToUndefined, z.string().optional()),
   UPLOADTHING_APP_ID: z.preprocess(emptyEnvToUndefined, z.string().optional()),
   /**

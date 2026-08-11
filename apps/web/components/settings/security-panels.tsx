@@ -4,6 +4,9 @@ import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   CheckCircle2Icon,
+  HistoryIcon,
+  Link2Icon,
+  LoaderCircleIcon,
   MonitorSmartphoneIcon,
   ShieldCheckIcon,
 } from "lucide-react";
@@ -190,14 +193,22 @@ export function LinkedAccountsPanel({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Způsoby přihlášení</CardTitle>
+      <CardHeader className="border-b">
+        <CardTitle className="flex items-center gap-2">
+          <Link2Icon className="text-muted-foreground size-4" />
+          Způsoby přihlášení
+        </CardTitle>
         <CardDescription>
           OAuth přes Google nebo GitHub. Poslední poskytovatel nelze odpojit.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {configuredProviders.length === 0 ? (
+      <CardContent className="space-y-3 pt-5">
+        {pending && accounts.length === 0 ? (
+          <div className="text-muted-foreground flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-6 text-sm">
+            <LoaderCircleIcon className="size-4 animate-spin" />
+            Načítám přihlášení…
+          </div>
+        ) : configuredProviders.length === 0 ? (
           <p className="text-muted-foreground text-sm">
             Žádný poskytovatel není na serveru nastavený. Doplňte OAuth údaje a
             obnovte stránku.
@@ -349,9 +360,12 @@ export function SessionsPanel({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
+      <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 border-b">
         <div className="space-y-1.5">
-          <CardTitle>Aktivní relace</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <MonitorSmartphoneIcon className="text-muted-foreground size-4" />
+            Aktivní relace
+          </CardTitle>
           <CardDescription>
             Kde jste přihlášeni. Podezřelé relace odvolejte.
           </CardDescription>
@@ -366,9 +380,14 @@ export function SessionsPanel({
           {busyKey === "revoke-others" ? "Odvolávám…" : "Odvolat ostatní"}
         </Button>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {sessions.length === 0 ? (
-          <div className="text-muted-foreground flex items-start gap-2 text-sm">
+      <CardContent className="space-y-3 pt-5">
+        {pending && sessions.length === 0 ? (
+          <div className="text-muted-foreground flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
+            <LoaderCircleIcon className="size-4 animate-spin" />
+            Načítám relace…
+          </div>
+        ) : sessions.length === 0 ? (
+          <div className="text-muted-foreground flex items-start gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
             <MonitorSmartphoneIcon className="mt-0.5 size-4 shrink-0" />
             <p>
               Žádné aktivní relace. Po přihlášení se tu objeví tento prohlížeč.
@@ -451,16 +470,24 @@ export function TrustedDevicesPanel() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Důvěryhodná zařízení</CardTitle>
+      <CardHeader className="border-b">
+        <CardTitle className="flex items-center gap-2">
+          <ShieldCheckIcon className="text-muted-foreground size-4" />
+          Důvěryhodná zařízení
+        </CardTitle>
         <CardDescription>
           Na přihlášení z nového zařízení vás upozorníme e-mailem. Přístup tím
           není blokován. Odkaz v e-mailu zařízení označí jako důvěryhodné.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {devices.length === 0 ? (
-          <div className="text-muted-foreground flex items-start gap-2 text-sm">
+      <CardContent className="space-y-3 pt-5">
+        {pending && devices.length === 0 ? (
+          <div className="text-muted-foreground flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
+            <LoaderCircleIcon className="size-4 animate-spin" />
+            Načítám zařízení…
+          </div>
+        ) : devices.length === 0 ? (
+          <div className="text-muted-foreground flex items-start gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
             <ShieldCheckIcon className="mt-0.5 size-4 shrink-0" />
             <p>
               Zatím žádná důvěryhodná zařízení. Po přihlášení z nového místa
@@ -510,15 +537,18 @@ export function SecurityAuditPanel() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Nedávná aktivita</CardTitle>
+      <CardHeader className="border-b">
+        <CardTitle className="flex items-center gap-2">
+          <HistoryIcon className="text-muted-foreground size-4" />
+          Nedávná aktivita
+        </CardTitle>
         <CardDescription>
           Audit přihlášení, relací, zařízení a API klíčů.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-2 pt-5">
         {events.length === 0 ? (
-          <div className="text-muted-foreground flex items-start gap-2 text-sm">
+          <div className="text-muted-foreground flex items-start gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
             <CheckCircle2Icon className="mt-0.5 size-4 shrink-0" />
             <p>
               Zatím žádné záznamy. Akce jako přihlášení nebo odvolání relace se

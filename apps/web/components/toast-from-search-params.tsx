@@ -17,6 +17,10 @@ const TOAST_KEYS = [
   "invoice_deleted",
   "invoice_duplicated",
   "invoice_emailed",
+  "platform_admin_granted",
+  "platform_admin_revoked",
+  "platform_admin_last",
+  "platform_admin_failed",
 ] as const;
 
 type ToastKey = (typeof TOAST_KEYS)[number];
@@ -57,6 +61,11 @@ function ToastFromSearchParamsInner() {
           failed: String(Number(failed) || 0),
         }),
       );
+    } else if (
+      toastKey === "platform_admin_last" ||
+      toastKey === "platform_admin_failed"
+    ) {
+      toast.error(t(toastKey));
     } else if (isToastKey(toastKey)) {
       toast.success(t(toastKey));
     }

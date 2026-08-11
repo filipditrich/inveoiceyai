@@ -10,6 +10,7 @@ import {
   touchTrustedDevice,
 } from "./device-trust";
 import { stashPendingDeviceToken } from "./pending-device-cookie";
+import { maybePromotePlatformAdminFromAllowlist } from "./platform-admin";
 import { recordSecurityAuditEvent } from "./security-audit";
 import { appOrigin, sendNewSignInEmail } from "../email/security";
 
@@ -41,6 +42,8 @@ export async function onSessionCreated(
       ipAddress: ip,
       userAgent: ua,
     });
+
+    await maybePromotePlatformAdminFromAllowlist(session.userId);
 
     const headers = context?.headers;
     let rawToken = headers ? readDeviceTokenFromHeaders(headers) : null;

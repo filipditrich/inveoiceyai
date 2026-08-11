@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Invoicey — české faktury bez zbytečného klikání";
+export const alt = "Invoicey — automatizace faktur bez zbytečného klikání";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -66,7 +66,7 @@ export default function OpenGraphImage() {
             maxWidth: "940px",
           }}
         >
-          České faktury bez zbytečného klikání.
+          Automatizace faktur bez zbytečného klikání.
         </div>
         <div
           style={{

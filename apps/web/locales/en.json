@@ -51,7 +51,11 @@
     "invoice_duplicated": "Invoice duplicated",
     "invoice_emailed": "Invoice sent by email",
     "bulk_summary": "Bulk action: {ok} ok, {skipped} skipped, {failed} failed.",
-    "clients_merged": "Merged {groups} groups — removed {removed} clients, repointed {repointed} invoices"
+    "clients_merged": "Merged {groups} groups — removed {removed} clients, repointed {repointed} invoices",
+    "platform_admin_granted": "Platform admin granted",
+    "platform_admin_revoked": "Platform admin revoked",
+    "platform_admin_last": "Cannot revoke the last platform admin",
+    "platform_admin_failed": "Could not update platform role"
   },
   "Status": {
     "invoice": {
@@ -76,9 +80,9 @@
   },
   "Marketing": {
     "meta": {
-      "title": "Czech invoices without the busywork",
-      "description": "Invoicey connects Czech invoicing, PDF, ISDOC, SPAYD QR and ARES with a modern web app and AI automation.",
-      "ogTitle": "Invoicey — Czech invoices without the busywork",
+      "title": "Invoice automation without the busywork",
+      "description": "Invoicey connects validated data, PDF, ISDOC, SPAYD QR and ARES with a modern web app and AI automation.",
+      "ogTitle": "Invoicey — invoice automation without the busywork",
       "ogDescription": "One validated invoice. Web, PDF, ISDOC, QR and AI automation."
     },
     "nav": {
@@ -93,7 +97,7 @@
       "ariaLabel": "Main navigation"
     },
     "footer": {
-      "description": "Czech invoices as structured data. Create them in the web, via JSON, or with AI — and always get the same validated output.",
+      "description": "Invoices as structured data. Create them in the web, via JSON, or with AI — and always get the same validated output.",
       "docs": "Docs",
       "privacy": "Privacy",
       "terms": "Terms",
@@ -103,14 +107,14 @@
       "legalNav": "Legal"
     },
     "hero": {
-      "badge": "Czech invoices, AI-ready",
+      "badge": "Built for web, JSON, and AI",
       "titleLine1": "Invoicing that starts with data.",
       "titleLine2": "Not a form.",
-      "subtitle": "Issue correct Czech documents from the web, JSON, or AI. Invoicey validates every time and produces the same PDF, ISDOC, and payment QR.",
+      "subtitle": "Issue documents from the web, JSON, or AI. Invoicey validates every time and produces the same PDF, ISDOC, and payment QR — including ARES, VAT, and Czech document rules.",
       "ctaPrimary": "Open Invoicey",
       "ctaSecondary": "How it works",
       "noPassword": "No password",
-      "czechUi": "Czech-first UI",
+      "czechUi": "Czech-first",
       "betaAccess": "Beta access"
     },
     "preview": {
@@ -162,10 +166,10 @@
       "step3Description": "Email the invoice to the client, track delivery and due date, and mark payment in the same overview."
     },
     "capabilities": {
-      "eyebrow": "Czech accounting reality",
+      "eyebrow": "Domain reality",
       "title": "The essentials are built in.",
-      "description": "Not another layer around a PDF generator. Invoicey builds on the data a Czech document actually needs.",
-      "docsTitle": "Czech documents without blind spots",
+      "description": "Not another layer around a PDF generator. Invoicey builds on the data a document actually needs — including ARES, VAT, and ISDOC.",
+      "docsTitle": "Documents without blind spots",
       "docsDescription": "Invoices, advances, proformas, and credit notes. VAT, tax point date, symbols, QR payment, and ISDOC are part of the same output.",
       "issuersTitle": "Every business has its own rules",
       "issuersDescription": "Bank account, numbering series, VAT registration, and visual assets stay with the correct issuer.",
@@ -317,8 +321,8 @@
     "continueWith": "Continue with {provider}",
     "consent": "By continuing you confirm that you have read the terms of use and privacy policy.",
     "shell": {
-      "tagline": "Czech invoicing",
-      "eyebrow": "Czech invoices, one schema",
+      "tagline": "Invoice automation",
+      "eyebrow": "One schema, every channel",
       "title": "From data to a finished document without detours.",
       "description": "Web, PDF, ISDOC, SPAYD QR, and agent tools all use the same validated invoice.",
       "oauthNote": "OAuth sign-in · no extra password",
@@ -361,10 +365,10 @@
   "App": {
     "meta": {
       "title": "Invoicey",
-      "description": "Czech invoicing — schema-first data, PDF + ISDOC + SPAYD QR"
+      "description": "Schema-first invoice automation · PDF, ISDOC & SPAYD QR"
     },
     "brand": {
-      "tagline": "Czech invoicing"
+      "tagline": "Invoice automation"
     },
     "nav": {
       "group": "Navigation",
@@ -407,7 +411,9 @@
     },
     "settings": {
       "title": "Settings",
-      "subtitle": "Appearance, account security, workspace members, and API keys.",
+      "eyebrow": "Account and workspace",
+      "subtitle": "Customize the interface, secure your account, and manage access for people and connected tools.",
+      "navigationLabel": "Settings sections",
       "nav": {
         "appearance": "Appearance",
         "security": "Security",
@@ -415,10 +421,20 @@
         "apiKeys": "API Keys",
         "integrations": "Integrations"
       },
+      "navDescriptions": {
+        "appearance": "Theme and interface language",
+        "security": "Sign-in, sessions, and devices",
+        "members": "People and permissions",
+        "apiKeys": "Access for automation",
+        "integrations": "Slack, MCP, and other tools"
+      },
       "appearance": {
+        "pageTitle": "Appearance and language",
+        "pageDescription": "Set up Invoicey so it feels right on this device.",
         "title": "Appearance",
         "description": "Light, dark, or match system. Preference is stored in this browser.",
-        "languageDescription": "Interface language for this app. Documentation stays in English."
+        "languageDescription": "Choose the language for controls and system messages. Documentation stays in English.",
+        "deviceNote": "Theme and language are stored in this browser. You can choose different settings on another device."
       }
     },
     "theme": {
@@ -429,6 +445,7 @@
     },
     "userMenu": {
       "settings": "Settings",
+      "platformAdmin": "Platform admin",
       "logOut": "Log out",
       "signingOut": "Signing out…"
     },
@@ -779,6 +796,157 @@
       "loadFailed": "Could not load keys"
     }
   },
+  "Admin": {
+    "brand": {
+      "title": "Invoicey Admin",
+      "tagline": "Platform console"
+    },
+    "nav": {
+      "group": "Platform",
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "workspaces": "Workspaces",
+      "invoices": "Invoices",
+      "issuers": "Issuers",
+      "backToApp": "Back to app",
+      "productGroup": "Product",
+      "productDashboard": "Product dashboard"
+    },
+    "breadcrumb": {
+      "root": "Admin",
+      "users": "Users",
+      "workspaces": "Workspaces",
+      "invoices": "Invoices",
+      "issuers": "Issuers"
+    },
+    "table": {
+      "search": "Search",
+      "copyId": "Copy id",
+      "copied": "Copied",
+      "columns": "Columns",
+      "paginationInfo": "'{'from'}' – '{'to'}' of '{'count'}'",
+      "nextPage": "Next page",
+      "previousPage": "Previous page",
+      "rowsPerPage": "Rows per page"
+    },
+    "dashboard": {
+      "title": "Platform dashboard",
+      "subtitle": "Cross-tenant totals across all workspaces.",
+      "statusTitle": "Invoices by status",
+      "recentTitle": "Recent invoices",
+      "recentEmpty": "No invoices yet.",
+      "cards": {
+        "users": "Users",
+        "workspaces": "Workspaces",
+        "invoices": "Invoices",
+        "issuers": "Issuers",
+        "adminsHint": "{count} platform admins",
+        "issuedHint": "{count} issued in 12m · {volume}"
+      },
+      "recent": {
+        "number": "Number",
+        "client": "Client",
+        "workspace": "Workspace",
+        "total": "Total",
+        "status": "Status"
+      }
+    },
+    "users": {
+      "title": "Users",
+      "subtitle": "All accounts. Grant or revoke platform admin here.",
+      "empty": "No users.",
+      "count": "{count, plural, one {# user} other {# users}}",
+      "filters": {
+        "searchPlaceholder": "name, email, id…"
+      },
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "verified": "Verified",
+        "role": "Platform role",
+        "memberships": "Memberships",
+        "defaultWorkspace": "Default workspace",
+        "createdAt": "Created",
+        "id": "User id",
+        "actions": "Actions"
+      },
+      "verified": {
+        "yes": "Verified",
+        "no": "Unverified"
+      },
+      "role": {
+        "admin": "Admin",
+        "none": "None"
+      },
+      "actions": {
+        "grant": "Grant admin",
+        "revoke": "Revoke"
+      }
+    },
+    "workspaces": {
+      "title": "Workspaces",
+      "subtitle": "All organizations with member and invoice counts.",
+      "empty": "No workspaces.",
+      "count": "{count, plural, one {# workspace} other {# workspaces}}",
+      "filters": {
+        "searchPlaceholder": "name, slug, id…"
+      },
+      "columns": {
+        "name": "Name",
+        "slug": "Slug",
+        "members": "Members",
+        "invoices": "Invoices",
+        "issuers": "Issuers",
+        "createdAt": "Created",
+        "id": "Workspace id"
+      }
+    },
+    "invoices": {
+      "title": "Invoices",
+      "subtitle": "Cross-tenant invoice list (read-only).",
+      "empty": "No invoices.",
+      "count": "{count, plural, one {# invoice} other {# invoices}}",
+      "filters": {
+        "searchPlaceholder": "number, client, workspace, issuer…"
+      },
+      "columns": {
+        "number": "Number",
+        "client": "Client",
+        "workspace": "Workspace",
+        "issuer": "Issuer",
+        "total": "Total",
+        "issueDate": "Issue date",
+        "dueDate": "Due date",
+        "status": "Status",
+        "id": "Invoice id",
+        "workspaceId": "Workspace id",
+        "issuerId": "Issuer id"
+      }
+    },
+    "issuers": {
+      "title": "Issuers",
+      "subtitle": "Cross-tenant issuer businesses (read-only).",
+      "empty": "No issuers.",
+      "count": "{count, plural, one {# issuer} other {# issuers}}",
+      "filters": {
+        "searchPlaceholder": "name, IČO, DIČ, workspace…"
+      },
+      "source": {
+        "ares": "ARES",
+        "manual": "Manual"
+      },
+      "columns": {
+        "name": "Name",
+        "ico": "IČO",
+        "dic": "DIČ",
+        "workspace": "Workspace",
+        "source": "Source",
+        "updatedAt": "Updated",
+        "id": "Issuer id",
+        "workspaceId": "Workspace id"
+      }
+    }
+  },
   "Consent": {
     "banner": {
       "title": "Your privacy, your choice",
@@ -801,6 +969,6 @@
   "Pwa": {
     "name": "Invoicey",
     "shortName": "Invoicey",
-    "description": "Czech invoicing — schema-first"
+    "description": "Schema-first invoice automation"
   }
 }

@@ -108,6 +108,13 @@ export const auth = betterAuth({
     additionalFields: {
       /** Workspace used by machine identities, which carry no active-org cookie. */
       defaultWorkspaceId: { type: "string", required: false, input: false },
+      /** Platform ops console (ADR 0024); input:false so clients cannot self-elevate. */
+      platformRole: {
+        type: "string",
+        required: false,
+        defaultValue: "none",
+        input: false,
+      },
     },
   },
 

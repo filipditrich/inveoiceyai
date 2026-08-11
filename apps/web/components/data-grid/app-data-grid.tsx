@@ -22,11 +22,18 @@ type AppDataGridProps<TData extends object> = {
   className?: string;
   showColumnVisibility?: boolean;
   showPagination?: boolean;
+  columnsLabel?: string;
+  paginationLabels?: {
+    info?: string;
+    nextPageLabel?: string;
+    previousPageLabel?: string;
+    rowsPerPageLabel?: string;
+  };
 };
 
 /**
  * Shared ReUI Data Grid shell: sticky dense header, optional toolbar,
- * column visibility, scroll area, Czech pagination labels.
+ * column visibility, scroll area, Czech pagination labels by default.
  */
 export function AppDataGrid<TData extends object>({
   table,
@@ -36,6 +43,8 @@ export function AppDataGrid<TData extends object>({
   className,
   showColumnVisibility = true,
   showPagination = true,
+  columnsLabel = "Sloupce",
+  paginationLabels,
 }: AppDataGridProps<TData>) {
   return (
     <DataGrid
@@ -61,7 +70,7 @@ export function AppDataGrid<TData extends object>({
                 trigger={
                   <Button size="sm" variant="outline">
                     <Columns3Icon className="size-4" />
-                    Sloupce
+                    {columnsLabel}
                   </Button>
                 }
               />
@@ -77,10 +86,14 @@ export function AppDataGrid<TData extends object>({
 
         {showPagination ? (
           <DataGridPagination
-            info="{from} – {to} z {count}"
-            nextPageLabel="Další stránka"
-            previousPageLabel="Předchozí stránka"
-            rowsPerPageLabel="Řádků na stránku"
+            info={paginationLabels?.info ?? "{from} – {to} z {count}"}
+            nextPageLabel={paginationLabels?.nextPageLabel ?? "Další stránka"}
+            previousPageLabel={
+              paginationLabels?.previousPageLabel ?? "Předchozí stránka"
+            }
+            rowsPerPageLabel={
+              paginationLabels?.rowsPerPageLabel ?? "Řádků na stránku"
+            }
             sizes={[25, 50, 100]}
           />
         ) : null}

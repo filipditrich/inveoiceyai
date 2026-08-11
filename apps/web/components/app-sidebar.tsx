@@ -36,9 +36,11 @@ import * as React from "react";
 
 export function AppSidebar({
   user,
+  isPlatformAdmin = false,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: { name: string; email: string; avatar: string };
+  isPlatformAdmin?: boolean;
 }) {
   const pathname = usePathname();
   const t = useTranslations("App");
@@ -180,7 +182,7 @@ export function AppSidebar({
         />
       </SidebarContent>
       <SidebarFooter className="gap-3">
-        <NavUser user={user} />
+        <NavUser isPlatformAdmin={isPlatformAdmin} user={user} />
         {process.env.NODE_ENV !== "production" ? (
           <p
             className="text-muted-foreground px-2 pb-1 font-mono text-[0.65rem] tabular-nums tracking-wide group-data-[collapsible=icon]:hidden"

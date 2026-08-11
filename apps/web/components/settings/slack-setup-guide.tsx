@@ -74,19 +74,20 @@ export function SlackSetupGuide() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2">
-          <MessageSquareIcon className="size-4" />
-          Slack bot (Eve)
+          <MessageSquareIcon className="text-muted-foreground size-4" />
+          Invoicey pro Slack
+          <Badge variant="secondary">Eve</Badge>
         </CardTitle>
         <CardDescription>
-          Agent ve Slacku — stejné nástroje jako MCP, s potvrzením u nevratných
-          akcí.
+          Připravujte faktury v konverzaci. Vystavení, odeslání a potvrzení
+          platby vždy vyžaduje souhlas.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-5">
         <section className="space-y-3">
-          <h3 className="text-sm font-medium">Jak ho používat</h3>
+          <h3 className="text-sm font-medium">Jak funguje</h3>
           <ul className="text-muted-foreground list-inside list-disc space-y-1.5 text-sm leading-relaxed">
             <li>Pozvěte bota do kanálu, nebo mu napište DM.</li>
             <li>
@@ -94,16 +95,16 @@ export function SlackSetupGuide() {
               relaci; v tom samém vlákně už zmínka není potřeba.
             </li>
             <li>
-              Bot připraví koncept, pošle PDF/ISDOC do threadu a odkaz do web
-              appky.
+              Bot připraví návrh, připojí PDF a ISDOC a přidá odkaz do webové
+              aplikace.
             </li>
           </ul>
         </section>
 
         <section className="space-y-3">
-          <h3 className="text-sm font-medium">Schválení (HITL)</h3>
+          <h3 className="text-sm font-medium">Akce vyžadující potvrzení</h3>
           <p className="text-muted-foreground text-sm">
-            Tyto akce vždy zastaví a požádají o approve/reject ve vlákně:
+            U těchto kroků se agent vždy zastaví a požádá o schválení:
           </p>
           <div className="space-y-2">
             {HITL_TOOLS.map((tool) => (
@@ -127,14 +128,14 @@ export function SlackSetupGuide() {
           <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-400" />
           <div className="space-y-1 leading-relaxed">
             <p className="font-medium text-amber-900 dark:text-amber-200">
-              Jak se autorizuje
+              Přístup bota ke workspace
             </p>
             <p className="text-muted-foreground text-xs">
-              Slack cesta jde přes <strong>Vercel Connect</strong> na{" "}
+              Slack komunikuje přes <strong>Vercel Connect</strong> na{" "}
               <code className="text-[11px]">/eve/v1/slack</code>. Agent běží
               jako <strong>deployment</strong> (ops workspace), ne jako váš
               osobní API klíč. Kdokoli v kanálu má stejnou moc — držte bota v
-              privátním kanálu s lidmi, kteří smí fakturovat.
+              soukromém kanálu s lidmi, kteří smí fakturovat.
             </p>
           </div>
         </div>
@@ -146,7 +147,7 @@ export function SlackSetupGuide() {
             )}
           >
             <span className="flex items-center gap-2">
-              Operator setup
+              Technické nastavení nasazení
               <Badge variant="outline">CLI</Badge>
             </span>
             <ChevronDownIcon
@@ -158,8 +159,8 @@ export function SlackSetupGuide() {
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-3 space-y-4">
             <p className="text-muted-foreground text-sm leading-relaxed">
-              V aplikaci Connect tlačítko není — připojení je jen přes Vercel
-              CLI. Osobní PAT ze Settings → API klíče Slack neautorizuje.
+              Tato část je určená správci nasazení. Připojení probíhá přes
+              Vercel CLI; osobní API klíč Slack neautorizuje.
             </p>
             <ol className="space-y-4">
               {OPERATOR_STEPS.map((step, index) => (
@@ -198,7 +199,7 @@ export function SlackSetupGuide() {
           href="/docs/integrations/slack"
           className="text-primary inline-flex items-center gap-1 text-sm hover:underline"
         >
-          Podrobný Slack guide
+          Podrobný návod pro Slack
           <ExternalLinkIcon className="size-3.5" />
         </Link>
       </CardContent>

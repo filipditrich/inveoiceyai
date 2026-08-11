@@ -25,6 +25,7 @@ flowchart LR
     Post --> P14["Plan 14<br/>auth<br/>done"]
     P14 --> P16["Plan 16<br/>account security<br/>done"]
     P16 --> P17["Plan 17<br/>public shell<br/>implementation done"]
+    P16 --> P18["Plan 18<br/>platform admin<br/>done"]
     P12a -.feeds.-> P13b
     P13a -.upgrades to.-> P13b
 ```
@@ -445,6 +446,25 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 - [ ] Merged to `main` + production smoke
 
 **Out of scope:** separate product/feature/AI/pricing pages, blog/CMS, billing, or new marketing trackers.
+
+### Plan 18 — Global platform admin
+
+**Status:** Done  
+**Completed:** 2026-08-11  
+**ADR:** [0024](./decisions/0024-platform-admin-user-flag.md) · [plan](../.cursor/plans/plan-18-platform-admin.md)
+
+**Goal:** User-level platform admin (orthogonal to workspace roles) plus an isolated `/admin` console for cross-tenant metrics and lists (users, workspaces, invoices, issuers).
+
+**Exit criteria:**
+
+- [x] `users.platform_role` + Better Auth field + `requirePlatformAdmin()`
+- [x] Env allowlist promote + grant script; runtime gate reads DB flag
+- [x] `/admin` dashboard + list pages; grant/revoke platform role with audit
+- [x] Nav entry for admins only; proxy matcher; cs/en i18n
+- [x] Typecheck / focused tests; `platform_role` column applied on Neon
+- [ ] Set `INVOICEY_PLATFORM_ADMIN_EMAILS` on Vercel prod/preview
+
+**Out of v1:** Better Auth admin plugin, MCP/Eve platform role, cross-tenant business mutations, RLS.
 
 ## Plans not yet promised
 

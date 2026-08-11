@@ -35,6 +35,7 @@ openssl rand -base64 32   # BETTER_AUTH_SECRET
 | `BETTER_AUTH_URL`                           | Falls back to `NEXT_PUBLIC_APP_URL` |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | No Google sign-in button            |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | No GitHub sign-in button            |
+| `INVOICEY_PLATFORM_ADMIN_EMAILS`            | No automatic platform-admin promote |
 
 Providers are only registered when **both** halves are present — a half-configured provider would be
 a button that fails after the redirect with an opaque error from the provider.
@@ -80,6 +81,7 @@ See [API keys](/docs/integrations/api-keys).
 | `NEXT_PUBLIC_APP_STAGE`              | `development` · `production` · `staging` · `beta` · `alpha`. Drives environment banners |
 | `DATABASE_URL_UNPOOLED`              | Direct connection for migrations. Optional locally                                      |
 | `INVOICEY_DEFAULT_WORKSPACE_ID`      | Workspace used by machine identities that carry no session — MCP, Slack, cron           |
+| `INVOICEY_PLATFORM_ADMIN_EMAILS`     | Comma-separated emails promoted to platform admin on sign-in (promote-only; ADR 0024)   |
 | `VERCEL_USE_EXPERIMENTAL_FRAMEWORKS` | Set to `1` at **build** time or the Slack agent's routes are never generated            |
 
 ## Fail-closed by default

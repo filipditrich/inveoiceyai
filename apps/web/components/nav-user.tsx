@@ -17,7 +17,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth/client";
-import { LoaderCircleIcon, LogOutIcon, SettingsIcon } from "lucide-react";
+import {
+  LoaderCircleIcon,
+  LogOutIcon,
+  SettingsIcon,
+  ShieldIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -36,12 +41,14 @@ function initialsFromName(name: string): string {
 
 export function NavUser({
   user,
+  isPlatformAdmin = false,
 }: {
   user: {
     name: string;
     email: string;
     avatar: string;
   };
+  isPlatformAdmin?: boolean;
 }) {
   const { isMobile } = useSidebar();
   const router = useRouter();
@@ -124,6 +131,12 @@ export function NavUser({
                 <SettingsIcon />
                 {t("settings")}
               </DropdownMenuItem>
+              {isPlatformAdmin ? (
+                <DropdownMenuItem render={<Link href="/admin" />}>
+                  <ShieldIcon />
+                  {t("platformAdmin")}
+                </DropdownMenuItem>
+              ) : null}
               <DropdownMenuItem
                 disabled={signingOut}
                 onClick={() => void signOut()}

@@ -8,7 +8,8 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 
 import { auth } from "./auth";
-import { ForbiddenError } from "./errors";
+import { ForbiddenError, UnauthorizedError } from "./errors";
+import { loadPlatformRole } from "./platform-admin";
 
 export type WorkspaceRole = "owner" | "admin" | "member";
 
@@ -17,6 +18,12 @@ export interface SessionUser {
   name: string;
   email: string;
   image: string | null;
+}
+
+export interface PlatformAdminContext {
+  userId: string;
+  email: string;
+  name: string;
 }
 
 export interface WorkspaceContext {
@@ -129,6 +136,47 @@ export async function requireWorkspaceRole(
     throw new ForbiddenError(`Requires ${minimum} role`);
   }
   return context;
+}
+
+/** True when the signed-in user has `users.platform_role = admin` (DB flag). */
+export async function isPlatformAdmin(): Promise<boolean> {
+  const session = await getSession();
+  if (!session) return false;
+  return (await loadPlatformRole(session.user.id)) === "admin";
+}
+
+/**
+ * Platform ops console gate (ADR 0024). Reads the DB flag — not the env allowlist.
+ * Redirects non-admins to the product dashboard.
+ */
+export async function requirePlatformAdmin(): Promise<PlatformAdminContext> {
+  const user = await requireSession();
+  const role = await loadPlatformRole(user.id);
+  if (role !== "admin") {
+    redirect("/dashboard");
+  }
+  return {
+    userId: user.id,
+    email: user.email,
+    name: user.name,
+  };
+}
+
+/** Same as `requirePlatformAdmin` but throws for server actions / route handlers. */
+export async function assertPlatformAdmin(): Promise<PlatformAdminContext> {
+  const session = await getSession();
+  if (!session) {
+    throw new UnauthorizedError();
+  }
+  const role = await loadPlatformRole(session.user.id);
+  if (role !== "admin") {
+    throw new ForbiddenError("Requires platform admin");
+  }
+  return {
+    userId: session.user.id,
+    email: session.user.email,
+    name: session.user.name,
+  };
 }
 
 /**

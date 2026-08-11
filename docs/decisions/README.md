@@ -35,3 +35,4 @@ When a decision changes:
 | [0021](./0021-immutable-imported-invoice-artifacts.md)     | Immutable imported invoice artifacts + provenance          | Accepted                   |
 | [0022](./0022-resend-and-react-email.md)                   | Resend + react-email for transactional mail                | Accepted                   |
 | [0023](./0023-account-security-soft-devices.md)            | Soft trusted devices + PAT cutover for machine auth        | Accepted                   |
+| [0024](./0024-platform-admin-user-flag.md)                 | Platform admin is a user flag, not a workspace role        | Accepted                   |

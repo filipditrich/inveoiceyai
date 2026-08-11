@@ -8,6 +8,9 @@ import {
   CopyIcon,
   ExternalLinkIcon,
   KeyRoundIcon,
+  LoaderCircleIcon,
+  ShieldAlertIcon,
+  SquareTerminalIcon,
 } from "lucide-react";
 
 import { recordAccountSecurityEventAction } from "@/actions/security";
@@ -163,28 +166,18 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">API klíče</h2>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          Osobní tokeny pro <strong>remote MCP</strong> (
-          <code className="text-xs">/api/mcp</code>). Váží se na váš výchozí
-          workspace. Eve HTTP a Slack používají jiné autorizace — ne tento klíč.
-        </p>
-      </div>
-
       <Card>
-        <CardHeader>
+        <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2">
-            <KeyRoundIcon className="size-4" />
+            <KeyRoundIcon className="text-muted-foreground size-4" />
             Vaše klíče
           </CardTitle>
           <CardDescription>
-            Celý token se zobrazí jen jednou při vytvoření. Ops klíč{" "}
-            <code className="text-xs">MCP_API_KEY</code> zůstává jako
-            deploymentová záloha.
+            Pojmenujte klíč podle aplikace nebo zařízení. Celý token se zobrazí
+            pouze jednou.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5 pt-5">
           {createdRaw ? (
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
               <div className="mb-1 flex items-center justify-between gap-2 font-medium">
@@ -212,28 +205,39 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
             </div>
           ) : null}
 
-          <div className="flex flex-wrap gap-2">
-            <Input
-              placeholder="Název klíče (např. Cursor)"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="max-w-xs"
-            />
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+            <label className="space-y-1.5 text-sm font-medium">
+              Název klíče
+              <Input
+                placeholder="Např. Cursor na MacBooku"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </label>
             <Button
               disabled={pending}
               loading={busyKey === "create"}
               onClick={create}
             >
+              <KeyRoundIcon />
               {busyKey === "create" ? "Vytvářím…" : "Vytvořit klíč"}
             </Button>
           </div>
 
-          <div className="space-y-3">
-            {keys.length === 0 ? (
-              <p className="text-muted-foreground text-sm">
-                Zatím žádné klíče. Vytvořte jeden a pokračujte nastavením MCP
-                níže.
-              </p>
+          <div className="space-y-3 border-t pt-4">
+            {pending && keys.length === 0 ? (
+              <div className="text-muted-foreground flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-7 text-sm">
+                <LoaderCircleIcon className="size-4 animate-spin" />
+                Načítám klíče…
+              </div>
+            ) : keys.length === 0 ? (
+              <div className="text-muted-foreground flex flex-col items-center rounded-lg border border-dashed px-4 py-7 text-center text-sm">
+                <KeyRoundIcon className="mb-2 size-5 opacity-60" />
+                <p className="text-foreground font-medium">Zatím bez klíčů</p>
+                <p className="mt-1 max-w-sm">
+                  Vytvořte první klíč a použijte ho v konfiguraci MCP níže.
+                </p>
+              </div>
             ) : (
               keys.map((k) => (
                 <div
@@ -268,11 +272,14 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
       </Card>
 
       <Card id="mcp">
-        <CardHeader>
-          <CardTitle>Nastavení remote MCP</CardTitle>
+        <CardHeader className="border-b">
+          <CardTitle className="flex items-center gap-2">
+            <SquareTerminalIcon className="text-muted-foreground size-4" />
+            Připojení remote MCP
+          </CardTitle>
           <CardDescription>
-            Interaktivní průvodce pro Cursor (nebo jiného MCP klienta).
-            Podrobnosti v dokumentaci.
+            Tři kroky pro Cursor, Claude Code nebo jiného kompatibilního
+            klienta.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -355,19 +362,22 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
             </li>
           </ol>
 
-          <div className="bg-muted/50 space-y-2 rounded-lg border px-3 py-2.5 text-sm">
-            <p className="font-medium">Poznámky k autorizaci</p>
-            <ul className="text-muted-foreground list-inside list-disc space-y-1 text-xs leading-relaxed">
-              <li>
-                Remote MCP přijímá váš PAT nebo ops{" "}
-                <code className="text-[11px]">MCP_API_KEY</code>.
-              </li>
-              <li>Local stdio MCP (dev) nepoužívá PAT — viz dokumentaci.</li>
-              <li>
-                Slack bot a Eve HTTP nejdou přes tento klíč (Connect / ops
-                klíče).
-              </li>
-            </ul>
+          <div className="bg-muted/50 flex items-start gap-3 rounded-lg border px-3 py-3 text-sm">
+            <ShieldAlertIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+            <div className="space-y-2">
+              <p className="font-medium">Který klíč kam patří</p>
+              <ul className="text-muted-foreground list-inside list-disc space-y-1 text-xs leading-relaxed">
+                <li>
+                  Remote MCP přijímá váš PAT nebo ops{" "}
+                  <code className="text-[11px]">MCP_API_KEY</code>.
+                </li>
+                <li>Local stdio MCP (dev) nepoužívá PAT — viz dokumentaci.</li>
+                <li>
+                  Slack bot a Eve HTTP nejdou přes tento klíč (Connect / ops
+                  klíče).
+                </li>
+              </ul>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">

@@ -11,6 +11,9 @@ import {
 
 import { workspaces } from "./workspaces";
 
+/** Platform-wide role (ADR 0024); orthogonal to workspace owner/admin/member. */
+export type PlatformRole = "none" | "admin";
+
 /**
  * Better Auth tables (Plan 14, ADR 0018) for `better-auth@1.6.26`.
  *
@@ -37,6 +40,11 @@ export const user = pgTable("users", {
   image: text("image"),
   /** Workspace machine identities fall back to (no active-org cookie). */
   defaultWorkspaceId: text("default_workspace_id"),
+  /** Platform ops console (ADR 0024); not a Better Auth organization role. */
+  platformRole: text("platform_role")
+    .$type<PlatformRole>()
+    .notNull()
+    .default("none"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
