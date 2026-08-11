@@ -228,7 +228,11 @@ export const oauthConsent = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
   (t) => [
-    uniqueIndex("oauth_consents_user_client_uidx").on(t.userId, t.clientId),
+    // Deliberately NOT unique. The plugin re-`create`s a consent row (it never
+    // upserts) whenever the request asks for a scope outside the stored consent
+    // or sends `prompt=consent`, so a unique (user, client) index would make
+    // every re-consent a 500. Upstream has no uniqueness here either.
+    index("oauth_consents_user_client_idx").on(t.userId, t.clientId),
   ],
 );
 
