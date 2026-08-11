@@ -11,17 +11,18 @@ export function getDefaultWorkspaceId(): string {
   return v != null && v.length > 0 ? v : DEFAULT_WORKSPACE_ID;
 }
 
-/** Inserts the workspace row when `id` is a UUID and missing. */
+/**
+ * Inserts the workspace row when missing.
+ *
+ * Does not require `id` to be a UUID: `workspaces.id` is `text`, and skipping
+ * the insert for other shapes returned an id with no row behind it, so every
+ * page filtered on it and silently rendered empty.
+ */
 export async function ensureDefaultWorkspace(
   database: InvoiceyDb,
   options?: { id?: string; name?: string },
 ): Promise<{ id: string }> {
   const id = options?.id ?? getDefaultWorkspaceId();
-  const uuidRe =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  if (!uuidRe.test(id)) {
-    return { id };
-  }
 
   const existing = await database
     .select({ id: workspaces.id })
@@ -35,10 +36,10 @@ export async function ensureDefaultWorkspace(
   await database.insert(workspaces).values({
     id,
     name: options?.name ?? "Default workspace",
-    // `slug` is required since Plan 14; derived from the id so lazily-created
-    // workspaces cannot collide. Whole function goes away in Plan 14 stage 6,
-    // once every caller resolves the workspace from the session instead.
-    slug: `ws-${id.slice(0, 8)}`,
+    // `slug` is required since Plan 14. Uses the whole id, not a prefix, so it
+    // inherits the primary key's uniqueness. Whole function goes away in Plan
+    // 14 stage 6, once callers resolve the workspace from the session instead.
+    slug: `ws-${id}`,
   });
   return { id };
 }
