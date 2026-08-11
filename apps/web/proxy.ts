@@ -2,14 +2,14 @@ import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * Optimistic redirect for signed-out users. NOT an authorization boundary —
+ * Optimistic redirect for signed-out users (Next 16 `proxy` convention). NOT an authorization boundary —
  * it only checks that a session cookie is present, never that it is valid.
  * Every page, action and route handler calls `requireWorkspace()` itself.
  *
  * The matcher is an allowlist, so adding a public route never requires
  * remembering to exempt it here.
  */
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   if (getSessionCookie(request)) {
     return NextResponse.next();
   }
@@ -22,6 +22,10 @@ export function middleware(request: NextRequest) {
   return NextResponse.redirect(url);
 }
 
+// No `runtime` key: a Proxy file always runs on Node, and Next rejects route
+// segment config here. That is what this file is for — as `middleware.ts` it
+// built as an Edge Function, which `withEve()` cannot deploy ("Service 'eve'
+// produced Edge Function output '_middleware'").
 export const config = {
   matcher: [
     "/dashboard/:path*",
