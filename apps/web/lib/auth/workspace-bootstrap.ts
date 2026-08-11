@@ -2,7 +2,19 @@ import "server-only";
 
 import { member, user as userTable, workspaces } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
+import { withDbTransaction } from "@invoicey/db/transaction";
 import { asc, eq } from "drizzle-orm";
+
+/** Postgres unique_violation. */
+const UNIQUE_VIOLATION = "23505";
+
+function isUniqueViolation(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { code?: unknown }).code === UNIQUE_VIOLATION
+  );
+}
 
 /** Shape Better Auth hands to the `user.create.after` hook. */
 interface CreatedUser {
@@ -34,41 +46,48 @@ function randomSuffix(): string {
  *
  * Inserts directly rather than calling `auth.api.createOrganization` — this runs
  * inside a Better Auth hook, where re-entering the API risks recursion.
+ *
+ * All three writes share one transaction. `user.create.after` only ever fires
+ * once per user, so a partial failure would otherwise leave the account with no
+ * membership forever — and no way to retry, since the hook never runs again.
  */
 export async function createPersonalWorkspace(
   user: CreatedUser,
 ): Promise<string> {
   const workspaceId = crypto.randomUUID();
   const name = user.name ? `${user.name}'s workspace` : "Personal workspace";
-
-  // Retry on the unique slug index rather than pre-checking (racy under
-  // concurrent first sign-ins).
   const base = slugBase(user);
+
+  // The slug retry wraps the transaction rather than sitting inside it: a
+  // failed statement aborts a Postgres transaction, so a second INSERT on the
+  // same tx would fail with "current transaction is aborted" regardless of the
+  // new slug. Each attempt therefore gets a fresh transaction.
   let slug = base;
-  for (let attempt = 0; attempt < 5; attempt += 1) {
+  for (let attempt = 0; ; attempt += 1) {
     try {
-      await db.insert(workspaces).values({ id: workspaceId, name, slug });
-      break;
+      return await withDbTransaction(async (tx) => {
+        await tx.insert(workspaces).values({ id: workspaceId, name, slug });
+
+        await tx.insert(member).values({
+          id: crypto.randomUUID(),
+          userId: user.id,
+          organizationId: workspaceId,
+          role: "owner",
+          createdAt: new Date(),
+        });
+
+        await tx
+          .update(userTable)
+          .set({ defaultWorkspaceId: workspaceId })
+          .where(eq(userTable.id, user.id));
+
+        return workspaceId;
+      });
     } catch (error) {
-      if (attempt === 4) throw error;
+      if (attempt >= 4 || !isUniqueViolation(error)) throw error;
       slug = `${base}-${randomSuffix()}`;
     }
   }
-
-  await db.insert(member).values({
-    id: crypto.randomUUID(),
-    userId: user.id,
-    organizationId: workspaceId,
-    role: "owner",
-    createdAt: new Date(),
-  });
-
-  await db
-    .update(userTable)
-    .set({ defaultWorkspaceId: workspaceId })
-    .where(eq(userTable.id, user.id));
-
-  return workspaceId;
 }
 
 /**
