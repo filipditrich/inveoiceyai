@@ -1,6 +1,5 @@
 import type { ClientOption, IssuerOption } from "@/lib/invoice-party-types";
 import { ensureAllIssuerNumberingSchemes } from "@/lib/issuer-numbering";
-import { getDefaultWorkspaceId } from "@/lib/workspace-id";
 import {
 	ClientSnapshotSchema,
 	IssuerSnapshotSchema,
@@ -9,8 +8,9 @@ import { clients, issuerBusinesses, issuerNumberingSchemes } from "@invoicey/db"
 import { db } from "@invoicey/db/client";
 import { eq } from "drizzle-orm";
 
-export async function loadIssuerOptions(): Promise<IssuerOption[]> {
-	const workspaceId = getDefaultWorkspaceId();
+export async function loadIssuerOptions(
+	workspaceId: string,
+): Promise<IssuerOption[]> {
 	const rows = await db
 		.select()
 		.from(issuerBusinesses)
@@ -56,8 +56,9 @@ export async function loadIssuerOptions(): Promise<IssuerOption[]> {
 	return out;
 }
 
-export async function loadClientOptions(): Promise<ClientOption[]> {
-	const workspaceId = getDefaultWorkspaceId();
+export async function loadClientOptions(
+	workspaceId: string,
+): Promise<ClientOption[]> {
 	const rows = await db
 		.select()
 		.from(clients)

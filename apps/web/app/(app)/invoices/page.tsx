@@ -6,10 +6,7 @@ import {
 	pragueTodayIso,
 } from "@/lib/invoice-status-sql";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
-import {
-	ensureDefaultWorkspace,
-	getDefaultWorkspaceId,
-} from "@/lib/workspace-id";
+import { requireWorkspace } from "@/lib/auth/session";
 import {
 	DISPLAY_STATUS_LABELS,
 	INVOICE_DISPLAY_STATUSES,
@@ -97,9 +94,8 @@ export default async function InvoicesPage({
 }: {
 	searchParams: Search;
 }) {
-	await ensureDefaultWorkspace();
 	const sp = await searchParams;
-	const workspaceId = getDefaultWorkspaceId();
+	const { workspaceId } = await requireWorkspace();
 	const page = Math.max(1, Number(sp.page ?? "1") || 1);
 	const sort = sp.sort === "date_asc" ? "date_asc" : "date_desc";
 	const todayIso = pragueTodayIso();
@@ -138,8 +134,8 @@ export default async function InvoicesPage({
 			.limit(PAGE_SIZE)
 			.offset(offset),
 		db.select().from(invoices).where(summaryWhere),
-		loadIssuerOptions(),
-		loadClientOptions(),
+		loadIssuerOptions(workspaceId),
+		loadClientOptions(workspaceId),
 	]);
 
 	const tally: Record<

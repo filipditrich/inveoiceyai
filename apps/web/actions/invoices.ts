@@ -6,10 +6,7 @@ import {
 	todayIsoDate,
 	type BuilderLineInput,
 } from "@/lib/build-invoice";
-import {
-	ensureDefaultWorkspace,
-	getDefaultWorkspaceId,
-} from "@/lib/workspace-id";
+import { requireWorkspace } from "@/lib/auth/session";
 import {
 	ClientSnapshotSchema,
 	InvoiceSchema,
@@ -253,7 +250,7 @@ async function replaceItems(
 
 /** Persist draft without consuming a number. */
 export async function saveInvoiceDraft(formData: FormData): Promise<void> {
-	const workspaceId = await ensureDefaultWorkspace();
+	const { workspaceId } = await requireWorkspace();
 	const existingId = optionalTrim(formData.get("id"));
 	const errBase =
 		existingId !== undefined
@@ -361,7 +358,7 @@ export async function saveInvoiceDraft(formData: FormData): Promise<void> {
 
 /** Issue: lock numbering, assign number, freeze snapshots. */
 export async function issueInvoice(formData: FormData): Promise<void> {
-	const workspaceId = await ensureDefaultWorkspace();
+	const { workspaceId } = await requireWorkspace();
 	const existingId = optionalTrim(formData.get("id"));
 	const errBase =
 		existingId !== undefined
@@ -663,7 +660,7 @@ export async function cancelInvoice(formData: FormData): Promise<void> {
 
 export async function deleteInvoice(formData: FormData): Promise<void> {
 	const id = optionalTrim(formData.get("id"));
-	const workspaceId = getDefaultWorkspaceId();
+	const { workspaceId } = await requireWorkspace();
 	if (!id) {
 		redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
 	}
@@ -687,7 +684,7 @@ export async function deleteInvoice(formData: FormData): Promise<void> {
 /** Duplicate issued or draft into a new draft. */
 export async function duplicateInvoice(formData: FormData): Promise<void> {
 	const id = optionalTrim(formData.get("id"));
-	const workspaceId = getDefaultWorkspaceId();
+	const { workspaceId } = await requireWorkspace();
 	if (!id) {
 		redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
 	}

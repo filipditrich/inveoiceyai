@@ -1,10 +1,16 @@
+import { getOptionalWorkspace } from "@/lib/auth/session";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { UploadThingError } from "uploadthing/server";
 
 const f = createUploadthing();
 
-/** Open-demo middleware — no auth until Plan 14. */
-async function demoMiddleware() {
-	return { workspace: "default" as const };
+/** Uploads are attributed to the caller's workspace; anonymous uploads are refused. */
+async function authedMiddleware() {
+	const context = await getOptionalWorkspace();
+	if (!context) {
+		throw new UploadThingError("Unauthorized");
+	}
+	return { userId: context.userId, workspaceId: context.workspaceId };
 }
 
 export const ourFileRouter = {
@@ -14,7 +20,7 @@ export const ourFileRouter = {
 		"image/jpeg": { maxFileSize: "1MB", maxFileCount: 1 },
 		"image/svg+xml": { maxFileSize: "1MB", maxFileCount: 1 },
 	})
-		.middleware(demoMiddleware)
+		.middleware(authedMiddleware)
 		.onUploadComplete(async ({ file }) => {
 			return { url: file.ufsUrl };
 		}),
@@ -23,7 +29,7 @@ export const ourFileRouter = {
 		"image/png": { maxFileSize: "1MB", maxFileCount: 1 },
 		"image/jpeg": { maxFileSize: "1MB", maxFileCount: 1 },
 	})
-		.middleware(demoMiddleware)
+		.middleware(authedMiddleware)
 		.onUploadComplete(async ({ file }) => {
 			return { url: file.ufsUrl };
 		}),
@@ -32,7 +38,7 @@ export const ourFileRouter = {
 		"image/png": { maxFileSize: "1MB", maxFileCount: 1 },
 		"image/jpeg": { maxFileSize: "1MB", maxFileCount: 1 },
 	})
-		.middleware(demoMiddleware)
+		.middleware(authedMiddleware)
 		.onUploadComplete(async ({ file }) => {
 			return { url: file.ufsUrl };
 		}),

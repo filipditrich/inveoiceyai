@@ -8,7 +8,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { getDefaultWorkspaceId } from "@/lib/workspace-id";
+import { requireWorkspace } from "@/lib/auth/session";
 import {
 	IssuerSnapshotSchema,
 	type IssuerSnapshot,
@@ -32,7 +32,7 @@ export default async function IssuersPage({
 	searchParams: Search;
 }) {
 	const sp = await searchParams;
-	const workspaceId = getDefaultWorkspaceId();
+	const { workspaceId } = await requireWorkspace();
 	const rows = await db
 		.select()
 		.from(issuerBusinesses)

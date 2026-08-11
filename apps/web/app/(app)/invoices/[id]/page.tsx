@@ -10,7 +10,7 @@ import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
 import { Button } from "@/components/ui/button";
 import { formatDateCs, formatMoney } from "@/lib/format";
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
-import { getDefaultWorkspaceId } from "@/lib/workspace-id";
+import { requireWorkspace } from "@/lib/auth/session";
 import { InvoiceSchema } from "@invoicey/invoice-core/schema";
 import { resolveDisplayStatus } from "@invoicey/invoice-core/status-display";
 import { invoices } from "@invoicey/db";
@@ -31,7 +31,7 @@ export default async function InvoiceDetailPage({
 }) {
 	const { id } = await params;
 	const sp = await searchParams;
-	const workspaceId = getDefaultWorkspaceId();
+	const { workspaceId } = await requireWorkspace();
 	const rows = await db
 		.select()
 		.from(invoices)
