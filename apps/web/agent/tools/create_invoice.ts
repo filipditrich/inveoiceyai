@@ -14,7 +14,7 @@ export default defineTool({
       .record(z.string(), z.unknown())
       .optional()
       .describe(
-        "Partial invoice: meta, client, vat, payment, items (issuer ignored).",
+        "Partial invoice: meta, client, vat, payment, items (issuer ignored). vat is required: { mode: regular|reverse_charge|oss, suppliesAbroad: none|eu|non_eu }. Domestic default: { mode: regular, suppliesAbroad: none }. Line vatRate does not replace vat.",
       ),
     issuerPresetId: z
       .string()
