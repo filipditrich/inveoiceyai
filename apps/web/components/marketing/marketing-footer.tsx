@@ -28,6 +28,12 @@ export function MarketingFooter() {
           >
             <Link
               className="hover:text-foreground transition-colors"
+              href="/docs"
+            >
+              Dokumentace
+            </Link>
+            <Link
+              className="hover:text-foreground transition-colors"
               href="/privacy"
             >
               Soukromí

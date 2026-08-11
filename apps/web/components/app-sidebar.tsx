@@ -2,6 +2,7 @@
 
 import { BrandLogo } from "@/components/brand-logo";
 import { NavMain } from "@/components/nav-main";
+import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
@@ -15,6 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_GIT_SHA, APP_VERSION } from "@/lib/app-build-info";
 import {
+  BookOpenIcon,
   Building2Icon,
   FileTextIcon,
   LayoutDashboardIcon,
@@ -121,6 +123,17 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent className="pt-1">
         <NavMain items={navMain} groupLabel={t("nav.group")} />
+        <NavSecondary
+          className="mt-auto"
+          groupLabel={t("nav.resourcesGroup")}
+          items={[
+            {
+              title: t("nav.docs"),
+              url: "/docs",
+              icon: <BookOpenIcon />,
+            },
+          ]}
+        />
       </SidebarContent>
       <SidebarFooter className="gap-3">
         <NavUser user={user} />

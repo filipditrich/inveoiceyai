@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { config as loadDotEnv } from "dotenv";
 import { withBotId } from "botid/next/config";
 import { withEve } from "eve/next";
+import { createMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -75,4 +76,17 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withEve(withBotId(withNextIntl(nextConfig)));
+/**
+ * Fumadocs content pipeline for `/docs` (`content/docs/**.mdx`) — registers the
+ * MDX + macro loaders (Turbopack rules) and adds `mdx` to `pageExtensions`.
+ *
+ * Innermost on purpose: `withEve` returns a config *function*, not an object,
+ * so it has to stay outermost. `createMDX()` returns a `NextConfig &
+ * PromiseLike<NextConfig>` whose `then` is non-enumerable; `withNextIntl`
+ * spreads it away. That is fine here — the deferred work is the content-config
+ * emit, which only applies to the `source.config.ts` API. We use the macro API,
+ * which compiles per-file through the loaders instead.
+ */
+const withMDX = createMDX();
+
+export default withEve(withBotId(withNextIntl(withMDX(nextConfig))));
