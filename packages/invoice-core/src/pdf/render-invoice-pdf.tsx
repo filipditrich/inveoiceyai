@@ -25,7 +25,7 @@ async function streamToUint8Array(
 	return Uint8Array.from(Buffer.concat(parts));
 }
 
-/** Visual page only (react-pdf). Prefer {@link renderInvoicePdf} for ISDOC.PDF. */
+/** Visual page only (react-pdf). Prefer {@link renderInvoicePdf} for PDF + embedded ISDOC. */
 export async function renderVisualInvoicePdf(
 	invoice: Invoice,
 ): Promise<Uint8Array> {
@@ -58,34 +58,11 @@ export async function renderVisualInvoicePdf(
 	return streamToUint8Array(pdfStream);
 }
 
-/**
- * Render invoice as ISDOC.PDF: visual page + embedded `invoice.isdoc`
- * (Catalog `/AF` + EmbeddedFiles, AFRelationship Alternative).
- */
+/** Render invoice PDF with ISDOC XML attached as `invoice.isdoc`. */
 export async function renderInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
 	const visual = await renderVisualInvoicePdf(invoice);
 	const isdocXml = renderIsdoc(invoice);
-	return embedIsdocInPdf(visual, isdocXml, {
-		title: `${documentLabel(invoice)} ${invoice.meta.number}`,
-		author: invoice.issuer.name,
-	});
-}
-
-function documentLabel(invoice: Invoice): string {
-	switch (invoice.meta.docType) {
-		case "invoice":
-			return "Faktura";
-		case "proforma":
-			return "Proforma";
-		case "advance":
-			return "Zálohová faktura";
-		case "credit_note":
-			return "Dobropis";
-		default: {
-			const _exhaustive: never = invoice.meta.docType;
-			return _exhaustive;
-		}
-	}
+	return embedIsdocInPdf(visual, isdocXml);
 }
 
 function customizationAllows(

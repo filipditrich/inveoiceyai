@@ -115,28 +115,23 @@ For each `items[]` (sorted by `position`):
 - Concatenate `vat.legalNote`, `notes`, credit reference `correctedInvoiceNumber` into one `Note` (newlines).
 - **Reverse charge / OSS:** `TaxSubTotal` + `Note` / `VATNote` carry legal text from `vat.legalNote` or defaults from [vat-czech.md](../domain/vat-czech.md).
 
-## ISDOC.PDF (embedded in PDF)
+## ISDOC embedded in PDF
 
-`renderInvoicePdf(invoice)` packages the visual PDF as **ISDOC.PDF**:
+`renderInvoicePdf(invoice)` attaches ISDOC XML inside the PDF (same pattern as NFCtron order invoices):
 
-1. Render the human-readable page with `@react-pdf/renderer`.
-2. Serialize the same invoice with `renderIsdoc`.
-3. Post-process with `pdf-lib` (`embedIsdocInPdf`):
-   - Embed as **`invoice.isdoc`** (`text/xml`)
-   - Register in Catalog **`/AF`** and **`/Names/EmbeddedFiles`**
-   - Set **`/AFRelationship` `/Alternative`** (independent PDF + XML from `Invoice`)
-   - Ensure Filespec **`/EF`** has both `/F` and `/UF`
-   - Add PDF/A-3**b** XMP (`pdfaid:part=3`, `pdfaid:conformance=B`) + sRGB `OutputIntent`
+1. Render the page with `@react-pdf/renderer`.
+2. Serialize with `renderIsdoc`.
+3. `pdf-lib` `attach()` as **`invoice.isdoc`** (`application/xml`) → Catalog `/AF` + `/Names/EmbeddedFiles`.
 
-Recommended download suffix: `-isdoc.pdf`. Standalone `.isdoc` XML remains available via `renderIsdoc` for importers that only accept raw XML.
+Recommended download suffix: `-isdoc.pdf`. Standalone `.isdoc` via `renderIsdoc` remains available.
 
-**Non-goal:** full PDF/A-3**a** (tagged PDF) / veraPDF certification while the visual engine is react-pdf. Public-admin `metadata-invoice-nsessl.xml` and `.isdocx` ZIP archives are out of scope.
+Not claimed: full official ISDOC.PDF / PDF/A-3a (tagged PDF, XMP `pdfaid`, ICC OutputIntent, Filespec `/AFRelationship`). Public-admin `metadata-invoice-nsessl.xml` and `.isdocx` are out of scope.
 
 ## MVP limitations
 
 - **OSS:** until schema adds per-line destination country, ISDOC uses client country and line rates; `Note` states OSS.
 - **BuildingNumber:** always empty; street line may include the descriptive/orientational number.
-- **PDF/A-3a tagging / veraPDF:** not claimed; see ISDOC.PDF section above.
+- **PDF/A-3 / veraPDF ISDOC.PDF profile:** not claimed; PDF only embeds the XML attachment.
 - **NSSSL metadata / ISDOCX:** not generated.
 
 ## References
