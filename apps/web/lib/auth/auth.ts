@@ -42,13 +42,16 @@ const socialProviders = {
     : {}),
 };
 
-if (process.env.NODE_ENV === "production" && !env.BETTER_AUTH_SECRET) {
-  // Better Auth silently falls back to a built-in dev secret otherwise, which
-  // would sign production session cookies with a publicly known key.
-  throw new Error(
-    "BETTER_AUTH_SECRET is required in production. Generate one with `openssl rand -base64 32`.",
-  );
-}
+/**
+ * No local secret assertion: `betterAuth()` already throws
+ * "You are using the default secret" at construction whenever
+ * `NODE_ENV=production` and no secret is set, so a hand-rolled check is dead
+ * code that only duplicates a clearer library error.
+ *
+ * Consequence to know about: `next build` runs with `NODE_ENV=production`, so
+ * once a route imports this module, builds require `BETTER_AUTH_SECRET` to be
+ * present at build time as well as at runtime.
+ */
 
 /**
  * Better Auth server instance (Plan 14, ADR 0018).
