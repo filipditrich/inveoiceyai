@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   renderInvoiceSentEmail,
+  renderNewSignInEmail,
   renderOverdueReminderEmail,
   renderPaymentReceivedEmail,
   renderWorkspaceInviteEmail,
@@ -48,5 +49,19 @@ describe("email renders", () => {
     const out = await renderPaymentReceivedEmail(invoiceFixture);
     expect(out.subject).toContain("Platba");
     expect(out.html).toContain("přijetí platby");
+  });
+
+  it("renders new_sign_in", async () => {
+    const out = await renderNewSignInEmail({
+      userName: "Filip",
+      ipAddress: "1.2.3.4",
+      userAgent: "Chrome",
+      signedInAt: "11. 8. 2026 13:00",
+      trustUrl: "https://invoicey.ditrich.me/security/trust?token=abc",
+      securitySettingsUrl: "https://invoicey.ditrich.me/settings/security",
+    });
+    expect(out.subject).toContain("přihlášení");
+    expect(out.html).toContain("Důvěřovat tomuto zařízení");
+    expect(out.text).toContain("settings/security");
   });
 });

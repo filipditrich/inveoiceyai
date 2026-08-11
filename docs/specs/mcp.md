@@ -47,7 +47,7 @@ flowchart LR
 ```
 
 - **Local:** `@modelcontextprotocol/sdk` stdio.
-- **Remote:** `mcp-handler`, Node runtime, `maxDuration` 120. `MCP_API_KEY` is optional in the env schema but the route **fails closed** when it is unset — `/api/mcp` always expects `Authorization: Bearer <key>` and rejects every request when no key is configured. (Legacy; replaced by OAuth in Plan 14.)
+- **Remote:** `mcp-handler`, Node runtime, `maxDuration` 120. Bearer must match env ops `MCP_API_KEY` **or** a Better Auth user PAT (Plan 16). Ops key → `INVOICEY_DEFAULT_WORKSPACE_ID`; user PAT → `users.defaultWorkspaceId`. Fails closed when neither matches.
 - **Issuer lock:** `create_invoice` injects issuer from preset or `getDemoIssuer()` / `INVOICEY_DEMO_ISSUER_JSON`.
 - **Presets file:** `INVOICEY_PRESETS_PATH` or `~/.invoicey/presets.json` (on Vercel: `/tmp/…` — ephemeral until Plan 12b).
 
@@ -107,11 +107,11 @@ flowchart LR
 
 ## Env
 
-| Var                         | Required          | Notes                                                                                                 |
-| --------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------- |
-| `INVOICEY_DEMO_ISSUER_JSON` | no                | Full `IssuerSnapshot` JSON override                                                                   |
-| `INVOICEY_PRESETS_PATH`     | no                | Absolute path to presets JSON                                                                         |
-| `MCP_API_KEY`               | to use `/api/mcp` | Bearer gate. Optional in the env schema (the app boots without it); the route fails closed when unset |
+| Var                         | Required     | Notes                                                                                        |
+| --------------------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| `INVOICEY_DEMO_ISSUER_JSON` | no           | Full `IssuerSnapshot` JSON override                                                          |
+| `INVOICEY_PRESETS_PATH`     | no           | Absolute path to presets JSON                                                                |
+| `MCP_API_KEY`               | ops fallback | Shared ops Bearer for `/api/mcp`. Optional if callers use user PATs from Settings → API keys |
 
 ## Plan 12b (shipped)
 
@@ -122,7 +122,12 @@ flowchart LR
 
 - Durable remote presets (Blob/DB)
 - MCP `unmark_invoice_paid` (web-only for now)
-- OAuth / Clerk (Plan 14)
+- Per-Slack-user workspace scoping (Eve Connect still uses ops default workspace)
+
+## Auth notes (Plan 14 / 16)
+
+- Human sign-in is Better Auth OAuth (ADR 0018), not Clerk.
+- Remote MCP accepts env ops `MCP_API_KEY` or a Better Auth user PAT (ADR 0023).
 
 ## References
 

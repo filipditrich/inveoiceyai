@@ -16,6 +16,7 @@ import { user } from "./auth-schema";
 import { workspaces } from "./workspaces";
 
 export * from "./auth-schema";
+export * from "./security-schema";
 export * from "./workspaces";
 
 /** Client row — `snapshot` holds validated ClientSnapshot JSON (Plan 4). */
@@ -344,7 +345,7 @@ export const emailMessages = pgTable(
     invoiceId: uuid("invoice_id").references(() => invoices.id, {
       onDelete: "set null",
     }),
-    /** invoice_sent | workspace_invite | overdue_reminder | payment_received */
+    /** invoice_sent | workspace_invite | overdue_reminder | payment_received | new_sign_in */
     template: text("template").notNull(),
     toEmail: text("to_email").notNull(),
     ccEmails: jsonb("cc_emails").$type<string[]>().default([]).notNull(),

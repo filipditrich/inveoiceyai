@@ -1,7 +1,10 @@
 import { env } from "@invoicey/env/server";
 import { registerInvoiceyMcpTools } from "@invoicey/invoice-tools/mcp";
+import { enterInvoiceyContext } from "@invoicey/invoice-tools/workspace-context";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
+
+import { resolveMachineBearer } from "@/lib/auth/machine-bearer";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -23,26 +26,31 @@ const mcpHandler = createMcpHandler(
   },
 );
 
-/**
- * Require `Authorization: Bearer` matching validated `MCP_API_KEY`.
- * Fails closed when the key is unset — no key configured means no access.
- */
+/** Env ops `MCP_API_KEY` or Better Auth user PAT; binds ALS workspace for tools. */
 async function verifyMcpApiKey(
   _req: Request,
   bearerToken?: string,
 ): Promise<AuthInfo | undefined> {
-  const expected = env.MCP_API_KEY;
-  if (!expected) {
+  const identity = await resolveMachineBearer(bearerToken, {
+    opsKeys: [env.MCP_API_KEY],
+  });
+  if (!identity) {
     return undefined;
   }
-  if (bearerToken === expected) {
-    return {
-      token: bearerToken,
-      clientId: "api-key",
-      scopes: ["invoicey"],
-    };
-  }
-  return undefined;
+  enterInvoiceyContext({
+    workspaceId: identity.workspaceId,
+    userId: identity.userId,
+  });
+  return {
+    token: bearerToken ?? "",
+    clientId: identity.kind === "ops" ? "ops-api-key" : identity.userId,
+    scopes: ["invoicey"],
+    extra: {
+      kind: identity.kind,
+      workspaceId: identity.workspaceId,
+      userId: identity.userId,
+    },
+  };
 }
 
 const handler = withMcpAuth(mcpHandler, verifyMcpApiKey, {

@@ -5,12 +5,19 @@ import { authSchema } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
 import { betterAuth } from "better-auth";
+import { createAuthMiddleware } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { mcp, organization } from "better-auth/plugins";
 
 import { sendWorkspaceInviteEmail } from "@/lib/email/invite";
 
+import {
+  deviceCookieOptions,
+  readDeviceTokenFromHeaders,
+} from "./device-trust";
+import { onSessionCreated } from "./on-session-created";
+import { takePendingDeviceToken } from "./pending-device-cookie";
 import {
   createPersonalWorkspace,
   resolveInitialWorkspaceId,
@@ -76,6 +83,19 @@ export const auth = betterAuth({
   emailAndPassword: { enabled: false },
   socialProviders,
 
+  advanced: {
+    ipAddress: {
+      ipAddressHeaders: ["x-forwarded-for", "x-real-ip"],
+    },
+  },
+
+  rateLimit: {
+    enabled: true,
+    storage: "database",
+    window: 10,
+    max: 100,
+  },
+
   /**
    * Both providers verify email addresses, so linking the same person's Google
    * and GitHub logins is safe. `allowDifferentEmails` stays off deliberately.
@@ -109,8 +129,24 @@ export const auth = betterAuth({
           );
           return { data: { ...session, activeOrganizationId } };
         },
+        after: async (session, context) => {
+          await onSessionCreated(session, context);
+        },
       },
     },
+  },
+
+  /** Persist pending `invoicey_did`; `nextCookies` (last plugin) writes Set-Cookie. */
+  hooks: {
+    after: createAuthMiddleware(async (ctx) => {
+      const created = ctx.context.newSession?.session;
+      if (!created?.id) return;
+      const pending = takePendingDeviceToken(created.id);
+      if (!pending) return;
+      if (ctx.headers && readDeviceTokenFromHeaders(ctx.headers)) return;
+      const cookie = deviceCookieOptions(pending);
+      ctx.setCookie(cookie.name, cookie.value, cookie.attributes);
+    }),
   },
 
   plugins: [

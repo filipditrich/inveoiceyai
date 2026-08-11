@@ -3,6 +3,8 @@ import { defineTool } from "eve/tools";
 import { always } from "eve/tools/approval";
 import { z } from "zod";
 
+import { withEveToolWorkspace } from "../lib/tool-workspace";
+
 export default defineTool({
   description:
     "Email an issued invoice (PDF + optional ISDOC) to the client. Requires Slack approval. Pass `to` when client has no contactEmail.",
@@ -15,7 +17,7 @@ export default defineTool({
     subject: z.string().optional(),
   }),
   approval: always(),
-  async execute(input) {
-    return sendInvoiceEmailById(input);
+  async execute(input, ctx) {
+    return withEveToolWorkspace(ctx, () => sendInvoiceEmailById(input));
   },
 });

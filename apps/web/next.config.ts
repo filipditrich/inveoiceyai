@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config as loadDotEnv } from "dotenv";
+import { withBotId } from "botid/next/config";
 import { withEve } from "eve/next";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
@@ -74,4 +75,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withEve(withNextIntl(nextConfig));
+export default withEve(withBotId(withNextIntl(nextConfig)));

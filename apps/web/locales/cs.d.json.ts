@@ -2,43 +2,60 @@
 // See: https://next-intl.dev/docs/workflows/typescript#messages-arguments
 
 declare const messages: {
-  "App": {
-    "meta": {
-      "title": "Invoicey",
-      "description": "Czech-first invoicing — schema-first data, PDF + ISDOC + SPAYD QR"
-    },
-    "brand": {
-      "tagline": "Czech invoicing"
-    },
-    "nav": {
-      "group": "Navigace",
-      "dashboard": "Přehled",
-      "invoices": "Faktury",
-      "invoicesList": "Faktury",
-      "invoicesNew": "Nová",
-      "invoicesImport": "Import",
-      "invoicesFromJson": "Z JSON",
-      "clients": "Klienti",
-      "issuers": "Dodavatelé"
-    },
-    "breadcrumb": {
-      "dashboard": "Přehled",
-      "invoices": "Faktury",
-      "clients": "Klienti",
-      "issuers": "Dodavatelé",
-      "settings": "Nastavení",
-      "fromJson": "Z JSON",
-      "import": "Import",
-      "new": "Nová",
-      "edit": "Upravit",
-      "invoice": "Faktura",
-      "issuer": "Dodavatel",
-      "client": "Klient",
-      "detail": "Detail"
-    },
-    "a11y": {
-      "toggleSidebar": "Přepnout postranní panel"
-    }
-  }
+  App: {
+    meta: {
+      title: "Invoicey";
+      description: "Czech-first invoicing — schema-first data, PDF + ISDOC + SPAYD QR";
+    };
+    brand: {
+      tagline: "Czech invoicing";
+    };
+    nav: {
+      group: "Navigace";
+      dashboard: "Přehled";
+      invoices: "Faktury";
+      invoicesList: "Faktury";
+      invoicesNew: "Nová";
+      invoicesImport: "Import";
+      invoicesFromJson: "Z JSON";
+      clients: "Klienti";
+      issuers: "Dodavatelé";
+    };
+    breadcrumb: {
+      dashboard: "Přehled";
+      invoices: "Faktury";
+      clients: "Klienti";
+      issuers: "Dodavatelé";
+      settings: "Nastavení";
+      fromJson: "Z JSON";
+      import: "Import";
+      new: "Nová";
+      edit: "Upravit";
+      invoice: "Faktura";
+      issuer: "Dodavatel";
+      client: "Klient";
+      detail: "Detail";
+      security: "Zabezpečení";
+      members: "Členové";
+      "api-keys": "API klíče";
+    };
+    a11y: {
+      toggleSidebar: "Přepnout postranní panel";
+    };
+    settings: {
+      title: "Nastavení";
+      subtitle: "Vzhled, zabezpečení účtu, členové workspace a API klíče.";
+      nav: {
+        appearance: "Vzhled";
+        security: "Zabezpečení";
+        members: "Členové";
+        apiKeys: "API klíče";
+      };
+      appearance: {
+        title: "Vzhled";
+        description: "Světlý, tmavý, nebo podle systému. Preference se ukládá v tomto prohlížeči.";
+      };
+    };
+  };
 };
 export default messages;

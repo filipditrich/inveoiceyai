@@ -9,7 +9,8 @@
     "./ops": "./src/invoice-ops.ts",
     "./artifacts": "./src/invoice-artifacts.ts",
     "./import": "./src/invoice-import.ts",
-    "./email": "./src/send-invoice-email.ts"
+    "./email": "./src/send-invoice-email.ts",
+    "./workspace-context": "./src/workspace-context.ts"
   },
   "scripts": {
     "lint": "eslint .",

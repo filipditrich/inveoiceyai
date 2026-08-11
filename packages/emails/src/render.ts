@@ -13,6 +13,10 @@ import {
   type PaymentReceivedEmailProps,
 } from "./templates/payment-received";
 import {
+  NewSignInEmail,
+  type NewSignInEmailProps,
+} from "./templates/new-sign-in";
+import {
   WorkspaceInviteEmail,
   type WorkspaceInviteEmailProps,
 } from "./templates/workspace-invite";
@@ -28,6 +32,7 @@ export const EMAIL_TEMPLATES = [
   "workspace_invite",
   "overdue_reminder",
   "payment_received",
+  "new_sign_in",
 ] as const;
 
 export type EmailTemplateId = (typeof EMAIL_TEMPLATES)[number];
@@ -87,6 +92,21 @@ export async function renderPaymentReceivedEmail(
   ]);
   return {
     subject: `Platba přijata — ${props.number}`,
+    html,
+    text,
+  };
+}
+
+export async function renderNewSignInEmail(
+  props: NewSignInEmailProps,
+): Promise<RenderedEmail> {
+  const element = NewSignInEmail(props);
+  const [html, text] = await Promise.all([
+    render(element),
+    render(element, { plainText: true }),
+  ]);
+  return {
+    subject: "Nové přihlášení do Invoicey",
     html,
     text,
   };

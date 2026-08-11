@@ -1,5 +1,4 @@
 import {
-  getDefaultWorkspaceId,
   invoiceItems,
   invoices,
   issuerBusinesses,
@@ -29,6 +28,7 @@ import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { getDemoIssuer } from "./demo-issuer";
 import { tryPersistInvoiceArtifacts } from "./invoice-artifacts";
 import { sendPaymentReceivedEmailIfEnabled } from "./send-invoice-email";
+import { resolveWorkspaceId } from "./workspace-context";
 
 export interface InvoiceSummary {
   id: string;
@@ -110,7 +110,7 @@ export async function resolveDefaultIssuer(options?: {
   if (!database) {
     return getDemoIssuer();
   }
-  const workspaceId = options?.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(options?.workspaceId);
   const rows = await database
     .select()
     .from(issuerBusinesses)
@@ -132,7 +132,7 @@ export async function listInvoices(options?: {
   unpaidOnly?: boolean;
 }): Promise<InvoiceSummary[]> {
   const database = requireDb();
-  const workspaceId = options?.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(options?.workspaceId);
   const limit = options?.limit ?? 25;
 
   const conditions = [eq(invoices.workspaceId, workspaceId)];
@@ -160,7 +160,7 @@ export async function getInvoice(options: {
   | { ok: false; error: string }
 > {
   const database = requireDb();
-  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(options.workspaceId);
   const rows = await database
     .select()
     .from(invoices)
@@ -187,7 +187,7 @@ export async function markInvoicePaidById(options: {
   { ok: true; summary: InvoiceSummary } | { ok: false; error: string }
 > {
   const database = requireDb();
-  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(options.workspaceId);
   const rows = await database
     .select()
     .from(invoices)
@@ -232,7 +232,7 @@ export async function cancelInvoiceById(options: {
   { ok: true; summary: InvoiceSummary } | { ok: false; error: string }
 > {
   const database = requireDb();
-  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(options.workspaceId);
   const rows = await database
     .select()
     .from(invoices)
@@ -266,7 +266,7 @@ export async function unmarkInvoicePaidById(options: {
   { ok: true; summary: InvoiceSummary } | { ok: false; error: string }
 > {
   const database = requireDb();
-  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(options.workspaceId);
   const rows = await database
     .select()
     .from(invoices)
@@ -319,7 +319,7 @@ export async function bulkMarkInvoicesPaid(options: {
   workspaceId?: string;
 }): Promise<BulkOpResult> {
   const database = requireDb();
-  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(options.workspaceId);
   const rows = await loadWorkspaceInvoicesByIds(
     database,
     workspaceId,
@@ -370,7 +370,7 @@ export async function bulkUnmarkInvoicesPaid(options: {
   workspaceId?: string;
 }): Promise<BulkOpResult> {
   const database = requireDb();
-  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(options.workspaceId);
   const rows = await loadWorkspaceInvoicesByIds(
     database,
     workspaceId,
@@ -405,7 +405,7 @@ export async function bulkCancelInvoices(options: {
   workspaceId?: string;
 }): Promise<BulkOpResult> {
   const database = requireDb();
-  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(options.workspaceId);
   const rows = await loadWorkspaceInvoicesByIds(
     database,
     workspaceId,
@@ -440,7 +440,7 @@ export async function bulkDeleteDraftInvoices(options: {
   workspaceId?: string;
 }): Promise<BulkOpResult> {
   const database = requireDb();
-  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(options.workspaceId);
   const rows = await loadWorkspaceInvoicesByIds(
     database,
     workspaceId,
@@ -482,7 +482,7 @@ export async function issueInvoiceById(options: {
     }
   | { ok: false; error: string }
 > {
-  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(options.workspaceId);
 
   try {
     const result = await withDbTransaction(async (tx) => {
@@ -682,7 +682,7 @@ export async function bulkIssueInvoices(options: {
   ids: string[];
   workspaceId?: string;
 }): Promise<BulkOpResult> {
-  const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  const workspaceId = resolveWorkspaceId(options.workspaceId);
   let ok = 0;
   let skipped = 0;
   let failed = 0;

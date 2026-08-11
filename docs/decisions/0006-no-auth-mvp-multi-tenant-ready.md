@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (Phase 0, 2026-05-03)
+Superseded in part by [0018](./0018-better-auth-oauth-only.md) (auth provider: Better Auth OAuth-only). Multi-tenant-ready schema stance remains (Phase 0, 2026-05-03).
 
 ## Context
 
