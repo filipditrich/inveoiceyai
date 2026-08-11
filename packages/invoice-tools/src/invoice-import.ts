@@ -1,5 +1,5 @@
 import {
-  clients,
+  ensureClient,
   invoiceImportBatches,
   invoiceItems,
   invoices,
@@ -52,7 +52,6 @@ export type InsertIssuedImportResult =
     }
   | { ok: false; error: string };
 
-
 function issuedAtFromDate(issueDate: string): Date {
   return new Date(`${issueDate}T12:00:00.000Z`);
 }
@@ -70,67 +69,6 @@ function extractCounterHint(number: string, issueDate: string): number | null {
   }
   const n = Number(digits.slice(-6));
   return Number.isFinite(n) ? n : null;
-}
-
-async function findClientIdByIco(
-  database: InvoiceyDb,
-  workspaceId: string,
-  ico: string | undefined,
-): Promise<string | null> {
-  if (!ico) {
-    return null;
-  }
-  const rows = await database
-    .select({ id: clients.id, snapshot: clients.snapshot })
-    .from(clients)
-    .where(eq(clients.workspaceId, workspaceId));
-  for (const row of rows) {
-    const snap = row.snapshot as { ico?: unknown };
-    if (snap?.ico === ico) {
-      return row.id;
-    }
-  }
-  return null;
-}
-
-async function ensureClient(
-  database: InvoiceyDb,
-  workspaceId: string,
-  clientSnapshot: Record<string, unknown>,
-  preferredId?: string,
-): Promise<string> {
-  const ico = typeof clientSnapshot.ico === "string" ? clientSnapshot.ico : undefined;
-  const existingId =
-    preferredId ?? (await findClientIdByIco(database, workspaceId, ico));
-  const now = new Date();
-  if (existingId) {
-    const found = await database
-      .select({ id: clients.id })
-      .from(clients)
-      .where(and(eq(clients.id, existingId), eq(clients.workspaceId, workspaceId)))
-      .limit(1);
-    if (found[0]) {
-      await database
-        .update(clients)
-        .set({
-          snapshot: { ...clientSnapshot, id: existingId },
-          updatedAt: now,
-        })
-        .where(eq(clients.id, existingId));
-      return existingId;
-    }
-  }
-
-  const id = preferredId ?? randomUUID();
-  await database.insert(clients).values({
-    id,
-    workspaceId,
-    source: ico ? "ares" : "manual",
-    snapshot: { ...clientSnapshot, id },
-    createdAt: now,
-    updatedAt: now,
-  });
-  return id;
 }
 
 function archiveClientSnapshot(
@@ -152,7 +90,9 @@ function archiveClientSnapshot(
   };
 }
 
-function archiveSyntheticItems(archive: ArchiveInvoicePayload): Invoice["items"] {
+function archiveSyntheticItems(
+  archive: ArchiveInvoicePayload,
+): Invoice["items"] {
   return [
     {
       position: 1,
@@ -162,7 +102,9 @@ function archiveSyntheticItems(archive: ArchiveInvoicePayload): Invoice["items"]
       unitPriceWithoutVat: Math.max(0, archive.totals.subtotal),
       vatRate:
         archive.totals.subtotal > 0
-          ? Math.round((archive.totals.vatTotal / archive.totals.subtotal) * 100)
+          ? Math.round(
+              (archive.totals.vatTotal / archive.totals.subtotal) * 100,
+            )
           : 0,
       lineSubtotal: archive.totals.subtotal,
       lineVat: archive.totals.vatTotal,
@@ -176,7 +118,9 @@ async function replaceItems(
   invoiceId: string,
   items: Invoice["items"],
 ): Promise<void> {
-  await database.delete(invoiceItems).where(eq(invoiceItems.invoiceId, invoiceId));
+  await database
+    .delete(invoiceItems)
+    .where(eq(invoiceItems.invoiceId, invoiceId));
   if (items.length === 0) {
     return;
   }
@@ -299,7 +243,9 @@ export async function insertIssuedImport(
   const existingNumber = await database
     .select({ id: invoices.id })
     .from(invoices)
-    .where(and(eq(invoices.issuerId, input.issuerId), eq(invoices.number, number)))
+    .where(
+      and(eq(invoices.issuerId, input.issuerId), eq(invoices.number, number)),
+    )
     .limit(1);
   if (existingNumber[0]) {
     return {
@@ -314,8 +260,12 @@ export async function insertIssuedImport(
     database,
     input.workspaceId,
     clientSnapshot,
-    input.clientId ??
-      (typeof clientSnapshot.id === "string" ? clientSnapshot.id : undefined),
+    {
+      preferredId:
+        input.clientId ??
+        (typeof clientSnapshot.id === "string" ? clientSnapshot.id : undefined),
+      source: "import",
+    },
   );
   clientSnapshot = { ...clientSnapshot, id: clientId };
   if (input.completeness === "full") {
@@ -422,7 +372,11 @@ export async function syncNumberingCounterAfterImport(
     }
     const year = Number(row.issueDate.slice(0, 4));
     if (scheme.resetPeriod === "yearly") {
-      if (maxYear == null || year > maxYear || (year === maxYear && hint > maxCounter)) {
+      if (
+        maxYear == null ||
+        year > maxYear ||
+        (year === maxYear && hint > maxCounter)
+      ) {
         if (year !== maxYear) {
           maxCounter = hint;
           maxYear = year;
@@ -435,7 +389,10 @@ export async function syncNumberingCounterAfterImport(
     }
   }
 
-  if (maxCounter > scheme.counter || (maxYear != null && maxYear !== scheme.counterYear)) {
+  if (
+    maxCounter > scheme.counter ||
+    (maxYear != null && maxYear !== scheme.counterYear)
+  ) {
     await database
       .update(issuerNumberingSchemes)
       .set({

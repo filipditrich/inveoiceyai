@@ -1,8 +1,9 @@
 import { and, eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
+import { ensureClient } from "./clients-repo";
 import type { InvoiceyDb } from "./create-db";
-import { clients, invoiceItems, invoices, issuerBusinesses } from "./schema";
+import { invoiceItems, invoices, issuerBusinesses } from "./schema";
 import { ensureDefaultWorkspace, getDefaultWorkspaceId } from "./workspace";
 
 /** Line shape for denormalized `invoice_items` rows. */
@@ -88,10 +89,9 @@ export async function persistDraftInvoice(
   await ensureDefaultWorkspace(database, { id: workspaceId });
 
   const issuerId = invoice.issuer.id;
-  const clientId = invoice.client.id;
   const now = new Date();
   const issuerSnapshot = invoice.issuer as Record<string, unknown>;
-  const clientSnapshot = invoice.client as Record<string, unknown>;
+  const clientSnapshotBase = invoice.client as Record<string, unknown>;
 
   const existingIssuer = await database
     .select({ id: issuerBusinesses.id })
@@ -118,30 +118,20 @@ export async function persistDraftInvoice(
     });
   }
 
-  const existingClient = await database
-    .select({ id: clients.id })
-    .from(clients)
-    .where(eq(clients.id, clientId))
-    .limit(1);
-
-  if (existingClient[0]) {
-    await database
-      .update(clients)
-      .set({
-        snapshot: clientSnapshot,
-        updatedAt: now,
-      })
-      .where(eq(clients.id, clientId));
-  } else {
-    await database.insert(clients).values({
-      id: clientId,
-      workspaceId,
+  const clientId = await ensureClient(
+    database,
+    workspaceId,
+    clientSnapshotBase,
+    {
+      preferredId: invoice.client.id,
       source: invoice.client.ico ? "ares" : "manual",
-      snapshot: clientSnapshot,
-      createdAt: now,
-      updatedAt: now,
-    });
-  }
+    },
+  );
+  const clientSnapshot = { ...clientSnapshotBase, id: clientId };
+  const payloadJson = {
+    ...(invoice as unknown as Record<string, unknown>),
+    client: clientSnapshot,
+  };
 
   const values = {
     workspaceId,
@@ -163,7 +153,7 @@ export async function persistDraftInvoice(
     notes: invoice.notes ?? null,
     issuerSnapshot,
     clientSnapshot,
-    payloadJson: invoice as unknown as Record<string, unknown>,
+    payloadJson,
     updatedAt: now,
   };
 

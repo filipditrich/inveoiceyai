@@ -11,10 +11,10 @@ Bulk-import previously issued invoices (PDF) into a workspace so Invoicey can ma
 
 ## Modes
 
-| Mode | When | What is stored |
-| --- | --- | --- |
-| `full` | Embedded or sidecar ISDOC found | Validated `InvoiceSchema` in `payload_json`, line items, original PDF + extracted ISDOC URLs |
-| `archive` | No ISDOC | `ArchiveInvoicePayload` (`kind: "archive"`), synthetic single line item, **original PDF only** |
+| Mode      | When                            | What is stored                                                                                 |
+| --------- | ------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `full`    | Embedded or sidecar ISDOC found | Validated `InvoiceSchema` in `payload_json`, line items, original PDF + extracted ISDOC URLs   |
+| `archive` | No ISDOC                        | `ArchiveInvoicePayload` (`kind: "archive"`), synthetic single line item, **original PDF only** |
 
 ## Provenance columns (`invoices`)
 
@@ -41,6 +41,17 @@ Bulk-import previously issued invoices (PDF) into a workspace so Invoicey can ma
 - else `num:{provider}:{number}:{issueDate}`
 
 Collisions on `external_key` or `(issuer_id, number)` → skip (report in summary). No replace in v1.
+
+### Clients
+
+Import reuses existing workspace clients instead of inserting one row per invoice:
+
+1. Prefer `preferredId` only when that client id already exists in the workspace
+2. Else match by normalized IČO (digits only)
+3. Else (no IČO) match by normalized name
+4. Else insert a new client
+
+Rows created/updated by import use `source: import` (not a live ARES lookup). Partial unique index `clients_workspace_ico_uidx` guards `(workspace_id, snapshot.ico)` when IČO is present — run **Sloučit duplicity** on `/clients` (or otherwise clean dupes) before applying the index in production.
 
 ## Artifacts
 

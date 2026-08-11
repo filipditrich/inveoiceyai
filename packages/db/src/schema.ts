@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
   index,
@@ -25,7 +26,7 @@ export const clients = pgTable(
   {
     id: uuid("id").primaryKey(),
     workspaceId: text("workspace_id").notNull(),
-    /** `"ares"` | `"manual"` */
+    /** `"ares"` | `"manual"` | `"import"` */
     source: text("source").notNull(),
     snapshot: jsonb("snapshot").notNull().$type<Record<string, unknown>>(),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -37,6 +38,15 @@ export const clients = pgTable(
   },
   (t) => [
     index("clients_workspace_updated_idx").on(t.workspaceId, t.updatedAt),
+    /**
+     * One client per IČO per workspace. Run mergeDuplicateClients (or clean
+     * dupes) before applying this index in production.
+     */
+    uniqueIndex("clients_workspace_ico_uidx")
+      .using("btree", t.workspaceId, sql`(${t.snapshot}->>'ico')`)
+      .where(
+        sql`${t.snapshot}->>'ico' IS NOT NULL AND btrim(${t.snapshot}->>'ico') <> ''`,
+      ),
   ],
 );
 

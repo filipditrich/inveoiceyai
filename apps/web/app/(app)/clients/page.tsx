@@ -1,3 +1,4 @@
+import { mergeClientsAction } from "@/actions/clients";
 import { ClientsDataGrid } from "@/components/clients/clients-data-grid";
 import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
@@ -46,9 +47,16 @@ export default async function ClientsPage() {
             Customers — ARES lookup or manual entry.
           </p>
         </div>
-        <Button render={<Link href="/clients/new" prefetch />} size="sm">
-          New client
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <form action={mergeClientsAction}>
+            <Button size="sm" type="submit" variant="outline">
+              Sloučit duplicity
+            </Button>
+          </form>
+          <Button render={<Link href="/clients/new" prefetch />} size="sm">
+            New client
+          </Button>
+        </div>
       </div>
 
       {items.length === 0 ? (

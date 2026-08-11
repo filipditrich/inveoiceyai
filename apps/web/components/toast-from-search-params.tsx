@@ -12,6 +12,7 @@ const TOAST_MESSAGES: Record<
   issuer_deleted: { type: "success", text: "Issuer deleted" },
   client_saved: { type: "success", text: "Client saved" },
   client_deleted: { type: "success", text: "Client deleted" },
+  clients_merged: { type: "success", text: "Duplicitní klienti sloučeni" },
   invoice_saved: { type: "success", text: "Draft saved" },
   invoice_issued: { type: "success", text: "Invoice issued" },
   invoice_paid: { type: "success", text: "Marked as paid" },
@@ -25,25 +26,37 @@ function ToastFromSearchParamsInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const toastKey = searchParams.get("toast");
+  const mergeGroups = searchParams.get("groups");
+  const mergeRemoved = searchParams.get("removed");
+  const mergeRepointed = searchParams.get("repointed");
 
   useEffect(() => {
     if (!toastKey) {
       return;
     }
-    const msg = TOAST_MESSAGES[toastKey];
-    if (msg) {
-      if (msg.type === "success") {
-        toast.success(msg.text);
-      } else {
-        toast.error(msg.text);
+    if (toastKey === "clients_merged") {
+      toast.success(
+        `Sloučeno ${mergeGroups ?? "0"} skupin — odstraněno ${mergeRemoved ?? "0"} klientů, přesměrováno ${mergeRepointed ?? "0"} faktur`,
+      );
+    } else {
+      const msg = TOAST_MESSAGES[toastKey];
+      if (msg) {
+        if (msg.type === "success") {
+          toast.success(msg.text);
+        } else {
+          toast.error(msg.text);
+        }
       }
     }
     const url = new URL(window.location.href);
     url.searchParams.delete("toast");
+    url.searchParams.delete("groups");
+    url.searchParams.delete("removed");
+    url.searchParams.delete("repointed");
     router.replace(`${url.pathname}${url.search}${url.hash}`, {
       scroll: false,
     });
-  }, [toastKey, router]);
+  }, [toastKey, mergeGroups, mergeRemoved, mergeRepointed, router]);
 
   return null;
 }

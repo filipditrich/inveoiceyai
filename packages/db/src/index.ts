@@ -18,3 +18,15 @@ export {
   type PersistableInvoice,
   type PersistDraftInvoiceResult,
 } from "./invoices-repo";
+export {
+  clientMergeGroupKey,
+  ensureClient,
+  groupClientsForMerge,
+  mergeDuplicateClients,
+  normalizeClientName,
+  normalizeIco,
+  pickMergeKeepId,
+  type ClientMergeRow,
+  type EnsureClientOptions,
+  type MergeDuplicateClientsResult,
+} from "./clients-repo";
