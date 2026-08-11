@@ -11,6 +11,11 @@ import {
 } from "./device-trust";
 import { stashPendingDeviceToken } from "./pending-device-cookie";
 import { maybePromotePlatformAdminFromAllowlist } from "./platform-admin";
+import { isEligibleForReferralAttribution } from "./referral-eligibility";
+import {
+  attributeReferralFromCode,
+  readReferralCodeFromHeaders,
+} from "./referral";
 import { recordSecurityAuditEvent } from "./security-audit";
 import { appOrigin, sendNewSignInEmail } from "../email/security";
 
@@ -46,6 +51,21 @@ export async function onSessionCreated(
     await maybePromotePlatformAdminFromAllowlist(session.userId);
 
     const headers = context?.headers;
+    const profile = await loadUserEmail(session.userId);
+    const referralCode = headers ? readReferralCodeFromHeaders(headers) : null;
+    if (
+      referralCode &&
+      profile?.createdAt &&
+      isEligibleForReferralAttribution(profile.createdAt)
+    ) {
+      await attributeReferralFromCode({
+        newUserId: session.userId,
+        code: referralCode,
+        ipAddress: ip,
+        userAgent: ua,
+      });
+    }
+
     let rawToken = headers ? readDeviceTokenFromHeaders(headers) : null;
     if (!rawToken) {
       rawToken = newDeviceToken();
@@ -61,7 +81,6 @@ export async function onSessionCreated(
       return;
     }
 
-    const profile = await loadUserEmail(session.userId);
     if (!profile?.email) return;
     const workspaceId =
       session.activeOrganizationId?.trim() ||

@@ -1,4 +1,6 @@
+import { sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   bigint,
   boolean,
   index,
@@ -32,26 +34,41 @@ export type PlatformRole = "none" | "admin";
  * (ADR 0019). See `authSchema` at the bottom of this file.
  */
 
-export const user = pgTable("users", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  emailVerified: boolean("email_verified").notNull().default(false),
-  image: text("image"),
-  /** Workspace machine identities fall back to (no active-org cookie). */
-  defaultWorkspaceId: text("default_workspace_id"),
-  /** Platform ops console (ADR 0024); not a Better Auth organization role. */
-  platformRole: text("platform_role")
-    .$type<PlatformRole>()
-    .notNull()
-    .default("none"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const user = pgTable(
+  "users",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    email: text("email").notNull().unique(),
+    emailVerified: boolean("email_verified").notNull().default(false),
+    image: text("image"),
+    /** Workspace machine identities fall back to (no active-org cookie). */
+    defaultWorkspaceId: text("default_workspace_id"),
+    /** Platform ops console (ADR 0024); not a Better Auth organization role. */
+    platformRole: text("platform_role")
+      .$type<PlatformRole>()
+      .notNull()
+      .default("none"),
+    /** Stable personal referral code for `/r/[code]` (ADR 0025). */
+    referralCode: text("referral_code"),
+    /** Set once at signup when `invoicey_ref` cookie resolves (ADR 0025). */
+    referredByUserId: text("referred_by_user_id").references(
+      (): AnyPgColumn => user.id,
+      { onDelete: "set null" },
+    ),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("users_referral_code_uidx")
+      .on(t.referralCode)
+      .where(sql`${t.referralCode} is not null`),
+  ],
+);
 
 export const session = pgTable(
   "sessions",

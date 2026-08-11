@@ -1,41 +1,108 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
+import { recordAccountSecurityEventAction } from "@/actions/security";
 import { authClient } from "@/lib/auth/client";
 import { Button } from "@/components/ui/button";
 
-export function InviteAcceptClient({ invitationId }: { invitationId: string }) {
+export function InviteAcceptClient({
+  invitationId,
+  canAct,
+}: {
+  invitationId: string;
+  canAct: boolean;
+}) {
+  const t = useTranslations("Invite");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [done, setDone] = useState(false);
+  const [busy, setBusy] = useState<"accept" | "decline" | null>(null);
+  const [done, setDone] = useState<"accepted" | "declined" | null>(null);
 
   const accept = () => {
+    if (!canAct) return;
+    setBusy("accept");
     startTransition(async () => {
-      const res = await authClient.organization.acceptInvitation({
-        invitationId,
-      });
-      if (res.error) {
-        toast.error(res.error.message || "Přijetí pozvánky selhalo");
-        return;
+      try {
+        const res = await authClient.organization.acceptInvitation({
+          invitationId,
+        });
+        if (res.error) {
+          toast.error(res.error.message || t("acceptFailed"));
+          return;
+        }
+        await recordAccountSecurityEventAction({
+          type: "invite_accept",
+          metadata: { invitationId },
+        });
+        setDone("accepted");
+        toast.success(t("acceptSuccess"));
+        router.push("/dashboard");
+        router.refresh();
+      } finally {
+        setBusy(null);
       }
-      setDone(true);
-      toast.success("Pozvánka přijata");
-      router.push("/dashboard");
-      router.refresh();
     });
   };
 
+  const decline = () => {
+    if (!canAct) return;
+    setBusy("decline");
+    startTransition(async () => {
+      try {
+        const res = await authClient.organization.rejectInvitation({
+          invitationId,
+        });
+        if (res.error) {
+          toast.error(res.error.message || t("declineFailed"));
+          return;
+        }
+        await recordAccountSecurityEventAction({
+          type: "invite_reject",
+          metadata: { invitationId },
+        });
+        setDone("declined");
+        toast.success(t("declineSuccess"));
+        router.push("/dashboard");
+        router.refresh();
+      } finally {
+        setBusy(null);
+      }
+    });
+  };
+
+  if (!canAct) return null;
+
   return (
-    <Button
-      className="w-full"
-      disabled={done}
-      loading={pending}
-      onClick={accept}
-    >
-      {done ? "Přijato" : pending ? "Přijímám…" : "Přijmout pozvánku"}
-    </Button>
+    <div className="flex flex-col gap-2 sm:flex-row">
+      <Button
+        className="w-full"
+        disabled={done !== null || pending}
+        loading={busy === "accept"}
+        onClick={accept}
+      >
+        {done === "accepted"
+          ? t("accepted")
+          : busy === "accept"
+            ? t("accepting")
+            : t("accept")}
+      </Button>
+      <Button
+        className="w-full"
+        variant="outline"
+        disabled={done !== null || pending}
+        loading={busy === "decline"}
+        onClick={decline}
+      >
+        {done === "declined"
+          ? t("declined")
+          : busy === "decline"
+            ? t("declining")
+            : t("decline")}
+      </Button>
+    </div>
   );
 }

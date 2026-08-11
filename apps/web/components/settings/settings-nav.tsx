@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
+  GiftIcon,
   KeyRoundIcon,
   PaletteIcon,
   PlugZapIcon,
@@ -31,6 +32,12 @@ const LINKS = [
     key: "members" as const,
     exact: false,
     icon: UsersRoundIcon,
+  },
+  {
+    href: "/settings/referrals",
+    key: "referrals" as const,
+    exact: false,
+    icon: GiftIcon,
   },
   {
     href: "/settings/api-keys",

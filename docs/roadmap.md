@@ -466,6 +466,28 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 
 **Out of v1:** Better Auth admin plugin, MCP/Eve platform role, cross-tenant business mutations, RLS.
 
+### Plan 19 — Workspace invites + referral attribution
+
+**Status:** Done  
+**Completed:** 2026-08-11  
+**ADR:** [0025](./decisions/0025-referral-attribution.md) · [plan](../.cursor/plans/plan-19-invites-referrals.md) · Spec: [`specs/account-security.md`](./specs/account-security.md)
+
+**Goal:** Polish Better Auth workspace member invites (email, accept page, i18n, resend/cancel/expiry, audit) and ship personal referral links that only attribute new signups (own workspace; record referrer + events).
+
+**Exit criteria:**
+
+- [x] Invite email polish + expiry copy; explicit `invitationExpiresIn` (48h)
+- [x] Members UI: i18n, expiry display, resend/cancel + audit events
+- [x] Rich `/invite/[id]` (workspace/inviter/role/expiry, mismatch/expired/reject)
+- [x] Schema: `users.referral_code`, `users.referred_by_user_id`, `referral_events`
+- [x] `/r/[code]` landing + `invoicey_ref` cookie; signup attribution once
+- [x] `/settings/referrals` (link + stats); admin users show code / referred-by
+- [x] ADR 0025 + specs + this roadmap section
+- [x] Typecheck / focused tests
+- [x] Plan 19 SQL applied on Neon (`packages/db/sql/2026-08-11-plan19-invites-referrals.sql`)
+
+**Out of v1:** Referral rewards, auto-join workspace, bilingual invite emails, MCP referral tools.
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:

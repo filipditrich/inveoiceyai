@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
   CheckCircle2Icon,
@@ -18,6 +19,8 @@ import {
   revokeTrustedDeviceAction,
 } from "@/actions/security";
 import { authClient } from "@/lib/auth/client";
+import type { AppLocale } from "@/i18n/config";
+import { formatDateTime } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,27 +47,29 @@ type SessionRow = {
   expiresAt: Date | string;
 };
 
-const AUDIT_LABELS: Record<string, string> = {
-  sign_in: "Přihlášení",
-  session_revoke: "Odvolání relace",
-  account_link: "Propojení účtu",
-  account_unlink: "Odpojení účtu",
-  device_trust: "Důvěra zařízení",
-  device_revoke: "Odvolání zařízení",
-  api_key_create: "Vytvoření API klíče",
-  api_key_revoke: "Odvolání API klíče",
-  invite_create: "Pozvánka vytvořena",
-  member_remove: "Člen odebrán",
-  member_role_update: "Změna role člena",
-};
-
-function formatWhen(value: Date | string): string {
-  const d = typeof value === "string" ? new Date(value) : value;
-  return new Intl.DateTimeFormat("cs-CZ", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(d);
+function formatWhen(value: Date | string, locale: AppLocale = "cs"): string {
+  return formatDateTime(value, locale);
 }
+
+const AUDIT_TYPE_KEYS = [
+  "sign_in",
+  "session_revoke",
+  "account_link",
+  "account_unlink",
+  "device_trust",
+  "device_revoke",
+  "api_key_create",
+  "api_key_revoke",
+  "invite_create",
+  "invite_resend",
+  "invite_cancel",
+  "invite_accept",
+  "invite_reject",
+  "member_remove",
+  "member_role_update",
+  "platform_admin_grant",
+  "platform_admin_revoke",
+] as const;
 
 function summarizeUa(ua?: string | null): string {
   const raw = ua?.trim() || "";
@@ -120,10 +125,6 @@ function providerLabel(provider: string): string {
   if (provider === "google") return "Google";
   if (provider === "github") return "GitHub";
   return provider;
-}
-
-function auditLabel(type: string): string {
-  return AUDIT_LABELS[type] ?? type;
 }
 
 export function LinkedAccountsPanel({
@@ -527,6 +528,8 @@ export function TrustedDevicesPanel() {
 }
 
 export function SecurityAuditPanel() {
+  const t = useTranslations("Settings.security.audit");
+  const locale = useLocale() as AppLocale;
   const [events, setEvents] = useState<
     Awaited<ReturnType<typeof getSecurityAuditAction>>
   >([]);
@@ -535,25 +538,27 @@ export function SecurityAuditPanel() {
     void getSecurityAuditAction().then(setEvents);
   }, []);
 
+  const auditLabel = (type: string): string => {
+    if ((AUDIT_TYPE_KEYS as readonly string[]).includes(type)) {
+      return t(`types.${type as (typeof AUDIT_TYPE_KEYS)[number]}`);
+    }
+    return type;
+  };
+
   return (
     <Card>
       <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2">
           <HistoryIcon className="text-muted-foreground size-4" />
-          Nedávná aktivita
+          {t("title")}
         </CardTitle>
-        <CardDescription>
-          Audit přihlášení, relací, zařízení a API klíčů.
-        </CardDescription>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2 pt-5">
         {events.length === 0 ? (
           <div className="text-muted-foreground flex items-start gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
             <CheckCircle2Icon className="mt-0.5 size-4 shrink-0" />
-            <p>
-              Zatím žádné záznamy. Akce jako přihlášení nebo odvolání relace se
-              tu objeví automaticky.
-            </p>
+            <p>{t("empty")}</p>
           </div>
         ) : (
           events.map((e) => (
@@ -563,7 +568,7 @@ export function SecurityAuditPanel() {
             >
               <span className="font-medium">{auditLabel(e.type)}</span>
               <span className="text-muted-foreground">
-                {formatWhen(e.createdAt)}
+                {formatWhen(e.createdAt, locale)}
                 {e.ipAddress ? ` · ${e.ipAddress}` : ""}
               </span>
             </div>

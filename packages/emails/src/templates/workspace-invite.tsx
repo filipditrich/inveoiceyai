@@ -8,10 +8,26 @@ export type WorkspaceInviteEmailProps = {
   inviterName: string;
   inviteUrl: string;
   role: string;
+  /** prague-local expiry label for czech copy */
+  expiresAtLabel?: string | null;
 };
+
+function roleLabel(role: string): string {
+  switch (role) {
+    case "admin":
+      return "správce";
+    case "owner":
+      return "vlastník";
+    case "member":
+      return "člen";
+    default:
+      return role;
+  }
+}
 
 export function WorkspaceInviteEmail(props: WorkspaceInviteEmailProps) {
   const title = `Pozvánka do ${props.workspaceName}`;
+  const role = roleLabel(props.role);
 
   return (
     <EmailShell
@@ -19,14 +35,33 @@ export function WorkspaceInviteEmail(props: WorkspaceInviteEmailProps) {
       title={title}
     >
       <Text style={bodyText}>
-        {props.inviterName} vás zve do workspace{" "}
-        <strong>{props.workspaceName}</strong> jako {props.role}.
+        Dobrý den, <strong>{props.inviterName}</strong> vás zve do pracovního
+        prostoru <strong>{props.workspaceName}</strong> v Invoicey jako{" "}
+        <strong>{role}</strong>.
       </Text>
-      <Text style={bodyText}>Kliknutím na tlačítko pozvánku přijmete:</Text>
+      <Text style={bodyText}>
+        Po přijetí uvidíte faktury, klienty a nastavení tohoto pracovního
+        prostoru podle své role. Přihlaste se účtem se stejným e-mailem, na
+        který přišla tato pozvánka.
+      </Text>
+      {props.expiresAtLabel ? (
+        <Text style={bodyText}>
+          Pozvánka platí do <strong>{props.expiresAtLabel}</strong> (časové
+          pásmo Evropa/Praha).
+        </Text>
+      ) : null}
+      <Text style={bodyText}>Kliknutím na tlačítko pozvánku otevřete:</Text>
       <Button href={props.inviteUrl} style={button}>
         Přijmout pozvánku
       </Button>
-      <Text style={muted}>Nebo otevřete odkaz: {props.inviteUrl}</Text>
+      <Text style={muted}>
+        Pokud tlačítko nefunguje, otevřete odkaz v prohlížeči:
+        <br />
+        {props.inviteUrl}
+      </Text>
+      <Text style={muted}>
+        Pokud jste tuto pozvánku neočekávali, e-mail můžete ignorovat.
+      </Text>
     </EmailShell>
   );
 }

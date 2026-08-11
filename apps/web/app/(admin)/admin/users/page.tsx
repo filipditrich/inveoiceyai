@@ -23,6 +23,8 @@ export default async function AdminUsersPage() {
           emailVerified: r.emailVerified,
           platformRole: r.platformRole,
           defaultWorkspaceId: r.defaultWorkspaceId,
+          referralCode: r.referralCode,
+          referredByEmail: r.referredByEmail,
           membershipCount: r.membershipCount,
           createdAtIso: r.createdAt.toISOString(),
         }))}

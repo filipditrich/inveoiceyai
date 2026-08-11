@@ -1,6 +1,6 @@
 # Account security
 
-Plan 16. ADR [0023](../decisions/0023-account-security-soft-devices.md).
+Plan 16 (+ Plan 19 invites/referrals). ADR [0023](../decisions/0023-account-security-soft-devices.md) · [0025](../decisions/0025-referral-attribution.md).
 
 ## Settings IA
 
@@ -8,11 +8,12 @@ Plan 16. ADR [0023](../decisions/0023-account-security-soft-devices.md).
 | ------------------------ | -------------------------------------------------------- |
 | `/settings`              | Appearance (theme)                                       |
 | `/settings/security`     | Sign-in methods, sessions, trusted devices, recent audit |
-| `/settings/members`      | Workspace members + invites                              |
+| `/settings/members`      | Workspace members + email invites                        |
+| `/settings/referrals`    | Personal product referral link + click/signup stats      |
 | `/settings/api-keys`     | Personal access tokens + interactive remote MCP setup    |
 | `/settings/integrations` | Slack (use + operator) and MCP entry points              |
 
-Nav: user menu → Settings. Invite accept: `/invite/[id]` (public, requires sign-in).
+Nav: user menu → Settings. Workspace invite accept: `/invite/[id]` (requires sign-in). Product referral landing: `/r/[code]` (public).
 
 ## Linked providers
 
@@ -53,17 +54,30 @@ Nav: user menu → Settings. Invite accept: `/invite/[id]` (public, requires sig
 
 MCP tools resolve workspace via request ALS; Eve Slack via ops default workspace.
 
-## Members
+## Members (workspace invites)
 
 - Roles: `owner` | `admin` | `member` (Better Auth organization defaults).
-- Invite email already wired (Plan 11); UI shows copyable `/invite/<id>` fallback.
-- Mutations: owner/admin only.
+- Invite email via `organization.sendInvitationEmail` → `workspace_invite` (Plan 11); UI shows copyable `/invite/<id>` fallback.
+- `invitationExpiresIn`: **48 hours** (explicit in auth config).
+- Pending invites: show expiry; actions **copy link / resend / cancel** (Better Auth `inviteMember({ resend: true })`, `cancelInvitation`).
+- Accept page loads invitation preview (workspace, inviter, role, invitee email, expiry). States: pending (accept/decline), expired, canceled/handled, **email mismatch** (signed-in email ≠ invite email → block accept).
+- Mutations: owner/admin only for invite/resend/cancel/role/remove.
+
+## Referrals (product attribution)
+
+- Each user has stable unique `users.referral_code`; optional `users.referred_by_user_id` set once at signup.
+- Public `GET /r/[code]` sets httpOnly cookie `invoicey_ref` (~30d), logs `referral_events` (`click`) when the cookie changes, then redirects to `/r/[code]/land`.
+- Session create attributes only for accounts created within ~1 hour when `referred_by` is still null (cookie → referrer; reject self-referral); logs `signup` event.
+- Referrals never create workspace membership (ADR 0025).
+- Settings `/settings/referrals`: personal link + click/signup counts. Admin users list shows code / referred-by when present.
 
 ## Audit events
 
 `security_audit_events.type`:
 
-`sign_in` | `session_revoke` | `account_link` | `account_unlink` | `device_trust` | `device_revoke` | `api_key_create` | `api_key_revoke` | `invite_create` | `member_remove` | `member_role_update`
+`sign_in` | `session_revoke` | `account_link` | `account_unlink` | `device_trust` | `device_revoke` | `api_key_create` | `api_key_revoke` | `invite_create` | `invite_resend` | `invite_cancel` | `invite_accept` | `invite_reject` | `member_remove` | `member_role_update` | `platform_admin_grant` | `platform_admin_revoke`
+
+Growth trail lives in `referral_events` (not security audit).
 
 ## Rate limiting
 

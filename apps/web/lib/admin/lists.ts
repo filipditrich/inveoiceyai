@@ -14,7 +14,7 @@ import {
   type PlatformRole,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { asc, desc, eq, sql } from "drizzle-orm";
+import { asc, desc, eq, inArray, sql } from "drizzle-orm";
 
 export type AdminUserRow = {
   id: string;
@@ -23,6 +23,8 @@ export type AdminUserRow = {
   emailVerified: boolean;
   platformRole: PlatformRole;
   defaultWorkspaceId: string | null;
+  referralCode: string | null;
+  referredByEmail: string | null;
   createdAt: Date;
   membershipCount: number;
 };
@@ -75,6 +77,8 @@ export async function adminListUsers(): Promise<AdminUserRow[]> {
       emailVerified: user.emailVerified,
       platformRole: user.platformRole,
       defaultWorkspaceId: user.defaultWorkspaceId,
+      referralCode: user.referralCode,
+      referredByUserId: user.referredByUserId,
       createdAt: user.createdAt,
       membershipCount: sql<number>`cast(count(${member.id}) as int)`,
     })
@@ -87,14 +91,43 @@ export async function adminListUsers(): Promise<AdminUserRow[]> {
       user.emailVerified,
       user.platformRole,
       user.defaultWorkspaceId,
+      user.referralCode,
+      user.referredByUserId,
       user.createdAt,
     )
     .orderBy(desc(user.createdAt))
     .limit(ADMIN_LIST_CAP);
 
+  const referrerIds = [
+    ...new Set(
+      rows
+        .map((r) => r.referredByUserId)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+  const referrerEmails = new Map<string, string>();
+  if (referrerIds.length > 0) {
+    const referrers = await db
+      .select({ id: user.id, email: user.email })
+      .from(user)
+      .where(inArray(user.id, referrerIds));
+    for (const r of referrers) {
+      referrerEmails.set(r.id, r.email);
+    }
+  }
+
   return rows.map((r) => ({
-    ...r,
+    id: r.id,
+    name: r.name,
+    email: r.email,
+    emailVerified: r.emailVerified,
     platformRole: r.platformRole === "admin" ? "admin" : "none",
+    defaultWorkspaceId: r.defaultWorkspaceId,
+    referralCode: r.referralCode,
+    referredByEmail: r.referredByUserId
+      ? (referrerEmails.get(r.referredByUserId) ?? r.referredByUserId)
+      : null,
+    createdAt: r.createdAt,
     membershipCount: Number(r.membershipCount ?? 0),
   }));
 }

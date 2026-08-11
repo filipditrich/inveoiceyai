@@ -18,6 +18,7 @@ import {
 } from "./device-trust";
 import { onSessionCreated } from "./on-session-created";
 import { takePendingDeviceToken } from "./pending-device-cookie";
+import { assignReferralCodeOnCreate } from "./referral";
 import {
   createPersonalWorkspace,
   resolveInitialWorkspaceId,
@@ -115,14 +116,17 @@ export const auth = betterAuth({
         defaultValue: "none",
         input: false,
       },
+      referralCode: { type: "string", required: false, input: false },
+      referredByUserId: { type: "string", required: false, input: false },
     },
   },
 
   databaseHooks: {
     user: {
       create: {
-        after: async (user) => {
-          await createPersonalWorkspace(user);
+        after: async (createdUser) => {
+          await createPersonalWorkspace(createdUser);
+          await assignReferralCodeOnCreate(createdUser.id);
         },
       },
     },
@@ -161,6 +165,8 @@ export const auth = betterAuth({
       // Default roles (owner/admin/member) match the requirement, so no
       // custom access control.
       creatorRole: "owner",
+      /** 48h — shown in invite email + members UI (Plan 19). */
+      invitationExpiresIn: 60 * 60 * 48,
       async sendInvitationEmail(data) {
         const inviteUrl = `${baseURL.replace(/\/$/, "")}/invite/${data.id}`;
         try {
@@ -172,6 +178,7 @@ export const auth = betterAuth({
             inviterEmail: data.inviter.user.email,
             role: data.role,
             inviteUrl,
+            expiresAt: data.invitation.expiresAt,
           });
         } catch (err) {
           /** keep invite row; Settings still shows copyable link */

@@ -15,16 +15,20 @@ export async function sendWorkspaceInviteEmail(opts: {
   inviterEmail?: string | null;
   role: string;
   inviteUrl: string;
+  expiresAt?: Date | string | null;
 }): Promise<void> {
   if (!getResendClient()) {
     throw new Error("RESEND_API_KEY is not configured");
   }
+
+  const expiresAtLabel = formatInviteExpiry(opts.expiresAt);
 
   const rendered = await renderWorkspaceInviteEmail({
     workspaceName: opts.workspaceName,
     inviterName: opts.inviterName,
     inviteUrl: opts.inviteUrl,
     role: opts.role,
+    expiresAtLabel,
   });
 
   const replyTo = opts.inviterEmail?.trim() || null;
@@ -44,4 +48,18 @@ export async function sendWorkspaceInviteEmail(opts: {
 
 export function isEmailConfigured(): boolean {
   return Boolean(env.RESEND_API_KEY);
+}
+
+/** prague-local label for czech invite mail */
+export function formatInviteExpiry(
+  value: Date | string | null | undefined,
+): string | null {
+  if (value == null) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat("cs-CZ", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/Prague",
+  }).format(date);
 }

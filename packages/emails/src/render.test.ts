@@ -33,9 +33,13 @@ describe("email renders", () => {
       inviterName: "Filip",
       inviteUrl: "https://invoicey.ditrich.me/invite/xyz",
       role: "member",
+      expiresAtLabel: "13. 8. 2026 20:47",
     });
     expect(out.subject).toContain("Invoicey");
+    expect(out.subject).toContain("13. 8. 2026");
     expect(out.html).toContain("Přijmout pozvánku");
+    expect(out.html).toContain("člen");
+    expect(out.html).toContain("platí do");
     expect(out.text).toContain("invite/xyz");
   });
 

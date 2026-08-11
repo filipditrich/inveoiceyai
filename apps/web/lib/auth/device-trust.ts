@@ -178,12 +178,14 @@ export async function loadUserEmail(userId: string): Promise<{
   email: string;
   name: string;
   defaultWorkspaceId: string | null;
+  createdAt: Date;
 } | null> {
   const [row] = await db
     .select({
       email: user.email,
       name: user.name,
       defaultWorkspaceId: user.defaultWorkspaceId,
+      createdAt: user.createdAt,
     })
     .from(user)
     .where(eq(user.id, userId))

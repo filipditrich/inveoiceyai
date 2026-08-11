@@ -60,8 +60,11 @@ export async function renderWorkspaceInviteEmail(
     render(element),
     render(element, { plainText: true }),
   ]);
+  const expiryNote = props.expiresAtLabel
+    ? ` (platí do ${props.expiresAtLabel})`
+    : "";
   return {
-    subject: `Pozvánka do ${props.workspaceName}`,
+    subject: `Pozvánka do ${props.workspaceName}${expiryNote}`,
     html,
     text,
   };

@@ -17,6 +17,7 @@ import { user } from "./auth-schema";
 import { workspaces } from "./workspaces";
 
 export * from "./auth-schema";
+export * from "./referral-schema";
 export * from "./security-schema";
 export * from "./workspaces";
 

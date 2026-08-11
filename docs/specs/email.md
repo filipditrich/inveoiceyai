@@ -26,6 +26,8 @@ Transactional email for Invoicey: invoice delivery to clients (PDF + optional IS
 
 Czech copy for MVP. Preview: `bun --cwd packages/emails email:dev`.
 
+**`workspace_invite` props:** `workspaceName`, `inviterName`, `inviteUrl`, `role` (member/admin), optional `expiresAtLabel` (human-readable Prague time). Copy explains access, expiry, and that the invitee must sign in with the invited email. Invitations expire after **48 hours** (`invitationExpiresIn` in Better Auth org config). Resend refreshes expiry and re-sends this template.
+
 ## From / Reply-To
 
 - **From address:** always `invoices@invoicey.ditrich.me` (override via `EMAIL_FROM`).

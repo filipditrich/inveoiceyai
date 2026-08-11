@@ -38,6 +38,8 @@ export type AdminUserGridItem = {
   emailVerified: boolean;
   platformRole: PlatformRole;
   defaultWorkspaceId: string | null;
+  referralCode: string | null;
+  referredByEmail: string | null;
   membershipCount: number;
   createdAtIso: string;
 };
@@ -93,6 +95,8 @@ export function AdminUsersGrid({
     useState<ColumnVisibilityState>({
       id: false,
       defaultWorkspaceId: false,
+      referralCode: false,
+      referredByEmail: true,
     });
   const [globalFilter, setGlobalFilter] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
@@ -172,6 +176,44 @@ export function AdminUsersGrid({
           <span className="tabular-nums">{row.original.membershipCount}</span>
         ),
         meta: { headerTitle: t("columns.memberships") },
+      },
+      {
+        id: "referralCode",
+        accessorFn: (row) => row.referralCode ?? "",
+        header: ({ column }) => (
+          <DataGridColumnHeader
+            column={column}
+            title={t("columns.referralCode")}
+          />
+        ),
+        cell: ({ row }) =>
+          row.original.referralCode ? (
+            <span className="font-mono text-xs">
+              {row.original.referralCode}
+            </span>
+          ) : (
+            "—"
+          ),
+        meta: { headerTitle: t("columns.referralCode") },
+      },
+      {
+        id: "referredByEmail",
+        accessorFn: (row) => row.referredByEmail ?? "",
+        header: ({ column }) => (
+          <DataGridColumnHeader
+            column={column}
+            title={t("columns.referredBy")}
+          />
+        ),
+        cell: ({ row }) =>
+          row.original.referredByEmail ? (
+            <span className="truncate text-xs">
+              {row.original.referredByEmail}
+            </span>
+          ) : (
+            "—"
+          ),
+        meta: { headerTitle: t("columns.referredBy"), autoSize: true },
       },
       {
         id: "defaultWorkspaceId",
@@ -277,7 +319,9 @@ export function AdminUsersGrid({
       return (
         row.original.name.toLowerCase().includes(q) ||
         row.original.email.toLowerCase().includes(q) ||
-        row.original.id.toLowerCase().includes(q)
+        row.original.id.toLowerCase().includes(q) ||
+        (row.original.referralCode?.toLowerCase().includes(q) ?? false) ||
+        (row.original.referredByEmail?.toLowerCase().includes(q) ?? false)
       );
     },
   });

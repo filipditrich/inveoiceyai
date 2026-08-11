@@ -49,6 +49,10 @@ export async function recordAccountSecurityEventAction(input: {
     | "api_key_revoke"
     | "session_revoke"
     | "invite_create"
+    | "invite_resend"
+    | "invite_cancel"
+    | "invite_accept"
+    | "invite_reject"
     | "member_remove"
     | "member_role_update"
   >;
