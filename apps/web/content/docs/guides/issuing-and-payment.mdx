@@ -1,6 +1,7 @@
 ---
-title: Issuing and payment
-description: Turning a draft into a tax document, then tracking payment.
+title: Issue & get paid
+description: Turn a draft into an immutable document and track payment.
+icon: Stamp
 ---
 
 ## Issuing
@@ -9,28 +10,35 @@ description: Turning a draft into a tax document, then tracking payment.
 
 <Steps>
   <Step>
-    ### Validate The draft payload is parsed against the full schema. Anything
-    missing or malformed stops here.
+    ### Validate
+
+    Parse the draft against the full schema. Missing or malformed data stops here.
+
   </Step>
   <Step>
-    ### Allocate a number The issuer's [numbering
-    scheme](/docs/concepts/numbering) row is locked, the next number computed,
-    and the counter incremented — with a yearly reset if the issue date crossed
-    into a new year.
+    ### Allocate a number
+
+    Lock the [numbering scheme](/docs/concepts/numbering), compute the next number and advance the
+    counter.
+
   </Step>
   <Step>
-    ### Freeze snapshots The live issuer and client are copied onto the invoice.
-    From now on it is [immune to edits](/docs/concepts/snapshots) of those
-    records.
+    ### Freeze snapshots
+
+    Copy the live issuer and client onto the invoice. Future edits cannot change them.
+
   </Step>
   <Step>
-    ### Recompute totals Totals are recalculated server-side and compared
-    against what was submitted. A mismatch aborts.
+    ### Recompute totals
+
+    Recalculate totals server-side and reject any mismatch.
+
   </Step>
   <Step>
-    ### Render and store The PDF and ISDOC are generated and uploaded, and their
-    URLs stored on the invoice so they are served rather than re-rendered on
-    every download.
+    ### Render and store
+
+    Generate and upload the PDF and ISDOC once, then store their URLs.
+
   </Step>
 </Steps>
 

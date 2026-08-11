@@ -1,6 +1,7 @@
 ---
-title: Importing your invoice history
-description: Bulk-loading previously issued invoices from another tool.
+title: Import history
+description: Preserve previously issued PDF and ISDOC files in bulk.
+icon: ArchiveRestore
 ---
 
 Switching to Invoicey mid-year leaves your history behind. The import flow at **Invoices → Import**
@@ -17,28 +18,41 @@ than starting from zero.
 
 <Steps>
   <Step>
-    ### Pick the issuer Which of your businesses issued these invoices.
-    Everything in one batch belongs to one issuer.
+    ### Pick the issuer
+
+    Choose the business that issued these invoices. One batch belongs to one issuer.
+
   </Step>
   <Step>
-    ### Set batch defaults The origin provider — `fakturaonline`, `idoklad`,
-    `fakturoid`, `pohoda`, `money_s3`, `vyfakturuj`, `superfaktura`, `custom` or
-    an older Invoicey — and whether they should land marked as paid.
-  </Step>
-  <Step>### Upload PDFs Up to 40 per drop, 16 MB each.</Step>
-  <Step>
-    ### Let Invoicey classify Each PDF is inspected for embedded or sidecar
-    ISDOC. This decides how much of the invoice is recoverable — see below.
+    ### Set batch defaults
+
+    Select the source provider and whether invoices should arrive marked as paid.
+
   </Step>
   <Step>
-    ### Review A grid of everything found. Archive-mode rows have editable
-    header fields; paid state is togglable per row.
+    ### Upload PDFs
+
+    Add up to 40 files per batch, 16 MB each.
+
   </Step>
   <Step>
-    ### Commit Rows are written as issued invoices with their **historical**
-    issue dates. No numbers are allocated — they keep the numbers they already
-    had — and the numbering counter is synced afterwards so your next native
-    invoice continues the sequence rather than colliding with it.
+    ### Let Invoicey classify
+
+    Each PDF is inspected for embedded or sidecar ISDOC data.
+
+  </Step>
+  <Step>
+    ### Review
+
+    Confirm every row. Archive imports expose editable header fields and paid state.
+
+  </Step>
+  <Step>
+    ### Import
+
+    Rows keep their historical dates and numbers. Invoicey's counter then advances past the imported
+    sequence so the next native invoice cannot collide.
+
   </Step>
 </Steps>
 
@@ -56,7 +70,7 @@ breakdown, both parties, dates.
 These behave like natively issued invoices: filterable, searchable, correctly counted in VAT and
 revenue totals. Both the original PDF and the extracted ISDOC are stored.
 
-Most Czech invoicing tools embed ISDOC. If you are importing from one of them, expect this.
+Most Czech invoicing tools embed ISDOC, so this is the preferred path.
 
 </Tab>
 
@@ -71,8 +85,7 @@ in the review grid — number, dates, client name, total. The original PDF is ke
 The invoice appears in your list with correct totals and dates. What you do **not** get is per-line
 detail or a real VAT breakdown, because that information was never machine-readable.
 
-There is no OCR or AI extraction. Guessing at tax-document line items is not a thing this product
-does.
+There is no OCR or AI extraction; Invoicey does not guess tax-document line items.
 
 </Tab>
 

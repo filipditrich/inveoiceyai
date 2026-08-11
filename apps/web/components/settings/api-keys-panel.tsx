@@ -288,7 +288,7 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
                     ? "Nový klíč je připravený — je vložený do ukázky níže."
                     : keys.length > 0
                       ? "Máte existující klíč. Celý token už nejde zobrazit — vytvořte nový, pokud ho nemáte uložený."
-                      : "Nejdřív vytvořte klíč výše. Bez něj remote MCP odmítne požadavek."}
+                      : "Nejprve vytvořte klíč výše. Bez něj vzdálené MCP požadavek odmítne."}
                 </p>
               </div>
             </li>

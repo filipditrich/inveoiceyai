@@ -16,10 +16,17 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_GIT_SHA, APP_VERSION } from "@/lib/app-build-info";
 import {
+  ArchiveRestoreIcon,
   BookOpenIcon,
+  BracesIcon,
   Building2Icon,
+  FilePlus2Icon,
   FileTextIcon,
+  ListIcon,
   LayoutDashboardIcon,
+  PlugZapIcon,
+  PlusIcon,
+  Settings2Icon,
   UsersIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -55,6 +62,7 @@ export function AppSidebar({
         {
           title: t("nav.invoicesList"),
           url: "/invoices",
+          icon: <ListIcon />,
           isActive:
             pathname === "/invoices" ||
             (pathname.startsWith("/invoices/") &&
@@ -65,16 +73,19 @@ export function AppSidebar({
         {
           title: t("nav.invoicesNew"),
           url: "/invoices/new",
+          icon: <FilePlus2Icon />,
           isActive: pathname === "/invoices/new",
         },
         {
           title: t("nav.invoicesImport"),
           url: "/invoices/import",
+          icon: <ArchiveRestoreIcon />,
           isActive: pathname === "/invoices/import",
         },
         {
           title: t("nav.invoicesFromJson"),
           url: "/invoices/from-json",
+          icon: <BracesIcon />,
           isActive: pathname === "/invoices/from-json",
         },
       ],
@@ -120,17 +131,50 @@ export function AppSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
         <div className="from-brand/25 via-brand/10 bg-linear-to-r mx-2 hidden h-px to-transparent group-data-[collapsible=icon]:hidden sm:block" />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground shadow-xs"
+              isActive={pathname === "/invoices/new"}
+              render={<Link href="/invoices/new" prefetch />}
+              tooltip={t("nav.newInvoice")}
+            >
+              <PlusIcon className="size-4" />
+              <span className="font-medium">{t("nav.newInvoice")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="pt-1">
         <NavMain items={navMain} groupLabel={t("nav.group")} />
         <NavSecondary
-          className="mt-auto"
+          groupLabel={t("nav.manageGroup")}
+          items={[
+            {
+              title: t("nav.settings"),
+              url: "/settings",
+              icon: <Settings2Icon />,
+              isActive:
+                (pathname === "/settings" ||
+                  pathname.startsWith("/settings/")) &&
+                pathname !== "/settings/integrations",
+            },
+            {
+              title: t("nav.integrations"),
+              url: "/settings/integrations",
+              icon: <PlugZapIcon />,
+              isActive: pathname === "/settings/integrations",
+            },
+          ]}
+        />
+        <NavSecondary
           groupLabel={t("nav.resourcesGroup")}
           items={[
             {
               title: t("nav.docs"),
               url: "/docs",
               icon: <BookOpenIcon />,
+              isActive: pathname === "/docs" || pathname.startsWith("/docs/"),
             },
           ]}
         />

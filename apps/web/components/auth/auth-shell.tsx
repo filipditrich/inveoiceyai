@@ -1,4 +1,5 @@
 import {
+  ArrowLeftIcon,
   CheckCircle2Icon,
   FileCheck2Icon,
   QrCodeIcon,
@@ -72,14 +73,17 @@ export async function AuthShell({
             <BrandLogo size={34} priority />
             <span className="font-semibold tracking-tight">Invoicey</span>
           </Link>
-          <div className="ml-auto flex items-center gap-3">
-            <LocaleSwitcher size="sm" />
+          <div className="ml-auto flex items-center gap-1 sm:gap-2">
             <Link
               href="/"
-              className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+              className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex size-8 items-center justify-center gap-1.5 rounded-md text-sm transition-colors sm:w-auto sm:px-2.5"
+              title={t("backHome")}
             >
-              {t("backHome")}
+              <ArrowLeftIcon className="size-3.5" />
+              <span className="sr-only sm:not-sr-only">{t("backHome")}</span>
             </Link>
+            <LocaleSwitcher compact className="sm:hidden" />
+            <LocaleSwitcher size="sm" className="hidden sm:inline-flex" />
           </div>
         </div>
 

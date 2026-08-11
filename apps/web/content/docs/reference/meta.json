@@ -1,5 +1,6 @@
 {
-  "title": "Reference",
+  "title": "Technical reference",
+  "icon": "Library",
   "pages": [
     "invoice-schema",
     "mcp-tools",

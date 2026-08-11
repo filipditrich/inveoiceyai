@@ -1,6 +1,7 @@
 ---
-title: Environment variables
-description: Every variable, what needs it, and what breaks without it.
+title: Environment
+description: Required and optional variables, grouped by capability.
+icon: Variable
 ---
 
 For [self-hosting](/docs/getting-started/self-hosting). Values are read from the **repo root** —
@@ -20,7 +21,7 @@ Without these, nothing starts.
 openssl rand -base64 32   # BETTER_AUTH_SECRET
 ```
 
-<Callout type="warn" title="The build-time requirement is the usual surprise">
+<Callout type="warn" title="Set the auth secret before building">
   `next build` runs with `NODE_ENV=production`, and the auth library refuses to
   construct with its default secret in production. Any build importing auth —
   all of them — fails without this. Set it in your CI or Vercel build

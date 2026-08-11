@@ -1,6 +1,7 @@
 ---
 title: Snapshots
-description: Why editing a client never changes invoices you already sent them.
+description: Why issued invoices keep the exact parties and assets they started with.
+icon: Snowflake
 ---
 
 When you issue an invoice, Invoicey copies the issuer and the client **into** the invoice. From then
@@ -48,8 +49,8 @@ and signature images.
 
 **Client:** name, IČO, DIČ, address and contact details.
 
-The invoice keeps a back-reference to the original record IDs, so "show me every invoice from this
-issuer" still works — you just cannot use it to rewrite what those invoices say.
+The invoice keeps the original record IDs for filtering and navigation, but never uses them to
+rewrite issued content.
 
 ## What is not captured
 

@@ -56,7 +56,7 @@ export async function MarketingHeader() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2 lg:ml-2">
-          <LocaleSwitcher size="sm" className="hidden sm:flex" />
+          <LocaleSwitcher compact className="hidden sm:inline-flex" />
           <Button
             variant="ghost"
             className="hidden sm:inline-flex"
@@ -93,7 +93,11 @@ export async function MarketingHeader() {
               >
                 {t("signIn")}
               </Link>
-              <LocaleSwitcher size="sm" className="mt-1 w-full" />
+              <LocaleSwitcher
+                align="start"
+                size="sm"
+                className="mt-1 w-full justify-start"
+              />
             </nav>
           </details>
         </div>

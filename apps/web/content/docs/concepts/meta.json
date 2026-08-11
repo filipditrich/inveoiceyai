@@ -1,5 +1,6 @@
 {
-  "title": "Core concepts",
+  "title": "How Invoicey works",
+  "icon": "Workflow",
   "pages": [
     "invoice-as-data",
     "czech-vat",

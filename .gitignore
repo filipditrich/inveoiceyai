@@ -34,6 +34,10 @@ npm-debug.log*
 # cursor local hook state (machine-specific)
 .cursor/hooks/
 .cursor/mcp.json
+.cursor/*.code-workspace
+
+# local agent settings and generated worktrees
+.claude/
 
 # local MCP presets (Plan 12a)
 .invoicey/

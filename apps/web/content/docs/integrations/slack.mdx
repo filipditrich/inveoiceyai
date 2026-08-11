@@ -1,13 +1,14 @@
 ---
 title: Slack
-description: An invoicing agent that lives in your Slack workspace.
+description: Draft and manage invoices from a Slack conversation.
+icon: MessageSquare
 ---
 
 Invoicey runs a durable agent in Slack. Mention it, or DM it, and describe the invoice you want — it
 looks the client up in ARES, builds the invoice, posts the PDF and ISDOC into the thread, and asks
 before doing anything irreversible.
 
-It is built on [Vercel Eve](https://eve.dev/docs) and runs inside the same deployment as the web app.
+It runs on [Vercel Eve](https://eve.dev/docs) inside the web deployment.
 
 ## Using it
 
@@ -36,7 +37,7 @@ Three actions always stop and ask, with an approve/reject prompt in the thread:
 | `mark_invoice_paid`  | Asserts money arrived                                     |
 | `send_invoice_email` | Reaches a real client's inbox                             |
 
-Creating and revising drafts does not ask. Drafts are cheap and deletable; the three above are not.
+Creating and revising drafts does not require approval.
 
 <Callout type="warn" title="Anyone in the channel can drive it">
   The agent authenticates as the deployment, not as the person typing. It does
@@ -44,13 +45,7 @@ Creating and revising drafts does not ask. Drafts are cheap and deletable; the t
   it in a private channel with the people who should have that power.
 </Callout>
 
-## Available tools
-
-`search_business` · `lookup_business` · `list_presets` · `get_preset` · `save_preset` ·
-`create_invoice` · `upload_invoice_files` · `list_invoices` · `get_invoice` · `issue_invoice` ·
-`mark_invoice_paid` · `send_invoice_email`
-
-The same handlers the [MCP tools](/docs/integrations/mcp) use, plus Slack-specific file upload.
+The agent uses the same validated handlers as [MCP](/docs/integrations/mcp), plus Slack file upload.
 
 ## Connecting Slack
 

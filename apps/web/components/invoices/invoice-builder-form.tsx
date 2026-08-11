@@ -30,12 +30,12 @@ import {
 } from "react-hook-form";
 import { z } from "zod";
 
-const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Zadej platné datum");
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Zadejte platné datum");
 
 const BuilderFormSchema = z
   .object({
-    issuerId: z.string().uuid("Vyber vystavovatele"),
-    clientId: z.string().uuid("Vyber odběratele"),
+    issuerId: z.string().uuid("Vyberte vystavovatele"),
+    clientId: z.string().uuid("Vyberte odběratele"),
     docType: z.enum(["invoice", "proforma", "advance", "credit_note"]),
     issueDate: isoDate,
     dueDate: isoDate,
@@ -51,16 +51,16 @@ const BuilderFormSchema = z
         z.object({
           description: z.string().min(1, "Popis je povinný"),
           quantity: z
-            .number({ error: "Zadej množství" })
+            .number({ error: "Zadejte množství" })
             .refine((q) => q !== 0, "Množství nesmí být 0"),
           unit: z.string().min(1, "Jednotka je povinná"),
           unitPriceWithoutVat: z
-            .number({ error: "Zadej cenu" })
+            .number({ error: "Zadejte cenu" })
             .nonnegative("Cena nesmí být záporná"),
-          vatRate: z.number({ error: "Zadej DPH %" }).min(0).max(100),
+          vatRate: z.number({ error: "Zadejte sazbu DPH" }).min(0).max(100),
         }),
       )
-      .min(1, "Přidej alespoň jednu položku"),
+      .min(1, "Přidejte alespoň jednu položku"),
   })
   .refine((d) => d.dueDate >= d.issueDate, {
     message: "Splatnost nesmí být před datem vystavení",
@@ -420,7 +420,7 @@ export function InvoiceBuilderForm({
   if (issuers.length === 0 || clients.length === 0) {
     return (
       <p className="text-muted-foreground text-sm">
-        Nejdřív založ{" "}
+        Nejprve vytvořte{" "}
         {issuers.length === 0 ? (
           <a className="underline" href="/issuers/new">
             vystavovatele
@@ -455,7 +455,7 @@ export function InvoiceBuilderForm({
             className="border-destructive/40 bg-destructive/10 text-destructive space-y-1 rounded-md border px-3 py-2 text-sm"
             role="alert"
           >
-            <p className="font-medium">Oprav chyby ve formuláři</p>
+            <p className="font-medium">Opravte chyby ve formuláři</p>
             <ul className="list-inside list-disc text-xs">
               {alertMessages.slice(0, 8).map((m) => (
                 <li key={m}>{m}</li>
@@ -466,7 +466,7 @@ export function InvoiceBuilderForm({
 
         <section className="grid gap-4 sm:grid-cols-2">
           <Field
-            description="Tvůj podnik (dodavatel na faktuře)."
+            description="Vaše firma uvedená na faktuře jako dodavatel."
             error={fieldError(errors, "issuerId")}
             label="Vystavovatel"
           >
@@ -865,7 +865,8 @@ async function refreshPreview(
 
 function humanInvalid(code: string): string {
   const map: Record<string, string> = {
-    required_fields: "Vyber vystavovatele, odběratele a alespoň jednu položku.",
+    required_fields:
+      "Vyberte vystavovatele, odběratele a alespoň jednu položku.",
     missing_parties: "Vystavovatel nebo odběratel nenalezen.",
     validation: "Faktura neprošla validací schématu.",
     missing_scheme: "Chybí číslovací schéma pro typ dokladu.",

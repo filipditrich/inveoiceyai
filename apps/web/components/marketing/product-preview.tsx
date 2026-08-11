@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 import styles from "./marketing-motion.module.css";
 
@@ -23,52 +24,50 @@ type InvoiceExample = {
   dueDays: number;
 };
 
-const EXAMPLES = [
-  {
-    label: "Měsíční služby",
-    prompt:
-      "Vystav fakturu pro Studio Sever za měsíční služby, 35 000 Kč bez DPH, splatnost 14 dní.",
-    customer: "Studio Sever",
-    companyId: "IČO 087 54 321 · ARES ověřeno",
-    service: "Měsíční služby",
-    baseAmount: 35_000,
-    vatRate: 0,
-    dueDays: 14,
-  },
-  {
-    label: "Webdesign",
-    prompt:
-      "Vystav fakturu pro Ateliér 21 za návrh webu, 48 000 Kč + DPH, splatnost 10 dní.",
-    customer: "Ateliér 21",
-    companyId: "IČO 142 68 095 · ARES ověřeno",
-    service: "Návrh webu",
-    baseAmount: 48_000,
-    vatRate: 21,
-    dueDays: 10,
-  },
-  {
-    label: "Konzultace",
-    prompt:
-      "Vystav fakturu pro Kavárnu Místo za konzultace, 18 500 Kč + DPH, splatnost 7 dní.",
-    customer: "Kavárna Místo",
-    companyId: "IČO 062 19 483 · ARES ověřeno",
-    service: "Produktové konzultace",
-    baseAmount: 18_500,
-    vatRate: 21,
-    dueDays: 7,
-  },
-] as const satisfies readonly InvoiceExample[];
-
 const AMOUNT_PATTERN = /(\d[\d\s]*(?:[.,]\d+)?)\s*(?:Kč|CZK)/i;
-const DUE_PATTERN = /(\d+)\s*(?:dní|dnů|dny)/i;
+const DUE_PATTERN = /(\d+)\s*(?:dní|dnů|dny|days?|day)/i;
 
 function parseAmount(value: string) {
   return Number.parseFloat(value.replaceAll(" ", "").replace(",", "."));
 }
 
 export function ProductPreview() {
-  const [prompt, setPrompt] = useState<string>(EXAMPLES[0].prompt);
-  const [invoice, setInvoice] = useState<InvoiceExample>(EXAMPLES[0]);
+  const locale = useLocale();
+  const t = useTranslations("Marketing.preview");
+  const examples: readonly InvoiceExample[] = [
+    {
+      label: t("exampleServices"),
+      prompt: t("promptServices"),
+      customer: "Studio Sever",
+      companyId: "087 54 321",
+      service: t("serviceMonthly"),
+      baseAmount: 35_000,
+      vatRate: 0,
+      dueDays: 14,
+    },
+    {
+      label: t("exampleWebdesign"),
+      prompt: t("promptWebdesign"),
+      customer: "Ateliér 21",
+      companyId: "142 68 095",
+      service: t("serviceWebdesign"),
+      baseAmount: 48_000,
+      vatRate: 21,
+      dueDays: 10,
+    },
+    {
+      label: t("exampleConsulting"),
+      prompt: t("promptConsulting"),
+      customer: "Kavárna Místo",
+      companyId: "062 19 483",
+      service: t("serviceConsulting"),
+      baseAmount: 18_500,
+      vatRate: 21,
+      dueDays: 7,
+    },
+  ];
+  const [prompt, setPrompt] = useState<string>(examples[0].prompt);
+  const [invoice, setInvoice] = useState<InvoiceExample>(examples[0]);
   const [revision, setRevision] = useState(0);
   const [hasUpdated, setHasUpdated] = useState(false);
   const promptRef = useRef<HTMLTextAreaElement>(null);
@@ -86,7 +85,7 @@ export function ProductPreview() {
     const normalizedPrompt = activePrompt.replaceAll(" ", " ");
     const amountMatch = normalizedPrompt.match(AMOUNT_PATTERN);
     const dueMatch = normalizedPrompt.match(DUE_PATTERN);
-    const matchedExample = EXAMPLES.find((example) =>
+    const matchedExample = examples.find((example) =>
       normalizedPrompt
         .toLocaleLowerCase("cs")
         .includes(example.customer.toLocaleLowerCase("cs")),
@@ -95,8 +94,12 @@ export function ProductPreview() {
     const parsedAmount = amountMatch
       ? parseAmount(amountMatch[1])
       : basis.baseAmount;
-    const hasVat = /(?:\+\s*DPH|s\s+DPH)/i.test(normalizedPrompt);
-    const noVat = /bez\s+DPH/i.test(normalizedPrompt);
+    const hasVat = /(?:\+\s*(?:DPH|VAT)|s\s+DPH|plus\s+VAT)/i.test(
+      normalizedPrompt,
+    );
+    const noVat = /(?:bez\s+DPH|excluding\s+VAT|no\s+VAT)/i.test(
+      normalizedPrompt,
+    );
 
     setInvoice({
       ...basis,
@@ -120,7 +123,11 @@ export function ProductPreview() {
 
   const totalAmount = invoice.baseAmount * (1 + invoice.vatRate / 100);
   const formatAmount = (amount: number) =>
-    new Intl.NumberFormat("cs-CZ", { maximumFractionDigits: 0 }).format(amount);
+    new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(amount);
+  const formatCurrency = (amount: number) =>
+    locale === "cs"
+      ? `${formatAmount(amount)} Kč`
+      : `CZK ${formatAmount(amount)}`;
 
   return (
     <div
@@ -137,10 +144,10 @@ export function ProductPreview() {
           <div className="flex items-center justify-between gap-3">
             <div className="text-primary flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.15em]">
               <SparklesIcon className="size-3.5" />
-              Zadejte fakturu přirozeně
+              {t("inputLabel")}
             </div>
             <span className="text-muted-foreground hidden text-[0.6rem] sm:block">
-              Enter pro aktualizaci
+              {t("enterHint")}
             </span>
           </div>
           <textarea
@@ -150,11 +157,11 @@ export function ProductPreview() {
             onKeyDown={submitOnEnter}
             rows={2}
             className="placeholder:text-muted-foreground/60 mt-3 w-full resize-none bg-transparent text-sm leading-6 outline-none"
-            aria-label="Pokyn pro vytvoření faktury"
+            aria-label={t("ariaLabel")}
           />
           <div className="mt-3 flex flex-col gap-3 border-t pt-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap gap-1.5">
-              {EXAMPLES.map((example) => (
+              {examples.map((example) => (
                 <button
                   key={example.label}
                   type="button"
@@ -169,7 +176,7 @@ export function ProductPreview() {
               type="submit"
               className="bg-foreground text-background hover:bg-primary hover:text-primary-foreground group inline-flex shrink-0 items-center justify-center gap-2 rounded-full px-3.5 py-2 text-[0.68rem] font-medium transition-colors"
             >
-              Připravit náhled
+              {t("updateButton")}
               <CornerDownLeftIcon className="size-3.5 transition-transform duration-200 group-hover:translate-y-0.5" />
             </button>
           </div>
@@ -177,7 +184,7 @@ export function ProductPreview() {
             className={`mt-2 text-[0.62rem] font-medium text-emerald-700 transition-opacity dark:text-emerald-300 ${hasUpdated ? "opacity-100" : "opacity-0"}`}
             aria-live="polite"
           >
-            Náhled aktualizován · povinné údaje ověřeny
+            {t("updated")}
           </p>
         </form>
 
@@ -194,21 +201,23 @@ export function ProductPreview() {
                 <span className="text-sm font-semibold">Invoicey</span>
               </div>
               <p className="text-muted-foreground mt-4 text-[0.55rem] font-medium uppercase tracking-[0.18em]">
-                Dodavatel
+                {t("issuer")}
               </p>
               <p className="mt-1 text-xs font-medium">Ditrich Labs</p>
               <p className="text-muted-foreground mt-0.5 text-[0.62rem]">
-                IČO 123 45 678
+                {t("issuerCompanyId")}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-xl font-semibold tracking-tight">Faktura</p>
+              <p className="text-xl font-semibold tracking-tight">
+                {t("invoice")}
+              </p>
               <p className="text-muted-foreground mt-1 font-mono text-[0.62rem]">
                 2026-0048
               </p>
               <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-1 text-[0.58rem] font-medium text-emerald-700 dark:text-emerald-300">
                 <span className="size-1.5 rounded-full bg-emerald-500" />
-                Připraveno
+                {t("ready")}
               </span>
             </div>
           </div>
@@ -216,33 +225,37 @@ export function ProductPreview() {
           <div className="grid grid-cols-2 gap-5 border-b py-4">
             <div>
               <p className="text-muted-foreground text-[0.55rem] font-medium uppercase tracking-[0.16em]">
-                Odběratel
+                {t("customer")}
               </p>
               <p className="mt-1 text-xs font-medium">{invoice.customer}</p>
               <p className="text-muted-foreground mt-0.5 text-[0.6rem]">
-                {invoice.companyId}
+                {t("aresVerified", { companyId: invoice.companyId })}
               </p>
             </div>
             <div>
               <p className="text-muted-foreground text-[0.55rem] font-medium uppercase tracking-[0.16em]">
-                Splatnost
+                {t("due")}
               </p>
-              <p className="mt-1 text-xs font-medium">{invoice.dueDays} dní</p>
+              <p className="mt-1 text-xs font-medium">
+                {t("days", { count: invoice.dueDays })}
+              </p>
               <p className="text-muted-foreground mt-0.5 text-[0.6rem]">
-                {invoice.vatRate > 0 ? `DPH ${invoice.vatRate} %` : "Bez DPH"}
+                {invoice.vatRate > 0
+                  ? t("vat", { rate: String(invoice.vatRate) })
+                  : t("withoutVat")}
               </p>
             </div>
           </div>
 
           <div className="py-4">
             <div className="text-muted-foreground grid grid-cols-[1fr_auto] gap-4 text-[0.55rem] font-medium uppercase tracking-[0.14em]">
-              <span>Položka</span>
-              <span>Částka</span>
+              <span>{t("item")}</span>
+              <span>{t("amount")}</span>
             </div>
             <div className="mt-2.5 grid grid-cols-[1fr_auto] gap-4 text-xs">
               <p className="font-medium">{invoice.service}</p>
               <p className="font-mono font-medium">
-                {formatAmount(invoice.baseAmount)} Kč
+                {formatCurrency(invoice.baseAmount)}
               </p>
             </div>
           </div>
@@ -256,15 +269,15 @@ export function ProductPreview() {
                 <p className="text-muted-foreground text-[0.55rem] font-medium uppercase tracking-[0.14em]">
                   SPAYD
                 </p>
-                <p className="mt-0.5 text-[0.6rem]">Platba mobilem</p>
+                <p className="mt-0.5 text-[0.6rem]">{t("mobilePayment")}</p>
               </div>
             </div>
             <div className="text-right">
               <p className="text-muted-foreground text-[0.55rem] font-medium uppercase tracking-[0.16em]">
-                Celkem
+                {t("total")}
               </p>
               <p className="mt-0.5 text-xl font-semibold tracking-tight">
-                {formatAmount(totalAmount)} Kč
+                {formatCurrency(totalAmount)}
               </p>
             </div>
           </div>

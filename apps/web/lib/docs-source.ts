@@ -1,5 +1,40 @@
 import { loader, type Source } from "fumadocs-core/source";
 import { defineDocs } from "fumadocs-mdx/macro";
+import {
+  ArchiveRestoreIcon,
+  BookOpenIcon,
+  BotIcon,
+  BracesIcon,
+  Building2Icon,
+  CircleDotIcon,
+  CircleHelpIcon,
+  ContactIcon,
+  FileCode2Icon,
+  FilePlus2Icon,
+  FilesIcon,
+  FileTextIcon,
+  HashIcon,
+  KeyRoundIcon,
+  LibraryIcon,
+  ListChecksIcon,
+  MessageSquareIcon,
+  MousePointer2Icon,
+  PercentIcon,
+  PlugIcon,
+  QrCodeIcon,
+  RocketIcon,
+  SendIcon,
+  ServerIcon,
+  SnowflakeIcon,
+  SquareTerminalIcon,
+  StampIcon,
+  UsersIcon,
+  VariableIcon,
+  WorkflowIcon,
+  WrenchIcon,
+  type LucideIcon,
+} from "lucide-react";
+import { createElement } from "react";
 
 /**
  * Public product documentation served at `/docs` (`content/docs/**`).
@@ -30,6 +65,44 @@ type DocsSource = Source<{
 
 const docsSource: DocsSource = docs.toFumadocsSource();
 
+const DOC_ICONS: Record<string, LucideIcon> = {
+  ArchiveRestore: ArchiveRestoreIcon,
+  BookOpen: BookOpenIcon,
+  Bot: BotIcon,
+  Braces: BracesIcon,
+  Building2: Building2Icon,
+  CircleDot: CircleDotIcon,
+  CircleHelp: CircleHelpIcon,
+  Contact: ContactIcon,
+  FileCode2: FileCode2Icon,
+  FilePlus2: FilePlus2Icon,
+  Files: FilesIcon,
+  FileText: FileTextIcon,
+  Hash: HashIcon,
+  KeyRound: KeyRoundIcon,
+  Library: LibraryIcon,
+  ListChecks: ListChecksIcon,
+  MessageSquare: MessageSquareIcon,
+  MousePointer2: MousePointer2Icon,
+  Percent: PercentIcon,
+  Plug: PlugIcon,
+  QrCode: QrCodeIcon,
+  Rocket: RocketIcon,
+  Send: SendIcon,
+  Server: ServerIcon,
+  Snowflake: SnowflakeIcon,
+  SquareTerminal: SquareTerminalIcon,
+  Stamp: StampIcon,
+  Users: UsersIcon,
+  Variable: VariableIcon,
+  Workflow: WorkflowIcon,
+  Wrench: WrenchIcon,
+};
+
 export const source = loader(docsSource, {
   baseUrl: "/docs",
+  icon(name) {
+    const Icon = name ? DOC_ICONS[name] : undefined;
+    return Icon ? createElement(Icon, { className: "size-4" }) : undefined;
+  },
 });

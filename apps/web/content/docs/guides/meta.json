@@ -1,5 +1,6 @@
 {
-  "title": "Guides",
+  "title": "Everyday workflows",
+  "icon": "ListChecks",
   "pages": [
     "issuers",
     "clients",

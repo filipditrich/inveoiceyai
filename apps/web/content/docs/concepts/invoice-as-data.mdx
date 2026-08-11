@@ -1,19 +1,16 @@
 ---
 title: An invoice is data
-description: The single schema every surface in Invoicey validates against.
+description: One validated schema powers the web, automation and every output.
+icon: Braces
 ---
 
-Most invoicing tools model an invoice as a document with fields attached. Invoicey inverts that: an
-invoice is a **validated data structure**, and the PDF, the ISDOC XML and the payment QR are three
-renderings of it.
-
-This is not an aesthetic preference. It is what makes the rest of the product possible.
+In Invoicey, an invoice is a **validated data structure**. PDF, ISDOC and payment QR are outputs of
+the same source data.
 
 ## One schema, every surface
 
-There is exactly one definition of what an invoice is — a Zod schema called `InvoiceSchema`. The web
-form, the [MCP tools](/docs/integrations/mcp), the [Slack agent](/docs/integrations/slack), the PDF
-renderer and the ISDOC generator all parse against it.
+`InvoiceSchema` is the shared Zod schema used by the web form, [MCP tools](/docs/integrations/mcp),
+[Slack agent](/docs/integrations/slack) and output renderers.
 
 ```text
 web form ─┐
@@ -24,13 +21,8 @@ Slack     ─┘         │                ├─▶ ISDOC XML
               rejected if invalid
 ```
 
-The practical consequence: **no surface can create an invoice the others cannot understand.** There
-is no "the API accepts fields the UI doesn't" drift, because there is no separate API model.
-
-It is also what makes AI-driven creation trustworthy. When an assistant in Cursor proposes an
-invoice, the schema is the referee. A missing DUZP, a malformed IČO, a due date before the issue
-date — all rejected, with a specific error the model reads and corrects. The assistant cannot talk
-its way past validation.
+The result: **every surface creates the same kind of invoice.** A missing DUZP, malformed IČO or
+invalid due date is rejected with a specific error that a person or assistant can correct.
 
 ## The shape
 
@@ -52,7 +44,7 @@ Field-by-field detail is in the [schema reference](/docs/reference/invoice-schem
 
 ## Validation is strict on purpose
 
-The schema encodes Czech invoicing law rather than being permissive and hoping for the best:
+The schema encodes the domain rules that protect issued invoices:
 
 | Rule                                         | Enforced                           |
 | -------------------------------------------- | ---------------------------------- |
@@ -65,29 +57,19 @@ The schema encodes Czech invoicing law rather than being permissive and hoping f
 | Credit notes reference the corrected invoice | conditional requirement            |
 | At least one line item                       | `.min(1)`                          |
 
-Defaults are applied by the caller _before_ validation, never silently at parse time. If a required
-field is absent, you get an error naming it — you do not get an invoice with a guessed value.
+Callers may apply explicit defaults before validation. The parser never guesses a required value.
 
 <Callout type="warn" title="This bites when automating">
-  Because nothing is silently defaulted, an assistant that omits `duzp` gets a
-  validation error rather than an invoice dated today. That is the intended
-  behaviour. It is also the single most common reason a first automated
-  `create_invoice` call fails.
+  An automated call that omits `duzp` fails validation instead of silently
+  choosing today's date. Include every required field in `create_invoice`.
 </Callout>
 
 ## Totals are computed, then verified
 
-Line items carry quantity, unit price and VAT rate. Totals are derived from them — grouped per VAT
-rate, then summed.
-
-When you issue, the totals are recomputed server-side and compared against what was submitted. A
-mismatch aborts the whole transaction. A client that miscalculates cannot persist a wrong total,
-which matters when the client is a language model.
+Totals are derived from quantity, unit price and VAT rate. At issue time, Invoicey recomputes them
+server-side and rejects a mismatch.
 
 ## Currency and language
 
-Both are literals in the schema: `CZK` and `cs`. Not configuration — literals.
-
-Multi-currency and multi-language invoices are a real amount of domain work (exchange-rate dates,
-per-country VAT rates, translated legal notes) and pretending to support them with a dropdown would
-produce invoices that are subtly wrong. They are out of scope until done properly.
+The schema currently supports Czech invoices in `CZK` and `cs`. Multi-currency and translated
+invoices require additional tax, exchange-rate and legal-note handling and are not yet supported.

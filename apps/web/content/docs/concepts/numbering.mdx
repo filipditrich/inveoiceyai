@@ -1,6 +1,7 @@
 ---
-title: Invoice numbering
-description: Templates, tokens, yearly resets and why numbers are never reused.
+title: Numbering
+description: Templates, counters, yearly resets and safe allocation.
+icon: Hash
 ---
 
 Every issuer defines a numbering scheme **per document type**. Invoices, proformas, advance invoices
@@ -33,7 +34,7 @@ F{YYYY}-{####}          →  F2026-0007
 
 <Callout title="Avoid slashes">
   `{YYYY}/{####}` produces `2026/0007`, which is valid but shows up in URLs, filenames and email
-  subjects. It works — it is just consistently mildly annoying.
+  subjects. Prefer a dash when these values leave Invoicey.
 </Callout>
 
 The counter width comes from the number of `#` characters, not from a separate setting. `{#####}`
@@ -47,7 +48,7 @@ With `yearly`, the counter returns to 1 the first time you issue in a new calend
 the **issue date**, not by the wall clock. Issuing a backdated December invoice in January uses
 December's sequence, which is what you want.
 
-With `never`, the counter simply keeps climbing.
+With `never`, the counter keeps climbing.
 
 Most Czech businesses reset yearly. Combine it with `{YYYY}` in the template so numbers stay unique
 across years.

@@ -212,7 +212,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
   if (issuers.length === 0) {
     return (
       <p className="text-muted-foreground text-sm">
-        Nejdřív vytvořte{" "}
+        Nejprve vytvořte{" "}
         <Link className="underline" href="/issuers">
           dodavatele
         </Link>

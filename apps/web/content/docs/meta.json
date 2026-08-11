@@ -3,16 +3,11 @@
   "root": true,
   "pages": [
     "index",
-    "---Getting started---",
     "getting-started",
-    "---Understanding Invoicey---",
     "concepts",
-    "---Using Invoicey---",
     "guides",
     "outputs",
-    "---Automation---",
     "integrations",
-    "---Reference---",
     "reference"
   ]
 }

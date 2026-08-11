@@ -1,4 +1,5 @@
 {
-  "title": "Documents",
+  "title": "Files & exports",
+  "icon": "Files",
   "pages": ["pdf", "isdoc", "payment-qr"]
 }

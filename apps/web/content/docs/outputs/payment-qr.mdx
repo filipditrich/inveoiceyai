@@ -1,6 +1,7 @@
 ---
-title: Payment QR code
-description: SPAYD QR platba so Czech banking apps pre-fill the payment.
+title: Payment QR
+description: SPAYD data that pre-fills a Czech bank payment.
+icon: QrCode
 ---
 
 Czech banking apps read **QR platba**, a QR code encoding a
@@ -65,6 +66,5 @@ Work down the list:
 
 Scan your first invoice with your own banking app before sending it to a client.
 
-The IBAN and the printed account number are two separate fields on the issuer, and **nothing checks
-that they describe the same account**. A mismatch means clients paying an account that is not yours —
-and the QR is the field they will trust.
+The IBAN and printed account number are separate issuer fields. Invoicey validates each format but
+cannot verify that they identify the same account. Confirm both before sending your first invoice.

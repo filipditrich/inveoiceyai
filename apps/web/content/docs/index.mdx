@@ -1,10 +1,10 @@
 ---
 title: What is Invoicey?
-description: Czech-first invoicing where every invoice is structured data first and a document second.
+description: Czech invoicing built on validated data, from draft to PDF, ISDOC and payment QR.
+icon: BookOpen
 ---
 
-Invoicey is an invoicing tool for Czech freelancers and small teams. It is built around one
-idea that shapes everything else:
+Invoicey helps Czech freelancers and small teams create, issue and deliver invoices.
 
 <Callout title="An invoice is data, not a document">
   Every invoice is a validated JSON payload first. The PDF, the ISDOC XML and
@@ -12,10 +12,8 @@ idea that shapes everything else:
   truth.
 </Callout>
 
-That choice is why Invoicey can offer surfaces a normal invoicing app cannot. The same
-validated payload is produced by the web UI, by an AI assistant in Cursor or Claude Code over
-[MCP](/docs/integrations/mcp), and by the [Slack agent](/docs/integrations/slack) — with no
-duplicated business logic and no "the API supports a different set of fields than the UI".
+The web app, [MCP](/docs/integrations/mcp) and [Slack agent](/docs/integrations/slack) all use that
+same validated payload.
 
 ## What you get
 
@@ -37,9 +35,7 @@ duplicated business logic and no "the API supports a different set of fields tha
   Slack   ─┘                          (validated)     └─▶  your workspace
 ```
 
-Whichever surface you use, the payload has to satisfy the same schema before anything is
-rendered or stored. An assistant that omits a required field gets a validation error back and
-retries — it cannot write a half-formed invoice into your workspace.
+Every surface must satisfy the same schema before Invoicey renders or stores an invoice.
 
 ## Start here
 
@@ -66,12 +62,12 @@ retries — it cannot write a half-formed invoice into your workspace.
   />
 </Cards>
 
-## What is not here yet
+## Current scope
 
-Invoicey is pre-1.0 and these docs describe only what actually ships today. Known gaps:
+Invoicey is pre-1.0. Today that means:
 
 - **Czech koruna only.** Multi-currency is not implemented.
-- **The app UI is Czech.** These docs are English.
+- **Czech and English UI.** Issued PDF and ISDOC labels remain Czech.
 - **API keys have no scopes.** A key is full access to one workspace — see [API keys](/docs/integrations/api-keys).
 - **No public REST API.** Automation goes through MCP or the Slack agent.
 - **No recurring invoices.**

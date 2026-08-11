@@ -30,7 +30,7 @@ declare const messages: {
   };
   Errors: {
     invalid: {
-      required_fields: "Vyber vystavovatele, odběratele a alespoň jednu položku.";
+      required_fields: "Vyberte vystavovatele, odběratele a alespoň jednu položku.";
       missing_parties: "Vystavovatel nebo odběratel nenalezen.";
       validation: "Faktura neprošla validací schématu.";
       missing_scheme: "Chybí číslovací schéma pro typ dokladu.";
@@ -53,7 +53,7 @@ declare const messages: {
     invoice_deleted: "Návrh smazán";
     invoice_duplicated: "Faktura duplikována";
     invoice_emailed: "Faktura odeslána e-mailem";
-    bulk_summary: "Hromadná akce: {ok} ok, {skipped} přeskočeno, {failed} chyb.";
+    bulk_summary: "Dokončeno: {ok} úspěšně, {skipped} přeskočeno, {failed} se nezdařilo.";
     clients_merged: "Sloučeno {groups} skupin — odstraněno {removed} klientů, přesměrováno {repointed} faktur";
   };
   Status: {
@@ -92,6 +92,7 @@ declare const messages: {
       docs: "Dokumentace";
       signIn: "Přihlásit se";
       openApp: "Otevřít aplikaci";
+      skipToContent: "Přeskočit na obsah";
       ariaLabel: "Hlavní navigace";
     };
     footer: {
@@ -114,6 +115,36 @@ declare const messages: {
       noPassword: "Bez hesla";
       czechUi: "České rozhraní";
       betaAccess: "Beta přístup";
+    };
+    preview: {
+      inputLabel: "Popište fakturu vlastními slovy";
+      enterHint: "Enter aktualizuje náhled";
+      ariaLabel: "Pokyn pro vytvoření faktury";
+      updateButton: "Aktualizovat náhled";
+      updated: "Náhled aktualizován · povinné údaje ověřeny";
+      exampleServices: "Měsíční služby";
+      exampleWebdesign: "Webdesign";
+      exampleConsulting: "Konzultace";
+      promptServices: "Vystav fakturu pro Studio Sever za měsíční služby, 35 000 Kč bez DPH, splatnost 14 dní.";
+      promptWebdesign: "Vystav fakturu pro Ateliér 21 za návrh webu, 48 000 Kč + DPH, splatnost 10 dní.";
+      promptConsulting: "Vystav fakturu pro Kavárnu Místo za konzultace, 18 500 Kč + DPH, splatnost 7 dní.";
+      serviceMonthly: "Měsíční služby";
+      serviceWebdesign: "Návrh webu";
+      serviceConsulting: "Produktové konzultace";
+      aresVerified: "IČO {companyId} · ověřeno v ARES";
+      issuerCompanyId: "IČO 123 45 678";
+      issuer: "Dodavatel";
+      invoice: "Faktura";
+      ready: "Připraveno";
+      customer: "Odběratel";
+      due: "Splatnost";
+      days: "{count, plural, one {# den} few {# dny} other {# dní}}";
+      vat: "DPH {rate} %";
+      withoutVat: "Bez DPH";
+      item: "Položka";
+      amount: "Částka";
+      mobilePayment: "Platba mobilem";
+      total: "Celkem";
     };
     trust: {
       pdfIsdoc: "PDF + ISDOC";
@@ -156,14 +187,17 @@ declare const messages: {
       description: "Slack a MCP používají stejné nástroje jako web. AI může dohledat firmu, sestavit návrh a připravit soubory, ale nevymýšlí chybějící povinné údaje a potvrzení citlivých akcí zůstává na vás.";
       item1: "ARES dohledání podle názvu nebo IČO";
       item2: "Validovaný návrh podle InvoiceSchema";
-      item3: "PDF a ISDOC ze stejného renderovacího jádra";
+      item3: "PDF a ISDOC ze stejného zdroje dat";
       item4: "Potvrzení před vydáním, odesláním nebo úhradou";
       chatTitle: "Invoicey v Slacku";
       chatSubtitle: "Strukturovaný návrh, ne volný text";
       chatUserMessage: "@Invoicey vystav měsíční fakturu pro Studio Sever, 35 000 Kč bez DPH, splatnost 14 dní.";
       chatReplyTitle: "Návrh je připravený";
+      chatClientLabel: "Klient";
       chatClient: "Studio Sever · ARES ověřeno";
+      chatAmountLabel: "Částka";
       chatAmount: "35 000 Kč";
+      chatOutputLabel: "Výstup";
       chatOutput: "PDF + ISDOC + SPAYD";
       chatAction: "Zkontrolovat a vystavit";
       chatDisclaimer: "Vydání faktury vždy vyžaduje potvrzení";
@@ -310,8 +344,8 @@ declare const messages: {
     submit: "Vytvořit můj pracovní prostor";
   };
   Invite: {
-    title: "Pozvánka do workspace";
-    description: "Přijměte pozvánku pro přístup k fakturám tohoto workspace.";
+    title: "Pozvánka do pracovního prostoru";
+    description: "Přijměte pozvánku a získejte přístup k fakturám v tomto pracovním prostoru.";
     accept: "Přijmout pozvánku";
     backToApp: "Zpět do aplikace";
   };
@@ -330,7 +364,7 @@ declare const messages: {
   App: {
     meta: {
       title: "Invoicey";
-      description: "Česká fakturace — schema-first data, PDF + ISDOC + SPAYD QR";
+      description: "Česká fakturace založená na datech · PDF, ISDOC a SPAYD QR";
     };
     brand: {
       tagline: "Česká fakturace";
@@ -339,12 +373,16 @@ declare const messages: {
       group: "Navigace";
       dashboard: "Přehled";
       invoices: "Faktury";
-      invoicesList: "Faktury";
-      invoicesNew: "Nová";
-      invoicesImport: "Import";
-      invoicesFromJson: "Z JSON";
+      invoicesList: "Všechny faktury";
+      invoicesNew: "Nová faktura";
+      invoicesImport: "Import historie";
+      invoicesFromJson: "Vytvořit z JSON";
       clients: "Klienti";
       issuers: "Dodavatelé";
+      newInvoice: "Nová faktura";
+      manageGroup: "Správa";
+      settings: "Nastavení";
+      integrations: "Integrace";
       resourcesGroup: "Zdroje";
       docs: "Dokumentace";
     };
@@ -479,7 +517,7 @@ declare const messages: {
       bulkPaid: "Zaplaceno";
       bulkUnpaid: "Zrušit zaplacení";
       bulkCancel: "Storno";
-      bulkDelete: "Smazat drafty";
+      bulkDelete: "Smazat návrhy";
     };
     filter: {
       status: "Stav";
@@ -503,7 +541,7 @@ declare const messages: {
       total: "Celkem";
       paidAt: "Zaplaceno";
       archiveNote: "Archivní import — položky nejsou k dispozici. Stáhněte originální PDF.";
-      invalidPayload: "Neplatný payload v DB.";
+      invalidPayload: "Uložená data faktury jsou neplatná.";
       backToList: "← Zpět na seznam";
       archive: "Archiv";
       import: "Import";
@@ -527,7 +565,7 @@ declare const messages: {
       subtitle: "Nejprve vytvořte návrh, potom jej zkontrolujte a vystavte. Náhled PDF najdete vedle formuláře nebo pod ním.";
       editTitle: "Úprava návrhu";
       issuer: "Vystavovatel";
-      issuerDescription: "Tvůj podnik (dodavatel na faktuře).";
+      issuerDescription: "Vaše firma uvedená na faktuře jako dodavatel.";
       client: "Odběratel";
       clientDescription: "Odběratel z registru klientů (ARES).";
       docType: "Typ dokladu";
@@ -578,20 +616,20 @@ declare const messages: {
       savingDraft: "Ukládám…";
       issue: "Vystavit";
       issuing: "Vystavuji…";
-      modeEdit: "Úprava draftu";
+      modeEdit: "Úprava návrhu";
       modeCreate: "Nová faktura";
-      missingParties: "Nejdřív založ {entities}.";
+      missingParties: "Nejprve vytvořte {entities}.";
       missingIssuer: "vystavovatele";
       missingClient: "odběratele";
       missingAnd: " a ";
       missingScheme: "(chybí schéma)";
       previewError: "Náhled se nepodařilo vytvořit";
-      formErrors: "Oprav chyby ve formuláři";
+      formErrors: "Opravte chyby ve formuláři";
       formFallback: "Vyplň povinná pole a alespoň jednu validní položku.";
     };
     import: {
       title: "Import historických faktur";
-      subtitle: "Nahrajte PDF. Pokud obsahují ISDOC (~80 %), naparsujeme je celé. Bez ISDOC uložíme originál jako archiv a doplníte hlavičku ručně.";
+      subtitle: "Nahrajte soubory PDF. Pokud obsahují vložený ISDOC, načteme i strukturovaná data. Ostatní uložíme jako archivní originály a základní údaje doplníte ručně.";
       backLink: "← Faktury";
     };
     fromJson: {
@@ -601,10 +639,10 @@ declare const messages: {
       backToInvoices: "← Zpět na faktury";
       jsonLabel: "Invoice JSON";
       loadPreset: "Načíst předvolbu";
-      renderPdf: "Vyrenderovat PDF";
+      renderPdf: "Vytvořit náhled PDF";
       rendering: "Renderuji…";
       resetSample: "Obnovit ukázku";
-      emptyPreview: "Spusťte „Vyrenderovat PDF“ pro náhled…";
+      emptyPreview: "Náhled zobrazíte tlačítkem „Vytvořit náhled PDF“.";
       parseError: "JSON se nepodařilo zpracovat: opravte syntaxi a zkuste znovu.";
       validationHelp: "InvoiceSchema ověří strukturu a zvýrazní chyby před vytvořením PDF.";
     };
@@ -693,7 +731,7 @@ declare const messages: {
       };
       trustedDevices: {
         title: "Důvěryhodná zařízení";
-        description: "Soft trust — nové zařízení dostane e-mail, přihlášení vždy projde.";
+        description: "Upozornění na nové zařízení e-mailem. Přihlášení tím není blokováno.";
         empty: "Zatím žádná důvěryhodná zařízení.";
         revoke: "Odvolat";
         revokeFailed: "Odvolání zařízení selhalo";
@@ -707,7 +745,7 @@ declare const messages: {
       };
     };
     members: {
-      title: "Členové workspace";
+      title: "Členové pracovního prostoru";
       description: "Role owner / admin / member.";
       remove: "Odebrat";
       removeFailed: "Odebrání selhalo";
@@ -766,7 +804,7 @@ declare const messages: {
   Pwa: {
     name: "Invoicey";
     shortName: "Invoicey";
-    description: "Česká fakturace — schema-first";
+    description: "Česká fakturace založená na datech";
   };
 };
 export default messages;

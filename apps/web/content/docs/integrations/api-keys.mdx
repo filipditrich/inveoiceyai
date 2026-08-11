@@ -1,6 +1,7 @@
 ---
 title: API keys
-description: Personal keys for MCP and the Slack agent, and the deployment-wide ops key.
+description: Authenticate personal automation without exposing your sign-in session.
+icon: KeyRound
 ---
 
 Automation surfaces — [MCP](/docs/integrations/mcp), the [Slack agent](/docs/integrations/slack) —
@@ -42,8 +43,7 @@ A personal key resolves to **your user**, and operates against **your default wo
 Within that workspace it is full access. There are no scopes and no read-only variant: a holder can
 list invoices, create them, issue them, mark them paid, and email them to your clients.
 
-Some of that reaches real people and asserts real facts about money. Treat a key as you would your
-password, because functionally it is one.
+Treat the key like a password: it can change financial records and send email to clients.
 
 <Callout
   type="warn"
@@ -72,9 +72,8 @@ Key creation and revocation are both written to your security audit log under
 `MCP_API_KEY` is an environment variable on the deployment. It authenticates as the deployment
 itself, against the configured default workspace, with no user attached.
 
-It exists for shared infrastructure — the Slack bot, a CI job — where there is no individual whose
-key it should be. It is a shared secret: not attributable, and rotating it means changing the
-variable and redeploying, which breaks every client at once.
+Use it only for shared infrastructure such as the Slack bot or CI. It is not attributable, and
+rotation requires a redeploy of every client that uses it.
 
 | Variable                | Gates                                     | When unset                      |
 | ----------------------- | ----------------------------------------- | ------------------------------- |

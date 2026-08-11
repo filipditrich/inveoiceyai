@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 
 import {
   SidebarGroup,
@@ -9,16 +9,14 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import Link from "next/link"
+} from "@/components/ui/sidebar";
+import Link from "next/link";
 
 function renderSecondaryAnchor(url: string) {
   if (url.startsWith("/")) {
-    return <Link prefetch href={url} />
+    return <Link prefetch href={url} />;
   }
-  return (
-    <a href={url} target="_blank" rel="noreferrer" />
-  )
+  return <a href={url} target="_blank" rel="noreferrer" />;
 }
 
 export function NavSecondary({
@@ -27,24 +25,30 @@ export function NavSecondary({
   ...props
 }: {
   items: {
-    title: string
-    url: string
-    icon: React.ReactNode
-  }[]
-  groupLabel?: string
+    title: string;
+    url: string;
+    icon: React.ReactNode;
+    isActive?: boolean;
+  }[];
+  groupLabel?: string;
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>
-      <SidebarGroupLabel className="px-4">{groupLabel}</SidebarGroupLabel>
+      <SidebarGroupLabel className="text-[0.65rem] uppercase tracking-[0.14em]">
+        {groupLabel}
+      </SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
-                size="sm"
+                isActive={item.isActive}
                 render={renderSecondaryAnchor(item.url)}
+                tooltip={item.title}
               >
-                {item.icon}
+                <span className="text-muted-foreground group-data-active/menu-button:text-sidebar-primary [&_svg]:size-4">
+                  {item.icon}
+                </span>
                 <span>{item.title}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -52,5 +56,5 @@ export function NavSecondary({
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  )
+  );
 }

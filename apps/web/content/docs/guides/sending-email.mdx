@@ -1,6 +1,7 @@
 ---
-title: Sending invoices by email
-description: Delivery, attachments, tracking and reminders.
+title: Email delivery
+description: Send attachments, track delivery and configure reminders.
+icon: Send
 ---
 
 Invoicey sends transactional email through [Resend](https://resend.com). Five kinds:
@@ -77,26 +78,30 @@ Self-hosting? Four steps, none automatable:
 
 <Steps>
   <Step>
-    ### Verify a sending domain Add and verify a domain in Resend and set its
-    DNS records. Sending from an unverified domain will not survive contact with
-    real inboxes.
+    ### Verify a sending domain
+
+    Add a domain in Resend and publish its DNS records.
+
   </Step>
   <Step>
-    ### Set the environment `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET` and
-    `EMAIL_FROM`. Sending and the webhook both **fail closed** when their
-    variable is unset — no silent no-op.
+    ### Set the environment
+
+    Configure `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET` and `EMAIL_FROM`. Missing values fail closed.
+
   </Step>
   <Step>
-    ### Point the webhook `https://your-host/api/webhooks/resend`, subscribed to
-    `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`,
-    `email.failed`, `email.complained`, `email.opened` and `email.clicked`.
-    Signatures are verified with Svix and events deduplicated by ID.
+    ### Point the webhook
+
+    Send Resend events to `https://your-host/api/webhooks/resend`. Subscribe to sent, delivered,
+    delayed, bounced, failed, complained, opened and clicked events.
+
   </Step>
   <Step>
-    ### Schedule the reminder cron Set `CRON_SECRET` and schedule a daily
-    request to `/api/cron/overdue-reminders` with it as a bearer token. Without
-    this, per-issuer reminders can be enabled in the UI but nothing will ever
-    fire.
+    ### Schedule reminders
+
+    Set `CRON_SECRET` and make a daily authenticated request to
+    `/api/cron/overdue-reminders`.
+
   </Step>
 </Steps>
 

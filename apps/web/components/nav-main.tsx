@@ -42,6 +42,7 @@ export function NavMain({
       title: string;
       url: string;
       isActive?: boolean;
+      icon?: React.ReactNode;
     }[];
   }[];
   groupLabel?: string;
@@ -88,6 +89,11 @@ export function NavMain({
                           isActive={subItem.isActive}
                           render={renderNavAnchor(subItem.url)}
                         >
+                          {subItem.icon ? (
+                            <span className="text-muted-foreground [&_svg]:size-3.5">
+                              {subItem.icon}
+                            </span>
+                          ) : null}
                           <span>{subItem.title}</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>

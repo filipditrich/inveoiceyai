@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import {
   ArrowRightIcon,
   BotIcon,
   Building2Icon,
   CheckCircle2Icon,
-  ChevronRightIcon,
   CircleDollarSignIcon,
   DatabaseIcon,
   FileArchiveIcon,
@@ -21,98 +21,78 @@ import {
 } from "lucide-react";
 
 import { ProductPreview } from "@/components/marketing/product-preview";
+import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import motionStyles from "@/components/marketing/marketing-motion.module.css";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export const metadata: Metadata = {
-  title: "České faktury bez zbytečného klikání",
-  description:
-    "Invoicey propojuje českou fakturaci, PDF, ISDOC, SPAYD QR a ARES s moderním webem a AI automatizací.",
-  alternates: { canonical: "/" },
-  openGraph: {
-    title: "Invoicey — české faktury bez zbytečného klikání",
-    description:
-      "Jedna validovaná faktura. Web, PDF, ISDOC, QR i AI automatizace.",
-    url: "/",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Marketing.meta");
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: { canonical: "/" },
+    openGraph: {
+      title: t("ogTitle"),
+      description: t("ogDescription"),
+      url: "/",
+    },
+  };
+}
 
-const TRUST_ITEMS = [
-  { icon: FileCheck2Icon, label: "PDF + ISDOC" },
-  { icon: QrCodeIcon, label: "SPAYD QR platba" },
-  { icon: SearchCheckIcon, label: "ARES podle IČO" },
-  { icon: Building2Icon, label: "Více dodavatelů" },
-] as const;
-
-const CAPABILITIES = [
-  {
-    icon: FileCheck2Icon,
-    title: "České doklady bez slepých míst",
-    description:
-      "Faktury, zálohy, proformy i dobropisy. DPH, DUZP, symboly, QR platba a ISDOC jsou součást stejného výstupu.",
-  },
-  {
-    icon: Building2Icon,
-    title: "Každá firma má vlastní pravidla",
-    description:
-      "Bankovní účet, číselná řada, plátcovství DPH i vizuální prvky zůstávají u správného dodavatele.",
-  },
-  {
-    icon: MailCheckIcon,
-    title: "Od vystavení po úhradu",
-    description:
-      "Odešlete PDF a ISDOC, sledujte doručení, splatnost a úhradu bez přepisování stavu mezi několika nástroji.",
-  },
-  {
-    icon: FileArchiveIcon,
-    title: "Historie zůstává historií",
-    description:
-      "Vydané doklady jsou neměnné. Starší PDF a ISDOC můžete importovat a zachovat jejich původ i přesnou podobu.",
-  },
-  {
-    icon: DatabaseIcon,
-    title: "Data jsou první, PDF až druhé",
-    description:
-      "Jedno validační schéma pohání web, JSON i nástroje pro agenty. Výsledek se nemění podle toho, odkud faktura vznikla.",
-  },
-  {
-    icon: ShieldCheckIcon,
-    title: "Oddělené pracovní prostory",
-    description:
-      "OAuth přihlášení přes Google nebo GitHub a kontrola členství pracovního prostoru na každé serverové hranici.",
-  },
-] as const;
-
-const FAQ = [
-  {
-    question: "Je Invoicey určené jen pro plátce DPH?",
-    answer:
-      "Ne. Podporuje plátce i neplátce, běžný režim DPH, přenesenou daňovou povinnost a další údaje českých dokladů.",
-  },
-  {
-    question: "Můžu fakturovat z více firem nebo živností?",
-    answer:
-      "Ano. Každý dodavatel má vlastní banku, číselné řady, DPH nastavení, logo i kontaktní údaje. Klienti přitom zůstávají sdílení v jednom pracovním prostoru.",
-  },
-  {
-    question: "Co znamená AI fakturace?",
-    answer:
-      "Agent neskládá PDF od oka. Připraví strukturovaný návrh, který projde stejnou validací jako faktura vytvořená ve webu. Vydání nebo odeslání citlivého dokladu zůstává potvrzovaná akce.",
-  },
-  {
-    question: "Lze přenést staré faktury?",
-    answer:
-      "Ano. Hromadný import přijímá PDF a ISDOC. Pokud PDF obsahuje vložený ISDOC, Invoicey načte i strukturovaná data; jinak zachová originál jako archivní doklad.",
-  },
-  {
-    question: "Je Invoicey účetní nebo daňové poradenství?",
-    answer:
-      "Ne. Invoicey pomáhá připravit a spravovat doklady, ale správnost konkrétního obchodního a daňového případu vždy odpovídá uživateli a jeho účetnímu či daňovému poradci.",
-  },
-] as const;
-
-export default function HomePage() {
+export default async function HomePage() {
+  const t = await getTranslations("Marketing");
+  const trustItems = [
+    { icon: FileCheck2Icon, label: t("trust.pdfIsdoc") },
+    { icon: QrCodeIcon, label: t("trust.spaydQr") },
+    { icon: SearchCheckIcon, label: t("trust.aresLookup") },
+    { icon: Building2Icon, label: t("trust.multiIssuer") },
+  ];
+  const capabilities = [
+    {
+      icon: FileCheck2Icon,
+      title: t("capabilities.docsTitle"),
+      description: t("capabilities.docsDescription"),
+    },
+    {
+      icon: Building2Icon,
+      title: t("capabilities.issuersTitle"),
+      description: t("capabilities.issuersDescription"),
+    },
+    {
+      icon: MailCheckIcon,
+      title: t("capabilities.emailTitle"),
+      description: t("capabilities.emailDescription"),
+    },
+    {
+      icon: FileArchiveIcon,
+      title: t("capabilities.historyTitle"),
+      description: t("capabilities.historyDescription"),
+    },
+    {
+      icon: DatabaseIcon,
+      title: t("capabilities.schemaTitle"),
+      description: t("capabilities.schemaDescription"),
+    },
+    {
+      icon: ShieldCheckIcon,
+      title: t("capabilities.securityTitle"),
+      description: t("capabilities.securityDescription"),
+    },
+  ];
+  const automationItems = [
+    t("automation.item1"),
+    t("automation.item2"),
+    t("automation.item3"),
+    t("automation.item4"),
+  ];
+  const faq = [
+    { question: t("faq.q1"), answer: t("faq.a1") },
+    { question: t("faq.q2"), answer: t("faq.a2") },
+    { question: t("faq.q3"), answer: t("faq.a3") },
+    { question: t("faq.q4"), answer: t("faq.a4") },
+    { question: t("faq.q5"), answer: t("faq.a5") },
+  ];
   return (
     <>
       <section className="relative overflow-hidden">
@@ -125,16 +105,14 @@ export default function HomePage() {
               className="bg-background/70 h-7 gap-1.5 px-3 backdrop-blur"
             >
               <SparklesIcon data-icon="inline-start" />
-              České faktury, připravené i pro AI
+              {t("hero.badge")}
             </Badge>
             <h1 className="mt-7 text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-[4.5rem]">
-              Fakturace, která začíná daty.
-              <span className="text-primary block">Ne formulářem.</span>
+              {t("hero.titleLine1")}
+              <span className="text-primary block">{t("hero.titleLine2")}</span>
             </h1>
             <p className="text-muted-foreground mt-7 max-w-xl text-pretty text-lg leading-relaxed sm:text-xl">
-              Vystavujte správné české doklady ve webu, z JSONu nebo přes AI.
-              Invoicey je pokaždé ověří a vytvoří stejné PDF, ISDOC i platební
-              QR.
+              {t("hero.subtitle")}
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Button
@@ -142,7 +120,7 @@ export default function HomePage() {
                 className="shadow-primary/15 h-11 px-5 text-[0.95rem] shadow-lg"
                 render={<Link href="/dashboard" prefetch={false} />}
               >
-                Otevřít Invoicey
+                {t("hero.ctaPrimary")}
                 <ArrowRightIcon data-icon="inline-end" />
               </Button>
               <Button
@@ -151,20 +129,21 @@ export default function HomePage() {
                 className="h-11 px-5 text-[0.95rem]"
                 render={<Link href="#jak-to-funguje" />}
               >
-                Jak to funguje
+                {t("hero.ctaSecondary")}
               </Button>
             </div>
             <div className="text-muted-foreground mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2Icon className="text-primary size-3.5" /> Bez hesla
+                <CheckCircle2Icon className="text-primary size-3.5" />
+                {t("hero.noPassword")}
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2Icon className="text-primary size-3.5" /> České
-                rozhraní
+                <CheckCircle2Icon className="text-primary size-3.5" />
+                {t("hero.czechUi")}
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2Icon className="text-primary size-3.5" /> Beta
-                přístup
+                <CheckCircle2Icon className="text-primary size-3.5" />
+                {t("hero.betaAccess")}
               </span>
             </div>
           </div>
@@ -173,9 +152,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section aria-label="Klíčové formáty" className="bg-muted/25 border-y">
+      <section
+        aria-label={t("trust.ariaLabel")}
+        className="bg-muted/25 border-y"
+      >
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-4 sm:px-6 md:grid-cols-4 lg:px-8">
-          {TRUST_ITEMS.map((item) => (
+          {trustItems.map((item) => (
             <div
               key={item.label}
               className={`${motionStyles.trustItem} md:border-border/60 flex items-center justify-center gap-2.5 border-x border-transparent px-3 py-5 text-sm font-medium`}
@@ -193,9 +175,9 @@ export default function HomePage() {
       >
         <div className="mx-auto max-w-7xl">
           <SectionIntro
-            eyebrow="Od zadání po zaplacení"
-            title="Méně ruční práce. Pořád máte kontrolu."
-            description="Invoicey drží celý životní cyklus dokladu pohromadě a citlivé kroky nechává ve vašich rukou."
+            eyebrow={t("workflow.eyebrow")}
+            title={t("workflow.title")}
+            description={t("workflow.description")}
           />
           <div
             className={`${motionStyles.scrollReveal} mt-14 grid gap-5 lg:grid-cols-3`}
@@ -203,20 +185,20 @@ export default function HomePage() {
             <WorkflowStep
               number="01"
               icon={<SearchCheckIcon />}
-              title="Připravte údaje"
-              description="Vyberte dodavatele, dohledejte klienta podle IČO a doplňte položky. Nebo pošlete stejná data jako JSON či pokyn agentovi."
+              title={t("workflow.step1Title")}
+              description={t("workflow.step1Description")}
             />
             <WorkflowStep
               number="02"
               icon={<FileCheck2Icon />}
-              title="Ověřte a vystavte"
-              description="Jedno schéma zkontroluje povinné údaje, DPH i součty. Teprve potom vznikne neměnný doklad, PDF, ISDOC a QR."
+              title={t("workflow.step2Title")}
+              description={t("workflow.step2Description")}
             />
             <WorkflowStep
               number="03"
               icon={<SendIcon />}
-              title="Odešlete a sledujte"
-              description="Pošlete fakturu klientovi, sledujte doručení a splatnost a označte úhradu ve stejném přehledu."
+              title={t("workflow.step3Title")}
+              description={t("workflow.step3Description")}
             />
           </div>
         </div>
@@ -228,14 +210,14 @@ export default function HomePage() {
       >
         <div className="mx-auto max-w-7xl">
           <SectionIntro
-            eyebrow="České účetní reálie"
-            title="To podstatné je součást základu."
-            description="Ne další vrstva kolem generátoru PDF. Invoicey staví na údajích, které český doklad skutečně potřebuje."
+            eyebrow={t("capabilities.eyebrow")}
+            title={t("capabilities.title")}
+            description={t("capabilities.description")}
           />
           <div
             className={`${motionStyles.scrollReveal} bg-border mt-14 grid gap-px overflow-hidden rounded-3xl border md:grid-cols-2 lg:grid-cols-3`}
           >
-            {CAPABILITIES.map((capability) => (
+            {capabilities.map((capability) => (
               <div
                 key={capability.title}
                 className={`${motionStyles.liftCard} bg-background p-6 sm:p-8`}
@@ -262,23 +244,16 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2 lg:gap-20">
           <div className={motionStyles.scrollReveal}>
             <Badge variant="secondary" className="h-7 gap-1.5 px-3">
-              <BotIcon data-icon="inline-start" /> Automatizace · beta
+              <BotIcon data-icon="inline-start" /> {t("automation.badge")}
             </Badge>
             <h2 className="mt-6 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
-              Agent připraví návrh. Pravidla rozhodnou, co projde.
+              {t("automation.title")}
             </h2>
             <p className="text-muted-foreground mt-6 text-lg leading-relaxed">
-              Slack a MCP používají stejné nástroje jako web. AI může dohledat
-              firmu, sestavit návrh a připravit soubory, ale nevymýšlí chybějící
-              povinné údaje a potvrzení citlivých akcí zůstává na vás.
+              {t("automation.description")}
             </p>
             <ul className="mt-8 space-y-3 text-sm">
-              {[
-                "ARES dohledání podle názvu nebo IČO",
-                "Validovaný návrh podle InvoiceSchema",
-                "PDF a ISDOC ze stejného renderovacího jádra",
-                "Potvrzení před vydáním, odesláním nebo úhradou",
-              ].map((item) => (
+              {automationItems.map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <CheckCircle2Icon className="text-primary mt-0.5 size-4 shrink-0" />
                   {item}
@@ -297,35 +272,44 @@ export default function HomePage() {
                   <MessageSquareTextIcon className="size-4" />
                 </span>
                 <div>
-                  <p className="text-sm font-medium">Invoicey v Slacku</p>
+                  <p className="text-sm font-medium">
+                    {t("automation.chatTitle")}
+                  </p>
                   <p className="text-background/55 dark:text-muted-foreground text-xs">
-                    Strukturovaný návrh, ne volný text
+                    {t("automation.chatSubtitle")}
                   </p>
                 </div>
               </div>
               <div className="space-y-4 py-5">
                 <div className="dark:bg-muted ml-auto max-w-[88%] rounded-2xl rounded-br-md bg-white/10 px-4 py-3 text-sm leading-relaxed">
-                  @Invoicey vystav měsíční fakturu pro Studio Sever, 35 000 Kč
-                  bez DPH, splatnost 14 dní.
+                  {t("automation.chatUserMessage")}
                 </div>
                 <div className="bg-brand text-brand-foreground max-w-[92%] rounded-2xl rounded-bl-md px-4 py-3 text-sm shadow-lg">
-                  <p className="font-medium">Návrh je připravený</p>
+                  <p className="font-medium">
+                    {t("automation.chatReplyTitle")}
+                  </p>
                   <div className="bg-black/8 mt-3 space-y-2 rounded-xl p-3 text-xs">
                     <ChatRow
-                      label="Klient"
-                      value="Studio Sever · ARES ověřeno"
+                      label={t("automation.chatClientLabel")}
+                      value={t("automation.chatClient")}
                     />
-                    <ChatRow label="Částka" value="35 000 Kč" />
-                    <ChatRow label="Výstup" value="PDF + ISDOC + SPAYD" />
+                    <ChatRow
+                      label={t("automation.chatAmountLabel")}
+                      value={t("automation.chatAmount")}
+                    />
+                    <ChatRow
+                      label={t("automation.chatOutputLabel")}
+                      value={t("automation.chatOutput")}
+                    />
                   </div>
                   <div className="bg-foreground text-background mt-3 inline-flex rounded-lg px-3 py-2 text-xs font-semibold">
-                    Zkontrolovat a vystavit
+                    {t("automation.chatAction")}
                   </div>
                 </div>
               </div>
               <div className="text-background/45 dark:border-border dark:text-muted-foreground flex items-center gap-2 border-t border-white/10 pt-4 text-[0.65rem]">
                 <LandmarkIcon className="size-3.5" />
-                Vydání faktury vždy vyžaduje potvrzení
+                {t("automation.chatDisclaimer")}
               </div>
             </div>
           </div>
@@ -338,24 +322,24 @@ export default function HomePage() {
         >
           <FeaturePanel
             icon={<Building2Icon />}
-            eyebrow="Více dodavatelů"
-            title="Živnost a s.r.o. bez přepínacího chaosu."
-            description="Vyberete, kdo fakturu vystavuje, a Invoicey použije jeho účet, číselnou řadu, DPH režim a vizuální prvky. Sdílený klient zůstává jeden."
+            eyebrow={t("featurePanels.multiIssuerEyebrow")}
+            title={t("featurePanels.multiIssuerTitle")}
+            description={t("featurePanels.multiIssuerDescription")}
             items={[
-              "Vlastní číselné řady",
-              "Bankovní údaje a QR",
-              "Logo, podpis a razítko",
+              t("featurePanels.multiIssuerItem1"),
+              t("featurePanels.multiIssuerItem2"),
+              t("featurePanels.multiIssuerItem3"),
             ]}
           />
           <FeaturePanel
             icon={<FileArchiveIcon />}
-            eyebrow="Historický import"
-            title="Začněte dnes, historii nechte beze změny."
-            description="Nahrajte starší PDF nebo ISDOC hromadně. Invoicey zachová původní soubory, označí jejich zdroj a nedovolí přepsat vydaný archivní doklad."
+            eyebrow={t("featurePanels.importEyebrow")}
+            title={t("featurePanels.importTitle")}
+            description={t("featurePanels.importDescription")}
             items={[
-              "PDF s vloženým ISDOC",
-              "Archivní režim bez ISDOC",
-              "Původ dokladu a neměnné soubory",
+              t("featurePanels.importItem1"),
+              t("featurePanels.importItem2"),
+              t("featurePanels.importItem3"),
             ]}
           />
         </div>
@@ -367,23 +351,13 @@ export default function HomePage() {
       >
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.7fr_1fr] lg:gap-20">
           <SectionIntro
-            eyebrow="Časté otázky"
-            title="Než otevřete první fakturu."
-            description="Stručně a bez produktové omáčky."
+            eyebrow={t("faq.eyebrow")}
+            title={t("faq.title")}
+            description={t("faq.description")}
             align="left"
           />
-          <div className={`${motionStyles.scrollReveal} divide-y border-y`}>
-            {FAQ.map((item, index) => (
-              <details key={item.question} className="group" open={index === 0}>
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-5 py-5 text-base font-medium marker:hidden">
-                  {item.question}
-                  <ChevronRightIcon className="text-muted-foreground size-4 shrink-0 transition-transform group-open:rotate-90" />
-                </summary>
-                <p className="text-muted-foreground max-w-2xl pb-5 text-sm leading-relaxed">
-                  {item.answer}
-                </p>
-              </details>
-            ))}
+          <div className={motionStyles.scrollReveal}>
+            <FaqAccordion items={faq} />
           </div>
         </div>
       </section>
@@ -395,21 +369,20 @@ export default function HomePage() {
           <CircleDollarSignIcon className="text-primary/15 absolute -bottom-12 -right-8 size-64 -rotate-12" />
           <div className="relative max-w-2xl">
             <p className="text-primary text-sm font-semibold uppercase tracking-wide">
-              Připraveno k vystavení
+              {t("cta.eyebrow")}
             </p>
             <h2 className="mt-4 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
-              Dejte fakturám jedno místo a jeden zdroj pravdy.
+              {t("cta.title")}
             </h2>
             <p className="text-muted-foreground mt-5 text-base leading-relaxed sm:text-lg">
-              Přihlaste se přes Google nebo GitHub. Heslo u Invoicey vytvářet
-              nemusíte.
+              {t("cta.description")}
             </p>
             <Button
               size="lg"
               className="mt-8 h-11 px-5 text-[0.95rem]"
               render={<Link href="/dashboard" prefetch={false} />}
             >
-              Otevřít Invoicey
+              {t("cta.button")}
               <ArrowRightIcon data-icon="inline-end" />
             </Button>
           </div>

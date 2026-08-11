@@ -1,4 +1,5 @@
 {
-  "title": "Integrations",
+  "title": "Connect & automate",
+  "icon": "Plug",
   "pages": ["api-keys", "mcp", "cursor", "claude-code", "slack"]
 }

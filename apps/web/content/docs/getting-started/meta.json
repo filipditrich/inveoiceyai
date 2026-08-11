@@ -1,4 +1,5 @@
 {
-  "title": "Getting started",
+  "title": "Start here",
+  "icon": "Rocket",
   "pages": ["quickstart", "workspaces", "self-hosting"]
 }

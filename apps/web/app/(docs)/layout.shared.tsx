@@ -1,4 +1,5 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
+import { ArrowUpRightIcon } from "lucide-react";
 
 import { BrandLogo } from "@/components/brand-logo";
 
@@ -22,8 +23,10 @@ export function docsBaseOptions(): BaseLayoutProps {
     githubUrl: "https://github.com/filipditrich/inveoiceyai",
     links: [
       {
+        type: "button",
         text: "Open app",
         url: "/dashboard",
+        icon: <ArrowUpRightIcon className="size-3.5" />,
         active: "none",
       },
     ],

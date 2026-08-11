@@ -1,15 +1,15 @@
 ---
 title: Quickstart
-description: From signing in to a sent invoice in about ten minutes.
+description: Create and send your first invoice in about ten minutes.
+icon: Rocket
 ---
 
 This walks the whole path once: sign in, set up the business that issues invoices, add a client,
 create an invoice, issue it, and send it. Everything after this page goes deeper on one step.
 
-<Callout type="warn" title="You need a bank account and an IČO">
-  Invoicey validates hard. It will not let you issue an invoice without a valid
-  8-digit IČO, a Czech IBAN and a complete address — because an invoice missing
-  those is not a valid Czech tax document. Have them at hand before you start.
+<Callout type="warn" title="Have your company and bank details ready">
+  Invoicey requires a valid 8-digit IČO, Czech IBAN and complete issuer address
+  before issue. Keep them nearby for this walkthrough.
 </Callout>
 
 <Steps>
@@ -20,9 +20,6 @@ create an invoice, issue it, and send it. Everything after this page goes deeper
 
 Invoicey uses OAuth only — **Google** or **GitHub**. There is no password to set and no
 email-confirmation step.
-
-Both providers verify email addresses, so signing in with Google and later with GitHub on the
-same address links to one account rather than creating a second one.
 
 First sign-in creates a personal [workspace](/docs/getting-started/workspaces) for you
 automatically. All your data lives inside it.
@@ -35,20 +32,17 @@ automatically. All your data lives inside it.
 
 An **issuer** is a business that issues invoices — you, or your s.r.o. Go to **Issuers → New**.
 
-Type your **IČO** and Invoicey queries [ARES](/docs/guides/clients#ares-lookup), the Czech business
-registry, filling in the legal name, address and DIČ. Check what came back; ARES is authoritative
-for the registry, but it does not know your bank account or whether you want to be shown as a VAT
-payer.
+Type your **IČO** and Invoicey fills the legal name, address and DIČ from
+[ARES](/docs/guides/clients#ares-lookup). Review the result, then add the details ARES cannot know:
 
 You must still supply:
 
-- **Bank account** — Czech format (`19-2000145399/0800`) and the matching **IBAN**. This is what
-  ends up in the [payment QR code](/docs/outputs/payment-qr).
+- **Bank account and matching IBAN** — used on the PDF and in the
+  [payment QR](/docs/outputs/payment-qr).
 - **VAT payer** — whether you charge DPH. If off, every line is forced to 0 % and the PDF prints
   _Nejsem plátce DPH_ instead of a VAT breakdown.
 - **Contact email** — required. It becomes the `Reply-To` on invoice emails.
-- **Numbering scheme** — how invoice numbers are generated. The default `{YYYY}{####}` produces
-  `20260001`. See [numbering](/docs/concepts/numbering).
+- **Numbering** — the default `{YYYY}{####}` produces `20260001`.
 
 Optionally upload a **logo**, **stamp** and **signature** image; they are placed on the PDF.
 
@@ -73,7 +67,7 @@ manually typed recipient.
 **Invoices → New**. Pick the issuer and client you just made, then add line items — description,
 quantity, unit price, VAT rate.
 
-The important fields, all of which Invoicey pre-fills with sane defaults:
+Invoicey pre-fills the header; review these fields:
 
 | Field                 | Meaning                                                                          |
 | --------------------- | -------------------------------------------------------------------------------- |
@@ -112,10 +106,8 @@ renders the PDF and ISDOC, and stamps the issue date.
 From the invoice detail, **Send email**. Invoicey attaches the PDF (always) and the ISDOC (on by
 default) and sends via Resend.
 
-The email comes from your deployment's verified sending domain with a display name of
-`{Issuer name} via Invoicey`, and `Reply-To` set to the issuer's contact email — so replies reach
-you, not the server. Delivery status (sent, delivered, bounced, opened) appears on the invoice
-timeline.
+The email uses `{Issuer name} via Invoicey`, replies go to the issuer's contact address, and delivery
+events appear on the invoice timeline.
 
 </Step>
 

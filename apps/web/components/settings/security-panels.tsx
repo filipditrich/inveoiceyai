@@ -454,8 +454,8 @@ export function TrustedDevicesPanel() {
       <CardHeader>
         <CardTitle>Důvěryhodná zařízení</CardTitle>
         <CardDescription>
-          Soft trust — nové zařízení dostane e-mail, přihlášení vždy projde.
-          Odkaz v e-mailu zařízení označí jako důvěryhodné.
+          Na přihlášení z nového zařízení vás upozorníme e-mailem. Přístup tím
+          není blokován. Odkaz v e-mailu zařízení označí jako důvěryhodné.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">

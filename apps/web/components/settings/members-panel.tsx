@@ -153,7 +153,7 @@ export function MembersPanel({
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Členové workspace</CardTitle>
+          <CardTitle>Členové pracovního prostoru</CardTitle>
           <CardDescription>Role owner / admin / member.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">

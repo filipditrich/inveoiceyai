@@ -1,10 +1,11 @@
 ---
 title: Creating invoices
-description: The three ways to get an invoice into Invoicey.
+description: Create a validated draft in the web app, from JSON or with AI.
+icon: FilePlus2
 ---
 
-There are three create paths. They all end at the same
-[validated payload](/docs/concepts/invoice-as-data) — pick whichever suits the moment.
+Choose a form, JSON or an assistant. Every path produces the same
+[validated payload](/docs/concepts/invoice-as-data).
 
 <Cards>
   <Card
@@ -51,12 +52,10 @@ Drafts follow live edits to the issuer and client until you issue.
 
 ## From JSON
 
-**Invoices → From JSON** takes a complete payload and renders it. Useful for checking exactly what
-the schema accepts, for debugging an automation that is producing rejected payloads, and for
-scripted one-offs.
+**Invoices → From JSON** validates and renders a complete payload. Use it to test the schema, debug
+automation or handle a scripted one-off.
 
-The page validates as you type and shows the specific failing path rather than a generic error, so
-it doubles as the fastest way to understand a validation message you hit elsewhere.
+Validation runs as you type and points to the failing field.
 
 Field reference: [invoice schema](/docs/reference/invoice-schema).
 
@@ -68,11 +67,8 @@ form:
 > Look up NFCtron by IČO, use my "s.r.o." issuer preset, and invoice them 40 hours of consulting at
 > 1 800 CZK plus 12 000 CZK for the integration work. Due in 14 days.
 
-The assistant calls ARES for the client, pulls the locked issuer from your preset, builds the
-payload, and gets it validated. If it omits something required, it sees the error and corrects it.
-
-This is the fastest path once your issuer presets exist — and the one this product is really
-designed around. It is also the one with the sharpest edge:
+The assistant looks up the client, loads your issuer preset, builds the payload and corrects any
+validation errors. Review the result before issuing:
 
 <Callout type="warn" title="Read what the assistant produced">
   Validation guarantees an invoice is *well-formed*, not that it is *correct*.
@@ -83,14 +79,10 @@ designed around. It is also the one with the sharpest edge:
 
 ## Templates
 
-Recurring shapes — a monthly retainer, a standard hourly rate — can be saved as **invoice template
-presets**: partial drafts holding items, VAT settings or payment defaults. An assistant merges the
-template and applies your specifics on top, so the repeated parts stay identical every month.
+Save recurring line items, VAT settings and payment defaults as **invoice template presets**. An
+assistant can merge a template with the details for this invoice.
 
 ## Duplicating
 
-Any invoice, in any state, can be duplicated. You get a fresh draft with the payload copied and the
-facts dropped — no number, no issue date, no payment, no snapshots.
-
-For most people this is the real "recurring invoice" workflow, since actual scheduled recurring
-invoices are not implemented.
+Duplicate any invoice to create a fresh draft. Invoicey copies its content but clears the number,
+issue facts, payment and snapshots. Scheduled recurring invoices are not yet available.

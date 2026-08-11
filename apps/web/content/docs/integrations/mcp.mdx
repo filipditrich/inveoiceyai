@@ -1,15 +1,15 @@
 ---
 title: MCP
-description: Drive Invoicey from any MCP-capable assistant.
+description: Let compatible assistants use Invoicey through validated tools.
+icon: Bot
 ---
 
 Invoicey exposes its invoicing tools over the
 [Model Context Protocol](https://modelcontextprotocol.io), so an assistant that speaks MCP can look
 up companies, build invoices, issue them, mark them paid and email them.
 
-This is not a bolt-on. The MCP tools call the _same_ handlers the web UI calls, and produce payloads
-against the _same_ [schema](/docs/concepts/invoice-as-data). There is no second implementation to
-drift out of sync, and no set of fields the API accepts but the UI does not.
+MCP tools call the same handlers and validate against the same
+[schema](/docs/concepts/invoice-as-data) as the web app. The supported fields and rules stay aligned.
 
 ## Two ways to connect
 
@@ -109,26 +109,16 @@ Storage follows the environment: Postgres when `DATABASE_URL` is set, otherwise 
   between invocations. Use the database-backed path in production.
 </Callout>
 
-## A realistic session
-
-> Look up NFCtron by IČO. Using my "s.r.o." issuer preset, invoice them 40 hours of consulting at
-> 1 800 CZK and 12 000 CZK for the integration work, due in 14 days.
-
-The assistant calls `lookup_business`, then `create_invoice` with the preset ID and the line items.
-It gets back a validated invoice plus a rendered PDF, or a list of validation issues to fix and
-retry.
-
-Then, later:
-
-> Which invoices are unpaid? Mark the NFCtron one paid and email them a receipt.
-
-`list_invoices` with `unpaidOnly`, `mark_invoice_paid`, `send_invoice_email`.
-
 <Callout type="warn" title="Validation is not verification">
   The schema guarantees an invoice is well-formed, not that it is right. It
   cannot tell that the model billed 40 hours when you worked 4. Read what it
   produced — issuing and sending are the irreversible steps.
 </Callout>
+
+## Try a complete request
+
+> Look up NFCtron by IČO. Using my "s.r.o." issuer preset, invoice them 40 hours of consulting at
+> 1 800 CZK, due in 14 days. Return the draft for review; do not issue it yet.
 
 ## Limitations
 

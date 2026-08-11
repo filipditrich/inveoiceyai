@@ -1,6 +1,7 @@
 ---
 title: Clients
-description: The client registry and ARES lookup.
+description: Build a clean client registry with ARES-assisted company data.
+icon: Contact
 ---
 
 Clients are the businesses you invoice. They live in a shared registry per workspace, so you enter
@@ -23,8 +24,7 @@ you rarely type a client's details by hand.
 **By name** — if you do not have the IČO, search by company name and pick from the matches, each
 shown with its IČO and address.
 
-Successful lookups are cached for 24 hours per IČO. Repeatedly opening the same client does not
-hammer a public government API.
+Successful lookups are cached for 24 hours per IČO, reducing unnecessary calls to the public API.
 
 <Callout title="ARES never supplies an email">
   The registry has no contact email, so that field is always yours to fill. It

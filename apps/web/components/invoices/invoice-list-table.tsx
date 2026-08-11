@@ -29,6 +29,13 @@ import {
   DataGridTableRowSelectAll,
 } from "@/components/reui/data-grid/data-grid-table";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { formatDateCs, formatMoney } from "@/lib/format";
 import {
@@ -41,6 +48,18 @@ import { DISPLAY_STATUS_ROW_ACCENT } from "@/lib/invoice-status-ui";
 import { cn } from "@/lib/utils";
 import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
 import {
+  CopyIcon,
+  EllipsisIcon,
+  EyeIcon,
+  FileDownIcon,
+  PencilIcon,
+  RotateCcwIcon,
+  StampIcon,
+  Trash2Icon,
+  WalletCardsIcon,
+  XCircleIcon,
+} from "lucide-react";
+import {
   useTable,
   type ColumnDef,
   type ColumnVisibilityState,
@@ -50,7 +69,13 @@ import {
 } from "@tanstack/react-table";
 import Link from "next/link";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
-import { useCallback, useMemo, useState, useTransition } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 
 export type InvoiceListRow = {
   id: string;
@@ -158,7 +183,7 @@ export function InvoiceListTable({
         cell: ({ row }) => <DataGridTableRowSelect row={row} />,
         enableSorting: false,
         enableHiding: false,
-        size: 40,
+        size: 36,
       },
       {
         accessorKey: "number",
@@ -167,10 +192,11 @@ export function InvoiceListTable({
           <DataGridColumnHeader column={column} title="Číslo" />
         ),
         cell: ({ row }) => (
-          <div className="font-medium tabular-nums">
+          <div className="truncate pr-2 font-medium tabular-nums">
             <Link
               className="underline-offset-4 hover:underline"
               href={`/invoices/${row.original.id}`}
+              title={row.original.number ?? "Návrh bez čísla"}
             >
               {row.original.number ?? "DRAFT"}
             </Link>
@@ -187,6 +213,7 @@ export function InvoiceListTable({
           </div>
         ),
         meta: { headerTitle: "Číslo" },
+        size: 105,
       },
       {
         accessorKey: "issueDate",
@@ -200,6 +227,7 @@ export function InvoiceListTable({
           </span>
         ),
         meta: { headerTitle: "Vystaveno" },
+        size: 84,
       },
       {
         accessorKey: "dueDate",
@@ -213,6 +241,7 @@ export function InvoiceListTable({
           </span>
         ),
         meta: { headerTitle: "Splatnost" },
+        size: 84,
       },
       {
         accessorKey: "clientName",
@@ -220,7 +249,8 @@ export function InvoiceListTable({
         header: ({ column }) => (
           <DataGridColumnHeader column={column} title="Klient" />
         ),
-        meta: { headerTitle: "Klient", autoSize: true },
+        meta: { headerTitle: "Klient", cellClassName: "truncate" },
+        size: 100,
       },
       {
         accessorKey: "total",
@@ -237,6 +267,7 @@ export function InvoiceListTable({
           </span>
         ),
         meta: { headerTitle: "Celkem" },
+        size: 94,
       },
       {
         accessorKey: "displayStatus",
@@ -249,6 +280,7 @@ export function InvoiceListTable({
           <InvoiceStatusBadge status={row.original.displayStatus} />
         ),
         meta: { headerTitle: "Stav" },
+        size: 64,
       },
       {
         id: "actions",
@@ -256,8 +288,12 @@ export function InvoiceListTable({
         enableHiding: false,
         header: () => <span className="sr-only">Akce</span>,
         cell: ({ row }) => <InvoiceRowActions row={row.original} />,
-        meta: { headerTitle: "Akce", headerClassName: "text-right" },
-        size: 280,
+        meta: {
+          headerTitle: "Akce",
+          headerClassName: "text-right",
+          cellClassName: "pr-2",
+        },
+        size: 120,
       },
     ],
     [],
@@ -521,83 +557,142 @@ function InvoiceMobileCard({ row }: { row: InvoiceListRow }) {
 
 function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
   return (
-    <div
-      className={cn(
-        "flex flex-wrap justify-end gap-1",
-        DISPLAY_STATUS_ROW_ACCENT[row.displayStatus],
+    <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
+      {row.displayStatus === "draft" ? (
+        <form action={issueSavedInvoice}>
+          <input name="id" type="hidden" value={row.id} />
+          <SubmitButton pendingLabel="Vystavuji…" size="sm">
+            <StampIcon />
+            Vystavit
+          </SubmitButton>
+        </form>
+      ) : (
+        <Button
+          render={<Link href={`/invoices/${row.id}`} prefetch />}
+          size="sm"
+          variant="ghost"
+        >
+          <EyeIcon />
+          Detail
+        </Button>
       )}
-    >
-      <Button
-        render={<Link href={`/invoices/${row.id}`} prefetch />}
-        size="sm"
-        variant="ghost"
-      >
-        Detail
-      </Button>
-      {row.displayStatus === "draft" ? (
-        <>
-          <form action={issueSavedInvoice}>
-            <input name="id" type="hidden" value={row.id} />
-            <SubmitButton pendingLabel="Vystavuji…" size="sm">
-              Vystavit
-            </SubmitButton>
-          </form>
-          <Button
-            render={<Link href={`/invoices/${row.id}/edit`} prefetch />}
-            size="sm"
-            variant="outline"
+
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              aria-label={`Další akce pro ${row.number ?? "návrh"}`}
+              size="icon-sm"
+              type="button"
+              variant="ghost"
+            />
+          }
+        >
+          <EllipsisIcon />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-48" sideOffset={6}>
+          {row.displayStatus === "draft" ? (
+            <>
+              <DropdownMenuItem
+                render={<Link href={`/invoices/${row.id}`} prefetch />}
+              >
+                <EyeIcon />
+                Detail faktury
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                render={<Link href={`/invoices/${row.id}/edit`} prefetch />}
+              >
+                <PencilIcon />
+                Upravit návrh
+              </DropdownMenuItem>
+            </>
+          ) : null}
+          <DropdownMenuItem
+            render={<a download href={`/api/invoices/${row.id}/pdf`} />}
           >
-            Upravit
-          </Button>
-        </>
-      ) : null}
-      <Button
-        render={<a download href={`/api/invoices/${row.id}/pdf`} />}
-        size="sm"
-        variant="ghost"
-      >
-        PDF
-      </Button>
-      <form action={duplicateInvoice}>
-        <input name="id" type="hidden" value={row.id} />
-        <SubmitButton pendingLabel="Duplikuji…" size="sm" variant="ghost">
-          Duplikovat
-        </SubmitButton>
-      </form>
-      {row.displayStatus === "unpaid" ||
-      row.displayStatus === "overdue" ||
-      row.displayStatus === "future" ? (
-        <>
-          <form action={markInvoicePaid}>
-            <input name="id" type="hidden" value={row.id} />
-            <SubmitButton pendingLabel="…" size="sm" variant="ghost">
-              Zaplaceno
-            </SubmitButton>
-          </form>
-          <form action={cancelInvoice}>
-            <input name="id" type="hidden" value={row.id} />
-            <SubmitButton pendingLabel="…" size="sm" variant="ghost">
-              Storno
-            </SubmitButton>
-          </form>
-        </>
-      ) : null}
-      {row.displayStatus === "paid" ? (
-        <form action={unmarkInvoicePaid}>
-          <input name="id" type="hidden" value={row.id} />
-          <SubmitButton pendingLabel="…" size="sm" variant="ghost">
-            Zrušit zaplacení
-          </SubmitButton>
-        </form>
-      ) : null}
-      {row.displayStatus === "draft" ? (
-        <form action={deleteInvoice}>
-          <input name="id" type="hidden" value={row.id} />
-          <SubmitButton pendingLabel="Mazání…" size="sm" variant="destructive">
-            Smazat
-          </SubmitButton>
-        </form>
-      ) : null}
+            <FileDownIcon />
+            Stáhnout PDF
+          </DropdownMenuItem>
+          <InvoiceActionMenuForm
+            action={duplicateInvoice}
+            icon={<CopyIcon />}
+            id={row.id}
+            label="Duplikovat"
+          />
+
+          {row.displayStatus === "unpaid" ||
+          row.displayStatus === "overdue" ||
+          row.displayStatus === "future" ? (
+            <>
+              <DropdownMenuSeparator />
+              <InvoiceActionMenuForm
+                action={markInvoicePaid}
+                icon={<WalletCardsIcon />}
+                id={row.id}
+                label="Označit jako zaplacenou"
+              />
+              <InvoiceActionMenuForm
+                action={cancelInvoice}
+                icon={<XCircleIcon />}
+                id={row.id}
+                label="Stornovat fakturu"
+              />
+            </>
+          ) : null}
+          {row.displayStatus === "paid" ? (
+            <>
+              <DropdownMenuSeparator />
+              <InvoiceActionMenuForm
+                action={unmarkInvoicePaid}
+                icon={<RotateCcwIcon />}
+                id={row.id}
+                label="Zrušit zaplacení"
+              />
+            </>
+          ) : null}
+          {row.displayStatus === "draft" ? (
+            <>
+              <DropdownMenuSeparator />
+              <InvoiceActionMenuForm
+                action={deleteInvoice}
+                icon={<Trash2Icon />}
+                id={row.id}
+                label="Smazat návrh"
+                variant="destructive"
+              />
+            </>
+          ) : null}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
+  );
+}
+
+function InvoiceActionMenuForm({
+  action,
+  icon,
+  id,
+  label,
+  variant = "default",
+}: {
+  action: (formData: FormData) => Promise<void>;
+  icon: ReactNode;
+  id: string;
+  label: string;
+  variant?: "default" | "destructive";
+}) {
+  return (
+    <form action={action}>
+      <input name="id" type="hidden" value={id} />
+      <DropdownMenuItem
+        className="w-full"
+        nativeButton
+        render={<button type="submit" />}
+        variant={variant}
+      >
+        {icon}
+        {label}
+      </DropdownMenuItem>
+    </form>
   );
 }
