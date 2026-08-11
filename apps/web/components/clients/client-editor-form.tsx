@@ -133,9 +133,10 @@ export function ClientEditorForm({
       {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
 
       <div className="space-y-2">
-        <Label>IČO (ARES)</Label>
+        <Label htmlFor="client-ico">IČO (ARES)</Label>
         <div className="flex flex-wrap gap-2">
           <Input
+            id="client-ico"
             className="max-w-xs"
             maxLength={8}
             onChange={(ev) => {
@@ -153,11 +154,12 @@ export function ClientEditorForm({
             type="button"
             variant="secondary"
           >
-            {lookingUp ? "Hledám…" : "Lookup"}
+            {lookingUp ? "Hledám…" : "Vyhledat v ARES"}
           </Button>
         </div>
         <p className="text-muted-foreground text-xs">
-          Předvyplnění z ARES, nebo ruční záznam bez ARES (např. 404).
+          Údaje můžete načíst z ARES nebo zadat ručně, například u zahraničního
+          klienta.
         </p>
       </div>
 
@@ -235,7 +237,7 @@ export function ClientEditorForm({
 
       <div className="flex gap-2">
         <Button disabled={lookingUp} loading={saving} type="submit">
-          {saving ? "Ukládám…" : "Save"}
+          {saving ? "Ukládám…" : "Uložit"}
         </Button>
         <span className="text-muted-foreground flex items-center text-xs">
           Zdroj: {source === "ares" ? "ARES" : "Ručně"}
@@ -246,10 +248,22 @@ export function ClientEditorForm({
 }
 
 function FieldGroup(props: { label: string; children: React.ReactNode }) {
+  const generatedId = React.useId();
+  const id = `client-field-${generatedId.replaceAll(":", "")}`;
+  let controlFound = false;
+  const children = React.Children.map(props.children, (child) => {
+    if (controlFound || !React.isValidElement(child)) {
+      return child;
+    }
+    controlFound = true;
+    const element = child as React.ReactElement<{ id?: string }>;
+    return React.cloneElement(element, { id: element.props.id ?? id });
+  });
+
   return (
     <div className="space-y-2">
-      <Label>{props.label}</Label>
-      {props.children}
+      <Label htmlFor={id}>{props.label}</Label>
+      {children}
     </div>
   );
 }

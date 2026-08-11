@@ -129,7 +129,7 @@ export function IssuersDataGrid({ items }: { items: IssuerTableItem[] }) {
                 size="sm"
                 variant="destructive"
               >
-                Delete
+                Smazat
               </SubmitButton>
             </form>
           </div>

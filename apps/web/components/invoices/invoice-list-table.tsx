@@ -333,35 +333,64 @@ export function InvoiceListTable({
 
   return (
     <div className={cn("space-y-3", barVisible && "pb-24")}>
-      <AppDataGrid
-        emptyMessage={
-          <p className="text-muted-foreground py-8 text-center text-sm">
+      <InvoiceListFilters
+        clientId={params.clientId ?? undefined}
+        clients={clients}
+        from={params.from ?? undefined}
+        issuerId={params.issuerId ?? undefined}
+        issuers={issuers}
+        onFiltersChange={onFiltersChange}
+        q={params.q ?? undefined}
+        status={params.status ?? undefined}
+        to={params.to ?? undefined}
+      />
+
+      <div className="space-y-3 md:hidden">
+        {rows.length > 0 ? (
+          rows.map((row) => <InvoiceMobileCard key={row.id} row={row} />)
+        ) : (
+          <p className="text-muted-foreground rounded-md border px-4 py-8 text-center text-sm">
             Žádné faktury.{" "}
-            <Link
-              className="text-primary underline-offset-4 hover:underline"
-              href="/invoices/new"
-            >
+            <Link className="text-primary underline" href="/invoices/new">
               Vytvořit první fakturu
             </Link>
             .
           </p>
-        }
-        recordCount={total}
-        table={table}
-        toolbar={
-          <InvoiceListFilters
-            clientId={params.clientId ?? undefined}
-            clients={clients}
-            from={params.from ?? undefined}
-            issuerId={params.issuerId ?? undefined}
-            issuers={issuers}
-            onFiltersChange={onFiltersChange}
-            q={params.q ?? undefined}
-            status={params.status ?? undefined}
-            to={params.to ?? undefined}
-          />
-        }
-      />
+        )}
+        {total > params.pageSize ? (
+          <div className="flex items-center justify-between gap-3">
+            <Button
+              disabled={params.page <= 1}
+              onClick={() => void setParams({ page: params.page - 1 })}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              Předchozí
+            </Button>
+            <span className="text-muted-foreground text-xs">
+              Strana {params.page} z {Math.ceil(total / params.pageSize)}
+            </span>
+            <Button
+              disabled={params.page * params.pageSize >= total}
+              onClick={() => void setParams({ page: params.page + 1 })}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              Další
+            </Button>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="hidden min-w-0 md:block">
+        <AppDataGrid
+          emptyMessage="Žádné faktury."
+          recordCount={total}
+          table={table}
+        />
+      </div>
 
       {barVisible ? (
         <div className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed inset-x-0 bottom-0 z-40 border-t px-4 py-3 shadow-lg backdrop-blur">
@@ -374,7 +403,7 @@ export function InvoiceListTable({
                 {" "}
                 · {formatMoney(selectedTotal)}
                 {selectedDrafts > 0
-                  ? ` · ${selectedDrafts} draft${selectedDrafts === 1 ? "" : "y"}`
+                  ? ` · ${selectedDrafts} ${selectedDrafts === 1 ? "návrh" : selectedDrafts >= 2 && selectedDrafts <= 4 ? "návrhy" : "návrhů"}`
                   : null}
               </span>
             </div>
@@ -447,6 +476,49 @@ export function InvoiceListTable({
   );
 }
 
+function InvoiceMobileCard({ row }: { row: InvoiceListRow }) {
+  return (
+    <article
+      className={cn(
+        "bg-card space-y-3 rounded-lg border border-l-4 p-4",
+        DISPLAY_STATUS_ROW_ACCENT[row.displayStatus],
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <Link
+            className="font-semibold tabular-nums underline-offset-4 hover:underline"
+            href={`/invoices/${row.id}`}
+          >
+            {row.number ?? "Návrh bez čísla"}
+          </Link>
+          <p className="text-muted-foreground truncate text-sm">
+            {row.clientName}
+          </p>
+        </div>
+        <InvoiceStatusBadge status={row.displayStatus} />
+      </div>
+      <dl className="grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <dt className="text-muted-foreground text-xs">Vystaveno</dt>
+          <dd className="tabular-nums">{formatDateCs(row.issueDate)}</dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground text-xs">Splatnost</dt>
+          <dd className="tabular-nums">{formatDateCs(row.dueDate)}</dd>
+        </div>
+        <div className="col-span-2">
+          <dt className="text-muted-foreground text-xs">Celkem</dt>
+          <dd className="font-medium tabular-nums">
+            {formatMoney(Number(row.total) || 0, row.currency || "CZK")}
+          </dd>
+        </div>
+      </dl>
+      <InvoiceRowActions row={row} />
+    </article>
+  );
+}
+
 function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
   return (
     <div
@@ -488,8 +560,8 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
       </Button>
       <form action={duplicateInvoice}>
         <input name="id" type="hidden" value={row.id} />
-        <SubmitButton pendingLabel="Dup…" size="sm" variant="ghost">
-          Dup
+        <SubmitButton pendingLabel="Duplikuji…" size="sm" variant="ghost">
+          Duplikovat
         </SubmitButton>
       </form>
       {row.displayStatus === "unpaid" ||
@@ -514,7 +586,7 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
         <form action={unmarkInvoicePaid}>
           <input name="id" type="hidden" value={row.id} />
           <SubmitButton pendingLabel="…" size="sm" variant="ghost">
-            Zrušit zapl.
+            Zrušit zaplacení
           </SubmitButton>
         </form>
       ) : null}

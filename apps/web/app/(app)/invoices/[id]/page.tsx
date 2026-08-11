@@ -11,7 +11,7 @@ import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
 import { SendInvoiceEmailSheet } from "@/components/invoices/send-invoice-email-sheet";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { formatDateCs, formatMoney } from "@/lib/format";
+import { formatDateCs, formatDateTime, formatMoney } from "@/lib/format";
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
 import { requireWorkspace } from "@/lib/auth/session";
 import { isEmailConfigured } from "@/lib/email/invite";
@@ -291,7 +291,7 @@ export default async function InvoiceDetailPage({
         </div>
         <div>
           <dt className="text-muted-foreground">Měna</dt>
-          <dd className="tabular-nums">{row.currency} (MVP pouze CZK)</dd>
+          <dd className="tabular-nums">{row.currency}</dd>
         </div>
         <div>
           <dt className="text-muted-foreground">Celkem</dt>
@@ -300,8 +300,8 @@ export default async function InvoiceDetailPage({
           </dd>
         </div>
         <div>
-          <dt className="text-muted-foreground">Zaplaceno</dt>
-          <dd>{row.paidAt?.toISOString() ?? "—"}</dd>
+          <dt className="text-muted-foreground">Zaplaceno dne</dt>
+          <dd>{row.paidAt ? formatDateTime(row.paidAt) : "—"}</dd>
         </div>
       </dl>
 
@@ -327,15 +327,16 @@ export default async function InvoiceDetailPage({
       ) : null}
 
       {payload?.success ? (
-        <div className="rounded-md border">
-          <table className="w-full text-sm">
+        <div className="max-w-full overflow-x-auto rounded-md border">
+          <table className="w-full min-w-[42rem] text-sm">
             <thead>
               <tr className="border-b text-left">
                 <th className="p-2">#</th>
                 <th className="p-2">Popis</th>
                 <th className="p-2">Množství</th>
-                <th className="p-2">Cena</th>
-                <th className="p-2">Celkem</th>
+                <th className="p-2">Cena bez DPH</th>
+                <th className="p-2">DPH</th>
+                <th className="p-2">Celkem s DPH</th>
               </tr>
             </thead>
             <tbody>
@@ -349,6 +350,7 @@ export default async function InvoiceDetailPage({
                   <td className="p-2 tabular-nums">
                     {formatMoney(it.unitPriceWithoutVat)}
                   </td>
+                  <td className="p-2 tabular-nums">{it.vatRate} %</td>
                   <td className="p-2 tabular-nums">
                     {formatMoney(it.lineTotal)}
                   </td>

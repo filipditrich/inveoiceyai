@@ -15,7 +15,7 @@ import {
   tryBuildInvoicePayload,
   type BuilderLineInput,
 } from "@/lib/build-invoice";
-import { formatDateCs, formatMoney } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
 import type { ClientOption, IssuerOption } from "@/lib/invoice-party-types";
 import { cn } from "@/lib/utils";
 import { nextInvoiceNumber } from "@invoicey/invoice-core/numbering";
@@ -499,6 +499,7 @@ export function InvoiceBuilderForm({
               {clients.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.snapshot.name}
+                  {c.snapshot.ico ? ` · IČO ${c.snapshot.ico}` : ""}
                 </option>
               ))}
             </select>
@@ -525,7 +526,7 @@ export function InvoiceBuilderForm({
             <p className="text-sm font-medium tabular-nums">{numberPreview}</p>
           </Field>
           <Field
-            description={`Datum vystavení · ${formatDateCs(watched.issueDate)}`}
+            description="Datum, kdy fakturu vystavujete."
             error={fieldError(errors, "issueDate")}
             label="Datum vystavení"
           >
@@ -536,7 +537,7 @@ export function InvoiceBuilderForm({
             />
           </Field>
           <Field
-            description={`Splatnost · ${formatDateCs(watched.dueDate)}`}
+            description="Poslední den pro včasnou úhradu."
             error={fieldError(errors, "dueDate")}
             label="Splatnost"
           >
@@ -547,7 +548,7 @@ export function InvoiceBuilderForm({
             />
           </Field>
           <Field
-            description={`Datum uskutečnění zdanitelného plnění · ${formatDateCs(watched.duzp)}`}
+            description="Datum uskutečnění zdanitelného plnění."
             error={fieldError(errors, "duzp")}
             label="DUZP"
           >
@@ -557,11 +558,14 @@ export function InvoiceBuilderForm({
               {...form.register("duzp")}
             />
           </Field>
-          <Field description="MVP pouze CZK — měnu nelze změnit." label="Měna">
+          <Field
+            description="Zatím podporujeme pouze české koruny."
+            label="Měna"
+          >
             <p className="text-sm font-medium tabular-nums">CZK (Kč)</p>
           </Field>
           <Field
-            description="Běžný režim, přenesení DPH, nebo OSS (advanced)."
+            description="Běžný režim, přenesení DPH nebo rozšířený režim OSS."
             error={fieldError(errors, "vatMode")}
             label="Režim DPH"
           >
@@ -581,7 +585,7 @@ export function InvoiceBuilderForm({
                 }}
                 type="checkbox"
               />
-              Advanced (OSS)
+              Zobrazit rozšířený režim OSS
             </label>
           </Field>
           <Field
@@ -693,6 +697,7 @@ export function InvoiceBuilderForm({
               >
                 <div className="space-y-1 sm:col-span-2">
                   <Input
+                    aria-label={`Popis položky ${index + 1}`}
                     aria-invalid={Boolean(descErr)}
                     placeholder="Popis služby / zboží"
                     {...form.register(`items.${index}.description`)}
@@ -703,6 +708,7 @@ export function InvoiceBuilderForm({
                 </div>
                 <div className="space-y-1">
                   <Input
+                    aria-label={`Množství položky ${index + 1}`}
                     aria-invalid={Boolean(
                       fieldError(
                         errors,
@@ -719,12 +725,14 @@ export function InvoiceBuilderForm({
                 </div>
                 <div className="space-y-1">
                   <Input
+                    aria-label={`Jednotka položky ${index + 1}`}
                     placeholder="ks / hod"
                     {...form.register(`items.${index}.unit`)}
                   />
                 </div>
                 <div className="space-y-1">
                   <Input
+                    aria-label={`Cena bez DPH položky ${index + 1}`}
                     placeholder="Cena bez DPH"
                     step="any"
                     type="number"
@@ -736,6 +744,7 @@ export function InvoiceBuilderForm({
                 <div className="flex flex-col gap-1">
                   <div className="flex gap-1">
                     <Input
+                      aria-label={`Sazba DPH položky ${index + 1} v procentech`}
                       placeholder="DPH %"
                       step="1"
                       type="number"
@@ -744,6 +753,7 @@ export function InvoiceBuilderForm({
                       })}
                     />
                     <Button
+                      aria-label={`Odebrat položku ${index + 1}`}
                       onClick={() => {
                         if (fields.length > 1) {
                           remove(index);
@@ -753,7 +763,7 @@ export function InvoiceBuilderForm({
                       type="button"
                       variant="ghost"
                     >
-                      ×
+                      <span aria-hidden="true">×</span>
                     </Button>
                   </div>
                   <p className="text-muted-foreground text-xs tabular-nums">
@@ -782,7 +792,7 @@ export function InvoiceBuilderForm({
           />
         </Field>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="bg-background/95 sticky bottom-0 z-20 -mx-4 flex flex-wrap gap-2 border-t px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
           <Button
             disabled={submitting !== null}
             loading={submitting === "draft"}
@@ -790,7 +800,7 @@ export function InvoiceBuilderForm({
             type="button"
             variant="outline"
           >
-            {submitting === "draft" ? "Ukládám…" : "Uložit draft"}
+            {submitting === "draft" ? "Ukládám…" : "Uložit návrh"}
           </Button>
           <Button
             disabled={submitting !== null}
@@ -801,7 +811,7 @@ export function InvoiceBuilderForm({
             {submitting === "issue" ? "Vystavuji…" : "Vystavit"}
           </Button>
           <span className="text-muted-foreground self-center text-xs">
-            {mode === "edit" ? "Úprava draftu" : "Nová faktura"}
+            {mode === "edit" ? "Úprava návrhu" : "Nová faktura"}
           </span>
         </div>
       </form>
@@ -860,8 +870,8 @@ function humanInvalid(code: string): string {
     validation: "Faktura neprošla validací schématu.",
     missing_scheme: "Chybí číslovací schéma pro typ dokladu.",
     already_issued: "Faktura už je vystavená.",
-    not_draft: "Lze upravit jen draft.",
-    cannot_issue: "Draft nelze vystavit.",
+    not_draft: "Lze upravit jen návrh.",
+    cannot_issue: "Návrh nelze vystavit.",
   };
   return map[code] ?? `Chyba: ${code}`;
 }

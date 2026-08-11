@@ -1617,7 +1617,7 @@ function DataGridTableRowSelect<TData extends object>({
               // Selection must not bubble into the row's onRowClick handler.
               event.stopPropagation();
             }}
-            aria-label="Select row"
+            aria-label="Vybrat řádek"
             className="align-[inherit]"
           />
         </>
@@ -1646,7 +1646,7 @@ function DataGridTableRowSelectAll() {
             onCheckedChange={(value) =>
               table.toggleAllPageRowsSelected(!!value)
             }
-            aria-label="Select all"
+            aria-label="Vybrat všechny řádky"
             className="align-[inherit]"
           />
         );

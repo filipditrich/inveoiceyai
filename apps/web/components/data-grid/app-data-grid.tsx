@@ -51,7 +51,7 @@ export function AppDataGrid<TData extends object>({
         width: "fixed",
       }}
     >
-      <div className={cn("space-y-3", className)}>
+      <div className={cn("min-w-0 max-w-full space-y-3", className)}>
         {toolbar || showColumnVisibility ? (
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="min-w-0 flex-1">{toolbar}</div>
@@ -69,8 +69,8 @@ export function AppDataGrid<TData extends object>({
           </div>
         ) : null}
 
-        <DataGridContainer className="rounded-md border">
-          <DataGridScrollArea className="max-h-[min(70vh,720px)]">
+        <DataGridContainer className="min-w-0 max-w-full overflow-hidden rounded-md border">
+          <DataGridScrollArea className="max-h-[min(70vh,720px)] max-w-full overflow-x-auto">
             <DataGridTable />
           </DataGridScrollArea>
         </DataGridContainer>

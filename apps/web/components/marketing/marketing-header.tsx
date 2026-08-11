@@ -1,4 +1,4 @@
-import { ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, MenuIcon } from "lucide-react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
@@ -68,6 +68,34 @@ export async function MarketingHeader() {
             {t("openApp")}
             <ArrowRightIcon data-icon="inline-end" />
           </Button>
+          <details className="group relative sm:hidden">
+            <summary className="border-input hover:bg-muted focus-visible:ring-ring flex size-9 cursor-pointer list-none items-center justify-center rounded-md border outline-none focus-visible:ring-2 [&::-webkit-details-marker]:hidden">
+              <MenuIcon className="size-4" aria-hidden="true" />
+              <span className="sr-only">Otevřít nabídku</span>
+            </summary>
+            <nav
+              aria-label={t("ariaLabel")}
+              className="bg-popover text-popover-foreground absolute right-0 top-11 z-50 w-64 space-y-1 rounded-xl border p-2 shadow-xl"
+            >
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="hover:bg-muted block rounded-lg px-3 py-2 text-sm font-medium"
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <div className="my-2 border-t" />
+              <Link
+                href="/sign-in"
+                className="hover:bg-muted block rounded-lg px-3 py-2 text-sm font-medium"
+              >
+                {t("signIn")}
+              </Link>
+              <LocaleSwitcher size="sm" className="mt-1 w-full" />
+            </nav>
+          </details>
         </div>
       </div>
     </header>

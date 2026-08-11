@@ -6,8 +6,7 @@ import {
   ClientVatIdSchema,
   IcoSchema,
 } from "@invoicey/invoice-core/schema";
-import { clients, mergeDuplicateClients } from "@invoicey/db";
-import { withDbTransaction } from "@invoicey/db/transaction";
+import { clients, ensureClient, mergeDuplicateClients } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -99,33 +98,27 @@ export async function saveClient(formData: FormData): Promise<void> {
 
   const snapshot = snapshotCandidate.data;
 
-  await withDbTransaction(async (tx) => {
-    const existing = await tx
-      .select({ id: clients.id })
-      .from(clients)
-      .where(and(eq(clients.id, rowId), eq(clients.workspaceId, workspaceId)))
-      .limit(1);
+  const existing = await db
+    .select({ id: clients.id })
+    .from(clients)
+    .where(and(eq(clients.id, rowId), eq(clients.workspaceId, workspaceId)))
+    .limit(1);
 
-    if (existing[0]) {
-      await tx
-        .update(clients)
-        .set({
-          snapshot: snapshot as Record<string, unknown>,
-          source: sourceLabel,
-          updatedAt: new Date(),
-        })
-        .where(
-          and(eq(clients.id, rowId), eq(clients.workspaceId, workspaceId)),
-        );
-    } else {
-      await tx.insert(clients).values({
-        id: snapshot.id,
-        workspaceId,
-        source: sourceLabel,
+  if (existing[0]) {
+    await db
+      .update(clients)
+      .set({
         snapshot: snapshot as Record<string, unknown>,
-      });
-    }
-  });
+        source: sourceLabel,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(clients.id, rowId), eq(clients.workspaceId, workspaceId)));
+  } else {
+    await ensureClient(db, workspaceId, snapshot as Record<string, unknown>, {
+      preferredId: snapshot.id,
+      source: sourceLabel,
+    });
+  }
 
   revalidatePath("/clients");
   revalidatePath("/invoices/new");

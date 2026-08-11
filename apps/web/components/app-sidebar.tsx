@@ -137,16 +137,18 @@ export function AppSidebar({
       </SidebarContent>
       <SidebarFooter className="gap-3">
         <NavUser user={user} />
-        <p
-          className="text-muted-foreground px-2 pb-1 font-mono text-[0.65rem] tabular-nums tracking-wide group-data-[collapsible=icon]:hidden"
-          title={`${t("meta.title")} v${APP_VERSION} (${APP_GIT_SHA})`}
-        >
-          v{APP_VERSION}
-          <span className="mx-1.5 opacity-40" aria-hidden>
-            ·
-          </span>
-          {APP_GIT_SHA}
-        </p>
+        {process.env.NODE_ENV !== "production" ? (
+          <p
+            className="text-muted-foreground px-2 pb-1 font-mono text-[0.65rem] tabular-nums tracking-wide group-data-[collapsible=icon]:hidden"
+            title={`${t("meta.title")} v${APP_VERSION} (${APP_GIT_SHA})`}
+          >
+            v{APP_VERSION}
+            <span className="mx-1.5 opacity-40" aria-hidden>
+              ·
+            </span>
+            {APP_GIT_SHA}
+          </p>
+        ) : null}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

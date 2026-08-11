@@ -592,9 +592,9 @@
       "backLink": "← Invoices"
     },
     "fromJson": {
-      "eyebrow": "Demo · Phase 3",
+      "eyebrow": "Structured input",
       "title": "Invoice from JSON",
-      "subtitle": "Paste an InvoiceSchema payload and render a PDF. Includes presets with payment instruction markdown.",
+      "subtitle": "Paste an <code>InvoiceSchema</code> JSON payload, validate its structure, and create a PDF preview.",
       "backToInvoices": "← Back to Invoices",
       "jsonLabel": "Invoice JSON",
       "loadPreset": "Load preset",
@@ -602,7 +602,8 @@
       "rendering": "Rendering…",
       "resetSample": "Reset sample",
       "emptyPreview": "Press “Render PDF” for a preview…",
-      "parseError": "Could not parse JSON: fix syntax errors and try again."
+      "parseError": "Could not parse JSON: fix syntax errors and try again.",
+      "validationHelp": "InvoiceSchema validates the structure and highlights errors before creating the PDF."
     },
     "email": {
       "send": "Send by email",

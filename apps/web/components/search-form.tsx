@@ -5,16 +5,20 @@ import { Label } from "@/components/ui/label";
 import { SidebarInput } from "@/components/ui/sidebar";
 import { SearchIcon } from "lucide-react";
 
-export function SearchForm({ ...props }: React.ComponentProps<"form">) {
+export function SearchForm({
+  inputId = "search",
+  ...props
+}: React.ComponentProps<"form"> & { inputId?: string }) {
   const t = useTranslations("App.search");
   return (
-    <form {...props}>
+    <form action="/invoices" method="get" role="search" {...props}>
       <div className="relative">
-        <Label htmlFor="search" className="sr-only">
+        <Label htmlFor={inputId} className="sr-only">
           {t("label")}
         </Label>
         <SidebarInput
-          id="search"
+          id={inputId}
+          name="q"
           placeholder={t("placeholder")}
           className="h-8 pl-7"
         />

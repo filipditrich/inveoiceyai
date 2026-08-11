@@ -270,7 +270,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
           <Input
             id="originLabel"
             onChange={(e) => setOriginLabel(e.target.value)}
-            placeholder="např. starý Word šablona"
+            placeholder="např. stará šablona ve Wordu"
             value={originLabel}
           />
         </div>

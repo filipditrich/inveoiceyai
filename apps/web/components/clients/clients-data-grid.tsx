@@ -102,7 +102,7 @@ export function ClientsDataGrid({ items }: { items: ClientTableItem[] }) {
           <DataGridColumnHeader column={column} title="Zdroj" />
         ),
         cell: ({ row }) => (
-          <span className="capitalize">{row.original.source}</span>
+          <span>{row.original.source === "ares" ? "ARES" : "Ručně"}</span>
         ),
         meta: { headerTitle: "Zdroj" },
       },
@@ -120,7 +120,7 @@ export function ClientsDataGrid({ items }: { items: ClientTableItem[] }) {
               size="sm"
               variant="outline"
             >
-              Edit
+              Upravit
             </Button>
             <form action={deleteClient}>
               <input name="id" type="hidden" value={row.original.rowId} />
@@ -129,7 +129,7 @@ export function ClientsDataGrid({ items }: { items: ClientTableItem[] }) {
                 size="sm"
                 variant="destructive"
               >
-                Delete
+                Smazat
               </SubmitButton>
             </form>
           </div>
