@@ -1,0 +1,767 @@
+{
+  "Common": {
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "back": "Back",
+    "loading": "Loading…",
+    "search": "Search",
+    "emptyDash": "—",
+    "all": "All",
+    "apply": "Apply",
+    "yes": "Yes",
+    "no": "No",
+    "create": "Create",
+    "copy": "Copy",
+    "close": "Close",
+    "confirm": "Confirm",
+    "filter": "Filter",
+    "previous": "previous",
+    "next": "next",
+    "locale": {
+      "label": "Language",
+      "cs": "Čeština",
+      "en": "English"
+    }
+  },
+  "Errors": {
+    "invalid": {
+      "required_fields": "Select an issuer, a client, and at least one line item.",
+      "missing_parties": "Issuer or client not found.",
+      "validation": "Invoice failed schema validation.",
+      "missing_scheme": "No numbering scheme found for this document type.",
+      "already_issued": "Invoice has already been issued.",
+      "not_draft": "Only drafts can be edited.",
+      "cannot_issue": "This draft cannot be issued.",
+      "has_invoices": "Cannot delete an issuer that has invoices.",
+      "generic": "Error: {code}"
+    }
+  },
+  "Toasts": {
+    "issuer_saved": "Issuer saved",
+    "issuer_deleted": "Issuer deleted",
+    "client_saved": "Client saved",
+    "client_deleted": "Client deleted",
+    "invoice_saved": "Draft saved",
+    "invoice_issued": "Invoice issued",
+    "invoice_paid": "Marked as paid",
+    "invoice_cancelled": "Invoice cancelled",
+    "invoice_deleted": "Draft deleted",
+    "invoice_duplicated": "Invoice duplicated",
+    "invoice_emailed": "Invoice sent by email",
+    "bulk_summary": "Bulk action: {ok} ok, {skipped} skipped, {failed} failed.",
+    "clients_merged": "Merged {groups} groups — removed {removed} clients, repointed {repointed} invoices"
+  },
+  "Status": {
+    "invoice": {
+      "draft": "Draft",
+      "unpaid": "Unpaid",
+      "overdue": "Overdue",
+      "paid": "Paid",
+      "future": "Future",
+      "cancelled": "Cancelled"
+    },
+    "invoiceCount": {
+      "label": "{count, plural, one {# invoice} other {# invoices}}"
+    },
+    "email": {
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "opened": "Opened",
+      "clicked": "Clicked",
+      "bounced": "Bounced",
+      "complained": "Complained"
+    }
+  },
+  "Marketing": {
+    "meta": {
+      "title": "Czech invoices without the busywork",
+      "description": "Invoicey connects Czech invoicing, PDF, ISDOC, SPAYD QR and ARES with a modern web app and AI automation.",
+      "ogTitle": "Invoicey — Czech invoices without the busywork",
+      "ogDescription": "One validated invoice. Web, PDF, ISDOC, QR and AI automation."
+    },
+    "nav": {
+      "howItWorks": "How it works",
+      "automation": "Automation",
+      "capabilities": "Features",
+      "faq": "FAQ",
+      "docs": "Docs",
+      "signIn": "Sign in",
+      "openApp": "Open app",
+      "ariaLabel": "Main navigation"
+    },
+    "footer": {
+      "description": "Czech invoices as structured data. Create them in the web, via JSON, or with AI — and always get the same validated output.",
+      "docs": "Docs",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies",
+      "cookieSettings": "Cookie settings",
+      "copyright": "© {year} Invoicey · Private beta",
+      "legalNav": "Legal"
+    },
+    "hero": {
+      "badge": "Czech invoices, AI-ready",
+      "titleLine1": "Invoicing that starts with data.",
+      "titleLine2": "Not a form.",
+      "subtitle": "Issue correct Czech documents from the web, JSON, or AI. Invoicey validates every time and produces the same PDF, ISDOC, and payment QR.",
+      "ctaPrimary": "Open Invoicey",
+      "ctaSecondary": "How it works",
+      "noPassword": "No password",
+      "czechUi": "Czech-first UI",
+      "betaAccess": "Beta access"
+    },
+    "trust": {
+      "pdfIsdoc": "PDF + ISDOC",
+      "spaydQr": "SPAYD QR payment",
+      "aresLookup": "ARES by ICO",
+      "multiIssuer": "Multiple issuers",
+      "ariaLabel": "Key formats"
+    },
+    "workflow": {
+      "eyebrow": "From entry to payment",
+      "title": "Less manual work. You stay in control.",
+      "description": "Invoicey keeps the full document lifecycle together and leaves sensitive steps in your hands.",
+      "step1Title": "Prepare the data",
+      "step1Description": "Pick an issuer, look up a client by ICO, and add line items. Or send the same data as JSON or an agent instruction.",
+      "step2Title": "Validate & issue",
+      "step2Description": "One schema checks required fields, VAT, and totals. Only then is an immutable document created — PDF, ISDOC, and QR.",
+      "step3Title": "Send & track",
+      "step3Description": "Email the invoice to the client, track delivery and due date, and mark payment in the same overview."
+    },
+    "capabilities": {
+      "eyebrow": "Czech accounting reality",
+      "title": "The essentials are built in.",
+      "description": "Not another layer around a PDF generator. Invoicey builds on the data a Czech document actually needs.",
+      "docsTitle": "Czech documents without blind spots",
+      "docsDescription": "Invoices, advances, proformas, and credit notes. VAT, tax point date, symbols, QR payment, and ISDOC are part of the same output.",
+      "issuersTitle": "Every business has its own rules",
+      "issuersDescription": "Bank account, numbering series, VAT registration, and visual assets stay with the correct issuer.",
+      "emailTitle": "From issuance to payment",
+      "emailDescription": "Send PDF and ISDOC, track delivery, due date, and payment without rewriting status across multiple tools.",
+      "historyTitle": "History stays history",
+      "historyDescription": "Issued documents are immutable. You can import older PDFs and ISDOCs while preserving their origin and exact form.",
+      "schemaTitle": "Data first, PDF second",
+      "schemaDescription": "One validation schema powers the web, JSON, and agent tools. The result doesn't change based on how the invoice was created.",
+      "securityTitle": "Isolated workspaces",
+      "securityDescription": "OAuth sign-in via Google or GitHub and workspace membership checks on every server boundary."
+    },
+    "automation": {
+      "badge": "Automation · beta",
+      "title": "The agent drafts. Rules decide what ships.",
+      "description": "Slack and MCP use the same tools as the web. AI can look up a company, assemble a draft, and prepare files — but it never fabricates required fields, and confirming sensitive actions stays with you.",
+      "item1": "ARES lookup by name or ICO",
+      "item2": "Validated draft via InvoiceSchema",
+      "item3": "PDF and ISDOC from the same rendering core",
+      "item4": "Confirmation before issuing, sending, or marking paid",
+      "chatTitle": "Invoicey in Slack",
+      "chatSubtitle": "A structured draft, not free text",
+      "chatUserMessage": "@Invoicey issue a monthly invoice for Studio Sever, CZK 35,000 excl. VAT, due in 14 days.",
+      "chatReplyTitle": "Draft is ready",
+      "chatClient": "Studio Sever · ARES verified",
+      "chatAmount": "CZK 35,000",
+      "chatOutput": "PDF + ISDOC + SPAYD",
+      "chatAction": "Review & issue",
+      "chatDisclaimer": "Issuing an invoice always requires confirmation"
+    },
+    "featurePanels": {
+      "multiIssuerEyebrow": "Multiple issuers",
+      "multiIssuerTitle": "Sole trader and LLC without the switching chaos.",
+      "multiIssuerDescription": "Pick who issues the invoice and Invoicey uses their account, numbering series, VAT mode, and visual assets. Shared clients stay shared.",
+      "multiIssuerItem1": "Own numbering series",
+      "multiIssuerItem2": "Bank details & QR",
+      "multiIssuerItem3": "Logo, signature & stamp",
+      "importEyebrow": "Historical import",
+      "importTitle": "Start today, leave history unchanged.",
+      "importDescription": "Upload older PDFs or ISDOCs in bulk. Invoicey preserves the original files, marks their source, and won't let you overwrite an issued archive document.",
+      "importItem1": "PDF with embedded ISDOC",
+      "importItem2": "Archive mode without ISDOC",
+      "importItem3": "Document origin & immutable files"
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Before you open your first invoice.",
+      "description": "Straight answers, no marketing fluff.",
+      "q1": "Is Invoicey only for VAT payers?",
+      "a1": "No. It supports both VAT and non-VAT payers, the standard VAT regime, domestic reverse charge, and other Czech document requirements.",
+      "q2": "Can I invoice from multiple businesses?",
+      "a2": "Yes. Each issuer has its own bank, numbering series, VAT settings, logo, and contact details. Clients remain shared within a single workspace.",
+      "q3": "What does AI invoicing mean?",
+      "a3": "The agent doesn't assemble a PDF by guesswork. It prepares a structured draft that passes the same validation as a web-created invoice. Issuing or sending a sensitive document remains a confirmed action.",
+      "q4": "Can I import old invoices?",
+      "a4": "Yes. Bulk import accepts PDF and ISDOC. If the PDF contains an embedded ISDOC, Invoicey also reads the structured data; otherwise it preserves the original as an archive document.",
+      "q5": "Is Invoicey accounting or tax advice?",
+      "a5": "No. Invoicey helps prepare and manage documents, but responsibility for each specific business and tax case always rests with the user and their accountant or tax advisor."
+    },
+    "cta": {
+      "eyebrow": "Ready to issue",
+      "title": "Give your invoices one place and one source of truth.",
+      "description": "Sign in with Google or GitHub. You don't need to create a password.",
+      "button": "Open Invoicey"
+    },
+    "legal": {
+      "terms": {
+        "metaTitle": "Terms of Use",
+        "metaDescription": "Terms of Use for Invoicey during the private beta.",
+        "eyebrow": "Legal",
+        "title": "Terms of Use",
+        "description": "Rules for using the current beta version of Invoicey and the division of responsibility between the service and the user.",
+        "betaNotice": "Private beta. These terms are a working version for the limited beta. Operator identification, paid plans, support level, and commercial terms will be added before public launch.",
+        "s1Title": "1. The Service",
+        "s1Body": "Invoicey is a tool for preparing, managing, importing, rendering, and sending invoicing documents. Some features may be available as beta, experimental, or only to selected users. The scope of the service may change during the beta.",
+        "s2Title": "2. Account & Access",
+        "s2Body": "Sign-in uses a supported OAuth provider — currently Google or GitHub. The user is responsible for securing this account and for the actions of people invited to their workspace. Access may not be shared in a way that bypasses permissions or technical limits.",
+        "s3Title": "3. Document Responsibility",
+        "s3Body": "Invoicey performs technical and schema-level checks but does not provide accounting, tax, or legal advice. The user is responsible for the accuracy of input data, choice of tax regime, authorization to issue a document, and its compliance with each specific business case. The user should review a document before issuing.",
+        "s4Title": "4. Agent & Automated Features",
+        "s4Body": "AI may prepare a draft or suggest a next step. Output may be incomplete or incorrect and must pass the same validation and human review as manually entered data. The user must not use automation for fraud, unauthorized issuance, or any other unlawful conduct.",
+        "s5Title": "5. Data & Files",
+        "s5Body": "The user retains rights to their data and files and grants Invoicey permission to process them solely for providing the service. The user must have the right to process personal and business data entered into the service. Important documents should also be stored in the user's own archive.",
+        "s6Title": "6. Availability & Changes",
+        "s6Body": "The beta is provided without guarantee of uninterrupted availability. The service may be changed, temporarily limited, or discontinued — especially for maintenance, security, or supplier changes. Where circumstances allow, significant changes will be announced in a reasonable manner.",
+        "s7Title": "7. Prohibited Use",
+        "s7Body": "The service may not be used to violate law, send spam, gain unauthorized access, circumvent security, distribute malicious code, or exploit the service in a way that places unreasonable load on it.",
+        "s8Title": "8. Limitation of Liability",
+        "s8Body": "To the extent permitted by law, the beta service is not liable for indirect damage, lost profits, or consequences of decisions based on unreviewed automated output. This does not affect rights that cannot be contractually limited under applicable law.",
+        "s9Title": "9. Changes to Terms",
+        "s9Body": "Terms may be updated as the service evolves. A new version will be published here with the update date. Continued use after the effective date of a change constitutes acceptance of the updated terms, unless law requires otherwise."
+      },
+      "privacy": {
+        "metaTitle": "Privacy",
+        "metaDescription": "How Invoicey handles personal data during the private beta.",
+        "eyebrow": "Legal",
+        "title": "Privacy",
+        "description": "An overview of data Invoicey needs to operate, why it processes them, and what choices you have.",
+        "betaNotice": "Private beta. Invoicey is currently provided to a limited circle of users. Full operator identification and contact details will be added before public commercial launch. Until then, use the same contact channel through which you gained access.",
+        "s1Title": "1. What Data We Process",
+        "s1Intro": "Depending on how you use Invoicey, the service may process:",
+        "s1Items": "name, email, and profile picture from your Google or GitHub account;membership and role in a workspace;issuer, client, and invoice data including contacts, bank details, ICO, DIC, and line items;uploaded logo, signature, stamp, and archival invoicing files;records of sending, delivery, and status of invoicing emails;technical security logs and, if you consent, anonymous aggregate traffic measurement.",
+        "s2Title": "2. Why We Use Data",
+        "s2Intro": "We use data only to the extent necessary for:",
+        "s2Items": "sign-in, account management, and workspace isolation;creating, storing, rendering, importing, and sending invoices;protecting the service, diagnosing errors, and preventing abuse;fulfilling legal obligations related to accounting documents;measuring performance and traffic on the public site — only if you grant consent to the 'Anonymous measurement' category.",
+        "s3Title": "3. Legal Basis",
+        "s3Body": "Account and invoicing operations are based on performance of a service the user requested. Security and necessary operational logs are processed under a legitimate interest in secure operations. Optional measurement is based on consent, which can be changed at any time.",
+        "s4Title": "4. Service Providers",
+        "s4Body": "Invoicey uses specialized infrastructure providers. Depending on enabled features, these include Vercel (hosting and optional measurement), Neon (database), UploadThing (files), Resend (transactional email), Google/GitHub (OAuth sign-in), and Slack/Vercel Connect for agent integration. These providers process data solely to deliver their specific function under their contractual and security terms.",
+        "s5Title": "5. Retention",
+        "s5Body": "Accounting and issued documents may be subject to statutory archiving obligations and are not automatically overwritten when live data changes. Other data is retained for the duration of the active account and subsequently only as long as necessary to protect the service, resolve claims, or fulfil legal obligations. Specific retention periods will be added to this page before public launch.",
+        "s6Title": "6. Your Rights",
+        "s6Body": "Within GDPR limits you may request access, correction, erasure, restriction of processing, portability, or raise an objection. Measurement consent can be withdrawn immediately via cookie settings. Some data from accounting documents may not be erasable if required by law.",
+        "s7Title": "7. Security & Changes",
+        "s7Body": "Application access uses OAuth without a separate Invoicey password. Working data is always queried in the context of verified workspace membership. No internet service can promise absolute security. This page will be updated when processing changes significantly, and a new update date will be published."
+      },
+      "cookies": {
+        "metaTitle": "Cookie Policy",
+        "metaDescription": "What cookies and local storage Invoicey uses and how to change your choice.",
+        "eyebrow": "Legal",
+        "title": "Cookie Policy",
+        "description": "Two clear categories. Essential technology for operation and optional anonymous measurement. No advertising cookies.",
+        "changeChoiceTitle": "Want to change your choice?",
+        "changeChoiceDescription": "You can open settings any time. Revoking analytics consent takes effect immediately.",
+        "changeChoiceButton": "Open cookie settings",
+        "s1Title": "1. Essential Technology",
+        "s1Body": "These technologies cannot be disabled because they enable sign-in, session security, workspace isolation, and remembering your privacy choice. They include Better Auth secure cookies and the c15t-consent record, which stores your choice for up to one year. The UI may also store purely functional preferences in local storage, such as the theme.",
+        "s2Title": "2. Anonymous Measurement",
+        "s2Body": "With your consent we load Vercel Analytics. It provides aggregate traffic and performance information for public pages. We do not use it for ad profiling or combine it with invoicing content. Without consent the analytics component is not loaded.",
+        "s3Title": "3. What We Don't Use",
+        "s3Body": "Invoicey currently does not use ad networks, remarketing pixels, or cross-site tracking cookies. If this changes, this page and consent options will be updated before activation.",
+        "s4Title": "4. Changing or Revoking Consent",
+        "s4Body": "You can open settings using the button above or the 'Cookie settings' link in the footer. Choosing 'Essential only' rejects or revokes measurement. Clearing site data in your browser also removes the stored choice, and we will ask again on your next visit."
+      }
+    }
+  },
+  "Auth": {
+    "meta": {
+      "title": "Sign In",
+      "description": "Sign in to Invoicey with Google or GitHub."
+    },
+    "eyebrow": "Welcome back",
+    "title": "Sign in to Invoicey",
+    "subtitle": "Continue with your Google or GitHub account. Invoicey does not create or store a separate password.",
+    "noProviders": "No sign-in provider is configured. Add Google or GitHub credentials and reload this page.",
+    "continueWith": "Continue with {provider}",
+    "consent": "By continuing you confirm that you have read the terms of use and privacy policy.",
+    "shell": {
+      "tagline": "Czech invoicing",
+      "eyebrow": "Czech invoices, one schema",
+      "title": "From data to a finished document without detours.",
+      "description": "Web, PDF, ISDOC, SPAYD QR, and agent tools all use the same validated invoice.",
+      "oauthNote": "OAuth sign-in · no extra password",
+      "backHome": "Back to Invoicey"
+    },
+    "redirecting": "Redirecting…",
+    "failed": "Sign-in failed. Please try again.",
+    "continueGoogle": "Continue with Google",
+    "continueGitHub": "Continue with GitHub"
+  },
+  "Onboarding": {
+    "meta": {
+      "title": "Workspace Setup"
+    },
+    "title": "Complete your workspace",
+    "subtitle": "The account {email} is signed in but has no workspace. We normally create one automatically; this step completes an interrupted setup.",
+    "benefit1": "A private space for your invoices",
+    "benefit2": "Workspace owner role",
+    "benefit3": "Ability to add your first business",
+    "submit": "Create my workspace"
+  },
+  "Invite": {
+    "title": "Workspace invitation",
+    "description": "Accept the invitation to access this workspace's invoices.",
+    "accept": "Accept invitation",
+    "backToApp": "Back to app"
+  },
+  "NotFound": {
+    "code": "404",
+    "title": "This page isn't on the invoice.",
+    "description": "The link may have expired or the page moved to a new address. Find the product overview on the home page.",
+    "backButton": "Back to Invoicey"
+  },
+  "AppError": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Try reloading the page.",
+    "retry": "Try again",
+    "backToDashboard": "Back to dashboard"
+  },
+  "App": {
+    "meta": {
+      "title": "Invoicey",
+      "description": "Czech invoicing — schema-first data, PDF + ISDOC + SPAYD QR"
+    },
+    "brand": {
+      "tagline": "Czech invoicing"
+    },
+    "nav": {
+      "group": "Navigation",
+      "dashboard": "Dashboard",
+      "invoices": "Invoices",
+      "invoicesList": "Invoices",
+      "invoicesNew": "New",
+      "invoicesImport": "Import",
+      "invoicesFromJson": "From JSON",
+      "clients": "Clients",
+      "issuers": "Issuers",
+      "resourcesGroup": "Resources",
+      "docs": "Docs"
+    },
+    "breadcrumb": {
+      "dashboard": "Dashboard",
+      "invoices": "Invoices",
+      "clients": "Clients",
+      "issuers": "Issuers",
+      "settings": "Settings",
+      "fromJson": "From JSON",
+      "import": "Import",
+      "new": "New",
+      "edit": "Edit",
+      "invoice": "Invoice",
+      "issuer": "Issuer",
+      "client": "Client",
+      "detail": "Detail",
+      "security": "Security",
+      "members": "Members",
+      "api-keys": "API Keys",
+      "integrations": "Integrations"
+    },
+    "a11y": {
+      "toggleSidebar": "Toggle sidebar"
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Appearance, account security, workspace members, and API keys.",
+      "nav": {
+        "appearance": "Appearance",
+        "security": "Security",
+        "members": "Members",
+        "apiKeys": "API Keys",
+        "integrations": "Integrations"
+      },
+      "appearance": {
+        "title": "Appearance",
+        "description": "Light, dark, or match system. Preference is stored in this browser.",
+        "languageDescription": "Interface language for this app. Documentation stays in English."
+      }
+    },
+    "theme": {
+      "label": "Appearance",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "userMenu": {
+      "settings": "Settings",
+      "logOut": "Log out",
+      "signingOut": "Signing out…"
+    },
+    "search": {
+      "label": "Search",
+      "placeholder": "Type to search…"
+    }
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Invoice statuses and revenue over the last 12 months.",
+    "goToInvoices": "Go to invoices",
+    "newInvoice": "New invoice",
+    "empty": {
+      "title": "Welcome to Invoicey",
+      "description": "Create your first issuer (your business) to start drafting invoices with ARES lookup, numbering, and PDF / ISDOC export.",
+      "cta": "Create your first issuer"
+    },
+    "issuerFilter": {
+      "label": "Issuer",
+      "all": "All issuers"
+    },
+    "recent": {
+      "title": "Recent invoices",
+      "client": "Client",
+      "viewAll": "View all",
+      "issueDate": "Issued",
+      "dueDate": "Due",
+      "amount": "Amount",
+      "empty": "No invoices yet.",
+      "createFirst": "Create your first invoice",
+      "number": "Number",
+      "issued": "Issued",
+      "due": "Due",
+      "total": "Total",
+      "status": "Status",
+      "draft": "DRAFT"
+    },
+    "balance": {
+      "issued12m": "Issued invoices (12 months)",
+      "outstanding": "Outstanding (incl. overdue and future)"
+    },
+    "chart": {
+      "title": "Issued vs paid",
+      "issued": "Issued",
+      "paid": "Paid",
+      "subtitle": "Last 12 months (amount, CZK)"
+    }
+  },
+  "Invoices": {
+    "list": {
+      "title": "Issued Invoices",
+      "subtitle": "Statuses, filters, and actions for invoices.",
+      "newButton": "+ Issue invoice",
+      "importButton": "Import",
+      "fromJsonButton": "From JSON",
+      "empty": "No invoices.",
+      "createFirst": "Create your first invoice",
+      "page": "Page {current} / {total} ({records})",
+      "records": "{count, plural, one {# record} other {# records}}",
+      "selectAll": "Select all",
+      "number": "Number",
+      "issued": "Issued",
+      "due": "Due",
+      "client": "Client",
+      "total": "Total",
+      "status": "Status",
+      "actions": "Actions",
+      "detail": "Detail",
+      "issue": "Issue",
+      "edit": "Edit",
+      "pdf": "PDF",
+      "duplicate": "Dup",
+      "markPaid": "Paid",
+      "cancel": "Cancel",
+      "unmarkPaid": "Unmark paid",
+      "delete": "Delete",
+      "draft": "DRAFT",
+      "archive": "archive",
+      "selected": "{count} selected",
+      "selectedDrafts": "{count, plural, one {# draft} other {# drafts}}",
+      "bulkIssue": "Issue",
+      "bulkPaid": "Paid",
+      "bulkUnpaid": "Unmark paid",
+      "bulkCancel": "Cancel",
+      "bulkDelete": "Delete drafts"
+    },
+    "filter": {
+      "status": "Status",
+      "issuer": "Issuer",
+      "client": "Client",
+      "from": "From",
+      "to": "To",
+      "search": "Search",
+      "searchPlaceholder": "number, client…",
+      "sort": "Sort",
+      "sortDateDesc": "Date ↓",
+      "sortDateAsc": "Date ↑",
+      "submit": "Filter"
+    },
+    "detail": {
+      "issueDate": "Issue date",
+      "dueDate": "Due date",
+      "duzp": "Tax point date",
+      "currency": "Currency",
+      "currencyNote": "(MVP: CZK only)",
+      "total": "Total",
+      "paidAt": "Paid",
+      "archiveNote": "Archive import — line items are not available. Download the original PDF.",
+      "invalidPayload": "Invalid payload in DB.",
+      "backToList": "← Back to list",
+      "archive": "Archive",
+      "import": "Import",
+      "issueButton": "Issue",
+      "editButton": "Edit",
+      "duplicateButton": "Duplicate",
+      "markPaidButton": "Mark as paid",
+      "unmarkPaidButton": "Unmark paid",
+      "cancelButton": "Cancel",
+      "deleteButton": "Delete",
+      "itemsHeader": {
+        "position": "#",
+        "description": "Description",
+        "quantity": "Quantity",
+        "price": "Price",
+        "total": "Total"
+      }
+    },
+    "builder": {
+      "title": "New invoice",
+      "subtitle": "Draft → Issue. PDF preview on the right.",
+      "editTitle": "Edit draft",
+      "issuer": "Issuer",
+      "issuerDescription": "Your business (the supplier on the invoice).",
+      "client": "Client",
+      "clientDescription": "Client from the registry (ARES).",
+      "docType": "Document type",
+      "docTypeDescription": "Type of tax / payment document.",
+      "docTypeInvoice": "Invoice",
+      "docTypeProforma": "Proforma",
+      "docTypeAdvance": "Advance",
+      "docTypeCreditNote": "Credit note",
+      "numberPreview": "Number preview",
+      "numberPreviewDescription": "Number is assigned on issuance.",
+      "issueDate": "Issue date",
+      "dueDate": "Due date",
+      "duzp": "Tax point date",
+      "duzpDescription": "Date of taxable supply",
+      "currency": "Currency",
+      "currencyDescription": "MVP: CZK only — currency cannot be changed.",
+      "vatMode": "VAT mode",
+      "vatModeDescription": "Standard, reverse charge, or OSS (advanced).",
+      "vatRegular": "Standard",
+      "vatReverseCharge": "Reverse charge",
+      "vatOss": "OSS",
+      "vatAdvanced": "Advanced (OSS)",
+      "suppliesAbroad": "Supplies abroad",
+      "suppliesAbroadDescription": "For B2B supply of goods/services abroad.",
+      "suppliesNone": "No",
+      "suppliesEu": "EU",
+      "suppliesNonEu": "Non-EU",
+      "legalNote": "Legal note",
+      "legalNoteDescription": "Note text on the invoice (e.g. Tax is due by the customer).",
+      "legalNotePlaceholder": "Tax is due by the customer",
+      "reverseChargeCode": "Reverse charge code",
+      "reverseChargeCodeDescription": "Code of the reverse charge regime.",
+      "correctedInvoice": "Corrected invoice",
+      "correctedInvoiceDescription": "Number of the original invoice being corrected.",
+      "itemsTitle": "Line items",
+      "itemsDescription": "Enter prices excl. VAT; totals are calculated automatically.",
+      "addRow": "Add row",
+      "descriptionPlaceholder": "Service / goods description",
+      "quantityPlaceholder": "Quantity",
+      "unitPlaceholder": "pcs / hrs",
+      "pricePlaceholder": "Price excl. VAT",
+      "vatPlaceholder": "VAT %",
+      "totalLine": "Total: {total} (VAT {vat})",
+      "notes": "Note",
+      "notesDescription": "Optional text on the PDF below line items.",
+      "notesPlaceholder": "E.g. thank you for your business",
+      "saveDraft": "Save draft",
+      "savingDraft": "Saving…",
+      "issue": "Issue",
+      "issuing": "Issuing…",
+      "modeEdit": "Editing draft",
+      "modeCreate": "New invoice",
+      "missingParties": "First create {entities}.",
+      "missingIssuer": "an issuer",
+      "missingClient": "a client",
+      "missingAnd": " and ",
+      "missingScheme": "(no scheme)",
+      "previewError": "Could not generate preview",
+      "formErrors": "Fix form errors",
+      "formFallback": "Fill required fields and at least one valid line item."
+    },
+    "import": {
+      "title": "Import historical invoices",
+      "subtitle": "Upload PDFs. If they contain ISDOC (~80%), we'll parse them in full. Without ISDOC we store the original as an archive and you fill in the header manually.",
+      "backLink": "← Invoices"
+    },
+    "fromJson": {
+      "eyebrow": "Demo · Phase 3",
+      "title": "Invoice from JSON",
+      "subtitle": "Paste an InvoiceSchema payload and render a PDF. Includes presets with payment instruction markdown.",
+      "backToInvoices": "← Back to Invoices",
+      "jsonLabel": "Invoice JSON",
+      "loadPreset": "Load preset",
+      "renderPdf": "Render PDF",
+      "rendering": "Rendering…",
+      "resetSample": "Reset sample",
+      "emptyPreview": "Press “Render PDF” for a preview…",
+      "parseError": "Could not parse JSON: fix syntax errors and try again."
+    },
+    "email": {
+      "send": "Send by email",
+      "subject": "Subject",
+      "to": "To",
+      "coverText": "Cover text",
+      "attachIsdoc": "Attach ISDOC",
+      "from": "From",
+      "replyTo": "Reply to"
+    }
+  },
+  "Clients": {
+    "title": "Clients",
+    "subtitle": "Customers — ARES lookup or manual entry.",
+    "newButton": "New client",
+    "empty": "No clients yet. Add a customer via ARES or manually.",
+    "createFirst": "Create your first client",
+    "table": {
+      "name": "Name",
+      "ico": "ICO",
+      "city": "City",
+      "source": "Source",
+      "actions": "Actions"
+    },
+    "newTitle": "New client",
+    "newSubtitle": "Enter IČO and look up via ARES, or fill in manually.",
+    "editTitle": "Edit client",
+    "editSubtitle": "Update customer details.",
+    "mergeDuplicates": "Merge duplicates",
+    "deleteClient": "Delete client",
+    "deleteIrreversible": "This cannot be undone.",
+    "deleting": "Deleting…"
+  },
+  "Issuers": {
+    "title": "Issuers",
+    "subtitle": "Your businesses — ARES, bank, VAT, numbering, logo.",
+    "newButton": "New issuer",
+    "empty": "No issuers yet. Add your business to start invoicing.",
+    "createFirst": "Create your first issuer",
+    "table": {
+      "name": "Name",
+      "ico": "ICO",
+      "dic": "DIC",
+      "vat": "VAT",
+      "vatPayer": "Payer",
+      "vatNonPayer": "Non-payer",
+      "actions": "Actions"
+    },
+    "newTitle": "New issuer",
+    "newSubtitle": "IČO via ARES, contact email, and bank. Other settings can be completed in sections after creation.",
+    "editTitle": "Edit issuer",
+    "editSubtitle": "Update business details, bank, and numbering."
+  },
+  "Settings": {
+    "security": {
+      "trustOk": "Device has been marked as trusted.",
+      "trustInvalid": "The device trust link is invalid or has expired.",
+      "linkedAccounts": {
+        "title": "Sign-in methods",
+        "description": "Google and GitHub. The last provider cannot be unlinked.",
+        "linked": "Linked",
+        "notLinked": "Not linked",
+        "link": "Link",
+        "unlink": "Unlink",
+        "unlinkLastError": "Cannot unlink the last sign-in method",
+        "unlinkFailed": "Unlink failed",
+        "loadFailed": "Could not load accounts",
+        "unlinkSuccess": "Provider unlinked"
+      },
+      "sessions": {
+        "title": "Active sessions",
+        "description": "IP, browser, and ability to revoke access.",
+        "revokeOthers": "Revoke others",
+        "revoke": "Revoke",
+        "empty": "No sessions.",
+        "unknownDevice": "Unknown device",
+        "unknownIp": "IP unknown",
+        "currentSession": "this session",
+        "revokeFailed": "Revoke failed",
+        "revokeSuccess": "Session revoked",
+        "revokeOthersSuccess": "Other sessions revoked",
+        "revokeAfterLink": "Other sessions revoked after account link",
+        "loadFailed": "Could not load sessions"
+      },
+      "trustedDevices": {
+        "title": "Trusted devices",
+        "description": "Soft trust — a new device receives an email; sign-in always succeeds.",
+        "empty": "No trusted devices yet.",
+        "revoke": "Revoke",
+        "revokeFailed": "Device revoke failed",
+        "revokeSuccess": "Device revoked",
+        "lastSeen": "last seen"
+      },
+      "audit": {
+        "title": "Recent activity",
+        "description": "Sign-in and security action audit.",
+        "empty": "No records yet."
+      }
+    },
+    "members": {
+      "title": "Workspace members",
+      "description": "Roles: owner / admin / member.",
+      "remove": "Remove",
+      "removeFailed": "Removal failed",
+      "removeSuccess": "Member removed",
+      "roleUpdateFailed": "Role change failed",
+      "roleUpdateSuccess": "Role updated",
+      "loadFailed": "Could not load members",
+      "invite": {
+        "title": "Invite",
+        "description": "Invitation email + copyable link as backup.",
+        "emailPlaceholder": "email@example.com",
+        "submit": "Invite",
+        "failed": "Invitation failed",
+        "success": "Invitation created",
+        "copyLink": "Copy link",
+        "linkCopied": "Link copied"
+      }
+    },
+    "apiKeys": {
+      "title": "API Keys",
+      "description": "Personal tokens for remote MCP and Eve HTTP. Env ops key remains as a fallback.",
+      "namePlaceholder": "Key name",
+      "create": "Create",
+      "createFailed": "Creation failed",
+      "createSuccess": "Key created — copy it now",
+      "revoke": "Revoke",
+      "revokeFailed": "Revoke failed",
+      "revokeSuccess": "Key revoked",
+      "empty": "No keys.",
+      "noName": "unnamed",
+      "newKeyTitle": "New key (shown only now)",
+      "copy": "Copy",
+      "copied": "Copied",
+      "loadFailed": "Could not load keys"
+    }
+  },
+  "Consent": {
+    "banner": {
+      "title": "Your privacy, your choice",
+      "description": "Essential cookies keep Invoicey running. You can allow anonymous measurement separately. No advertising cookies.",
+      "details": "Details",
+      "customize": "Settings",
+      "rejectAll": "Essential only",
+      "acceptAnalytics": "Allow analytics"
+    },
+    "dialog": {
+      "title": "Privacy settings",
+      "description": "Choose which categories you consent to. Essential cannot be disabled.",
+      "necessary": "Essential",
+      "necessaryDescription": "Technologies required for proper app function and security.",
+      "measurement": "Measurement",
+      "measurementDescription": "Helps us understand traffic and service performance.",
+      "save": "Save"
+    }
+  },
+  "Pwa": {
+    "name": "Invoicey",
+    "shortName": "Invoicey",
+    "description": "Czech invoicing — schema-first"
+  }
+}

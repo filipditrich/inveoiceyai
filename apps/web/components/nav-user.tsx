@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth/client";
 import { LoaderCircleIcon, LogOutIcon, SettingsIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -44,6 +45,7 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
   const router = useRouter();
+  const t = useTranslations("App.userMenu");
   const initials = initialsFromName(user.name);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -120,7 +122,7 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem render={<Link href="/settings" />}>
                 <SettingsIcon />
-                Nastavení
+                {t("settings")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 disabled={signingOut}
@@ -131,7 +133,7 @@ export function NavUser({
                 ) : (
                   <LogOutIcon />
                 )}
-                {signingOut ? "Odhlašuji…" : "Log out"}
+                {signingOut ? t("signingOut") : t("logOut")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

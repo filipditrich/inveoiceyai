@@ -2,16 +2,20 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { auth } from "@/lib/auth/auth";
 import { safeNext } from "@/lib/auth/safe-next";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { SignInForm } from "./sign-in-form";
 
-export const metadata: Metadata = {
-  title: "Přihlášení",
-  description: "Přihlaste se do Invoicey přes Google nebo GitHub.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Auth.meta");
+  return {
+    title: t("title"),
+    description: t("description"),
+    robots: { index: false, follow: false },
+  };
+}
 
 type Provider = "google" | "github";
 
@@ -31,6 +35,7 @@ export default async function SignInPage({
   const session = await auth.api.getSession({ headers: await headers() });
   const { next } = await searchParams;
   const target = safeNext(next);
+  const t = await getTranslations("Auth");
 
   if (session) {
     redirect(target);
@@ -42,14 +47,13 @@ export default async function SignInPage({
     <AuthShell>
       <div>
         <p className="text-primary text-sm font-semibold uppercase tracking-wide">
-          Vítejte zpět
+          {t("eyebrow")}
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em]">
-          Přihlášení do Invoicey
+          {t("title")}
         </h1>
         <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
-          Pokračujte účtem Google nebo GitHub. Invoicey nevytváří ani neukládá
-          další heslo.
+          {t("subtitle")}
         </p>
 
         <div className="mt-8">
@@ -57,15 +61,13 @@ export default async function SignInPage({
             <SignInForm next={target} providers={providers} />
           ) : (
             <div className="border-destructive/25 bg-destructive/5 text-destructive rounded-2xl border p-4 text-sm leading-relaxed">
-              Není nastavený žádný poskytovatel přihlášení. Doplňte přístupové
-              údaje Google nebo GitHub a stránku načtěte znovu.
+              {t("noProviders")}
             </div>
           )}
         </div>
 
         <p className="text-muted-foreground mt-6 text-center text-xs leading-relaxed">
-          Pokračováním potvrzujete, že jste se seznámili s podmínkami používání
-          a zásadami ochrany soukromí.
+          {t("consent")}
         </p>
       </div>
     </AuthShell>

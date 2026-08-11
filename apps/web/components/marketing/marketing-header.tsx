@@ -1,18 +1,23 @@
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { BrandLogo } from "@/components/brand-logo";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Button } from "@/components/ui/button";
 
-const NAV_ITEMS = [
-  { href: "/#jak-to-funguje", label: "Jak to funguje" },
-  { href: "/#automatizace", label: "Automatizace" },
-  { href: "/#prehled", label: "Co umí" },
-  { href: "/#faq", label: "Otázky" },
-  { href: "/docs", label: "Dokumentace" },
-] as const;
+export async function MarketingHeader() {
+  const t = await getTranslations("Marketing.nav");
+  const tBrand = await getTranslations("App.brand");
 
-export function MarketingHeader() {
+  const navItems = [
+    { href: "/#jak-to-funguje", label: t("howItWorks") },
+    { href: "/#automatizace", label: t("automation") },
+    { href: "/#prehled", label: t("capabilities") },
+    { href: "/#faq", label: t("faq") },
+    { href: "/docs", label: t("docs") },
+  ];
+
   return (
     <header className="bg-background/85 sticky top-0 z-40 border-b backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6 lg:px-8">
@@ -30,16 +35,16 @@ export function MarketingHeader() {
               Invoicey
             </span>
             <span className="text-muted-foreground mt-1 block text-[0.65rem] tracking-wide">
-              Czech invoicing
+              {tBrand("tagline")}
             </span>
           </span>
         </Link>
 
         <nav
-          aria-label="Hlavní navigace"
+          aria-label={t("ariaLabel")}
           className="ml-auto hidden items-center gap-1 lg:flex"
         >
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -51,15 +56,16 @@ export function MarketingHeader() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2 lg:ml-2">
+          <LocaleSwitcher size="sm" className="hidden sm:flex" />
           <Button
             variant="ghost"
             className="hidden sm:inline-flex"
             render={<Link href="/sign-in" />}
           >
-            Přihlásit se
+            {t("signIn")}
           </Button>
           <Button render={<Link href="/dashboard" prefetch={false} />}>
-            Otevřít aplikaci
+            {t("openApp")}
             <ArrowRightIcon data-icon="inline-end" />
           </Button>
         </div>

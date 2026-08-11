@@ -8,6 +8,7 @@ import { clients } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 type Search = Promise<{ invalid?: string }>;
@@ -24,6 +25,8 @@ export default async function ClientEditPage({
   const { id } = await params;
   const { workspaceId } = await requireWorkspace();
   const sp = await searchParams;
+  const t = await getTranslations("Clients");
+  const tCommon = await getTranslations("Common");
 
   const hit = await db
     .select()
@@ -49,10 +52,12 @@ export default async function ClientEditPage({
           variant="outline"
           size="sm"
         >
-          ← Back
+          ← {tCommon("back")}
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Edit client</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {t("editTitle")}
+          </h1>
           <p className="text-muted-foreground">{snap.data.name}</p>
         </div>
       </div>
@@ -68,10 +73,12 @@ export default async function ClientEditPage({
           className="flex flex-wrap items-center gap-3"
         >
           <input name="id" type="hidden" value={id} />
-          <SubmitButton pendingLabel="Mazání…" variant="destructive">
-            Delete client
+          <SubmitButton pendingLabel={t("deleting")} variant="destructive">
+            {t("deleteClient")}
           </SubmitButton>
-          <span className="text-muted-foreground text-sm">Nenávratné.</span>
+          <span className="text-muted-foreground text-sm">
+            {t("deleteIrreversible")}
+          </span>
         </form>
       </div>
     </div>

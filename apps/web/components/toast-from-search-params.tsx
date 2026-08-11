@@ -1,34 +1,41 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Suspense, useEffect } from "react";
 import { toast } from "sonner";
 
-const TOAST_MESSAGES: Record<
-  string,
-  { type: "success" | "error"; text: string }
-> = {
-  issuer_saved: { type: "success", text: "Vystavovatel uložen" },
-  issuer_deleted: { type: "success", text: "Vystavovatel smazán" },
-  client_saved: { type: "success", text: "Client saved" },
-  client_deleted: { type: "success", text: "Client deleted" },
-  clients_merged: { type: "success", text: "Duplicitní klienti sloučeni" },
-  invoice_saved: { type: "success", text: "Draft saved" },
-  invoice_issued: { type: "success", text: "Invoice issued" },
-  invoice_paid: { type: "success", text: "Marked as paid" },
-  invoice_cancelled: { type: "success", text: "Invoice cancelled" },
-  invoice_deleted: { type: "success", text: "Draft deleted" },
-  invoice_duplicated: { type: "success", text: "Invoice duplicated" },
-  invoice_emailed: { type: "success", text: "Faktura odeslána e-mailem" },
-};
+const TOAST_KEYS = [
+  "issuer_saved",
+  "issuer_deleted",
+  "client_saved",
+  "client_deleted",
+  "invoice_saved",
+  "invoice_issued",
+  "invoice_paid",
+  "invoice_cancelled",
+  "invoice_deleted",
+  "invoice_duplicated",
+  "invoice_emailed",
+] as const;
+
+type ToastKey = (typeof TOAST_KEYS)[number];
+
+function isToastKey(value: string): value is ToastKey {
+  return (TOAST_KEYS as readonly string[]).includes(value);
+}
 
 function ToastFromSearchParamsInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const t = useTranslations("Toasts");
   const toastKey = searchParams.get("toast");
   const mergeGroups = searchParams.get("groups");
   const mergeRemoved = searchParams.get("removed");
   const mergeRepointed = searchParams.get("repointed");
+  const ok = searchParams.get("ok");
+  const skipped = searchParams.get("skipped");
+  const failed = searchParams.get("failed");
 
   useEffect(() => {
     if (!toastKey) {
@@ -36,27 +43,45 @@ function ToastFromSearchParamsInner() {
     }
     if (toastKey === "clients_merged") {
       toast.success(
-        `Sloučeno ${mergeGroups ?? "0"} skupin — odstraněno ${mergeRemoved ?? "0"} klientů, přesměrováno ${mergeRepointed ?? "0"} faktur`,
+        t("clients_merged", {
+          groups: mergeGroups ?? "0",
+          removed: mergeRemoved ?? "0",
+          repointed: mergeRepointed ?? "0",
+        }),
       );
-    } else {
-      const msg = TOAST_MESSAGES[toastKey];
-      if (msg) {
-        if (msg.type === "success") {
-          toast.success(msg.text);
-        } else {
-          toast.error(msg.text);
-        }
-      }
+    } else if (toastKey === "bulk_summary") {
+      toast.success(
+        t("bulk_summary", {
+          ok: String(Number(ok) || 0),
+          skipped: String(Number(skipped) || 0),
+          failed: String(Number(failed) || 0),
+        }),
+      );
+    } else if (isToastKey(toastKey)) {
+      toast.success(t(toastKey));
     }
     const url = new URL(window.location.href);
     url.searchParams.delete("toast");
     url.searchParams.delete("groups");
     url.searchParams.delete("removed");
     url.searchParams.delete("repointed");
+    url.searchParams.delete("ok");
+    url.searchParams.delete("skipped");
+    url.searchParams.delete("failed");
     router.replace(`${url.pathname}${url.search}${url.hash}`, {
       scroll: false,
     });
-  }, [toastKey, mergeGroups, mergeRemoved, mergeRepointed, router]);
+  }, [
+    toastKey,
+    mergeGroups,
+    mergeRemoved,
+    mergeRepointed,
+    ok,
+    skipped,
+    failed,
+    router,
+    t,
+  ]);
 
   return null;
 }

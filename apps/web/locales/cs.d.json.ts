@@ -2,13 +2,338 @@
 // See: https://next-intl.dev/docs/workflows/typescript#messages-arguments
 
 declare const messages: {
+  Common: {
+    save: "Uložit";
+    delete: "Smazat";
+    edit: "Upravit";
+    cancel: "Zrušit";
+    back: "Zpět";
+    loading: "Načítání…";
+    search: "Hledat";
+    emptyDash: "—";
+    all: "Vše";
+    apply: "Použít";
+    yes: "Ano";
+    no: "Ne";
+    create: "Vytvořit";
+    copy: "Kopírovat";
+    close: "Zavřít";
+    confirm: "Potvrdit";
+    filter: "Filtrovat";
+    previous: "předchozí";
+    next: "další";
+    locale: {
+      label: "Jazyk";
+      cs: "Čeština";
+      en: "English";
+    };
+  };
+  Errors: {
+    invalid: {
+      required_fields: "Vyber vystavovatele, odběratele a alespoň jednu položku.";
+      missing_parties: "Vystavovatel nebo odběratel nenalezen.";
+      validation: "Faktura neprošla validací schématu.";
+      missing_scheme: "Chybí číslovací schéma pro typ dokladu.";
+      already_issued: "Faktura už je vystavená.";
+      not_draft: "Lze upravit jen draft.";
+      cannot_issue: "Draft nelze vystavit.";
+      has_invoices: "Nelze smazat vystavovatele s existujícími fakturami.";
+      generic: "Chyba: {code}";
+    };
+  };
+  Toasts: {
+    issuer_saved: "Vystavovatel uložen";
+    issuer_deleted: "Vystavovatel smazán";
+    client_saved: "Klient uložen";
+    client_deleted: "Klient smazán";
+    invoice_saved: "Draft uložen";
+    invoice_issued: "Faktura vystavena";
+    invoice_paid: "Označeno jako zaplaceno";
+    invoice_cancelled: "Faktura stornována";
+    invoice_deleted: "Draft smazán";
+    invoice_duplicated: "Faktura duplikována";
+    invoice_emailed: "Faktura odeslána e-mailem";
+    bulk_summary: "Hromadná akce: {ok} ok, {skipped} přeskočeno, {failed} chyb.";
+    clients_merged: "Sloučeno {groups} skupin — odstraněno {removed} klientů, přesměrováno {repointed} faktur";
+  };
+  Status: {
+    invoice: {
+      draft: "Návrh";
+      unpaid: "Nezaplaceno";
+      overdue: "Po splatnosti";
+      paid: "Zaplaceno";
+      future: "Budoucí";
+      cancelled: "Stornováno";
+    };
+    invoiceCount: {
+      label: "{count, plural, one {# faktura} few {# faktury} other {# faktur}}";
+    };
+    email: {
+      sent: "Odesláno";
+      delivered: "Doručeno";
+      opened: "Otevřeno";
+      clicked: "Kliknuto";
+      bounced: "Nedoručeno";
+      complained: "Stížnost";
+    };
+  };
+  Marketing: {
+    meta: {
+      title: "České faktury bez zbytečného klikání";
+      description: "Invoicey propojuje českou fakturaci, PDF, ISDOC, SPAYD QR a ARES s moderním webem a AI automatizací.";
+      ogTitle: "Invoicey — české faktury bez zbytečného klikání";
+      ogDescription: "Jedna validovaná faktura. Web, PDF, ISDOC, QR i AI automatizace.";
+    };
+    nav: {
+      howItWorks: "Jak to funguje";
+      automation: "Automatizace";
+      capabilities: "Co umí";
+      faq: "Otázky";
+      docs: "Dokumentace";
+      signIn: "Přihlásit se";
+      openApp: "Otevřít aplikaci";
+      ariaLabel: "Hlavní navigace";
+    };
+    footer: {
+      description: "České faktury jako strukturovaná data. Vytvořte je ve webu, přes JSON nebo s pomocí AI a pokaždé získejte stejný validovaný výstup.";
+      docs: "Dokumentace";
+      privacy: "Soukromí";
+      terms: "Podmínky";
+      cookies: "Cookies";
+      cookieSettings: "Nastavení cookies";
+      copyright: "© {year} Invoicey · Neveřejná beta";
+      legalNav: "Právní informace";
+    };
+    hero: {
+      badge: "České faktury, připravené i pro AI";
+      titleLine1: "Fakturace, která začíná daty.";
+      titleLine2: "Ne formulářem.";
+      subtitle: "Vystavujte správné české doklady ve webu, z JSONu nebo přes AI. Invoicey je pokaždé ověří a vytvoří stejné PDF, ISDOC i platební QR.";
+      ctaPrimary: "Otevřít Invoicey";
+      ctaSecondary: "Jak to funguje";
+      noPassword: "Bez hesla";
+      czechUi: "České rozhraní";
+      betaAccess: "Beta přístup";
+    };
+    trust: {
+      pdfIsdoc: "PDF + ISDOC";
+      spaydQr: "SPAYD QR platba";
+      aresLookup: "ARES podle IČO";
+      multiIssuer: "Více dodavatelů";
+      ariaLabel: "Klíčové formáty";
+    };
+    workflow: {
+      eyebrow: "Od zadání po zaplacení";
+      title: "Méně ruční práce. Pořád máte kontrolu.";
+      description: "Invoicey drží celý životní cyklus dokladu pohromadě a citlivé kroky nechává ve vašich rukou.";
+      step1Title: "Připravte údaje";
+      step1Description: "Vyberte dodavatele, dohledejte klienta podle IČO a doplňte položky. Nebo pošlete stejná data jako JSON či pokyn agentovi.";
+      step2Title: "Ověřte a vystavte";
+      step2Description: "Jedno schéma zkontroluje povinné údaje, DPH i součty. Teprve potom vznikne neměnný doklad, PDF, ISDOC a QR.";
+      step3Title: "Odešlete a sledujte";
+      step3Description: "Pošlete fakturu klientovi, sledujte doručení a splatnost a označte úhradu ve stejném přehledu.";
+    };
+    capabilities: {
+      eyebrow: "České účetní reálie";
+      title: "To podstatné je součást základu.";
+      description: "Ne další vrstva kolem generátoru PDF. Invoicey staví na údajích, které český doklad skutečně potřebuje.";
+      docsTitle: "České doklady bez slepých míst";
+      docsDescription: "Faktury, zálohy, proformy i dobropisy. DPH, DUZP, symboly, QR platba a ISDOC jsou součást stejného výstupu.";
+      issuersTitle: "Každá firma má vlastní pravidla";
+      issuersDescription: "Bankovní účet, číselná řada, plátcovství DPH i vizuální prvky zůstávají u správného dodavatele.";
+      emailTitle: "Od vystavení po úhradu";
+      emailDescription: "Odešlete PDF a ISDOC, sledujte doručení, splatnost a úhradu bez přepisování stavu mezi několika nástroji.";
+      historyTitle: "Historie zůstává historií";
+      historyDescription: "Vydané doklady jsou neměnné. Starší PDF a ISDOC můžete importovat a zachovat jejich původ i přesnou podobu.";
+      schemaTitle: "Data jsou první, PDF až druhé";
+      schemaDescription: "Jedno validační schéma pohání web, JSON i nástroje pro agenty. Výsledek se nemění podle toho, odkud faktura vznikla.";
+      securityTitle: "Oddělené pracovní prostory";
+      securityDescription: "OAuth přihlášení přes Google nebo GitHub a kontrola členství pracovního prostoru na každé serverové hranici.";
+    };
+    automation: {
+      badge: "Automatizace · beta";
+      title: "Agent připraví návrh. Pravidla rozhodnou, co projde.";
+      description: "Slack a MCP používají stejné nástroje jako web. AI může dohledat firmu, sestavit návrh a připravit soubory, ale nevymýšlí chybějící povinné údaje a potvrzení citlivých akcí zůstává na vás.";
+      item1: "ARES dohledání podle názvu nebo IČO";
+      item2: "Validovaný návrh podle InvoiceSchema";
+      item3: "PDF a ISDOC ze stejného renderovacího jádra";
+      item4: "Potvrzení před vydáním, odesláním nebo úhradou";
+      chatTitle: "Invoicey v Slacku";
+      chatSubtitle: "Strukturovaný návrh, ne volný text";
+      chatUserMessage: "@Invoicey vystav měsíční fakturu pro Studio Sever, 35 000 Kč bez DPH, splatnost 14 dní.";
+      chatReplyTitle: "Návrh je připravený";
+      chatClient: "Studio Sever · ARES ověřeno";
+      chatAmount: "35 000 Kč";
+      chatOutput: "PDF + ISDOC + SPAYD";
+      chatAction: "Zkontrolovat a vystavit";
+      chatDisclaimer: "Vydání faktury vždy vyžaduje potvrzení";
+    };
+    featurePanels: {
+      multiIssuerEyebrow: "Více dodavatelů";
+      multiIssuerTitle: "Živnost a s.r.o. bez přepínacího chaosu.";
+      multiIssuerDescription: "Vyberete, kdo fakturu vystavuje, a Invoicey použije jeho účet, číselnou řadu, DPH režim a vizuální prvky. Sdílený klient zůstává jeden.";
+      multiIssuerItem1: "Vlastní číselné řady";
+      multiIssuerItem2: "Bankovní údaje a QR";
+      multiIssuerItem3: "Logo, podpis a razítko";
+      importEyebrow: "Historický import";
+      importTitle: "Začněte dnes, historii nechte beze změny.";
+      importDescription: "Nahrajte starší PDF nebo ISDOC hromadně. Invoicey zachová původní soubory, označí jejich zdroj a nedovolí přepsat vydaný archivní doklad.";
+      importItem1: "PDF s vloženým ISDOC";
+      importItem2: "Archivní režim bez ISDOC";
+      importItem3: "Původ dokladu a neměnné soubory";
+    };
+    faq: {
+      eyebrow: "Časté otázky";
+      title: "Než otevřete první fakturu.";
+      description: "Stručně a bez produktové omáčky.";
+      q1: "Je Invoicey určené jen pro plátce DPH?";
+      a1: "Ne. Podporuje plátce i neplátce, běžný režim DPH, přenesenou daňovou povinnost a další údaje českých dokladů.";
+      q2: "Můžu fakturovat z více firem nebo živností?";
+      a2: "Ano. Každý dodavatel má vlastní banku, číselné řady, DPH nastavení, logo i kontaktní údaje. Klienti přitom zůstávají sdílení v jednom pracovním prostoru.";
+      q3: "Co znamená AI fakturace?";
+      a3: "Agent neskládá PDF od oka. Připraví strukturovaný návrh, který projde stejnou validací jako faktura vytvořená ve webu. Vydání nebo odeslání citlivého dokladu zůstává potvrzovaná akce.";
+      q4: "Lze přenést staré faktury?";
+      a4: "Ano. Hromadný import přijímá PDF a ISDOC. Pokud PDF obsahuje vložený ISDOC, Invoicey načte i strukturovaná data; jinak zachová originál jako archivní doklad.";
+      q5: "Je Invoicey účetní nebo daňové poradenství?";
+      a5: "Ne. Invoicey pomáhá připravit a spravovat doklady, ale správnost konkrétního obchodního a daňového případu vždy odpovídá uživateli a jeho účetnímu či daňovému poradci.";
+    };
+    cta: {
+      eyebrow: "Připraveno k vystavení";
+      title: "Dejte fakturám jedno místo a jeden zdroj pravdy.";
+      description: "Přihlaste se přes Google nebo GitHub. Heslo u Invoicey vytvářet nemusíte.";
+      button: "Otevřít Invoicey";
+    };
+    legal: {
+      terms: {
+        metaTitle: "Podmínky používání";
+        metaDescription: "Podmínky používání Invoicey v průběhu neveřejné beta verze.";
+        eyebrow: "Právní informace";
+        title: "Podmínky používání";
+        description: "Pravidla pro používání aktuální beta verze Invoicey a rozdělení odpovědnosti mezi službu a uživatele.";
+        betaNotice: "Neveřejná beta verze. Tyto podmínky jsou pracovní verzí pro omezený beta provoz. Identifikace provozovatele, placené tarify, úroveň podpory a komerční podmínky budou doplněny před veřejným spuštěním.";
+        s1Title: "1. Služba";
+        s1Body: "Invoicey je nástroj pro přípravu, správu, import, vykreslení a odesílání fakturačních dokladů. Některé funkce mohou být dostupné jako beta, experiment nebo pouze vybraným uživatelům. Aktuální rozsah služby se může během beta provozu měnit.";
+        s2Title: "2. Účet a přístup";
+        s2Body: "Přihlášení probíhá přes podporovaného OAuth poskytovatele, aktuálně Google nebo GitHub. Uživatel odpovídá za zabezpečení tohoto účtu a za činnost osob, které pozve do svého pracovního prostoru. Přístup není dovoleno sdílet způsobem, který obchází oprávnění nebo technická omezení služby.";
+        s3Title: "3. Odpovědnost za doklady";
+        s3Body: "Invoicey provádí technické a schématické kontroly, ale neposkytuje účetní, daňové ani právní poradenství. Uživatel odpovídá za pravdivost vstupních údajů, volbu daňového režimu, oprávnění doklad vystavit a jeho soulad s konkrétním obchodním případem. Před vydáním má uživatel doklad zkontrolovat.";
+        s4Title: "4. Agentní a automatizované funkce";
+        s4Body: "AI může připravit návrh nebo navrhnout další krok. Výstup může být neúplný nebo chybný a musí projít stejnou validací a lidskou kontrolou jako ručně zadané údaje. Uživatel nesmí automatizaci využít k podvodu, vydávání dokladů bez oprávnění nebo jinému protiprávnímu jednání.";
+        s5Title: "5. Data a soubory";
+        s5Body: "Uživatel si ponechává práva ke svým údajům a souborům a uděluje Invoicey oprávnění zpracovat je pouze pro poskytnutí služby. Uživatel musí mít právo zpracovávat osobní a obchodní údaje, které do služby vloží. Důležité doklady je vhodné uchovávat také ve vlastním archivu.";
+        s6Title: "6. Dostupnost a změny";
+        s6Body: "Beta verze je poskytována bez záruky nepřetržité dostupnosti. Služba může být změněna, dočasně omezena nebo ukončena, zejména kvůli údržbě, bezpečnosti nebo změnám dodavatelů. Pokud to okolnosti dovolí, významnou změnu oznámíme přiměřeným způsobem.";
+        s7Title: "7. Zakázané použití";
+        s7Body: "Službu nelze používat k porušování právních předpisů, zasílání spamu, neoprávněnému přístupu, obcházení zabezpečení, šíření škodlivého kódu nebo vytěžování služby způsobem, který ji nepřiměřeně zatěžuje.";
+        s8Title: "8. Omezení odpovědnosti";
+        s8Body: "V rozsahu dovoleném právem neodpovídá beta služba za nepřímou škodu, ušlý zisk ani důsledky rozhodnutí založených na nezkontrolovaném automatizovaném výstupu. Tím nejsou dotčena práva, která podle zákona nelze smluvně omezit.";
+        s9Title: "9. Změny podmínek";
+        s9Body: "Podmínky mohou být upraveny spolu s vývojem služby. Nová verze bude zveřejněna zde s datem aktualizace. Pokračování v používání po účinnosti změny znamená přijetí aktualizovaných podmínek, pokud právní předpis nevyžaduje jiný postup.";
+      };
+      privacy: {
+        metaTitle: "Ochrana soukromí";
+        metaDescription: "Jak Invoicey pracuje s osobními údaji v průběhu neveřejné beta verze.";
+        eyebrow: "Právní informace";
+        title: "Ochrana soukromí";
+        description: "Přehled údajů, které Invoicey potřebuje k provozu služby, proč je zpracovává a jaké máte možnosti.";
+        betaNotice: "Neveřejná beta verze. Invoicey je nyní poskytováno omezenému okruhu uživatelů. Úplné identifikační a kontaktní údaje provozovatele budou doplněny před veřejným komerčním spuštěním. Do té doby použijte pro požadavky stejný kontaktní kanál, kterým jste získali přístup.";
+        s1Title: "1. Jaké údaje zpracováváme";
+        s1Intro: "Podle toho, jak Invoicey používáte, může služba zpracovávat:";
+        s1Items: "jméno, e-mail a profilový obrázek z Google nebo GitHub účtu;členství a roli v pracovním prostoru;údaje dodavatelů, klientů a faktur, včetně kontaktních údajů, bankovních údajů, IČO, DIČ a položek dokladů;nahrané logo, podpis, razítko a archivní fakturační soubory;záznamy o odeslání, doručení a stavu fakturačních e-mailů;technické bezpečnostní záznamy a, pokud s tím souhlasíte, anonymní souhrnné měření návštěvnosti.";
+        s2Title: "2. Proč údaje používáme";
+        s2Intro: "Údaje používáme pouze v rozsahu potřebném pro:";
+        s2Items: "přihlášení, správu účtu a oddělení pracovních prostorů;vytvoření, uložení, vykreslení, import a odeslání faktur;ochranu služby, diagnostiku chyb a prevenci zneužití;splnění zákonných povinností spojených s účetními doklady;měření výkonu a používání veřejného webu, pouze pokud udělíte souhlas s kategorií „Anonymní měření“.";
+        s3Title: "3. Právní základ";
+        s3Body: "Provoz účtu a fakturačních funkcí je založen na plnění služby, o kterou uživatel požádal. Bezpečnostní a nezbytné provozní záznamy zpracováváme na základě oprávněného zájmu na bezpečném provozu. Volitelné měření je založeno na souhlasu, který lze kdykoliv změnit.";
+        s4Title: "4. Dodavatelé služby";
+        s4Body: "Invoicey používá specializované dodavatele infrastruktury. Podle zapnutých funkcí jde zejména o Vercel (hosting a volitelné měření), Neon (databáze), UploadThing (soubory), Resend (transakční e-mail), Google/GitHub (OAuth přihlášení) a Slack/Vercel Connect pro agentní integraci. Tito dodavatelé zpracovávají údaje jen pro zajištění dané funkce a podle svých smluvních a bezpečnostních podmínek.";
+        s5Title: "5. Doba uchování";
+        s5Body: "Účetní a vystavené doklady mohou podléhat zákonným archivačním povinnostem a nejsou automaticky přepisovány při změně živých údajů. Ostatní údaje uchováváme po dobu aktivního účtu a následně jen po dobu nezbytnou k ochraně služby, řešení nároků nebo splnění právní povinnosti. Konkrétní retenční lhůty budou před veřejným spuštěním doplněny do této stránky.";
+        s6Title: "6. Vaše práva";
+        s6Body: "V mezích GDPR můžete požádat o přístup, opravu, výmaz, omezení zpracování, přenositelnost nebo vznést námitku. Souhlas s měřením lze odvolat okamžitě přes nastavení cookies. Některé údaje z účetních dokladů nemusí být možné vymazat, pokud jejich uchování vyžaduje zákon.";
+        s7Title: "7. Zabezpečení a změny";
+        s7Body: "Přístup do aplikace používá OAuth bez vlastního hesla u Invoicey. Pracovní data jsou vždy dotazována v kontextu ověřeného členství v pracovním prostoru. Žádné internetové službě však nelze slíbit absolutní bezpečnost. Tuto stránku upravíme při změně významného způsobu zpracování a zveřejníme nové datum aktualizace.";
+      };
+      cookies: {
+        metaTitle: "Používání cookies";
+        metaDescription: "Jaké cookies a lokální úložiště Invoicey používá a jak změnit volbu.";
+        eyebrow: "Právní informace";
+        title: "Používání cookies";
+        description: "Dvě srozumitelné kategorie. Nezbytné technologie pro provoz a volitelné anonymní měření. Žádné reklamní cookies.";
+        changeChoiceTitle: "Chcete změnit svou volbu?";
+        changeChoiceDescription: "Nastavení otevřete kdykoliv. Odvolání analytického souhlasu se projeví bez dalšího sledování.";
+        changeChoiceButton: "Otevřít nastavení cookies";
+        s1Title: "1. Nezbytné technologie";
+        s1Body: "Tyto technologie nelze vypnout, protože zajišťují přihlášení, zabezpečení relace, oddělení pracovního prostoru a zapamatování vaší volby soukromí. Patří sem zejména bezpečné cookies Better Auth a záznam c15t-consent, který uchovává vaši volbu nejdéle jeden rok. Rozhraní může v lokálním úložišti ukládat také čistě funkční preference, například motiv vzhledu.";
+        s2Title: "2. Anonymní měření";
+        s2Body: "Po vašem souhlasu načteme Vercel Analytics. Poskytuje souhrnné informace o návštěvnosti a výkonu veřejných stránek. Nepoužíváme je k reklamnímu profilování ani je nekombinujeme s fakturačním obsahem. Bez souhlasu se analytická komponenta nenačte.";
+        s3Title: "3. Co nepoužíváme";
+        s3Body: "Invoicey v současnosti nepoužívá reklamní sítě, remarketingové pixely ani cookies pro sledování napříč weby. Pokud by se to změnilo, tato stránka i volby souhlasu budou aktualizovány před jejich zapnutím.";
+        s4Title: "4. Změna nebo odvolání souhlasu";
+        s4Body: "Nastavení můžete otevřít tlačítkem výše nebo odkazem „Nastavení cookies“ v patičce. Volba „Pouze nezbytné“ odmítne nebo odvolá měření. Vymazání dat webu v prohlížeči odstraní i uloženou volbu a při příští návštěvě se zeptáme znovu.";
+      };
+    };
+  };
+  Auth: {
+    meta: {
+      title: "Přihlášení";
+      description: "Přihlaste se do Invoicey přes Google nebo GitHub.";
+    };
+    eyebrow: "Vítejte zpět";
+    title: "Přihlášení do Invoicey";
+    subtitle: "Pokračujte účtem Google nebo GitHub. Invoicey nevytváří ani neukládá další heslo.";
+    noProviders: "Není nastavený žádný poskytovatel přihlášení. Doplňte přístupové údaje Google nebo GitHub a stránku načtěte znovu.";
+    continueWith: "Pokračovat přes {provider}";
+    consent: "Pokračováním potvrzujete, že jste se seznámili s podmínkami používání a zásadami ochrany soukromí.";
+    shell: {
+      tagline: "Česká fakturace";
+      eyebrow: "České faktury, jedno schéma";
+      title: "Od údajů k hotovému dokladu bez zbytečných odboček.";
+      description: "Web, PDF, ISDOC, SPAYD QR i agentní nástroje pracují se stejnou validovanou fakturou.";
+      oauthNote: "OAuth přihlášení · žádné další heslo";
+      backHome: "Zpět na Invoicey";
+    };
+    redirecting: "Přesměrovávám…";
+    failed: "Přihlášení se nepodařilo. Zkuste to prosím znovu.";
+    continueGoogle: "Pokračovat přes Google";
+    continueGitHub: "Pokračovat přes GitHub";
+  };
+  Onboarding: {
+    meta: {
+      title: "Nastavení pracovního prostoru";
+    };
+    title: "Dokončete pracovní prostor";
+    subtitle: "Účet {email} je přihlášený, ale nemá pracovní prostor. Obvykle jej vytvoříme automaticky; tímto krokem dokončíte přerušené nastavení.";
+    benefit1: "Soukromý prostor pro vaše faktury";
+    benefit2: "Role vlastníka pracovního prostoru";
+    benefit3: "Možnost přidat první dodavatelskou firmu";
+    submit: "Vytvořit můj pracovní prostor";
+  };
+  Invite: {
+    title: "Pozvánka do workspace";
+    description: "Přijměte pozvánku pro přístup k fakturám tohoto workspace.";
+    accept: "Přijmout pozvánku";
+    backToApp: "Zpět do aplikace";
+  };
+  NotFound: {
+    code: "404";
+    title: "Tahle stránka na faktuře není.";
+    description: "Odkaz mohl zastarat nebo stránka změnila adresu. Veřejný přehled produktu najdete na úvodní stránce.";
+    backButton: "Zpět na Invoicey";
+  };
+  AppError: {
+    title: "Něco se pokazilo";
+    description: "Nastala neočekávaná chyba. Zkuste stránku načíst znovu.";
+    retry: "Zkusit znovu";
+    backToDashboard: "Zpět na přehled";
+  };
   App: {
     meta: {
       title: "Invoicey";
-      description: "Czech-first invoicing — schema-first data, PDF + ISDOC + SPAYD QR";
+      description: "Česká fakturace — schema-first data, PDF + ISDOC + SPAYD QR";
     };
     brand: {
-      tagline: "Czech invoicing";
+      tagline: "Česká fakturace";
     };
     nav: {
       group: "Navigace";
@@ -58,8 +383,390 @@ declare const messages: {
       appearance: {
         title: "Vzhled";
         description: "Světlý, tmavý, nebo podle systému. Preference se ukládá v tomto prohlížeči.";
+        languageDescription: "Jazyk rozhraní pro tuto aplikaci. Dokumentace zůstává anglicky.";
       };
     };
+    theme: {
+      label: "Vzhled";
+      light: "Světlý";
+      dark: "Tmavý";
+      system: "Systém";
+    };
+    userMenu: {
+      settings: "Nastavení";
+      logOut: "Odhlásit se";
+      signingOut: "Odhlašuji…";
+    };
+    search: {
+      label: "Hledat";
+      placeholder: "Zadejte hledaný výraz…";
+    };
+  };
+  Dashboard: {
+    title: "Přehled";
+    subtitle: "Stavy faktur a obrat za posledních 12 měsíců.";
+    goToInvoices: "Přejít na faktury";
+    newInvoice: "Nová faktura";
+    empty: {
+      title: "Vítejte v Invoicey";
+      description: "Vytvořte prvního dodavatele (vaši firmu) a začněte vystavovat faktury s ARES ověřením, číslováním a PDF / ISDOC exportem.";
+      cta: "Vytvořit prvního vystavovatele";
+    };
+    issuerFilter: {
+      label: "Dodavatel";
+      all: "Všichni dodavatelé";
+    };
+    recent: {
+      title: "Nedávné faktury";
+      client: "Klient";
+      viewAll: "Zobrazit vše";
+      issueDate: "Vystaveno";
+      dueDate: "Splatnost";
+      amount: "Částka";
+      empty: "Zatím žádné faktury.";
+      createFirst: "Vytvořte první fakturu";
+      number: "Číslo";
+      issued: "Vystaveno";
+      due: "Splatnost";
+      total: "Celkem";
+      status: "Stav";
+      draft: "NÁVRH";
+    };
+    balance: {
+      issued12m: "Vystavené faktury (12 měsíců)";
+      outstanding: "Neuhrazeno (včetně po splatnosti a budoucích)";
+    };
+    chart: {
+      title: "Vystaveno vs zaplaceno";
+      issued: "Vystaveno";
+      paid: "Zaplaceno";
+      subtitle: "Posledních 12 měsíců (částka, CZK)";
+    };
+  };
+  Invoices: {
+    list: {
+      title: "Vystavené faktury";
+      subtitle: "Stavy, filtry a akce nad fakturami.";
+      newButton: "+ Vystavit fakturu";
+      importButton: "Import";
+      fromJsonButton: "Z JSON";
+      empty: "Žádné faktury.";
+      createFirst: "Vytvořit první fakturu";
+      page: "Strana {current} / {total} ({records})";
+      records: "{count, plural, one {# záznam} few {# záznamy} other {# záznamů}}";
+      selectAll: "Vybrat vše";
+      number: "Číslo";
+      issued: "Vystaveno";
+      due: "Splatnost";
+      client: "Klient";
+      total: "Celkem";
+      status: "Stav";
+      actions: "Akce";
+      detail: "Detail";
+      issue: "Vystavit";
+      edit: "Upravit";
+      pdf: "PDF";
+      duplicate: "Dup";
+      markPaid: "Zaplaceno";
+      cancel: "Storno";
+      unmarkPaid: "Zrušit zapl.";
+      delete: "Smazat";
+      draft: "NÁVRH";
+      archive: "archiv";
+      selected: "{count} vybraných";
+      selectedDrafts: "{count, plural, one {# draft} few {# drafty} other {# draftů}}";
+      bulkIssue: "Vystavit";
+      bulkPaid: "Zaplaceno";
+      bulkUnpaid: "Zrušit zaplacení";
+      bulkCancel: "Storno";
+      bulkDelete: "Smazat drafty";
+    };
+    filter: {
+      status: "Stav";
+      issuer: "Dodavatel";
+      client: "Odběratel";
+      from: "Od";
+      to: "Do";
+      search: "Hledat";
+      searchPlaceholder: "číslo, klient…";
+      sort: "Řazení";
+      sortDateDesc: "Datum ↓";
+      sortDateAsc: "Datum ↑";
+      submit: "Filtrovat";
+    };
+    detail: {
+      issueDate: "Datum vystavení";
+      dueDate: "Splatnost";
+      duzp: "DUZP";
+      currency: "Měna";
+      currencyNote: "(MVP pouze CZK)";
+      total: "Celkem";
+      paidAt: "Zaplaceno";
+      archiveNote: "Archivní import — položky nejsou k dispozici. Stáhněte originální PDF.";
+      invalidPayload: "Neplatný payload v DB.";
+      backToList: "← Zpět na seznam";
+      archive: "Archiv";
+      import: "Import";
+      issueButton: "Vystavit";
+      editButton: "Upravit";
+      duplicateButton: "Duplikovat";
+      markPaidButton: "Označit zaplaceno";
+      unmarkPaidButton: "Zrušit zaplaceno";
+      cancelButton: "Stornovat";
+      deleteButton: "Smazat";
+      itemsHeader: {
+        position: "#";
+        description: "Popis";
+        quantity: "Množství";
+        price: "Cena";
+        total: "Celkem";
+      };
+    };
+    builder: {
+      title: "Nová faktura";
+      subtitle: "Draft → Issue. Náhled PDF vpravo.";
+      editTitle: "Úprava draftu";
+      issuer: "Vystavovatel";
+      issuerDescription: "Tvůj podnik (dodavatel na faktuře).";
+      client: "Odběratel";
+      clientDescription: "Odběratel z registru klientů (ARES).";
+      docType: "Typ dokladu";
+      docTypeDescription: "Typ daňového / platebního dokladu.";
+      docTypeInvoice: "Faktura";
+      docTypeProforma: "Proforma";
+      docTypeAdvance: "Záloha";
+      docTypeCreditNote: "Dobropis";
+      numberPreview: "Náhled čísla";
+      numberPreviewDescription: "Číslo se přiřadí až při vystavení.";
+      issueDate: "Datum vystavení";
+      dueDate: "Splatnost";
+      duzp: "DUZP";
+      duzpDescription: "Datum uskutečnění zdanitelného plnění";
+      currency: "Měna";
+      currencyDescription: "MVP pouze CZK — měnu nelze změnit.";
+      vatMode: "Režim DPH";
+      vatModeDescription: "Běžný režim, přenesení DPH, nebo OSS (advanced).";
+      vatRegular: "Běžný";
+      vatReverseCharge: "Přenesení DPH";
+      vatOss: "OSS";
+      vatAdvanced: "Advanced (OSS)";
+      suppliesAbroad: "Dodání do zahraničí";
+      suppliesAbroadDescription: "Pro B2B dodání zboží/služeb do zahraničí.";
+      suppliesNone: "Ne";
+      suppliesEu: "EU";
+      suppliesNonEu: "Mimo EU";
+      legalNote: "Právní doložka";
+      legalNoteDescription: "Text doložky na faktuře (např. Daň odvede zákazník).";
+      legalNotePlaceholder: "Daň odvede zákazník";
+      reverseChargeCode: "Kód přenesení DPH";
+      reverseChargeCodeDescription: "Kód režimu přenesení daňové povinnosti.";
+      correctedInvoice: "Opravovaná faktura";
+      correctedInvoiceDescription: "Číslo původní faktury, kterou opravuješ.";
+      itemsTitle: "Položky";
+      itemsDescription: "Ceny zadávej bez DPH; celkem se počítá automaticky.";
+      addRow: "Přidat řádek";
+      descriptionPlaceholder: "Popis služby / zboží";
+      quantityPlaceholder: "Množství";
+      unitPlaceholder: "ks / hod";
+      pricePlaceholder: "Cena bez DPH";
+      vatPlaceholder: "DPH %";
+      totalLine: "Celkem: {total} (DPH {vat})";
+      notes: "Poznámka";
+      notesDescription: "Volitelný text na PDF pod položkami.";
+      notesPlaceholder: "Např. děkujeme za spolupráci";
+      saveDraft: "Uložit draft";
+      savingDraft: "Ukládám…";
+      issue: "Vystavit";
+      issuing: "Vystavuji…";
+      modeEdit: "Úprava draftu";
+      modeCreate: "Nová faktura";
+      missingParties: "Nejdřív založ {entities}.";
+      missingIssuer: "vystavovatele";
+      missingClient: "odběratele";
+      missingAnd: " a ";
+      missingScheme: "(chybí schéma)";
+      previewError: "Náhled se nepodařilo vytvořit";
+      formErrors: "Oprav chyby ve formuláři";
+      formFallback: "Vyplň povinná pole a alespoň jednu validní položku.";
+    };
+    import: {
+      title: "Import historických faktur";
+      subtitle: "Nahrajte PDF. Pokud obsahují ISDOC (~80 %), naparsujeme je celé. Bez ISDOC uložíme originál jako archiv a doplníte hlavičku ručně.";
+      backLink: "← Faktury";
+    };
+    fromJson: {
+      eyebrow: "Demo · Fáze 3";
+      title: "Faktura z JSON";
+      subtitle: "Vložte InvoiceSchema JSON a vyrenderujte PDF. Obsahuje předvolby s markdown platebními instrukcemi.";
+      backToInvoices: "← Zpět na faktury";
+      jsonLabel: "Invoice JSON";
+      loadPreset: "Načíst předvolbu";
+      renderPdf: "Vyrenderovat PDF";
+      rendering: "Renderuji…";
+      resetSample: "Obnovit ukázku";
+      emptyPreview: "Spusťte „Vyrenderovat PDF“ pro náhled…";
+      parseError: "JSON se nepodařilo zpracovat: opravte syntaxi a zkuste znovu.";
+    };
+    email: {
+      send: "Odeslat e-mailem";
+      subject: "Předmět";
+      to: "Komu";
+      coverText: "Průvodní text";
+      attachIsdoc: "Přiložit ISDOC";
+      from: "Od";
+      replyTo: "Odpovědět na";
+    };
+  };
+  Clients: {
+    title: "Klienti";
+    subtitle: "Odběratelé — ARES dohledání nebo ruční zadání.";
+    newButton: "Nový klient";
+    empty: "Zatím žádní klienti. Přidejte odběratele přes ARES nebo ručně.";
+    createFirst: "Vytvořit prvního klienta";
+    table: {
+      name: "Jméno";
+      ico: "IČO";
+      city: "Město";
+      source: "Zdroj";
+      actions: "Akce";
+    };
+    newTitle: "Nový klient";
+    newSubtitle: "Zadej IČO a Lookup (ARES), nebo vyplň ručně.";
+    editTitle: "Upravit klienta";
+    editSubtitle: "Aktualizujte údaje odběratele.";
+    mergeDuplicates: "Sloučit duplicity";
+    deleteClient: "Smazat klienta";
+    deleteIrreversible: "Nenávratné.";
+    deleting: "Mazání…";
+  };
+  Issuers: {
+    title: "Dodavatelé";
+    subtitle: "Vaše firmy — ARES, banka, DPH, číslování, logo.";
+    newButton: "Nový vystavovatel";
+    empty: "Zatím žádní dodavatelé. Přidejte firmu a začněte fakturovat.";
+    createFirst: "Vytvořit prvního vystavovatele";
+    table: {
+      name: "Název";
+      ico: "IČO";
+      dic: "DIČ";
+      vat: "DPH";
+      vatPayer: "Plátce";
+      vatNonPayer: "Neplátce";
+      actions: "Akce";
+    };
+    newTitle: "Nový vystavovatel";
+    newSubtitle: "IČO přes ARES, kontaktní e-mail a banka. Ostatní nastavení doplníte v sekcích po vytvoření.";
+    editTitle: "Upravit dodavatele";
+    editSubtitle: "Aktualizujte firemní údaje, banku a číslování.";
+  };
+  Settings: {
+    security: {
+      trustOk: "Zařízení bylo označeno jako důvěryhodné.";
+      trustInvalid: "Odkaz pro důvěru zařízení je neplatný nebo vypršel.";
+      linkedAccounts: {
+        title: "Způsoby přihlášení";
+        description: "Google a GitHub. Poslední poskytovatel nelze odpojit.";
+        linked: "Propojeno";
+        notLinked: "Nepropojeno";
+        link: "Propojit";
+        unlink: "Odpojit";
+        unlinkLastError: "Nelze odpojit poslední způsob přihlášení";
+        unlinkFailed: "Odpojení selhalo";
+        loadFailed: "Nepodařilo se načíst účty";
+        unlinkSuccess: "Poskytovatel odpojen";
+      };
+      sessions: {
+        title: "Aktivní relace";
+        description: "IP, prohlížeč a možnost odvolat přístup.";
+        revokeOthers: "Odvolat ostatní";
+        revoke: "Odvolat";
+        empty: "Žádné relace.";
+        unknownDevice: "Neznámé zařízení";
+        unknownIp: "IP neznámá";
+        currentSession: "tato relace";
+        revokeFailed: "Odvolání selhalo";
+        revokeSuccess: "Relace odvolána";
+        revokeOthersSuccess: "Ostatní relace odvolány";
+        revokeAfterLink: "Ostatní relace odvolány po propojení účtu";
+        loadFailed: "Nepodařilo se načíst relace";
+      };
+      trustedDevices: {
+        title: "Důvěryhodná zařízení";
+        description: "Soft trust — nové zařízení dostane e-mail, přihlášení vždy projde.";
+        empty: "Zatím žádná důvěryhodná zařízení.";
+        revoke: "Odvolat";
+        revokeFailed: "Odvolání zařízení selhalo";
+        revokeSuccess: "Zařízení odvoláno";
+        lastSeen: "naposledy";
+      };
+      audit: {
+        title: "Nedávná aktivita";
+        description: "Audit přihlášení a bezpečnostních akcí.";
+        empty: "Zatím žádné záznamy.";
+      };
+    };
+    members: {
+      title: "Členové workspace";
+      description: "Role owner / admin / member.";
+      remove: "Odebrat";
+      removeFailed: "Odebrání selhalo";
+      removeSuccess: "Člen odebrán";
+      roleUpdateFailed: "Změna role selhala";
+      roleUpdateSuccess: "Role aktualizována";
+      loadFailed: "Členové se nenačetli";
+      invite: {
+        title: "Pozvat";
+        description: "E-mail pozvánky + zkopírovatelný odkaz jako záloha.";
+        emailPlaceholder: "email@example.com";
+        submit: "Pozvat";
+        failed: "Pozvánka selhala";
+        success: "Pozvánka vytvořena";
+        copyLink: "Kopírovat odkaz";
+        linkCopied: "Odkaz zkopírován";
+      };
+    };
+    apiKeys: {
+      title: "API klíče";
+      description: "Osobní tokeny pro remote MCP a Eve HTTP. Env ops klíč zůstává jako záloha.";
+      namePlaceholder: "Název klíče";
+      create: "Vytvořit";
+      createFailed: "Vytvoření selhalo";
+      createSuccess: "Klíč vytvořen — zkopírujte ho teď";
+      revoke: "Odvolat";
+      revokeFailed: "Odvolání selhalo";
+      revokeSuccess: "Klíč odvolán";
+      empty: "Žádné klíče.";
+      noName: "bez názvu";
+      newKeyTitle: "Nový klíč (zobrazí se jen teď)";
+      copy: "Kopírovat";
+      copied: "Zkopírováno";
+      loadFailed: "Klíče se nenačetly";
+    };
+  };
+  Consent: {
+    banner: {
+      title: "Vaše soukromí, vaše volba";
+      description: "Nezbytné cookies drží Invoicey v chodu. Anonymní měření nám můžete povolit zvlášť. Žádné reklamní cookies.";
+      details: "Podrobnosti";
+      customize: "Nastavení";
+      rejectAll: "Pouze nezbytné";
+      acceptAnalytics: "Povolit analytiku";
+    };
+    dialog: {
+      title: "Nastavení soukromí";
+      description: "Vyberte kategorie, se kterými souhlasíte. Nezbytné nelze vypnout.";
+      necessary: "Nezbytné";
+      necessaryDescription: "Technologie nutné ke správnému fungování aplikace a zabezpečení.";
+      measurement: "Měření";
+      measurementDescription: "Pomáhají pochopení návštěvnosti a výkonu služby.";
+      save: "Uložit";
+    };
+  };
+  Pwa: {
+    name: "Invoicey";
+    shortName: "Invoicey";
+    description: "Česká fakturace — schema-first";
   };
 };
+
 export default messages;

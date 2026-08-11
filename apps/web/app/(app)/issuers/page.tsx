@@ -9,6 +9,7 @@ import { issuerBusinesses } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 type IssuerTableItem = {
   rowId: string;
@@ -23,6 +24,8 @@ export default async function IssuersPage({
 }: {
   searchParams: Search;
 }) {
+  const t = await getTranslations("Issuers");
+  const tErrors = await getTranslations("Errors.invalid");
   const sp = await searchParams;
   const { workspaceId } = await requireWorkspace();
   const rows = await db
@@ -44,24 +47,21 @@ export default async function IssuersPage({
     });
   }
 
-  const err =
-    sp.invalid === "has_invoices"
-      ? "Nelze smazat vystavovatele s existujícími fakturami."
-      : sp.invalid
-        ? `Chyba: ${sp.invalid}`
-        : null;
+  const err = sp.invalid
+    ? sp.invalid === "has_invoices"
+      ? tErrors("has_invoices")
+      : tErrors("generic", { code: sp.invalid })
+    : null;
 
   return (
     <div className="space-y-4 px-4 py-6 lg:px-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Issuers</h1>
-          <p className="text-muted-foreground">
-            Your businesses — ARES, bank, VAT, numbering, logo.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Button render={<Link href="/issuers/new" prefetch />} size="sm">
-          Nový vystavovatel
+          {t("newButton")}
         </Button>
       </div>
 
@@ -69,11 +69,9 @@ export default async function IssuersPage({
 
       {items.length === 0 ? (
         <div className="rounded-md border border-dashed p-8 text-center">
-          <p className="text-muted-foreground mb-3 text-sm">
-            No issuers yet. Add your business to start invoicing.
-          </p>
+          <p className="text-muted-foreground mb-3 text-sm">{t("empty")}</p>
           <Button render={<Link href="/welcome" prefetch />} size="sm">
-            Vytvořit prvního vystavovatele
+            {t("createFirst")}
           </Button>
         </div>
       ) : (

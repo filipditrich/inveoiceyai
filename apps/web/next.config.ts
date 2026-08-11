@@ -49,7 +49,7 @@ const invoiceCoreAssets = [
 const withNextIntl = createNextIntlPlugin({
   requestConfig: "./i18n/request.ts",
   experimental: {
-    /** typed message keys from the Czech catalog (ADR 0012) */
+    /** typed message keys from the Czech catalog (source of truth for AppConfig) */
     createMessagesDeclaration: ["./locales/cs.json"],
   },
 });

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth/client";
 import { LoaderCircleIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 type Provider = "google" | "github";
@@ -14,6 +15,7 @@ export function SignInForm({
   next: string;
   providers: Provider[];
 }) {
+  const t = useTranslations("Auth");
   const [pending, setPending] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,8 +27,7 @@ export function SignInForm({
       callbackURL: next,
     });
     if (signInError) {
-      // Only reached when the redirect never happens.
-      setError(signInError.message ?? "Sign-in failed. Please try again.");
+      setError(signInError.message ?? t("failed"));
       setPending(null);
     }
   }
@@ -46,7 +47,7 @@ export function SignInForm({
             <GoogleIcon />
           )}
           <span className="flex-1 text-center">
-            {pending === "google" ? "Přesměrovávám…" : "Pokračovat přes Google"}
+            {pending === "google" ? t("redirecting") : t("continueGoogle")}
           </span>
         </Button>
       )}
@@ -63,13 +64,13 @@ export function SignInForm({
             <GitHubIcon />
           )}
           <span className="flex-1 text-center">
-            {pending === "github" ? "Přesměrovávám…" : "Pokračovat přes GitHub"}
+            {pending === "github" ? t("redirecting") : t("continueGitHub")}
           </span>
         </Button>
       )}
       {error && (
         <p role="alert" className="text-destructive text-sm">
-          Přihlášení se nepodařilo. Zkuste to prosím znovu. ({error})
+          {t("failed")} ({error})
         </p>
       )}
     </div>

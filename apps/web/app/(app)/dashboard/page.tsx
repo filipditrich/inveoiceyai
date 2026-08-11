@@ -8,6 +8,7 @@ import { loadDashboardMetrics } from "@/lib/dashboard-metrics";
 import { loadIssuerOptions } from "@/lib/load-parties";
 import { requireWorkspace } from "@/lib/auth/session";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 type Search = Promise<{ issuerId?: string }>;
 
@@ -16,6 +17,7 @@ export default async function DashboardPage({
 }: {
   searchParams: Search;
 }) {
+  const t = await getTranslations("Dashboard");
   const { workspaceId } = await requireWorkspace();
   const sp = await searchParams;
   const issuerId = sp.issuerId?.trim() || undefined;
@@ -28,14 +30,13 @@ export default async function DashboardPage({
     return (
       <div className="flex flex-1 flex-col items-start gap-4 px-4 py-10 lg:px-6">
         <h1 className="text-2xl font-semibold tracking-tight">
-          Vítejte v Invoicey
+          {t("empty.title")}
         </h1>
         <p className="text-muted-foreground max-w-lg">
-          Vytvořte prvního vystavovatele (vaši firmu), abyste mohli vystavovat
-          faktury s ARES, číslováním a PDF / ISDOC exportem.
+          {t("empty.description")}
         </p>
         <Button render={<Link href="/welcome" prefetch />} size="sm">
-          Vytvořit prvního vystavovatele
+          {t("empty.cta")}
         </Button>
       </div>
     );
@@ -45,10 +46,8 @@ export default async function DashboardPage({
     <div className="@container/main flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
       <div className="flex flex-wrap items-end justify-between gap-3 px-4 lg:px-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Přehled</h1>
-          <p className="text-muted-foreground text-sm">
-            Stavy faktur a obrat za posledních 12 měsíců.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -56,10 +55,10 @@ export default async function DashboardPage({
             size="sm"
             variant="outline"
           >
-            Přejít na faktury
+            {t("goToInvoices")}
           </Button>
           <Button render={<Link href="/invoices/new" prefetch />} size="sm">
-            New invoice
+            {t("newInvoice")}
           </Button>
         </div>
       </div>

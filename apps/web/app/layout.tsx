@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import {
+  getLocale,
+  getMessages,
+  getTranslations,
+  getTimeZone,
+} from "next-intl/server";
 
 import { env } from "@/env.config.server";
+import type { AppLocale } from "@/i18n/config";
+import { toOgLocale } from "@/i18n/config";
+import { appFormats } from "@/i18n/formats";
 
 import Providers from "./providers";
 
@@ -20,6 +28,7 @@ const geistMono = Geist_Mono({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations("App.meta");
   return {
     metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
@@ -32,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
     category: "business",
     openGraph: {
       type: "website",
-      locale: "cs_CZ",
+      locale: toOgLocale(locale),
       siteName: t("title"),
       title: t("title"),
       description: t("description"),
@@ -57,6 +66,7 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const timeZone = await getTimeZone();
 
   return (
     <html
@@ -68,7 +78,12 @@ export default async function RootLayout({
         className="bg-background text-foreground font-sans antialiased"
         suppressHydrationWarning
       >
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider
+          locale={locale}
+          messages={messages}
+          timeZone={timeZone}
+          formats={appFormats}
+        >
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
       </body>

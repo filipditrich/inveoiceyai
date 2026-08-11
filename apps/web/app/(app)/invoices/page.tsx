@@ -22,6 +22,7 @@ import { invoices } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { and, count } from "drizzle-orm";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 type Search = Promise<{
   invalid?: string;
@@ -46,6 +47,9 @@ export default async function InvoicesPage({
   searchParams: Search;
 }) {
   const sp = await searchParams;
+  const t = await getTranslations("Invoices.list");
+  const tErrors = await getTranslations("Errors.invalid");
+  const tToasts = await getTranslations("Toasts");
   const { workspaceId } = await requireWorkspace();
   const page = parsePage(sp.page);
   const pageSize = parsePageSize(sp.pageSize);
@@ -162,40 +166,43 @@ export default async function InvoicesPage({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Vystavené faktury
+            {t("title")}
           </h1>
-          <p className="text-muted-foreground">
-            Stavy, filtry a akce nad fakturami.
-          </p>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <div className="flex gap-2">
           <Button render={<Link href="/invoices/new" prefetch />} size="sm">
-            + Vystavit fakturu
+            {t("newButton")}
           </Button>
           <Button
             render={<Link href="/invoices/import" prefetch />}
             size="sm"
             variant="outline"
           >
-            Import
+            {t("importButton")}
           </Button>
           <Button
             render={<Link href="/invoices/from-json" prefetch />}
             size="sm"
             variant="outline"
           >
-            From JSON
+            {t("fromJsonButton")}
           </Button>
         </div>
       </div>
 
       {sp.invalid ? (
-        <p className="text-destructive text-sm">Chyba: {sp.invalid}</p>
+        <p className="text-destructive text-sm">
+          {tErrors("generic", { code: sp.invalid })}
+        </p>
       ) : null}
       {sp.toast?.startsWith("bulk_") ? (
         <p className="text-muted-foreground text-sm">
-          Hromadná akce: {sp.ok ?? "0"} ok, {sp.skipped ?? "0"} přeskočeno,{" "}
-          {sp.failed ?? "0"} chyb.
+          {tToasts("bulk_summary", {
+            ok: String(Number(sp.ok) || 0),
+            skipped: String(Number(sp.skipped) || 0),
+            failed: String(Number(sp.failed) || 0),
+          })}
         </p>
       ) : null}
 

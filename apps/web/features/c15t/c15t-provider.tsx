@@ -1,11 +1,13 @@
 "use client";
 
 import { ConsentManagerProvider } from "@c15t/react";
+import { useLocale, useTranslations } from "next-intl";
 import type { PropsWithChildren } from "react";
 import { serialize } from "cookie";
 
 import { C15T_CONSENT_STORAGE_KEY } from "@/features/c15t/constants";
 import { invoiceyC15tMessages } from "@/features/c15t/messages";
+import type { AppLocale } from "@/i18n/config";
 
 function persistConsentCookie(consents: Record<string, boolean>) {
   if (typeof document === "undefined") return;
@@ -25,6 +27,9 @@ function persistConsentCookie(consents: Record<string, boolean>) {
 
 /** Offline c15t; mirrors consent to cookie in `onConsentSet`. */
 export function C15tProvider({ children }: PropsWithChildren) {
+  const locale = useLocale() as AppLocale;
+  const tFooter = useTranslations("Marketing.footer");
+
   return (
     <ConsentManagerProvider
       options={{
@@ -34,24 +39,24 @@ export function C15tProvider({ children }: PropsWithChildren) {
           privacyPolicy: {
             href: "/privacy",
             target: "_self",
-            label: "Ochrana soukromí",
+            label: tFooter("privacy"),
           },
           cookiePolicy: {
             href: "/cookies",
             target: "_self",
-            label: "Cookies",
+            label: tFooter("cookies"),
           },
           termsOfService: {
             href: "/terms",
             target: "_self",
-            label: "Podmínky",
+            label: tFooter("terms"),
           },
         },
         storageConfig: {
           storageKey: C15T_CONSENT_STORAGE_KEY,
         },
         i18n: {
-          locale: "cs",
+          locale,
           detectBrowserLanguage: false,
           messages: invoiceyC15tMessages,
         },
