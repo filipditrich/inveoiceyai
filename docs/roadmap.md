@@ -248,7 +248,7 @@ Plans listed here do not block the MVP and can be picked up in parallel with Pla
 **Completed:** 2026-08-11  
 **Spec:** [`specs/email.md`](./specs/email.md) · [ADR 0022](./decisions/0022-resend-and-react-email.md)
 
-Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still needed:** verify `mail.invoicey.ditrich.me`, set Resend/webhook/`CRON_SECRET` on Vercel, run one real send + webhook check.
+Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still needed:** verify `invoicey.ditrich.me`, set Resend/webhook/`CRON_SECRET` on Vercel, run one real send + webhook check.
 
 #### Plan 11a — Email engine
 
@@ -418,15 +418,17 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 - [x] Soft trusted devices + `new_sign_in` email + trust link
 - [x] Security audit feed
 - [x] Members invite/list/role/remove + `/invite/[id]`
-- [x] API keys UI; MCP + Eve accept user PAT or env ops key; workspace threading
+- [x] API keys UI; MCP accepts user PAT or env ops key; Eve HTTP ops-key only (channel client boundary); workspace threading
 - [x] BA DB rate limit + BotID on auth surfaces
 - [x] Spec + ADR 0023 + this roadmap section
 - [x] Plan 16 SQL applied on Neon (`rate_limits`, `trusted_devices`, `security_audit_events`)
 
 ### Plan 17 — Public website and entry shell
 
-**Status:** In progress  
-**Completed:** —  
+**Status:** Done (implementation; merge and production smoke pending)
+
+**Completed:** 2026-08-11
+
 **Spec:** [`specs/public-shell.md`](./specs/public-shell.md) · [plan](../.cursor/plans/plan-17-public-shell.md)
 
 **Goal:** Wrap the authenticated product in a compact public website: one substantial Czech homepage, polished OAuth/onboarding entry, essential legal routes, launch metadata, and an Invoicey-native consent experience.

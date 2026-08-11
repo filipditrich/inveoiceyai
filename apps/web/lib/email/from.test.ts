@@ -16,10 +16,8 @@ describe("from helpers", () => {
   });
 
   it("parses EMAIL_FROM", () => {
-    const parsed = parseEmailFrom(
-      "Invoicey <invoices@mail.invoicey.ditrich.me>",
-    );
-    expect(parsed.address).toBe("invoices@mail.invoicey.ditrich.me");
+    const parsed = parseEmailFrom("Invoicey <invoices@invoicey.ditrich.me>");
+    expect(parsed.address).toBe("invoices@invoicey.ditrich.me");
     expect(parsed.display).toBe("Invoicey");
   });
 

@@ -19,5 +19,5 @@ Shared transactional send path: `@invoicey/emails` templates, Resend client, `em
 ## Notes
 
 - Sync send only (no queue worker).
-- Sending domain: `mail.invoicey.ditrich.me`.
+- Sending domain: `invoicey.ditrich.me`.
 - Shared transport: `@invoicey/invoice-tools/email` `sendTransactionalEmail`.

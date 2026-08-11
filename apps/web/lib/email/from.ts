@@ -1,4 +1,4 @@
-const DEFAULT_FROM_ADDRESS = "invoices@mail.invoicey.ditrich.me";
+const DEFAULT_FROM_ADDRESS = "invoices@invoicey.ditrich.me";
 const DEFAULT_FROM_NAME = "Invoicey";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -23,7 +23,7 @@ Alternatives considered:
 
 ## Consequences
 
-- Domain verification and DNS for `mail.invoicey.ditrich.me` are operator prerequisites.
+- Domain verification and DNS for `invoicey.ditrich.me` are operator prerequisites.
 - Open/click rates are soft signals (pixel/link tracking); UI prioritizes sent/delivered/bounced.
 - Better Auth `sendInvitationEmail` uses the same Resend client — no second mail stack.
 - Migrating to SES later would replace the transport adapter, not the templates package.

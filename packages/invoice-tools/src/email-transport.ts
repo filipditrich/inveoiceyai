@@ -9,7 +9,7 @@ import type { EmailTemplateId } from "@invoicey/emails";
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 
-const DEFAULT_FROM = "Invoicey <invoices@mail.invoicey.ditrich.me>";
+const DEFAULT_FROM = "Invoicey <invoices@invoicey.ditrich.me>";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export type EmailAttachment = {
@@ -60,7 +60,7 @@ function parseFrom(raw: string | undefined | null): {
 } {
   const fallback = {
     display: "Invoicey",
-    address: "invoices@mail.invoicey.ditrich.me",
+    address: "invoices@invoicey.ditrich.me",
   };
   if (!raw?.trim()) return fallback;
   const match = raw.trim().match(/^(.*?)\s*<([^>]+)>$/);
