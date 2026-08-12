@@ -2,6 +2,7 @@ import { mergeClientsAction } from "@/actions/clients";
 import { ClientsDataGrid } from "@/components/clients/clients-data-grid";
 import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
+import { invalidMessage } from "@/lib/invalid-message";
 import {
   ClientSnapshotSchema,
   type ClientSnapshot,
@@ -12,14 +13,22 @@ import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
+type Search = Promise<{ invalid?: string }>;
+
 type ClientTableItem = {
   rowId: string;
   source: string;
   snapshot: ClientSnapshot;
 };
 
-export default async function ClientsPage() {
+export default async function ClientsPage({
+  searchParams,
+}: {
+  searchParams: Search;
+}) {
   const t = await getTranslations("Clients");
+  const tErrors = await getTranslations("Errors.invalid");
+  const sp = await searchParams;
   const { workspaceId } = await requireWorkspace();
   const rows = await db
     .select()
@@ -39,6 +48,8 @@ export default async function ClientsPage() {
       snapshot: parsed.data,
     });
   }
+
+  const err = sp.invalid ? invalidMessage(tErrors, sp.invalid) : null;
 
   return (
     <div className="space-y-4 px-4 py-6 lg:px-6">
@@ -60,6 +71,7 @@ export default async function ClientsPage() {
           </Button>
         </div>
       </div>
+      {err ? <p className="text-destructive text-sm">{err}</p> : null}
 
       {items.length === 0 ? (
         <div className="rounded-md border border-dashed p-8 text-center">

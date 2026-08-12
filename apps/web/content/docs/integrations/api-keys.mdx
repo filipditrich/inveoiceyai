@@ -79,12 +79,12 @@ itself, against the configured default workspace, with no user attached.
 Use it only for shared infrastructure such as the Slack bot or CI. It is not attributable, and
 rotation requires a redeploy of every client that uses it.
 
-| Variable                | Gates                                     | When unset                      |
-| ----------------------- | ----------------------------------------- | ------------------------------- |
-| `MCP_API_KEY`           | `/api/mcp`, and `/eve/v1/*` as a fallback | Only personal keys are accepted |
-| `EVE_API_KEY`           | `/eve/v1/*` over HTTP                     | Falls back to `MCP_API_KEY`     |
-| `CRON_SECRET`           | `/api/cron/overdue-reminders`             | Reminders never fire            |
-| `RESEND_WEBHOOK_SECRET` | `/api/webhooks/resend`                    | The webhook rejects all events  |
+| Variable                | Gates                                                       | When unset                      |
+| ----------------------- | ----------------------------------------------------------- | ------------------------------- |
+| `MCP_API_KEY`           | `/api/mcp`, and `/eve/v1/*` as a fallback                   | Only personal keys are accepted |
+| `EVE_API_KEY`           | `/eve/v1/*` over HTTP                                       | Falls back to `MCP_API_KEY`     |
+| `CRON_SECRET`           | `/api/cron/overdue-reminders`, `/api/cron/recurring-drafts` | Cron jobs never fire            |
+| `RESEND_WEBHOOK_SECRET` | `/api/webhooks/resend`                                      | The webhook rejects all events  |
 
 Generate one with:
 

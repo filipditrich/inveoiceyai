@@ -39,6 +39,7 @@ export function SiteHeader() {
     integrations: t("breadcrumb.integrations"),
     "from-json": t("breadcrumb.fromJson"),
     import: t("breadcrumb.import"),
+    recurring: t("breadcrumb.recurring"),
     new: t("breadcrumb.new"),
     edit: t("breadcrumb.edit"),
   };

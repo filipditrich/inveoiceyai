@@ -70,4 +70,4 @@ Invoicey is pre-1.0. Today that means:
 - **Czech and English UI.** Issued PDF and ISDOC labels remain Czech.
 - **API keys have no scopes.** A key is full access to one workspace — see [API keys](/docs/integrations/api-keys).
 - **No public REST API.** Automation goes through MCP or the Slack agent.
-- **No recurring invoices.**
+- **Recurring invoices are drafts only.** A daily cron creates a reviewable draft; you issue and send it. Auto-issue and auto-email are not in v1.

@@ -124,7 +124,7 @@ export const privateEnvSchema = z.object({
     emptyEnvToUndefined,
     z.string().min(1).optional(),
   ),
-  /** Bearer for `/api/cron/overdue-reminders`. */
+  /** Bearer for `/api/cron/overdue-reminders` and `/api/cron/recurring-drafts`. */
   CRON_SECRET: z.preprocess(emptyEnvToUndefined, z.string().min(1).optional()),
 });
 

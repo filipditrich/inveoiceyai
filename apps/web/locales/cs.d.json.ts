@@ -38,6 +38,17 @@ declare const messages: {
       not_draft: "Lze upravit jen návrh.";
       cannot_issue: "Návrh nelze vystavit.";
       has_invoices: "Nelze smazat vystavovatele s existujícími fakturami.";
+      missing_id: "Chybí identifikátor.";
+      missing_name: "Název je povinný.";
+      duplicate_name: "Šablona s tímto názvem už existuje.";
+      unsupported_doc_type: "Opakovat lze jen běžné faktury.";
+      not_found: "Nenalezeno.";
+      invalid_day: "Den v měsíci musí být 1–28.";
+      invalid_cadence: "Zvolte měsíčně nebo čtvrtletně.";
+      open_draft: "Pro tento plán už existuje nevystavený návrh.";
+      invalid_payload: "Uložená šablona není platná faktura.";
+      has_templates: "Nelze smazat, dokud existují opakované šablony.";
+      has_client_invoices: "Nelze smazat klienta s existujícími fakturami.";
       generic: "Chyba: {code}";
     };
   };
@@ -53,6 +64,12 @@ declare const messages: {
     invoice_deleted: "Návrh smazán";
     invoice_duplicated: "Faktura duplikována";
     invoice_emailed: "Faktura odeslána e-mailem";
+    recurring_saved: "Opakovaný plán uložen";
+    recurring_paused: "Plán pozastaven";
+    recurring_resumed: "Plán obnoven";
+    recurring_skipped: "Další běh přeskočen";
+    recurring_drafted: "Návrh vytvořen z plánu";
+    recurring_deleted: "Opakovaná šablona smazána";
     bulk_summary: "Dokončeno: {ok} úspěšně, {skipped} přeskočeno, {failed} se nezdařilo.";
     clients_merged: "Sloučeno {groups} skupin — odstraněno {removed} klientů, přesměrováno {repointed} faktur";
     platform_admin_granted: "Platformní admin udělen";
@@ -451,6 +468,7 @@ declare const messages: {
       invoicesAi: "AI koncept";
       invoicesImport: "Import vystavených";
       invoicesFromJson: "Z JSON";
+      invoicesRecurring: "Opakované";
       clients: "Klienti";
       issuers: "Dodavatelé";
       newInvoice: "Nová faktura";
@@ -470,6 +488,7 @@ declare const messages: {
       fromJson: "Z JSON";
       ai: "AI koncept";
       import: "Import";
+      recurring: "Opakované";
       new: "Nová";
       edit: "Upravit";
       invoice: "Faktura";
@@ -706,6 +725,7 @@ declare const messages: {
       client: "Klient";
       total: "Celkem";
       status: "Stav";
+      source: "Zdroj";
       actions: "Akce";
       detail: "Detail";
       issue: "Vystavit";
@@ -728,6 +748,7 @@ declare const messages: {
     };
     filter: {
       status: "Stav";
+      source: "Zdroj";
       issuer: "Dodavatel";
       client: "Odběratel";
       from: "Od";
@@ -759,12 +780,21 @@ declare const messages: {
       unmarkPaidButton: "Zrušit zaplaceno";
       cancelButton: "Stornovat";
       deleteButton: "Smazat";
+      fromRecurring: "Z opakovaného plánu";
+      viewSchedule: "Opakovaný plán";
+      pdfEmpty: "PDF zatím není k dispozici.";
+      issuingPending: "Vystavuji…";
+      savingPending: "Ukládám…";
+      duplicatingPending: "Duplikuji…";
+      cancellingPending: "Stornuji…";
+      deletingPending: "Mazání…";
       itemsHeader: {
         position: "#";
         description: "Popis";
         quantity: "Množství";
-        price: "Cena";
-        total: "Celkem";
+        price: "Cena bez DPH";
+        vat: "DPH";
+        total: "Celkem s DPH";
       };
     };
     builder: {
@@ -879,6 +909,50 @@ declare const messages: {
       attachIsdoc: "Přiložit ISDOC";
       from: "Od";
       replyTo: "Odpovědět na";
+    };
+  };
+  Recurring: {
+    list: {
+      title: "Opakované faktury";
+      subtitle: "Šablony, ze kterých vznikne návrh podle plánu. Vystavení a odeslání zůstává na vás.";
+      empty: "Zatím nemáte žádný opakovaný plán.";
+      emptyCta: "Otevřete fakturu a uložte ji jako opakovanou";
+      createFirst: "Nejprve vytvořte fakturu";
+      name: "Název";
+      client: "Odběratel";
+      cadence: "Periodicita";
+      monthly: "Měsíčně";
+      quarterly: "Čtvrtletně";
+      day: "den {day}";
+      nextRun: "Další běh";
+      lastDraft: "Poslední návrh";
+      never: "Nikdy";
+      status: "Stav";
+      active: "Aktivní";
+      paused: "Pozastaveno";
+      actions: "Akce";
+      pause: "Pozastavit";
+      resume: "Obnovit";
+      skip: "Přeskočit";
+      runNow: "Spustit teď";
+      delete: "Smazat";
+      deleteConfirm: "Smazat tuto opakovanou šablonu? Existující návrhy zůstanou.";
+      saving: "Ukládám…";
+      running: "Vytvářím…";
+      deleting: "Mazání…";
+    };
+    sheet: {
+      trigger: "Opakovat";
+      title: "Uložit jako opakovanou";
+      description: "Invoicey k tomuto dni v období vytvoří návrh. Vy ho zkontrolujete, vystavíte a odešlete.";
+      name: "Název";
+      cadence: "Periodicita";
+      monthly: "Měsíčně";
+      quarterly: "Čtvrtletně";
+      dayOfMonth: "Den v měsíci";
+      dayHint: "Jen dny 1–28, aby platily v každém měsíci.";
+      submit: "Uložit plán";
+      saving: "Ukládám…";
     };
   };
   Clients: {

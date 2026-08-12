@@ -6,7 +6,13 @@ import {
   ClientVatIdSchema,
   IcoSchema,
 } from "@invoicey/invoice-core/schema";
-import { clients, ensureClient, mergeDuplicateClients } from "@invoicey/db";
+import {
+  clients,
+  ensureClient,
+  invoiceTemplates,
+  invoices,
+  mergeDuplicateClients,
+} from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -130,6 +136,29 @@ export async function deleteClient(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
   if (!id) {
     redirect(`/clients?invalid=${encodeURIComponent("missing_id")}`);
+  }
+  const [invoiceRow] = await db
+    .select({ id: invoices.id })
+    .from(invoices)
+    .where(
+      and(eq(invoices.clientId, id), eq(invoices.workspaceId, workspaceId)),
+    )
+    .limit(1);
+  if (invoiceRow) {
+    redirect(`/clients?invalid=${encodeURIComponent("has_client_invoices")}`);
+  }
+  const [templateRow] = await db
+    .select({ id: invoiceTemplates.id })
+    .from(invoiceTemplates)
+    .where(
+      and(
+        eq(invoiceTemplates.clientId, id),
+        eq(invoiceTemplates.workspaceId, workspaceId),
+      ),
+    )
+    .limit(1);
+  if (templateRow) {
+    redirect(`/clients?invalid=${encodeURIComponent("has_templates")}`);
   }
   await db
     .delete(clients)

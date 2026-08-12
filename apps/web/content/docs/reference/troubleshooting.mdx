@@ -113,6 +113,13 @@ See [payment QR](/docs/outputs/payment-qr).
   toggle alone does nothing.
 </Accordion>
 
+<Accordion title="Recurring drafts never appear">
+  Apply the Plan 10 SQL (`packages/db/sql/2026-08-12-plan10-recurring.sql`), set
+  `CRON_SECRET`, and confirm Vercel Cron hits `/api/cron/recurring-drafts` at
+  06:00. Paused schedules and schedules that already have an unissued draft are
+  skipped on purpose.
+</Accordion>
+
 <Accordion title="Emails land in spam">
   Verify your sending domain in Resend and set its DNS records. The From address
   is always the deployment's verified domain — sending as an arbitrary address

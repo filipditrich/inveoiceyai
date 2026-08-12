@@ -96,12 +96,13 @@ export function buildInvoicePayload(input: BuilderInvoiceInput): Invoice {
   );
 
   const method = input.paymentMethod ?? "transfer";
+  const variableSymbol = digitsOnly(input.number).slice(0, 10);
   const payment =
     method === "transfer"
       ? {
           method: "transfer" as const,
           bankAccount: input.issuer.bank,
-          variableSymbol: digitsOnly(input.number).slice(0, 10) || "0",
+          ...(variableSymbol ? { variableSymbol } : {}),
         }
       : { method };
 

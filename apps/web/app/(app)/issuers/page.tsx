@@ -1,6 +1,7 @@
 import { IssuersDataGrid } from "@/components/issuers/issuers-data-grid";
 import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
+import { invalidMessage } from "@/lib/invalid-message";
 import {
   IssuerSnapshotSchema,
   type IssuerSnapshot,
@@ -47,17 +48,15 @@ export default async function IssuersPage({
     });
   }
 
-  const err = sp.invalid
-    ? sp.invalid === "has_invoices"
-      ? tErrors("has_invoices")
-      : tErrors("generic", { code: sp.invalid })
-    : null;
+  const err = sp.invalid ? invalidMessage(tErrors, sp.invalid) : null;
 
   return (
     <div className="space-y-4 px-4 py-6 lg:px-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {t("title")}
+          </h1>
           <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Button render={<Link href="/issuers/new" prefetch />} size="sm">

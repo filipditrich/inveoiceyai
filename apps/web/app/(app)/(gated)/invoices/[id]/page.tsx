@@ -6,6 +6,7 @@ import {
   markInvoicePaid,
   unmarkInvoicePaid,
 } from "@/actions/invoices";
+import { SaveRecurringSheet } from "@/components/invoices/save-recurring-sheet";
 import { InvoiceEmailTimeline } from "@/components/invoices/invoice-email-timeline";
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
 import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
@@ -13,7 +14,9 @@ import { SendInvoiceEmailSheet } from "@/components/invoices/send-invoice-email-
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { formatDateCs, formatDateTime, formatMoney } from "@/lib/format";
+import { formatInvoiceDate, formatDateTime, formatMoney } from "@/lib/format";
+import type { AppLocale } from "@/i18n/config";
+import { invalidMessage } from "@/lib/invalid-message";
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
 import { requireWorkspace } from "@/lib/auth/session";
 import { isEmailConfigured } from "@/lib/email/invite";
@@ -44,12 +47,14 @@ import {
   FileCodeIcon,
   FileDownIcon,
   PencilIcon,
+  RepeatIcon,
   StampIcon,
   Trash2Icon,
   WalletCardsIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 
 type Params = Promise<{ id: string }>;
 type Search = Promise<{ invalid?: string }>;
@@ -64,6 +69,9 @@ export default async function InvoiceDetailPage({
   const { id } = await params;
   const sp = await searchParams;
   const { workspaceId } = await requireWorkspace();
+  const t = await getTranslations("Invoices.detail");
+  const tErrors = await getTranslations("Errors.invalid");
+  const locale = (await getLocale()) as AppLocale;
   const rows = await db
     .select()
     .from(invoices)
@@ -167,13 +175,22 @@ export default async function InvoiceDetailPage({
             <InvoiceStatusBadge status={displayStatus} />
             {row.importCompleteness === "archive" ? (
               <span className="rounded border px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide">
-                Archiv
+                {t("archive")}
               </span>
             ) : null}
             {row.importCompleteness === "full" ? (
               <span className="rounded border px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide">
-                Import
+                {t("import")}
               </span>
+            ) : null}
+            {row.recurringScheduleId ? (
+              <Link
+                className="text-xs underline"
+                href="/invoices/recurring"
+                prefetch
+              >
+                {t("fromRecurring")}
+              </Link>
             ) : null}
             {originLabel ? (
               <span className="text-xs">
@@ -187,9 +204,9 @@ export default async function InvoiceDetailPage({
           {displayStatus === "draft" ? (
             <form action={issueSavedInvoice}>
               <input name="id" type="hidden" value={id} />
-              <SubmitButton pendingLabel="Vystavuji…" size="sm">
+              <SubmitButton pendingLabel={t("issuingPending")} size="sm">
                 <StampIcon data-icon="inline-start" />
-                Vystavit
+                {t("issueButton")}
               </SubmitButton>
             </form>
           ) : null}
@@ -198,9 +215,9 @@ export default async function InvoiceDetailPage({
           displayStatus === "future" ? (
             <form action={markInvoicePaid}>
               <input name="id" type="hidden" value={id} />
-              <SubmitButton pendingLabel="Ukládám…" size="sm">
+              <SubmitButton pendingLabel={t("savingPending")} size="sm">
                 <WalletCardsIcon data-icon="inline-start" />
-                Označit zaplaceno
+                {t("markPaidButton")}
               </SubmitButton>
             </form>
           ) : null}
@@ -233,16 +250,41 @@ export default async function InvoiceDetailPage({
               variant="outline"
             >
               <PencilIcon data-icon="inline-start" />
-              Upravit
+              {t("editButton")}
             </Button>
           ) : null}
           <form action={duplicateInvoice}>
             <input name="id" type="hidden" value={id} />
-            <SubmitButton pendingLabel="Duplikuji…" size="sm" variant="outline">
+            <SubmitButton
+              pendingLabel={t("duplicatingPending")}
+              size="sm"
+              variant="outline"
+            >
               <CopyIcon data-icon="inline-start" />
-              Duplikovat
+              {t("duplicateButton")}
             </SubmitButton>
           </form>
+          {row.docType === "invoice" && !archive ? (
+            row.recurringScheduleId ? (
+              <Button
+                render={<Link href="/invoices/recurring" prefetch />}
+                size="sm"
+                variant="outline"
+              >
+                <RepeatIcon data-icon="inline-start" />
+                {t("viewSchedule")}
+              </Button>
+            ) : (
+              <SaveRecurringSheet
+                defaultDayOfMonth={Math.min(
+                  28,
+                  Math.max(1, Number(row.issueDate.slice(8, 10)) || 1),
+                )}
+                defaultName={`${row.clientName} · ${row.number ?? "DRAFT"}`}
+                invoiceId={id}
+              />
+            )
+          ) : null}
           {canEmail ? (
             <SendInvoiceEmailSheet
               defaultAttachIsdoc={emailSettings.attachIsdocByDefault}
@@ -263,12 +305,12 @@ export default async function InvoiceDetailPage({
             <form action={cancelInvoice}>
               <input name="id" type="hidden" value={id} />
               <SubmitButton
-                pendingLabel="Stornuji…"
+                pendingLabel={t("cancellingPending")}
                 size="sm"
                 variant="secondary"
               >
                 <BanIcon data-icon="inline-start" />
-                Stornovat
+                {t("cancelButton")}
               </SubmitButton>
             </form>
           ) : null}
@@ -276,12 +318,12 @@ export default async function InvoiceDetailPage({
             <form action={unmarkInvoicePaid}>
               <input name="id" type="hidden" value={id} />
               <SubmitButton
-                pendingLabel="Ukládám…"
+                pendingLabel={t("savingPending")}
                 size="sm"
                 variant="secondary"
               >
                 <WalletCardsIcon data-icon="inline-start" />
-                Zrušit zaplaceno
+                {t("unmarkPaidButton")}
               </SubmitButton>
             </form>
           ) : null}
@@ -289,12 +331,12 @@ export default async function InvoiceDetailPage({
             <form action={deleteInvoice}>
               <input name="id" type="hidden" value={id} />
               <SubmitButton
-                pendingLabel="Mazání…"
+                pendingLabel={t("deletingPending")}
                 size="sm"
                 variant="destructive"
               >
                 <Trash2Icon data-icon="inline-start" />
-                Smazat
+                {t("deleteButton")}
               </SubmitButton>
             </form>
           ) : null}
@@ -302,13 +344,15 @@ export default async function InvoiceDetailPage({
       </div>
 
       {sp.invalid ? (
-        <p className="text-destructive text-sm">Chyba: {sp.invalid}</p>
+        <p className="text-destructive text-sm">
+          {invalidMessage(tErrors, sp.invalid)}
+        </p>
       ) : null}
 
       {showPdfPreview ? (
         <div className="overflow-hidden rounded-md border">
           <InvoicePdfPreview
-            emptyLabel="PDF zatím není k dispozici."
+            emptyLabel={t("pdfEmpty")}
             url={`/api/invoices/${id}/pdf?disposition=inline`}
           />
         </div>
@@ -316,30 +360,36 @@ export default async function InvoiceDetailPage({
 
       <dl className="grid gap-3 text-sm sm:grid-cols-2">
         <div>
-          <dt className="text-muted-foreground">Datum vystavení</dt>
-          <dd className="tabular-nums">{formatDateCs(row.issueDate)}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Splatnost</dt>
-          <dd className="tabular-nums">{formatDateCs(row.dueDate)}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">DUZP</dt>
-          <dd className="tabular-nums">{formatDateCs(row.duzp)}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Měna</dt>
-          <dd className="tabular-nums">{row.currency}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Celkem</dt>
+          <dt className="text-muted-foreground">{t("issueDate")}</dt>
           <dd className="tabular-nums">
-            {formatMoney(Number(row.total) || 0, row.currency || "CZK")}
+            {formatInvoiceDate(row.issueDate, locale)}
           </dd>
         </div>
         <div>
-          <dt className="text-muted-foreground">Zaplaceno dne</dt>
-          <dd>{row.paidAt ? formatDateTime(row.paidAt) : "—"}</dd>
+          <dt className="text-muted-foreground">{t("dueDate")}</dt>
+          <dd className="tabular-nums">
+            {formatInvoiceDate(row.dueDate, locale)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">{t("duzp")}</dt>
+          <dd className="tabular-nums">
+            {formatInvoiceDate(row.duzp, locale)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">{t("currency")}</dt>
+          <dd className="tabular-nums">{row.currency}</dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">{t("total")}</dt>
+          <dd className="tabular-nums">
+            {formatMoney(Number(row.total) || 0, row.currency || "CZK", locale)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">{t("paidAt")}</dt>
+          <dd>{row.paidAt ? formatDateTime(row.paidAt, locale) : "—"}</dd>
         </div>
       </dl>
 
@@ -360,7 +410,7 @@ export default async function InvoiceDetailPage({
 
       {archive ? (
         <p className="text-muted-foreground rounded-md border p-3 text-sm">
-          Archivní import — položky nejsou k dispozici. Originální PDF je výše.
+          {t("archiveNote")}
         </p>
       ) : null}
 
@@ -369,12 +419,12 @@ export default async function InvoiceDetailPage({
           <table className="w-full min-w-[42rem] text-sm">
             <thead>
               <tr className="border-b text-left">
-                <th className="p-2">#</th>
-                <th className="p-2">Popis</th>
-                <th className="p-2">Množství</th>
-                <th className="p-2">Cena bez DPH</th>
-                <th className="p-2">DPH</th>
-                <th className="p-2">Celkem s DPH</th>
+                <th className="p-2">{t("itemsHeader.position")}</th>
+                <th className="p-2">{t("itemsHeader.description")}</th>
+                <th className="p-2">{t("itemsHeader.quantity")}</th>
+                <th className="p-2">{t("itemsHeader.price")}</th>
+                <th className="p-2">{t("itemsHeader.vat")}</th>
+                <th className="p-2">{t("itemsHeader.total")}</th>
               </tr>
             </thead>
             <tbody>
@@ -386,11 +436,15 @@ export default async function InvoiceDetailPage({
                     {it.quantity} {it.unit}
                   </td>
                   <td className="p-2 tabular-nums">
-                    {formatMoney(it.unitPriceWithoutVat)}
+                    {formatMoney(
+                      it.unitPriceWithoutVat,
+                      row.currency || "CZK",
+                      locale,
+                    )}
                   </td>
                   <td className="p-2 tabular-nums">{it.vatRate} %</td>
                   <td className="p-2 tabular-nums">
-                    {formatMoney(it.lineTotal)}
+                    {formatMoney(it.lineTotal, row.currency || "CZK", locale)}
                   </td>
                 </tr>
               ))}
@@ -400,12 +454,12 @@ export default async function InvoiceDetailPage({
       ) : null}
 
       {!archive && payload && !payload.success ? (
-        <p className="text-destructive text-sm">Neplatný payload v DB.</p>
+        <p className="text-destructive text-sm">{t("invalidPayload")}</p>
       ) : null}
 
       <p>
         <Link className="text-sm underline" href="/invoices">
-          ← Zpět na seznam
+          {t("backToList")}
         </Link>
       </p>
     </div>

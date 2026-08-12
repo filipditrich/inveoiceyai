@@ -82,7 +82,21 @@ validation errors. Review the result before issuing:
 Save recurring line items, VAT settings and payment defaults as **invoice template presets**. An
 assistant can merge a template with the details for this invoice.
 
+## Recurring drafts
+
+**Invoices → Recurring**, or **Repeat** on an invoice detail. Invoicey saves the
+lines as a template and creates a **draft** on the chosen day (monthly or
+quarterly, days 1–28). You still issue and send it yourself.
+
+The next run is never the same calendar day. If a previous draft from that
+schedule is still unissued, the cron skips rather than piling drafts. Change
+lines by saving a new template from a newer invoice — there is no template
+editor.
+
+Cron: `GET /api/cron/recurring-drafts` with `Authorization: Bearer ${CRON_SECRET}`,
+scheduled at 06:00 Europe/Prague (before overdue reminders).
+
 ## Duplicating
 
 Duplicate any invoice to create a fresh draft. Invoicey copies its content but clears the number,
-issue facts, payment and snapshots. Scheduled recurring invoices are not yet available.
+issue facts, payment and snapshots.

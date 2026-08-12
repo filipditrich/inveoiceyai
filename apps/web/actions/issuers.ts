@@ -20,6 +20,7 @@ import {
 } from "@invoicey/invoice-core";
 import {
   invoices,
+  invoiceTemplates,
   issuerBusinesses,
   issuerNumberingSchemes,
   type IssuerEmailSettings,
@@ -686,7 +687,20 @@ export async function deleteIssuer(formData: FormData): Promise<void> {
       )
       .limit(1);
     if (found[0]) {
-      return true;
+      return "has_invoices" as const;
+    }
+    const templates = await tx
+      .select({ id: invoiceTemplates.id })
+      .from(invoiceTemplates)
+      .where(
+        and(
+          eq(invoiceTemplates.issuerId, id),
+          eq(invoiceTemplates.workspaceId, workspaceId),
+        ),
+      )
+      .limit(1);
+    if (templates[0]) {
+      return "has_templates" as const;
     }
     await tx
       .delete(issuerBusinesses)
@@ -696,11 +710,11 @@ export async function deleteIssuer(formData: FormData): Promise<void> {
           eq(issuerBusinesses.workspaceId, workspaceId),
         ),
       );
-    return false;
+    return null;
   });
 
   if (linked) {
-    redirect(`/issuers?invalid=${encodeURIComponent("has_invoices")}`);
+    redirect(`/issuers?invalid=${encodeURIComponent(linked)}`);
   }
 
   revalidateIssuerPaths();

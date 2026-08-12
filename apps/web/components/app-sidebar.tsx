@@ -29,6 +29,7 @@ import {
   LayoutDashboardIcon,
   PlugZapIcon,
   PlusIcon,
+  RepeatIcon,
   Settings2Icon,
   SparklesIcon,
   UsersIcon,
@@ -89,7 +90,8 @@ export function AppSidebar({
               !pathname.startsWith("/invoices/new") &&
               !pathname.startsWith("/invoices/ai") &&
               !pathname.startsWith("/invoices/from-json") &&
-              !pathname.startsWith("/invoices/import")),
+              !pathname.startsWith("/invoices/import") &&
+              !pathname.startsWith("/invoices/recurring")),
         },
         {
           title: t("nav.invoicesNew"),
@@ -102,6 +104,12 @@ export function AppSidebar({
           url: "/invoices/ai",
           icon: <SparklesIcon />,
           isActive: pathname === "/invoices/ai",
+        },
+        {
+          title: t("nav.invoicesRecurring"),
+          url: "/invoices/recurring",
+          icon: <RepeatIcon />,
+          isActive: pathname === "/invoices/recurring",
         },
         {
           title: t("nav.invoicesImport"),
