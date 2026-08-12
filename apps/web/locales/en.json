@@ -374,6 +374,25 @@
     "emailMismatch": "You are signed in as {signedInEmail}, but this invitation was sent to {inviteEmail}. Sign in with the invited email to continue.",
     "signedInAs": "Signed in as {email}"
   },
+  "SlackLink": {
+    "title": "Link Slack to Invoicey",
+    "description": "Confirm that this Slack account may invoice in your current workspace.",
+    "confirm": "Link Slack",
+    "confirming": "Linking…",
+    "confirmed": "Linked",
+    "confirmFailed": "Could not link Slack",
+    "confirmSuccess": "Slack is linked. Your next Slack message will use this workspace.",
+    "rebindSuccess": "Slack now uses your current workspace.",
+    "backToApp": "Back to app",
+    "slackUser": "Slack user",
+    "workspace": "Workspace for new invoices",
+    "workspaceHint": "New Slack invoices will land here. Older Slack invoices in another workspace stay put. Switch workspace in the sidebar and reopen the link if this is wrong.",
+    "signedInAs": "Signed in as {email}",
+    "notFound": "This link does not exist. Message the bot again for a new DM.",
+    "expired": "This link expired (15 minutes). Message the bot again.",
+    "consumed": "This link was already used. Message the bot if you need a new one.",
+    "stealRefused": "This Slack account is already linked to another Invoicey user. Ask them to unlink it in Settings → Integrations."
+  },
   "Referral": {
     "title": "{name} invited you to Invoicey",
     "titleAnonymous": "You were invited to Invoicey",
@@ -956,7 +975,10 @@
           "member_remove": "Member removed",
           "member_role_update": "Member role updated",
           "platform_admin_grant": "Platform admin granted",
-          "platform_admin_revoke": "Platform admin revoked"
+          "platform_admin_revoke": "Platform admin revoked",
+          "slack_link": "Slack linked",
+          "slack_unlink": "Slack unlinked",
+          "slack_rebind": "Slack workspace rebound"
         }
       }
     },
@@ -1036,6 +1058,22 @@
       "copy": "Copy",
       "copied": "Copied",
       "loadFailed": "Could not load keys"
+    },
+    "integrations": {
+      "slackIdentity": {
+        "title": "Linked Slack",
+        "description": "One Slack account maps to one Invoicey user and one workspace. Unlinked mentions are refused.",
+        "empty": "No Slack account yet. DM the bot — it will send a confirm link.",
+        "slackUser": "Slack user {id}",
+        "team": "Team {id}",
+        "unlink": "Unlink",
+        "unlinkFailed": "Unlink failed",
+        "unlinkSuccess": "Slack account unlinked",
+        "useCurrentWorkspace": "Use {name}",
+        "currentWorkspace": "Current workspace",
+        "rebindFailed": "Could not switch workspace",
+        "rebindSuccess": "Slack now uses the current workspace"
+      }
     }
   },
   "Admin": {

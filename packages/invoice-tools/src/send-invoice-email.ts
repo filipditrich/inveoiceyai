@@ -21,7 +21,10 @@ import {
 import { and, desc, eq } from "drizzle-orm";
 
 import { isValidEmailAddress, sendTransactionalEmail } from "./email-transport";
-import { resolveWorkspaceId } from "./workspace-context";
+import {
+  getInvoiceyRequestContext,
+  resolveWorkspaceId,
+} from "./workspace-context";
 
 const DEFAULT_COVER =
   "Dobrý den,\n\nv příloze zasílám fakturu {number}.\n\nS pozdravem";
@@ -239,7 +242,7 @@ export async function sendInvoiceEmailById(
       attachPdf: true,
       attachIsdoc,
       attachments,
-      createdBy: input.createdBy ?? null,
+      createdBy: input.createdBy ?? getInvoiceyRequestContext()?.userId ?? null,
     });
     return {
       ok: true,

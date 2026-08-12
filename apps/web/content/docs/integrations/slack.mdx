@@ -18,7 +18,8 @@ Mention the bot in a channel it has been invited to, or send it a direct message
 > from my "s.r.o." preset
 
 It replies in a thread with the draft, the invoice ID, a link into the web app, and the rendered PDF
-and ISDOC as file attachments.
+and ISDOC as file attachments. The first time you talk to the bot, it DMs a link to confirm your
+Slack account against the Invoicey workspace you are viewing in the browser.
 
 **Follow-ups in the same thread do not need a mention.** The agent keeps session context, so you can
 just say:
@@ -39,10 +40,11 @@ Three actions always stop and ask, with an approve/reject prompt in the thread:
 
 Creating and revising drafts does not require approval.
 
-<Callout type="warn" title="Anyone in the channel can drive it">
-  The agent authenticates as the deployment, not as the person typing. It does
-  not check whether the Slack user is entitled to invoice on your behalf. Keep
-  it in a private channel with the people who should have that power.
+<Callout type="warn" title="Link Slack before the bot will work">
+  Unlinked Slack users are refused — no drafts, no ARES. The bot DMs a one-shot
+  confirm link (15 minutes). Confirm it while viewing the Invoicey workspace
+  that should receive **new** invoices. Anyone in the channel can still click
+  Allow/Deny on an approval card; keep the bot in a private channel.
 </Callout>
 
 The agent uses the same validated handlers as [MCP](/docs/integrations/mcp), plus Slack file upload.
@@ -115,10 +117,12 @@ curl -sS https://your-host/eve/v1/health
 
 ## Limitations
 
-- **One workspace.** The agent operates against a single configured Invoicey workspace.
-- **No per-Slack-user scoping.** Everyone in the channel has the same power.
+- **Link required.** Each Slack user must confirm `/slack/link/[code]` against an Invoicey workspace they belong to. There is no email matching.
+- **One Slack account → one Invoicey user + one workspace.** Rebind the workspace in Settings → Integrations, or unlink so someone else can confirm.
+- **HITL is not identity.** Allow/Deny in the thread can be clicked by anyone in the channel. Keep the bot private.
 - **No slash commands.** Mentions and DMs only.
 - **No import.** [Historical import](/docs/guides/importing-history) stays web-only.
+- **Old Slack invoices** created before linking stay on the previous (ops) workspace.
 
 ## Troubleshooting
 

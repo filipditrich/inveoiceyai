@@ -2,10 +2,7 @@ import {
   fetchAresEkonomickySubjekt,
   searchAresByObchodniJmeno,
 } from "@invoicey/ares";
-import {
-  persistDraftInvoice,
-  tryCreateDbFromEnv,
-} from "@invoicey/db";
+import { persistDraftInvoice, tryCreateDbFromEnv } from "@invoicey/db";
 import { renderInvoicePdf, renderIsdoc } from "@invoicey/invoice-core";
 import {
   IssuerSnapshotSchema,
@@ -19,6 +16,7 @@ import {
   type NormalizedIssue,
 } from "./normalize-draft-invoice";
 import { getPreset } from "./presets";
+import { resolveWorkspaceId } from "./workspace-context";
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
@@ -154,11 +152,16 @@ export async function createAndRenderInvoice(options: {
   const database = tryCreateDbFromEnv();
   if (database) {
     try {
-      const persisted = await persistDraftInvoice(database, invoice);
+      const persisted = await persistDraftInvoice(database, invoice, {
+        workspaceId: resolveWorkspaceId(),
+      });
       invoiceId = persisted.invoiceId;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      return { ok: false, error: `failed to persist draft invoice: ${message}` };
+      return {
+        ok: false,
+        error: `failed to persist draft invoice: ${message}`,
+      };
     }
   }
 

@@ -32,6 +32,7 @@ When a decision changes:
 | [0017](./0017-tailwind-v4-tooling-baseline.md)             | Tailwind CSS v4 tooling baseline for web app               | Accepted                   |
 | [0018](./0018-better-auth-oauth-only.md)                   | Better Auth, OAuth-only (no Clerk, no passwords)           | Accepted                   |
 | [0019](./0019-workspaces-are-better-auth-organizations.md) | Workspaces are Better Auth organizations                   | Accepted                   |
+| [0020](./0020-slack-identity-linking.md)                   | Explicit Slack identity linking (no email match)           | Accepted                   |
 | [0021](./0021-immutable-imported-invoice-artifacts.md)     | Immutable imported invoice artifacts + provenance          | Accepted                   |
 | [0022](./0022-resend-and-react-email.md)                   | Resend + react-email for transactional mail                | Accepted                   |
 | [0023](./0023-account-security-soft-devices.md)            | Soft trusted devices + PAT cutover for machine auth        | Accepted                   |

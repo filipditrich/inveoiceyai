@@ -36,6 +36,28 @@ export {
   type PersistDraftInvoiceResult,
 } from "./invoices-repo";
 export {
+  SLACK_LINK_CODE_TTL_MS,
+  consumeSlackLinkCode,
+  createOrReuseSlackLinkCode,
+  deleteSlackIdentityForUser,
+  findSlackIdentity,
+  generateSlackLinkCode,
+  getSlackLinkCode,
+  getWorkspaceName,
+  isSlackLinkCodeOpen,
+  isWorkspaceMember,
+  listSlackIdentitiesForUser,
+  rebindSlackIdentityWorkspace,
+  resolveLinkedSlackPrincipal,
+  slackLinkConfirmDecision,
+  upsertSlackIdentity,
+  type LinkedSlackPrincipal,
+  type SlackIdentityListItem,
+  type SlackIdentityRecord,
+  type SlackLinkCodeRecord,
+  type SlackLinkConfirmDecision,
+} from "./slack-identities";
+export {
   clientMergeGroupKey,
   ensureClient,
   groupClientsForMerge,

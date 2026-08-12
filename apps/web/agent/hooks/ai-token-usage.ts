@@ -7,6 +7,11 @@ import {
 } from "@invoicey/db";
 import { defineHook, type HookContext } from "eve/hooks";
 
+import {
+  isSlackSession,
+  meteringIdentityFromAuth,
+} from "../lib/metering-identity";
+
 /**
  * Gate Slack/Eve turns when the workspace has no AI tokens, and meter each
  * completed model step against product=slack.
@@ -18,6 +23,11 @@ export default defineHook({
       if (!database) return;
 
       const workspaceId = workspaceFromCtx(ctx);
+      if (!workspaceId) {
+        throw new Error(
+          "This Slack account is not linked to Invoicey. Open the DM link to confirm, then try again.",
+        );
+      }
       try {
         await assertHasTokens(database, workspaceId);
       } catch (err) {
@@ -39,15 +49,19 @@ export default defineHook({
       const completionTokens = usage?.outputTokens ?? 0;
       if (promptTokens + completionTokens <= 0) return;
 
-      const workspaceId = workspaceFromCtx(ctx);
-      const userId = userIdFromCtx(ctx);
+      const identity = meteringIdentityFromAuth(
+        ctx.session.auth.current,
+        getDefaultWorkspaceId(),
+      );
+      if (!identity.workspaceId) return;
+
       const model =
         process.env.INVOICEY_AI_MODEL?.trim() || "openai/gpt-4o-mini";
 
       try {
         await recordLlmUsage({
-          workspaceId,
-          userId,
+          workspaceId: identity.workspaceId,
+          userId: identity.userId,
           product: "slack",
           model,
           promptTokens,
@@ -57,28 +71,21 @@ export default defineHook({
             stepIndex: event.data.stepIndex,
             finishReason: event.data.finishReason,
             channel: ctx.channel.kind ?? null,
+            principalId: identity.principalId ?? null,
+            slackTeamId: identity.slackTeamId ?? null,
+            slackUserId: identity.slackUserId ?? null,
           },
         });
-      } catch {
-        /** metering must not fail the turn after the model already ran */
+      } catch (err) {
+        console.error("[invoicey-slack] AI token metering failed", err);
       }
     },
   },
 });
 
-function workspaceFromCtx(ctx: HookContext): string {
-  const attrs = ctx.session.auth.current?.attributes;
-  const fromAuth =
-    typeof attrs?.workspaceId === "string" ? attrs.workspaceId.trim() : "";
-  if (fromAuth) return fromAuth;
-  return getDefaultWorkspaceId();
-}
-
-function userIdFromCtx(ctx: HookContext): string | undefined {
+function workspaceFromCtx(ctx: HookContext): string | null {
   const current = ctx.session.auth.current;
-  if (!current) return undefined;
-  const attrs = current.attributes;
-  if (typeof attrs?.userId === "string") return attrs.userId;
-  if (current.principalType === "user") return current.principalId;
-  return undefined;
+  const identity = meteringIdentityFromAuth(current, getDefaultWorkspaceId());
+  if (isSlackSession(current) && !identity.workspaceId) return null;
+  return identity.workspaceId || null;
 }

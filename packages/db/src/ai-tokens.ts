@@ -11,6 +11,7 @@ import {
   type AiTokenBucket,
   type AiUsageProduct,
 } from "./ai-usage";
+import { user } from "./auth-schema";
 import type { InvoiceyDb } from "./create-db";
 import type { DbTransaction } from "./transaction";
 import { withDbTransaction } from "./transaction";
@@ -154,6 +155,21 @@ export type RecordLlmUsageResult = {
   summary: AiTokenSummary;
 };
 
+/** Drop ids that are not in `users` so Slack principals cannot roll back a debit. */
+async function existingUserId(
+  db: DbOrTx,
+  userId: string | null | undefined,
+): Promise<string | null> {
+  const trimmed = userId?.trim();
+  if (!trimmed) return null;
+  const [row] = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(eq(user.id, trimmed))
+    .limit(1);
+  return row?.id ?? null;
+}
+
 /** Atomically debit buckets (monthly → gifted → purchased) and append an llm event. */
 export async function recordLlmUsage(
   input: RecordLlmUsageInput,
@@ -163,6 +179,7 @@ export async function recordLlmUsage(
   const totalTokens = promptTokens + completionTokens;
 
   return withDbTransaction(async (tx) => {
+    const userId = await existingUserId(tx, input.userId);
     await ensureAiTokenBalance(tx, input.workspaceId);
 
     const [locked] = await tx
@@ -193,7 +210,7 @@ export async function recordLlmUsage(
     await tx.insert(aiUsageEvents).values({
       id: eventId,
       workspaceId: input.workspaceId,
-      userId: input.userId ?? null,
+      userId,
       product: input.product,
       kind: "llm",
       model: input.model ?? null,
@@ -237,11 +254,12 @@ export async function recordToolActivity(
   input: RecordToolActivityInput,
 ): Promise<{ eventId: string }> {
   await ensureAiTokenBalance(db, input.workspaceId);
+  const userId = await existingUserId(db, input.userId);
   const eventId = crypto.randomUUID();
   await db.insert(aiUsageEvents).values({
     id: eventId,
     workspaceId: input.workspaceId,
-    userId: input.userId ?? null,
+    userId,
     product: input.product ?? "mcp",
     kind: "tool_call",
     model: null,

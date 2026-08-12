@@ -69,6 +69,9 @@ const AUDIT_TYPE_KEYS = [
   "member_role_update",
   "platform_admin_grant",
   "platform_admin_revoke",
+  "slack_link",
+  "slack_unlink",
+  "slack_rebind",
 ] as const;
 
 function summarizeUa(ua?: string | null): string {

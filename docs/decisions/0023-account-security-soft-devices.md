@@ -26,7 +26,7 @@ Alternatives considered:
 ## Consequences
 
 - Security mail requires `defaultWorkspaceId` for `email_messages.workspace_id` (transport constraint); missing workspace logs and skips mail without failing login.
-- Eve Slack Connect sessions still resolve workspace via ops default until Slack identity linking ships.
+- Eve Slack Connect sessions resolve workspace via explicit Slack identity linking (ADR 0020), not the ops default.
 - Operators keep a shared env key for CI/automation alongside per-user PATs.
 
 ## Plans touched

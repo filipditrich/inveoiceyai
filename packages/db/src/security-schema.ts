@@ -27,7 +27,10 @@ export type SecurityAuditEventType =
   | "member_remove"
   | "member_role_update"
   | "platform_admin_grant"
-  | "platform_admin_revoke";
+  | "platform_admin_revoke"
+  | "slack_link"
+  | "slack_unlink"
+  | "slack_rebind";
 
 /** Soft-trusted browsers (Plan 16, ADR 0023). */
 export const trustedDevices = pgTable(

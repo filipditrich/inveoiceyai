@@ -1,19 +1,19 @@
 # Account security
 
-Plan 16 (+ Plan 19 invites/referrals). ADR [0023](../decisions/0023-account-security-soft-devices.md) · [0025](../decisions/0025-referral-attribution.md).
+Plan 16 (+ Plan 19 invites/referrals). ADR [0020](../decisions/0020-slack-identity-linking.md) · [0023](../decisions/0023-account-security-soft-devices.md) · [0025](../decisions/0025-referral-attribution.md).
 
 ## Settings IA
 
-| Route                    | Purpose                                                  |
-| ------------------------ | -------------------------------------------------------- |
-| `/settings`              | Appearance (theme)                                       |
-| `/settings/security`     | Sign-in methods, sessions, trusted devices, recent audit |
-| `/settings/members`      | Workspace members + email invites                        |
-| `/settings/referrals`    | Personal product referral link + click/signup stats      |
-| `/settings/api-keys`     | Personal access tokens + interactive remote MCP setup    |
-| `/settings/integrations` | Slack (use + operator) and MCP entry points              |
+| Route                    | Purpose                                                                  |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `/settings`              | Appearance (theme)                                                       |
+| `/settings/security`     | Sign-in methods, sessions, trusted devices, recent audit                 |
+| `/settings/members`      | Workspace members + email invites                                        |
+| `/settings/referrals`    | Personal product referral link + click/signup stats                      |
+| `/settings/api-keys`     | Personal access tokens + interactive remote MCP setup                    |
+| `/settings/integrations` | Slack identity (unlink/rebind), Slack (use + operator), MCP entry points |
 
-Nav: user menu → Settings. Workspace invite accept: `/invite/[id]` (requires sign-in). Product referral landing: `/r/[code]` (public).
+Nav: user menu → Settings. Workspace invite accept: `/invite/[id]` (requires sign-in). Slack link confirm: `/slack/link/[code]` (requires sign-in). Product referral landing: `/r/[code]` (public).
 
 ## Linked providers
 
@@ -50,9 +50,9 @@ Nav: user menu → Settings. Workspace invite accept: `/invite/[id]` (requires s
 
 **Eve HTTP** (`/eve/v1/*`, non-Slack): ops `EVE_API_KEY` or `MCP_API_KEY` (or OIDC / localDev). User PATs are **not** accepted.
 
-**Slack Eve**: Vercel Connect → `/eve/v1/slack` (deployment identity, ops workspace). Not Settings PATs.
+**Slack Eve**: Vercel Connect → `/eve/v1/slack`. Unlinked Slack users are refused (DM to `/slack/link/[code]`). Linked sessions use `slack_identities` (Invoicey user + workspace). Not Settings PATs. HITL Allow/Deny is not a per-click identity check — keep the bot in a private channel.
 
-MCP tools resolve workspace via request ALS; Eve Slack via ops default workspace.
+MCP tools resolve workspace via request ALS; Eve Slack via the linked identity overlay (fail closed without it). Eve HTTP ops keeps the env default workspace.
 
 ## Members (workspace invites)
 
@@ -75,7 +75,7 @@ MCP tools resolve workspace via request ALS; Eve Slack via ops default workspace
 
 `security_audit_events.type`:
 
-`sign_in` | `session_revoke` | `account_link` | `account_unlink` | `device_trust` | `device_revoke` | `api_key_create` | `api_key_revoke` | `invite_create` | `invite_resend` | `invite_cancel` | `invite_accept` | `invite_reject` | `member_remove` | `member_role_update` | `platform_admin_grant` | `platform_admin_revoke`
+`sign_in` | `session_revoke` | `account_link` | `account_unlink` | `device_trust` | `device_revoke` | `api_key_create` | `api_key_revoke` | `invite_create` | `invite_resend` | `invite_cancel` | `invite_accept` | `invite_reject` | `member_remove` | `member_role_update` | `platform_admin_grant` | `platform_admin_revoke` | `slack_link` | `slack_unlink` | `slack_rebind`
 
 Growth trail lives in `referral_events` (not security audit).
 

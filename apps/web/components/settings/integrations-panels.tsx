@@ -6,6 +6,10 @@ import {
   TerminalIcon,
 } from "lucide-react";
 
+import {
+  SlackIdentitiesPanel,
+  type SlackIdentityView,
+} from "@/components/settings/slack-identities-panel";
 import { SlackSetupGuide } from "@/components/settings/slack-setup-guide";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,9 +20,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export function IntegrationsPanels() {
+export function IntegrationsPanels({
+  slackIdentities,
+  currentWorkspaceId,
+  currentWorkspaceName,
+}: {
+  slackIdentities: SlackIdentityView[];
+  currentWorkspaceId: string;
+  currentWorkspaceName: string;
+}) {
   return (
     <div className="flex flex-col gap-6">
+      <SlackIdentitiesPanel
+        identities={slackIdentities}
+        currentWorkspaceId={currentWorkspaceId}
+        currentWorkspaceName={currentWorkspaceName}
+      />
       <SlackSetupGuide />
 
       <Card>

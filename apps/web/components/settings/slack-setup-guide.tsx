@@ -91,6 +91,10 @@ export function SlackSetupGuide() {
           <ul className="text-muted-foreground list-inside list-disc space-y-1.5 text-sm leading-relaxed">
             <li>Pozvěte bota do kanálu, nebo mu napište DM.</li>
             <li>
+              Nespárovaný Slack účet nejdřív dostane DM s odkazem na potvrzení v
+              Invoicey.
+            </li>
+            <li>
               Zmínka <code className="text-xs">@Invoicey</code> nebo DM spustí
               relaci; v tom samém vlákně už zmínka není potřeba.
             </li>
@@ -128,14 +132,14 @@ export function SlackSetupGuide() {
           <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-400" />
           <div className="space-y-1 leading-relaxed">
             <p className="font-medium text-amber-900 dark:text-amber-200">
-              Přístup bota ke workspace
+              Přístup po propojení Slacku
             </p>
             <p className="text-muted-foreground text-xs">
-              Slack komunikuje přes <strong>Vercel Connect</strong> na{" "}
-              <code className="text-[11px]">/eve/v1/slack</code>. Agent běží
-              jako <strong>deployment</strong> (ops workspace), ne jako váš
-              osobní API klíč. Kdokoli v kanálu má stejnou moc — držte bota v
-              soukromém kanálu s lidmi, kteří smí fakturovat.
+              Nespárovaní Slack uživatelé nedostanou žádnou relaci — bot jim
+              pošle DM s odkazem na potvrzení v Invoicey. Propojení platí pro
+              jeden Invoicey účet a jeden workspace. Allow/Deny ve vlákně může
+              kliknout kdokoli v kanálu; držte bota v soukromém kanálu s lidmi,
+              kteří smí fakturovat.
             </p>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { resolveLinkedSlackPrincipal, tryCreateDbFromEnv } from "@invoicey/db";
 import { connectSlackCredentials } from "@vercel/connect/eve";
 import { defaultSlackAuth, slackChannel } from "eve/channels/slack";
 
@@ -8,10 +9,15 @@ import {
 } from "../lib/slack-channel-extras";
 import { SLACK_CONNECT_UID } from "../lib/slack-connect";
 import {
+  overlayInvoiceyIdentity,
+  slackDisplayNameFromAuth,
+  slackIdsFromAuth,
+} from "../lib/slack-identity";
+import {
   buildInvoiceCard,
   pendingCardFromToolResult,
 } from "../lib/slack-invoice-card";
-import { appOrigin } from "../lib/slack-thread";
+import { deliverSlackLinkInvite } from "../lib/slack-link";
 import {
   appendThinkingTasks,
   completeThinkingTask,
@@ -19,6 +25,7 @@ import {
   startThinkingStream,
   stopThinkingStream,
 } from "../lib/slack-thinking-stream";
+import { appOrigin } from "../lib/slack-thread";
 import {
   invoiceyActionLabel,
   invoiceyActionsLabel,
@@ -79,13 +86,41 @@ export default slackChannel({
     if (message.author?.isBot) return null;
     const isDirectMessage = message.raw.channel_type === "im";
     const shouldHandle =
-      isDirectMessage ||
-      ctx.isBotMentioned() ||
-      (await ctx.isSubscribed());
+      isDirectMessage || ctx.isBotMentioned() || (await ctx.isSubscribed());
     if (!shouldHandle) return null;
     await ctx.cancel();
     const auth = defaultSlackAuth(message, ctx);
-    return auth ? { auth } : null;
+    if (!auth) return null;
+
+    const ids = slackIdsFromAuth(auth);
+    if (!ids) {
+      await ctx.thread.post(
+        "I could not identify this Slack user, so I cannot start an Invoicey session.",
+      );
+      return null;
+    }
+
+    const database = tryCreateDbFromEnv();
+    const principal = database
+      ? await resolveLinkedSlackPrincipal(database, ids)
+      : { status: "unlinked" as const };
+
+    if (principal.status === "linked") {
+      return {
+        auth: overlayInvoiceyIdentity(auth, principal.identity),
+      };
+    }
+
+    await deliverSlackLinkInvite({
+      db: database,
+      thread: ctx.thread,
+      isDirectMessage,
+      slackTeamId: ids.slackTeamId,
+      slackUserId: ids.slackUserId,
+      slackUserName: slackDisplayNameFromAuth(auth),
+      reason: principal.status,
+    });
+    return null;
   },
   events: {
     async "turn.started"(_data, channel) {

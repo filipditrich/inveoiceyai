@@ -374,6 +374,25 @@
     "emailMismatch": "Jste přihlášeni jako {signedInEmail}, ale pozvánka byla odeslána na {inviteEmail}. Přihlaste se pozvaným e-mailem.",
     "signedInAs": "Přihlášeni jako {email}"
   },
+  "SlackLink": {
+    "title": "Propojit Slack s Invoicey",
+    "description": "Potvrďte, že tento Slack účet smí fakturovat v aktuálním pracovním prostoru.",
+    "confirm": "Propojit se Slackem",
+    "confirming": "Propojuji…",
+    "confirmed": "Propojeno",
+    "confirmFailed": "Propojení se nepodařilo",
+    "confirmSuccess": "Slack účet je propojený. Další zpráva v Slacku už půjde do tohoto workspace.",
+    "rebindSuccess": "Slack účet teď používá aktuální pracovní prostor.",
+    "backToApp": "Zpět do aplikace",
+    "slackUser": "Slack uživatel",
+    "workspace": "Pracovní prostor pro nové faktury",
+    "workspaceHint": "Nové faktury ze Slacku půjdou sem. Starší Slack faktury v jiném workspace se nemění. Workspace přepnete v postranním panelu a odkaz otevřete znovu.",
+    "signedInAs": "Přihlášeni jako {email}",
+    "notFound": "Odkaz na propojení neexistuje. Napište botovi znovu a použijte nový DM.",
+    "expired": "Odkaz vypršel (15 minut). Napište botovi znovu.",
+    "consumed": "Tento odkaz už byl použit. Napište botovi, pokud potřebujete nový.",
+    "stealRefused": "Tento Slack účet je už propojený s jiným Invoicey uživatelem. Nechte ho odpojit v Nastavení → Integrace."
+  },
   "Referral": {
     "title": "{name} vás zve do Invoicey",
     "titleAnonymous": "Byli jste pozváni do Invoicey",
@@ -956,7 +975,10 @@
           "member_remove": "Člen odebrán",
           "member_role_update": "Změna role člena",
           "platform_admin_grant": "Platformní admin udělen",
-          "platform_admin_revoke": "Platformní admin odebrán"
+          "platform_admin_revoke": "Platformní admin odebrán",
+          "slack_link": "Propojení Slacku",
+          "slack_unlink": "Odpojení Slacku",
+          "slack_rebind": "Změna Slack workspace"
         }
       }
     },
@@ -1036,6 +1058,22 @@
       "copy": "Kopírovat",
       "copied": "Zkopírováno",
       "loadFailed": "Klíče se nenačetly"
+    },
+    "integrations": {
+      "slackIdentity": {
+        "title": "Propojený Slack",
+        "description": "Jeden Slack účet patří jednomu Invoicey uživateli a jednomu workspace. Nespárované zmínky bot odmítne.",
+        "empty": "Zatím žádný Slack účet. Napište botovi DM — pošle odkaz k potvrzení.",
+        "slackUser": "Slack uživatel {id}",
+        "team": "Tým {id}",
+        "unlink": "Odpojit",
+        "unlinkFailed": "Odpojení selhalo",
+        "unlinkSuccess": "Slack účet odpojen",
+        "useCurrentWorkspace": "Použít {name}",
+        "currentWorkspace": "Aktuální workspace",
+        "rebindFailed": "Změna workspace selhala",
+        "rebindSuccess": "Slack teď používá aktuální workspace"
+      }
     }
   },
   "Admin": {
