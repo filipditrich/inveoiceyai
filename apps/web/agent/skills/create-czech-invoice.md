@@ -23,7 +23,7 @@ description: Step-by-step Czech invoice creation via ARES, draft render, Slack u
    - If amounts are spoken/quoted **including** VAT, set `pricesIncludeVat: true` — normalizer converts to exclusive using the line rate (0 for reverse charge).
    - Never invent `legalNote` / `localReverseChargeCode`; reverse charge without a code fails.
 4. `upload_invoice_files` with `invoiceId` from the create result.
-5. Tell the user the draft `invoiceId`, web URL, and that Issue / Mark paid need button confirmation.
-6. When they ask to issue: `issue_invoice` → wait for approval → `upload_invoice_files` again.
-7. When they ask to mark paid: `mark_invoice_paid` → wait for approval.
-8. When they ask to email the invoice: `send_invoice_email` → wait for approval. Pass `to` if the client has no `contactEmail`.
+5. Keep the reply short — Slack posts a structured Card + **View in Invoicey**; mention draft `invoiceId` only if useful.
+6. When they ask to issue: `issue_invoice` → wait for Allow/Deny → re-upload if needed.
+7. When they ask to mark paid: `mark_invoice_paid` → wait for Allow/Deny.
+8. When they ask to email the invoice: `send_invoice_email` → wait for Allow/Deny. Pass `to` if the client has no `contactEmail`.

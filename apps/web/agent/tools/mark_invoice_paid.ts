@@ -6,7 +6,8 @@ import { z } from "zod";
 import { withEveToolWorkspace } from "../lib/tool-workspace";
 
 export default defineTool({
-  description: "Mark an issued invoice as paid. Requires Slack approval.",
+  description:
+    "Mark an issued invoice as paid. Requires Slack Allow/Deny — confirm the invoice id and amount on the approval card before allowing.",
   inputSchema: z.object({
     id: z.string().uuid(),
   }),

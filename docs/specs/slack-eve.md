@@ -12,7 +12,7 @@ flowchart TB
   Tools --> InvoiceTools["@invoicey/invoice-tools + /ops"]
   InvoiceTools --> Neon["Neon default workspace"]
   InvoiceTools --> Core["invoice-core PDF/ISDOC"]
-  EveRuntime -->|"thread reply + file upload"| SlackAPI["Slack"]
+  EveRuntime -->|"Thinking Steps + Card + files"| SlackAPI["Slack"]
   Cursor["Cursor"] -->|"stdio or /api/mcp"| InvoiceTools
 ```
 
@@ -20,10 +20,25 @@ flowchart TB
 | ------------- | ------------------------------------------------------------------------------------------------------------ |
 | Agent root    | [`apps/web/agent/`](../../apps/web/agent/)                                                                   |
 | Mount         | [`apps/web/next.config.ts`](../../apps/web/next.config.ts) — `withEve(nextConfig)` → `/eve/v1/*`             |
-| Slack channel | `agent/channels/slack.ts` — `connectSlackCredentials("slack/invoicey")`                                      |
+| Slack channel | `agent/channels/slack.ts` — Connect + **live feedback** event overrides (Thinking Steps + invoice Cards)     |
 | HTTP channel  | `agent/channels/eve.ts` — Bearer ops key (`EVE_API_KEY` / `MCP_API_KEY`) **or** user PAT + OIDC + `localDev` |
 | Domain ops    | `@invoicey/invoice-tools/ops` (`issueInvoiceById`, `markInvoicePaidById`, list/get)                          |
 | Create/render | `@invoicey/invoice-tools` (`createAndRenderInvoice`, presets, ARES)                                          |
+
+### Slack live feedback
+
+Invoicey’s Slack channel overrides Eve defaults for richer UX (Linear-style progress):
+
+| Phase | Mechanism |
+| --- | --- |
+| Turn start | Typing `Working…`; Thinking Steps stream opens on the **first tool batch** (clarify-only turns stay quiet) |
+| Tool calls | `chat.appendStream` `task_update` chunks with domain labels (ARES, create draft, upload, …) |
+| HITL | Stream stops with “Waiting for approval…” **before** Eve Allow/Deny cards; `session.waiting` is a safety net |
+| Tool results | Stash invoice/list Card payload; mark tasks complete (optional `sources` → View in Invoicey) |
+| Final reply | Stop stream with markdown + Card blocks, **or** `thread.post(Card)` with View button when streaming unavailable |
+| Artifacts | PDF/ISDOC file uploads stay separate thread messages |
+
+Helpers: `agent/lib/slack-thinking-stream.ts`, `slack-invoice-card.ts`, `slack-tool-labels.ts`, `slack-channel-extras.ts`.
 
 **Auth policy**
 
@@ -91,6 +106,9 @@ The agent cannot complete these steps:
 | 6   | Presets                        | `save_preset` / `list_presets` hit Neon                                      |
 | 7   | Deploy                         | `GET /eve/v1/health` OK; Connect hits `/eve/v1/slack`                        |
 | 8   | Regression                     | Cursor MCP `create_invoice` + web Issue UI still work                        |
+| 9   | Live card / Thinking Steps     | One streamed progress message (or Card fallback) with domain task labels; final Card or stream includes **View in Invoicey**; PDF/ISDOC still upload as files. If streaming is unavailable, Vercel logs `[invoicey-slack] chat.startStream failed:` and the thread uses typing + a final Card. |
+| 10  | List Card                      | `list_invoices` yields a compact multi-field Card (not a long prose table)   |
+| 11  | HITL live card                 | `@Invoicey` Issue / Mark paid / Email: live card finalizes with “Waiting for approval…” then Allow/Deny appears; after Allow, issued/paid/email Card includes **View in Invoicey** |
 
 ## Deploy note
 

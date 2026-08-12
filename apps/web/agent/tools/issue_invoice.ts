@@ -10,7 +10,7 @@ import { uploadInvoiceArtifacts } from "../lib/upload-slack-files";
 
 export default defineTool({
   description:
-    "Issue a draft invoice (atomic numbering). Requires Slack approval. Uploads issued PDF/ISDOC when in a Slack thread.",
+    "Issue a draft invoice (atomic numbering). Requires Slack Allow/Deny — review client, total, and id in the approval card before allowing. Uploads issued PDF/ISDOC when in a Slack thread.",
   inputSchema: z.object({
     id: z.string().uuid().describe("Draft invoice id"),
   }),
