@@ -89,4 +89,7 @@ const nextConfig: NextConfig = {
  */
 const withMDX = createMDX();
 
-export default withEve(withBotId(withNextIntl(withMDX(nextConfig))));
+export default withEve(withBotId(withNextIntl(withMDX(nextConfig))), {
+  /** copy invoice-core fonts/xsd into Eve `__server.func` after nitro build */
+  eveBuildCommand: "node ./scripts/eve-build-with-assets.mjs",
+});

@@ -103,6 +103,8 @@ curl -sS https://invoicey.ditrich.me/eve/v1/health
 
 **Turbo remote cache:** `@invoicey/web` build must not be turbo-cached on Vercel. A cache hit can skip the `withEve` nitro packaging, leave `/eve/v1/*` as Next HTML, and make Slack Connect look “healthy” (HTTP 200 HTML) while Eve never runs. Guard: `apps/web/turbo.json` sets `build.cache: false` and includes `.eve/**` in outputs. Symptom of a bad deploy: `GET /eve/v1/health` returns marketing HTML/`404` instead of JSON `ready`, and `lambdaRuntimeStats.nodejs` drops (e.g. 4 instead of 7). Fix: promote the last Eve-good deployment or `vercel redeploy <id> --target production` (full rebuild).
 
+**PDF fonts in Eve:** Next `outputFileTracingIncludes` does **not** ship into Eve’s nitro `__server.func`. Without assets, Slack `create_invoice` fails with `Missing invoice-core asset 'fonts/Inter-Regular.ttf'`. Guard: `withEve(..., { eveBuildCommand: "node ./scripts/eve-build-with-assets.mjs" })` copies `packages/invoice-core/assets` into the function after `eve build`, plus static `new URL(..., import.meta.url)` font refs in `register-fonts.ts`.
+
 ## Local smoke
 
 ```bash
