@@ -21,6 +21,8 @@ const tables = [
   "issuer_numbering_schemes",
   "invoices",
   "invoice_items",
+  "invoice_templates",
+  "recurring_schedules",
   "presets",
 ];
 

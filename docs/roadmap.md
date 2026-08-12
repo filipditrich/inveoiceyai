@@ -241,7 +241,7 @@ Plans listed here do not block the MVP and can be picked up in parallel with Pla
 
 ### Plan 10 — Recurring invoice drafts
 
-**Status:** Done (implementation; apply SQL on Neon)  
+**Status:** Done  
 **Completed:** 2026-08-12  
 **Spec:** [`specs/recurring.md`](./specs/recurring.md) · [ADR 0027](./decisions/0027-recurring-drafts-only.md) · [plan](../.cursor/plans/plan-10-recurring.md)
 
@@ -255,9 +255,9 @@ Plans listed here do not block the MVP and can be picked up in parallel with Pla
 - [x] Cron `/api/cron/recurring-drafts` (`CRON_SECRET`) + `0 6 * * *`
 - [x] `/invoices/recurring` + save-from-invoice; cs/en
 - [x] Vitest for next-run / materialize / skip; typecheck / lint / test
-- [ ] Apply `packages/db/sql/2026-08-12-plan10-recurring.sql` (or `bun db:push`) on Neon
+- [x] Apply `packages/db/sql/2026-08-12-plan10-recurring.sql` on Neon
 
-**Out of v1:** auto-issue, auto-email, MCP/Eve tools, day 29–31 / last-of-month, template line editor.
+**Out of v1:** auto-issue, auto-email, MCP/Eve tools, template line editor.
 
 ### Plan 11 — Email delivery
 

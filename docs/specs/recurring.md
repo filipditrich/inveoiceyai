@@ -18,7 +18,7 @@ Save an issued (or draft) invoice as a named template, attach a monthly or quart
 ### Tables
 
 - `invoice_templates` — workspace-scoped named payload (`payload_json` is Invoice-shaped). `payment_due_days` is `dueDate − issueDate` from the source. Unique `(workspace_id, name)`.
-- `recurring_schedules` — 1:1 with a template in v1 (`template_id` unique). `cadence` is `monthly` \| `quarterly`. `day_of_month` is 1–28. `next_run_on` is a Prague calendar `YYYY-MM-DD`. `paused` is 0/1. `last_invoice_id` is a uuid without FK (avoids a cycle with invoices).
+- `recurring_schedules` — 1:1 with a template in v1 (`template_id` unique). `cadence` is `weekly` \| `monthly` \| `quarterly` \| `yearly`. `day_of_month` is 1–31 (31 = last day of the month). `next_run_on` is a Prague calendar `YYYY-MM-DD`. `paused` is 0/1. `last_invoice_id` is a uuid without FK (avoids a cycle with invoices).
 - `invoices.recurring_schedule_id` — nullable FK, `ON DELETE SET NULL`. Used for provenance and “open draft exists”.
 
 Do **not** reuse MCP `presets` (`kind: invoice_template`).
@@ -46,8 +46,8 @@ Skip (count as skipped, not error) when:
 
 ### Cadence
 
-- Default `next_run_on` on create = next occurrence of `day_of_month` **≥ tomorrow** (never same-day surprise).
-- After a cron run, add 1 month (monthly) or 3 months (quarterly), keeping `day_of_month`.
+- Default `next_run_on` on create = next occurrence of `day_of_month` **≥ tomorrow** (never same-day surprise). Weekly uses tomorrow.
+- After a cron run, add 7 days (weekly), 1 month (monthly), 3 months (quarterly), or 12 months (yearly). Day 31 clamps to the last calendar day of that month.
 
 ### Cron
 
@@ -66,7 +66,6 @@ No template line editor. Change lines by saving a new template from a newer invo
 
 - `TODO(plan-10-later):` auto-issue / auto-email opt-in
 - `TODO(plan-10-later):` MCP / Eve tools
-- `TODO(plan-10-later):` last-of-month and day 29–31
 
 ## References
 
