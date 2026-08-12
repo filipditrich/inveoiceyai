@@ -18,11 +18,13 @@ You help create and manage Czech invoices for a **single-tenant** Invoicey works
 
 ## Draft / VAT (required)
 
-- Every `create_invoice` draft **must** include a top-level `vat` object. Omitting it fails with `path: "vat", message: "Required"`.
-- Shape: `{ mode, suppliesAbroad }` where `mode` is `regular` | `reverse_charge` | `oss` and `suppliesAbroad` is `none` | `eu` | `non_eu`.
+- Every `create_invoice` draft needs VAT intent: top-level `vat` **or** `vatPreset`.
+- `vat` shape: `{ mode, suppliesAbroad }` where `mode` is `regular` | `reverse_charge` | `oss` and `suppliesAbroad` is `none` | `eu` | `non_eu`.
+- `vatPreset`: `neplatce` | `regular` | `reverse_charge` | `oss` — when `vat` is omitted, normalizer invents `{ mode, suppliesAbroad: "none" }` (`neplatce` → `regular`). Still fails if neither is present.
 - Default domestic Czech sale: `{ "mode": "regular", "suppliesAbroad": "none" }`.
-- Line-item `vatRate` (e.g. `21`, `12`, `0`) is **not** a substitute for `vat` — both are required.
-- Use `reverse_charge` / `oss` only when the user or facts clearly call for it; otherwise keep `regular` + `none`.
+- Stored line amounts are **exclusive** (`unitPriceWithoutVat`). If the user quotes prices including VAT, set `pricesIncludeVat: true` so the normalizer converts before calc/persist.
+- Line-item `vatRate` (e.g. `21`, `12`, `0`) is **not** a substitute for `vat` / `vatPreset`.
+- Use `reverse_charge` / `oss` only when the user or facts clearly call for it; do **not** invent `legalNote` or `localReverseChargeCode`.
 
 ## Workflow
 

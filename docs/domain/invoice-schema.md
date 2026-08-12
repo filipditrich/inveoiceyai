@@ -10,15 +10,15 @@ See also: [`vat-czech.md`](./vat-czech.md), [`numbering.md`](./numbering.md), [`
 
 ```ts
 const InvoiceSchema = z.object({
-	meta: InvoiceMetaSchema,
-	issuer: IssuerSnapshotSchema,
-	client: ClientSnapshotSchema,
-	vat: InvoiceVatSchema,
-	payment: PaymentSchema,
-	items: z.array(InvoiceItemSchema).min(1),
-	totals: TotalsSchema,
-	notes: z.string().max(2000).optional(),
-	customization: InvoiceCustomizationSchema.optional(),
+  meta: InvoiceMetaSchema,
+  issuer: IssuerSnapshotSchema,
+  client: ClientSnapshotSchema,
+  vat: InvoiceVatSchema,
+  payment: PaymentSchema,
+  items: z.array(InvoiceItemSchema).min(1),
+  totals: TotalsSchema,
+  notes: z.string().max(2000).optional(),
+  customization: InvoiceCustomizationSchema.optional(),
 });
 
 type Invoice = z.infer<typeof InvoiceSchema>;
@@ -30,16 +30,16 @@ Every nested schema is described below. All shapes are intentionally explicit �
 
 ```ts
 const InvoiceMetaSchema = z.object({
-	docType: z.enum(['invoice', 'proforma', 'advance', 'credit_note']),
-	number: z.string().min(1).max(64),
-	issueDate: z.string().date(),
-	dueDate: z.string().date(),
-	/** Datum uskutečnění zdanitelného plnění */
-	duzp: z.string().date(),
-	language: z.literal('cs'),
-	currency: z.literal('CZK'),
-	/** Reference to the original invoice (only for credit_note) */
-	correctedInvoiceNumber: z.string().min(1).max(64).optional(),
+  docType: z.enum(["invoice", "proforma", "advance", "credit_note"]),
+  number: z.string().min(1).max(64),
+  issueDate: z.string().date(),
+  dueDate: z.string().date(),
+  /** Datum uskutečnění zdanitelného plnění */
+  duzp: z.string().date(),
+  language: z.literal("cs"),
+  currency: z.enum(["CZK", "EUR", "USD"]),
+  /** Reference to the original invoice (only for credit_note) */
+  correctedInvoiceNumber: z.string().min(1).max(64).optional(),
 });
 ```
 
@@ -56,43 +56,44 @@ const InvoiceMetaSchema = z.object({
 
 ```ts
 const IssuerSnapshotSchema = z.object({
-	id: z.string().uuid(),
-	name: z.string().min(1).max(200),
-	ico: IcoSchema,
-	dic: DicSchema.optional(),
-	address: AddressSchema,
-	bank: BankAccountSchema,
-	vatPayer: z.boolean(),
-	logoUrl: z.string().url().optional(),
-	stampUrl: z.string().url().optional(),
-	signatureUrl: z.string().url().optional(),
-	registryNote: z.string().max(500).optional(),
+  id: z.string().uuid(),
+  name: z.string().min(1).max(200),
+  ico: IcoSchema,
+  dic: DicSchema.optional(),
+  address: AddressSchema,
+  bank: BankAccountSchema,
+  vatPayer: z.boolean(),
+  logoUrl: z.string().url().optional(),
+  stampUrl: z.string().url().optional(),
+  signatureUrl: z.string().url().optional(),
+  registryNote: z.string().max(500).optional(),
 });
 ```
 
 Where:
 
 ```ts
-const IcoSchema = z
-	.string()
-	.regex(/^\d{8}$/, 'IČO must be exactly 8 digits');
+const IcoSchema = z.string().regex(/^\d{8}$/, "IČO must be exactly 8 digits");
 
 const DicSchema = z
-	.string()
-	.regex(/^CZ\d{8,10}$/, 'DIČ must be CZ followed by 8–10 digits');
+  .string()
+  .regex(/^CZ\d{8,10}$/, "DIČ must be CZ followed by 8–10 digits");
 
 const AddressSchema = z.object({
-	street: z.string().min(1).max(200),
-	city: z.string().min(1).max(100),
-	zip: z.string().regex(/^\d{3} ?\d{2}$/, 'PSČ must be 5 digits'),
-	country: z.literal('CZ'),
+  street: z.string().min(1).max(200),
+  city: z.string().min(1).max(100),
+  zip: z.string().regex(/^\d{3} ?\d{2}$/, "PSČ must be 5 digits"),
+  country: z.literal("CZ"),
 });
 
 const BankAccountSchema = z.object({
-	/** Czech account number in canonical form `prefix-number/bankCode` */
-	accountNumber: z.string().regex(/^(?:\d{1,6}-)?\d{1,10}\/\d{4}$/),
-	iban: z.string().regex(/^CZ\d{22}$/),
-	bic: z.string().regex(/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/).optional(),
+  /** Czech account number in canonical form `prefix-number/bankCode` */
+  accountNumber: z.string().regex(/^(?:\d{1,6}-)?\d{1,10}\/\d{4}$/),
+  iban: z.string().regex(/^CZ\d{22}$/),
+  bic: z
+    .string()
+    .regex(/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/)
+    .optional(),
 });
 ```
 
@@ -116,27 +117,27 @@ UI lets the issuer save a default note that's used unless overridden per invoice
 
 ```ts
 const ClientSnapshotSchema = z.object({
-	id: z.string().uuid(),
-	name: z.string().min(1).max(200),
-	ico: IcoSchema.optional(),
-	dic: DicSchema.optional(),
-	address: ClientAddressSchema,
-	contactEmail: z.string().email().optional(),
+  id: z.string().uuid(),
+  name: z.string().min(1).max(200),
+  ico: IcoSchema.optional(),
+  dic: DicSchema.optional(),
+  address: ClientAddressSchema,
+  contactEmail: z.string().email().optional(),
 });
 
 const ClientAddressSchema = z.object({
-	street: z.string().min(1).max(200),
-	city: z.string().min(1).max(100),
-	zip: z.string().regex(/^\d{3} ?\d{2}|[A-Z0-9 \-]{3,10}$/),
-	/** ISO 3166-1 alpha-2 — typically 'CZ' for MVP but allowed for cross-border invoices */
-	country: z.string().regex(/^[A-Z]{2}$/),
+  street: z.string().min(1).max(200),
+  city: z.string().min(1).max(100),
+  zip: z.string().regex(/^\d{3} ?\d{2}|[A-Z0-9 \-]{3,10}$/),
+  /** ISO 3166-1 alpha-2 — typically 'CZ' for MVP but allowed for cross-border invoices */
+  country: z.string().regex(/^[A-Z]{2}$/),
 });
 ```
 
 Notes:
 
 - `ico` is optional because clients can be foreign or natural persons without an IČO
-- For Czech B2B invoices, IČO is effectively mandatory and the UI enforces it; the *schema* allows omission so OBO/self-billing and foreign clients fit
+- For Czech B2B invoices, IČO is effectively mandatory and the UI enforces it; the _schema_ allows omission so OBO/self-billing and foreign clients fit
 - Address allows non-CZ ZIP/format because we want to model invoicing abroad even though MVP language is Czech-only
 
 Like `issuer`, `client` is a snapshot — see [`snapshots.md`](./snapshots.md).
@@ -145,12 +146,12 @@ Like `issuer`, `client` is a snapshot — see [`snapshots.md`](./snapshots.md).
 
 ```ts
 const InvoiceVatSchema = z.object({
-	mode: z.enum(['regular', 'reverse_charge', 'oss']),
-	suppliesAbroad: z.enum(['none', 'eu', 'non_eu']),
-	/** Free-text legal note shown on the PDF, e.g. "Daň odvede zákazník dle § 92a..." */
-	legalNote: z.string().max(500).optional(),
-	/** ISDOC LocalReverseChargeCode (e.g. 4 = construction); required when reverse_charge. */
-	localReverseChargeCode: z.string().min(1).max(10).optional(),
+  mode: z.enum(["regular", "reverse_charge", "oss"]),
+  suppliesAbroad: z.enum(["none", "eu", "non_eu"]),
+  /** Free-text legal note shown on the PDF, e.g. "Daň odvede zákazník dle § 92a..." */
+  legalNote: z.string().max(500).optional(),
+  /** ISDOC LocalReverseChargeCode (e.g. 4 = construction); required when reverse_charge. */
+  localReverseChargeCode: z.string().min(1).max(10).optional(),
 });
 ```
 
@@ -167,16 +168,25 @@ Refer to [`vat-czech.md`](./vat-czech.md) for the full semantics and per-mode wo
 
 ```ts
 const PaymentSchema = z.object({
-	method: z.enum(['transfer', 'cash', 'card']),
-	bankAccount: BankAccountSchema.optional(),
-	/** Czech variable symbol — typically the numeric portion of meta.number */
-	variableSymbol: z.string().regex(/^\d{1,10}$/).optional(),
-	constantSymbol: z.string().regex(/^\d{1,4}$/).optional(),
-	specificSymbol: z.string().regex(/^\d{1,10}$/).optional(),
-	/** Multi-line text above the payment block. Markdown: `**bold**`, `*italic*`, `_italic_`. */
-	instructionsBefore: z.string().max(2000).optional(),
-	/** Multi-line text below the payment block (above `notes`). Same markdown subset. */
-	instructionsAfter: z.string().max(2000).optional(),
+  method: z.enum(["transfer", "cash", "card"]),
+  bankAccount: BankAccountSchema.optional(),
+  /** Czech variable symbol — typically the numeric portion of meta.number */
+  variableSymbol: z
+    .string()
+    .regex(/^\d{1,10}$/)
+    .optional(),
+  constantSymbol: z
+    .string()
+    .regex(/^\d{1,4}$/)
+    .optional(),
+  specificSymbol: z
+    .string()
+    .regex(/^\d{1,10}$/)
+    .optional(),
+  /** Multi-line text above the payment block. Markdown: `**bold**`, `*italic*`, `_italic_`. */
+  instructionsBefore: z.string().max(2000).optional(),
+  /** Multi-line text below the payment block (above `notes`). Same markdown subset. */
+  instructionsAfter: z.string().max(2000).optional(),
 });
 ```
 
@@ -192,25 +202,25 @@ Validation:
 
 ```ts
 const InvoiceItemSchema = z.object({
-	position: z.number().int().min(1),
-	description: z.string().min(1).max(500),
-	quantity: z.number().positive(),
-	/** Free-form unit label: 'ks' (pieces), 'h' (hours), 'měs.' (months), '%', etc. */
-	unit: z.string().min(1).max(20),
-	unitPriceWithoutVat: z.number().nonnegative(),
-	vatRate: VatRateSchema,
-	/** Pre-computed totals for this line — required and re-validated server-side */
-	lineSubtotal: z.number().nonnegative(),
-	lineVat: z.number().nonnegative(),
-	lineTotal: z.number().nonnegative(),
+  position: z.number().int().min(1),
+  description: z.string().min(1).max(500),
+  quantity: z.number().positive(),
+  /** Free-form unit label: 'ks' (pieces), 'h' (hours), 'měs.' (months), '%', etc. */
+  unit: z.string().min(1).max(20),
+  unitPriceWithoutVat: z.number().nonnegative(),
+  vatRate: VatRateSchema,
+  /** Pre-computed totals for this line — required and re-validated server-side */
+  lineSubtotal: z.number().nonnegative(),
+  lineVat: z.number().nonnegative(),
+  lineTotal: z.number().nonnegative(),
 });
 
 const VatRateSchema = z.union([
-	z.literal(0),
-	z.literal(12),
-	z.literal(21),
-	/** Custom positive rate — used for backdated invoices with historical rates (15, 10) */
-	z.number().min(0).max(100).int(),
+  z.literal(0),
+  z.literal(12),
+  z.literal(21),
+  /** Custom positive rate — used for backdated invoices with historical rates (15, 10) */
+  z.number().min(0).max(100).int(),
 ]);
 ```
 
@@ -220,8 +230,8 @@ For every item:
 
 ```ts
 lineSubtotal === round2(quantity * unitPriceWithoutVat);
-lineVat       === round2(lineSubtotal * vatRate / 100);
-lineTotal     === round2(lineSubtotal + lineVat);
+lineVat === round2((lineSubtotal * vatRate) / 100);
+lineTotal === round2(lineSubtotal + lineVat);
 ```
 
 `round2` = banker's rounding to 2 decimals (`Math.round` then `/100`). `calcTotals` produces these and the server action re-runs it before persisting; the schema accepts the user-provided values but the server treats them as advisory.
@@ -232,16 +242,16 @@ The `position` field is 1-indexed and dense (no gaps), reordered server-side aft
 
 ```ts
 const TotalsSchema = z.object({
-	subtotal: z.number().nonnegative(),
-	vatBreakdown: z.array(VatBreakdownEntrySchema),
-	vatTotal: z.number().nonnegative(),
-	total: z.number().nonnegative(),
+  subtotal: z.number().nonnegative(),
+  vatBreakdown: z.array(VatBreakdownEntrySchema),
+  vatTotal: z.number().nonnegative(),
+  total: z.number().nonnegative(),
 });
 
 const VatBreakdownEntrySchema = z.object({
-	rate: z.number().min(0).max(100),
-	base: z.number().nonnegative(),
-	vat: z.number().nonnegative(),
+  rate: z.number().min(0).max(100),
+  base: z.number().nonnegative(),
+  vat: z.number().nonnegative(),
 });
 ```
 
@@ -258,11 +268,11 @@ The `vatBreakdown` array is what the PDF renders as the "Rekapitulace DPH" block
 
 ```ts
 const InvoiceCustomizationSchema = z.object({
-	accentColor: z
-		.enum(['neutral', 'blue', 'green', 'amber', 'rose', 'violet'])
-		.default('neutral'),
-	showStamp: z.boolean().default(false),
-	showSignature: z.boolean().default(false),
+  accentColor: z
+    .enum(["neutral", "blue", "green", "amber", "rose", "violet"])
+    .default("neutral"),
+  showStamp: z.boolean().default(false),
+  showSignature: z.boolean().default(false),
 });
 ```
 
@@ -274,88 +284,86 @@ A real `Invoice` produced by an issuer that is `vatPayer = true`, regular VAT mo
 
 ```json
 {
-	"meta": {
-		"docType": "invoice",
-		"number": "20260001",
-		"issueDate": "2026-05-03",
-		"dueDate": "2026-05-17",
-		"duzp": "2026-05-03",
-		"language": "cs",
-		"currency": "CZK"
-	},
-	"issuer": {
-		"id": "ca8b8d4e-2e7e-4f6a-9b7d-1f9c1234abcd",
-		"name": "Filip Ditrich",
-		"ico": "12345678",
-		"dic": "CZ12345678",
-		"address": {
-			"street": "Na Příkopě 14",
-			"city": "Praha",
-			"zip": "110 00",
-			"country": "CZ"
-		},
-		"bank": {
-			"accountNumber": "1920014539/0800",
-			"iban": "CZ6508000000192000145399",
-			"bic": "GIBACZPX"
-		},
-		"vatPayer": true,
-		"logoUrl": "https://cdn.uploadthing.com/abc123/logo.png",
-		"registryNote": "Fyzická osoba zapsaná v živnostenském rejstříku."
-	},
-	"client": {
-		"id": "5bc1d5a7-0c58-4cda-a1f6-4ad9876543ff",
-		"name": "NFCtron s.r.o.",
-		"ico": "07654321",
-		"dic": "CZ07654321",
-		"address": {
-			"street": "Křížová 2598/4",
-			"city": "Brno",
-			"zip": "603 00",
-			"country": "CZ"
-		},
-		"contactEmail": "billing@nfctron.com"
-	},
-	"vat": {
-		"mode": "regular",
-		"suppliesAbroad": "none"
-	},
-	"payment": {
-		"method": "transfer",
-		"bankAccount": {
-			"accountNumber": "1920014539/0800",
-			"iban": "CZ6508000000192000145399",
-			"bic": "GIBACZPX"
-		},
-		"variableSymbol": "20260001",
-		"constantSymbol": "0308"
-	},
-	"items": [
-		{
-			"position": 1,
-			"description": "Vývojové práce za duben 2026 — backend",
-			"quantity": 80,
-			"unit": "h",
-			"unitPriceWithoutVat": 1500,
-			"vatRate": 21,
-			"lineSubtotal": 120000,
-			"lineVat": 25200,
-			"lineTotal": 145200
-		}
-	],
-	"totals": {
-		"subtotal": 120000,
-		"vatBreakdown": [
-			{ "rate": 21, "base": 120000, "vat": 25200 }
-		],
-		"vatTotal": 25200,
-		"total": 145200
-	},
-	"customization": {
-		"accentColor": "neutral",
-		"showStamp": false,
-		"showSignature": true
-	}
+  "meta": {
+    "docType": "invoice",
+    "number": "20260001",
+    "issueDate": "2026-05-03",
+    "dueDate": "2026-05-17",
+    "duzp": "2026-05-03",
+    "language": "cs",
+    "currency": "CZK"
+  },
+  "issuer": {
+    "id": "ca8b8d4e-2e7e-4f6a-9b7d-1f9c1234abcd",
+    "name": "Filip Ditrich",
+    "ico": "12345678",
+    "dic": "CZ12345678",
+    "address": {
+      "street": "Na Příkopě 14",
+      "city": "Praha",
+      "zip": "110 00",
+      "country": "CZ"
+    },
+    "bank": {
+      "accountNumber": "1920014539/0800",
+      "iban": "CZ6508000000192000145399",
+      "bic": "GIBACZPX"
+    },
+    "vatPayer": true,
+    "logoUrl": "https://cdn.uploadthing.com/abc123/logo.png",
+    "registryNote": "Fyzická osoba zapsaná v živnostenském rejstříku."
+  },
+  "client": {
+    "id": "5bc1d5a7-0c58-4cda-a1f6-4ad9876543ff",
+    "name": "NFCtron s.r.o.",
+    "ico": "07654321",
+    "dic": "CZ07654321",
+    "address": {
+      "street": "Křížová 2598/4",
+      "city": "Brno",
+      "zip": "603 00",
+      "country": "CZ"
+    },
+    "contactEmail": "billing@nfctron.com"
+  },
+  "vat": {
+    "mode": "regular",
+    "suppliesAbroad": "none"
+  },
+  "payment": {
+    "method": "transfer",
+    "bankAccount": {
+      "accountNumber": "1920014539/0800",
+      "iban": "CZ6508000000192000145399",
+      "bic": "GIBACZPX"
+    },
+    "variableSymbol": "20260001",
+    "constantSymbol": "0308"
+  },
+  "items": [
+    {
+      "position": 1,
+      "description": "Vývojové práce za duben 2026 — backend",
+      "quantity": 80,
+      "unit": "h",
+      "unitPriceWithoutVat": 1500,
+      "vatRate": 21,
+      "lineSubtotal": 120000,
+      "lineVat": 25200,
+      "lineTotal": 145200
+    }
+  ],
+  "totals": {
+    "subtotal": 120000,
+    "vatBreakdown": [{ "rate": 21, "base": 120000, "vat": 25200 }],
+    "vatTotal": 25200,
+    "total": 145200
+  },
+  "customization": {
+    "accentColor": "neutral",
+    "showStamp": false,
+    "showSignature": true
+  }
 }
 ```
 
@@ -365,44 +373,42 @@ Construction service to a Czech VAT-payer client, both registered for VAT:
 
 ```json
 {
-	"meta": {
-		"docType": "invoice",
-		"number": "20260002",
-		"issueDate": "2026-05-03",
-		"dueDate": "2026-05-17",
-		"duzp": "2026-04-30",
-		"language": "cs",
-		"currency": "CZK"
-	},
-	"issuer": { "...": "as above" },
-	"client": { "...": "as above (Czech, vatPayer)" },
-	"vat": {
-		"mode": "reverse_charge",
-		"suppliesAbroad": "none",
-		"legalNote": "Daň odvede zákazník dle § 92a zákona č. 235/2004 Sb."
-	},
-	"payment": { "method": "transfer", "...": "as above" },
-	"items": [
-		{
-			"position": 1,
-			"description": "Stavební práce — rekonstrukce kanceláří",
-			"quantity": 1,
-			"unit": "ks",
-			"unitPriceWithoutVat": 250000,
-			"vatRate": 0,
-			"lineSubtotal": 250000,
-			"lineVat": 0,
-			"lineTotal": 250000
-		}
-	],
-	"totals": {
-		"subtotal": 250000,
-		"vatBreakdown": [
-			{ "rate": 0, "base": 250000, "vat": 0 }
-		],
-		"vatTotal": 0,
-		"total": 250000
-	}
+  "meta": {
+    "docType": "invoice",
+    "number": "20260002",
+    "issueDate": "2026-05-03",
+    "dueDate": "2026-05-17",
+    "duzp": "2026-04-30",
+    "language": "cs",
+    "currency": "CZK"
+  },
+  "issuer": { "...": "as above" },
+  "client": { "...": "as above (Czech, vatPayer)" },
+  "vat": {
+    "mode": "reverse_charge",
+    "suppliesAbroad": "none",
+    "legalNote": "Daň odvede zákazník dle § 92a zákona č. 235/2004 Sb."
+  },
+  "payment": { "method": "transfer", "...": "as above" },
+  "items": [
+    {
+      "position": 1,
+      "description": "Stavební práce — rekonstrukce kanceláří",
+      "quantity": 1,
+      "unit": "ks",
+      "unitPriceWithoutVat": 250000,
+      "vatRate": 0,
+      "lineSubtotal": 250000,
+      "lineVat": 0,
+      "lineTotal": 250000
+    }
+  ],
+  "totals": {
+    "subtotal": 250000,
+    "vatBreakdown": [{ "rate": 0, "base": 250000, "vat": 0 }],
+    "vatTotal": 0,
+    "total": 250000
+  }
 }
 ```
 
@@ -412,41 +418,39 @@ Reduces invoice `20260001` by one line (returned hours):
 
 ```json
 {
-	"meta": {
-		"docType": "credit_note",
-		"number": "DOB20260001",
-		"issueDate": "2026-05-10",
-		"dueDate": "2026-05-24",
-		"duzp": "2026-05-10",
-		"language": "cs",
-		"currency": "CZK",
-		"correctedInvoiceNumber": "20260001"
-	},
-	"issuer": { "...": "as above" },
-	"client": { "...": "as above" },
-	"vat": { "mode": "regular", "suppliesAbroad": "none" },
-	"payment": { "method": "transfer", "...": "as above" },
-	"items": [
-		{
-			"position": 1,
-			"description": "Storno 8 h — duplicitně fakturováno",
-			"quantity": -8,
-			"unit": "h",
-			"unitPriceWithoutVat": 1500,
-			"vatRate": 21,
-			"lineSubtotal": -12000,
-			"lineVat": -2520,
-			"lineTotal": -14520
-		}
-	],
-	"totals": {
-		"subtotal": -12000,
-		"vatBreakdown": [
-			{ "rate": 21, "base": -12000, "vat": -2520 }
-		],
-		"vatTotal": -2520,
-		"total": -14520
-	}
+  "meta": {
+    "docType": "credit_note",
+    "number": "DOB20260001",
+    "issueDate": "2026-05-10",
+    "dueDate": "2026-05-24",
+    "duzp": "2026-05-10",
+    "language": "cs",
+    "currency": "CZK",
+    "correctedInvoiceNumber": "20260001"
+  },
+  "issuer": { "...": "as above" },
+  "client": { "...": "as above" },
+  "vat": { "mode": "regular", "suppliesAbroad": "none" },
+  "payment": { "method": "transfer", "...": "as above" },
+  "items": [
+    {
+      "position": 1,
+      "description": "Storno 8 h — duplicitně fakturováno",
+      "quantity": -8,
+      "unit": "h",
+      "unitPriceWithoutVat": 1500,
+      "vatRate": 21,
+      "lineSubtotal": -12000,
+      "lineVat": -2520,
+      "lineTotal": -14520
+    }
+  ],
+  "totals": {
+    "subtotal": -12000,
+    "vatBreakdown": [{ "rate": 21, "base": -12000, "vat": -2520 }],
+    "vatTotal": -2520,
+    "total": -14520
+  }
 }
 ```
 
@@ -466,19 +470,19 @@ The DB schema mirrors the Zod schema; see Plan 1 for the Drizzle implementation.
 
 ISDOC 6.0.2 fields map roughly:
 
-| `InvoiceSchema` field | ISDOC element |
-| --- | --- |
-| `meta.docType` | `<DocumentType>` |
-| `meta.number` | `<ID>` |
-| `meta.issueDate` | `<IssueDate>` |
-| `meta.duzp` | `<TaxPointDate>` |
-| `meta.dueDate` | `<PaymentMeans>…<PaymentDueDate>` |
-| `issuer.*` | `<AccountingSupplierParty>` |
-| `client.*` | `<AccountingCustomerParty>` (`PartyIdentification/ID` empty when no IČO) |
-| `items[*]` | `<InvoiceLines><InvoiceLine>` |
-| `totals.*` | `<LegalMonetaryTotal>`, `<TaxTotal>` |
-| `vat.legalNote` | `<Note>` / line `<VATNote>` (reverse charge) |
-| `vat.localReverseChargeCode` | `<LocalReverseChargeCode>` |
+| `InvoiceSchema` field        | ISDOC element                                                            |
+| ---------------------------- | ------------------------------------------------------------------------ |
+| `meta.docType`               | `<DocumentType>`                                                         |
+| `meta.number`                | `<ID>`                                                                   |
+| `meta.issueDate`             | `<IssueDate>`                                                            |
+| `meta.duzp`                  | `<TaxPointDate>`                                                         |
+| `meta.dueDate`               | `<PaymentMeans>…<PaymentDueDate>`                                        |
+| `issuer.*`                   | `<AccountingSupplierParty>`                                              |
+| `client.*`                   | `<AccountingCustomerParty>` (`PartyIdentification/ID` empty when no IČO) |
+| `items[*]`                   | `<InvoiceLines><InvoiceLine>`                                            |
+| `totals.*`                   | `<LegalMonetaryTotal>`, `<TaxTotal>`                                     |
+| `vat.legalNote`              | `<Note>` / line `<VATNote>` (reverse charge)                             |
+| `vat.localReverseChargeCode` | `<LocalReverseChargeCode>`                                               |
 
 Full mapping lives in `specs/isdoc.md` (written before Plan 3).
 

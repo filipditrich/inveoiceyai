@@ -32,12 +32,15 @@ function renderNavAnchor(url: string) {
 export function NavMain({
   items,
   groupLabel = "Platform",
+  collapseLabel,
 }: {
   items: {
     title: string;
     url: string;
     icon: React.ReactNode;
     isActive?: boolean;
+    /** always expand invoices submenu */
+    defaultOpen?: boolean;
     items?: {
       title: string;
       url: string;
@@ -46,6 +49,7 @@ export function NavMain({
     }[];
   }[];
   groupLabel?: string;
+  collapseLabel?: (title: string) => string;
 }) {
   return (
     <SidebarGroup>
@@ -56,7 +60,7 @@ export function NavMain({
         {items.map((item) => (
           <Collapsible
             key={item.title}
-            defaultOpen={item.isActive}
+            defaultOpen={item.defaultOpen ?? item.isActive}
             render={<SidebarMenuItem />}
           >
             <SidebarMenuButton
@@ -78,7 +82,9 @@ export function NavMain({
                 >
                   <ChevronRightIcon />
                   <span className="sr-only">
-                    Rozbalit nebo sbalit {item.title}
+                    {collapseLabel
+                      ? collapseLabel(item.title)
+                      : `Toggle ${item.title}`}
                   </span>
                 </SidebarMenuAction>
                 <CollapsibleContent>

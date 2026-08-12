@@ -68,6 +68,7 @@ export default async function InvoiceEditPage({
           issueDate: inv.meta.issueDate,
           dueDate: inv.meta.dueDate,
           duzp: inv.meta.duzp,
+          currency: inv.meta.currency,
           vatMode: inv.vat.mode,
           suppliesAbroad: inv.vat.suppliesAbroad,
           legalNote: inv.vat.legalNote,

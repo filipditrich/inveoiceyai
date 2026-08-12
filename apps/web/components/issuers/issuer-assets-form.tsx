@@ -52,21 +52,21 @@ export function IssuerAssetsForm(props: {
         </p>
       ) : null}
       <AssetField
-        label="Logo URL"
+        label="Logo"
         onUrl={setLogoUrl}
         endpoint="issuerLogo"
         uploadConfigured={uploadConfigured}
         url={logoUrl}
       />
       <AssetField
-        label="Razítko URL"
+        label="Razítko"
         onUrl={setStampUrl}
         endpoint="issuerStamp"
         uploadConfigured={uploadConfigured}
         url={stampUrl}
       />
       <AssetField
-        label="Podpis URL"
+        label="Podpis"
         onUrl={setSignatureUrl}
         endpoint="issuerSignature"
         uploadConfigured={uploadConfigured}

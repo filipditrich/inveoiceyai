@@ -8,9 +8,13 @@ import {
   DOC_TYPES,
   type NumberingSchemeDraft,
 } from "@/lib/issuer-types";
-import { UploadButton } from "@/lib/uploadthing";
+import { UploadDropzone } from "@/lib/uploadthing";
 import type { ClientDraft } from "@invoicey/ares";
-import { IcoSchema } from "@invoicey/invoice-core/schema";
+import {
+  IcoSchema,
+  isValidCzIban,
+  suggestCzIban,
+} from "@invoicey/invoice-core/schema";
 import * as React from "react";
 
 export { DEFAULT_TEMPLATES, DOC_TYPES, type NumberingSchemeDraft };
@@ -27,6 +31,117 @@ export function FieldGroup(props: {
   );
 }
 
+/** Suggest CZ IBAN from account number; preserve manual IBAN edits. */
+export function useCzechIbanSuggest(initialAccount = "", initialIban = "") {
+  const [accountNumber, setAccountNumber] = React.useState(initialAccount);
+  const [iban, setIban] = React.useState(initialIban);
+  const [ibanTouched, setIbanTouched] = React.useState(false);
+  const [autoIban, setAutoIban] = React.useState<string | null>(() =>
+    suggestCzIban(initialAccount),
+  );
+
+  function onAccountNumberChange(value: string) {
+    setAccountNumber(value);
+    const suggested = suggestCzIban(value);
+    setAutoIban(suggested);
+    if (
+      !ibanTouched ||
+      iban === "" ||
+      (autoIban != null && iban === autoIban)
+    ) {
+      setIban(suggested ?? "");
+      if (suggested) {
+        setIbanTouched(false);
+      }
+    }
+  }
+
+  function onIbanChange(value: string) {
+    setIbanTouched(true);
+    setIban(value.replace(/\s+/gu, "").toUpperCase());
+  }
+
+  function seedBank(nextAccount: string, nextIban?: string) {
+    setAccountNumber(nextAccount);
+    const suggested = suggestCzIban(nextAccount);
+    setAutoIban(suggested);
+    const resolved =
+      (nextIban?.replace(/\s+/gu, "").toUpperCase() || suggested) ?? "";
+    setIban(resolved);
+    setIbanTouched(Boolean(nextIban && nextIban !== suggested));
+  }
+
+  const accountHint =
+    accountNumber.trim() && !suggestCzIban(accountNumber)
+      ? "Zadejte účet ve tvaru 123456789/0100 nebo 19-2000145399/0800."
+      : null;
+  const ibanHint =
+    iban.trim() && !isValidCzIban(iban)
+      ? "IBAN má neplatný kontrolní součet."
+      : autoIban && iban === autoIban
+        ? "IBAN doplněn z čísla účtu."
+        : null;
+
+  return {
+    accountNumber,
+    iban,
+    setAccountNumber: onAccountNumberChange,
+    setIban: onIbanChange,
+    seedBank,
+    accountHint,
+    ibanHint,
+  };
+}
+
+export function BankAccountFields(props: {
+  accountNumber: string;
+  iban: string;
+  bic: string;
+  onAccountNumber: (v: string) => void;
+  onIban: (v: string) => void;
+  onBic: (v: string) => void;
+  accountHint?: string | null;
+  ibanHint?: string | null;
+  required?: boolean;
+}) {
+  return (
+    <>
+      <FieldGroup label="Číslo účtu (např. 123456789/0100)">
+        <Input
+          onChange={(ev) => {
+            props.onAccountNumber(ev.target.value);
+          }}
+          required={props.required}
+          value={props.accountNumber}
+        />
+        {props.accountHint ? (
+          <p className="text-muted-foreground text-xs">{props.accountHint}</p>
+        ) : null}
+      </FieldGroup>
+      <FieldGroup label="IBAN">
+        <Input
+          onChange={(ev) => {
+            props.onIban(ev.target.value);
+          }}
+          required={props.required}
+          value={props.iban}
+        />
+        {props.ibanHint ? (
+          <p className="text-muted-foreground text-xs">{props.ibanHint}</p>
+        ) : null}
+      </FieldGroup>
+      <FieldGroup label="BIC (volitelné)">
+        <Input
+          onChange={(ev) => {
+            props.onBic(ev.target.value);
+          }}
+          value={props.bic}
+        />
+      </FieldGroup>
+    </>
+  );
+}
+
 export function AssetField(props: {
   label: string;
   url: string;
@@ -34,19 +149,39 @@ export function AssetField(props: {
   endpoint: "issuerLogo" | "issuerStamp" | "issuerSignature";
   uploadConfigured: boolean;
 }) {
+  const [showUrl, setShowUrl] = React.useState(false);
+  const hasUrl = props.url.trim().length > 0;
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <Label>{props.label}</Label>
-      <Input
-        onChange={(ev) => {
-          props.onUrl(ev.target.value);
-        }}
-        placeholder="https://…"
-        type="url"
-        value={props.url}
-      />
+      {hasUrl ? (
+        <div className="bg-muted/40 flex items-start gap-3 rounded-lg border p-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            alt={props.label}
+            className="bg-background h-16 w-16 rounded object-contain"
+            src={props.url}
+          />
+          <div className="min-w-0 flex-1 space-y-2">
+            <p className="text-muted-foreground truncate text-xs">
+              {props.url}
+            </p>
+            <Button
+              onClick={() => {
+                props.onUrl("");
+              }}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              Odebrat
+            </Button>
+          </div>
+        </div>
+      ) : null}
       {props.uploadConfigured ? (
-        <UploadButton
+        <UploadDropzone
           endpoint={props.endpoint}
           onClientUploadComplete={(res) => {
             const first = res[0];
@@ -62,7 +197,32 @@ export function AssetField(props: {
             console.error(err);
           }}
         />
-      ) : null}
+      ) : (
+        <p className="text-muted-foreground text-xs">
+          Upload není k dispozici — vložte URL níže.
+        </p>
+      )}
+      <div className="space-y-2">
+        <button
+          className="text-muted-foreground text-xs underline-offset-2 hover:underline"
+          onClick={() => {
+            setShowUrl((v) => !v);
+          }}
+          type="button"
+        >
+          {showUrl ? "Skrýt URL" : "Vložit URL ručně"}
+        </button>
+        {showUrl || !props.uploadConfigured ? (
+          <Input
+            onChange={(ev) => {
+              props.onUrl(ev.target.value);
+            }}
+            placeholder="https://…"
+            type="url"
+            value={props.url}
+          />
+        ) : null}
+      </div>
     </div>
   );
 }

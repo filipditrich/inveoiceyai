@@ -141,7 +141,9 @@ function formToBuilderFields(formData: FormData): {
   issueDate: string;
   dueDate: string;
   duzp: string;
+  currency: Invoice["meta"]["currency"];
   vatMode: VatMode;
+  pricesIncludeVat: boolean;
   suppliesAbroad: SuppliesAbroad;
   notes: string | undefined;
   legalNote: string | undefined;
@@ -162,11 +164,16 @@ function formToBuilderFields(formData: FormData): {
   const dueDate =
     optionalTrim(formData.get("dueDate")) ?? addDaysIso(issueDate, 14);
   const duzp = optionalTrim(formData.get("duzp")) ?? issueDate;
+  const currencyRaw = optionalTrim(formData.get("currency")) ?? "CZK";
+  const currency: Invoice["meta"]["currency"] =
+    currencyRaw === "EUR" || currencyRaw === "USD" ? currencyRaw : "CZK";
   const vatModeRaw = optionalTrim(formData.get("vatMode")) ?? "regular";
   const vatMode: VatMode =
     vatModeRaw === "reverse_charge" || vatModeRaw === "oss"
       ? vatModeRaw
       : "regular";
+  const pricesIncludeVat =
+    optionalTrim(formData.get("pricesIncludeVat")) === "true";
   const suppliesRaw = optionalTrim(formData.get("suppliesAbroad")) ?? "none";
   const suppliesAbroad: SuppliesAbroad =
     suppliesRaw === "eu" || suppliesRaw === "non_eu" ? suppliesRaw : "none";
@@ -186,7 +193,9 @@ function formToBuilderFields(formData: FormData): {
     issueDate,
     dueDate,
     duzp,
+    currency,
     vatMode,
+    pricesIncludeVat,
     suppliesAbroad,
     notes,
     legalNote,
@@ -288,9 +297,11 @@ export async function saveInvoiceDraft(formData: FormData): Promise<void> {
       issueDate: fields.issueDate,
       dueDate: fields.dueDate,
       duzp: fields.duzp,
+      currency: fields.currency,
       issuer: parties.issuer,
       client: parties.client,
       vatMode: fields.vatMode,
+      pricesIncludeVat: fields.pricesIncludeVat,
       suppliesAbroad: fields.suppliesAbroad,
       legalNote: fields.legalNote,
       localReverseChargeCode: fields.localReverseChargeCode,
@@ -473,9 +484,11 @@ export async function issueInvoice(formData: FormData): Promise<void> {
         issueDate: fields.issueDate,
         dueDate: fields.dueDate,
         duzp: fields.duzp,
+        currency: fields.currency,
         issuer: issuerSnap.data,
         client: clientSnap.data,
         vatMode: fields.vatMode,
+        pricesIncludeVat: fields.pricesIncludeVat,
         suppliesAbroad: fields.suppliesAbroad,
         legalNote: fields.legalNote,
         localReverseChargeCode: fields.localReverseChargeCode,

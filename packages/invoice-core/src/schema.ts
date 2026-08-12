@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+import { czIbanMatchesAccount, isValidCzIban } from "./bank/czech-iban";
+
+export {
+  czechAccountToBban,
+  czechAccountToIban,
+  czIbanMatchesAccount,
+  isValidCzIban,
+  parseCzAccountParts,
+  suggestCzIban,
+} from "./bank/czech-iban";
+
 export const IcoSchema = z
   .string()
   .regex(/^\d{8}$/, "IČO must be exactly 8 digits");
@@ -33,14 +44,27 @@ export const ClientAddressSchema = z.object({
   country: z.string().regex(/^[A-Z]{2}$/),
 });
 
-export const BankAccountSchema = z.object({
-  accountNumber: z.string().regex(/^(?:\d{1,6}-)?\d{1,10}\/\d{4}$/),
-  iban: z.string().regex(/^CZ\d{22}$/),
-  bic: z
-    .string()
-    .regex(/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/)
-    .optional(),
-});
+export const BankAccountSchema = z
+  .object({
+    accountNumber: z.string().regex(/^(?:\d{1,6}-)?\d{1,10}\/\d{4}$/),
+    iban: z
+      .string()
+      .regex(/^CZ\d{22}$/)
+      .refine(isValidCzIban, "IBAN failed mod-97 checksum"),
+    bic: z
+      .string()
+      .regex(/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/)
+      .optional(),
+  })
+  .superRefine((bank, ctx) => {
+    if (!czIbanMatchesAccount(bank.iban, bank.accountNumber)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "IBAN does not match account number",
+        path: ["iban"],
+      });
+    }
+  });
 
 export const VatRateSchema = z.union([
   z.literal(0),
@@ -56,6 +80,25 @@ export const InvoiceVatSchema = z.object({
   localReverseChargeCode: z.string().min(1).max(10).optional(),
 });
 
+export const InvoiceCurrencySchema = z.enum(["CZK", "EUR", "USD"]);
+export type InvoiceCurrency = z.infer<typeof InvoiceCurrencySchema>;
+
+/** PDF amount suffix (Kč / EUR / USD). */
+export function currencyDisplaySuffix(currency: InvoiceCurrency): string {
+  switch (currency) {
+    case "CZK":
+      return "Kč";
+    case "EUR":
+      return "EUR";
+    case "USD":
+      return "USD";
+    default: {
+      const _exhaustive: never = currency;
+      return _exhaustive;
+    }
+  }
+}
+
 export const InvoiceMetaSchema = z
   .object({
     docType: z.enum(["invoice", "proforma", "advance", "credit_note"]),
@@ -64,7 +107,7 @@ export const InvoiceMetaSchema = z
     dueDate: z.string().date(),
     duzp: z.string().date(),
     language: z.literal("cs"),
-    currency: z.literal("CZK"),
+    currency: InvoiceCurrencySchema,
     correctedInvoiceNumber: z.string().min(1).max(64).optional(),
   })
   .superRefine((meta, ctx) => {

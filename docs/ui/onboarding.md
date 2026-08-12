@@ -13,8 +13,8 @@
 
 ## Welcome steps
 
-1. **Identita** — IČO → `GET /api/ares/[ico]` → confirm name / address / contact email / VAT.
-2. **Banka** — account number + IBAN (required by `IssuerSnapshotSchema`); optional BIC.
+1. **Identita** — IČO → `GET /api/ares/[ico]` → confirm name / address / contact email / VAT, **or** upload an issued PDF with embedded ISDOC (`parseIssuerFromWelcomePdf` → `parseIssuerFromIsdoc`) to prefill identity + bank.
+2. **Banka** — account number + IBAN (required by `IssuerSnapshotSchema`); optional BIC. IBAN is auto-suggested from the Czech account number (mod-97 validated).
 3. **Hotovo** — issuer persisted with default numbering schemes and email settings; links to dashboard and edit sections.
 
 **Skip:** “Přeskočit pro teď” sets `workspaces.metadata.issuerWelcomeDismissedAt` (JSON text column) and redirects to `/dashboard` empty CTA. Creating any issuer clears the soft gate via count &gt; 0.

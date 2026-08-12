@@ -1,10 +1,16 @@
 "use client";
 
-import { createIssuer, dismissIssuerWelcome } from "@/actions/issuers";
 import {
+  createIssuer,
+  dismissIssuerWelcome,
+  parseIssuerFromWelcomePdf,
+} from "@/actions/issuers";
+import {
+  BankAccountFields,
   FieldGroup,
   lookupAresByIco,
   lookupMessageFromInvalid,
+  useCzechIbanSuggest,
 } from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +32,7 @@ export function IssuerWelcomeWizard(props: {
   const [pending, startTransition] = React.useTransition();
   const [skipPending, startSkip] = React.useTransition();
   const [lookupPending, setLookupPending] = React.useState(false);
+  const [uploadPending, setUploadPending] = React.useState(false);
 
   const [source, setSource] = React.useState<"ares" | "manual">("manual");
   const [icoInput, setIcoInput] = React.useState("");
@@ -36,12 +43,46 @@ export function IssuerWelcomeWizard(props: {
   const [zip, setZip] = React.useState("");
   const [contactEmail, setContactEmail] = React.useState("");
   const [vatPayer, setVatPayer] = React.useState(true);
-  const [accountNumber, setAccountNumber] = React.useState("");
-  const [iban, setIban] = React.useState("");
+  const bank = useCzechIbanSuggest();
   const [bic, setBic] = React.useState("");
   const [msg, setMsg] = React.useState<string | null>(() =>
     lookupMessageFromInvalid(props.invalidQuery),
   );
+
+  async function onUploadIssuedPdf(file: File | null) {
+    if (!file) {
+      return;
+    }
+    setMsg(null);
+    setUploadPending(true);
+    try {
+      const fd = new FormData();
+      fd.set("file", file);
+      const result = await parseIssuerFromWelcomePdf(fd);
+      if (!result.ok) {
+        setMsg(result.message);
+        return;
+      }
+      const { draft } = result;
+      setSource("manual");
+      setIcoInput(draft.ico);
+      setName(draft.name);
+      setDic(draft.dic);
+      setStreet(draft.street);
+      setCity(draft.city);
+      setZip(draft.zip);
+      setContactEmail(draft.contactEmail);
+      setVatPayer(draft.vatPayer);
+      if (draft.accountNumber) {
+        bank.seedBank(draft.accountNumber, draft.iban || undefined);
+      }
+      if (draft.bic) {
+        setBic(draft.bic);
+      }
+    } finally {
+      setUploadPending(false);
+    }
+  }
 
   async function onLookupFromAres() {
     setMsg(null);
@@ -90,7 +131,7 @@ export function IssuerWelcomeWizard(props: {
   function onCreate(e: FormEvent) {
     e.preventDefault();
     setMsg(null);
-    if (!accountNumber.trim() || !iban.trim()) {
+    if (!bank.accountNumber.trim() || !bank.iban.trim()) {
       setMsg("Vyplňte bankovní účet a IBAN.");
       return;
     }
@@ -106,8 +147,8 @@ export function IssuerWelcomeWizard(props: {
     fd.set("city", city);
     fd.set("zip", zip);
     fd.set("contactEmail", contactEmail.trim());
-    fd.set("accountNumber", accountNumber.trim());
-    fd.set("iban", iban.trim());
+    fd.set("accountNumber", bank.accountNumber.trim());
+    fd.set("iban", bank.iban.trim());
     if (bic.trim()) {
       fd.set("bic", bic.trim());
     }
@@ -164,7 +205,7 @@ export function IssuerWelcomeWizard(props: {
           </h1>
           <p className="text-muted-foreground text-sm">
             {step === "identity"
-              ? "Načtěte firmu z ARES podle IČO a potvrďte kontaktní e-mail."
+              ? "Načtěte firmu z ARES podle IČO, nebo nahrajte vystavenou fakturu s ISDOC, a potvrďte kontaktní e-mail."
               : "Doplňte bankovní účet — potřebujeme ho pro QR platby na fakturách."}
           </p>
         </div>
@@ -187,6 +228,22 @@ export function IssuerWelcomeWizard(props: {
 
       {step === "identity" ? (
         <form className="space-y-4" onSubmit={onIdentityNext}>
+          <FieldGroup label="Rychlý start — nahrát vystavenou fakturu">
+            <Input
+              accept="application/pdf,.pdf"
+              disabled={uploadPending}
+              onChange={(ev) => {
+                void onUploadIssuedPdf(ev.target.files?.[0] ?? null);
+                ev.target.value = "";
+              }}
+              type="file"
+            />
+            <p className="text-muted-foreground text-xs">
+              {uploadPending
+                ? "Načítám údaje z PDF…"
+                : "Pouze PDF s vloženým ISDOC (bez OCR). Údaje dodavatele a banky se předvyplní."}
+            </p>
+          </FieldGroup>
           <FieldGroup label="IČO">
             <div className="flex flex-wrap gap-2">
               <Input
@@ -284,32 +341,17 @@ export function IssuerWelcomeWizard(props: {
         </form>
       ) : (
         <form className="space-y-4" onSubmit={onCreate}>
-          <FieldGroup label="Číslo účtu (např. 123456789/0100)">
-            <Input
-              onChange={(ev) => {
-                setAccountNumber(ev.target.value);
-              }}
-              required
-              value={accountNumber}
-            />
-          </FieldGroup>
-          <FieldGroup label="IBAN">
-            <Input
-              onChange={(ev) => {
-                setIban(ev.target.value);
-              }}
-              required
-              value={iban}
-            />
-          </FieldGroup>
-          <FieldGroup label="BIC (volitelné)">
-            <Input
-              onChange={(ev) => {
-                setBic(ev.target.value);
-              }}
-              value={bic}
-            />
-          </FieldGroup>
+          <BankAccountFields
+            accountHint={bank.accountHint}
+            accountNumber={bank.accountNumber}
+            bic={bic}
+            iban={bank.iban}
+            ibanHint={bank.ibanHint}
+            onAccountNumber={bank.setAccountNumber}
+            onBic={setBic}
+            onIban={bank.setIban}
+            required
+          />
           <div className="flex flex-wrap gap-2">
             <Button
               disabled={pending}

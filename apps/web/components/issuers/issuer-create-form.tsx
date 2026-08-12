@@ -2,10 +2,12 @@
 
 import { createIssuer } from "@/actions/issuers";
 import {
+  BankAccountFields,
   FieldGroup,
   lookupAresByIco,
   lookupMessageFromInvalid,
   SubmitRow,
+  useCzechIbanSuggest,
 } from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,8 +30,7 @@ export function IssuerCreateForm(props: {
   const [city, setCity] = React.useState("");
   const [zip, setZip] = React.useState("");
   const [contactEmail, setContactEmail] = React.useState("");
-  const [accountNumber, setAccountNumber] = React.useState("");
-  const [iban, setIban] = React.useState("");
+  const bank = useCzechIbanSuggest();
   const [bic, setBic] = React.useState("");
   const [vatPayer, setVatPayer] = React.useState(true);
   const [lookupPending, setLookupPending] = React.useState(false);
@@ -78,8 +79,8 @@ export function IssuerCreateForm(props: {
     fd.set("city", city);
     fd.set("zip", zip);
     fd.set("contactEmail", contactEmail.trim());
-    fd.set("accountNumber", accountNumber.trim());
-    fd.set("iban", iban.trim());
+    fd.set("accountNumber", bank.accountNumber.trim());
+    fd.set("iban", bank.iban.trim());
     if (bic.trim()) {
       fd.set("bic", bic.trim());
     }
@@ -203,32 +204,17 @@ export function IssuerCreateForm(props: {
 
       <section className="space-y-4">
         <h2 className="text-lg font-medium">Banka</h2>
-        <FieldGroup label="Číslo účtu (např. 123456789/0100)">
-          <Input
-            onChange={(ev) => {
-              setAccountNumber(ev.target.value);
-            }}
-            required
-            value={accountNumber}
-          />
-        </FieldGroup>
-        <FieldGroup label="IBAN">
-          <Input
-            onChange={(ev) => {
-              setIban(ev.target.value);
-            }}
-            required
-            value={iban}
-          />
-        </FieldGroup>
-        <FieldGroup label="BIC (volitelné)">
-          <Input
-            onChange={(ev) => {
-              setBic(ev.target.value);
-            }}
-            value={bic}
-          />
-        </FieldGroup>
+        <BankAccountFields
+          accountHint={bank.accountHint}
+          accountNumber={bank.accountNumber}
+          bic={bic}
+          iban={bank.iban}
+          ibanHint={bank.ibanHint}
+          onAccountNumber={bank.setAccountNumber}
+          onBic={setBic}
+          onIban={bank.setIban}
+          required
+        />
       </section>
 
       <p className="text-muted-foreground text-xs">

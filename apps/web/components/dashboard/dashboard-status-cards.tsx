@@ -21,6 +21,20 @@ function hrefFor(status: StatusBucket["status"], issuerId?: string): string {
   return `/invoices?${params.toString()}`;
 }
 
+function formatBucketTotals(
+  totalsByCurrency: Record<string, number>,
+  locale: AppLocale,
+): string {
+  const entries = Object.entries(totalsByCurrency);
+  if (entries.length === 0) {
+    return formatMoney(0, "CZK", locale);
+  }
+  return entries
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([currency, total]) => formatMoney(total, currency, locale))
+    .join(" · ");
+}
+
 export async function DashboardStatusCards({
   buckets,
   issuerId,
@@ -48,7 +62,7 @@ export async function DashboardStatusCards({
                 {tStatus(b.status)}
               </CardDescription>
               <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-                {formatMoney(b.total, "CZK", locale)}
+                {formatBucketTotals(b.totalsByCurrency, locale)}
               </CardTitle>
             </CardHeader>
             <CardFooter className="text-muted-foreground text-sm tabular-nums">

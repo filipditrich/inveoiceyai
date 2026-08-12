@@ -2,11 +2,11 @@
 
 import { saveIssuerBank } from "@/actions/issuers";
 import {
-  FieldGroup,
+  BankAccountFields,
   lookupMessageFromInvalid,
   SubmitRow,
+  useCzechIbanSuggest,
 } from "@/components/issuers/issuer-form-shared";
-import { Input } from "@/components/ui/input";
 import type { IssuerSnapshot } from "@invoicey/invoice-core/schema";
 import type { FormEvent } from "react";
 import * as React from "react";
@@ -17,10 +17,10 @@ export function IssuerBankForm(props: {
 }) {
   const { snapshot } = props;
   const [pending, startTransition] = React.useTransition();
-  const [accountNumber, setAccountNumber] = React.useState(
+  const bank = useCzechIbanSuggest(
     snapshot.bank.accountNumber,
+    snapshot.bank.iban,
   );
-  const [iban, setIban] = React.useState(snapshot.bank.iban);
   const [bic, setBic] = React.useState(snapshot.bank.bic ?? "");
   const userMsg = lookupMessageFromInvalid(props.invalidQuery);
 
@@ -28,8 +28,8 @@ export function IssuerBankForm(props: {
     e.preventDefault();
     const fd = new FormData();
     fd.set("id", snapshot.id);
-    fd.set("accountNumber", accountNumber.trim());
-    fd.set("iban", iban.trim());
+    fd.set("accountNumber", bank.accountNumber.trim());
+    fd.set("iban", bank.iban.trim());
     if (bic.trim()) {
       fd.set("bic", bic.trim());
     }
@@ -41,32 +41,17 @@ export function IssuerBankForm(props: {
   return (
     <form className="max-w-2xl space-y-6" onSubmit={onSubmit}>
       {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
-      <FieldGroup label="Číslo účtu (např. 123456789/0100)">
-        <Input
-          onChange={(ev) => {
-            setAccountNumber(ev.target.value);
-          }}
-          required
-          value={accountNumber}
-        />
-      </FieldGroup>
-      <FieldGroup label="IBAN">
-        <Input
-          onChange={(ev) => {
-            setIban(ev.target.value);
-          }}
-          required
-          value={iban}
-        />
-      </FieldGroup>
-      <FieldGroup label="BIC (volitelné)">
-        <Input
-          onChange={(ev) => {
-            setBic(ev.target.value);
-          }}
-          value={bic}
-        />
-      </FieldGroup>
+      <BankAccountFields
+        accountHint={bank.accountHint}
+        accountNumber={bank.accountNumber}
+        bic={bic}
+        iban={bank.iban}
+        ibanHint={bank.ibanHint}
+        onAccountNumber={bank.setAccountNumber}
+        onBic={setBic}
+        onIban={bank.setIban}
+        required
+      />
       <SubmitRow pending={pending} />
     </form>
   );

@@ -16,8 +16,12 @@ export async function DashboardBalanceRow({
     <div className="grid gap-4 px-4 sm:grid-cols-2 lg:px-6">
       <div className="rounded-md border px-4 py-3">
         <div className="text-muted-foreground text-sm">{t("issued12m")}</div>
-        <div className="mt-1 text-2xl font-semibold tabular-nums">
-          {formatMoney(balance.issuedVolume12m, "CZK", locale)}
+        <div className="mt-1 space-y-0.5 text-2xl font-semibold tabular-nums">
+          {balance.byCurrency.map((row) => (
+            <div key={row.currency}>
+              {formatMoney(row.issuedVolume12m, row.currency, locale)}
+            </div>
+          ))}
         </div>
         <div className="text-muted-foreground text-xs tabular-nums">
           {tCount("label", { count: balance.issuedCount12m })}
@@ -25,8 +29,12 @@ export async function DashboardBalanceRow({
       </div>
       <div className="rounded-md border px-4 py-3">
         <div className="text-muted-foreground text-sm">{t("outstanding")}</div>
-        <div className="mt-1 text-2xl font-semibold tabular-nums text-orange-700 dark:text-orange-400">
-          {formatMoney(balance.outstanding, "CZK", locale)}
+        <div className="mt-1 space-y-0.5 text-2xl font-semibold tabular-nums text-orange-700 dark:text-orange-400">
+          {balance.byCurrency.map((row) => (
+            <div key={row.currency}>
+              {formatMoney(row.outstanding, row.currency, locale)}
+            </div>
+          ))}
         </div>
         <div className="text-muted-foreground text-xs tabular-nums">
           {tCount("label", { count: balance.outstandingCount })}

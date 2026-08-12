@@ -15,6 +15,10 @@ import {
   type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
 import {
+  extractIsdocFromPdf,
+  parseIssuerFromIsdoc,
+} from "@invoicey/invoice-core";
+import {
   invoices,
   issuerBusinesses,
   issuerNumberingSchemes,
@@ -701,4 +705,77 @@ export async function deleteIssuer(formData: FormData): Promise<void> {
 
   revalidateIssuerPaths();
   redirect("/issuers?toast=issuer_deleted");
+}
+
+export type WelcomeIssuerDraft = {
+  name: string;
+  ico: string;
+  dic: string;
+  street: string;
+  city: string;
+  zip: string;
+  contactEmail: string;
+  vatPayer: boolean;
+  accountNumber: string;
+  iban: string;
+  bic: string;
+};
+
+/**
+ * Prefill welcome issuer draft from an issued PDF with embedded ISDOC.
+ */
+export async function parseIssuerFromWelcomePdf(
+  formData: FormData,
+): Promise<
+  { ok: true; draft: WelcomeIssuerDraft } | { ok: false; message: string }
+> {
+  await requireWorkspace();
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, message: "Vyberte PDF fakturu." };
+  }
+  if (file.type && file.type !== "application/pdf") {
+    return { ok: false, message: "Nahrajte soubor PDF." };
+  }
+
+  try {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const xml = await extractIsdocFromPdf(bytes);
+    if (!xml) {
+      return {
+        ok: false,
+        message:
+          "V PDF není vložený ISDOC. Nahrajte fakturu vydanou systémem, který ISDOC embeduje (např. Invoicey / fakturaonline).",
+      };
+    }
+    const parsed = parseIssuerFromIsdoc(xml);
+    return {
+      ok: true,
+      draft: {
+        name: parsed.name,
+        ico: parsed.ico ?? "",
+        dic: parsed.dic ?? "",
+        street: parsed.street,
+        city: parsed.city,
+        zip: parsed.zip,
+        contactEmail: parsed.contactEmail ?? "",
+        vatPayer: parsed.vatPayer,
+        accountNumber: parsed.accountNumber ?? "",
+        iban: parsed.iban ?? "",
+        bic: parsed.bic ?? "",
+      },
+    };
+  } catch (err) {
+    const code = err instanceof Error ? err.message : "parse_failed";
+    const map: Record<string, string> = {
+      isdoc_missing_invoice_root: "Soubor neobsahuje platný ISDOC doklad.",
+      isdoc_missing_supplier: "V ISDOC chybí údaje dodavatele.",
+      isdoc_missing_supplier_name: "V ISDOC chybí název dodavatele.",
+      isdoc_supplier_not_cz: "Dodavatel musí mít adresu v ČR.",
+    };
+    return {
+      ok: false,
+      message: map[code] ?? "Nepodařilo se načíst vystavovatele z PDF.",
+    };
+  }
 }

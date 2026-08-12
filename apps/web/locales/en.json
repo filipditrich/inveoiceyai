@@ -409,11 +409,11 @@
       "group": "Navigation",
       "dashboard": "Dashboard",
       "invoices": "Invoices",
-      "invoicesList": "All invoices",
-      "invoicesNew": "New invoice",
+      "invoicesList": "List",
+      "invoicesNew": "Create",
       "invoicesAi": "AI draft",
-      "invoicesImport": "Import history",
-      "invoicesFromJson": "Create from JSON",
+      "invoicesImport": "Import issued",
+      "invoicesFromJson": "From JSON",
       "clients": "Clients",
       "issuers": "Issuers",
       "newInvoice": "New invoice",
@@ -421,7 +421,8 @@
       "settings": "Settings",
       "integrations": "Integrations",
       "resourcesGroup": "Resources",
-      "docs": "Docs"
+      "docs": "Docs",
+      "collapseToggle": "Expand or collapse {title}"
     },
     "breadcrumb": {
       "dashboard": "Dashboard",

@@ -4,6 +4,7 @@ export {
   normalizeDraftToInvoice,
   todayPragueYmd,
   type NormalizedIssue,
+  type VatPreset,
 } from "./normalize-draft-invoice";
 export { parseAmountCz } from "./parse-amount-cz";
 export {

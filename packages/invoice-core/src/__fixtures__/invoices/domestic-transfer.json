@@ -1,77 +1,77 @@
 {
-	"meta": {
-		"docType": "invoice",
-		"number": "20260001",
-		"issueDate": "2026-05-03",
-		"dueDate": "2026-05-17",
-		"duzp": "2026-05-03",
-		"language": "cs",
-		"currency": "CZK"
-	},
-	"issuer": {
-		"id": "ca8b8d4e-2e7e-4f6a-9b7d-1f9c1234abcd",
-		"name": "Filip Ditrich",
-		"ico": "12345678",
-		"dic": "CZ12345678",
-		"address": {
-			"street": "Na Příkopě 14",
-			"city": "Praha",
-			"zip": "110 00",
-			"country": "CZ"
-		},
-		"bank": {
-			"accountNumber": "1920014539/0800",
-			"iban": "CZ6508000000192000145399",
-			"bic": "GIBACZPX"
-		},
-		"vatPayer": true,
-		"contactEmail": "faktura@filipditrich.demo",
-		"logoUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNgYGD4DwABBAEAHb6Q+QAAAABJRU5ErkJggg=="
-	},
-	"client": {
-		"id": "5bc1d5a7-0c58-4cda-a1f6-4ad9876543ff",
-		"name": "NFCtron s.r.o.",
-		"ico": "07654321",
-		"dic": "CZ07654321",
-		"address": {
-			"street": "Křížová 2598/4",
-			"city": "Brno",
-			"zip": "603 00",
-			"country": "CZ"
-		},
-		"contactEmail": "billing@nfctron.com"
-	},
-	"vat": {
-		"mode": "regular",
-		"suppliesAbroad": "none"
-	},
-	"payment": {
-		"method": "transfer",
-		"bankAccount": {
-			"accountNumber": "1920014539/0800",
-			"iban": "CZ6508000000192000145399",
-			"bic": "GIBACZPX"
-		},
-		"variableSymbol": "20260001",
-		"constantSymbol": "0308"
-	},
-	"items": [
-		{
-			"position": 1,
-			"description": "Práce",
-			"quantity": 1,
-			"unit": "ks",
-			"unitPriceWithoutVat": 1000,
-			"vatRate": 21,
-			"lineSubtotal": 1000,
-			"lineVat": 210,
-			"lineTotal": 1210
-		}
-	],
-	"totals": {
-		"subtotal": 1000,
-		"vatBreakdown": [{ "rate": 21, "base": 1000, "vat": 210 }],
-		"vatTotal": 210,
-		"total": 1210
-	}
+  "meta": {
+    "docType": "invoice",
+    "number": "20260001",
+    "issueDate": "2026-05-03",
+    "dueDate": "2026-05-17",
+    "duzp": "2026-05-03",
+    "language": "cs",
+    "currency": "CZK"
+  },
+  "issuer": {
+    "id": "ca8b8d4e-2e7e-4f6a-9b7d-1f9c1234abcd",
+    "name": "Filip Ditrich",
+    "ico": "12345678",
+    "dic": "CZ12345678",
+    "address": {
+      "street": "Na Příkopě 14",
+      "city": "Praha",
+      "zip": "110 00",
+      "country": "CZ"
+    },
+    "bank": {
+      "accountNumber": "1920014539/0800",
+      "iban": "CZ9708000000001920014539",
+      "bic": "GIBACZPX"
+    },
+    "vatPayer": true,
+    "contactEmail": "faktura@filipditrich.demo",
+    "logoUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNgYGD4DwABBAEAHb6Q+QAAAABJRU5ErkJggg=="
+  },
+  "client": {
+    "id": "5bc1d5a7-0c58-4cda-a1f6-4ad9876543ff",
+    "name": "NFCtron s.r.o.",
+    "ico": "07654321",
+    "dic": "CZ07654321",
+    "address": {
+      "street": "Křížová 2598/4",
+      "city": "Brno",
+      "zip": "603 00",
+      "country": "CZ"
+    },
+    "contactEmail": "billing@nfctron.com"
+  },
+  "vat": {
+    "mode": "regular",
+    "suppliesAbroad": "none"
+  },
+  "payment": {
+    "method": "transfer",
+    "bankAccount": {
+      "accountNumber": "1920014539/0800",
+      "iban": "CZ9708000000001920014539",
+      "bic": "GIBACZPX"
+    },
+    "variableSymbol": "20260001",
+    "constantSymbol": "0308"
+  },
+  "items": [
+    {
+      "position": 1,
+      "description": "Práce",
+      "quantity": 1,
+      "unit": "ks",
+      "unitPriceWithoutVat": 1000,
+      "vatRate": 21,
+      "lineSubtotal": 1000,
+      "lineVat": 210,
+      "lineTotal": 1210
+    }
+  ],
+  "totals": {
+    "subtotal": 1000,
+    "vatBreakdown": [{ "rate": 21, "base": 1000, "vat": 210 }],
+    "vatTotal": 210,
+    "total": 1210
+  }
 }

@@ -17,7 +17,7 @@ const FALLBACK_ISSUER: IssuerSnapshot = {
   },
   bank: {
     accountNumber: "999888/6060",
-    iban: "CZ6550600000019998877777",
+    iban: "CZ6060600000000000999888",
   },
   vatPayer: true,
   contactEmail: "faktura@sluzby-demo.cz",

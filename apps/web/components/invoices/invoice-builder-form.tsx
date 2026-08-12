@@ -32,6 +32,8 @@ import { z } from "zod";
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Zadejte platné datum");
 
+const STANDARD_VAT_RATES = [0, 12, 21] as const;
+
 const BuilderFormSchema = z
   .object({
     issuerId: z.string().uuid("Vyberte vystavovatele"),
@@ -40,7 +42,9 @@ const BuilderFormSchema = z
     issueDate: isoDate,
     dueDate: isoDate,
     duzp: isoDate,
+    currency: z.enum(["CZK", "EUR", "USD"]),
     vatMode: z.enum(["regular", "reverse_charge", "oss"]),
+    pricesIncludeVat: z.boolean(),
     suppliesAbroad: z.enum(["none", "eu", "non_eu"]),
     legalNote: z.string().optional(),
     localReverseChargeCode: z.string().optional(),
@@ -68,6 +72,16 @@ const BuilderFormSchema = z
   });
 
 type BuilderFormValues = z.infer<typeof BuilderFormSchema>;
+
+function isStandardVatRate(
+  rate: number,
+): rate is (typeof STANDARD_VAT_RATES)[number] {
+  return (STANDARD_VAT_RATES as readonly number[]).includes(rate);
+}
+
+function defaultLineVatRate(vatPayer: boolean): number {
+  return vatPayer ? 21 : 0;
+}
 
 export type { ClientOption, IssuerOption };
 
@@ -109,6 +123,9 @@ export function InvoiceBuilderForm({
 }: InvoiceBuilderFormProps) {
   const defaultIssue = initial?.issueDate ?? todayIsoDate();
   const firstIssuer = issuers[0];
+  const initialIssuer =
+    issuers.find((i) => i.id === (initial?.issuerId ?? firstIssuer?.id)) ??
+    firstIssuer;
   const form = useForm<BuilderFormValues>({
     resolver: standardSchemaResolver(BuilderFormSchema),
     mode: "onBlur",
@@ -119,7 +136,9 @@ export function InvoiceBuilderForm({
       issueDate: defaultIssue,
       dueDate: initial?.dueDate ?? addDaysIso(defaultIssue, 14),
       duzp: initial?.duzp ?? defaultIssue,
+      currency: initial?.currency ?? "CZK",
       vatMode: initial?.vatMode ?? "regular",
+      pricesIncludeVat: initial?.pricesIncludeVat ?? false,
       suppliesAbroad: initial?.suppliesAbroad ?? "none",
       legalNote: initial?.legalNote ?? "",
       localReverseChargeCode: initial?.localReverseChargeCode ?? "",
@@ -131,7 +150,7 @@ export function InvoiceBuilderForm({
           quantity: 1,
           unit: "ks",
           unitPriceWithoutVat: 0,
-          vatRate: 21,
+          vatRate: defaultLineVatRate(initialIssuer?.snapshot.vatPayer ?? true),
         },
       ],
     },
@@ -159,6 +178,23 @@ export function InvoiceBuilderForm({
     () => initial?.vatMode === "oss",
   );
   const [formErrorList, setFormErrorList] = React.useState<string[]>([]);
+  const [customVatRateLines, setCustomVatRateLines] = React.useState<
+    Record<number, boolean>
+  >(() => {
+    const items = initial?.items ?? [];
+    const map: Record<number, boolean> = {};
+    items.forEach((it, idx) => {
+      if (it.vatRate != null && !isStandardVatRate(Number(it.vatRate))) {
+        map[idx] = true;
+      }
+    });
+    return map;
+  });
+
+  const selectedIssuer = issuers.find((i) => i.id === watched.issuerId);
+  const issuerVatPayer = selectedIssuer?.snapshot.vatPayer ?? true;
+  const hideRatePicker =
+    !issuerVatPayer || watched.vatMode === "reverse_charge";
 
   React.useEffect(() => {
     return () => {
@@ -168,15 +204,49 @@ export function InvoiceBuilderForm({
     };
   }, []);
 
+  /** neplátce: force regular + zero rates */
   React.useEffect(() => {
     const issuer = issuers.find((i) => i.id === watched.issuerId);
-    if (!issuer || initial?.vatMode) {
+    if (!issuer || issuer.snapshot.vatPayer) {
       return;
     }
-    if (!issuer.snapshot.vatPayer && watched.vatMode !== "regular") {
+    if (watched.vatMode !== "regular") {
       form.setValue("vatMode", "regular");
     }
-  }, [watched.issuerId, issuers, form, initial?.vatMode, watched.vatMode]);
+    const items = form.getValues("items");
+    let changed = false;
+    const next = items.map((it) => {
+      if (it.vatRate === 0) {
+        return it;
+      }
+      changed = true;
+      return { ...it, vatRate: 0 };
+    });
+    if (changed) {
+      form.setValue("items", next);
+      setCustomVatRateLines({});
+    }
+  }, [watched.issuerId, issuers, form, watched.vatMode]);
+
+  /** reverse_charge: zero line rates */
+  React.useEffect(() => {
+    if (watched.vatMode !== "reverse_charge") {
+      return;
+    }
+    const items = form.getValues("items");
+    let changed = false;
+    const next = items.map((it) => {
+      if (it.vatRate === 0) {
+        return it;
+      }
+      changed = true;
+      return { ...it, vatRate: 0 };
+    });
+    if (changed) {
+      form.setValue("items", next);
+      setCustomVatRateLines({});
+    }
+  }, [watched.vatMode, form]);
 
   React.useEffect(() => {
     const issuer = issuers.find((i) => i.id === watched.issuerId);
@@ -230,6 +300,7 @@ export function InvoiceBuilderForm({
       issueDate: watched.issueDate,
       dueDate: watched.dueDate,
       duzp: watched.duzp,
+      currency: watched.currency,
       issuer,
       client,
       vatMode: watched.vatMode,
@@ -239,6 +310,7 @@ export function InvoiceBuilderForm({
       correctedInvoiceNumber: watched.correctedInvoiceNumber || undefined,
       items: lines,
       notes: watched.notes || undefined,
+      pricesIncludeVat: watched.pricesIncludeVat,
     });
     if (!built.ok) {
       return { invoice: null, error: built.message };
@@ -254,7 +326,9 @@ export function InvoiceBuilderForm({
     watched.issueDate,
     watched.dueDate,
     watched.duzp,
+    watched.currency,
     watched.vatMode,
+    watched.pricesIncludeVat,
     watched.suppliesAbroad,
     watched.legalNote,
     watched.localReverseChargeCode,
@@ -332,10 +406,14 @@ export function InvoiceBuilderForm({
       issueDate: watched.issueDate,
       dueDate: watched.dueDate,
       duzp: watched.duzp,
+      currency: watched.currency,
       issuer,
       client,
       vatMode: watched.vatMode,
       suppliesAbroad: watched.suppliesAbroad,
+      legalNote: watched.legalNote || undefined,
+      localReverseChargeCode: watched.localReverseChargeCode || undefined,
+      pricesIncludeVat: watched.pricesIncludeVat,
       items: watched.items.map((it) => ({
         description: it.description || "—",
         quantity: Number(it.quantity) || 1,
@@ -391,7 +469,9 @@ export function InvoiceBuilderForm({
     fd.set("issueDate", values.issueDate);
     fd.set("dueDate", values.dueDate);
     fd.set("duzp", values.duzp);
+    fd.set("currency", values.currency);
     fd.set("vatMode", values.vatMode);
+    fd.set("pricesIncludeVat", values.pricesIncludeVat ? "true" : "false");
     fd.set("suppliesAbroad", values.suppliesAbroad);
     if (values.legalNote) {
       fd.set("legalNote", values.legalNote);
@@ -559,34 +639,54 @@ export function InvoiceBuilderForm({
             />
           </Field>
           <Field
-            description="Zatím podporujeme pouze české koruny."
+            description="Měna faktury. QR platba (SPAYD) je dostupná jen pro CZK."
+            error={fieldError(errors, "currency")}
             label="Měna"
           >
-            <p className="text-sm font-medium tabular-nums">CZK (Kč)</p>
+            <select
+              className={selectClassName()}
+              {...form.register("currency")}
+            >
+              <option value="CZK">CZK (Kč)</option>
+              <option value="EUR">EUR</option>
+              <option value="USD">USD</option>
+            </select>
           </Field>
           <Field
-            description="Běžný režim, přenesení DPH nebo rozšířený režim OSS."
+            description="Režim DPH (běžný / přenesení / OSS). U neplátce je vždy běžný se sazbou 0 %."
             error={fieldError(errors, "vatMode")}
             label="Režim DPH"
           >
-            <select className={selectClassName()} {...form.register("vatMode")}>
-              <option value="regular">Běžný</option>
-              <option value="reverse_charge">Přenesení DPH</option>
-              {showAdvancedVat ? <option value="oss">OSS</option> : null}
+            <select
+              className={selectClassName()}
+              disabled={!issuerVatPayer}
+              {...form.register("vatMode")}
+            >
+              <option value="regular">
+                {issuerVatPayer ? "Běžný (plátce)" : "Neplátce DPH"}
+              </option>
+              {issuerVatPayer ? (
+                <option value="reverse_charge">Přenesení DPH</option>
+              ) : null}
+              {issuerVatPayer && showAdvancedVat ? (
+                <option value="oss">OSS</option>
+              ) : null}
             </select>
-            <label className="text-muted-foreground flex items-center gap-2 text-xs">
-              <input
-                checked={showAdvancedVat}
-                onChange={(ev) => {
-                  setShowAdvancedVat(ev.target.checked);
-                  if (!ev.target.checked && watched.vatMode === "oss") {
-                    form.setValue("vatMode", "regular");
-                  }
-                }}
-                type="checkbox"
-              />
-              Zobrazit rozšířený režim OSS
-            </label>
+            {issuerVatPayer ? (
+              <label className="text-muted-foreground flex items-center gap-2 text-xs">
+                <input
+                  checked={showAdvancedVat}
+                  onChange={(ev) => {
+                    setShowAdvancedVat(ev.target.checked);
+                    if (!ev.target.checked && watched.vatMode === "oss") {
+                      form.setValue("vatMode", "regular");
+                    }
+                  }}
+                  type="checkbox"
+                />
+                Zobrazit rozšířený režim OSS
+              </label>
+            ) : null}
           </Field>
           <Field
             description="Pro B2B dodání zboží/služeb do zahraničí."
@@ -643,29 +743,46 @@ export function InvoiceBuilderForm({
         ) : null}
 
         <section className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="font-medium">Položky</h2>
               <p className="text-muted-foreground text-xs">
-                Ceny zadávej bez DPH; celkem se počítá automaticky.
+                {watched.pricesIncludeVat
+                  ? "Ceny zadáváš včetně DPH; před uložením se převedou na bez DPH."
+                  : "Ceny zadáváš bez DPH; celkem se počítá automaticky."}
               </p>
             </div>
-            <Button
-              onClick={() => {
-                append({
-                  description: "",
-                  quantity: 1,
-                  unit: "ks",
-                  unitPriceWithoutVat: 0,
-                  vatRate: 21,
-                });
-              }}
-              size="sm"
-              type="button"
-              variant="secondary"
-            >
-              Přidat řádek
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                aria-label="Zadávání cen s DPH nebo bez DPH"
+                className={selectClassName()}
+                onChange={(ev) => {
+                  form.setValue("pricesIncludeVat", ev.target.value === "incl");
+                }}
+                value={watched.pricesIncludeVat ? "incl" : "excl"}
+              >
+                <option value="excl">Ceny bez DPH</option>
+                <option value="incl">Ceny s DPH</option>
+              </select>
+              <Button
+                onClick={() => {
+                  append({
+                    description: "",
+                    quantity: 1,
+                    unit: "ks",
+                    unitPriceWithoutVat: 0,
+                    vatRate: hideRatePicker
+                      ? 0
+                      : defaultLineVatRate(issuerVatPayer),
+                  });
+                }}
+                size="sm"
+                type="button"
+                variant="secondary"
+              >
+                Přidat řádek
+              </Button>
+            </div>
           </div>
           {fieldError(errors, "items") ? (
             <p className="text-destructive text-xs">
@@ -674,14 +791,20 @@ export function InvoiceBuilderForm({
           ) : null}
           {fields.map((field, index) => {
             const line = watched.items[index];
-            const lineTotal =
-              (Number(line?.quantity) || 0) *
-              (Number(line?.unitPriceWithoutVat) || 0) *
-              (1 + (Number(line?.vatRate) || 0) / 100);
+            const qty = Number(line?.quantity) || 0;
+            const unitPrice = Number(line?.unitPriceWithoutVat) || 0;
+            const rate = Number(line?.vatRate) || 0;
+            const lineTotal = watched.pricesIncludeVat
+              ? qty * unitPrice
+              : qty * unitPrice * (1 + rate / 100);
             const descErr = fieldError(
               errors,
               `items.${index}.description` as FieldPath<BuilderFormValues>,
             );
+            const showCustomRate =
+              customVatRateLines[index] === true ||
+              (line?.vatRate != null &&
+                !isStandardVatRate(Number(line.vatRate)));
             return (
               <div
                 className={cn(
@@ -732,8 +855,14 @@ export function InvoiceBuilderForm({
                 </div>
                 <div className="space-y-1">
                   <Input
-                    aria-label={`Cena bez DPH položky ${index + 1}`}
-                    placeholder="Cena bez DPH"
+                    aria-label={
+                      watched.pricesIncludeVat
+                        ? `Cena s DPH položky ${index + 1}`
+                        : `Cena bez DPH položky ${index + 1}`
+                    }
+                    placeholder={
+                      watched.pricesIncludeVat ? "Cena s DPH" : "Cena bez DPH"
+                    }
                     step="any"
                     type="number"
                     {...form.register(`items.${index}.unitPriceWithoutVat`, {
@@ -743,15 +872,75 @@ export function InvoiceBuilderForm({
                 </div>
                 <div className="flex flex-col gap-1">
                   <div className="flex gap-1">
-                    <Input
-                      aria-label={`Sazba DPH položky ${index + 1} v procentech`}
-                      placeholder="DPH %"
-                      step="1"
-                      type="number"
-                      {...form.register(`items.${index}.vatRate`, {
-                        valueAsNumber: true,
-                      })}
-                    />
+                    {hideRatePicker ? (
+                      <>
+                        <Input
+                          aria-label={`Sazba DPH položky ${index + 1}`}
+                          disabled
+                          readOnly
+                          value="0 %"
+                        />
+                        <input
+                          type="hidden"
+                          {...form.register(`items.${index}.vatRate`, {
+                            valueAsNumber: true,
+                          })}
+                        />
+                      </>
+                    ) : (
+                      <div className="flex min-w-0 flex-1 flex-col gap-1">
+                        <select
+                          aria-label={`Sazba DPH položky ${index + 1}`}
+                          className={selectClassName()}
+                          onChange={(ev) => {
+                            const v = ev.target.value;
+                            if (v === "other") {
+                              setCustomVatRateLines((prev) => ({
+                                ...prev,
+                                [index]: true,
+                              }));
+                              return;
+                            }
+                            setCustomVatRateLines((prev) => {
+                              const next = { ...prev };
+                              delete next[index];
+                              return next;
+                            });
+                            form.setValue(`items.${index}.vatRate`, Number(v), {
+                              shouldValidate: true,
+                            });
+                          }}
+                          value={
+                            showCustomRate
+                              ? "other"
+                              : String(isStandardVatRate(rate) ? rate : 21)
+                          }
+                        >
+                          <option value="0">0 %</option>
+                          <option value="12">12 %</option>
+                          <option value="21">21 %</option>
+                          <option value="other">Jiná…</option>
+                        </select>
+                        {showCustomRate ? (
+                          <Input
+                            aria-label={`Vlastní sazba DPH položky ${index + 1}`}
+                            placeholder="%"
+                            step="1"
+                            type="number"
+                            {...form.register(`items.${index}.vatRate`, {
+                              valueAsNumber: true,
+                            })}
+                          />
+                        ) : (
+                          <input
+                            type="hidden"
+                            {...form.register(`items.${index}.vatRate`, {
+                              valueAsNumber: true,
+                            })}
+                          />
+                        )}
+                      </div>
+                    )}
                     <Button
                       aria-label={`Odebrat položku ${index + 1}`}
                       onClick={() => {
@@ -767,7 +956,7 @@ export function InvoiceBuilderForm({
                     </Button>
                   </div>
                   <p className="text-muted-foreground text-xs tabular-nums">
-                    {formatMoney(lineTotal)}
+                    {formatMoney(lineTotal, watched.currency)}
                   </p>
                 </div>
               </div>
@@ -775,8 +964,8 @@ export function InvoiceBuilderForm({
           })}
           {totalsPreview ? (
             <p className="text-sm font-medium tabular-nums">
-              Celkem: {formatMoney(totalsPreview.total)} (DPH{" "}
-              {formatMoney(totalsPreview.vatTotal)})
+              Celkem: {formatMoney(totalsPreview.total, watched.currency)} (DPH{" "}
+              {formatMoney(totalsPreview.vatTotal, watched.currency)})
             </p>
           ) : null}
         </section>

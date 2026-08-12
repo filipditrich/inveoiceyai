@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (Phase 0, 2026-05-03)
+Superseded in part by [ADR 0026](0026-multi-currency-without-fx.md) for currency enum (language still Czech-only).
 
 ## Context
 
@@ -20,7 +20,7 @@ Forces:
 - ARES is Czech-only; lookups for foreign businesses won't work either way
 - Multi-currency adds: exchange-rate fetching (CNB), per-invoice rate snapshot, currency rounding rules, currency display per line
 - Bilingual adds: i18n in `@react-pdf/renderer` template, language toggle in builder, dual labels on PDF
-- Doing all three later is *additive*: `currency: z.literal('CZK')` becomes `currency: z.enum(['CZK', 'EUR', 'USD'])`; `language: z.literal('cs')` becomes `z.enum(['cs', 'en'])`. No semantic break.
+- Doing all three later is _additive_: `currency: z.literal('CZK')` becomes `currency: z.enum(['CZK', 'EUR', 'USD'])`; `language: z.literal('cs')` becomes `z.enum(['cs', 'en'])`. No semantic break.
 
 ## Decision
 

@@ -77,6 +77,7 @@ export function AppSidebar({
       url: "/invoices",
       icon: <FileTextIcon />,
       isActive: invoicesOpen,
+      defaultOpen: true,
       items: [
         {
           title: t("nav.invoicesList"),
@@ -177,7 +178,11 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="pt-1">
-        <NavMain items={navMain} groupLabel={t("nav.group")} />
+        <NavMain
+          collapseLabel={(title) => t("nav.collapseToggle", { title })}
+          groupLabel={t("nav.group")}
+          items={navMain}
+        />
         <NavSecondary
           groupLabel={t("nav.manageGroup")}
           items={[

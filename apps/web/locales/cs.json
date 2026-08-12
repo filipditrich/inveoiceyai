@@ -409,11 +409,11 @@
       "group": "Navigace",
       "dashboard": "Přehled",
       "invoices": "Faktury",
-      "invoicesList": "Všechny faktury",
-      "invoicesNew": "Nová faktura",
+      "invoicesList": "Seznam",
+      "invoicesNew": "Vytvořit",
       "invoicesAi": "AI koncept",
-      "invoicesImport": "Import historie",
-      "invoicesFromJson": "Vytvořit z JSON",
+      "invoicesImport": "Import vystavených",
+      "invoicesFromJson": "Z JSON",
       "clients": "Klienti",
       "issuers": "Dodavatelé",
       "newInvoice": "Nová faktura",
@@ -421,7 +421,8 @@
       "settings": "Nastavení",
       "integrations": "Integrace",
       "resourcesGroup": "Zdroje",
-      "docs": "Dokumentace"
+      "docs": "Dokumentace",
+      "collapseToggle": "Rozbalit nebo sbalit {title}"
     },
     "breadcrumb": {
       "dashboard": "Přehled",

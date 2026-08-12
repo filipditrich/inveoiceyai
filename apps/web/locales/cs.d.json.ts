@@ -412,11 +412,11 @@ declare const messages: {
       group: "Navigace";
       dashboard: "Přehled";
       invoices: "Faktury";
-      invoicesList: "Všechny faktury";
-      invoicesNew: "Nová faktura";
+      invoicesList: "Seznam";
+      invoicesNew: "Vytvořit";
       invoicesAi: "AI koncept";
-      invoicesImport: "Import historie";
-      invoicesFromJson: "Vytvořit z JSON";
+      invoicesImport: "Import vystavených";
+      invoicesFromJson: "Z JSON";
       clients: "Klienti";
       issuers: "Dodavatelé";
       newInvoice: "Nová faktura";
@@ -425,6 +425,7 @@ declare const messages: {
       integrations: "Integrace";
       resourcesGroup: "Zdroje";
       docs: "Dokumentace";
+      collapseToggle: "Rozbalit nebo sbalit {title}";
     };
     breadcrumb: {
       dashboard: "Přehled";

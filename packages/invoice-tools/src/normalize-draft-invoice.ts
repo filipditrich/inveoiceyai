@@ -2,18 +2,25 @@ import { randomUUID } from "node:crypto";
 import { parseCzAddressText } from "@invoicey/ares";
 import { addDays, format, parseISO } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
-import { calcTotals } from "@invoicey/invoice-core";
+import {
+  calcTotals,
+  exclusiveUnitPriceFromInclusive,
+} from "@invoicey/invoice-core";
 import {
   ClientSnapshotSchema,
+  InvoiceCurrencySchema,
   InvoiceMetaSchema,
   InvoiceSchema,
   InvoiceVatSchema,
   PaymentSchema,
   type Invoice,
+  type InvoiceCurrency,
   type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
 
 const PRAGUE = "Europe/Prague";
+
+export type VatPreset = "neplatce" | "regular" | "reverse_charge" | "oss";
 
 export interface NormalizedIssue {
   path: string;
@@ -35,8 +42,23 @@ export function addCalendarDaysYmd(isoDate: string, days: number): string {
   return format(bumped, "yyyy-MM-dd");
 }
 
+function vatFromPreset(preset: unknown): Record<string, unknown> | undefined {
+  switch (preset) {
+    case "neplatce":
+    case "regular":
+      return { mode: "regular", suppliesAbroad: "none" };
+    case "reverse_charge":
+      return { mode: "reverse_charge", suppliesAbroad: "none" };
+    case "oss":
+      return { mode: "oss", suppliesAbroad: "none" };
+    default:
+      return undefined;
+  }
+}
+
 /**
  * Merges a partial invoice draft with a locked issuer, recomputes totals, and validates.
+ * Optional draft fields: `vatPreset`, `pricesIncludeVat` (stripped before schema validate).
  */
 export function normalizeDraftToInvoice(
   draft: unknown,
@@ -81,7 +103,10 @@ export function normalizeDraftToInvoice(
         ? metaRaw.duzp
         : issueDate,
     language: "cs" as const,
-    currency: "CZK" as const,
+    currency: (() => {
+      const parsed = InvoiceCurrencySchema.safeParse(metaRaw.currency);
+      return parsed.success ? parsed.data : ("CZK" as InvoiceCurrency);
+    })(),
     correctedInvoiceNumber:
       typeof metaRaw.correctedInvoiceNumber === "string"
         ? metaRaw.correctedInvoiceNumber
@@ -135,7 +160,12 @@ export function normalizeDraftToInvoice(
     };
   }
 
-  const vatParsed = InvoiceVatSchema.safeParse(draft.vat);
+  const pricesIncludeVat = draft.pricesIncludeVat === true;
+  const vatRaw = isRecord(draft.vat)
+    ? draft.vat
+    : vatFromPreset(draft.vatPreset);
+
+  const vatParsed = InvoiceVatSchema.safeParse(vatRaw);
   if (!vatParsed.success) {
     return {
       ok: false,
@@ -144,6 +174,11 @@ export function normalizeDraftToInvoice(
         message: i.message,
       })),
     };
+  }
+
+  let vatData = vatParsed.data;
+  if (!issuer.vatPayer) {
+    vatData = { ...vatData, mode: "regular" };
   }
 
   const paymentRaw = draft.payment;
@@ -219,13 +254,22 @@ export function normalizeDraftToInvoice(
         ],
       };
     }
+
+    const forceZero = !issuer.vatPayer || vatData.mode === "reverse_charge";
+    const effectiveRate = forceZero ? 0 : vatRate;
+    const conversionRate =
+      vatData.mode === "reverse_charge" || !issuer.vatPayer ? 0 : vatRate;
+    const exclusive = pricesIncludeVat
+      ? exclusiveUnitPriceFromInclusive(unitPrice, conversionRate)
+      : unitPrice;
+
     lineInputs.push({
       position: pos,
       description: desc,
       quantity: qty,
       unit,
-      unitPriceWithoutVat: unitPrice,
-      vatRate,
+      unitPriceWithoutVat: exclusive,
+      vatRate: effectiveRate,
     });
     i += 1;
   }
@@ -243,7 +287,7 @@ export function normalizeDraftToInvoice(
 
   const { items: builtItems, totals } = calcTotals(
     lineInputs,
-    vatParsed.data,
+    vatData,
     issuer.vatPayer,
   );
 
@@ -256,7 +300,7 @@ export function normalizeDraftToInvoice(
     meta: metaParsed.data,
     issuer,
     client: clientParsed.data,
-    vat: vatParsed.data,
+    vat: vatData,
     payment: payParsed.data,
     items: builtItems,
     totals,

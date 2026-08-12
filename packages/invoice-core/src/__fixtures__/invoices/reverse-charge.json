@@ -1,74 +1,74 @@
 {
-	"meta": {
-		"docType": "invoice",
-		"number": "RC20260003",
-		"issueDate": "2026-05-03",
-		"dueDate": "2026-06-03",
-		"duzp": "2026-05-03",
-		"language": "cs",
-		"currency": "CZK"
-	},
-	"issuer": {
-		"id": "c3333333-3333-3333-3333-333333333333",
-		"name": "Stavař spol.",
-		"ico": "11111111",
-		"dic": "CZ1111111187",
-		"address": {
-			"street": "Stavební 5",
-			"city": "Praha",
-			"zip": "170 00",
-			"country": "CZ"
-		},
-		"bank": {
-			"accountNumber": "123456/0100",
-			"iban": "CZ6501000000001234568798"
-		},
-		"vatPayer": true,
-		"contactEmail": "faktury@stavar-demo.cz"
-	},
-	"client": {
-		"id": "d4444444-4444-4444-4444-444444444444",
-		"name": "Developer a.s.",
-		"ico": "22222222",
-		"dic": "CZ2222222296",
-		"address": {
-			"street": "Kancelářská 3",
-			"city": "Praha",
-			"zip": "186 00",
-			"country": "CZ"
-		}
-	},
-	"vat": {
-		"mode": "reverse_charge",
-		"suppliesAbroad": "none",
-		"localReverseChargeCode": "4",
-		"legalNote": "Daň odvede zákazník dle § 92e zákona č. 235/2004 Sb."
-	},
-	"payment": {
-		"method": "transfer",
-		"bankAccount": {
-			"accountNumber": "123456/0100",
-			"iban": "CZ6501000000001234568798"
-		},
-		"variableSymbol": "223344"
-	},
-	"items": [
-		{
-			"position": 1,
-			"description": "Stavební práce",
-			"quantity": 1,
-			"unit": "ks",
-			"unitPriceWithoutVat": 250000,
-			"vatRate": 0,
-			"lineSubtotal": 250000,
-			"lineVat": 0,
-			"lineTotal": 250000
-		}
-	],
-	"totals": {
-		"subtotal": 250000,
-		"vatBreakdown": [{ "rate": 0, "base": 250000, "vat": 0 }],
-		"vatTotal": 0,
-		"total": 250000
-	}
+  "meta": {
+    "docType": "invoice",
+    "number": "RC20260003",
+    "issueDate": "2026-05-03",
+    "dueDate": "2026-06-03",
+    "duzp": "2026-05-03",
+    "language": "cs",
+    "currency": "CZK"
+  },
+  "issuer": {
+    "id": "c3333333-3333-3333-3333-333333333333",
+    "name": "Stavař spol.",
+    "ico": "11111111",
+    "dic": "CZ1111111187",
+    "address": {
+      "street": "Stavební 5",
+      "city": "Praha",
+      "zip": "170 00",
+      "country": "CZ"
+    },
+    "bank": {
+      "accountNumber": "123456/0100",
+      "iban": "CZ9701000000000000123456"
+    },
+    "vatPayer": true,
+    "contactEmail": "faktury@stavar-demo.cz"
+  },
+  "client": {
+    "id": "d4444444-4444-4444-4444-444444444444",
+    "name": "Developer a.s.",
+    "ico": "22222222",
+    "dic": "CZ2222222296",
+    "address": {
+      "street": "Kancelářská 3",
+      "city": "Praha",
+      "zip": "186 00",
+      "country": "CZ"
+    }
+  },
+  "vat": {
+    "mode": "reverse_charge",
+    "suppliesAbroad": "none",
+    "localReverseChargeCode": "4",
+    "legalNote": "Daň odvede zákazník dle § 92e zákona č. 235/2004 Sb."
+  },
+  "payment": {
+    "method": "transfer",
+    "bankAccount": {
+      "accountNumber": "123456/0100",
+      "iban": "CZ9701000000000000123456"
+    },
+    "variableSymbol": "223344"
+  },
+  "items": [
+    {
+      "position": 1,
+      "description": "Stavební práce",
+      "quantity": 1,
+      "unit": "ks",
+      "unitPriceWithoutVat": 250000,
+      "vatRate": 0,
+      "lineSubtotal": 250000,
+      "lineVat": 0,
+      "lineTotal": 250000
+    }
+  ],
+  "totals": {
+    "subtotal": 250000,
+    "vatBreakdown": [{ "rate": 0, "base": 250000, "vat": 0 }],
+    "vatTotal": 0,
+    "total": 250000
+  }
 }
