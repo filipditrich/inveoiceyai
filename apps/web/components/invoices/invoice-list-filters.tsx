@@ -9,6 +9,10 @@ import type { Filter, FilterFieldConfig } from "@/components/reui/filters";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  ORIGIN_PROVIDER_LABELS,
+  type InvoiceOriginProvider,
+} from "@invoicey/invoice-core/import";
+import {
   DISPLAY_STATUS_LABELS,
   INVOICE_DISPLAY_STATUSES,
 } from "@invoicey/invoice-core/status-display";
@@ -16,16 +20,22 @@ import {
   Building2Icon,
   CalendarIcon,
   SearchIcon,
+  TagIcon,
   UserIcon,
 } from "lucide-react";
 import { useCallback, useMemo } from "react";
 
 export type PartyOption = { id: string; name: string };
 
+const ORIGIN_PROVIDERS = Object.keys(
+  ORIGIN_PROVIDER_LABELS,
+) as InvoiceOriginProvider[];
+
 type InvoiceListFiltersProps = {
   status?: string;
   issuerId?: string;
   clientId?: string;
+  originProvider?: string;
   q?: string;
   from?: string;
   to?: string;
@@ -35,6 +45,7 @@ type InvoiceListFiltersProps = {
     status?: string;
     issuerId?: string;
     clientId?: string;
+    originProvider?: string;
     q?: string;
     from?: string;
     to?: string;
@@ -45,6 +56,7 @@ export function InvoiceListFilters({
   status,
   issuerId,
   clientId,
+  originProvider,
   q,
   from,
   to,
@@ -74,6 +86,17 @@ export function InvoiceListFilters({
         })),
       },
       {
+        key: "originProvider",
+        label: "Zdroj",
+        type: "select",
+        icon: <TagIcon className="size-3.5" />,
+        defaultOperator: "is",
+        options: ORIGIN_PROVIDERS.map((p) => ({
+          value: p,
+          label: ORIGIN_PROVIDER_LABELS[p],
+        })),
+      },
+      {
         key: "issuerId",
         label: "Dodavatel",
         type: "select",
@@ -96,8 +119,12 @@ export function InvoiceListFilters({
   );
 
   const filters = useMemo(
-    () => filtersFromRecord({ status, issuerId, clientId, q }, fields),
-    [status, issuerId, clientId, q, fields],
+    () =>
+      filtersFromRecord(
+        { status, issuerId, clientId, originProvider, q },
+        fields,
+      ),
+    [status, issuerId, clientId, originProvider, q, fields],
   );
 
   const emit = useCallback(
@@ -107,6 +134,7 @@ export function InvoiceListFilters({
         status: rec.status,
         issuerId: rec.issuerId,
         clientId: rec.clientId,
+        originProvider: rec.originProvider,
         q: rec.q,
         from: dates.from,
         to: dates.to,

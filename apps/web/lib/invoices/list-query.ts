@@ -1,5 +1,15 @@
 import { invoices } from "@invoicey/db";
-import { asc, desc, eq, gte, ilike, lte, or, type SQL } from "drizzle-orm";
+import {
+  asc,
+  desc,
+  eq,
+  gte,
+  ilike,
+  isNull,
+  lte,
+  or,
+  type SQL,
+} from "drizzle-orm";
 
 export const DEFAULT_PAGE_SIZE = 50;
 export const PAGE_SIZES = [25, 50, 100] as const;
@@ -77,6 +87,7 @@ export function buildInvoiceBaseConditions(
     q?: string | null;
     from?: string | null;
     to?: string | null;
+    originProvider?: string | null;
   },
 ): SQL[] {
   const conditions: SQL[] = [eq(invoices.workspaceId, workspaceId)];
@@ -91,6 +102,18 @@ export function buildInvoiceBaseConditions(
   }
   if (sp.to) {
     conditions.push(lte(invoices.issueDate, sp.to));
+  }
+  if (sp.originProvider) {
+    if (sp.originProvider === "invoicey") {
+      conditions.push(
+        or(
+          isNull(invoices.originProvider),
+          eq(invoices.originProvider, "invoicey"),
+        )!,
+      );
+    } else {
+      conditions.push(eq(invoices.originProvider, sp.originProvider));
+    }
   }
   if (sp.q?.trim()) {
     const q = `%${sp.q.trim()}%`;

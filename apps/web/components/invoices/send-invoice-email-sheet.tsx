@@ -13,6 +13,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { MailIcon } from "lucide-react";
 import * as React from "react";
 
 export type SendInvoiceEmailSheetProps = {
@@ -40,6 +41,7 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
       <SheetTrigger
         render={
           <Button size="sm" type="button" variant="outline">
+            <MailIcon data-icon="inline-start" />
             Odeslat e-mailem
           </Button>
         }

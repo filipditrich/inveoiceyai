@@ -766,14 +766,7 @@ function DataGridTableHead({ children }: { children: ReactNode }) {
   const { props } = useDataGrid();
 
   return (
-    <thead
-      className={cn(
-        props.tableClassNames?.header,
-        props.tableLayout?.headerSticky && props.tableClassNames?.headerSticky,
-      )}
-    >
-      {children}
-    </thead>
+    <thead className={cn(props.tableClassNames?.header)}>{children}</thead>
   );
 }
 
@@ -851,6 +844,13 @@ function DataGridTableHeadRowCell<TData extends object>({
         ...(props.tableLayout?.columnsPinnable &&
           column.getCanPin() &&
           getPinningStyles(column)),
+        ...(props.tableLayout?.headerSticky
+          ? {
+              position: "sticky" as const,
+              top: 0,
+              zIndex: isPinned ? 40 : 30,
+            }
+          : null),
         ...(props.tableLayout?.columnsResizable && {
           width: `calc(var(--header-${header.id}-size) * 1px)`,
         }),
@@ -866,6 +866,7 @@ function DataGridTableHeadRowCell<TData extends object>({
       className={cn(
         "text-foreground relative h-10 text-left align-middle font-medium rtl:text-right [&:has([role=checkbox])]:pe-0",
         headerCellSpacing,
+        props.tableLayout?.headerSticky && props.tableClassNames?.headerSticky,
         props.tableLayout?.headerBackground && "bg-muted",
         props.tableLayout?.cellBorder && "border-e",
         props.tableLayout?.columnsResizable &&

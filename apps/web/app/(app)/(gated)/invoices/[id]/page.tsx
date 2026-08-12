@@ -7,9 +7,11 @@ import {
   unmarkInvoicePaid,
 } from "@/actions/invoices";
 import { InvoiceEmailTimeline } from "@/components/invoices/invoice-email-timeline";
+import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
 import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
 import { SendInvoiceEmailSheet } from "@/components/invoices/send-invoice-email-sheet";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { formatDateCs, formatDateTime, formatMoney } from "@/lib/format";
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
@@ -36,6 +38,16 @@ import { resolveDisplayStatus } from "@invoicey/invoice-core/status-display";
 import { emailSuppressions, invoices, issuerBusinesses } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
+import {
+  BanIcon,
+  CopyIcon,
+  FileCodeIcon,
+  FileDownIcon,
+  PencilIcon,
+  StampIcon,
+  Trash2Icon,
+  WalletCardsIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -74,10 +86,11 @@ export default async function InvoiceDetailPage({
     },
     pragueTodayIso(),
   );
-  const originProvider = row.originProvider as InvoiceOriginProvider | null;
+  const originProvider = (row.originProvider ??
+    (row.issuedAt ? "invoicey" : null)) as InvoiceOriginProvider | null;
   const originLabel =
-    originProvider && originProvider in ORIGIN_PROVIDER_LABELS
-      ? ORIGIN_PROVIDER_LABELS[originProvider]
+    originProvider != null
+      ? (ORIGIN_PROVIDER_LABELS[originProvider] ?? row.originLabel)
       : row.originLabel;
 
   const [issuerRow] = await db
@@ -137,6 +150,10 @@ export default async function InvoiceDetailPage({
 
   const canEmail =
     Boolean(row.issuedAt) && !row.cancelledAt && displayStatus !== "draft";
+  const showPdfPreview = Boolean(row.issuedAt);
+  const showIsdoc =
+    Boolean(row.isdocUrl) ||
+    (!row.importCompleteness && Boolean(payload?.success));
 
   return (
     <div className="space-y-6 px-4 py-6 lg:px-6">
@@ -166,47 +183,63 @@ export default async function InvoiceDetailPage({
             ) : null}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {displayStatus === "draft" ? (
-            <>
-              <form action={issueSavedInvoice}>
-                <input name="id" type="hidden" value={id} />
-                <SubmitButton pendingLabel="Vystavuji…" size="sm">
-                  Vystavit
-                </SubmitButton>
-              </form>
-              <Button
-                render={<Link href={`/invoices/${id}/edit`} prefetch />}
-                size="sm"
-                variant="outline"
-              >
-                Upravit
-              </Button>
-            </>
+            <form action={issueSavedInvoice}>
+              <input name="id" type="hidden" value={id} />
+              <SubmitButton pendingLabel="Vystavuji…" size="sm">
+                <StampIcon data-icon="inline-start" />
+                Vystavit
+              </SubmitButton>
+            </form>
           ) : null}
-          <Button
-            render={<a href={`/api/invoices/${id}/pdf`} download />}
-            size="sm"
-            variant="outline"
-          >
-            PDF
-          </Button>
-          {row.isdocUrl || (!row.importCompleteness && payload?.success) ? (
+          {displayStatus === "unpaid" ||
+          displayStatus === "overdue" ||
+          displayStatus === "future" ? (
+            <form action={markInvoicePaid}>
+              <input name="id" type="hidden" value={id} />
+              <SubmitButton pendingLabel="Ukládám…" size="sm">
+                <WalletCardsIcon data-icon="inline-start" />
+                Označit zaplaceno
+              </SubmitButton>
+            </form>
+          ) : null}
+
+          <ButtonGroup>
             <Button
-              render={<a href={`/api/invoices/${id}/isdoc`} download />}
+              render={<a href={`/api/invoices/${id}/pdf`} download />}
               size="sm"
               variant="outline"
             >
-              ISDOC
+              <FileDownIcon data-icon="inline-start" />
+              PDF
+            </Button>
+            {showIsdoc ? (
+              <Button
+                render={<a href={`/api/invoices/${id}/isdoc`} download />}
+                size="sm"
+                variant="outline"
+              >
+                <FileCodeIcon data-icon="inline-start" />
+                ISDOC
+              </Button>
+            ) : null}
+          </ButtonGroup>
+
+          {displayStatus === "draft" ? (
+            <Button
+              render={<Link href={`/invoices/${id}/edit`} prefetch />}
+              size="sm"
+              variant="outline"
+            >
+              <PencilIcon data-icon="inline-start" />
+              Upravit
             </Button>
           ) : null}
           <form action={duplicateInvoice}>
             <input name="id" type="hidden" value={id} />
-            <SubmitButton
-              pendingLabel="Duplikuji…"
-              size="sm"
-              variant="secondary"
-            >
+            <SubmitButton pendingLabel="Duplikuji…" size="sm" variant="outline">
+              <CopyIcon data-icon="inline-start" />
               Duplikovat
             </SubmitButton>
           </form>
@@ -223,27 +256,21 @@ export default async function InvoiceDetailPage({
               suppressedEmails={suppressedEmails}
             />
           ) : null}
+
           {displayStatus === "unpaid" ||
           displayStatus === "overdue" ||
           displayStatus === "future" ? (
-            <>
-              <form action={markInvoicePaid}>
-                <input name="id" type="hidden" value={id} />
-                <SubmitButton pendingLabel="Ukládám…" size="sm">
-                  Označit zaplaceno
-                </SubmitButton>
-              </form>
-              <form action={cancelInvoice}>
-                <input name="id" type="hidden" value={id} />
-                <SubmitButton
-                  pendingLabel="Stornuji…"
-                  size="sm"
-                  variant="secondary"
-                >
-                  Stornovat
-                </SubmitButton>
-              </form>
-            </>
+            <form action={cancelInvoice}>
+              <input name="id" type="hidden" value={id} />
+              <SubmitButton
+                pendingLabel="Stornuji…"
+                size="sm"
+                variant="secondary"
+              >
+                <BanIcon data-icon="inline-start" />
+                Stornovat
+              </SubmitButton>
+            </form>
           ) : null}
           {displayStatus === "paid" ? (
             <form action={unmarkInvoicePaid}>
@@ -253,6 +280,7 @@ export default async function InvoiceDetailPage({
                 size="sm"
                 variant="secondary"
               >
+                <WalletCardsIcon data-icon="inline-start" />
                 Zrušit zaplaceno
               </SubmitButton>
             </form>
@@ -265,6 +293,7 @@ export default async function InvoiceDetailPage({
                 size="sm"
                 variant="destructive"
               >
+                <Trash2Icon data-icon="inline-start" />
                 Smazat
               </SubmitButton>
             </form>
@@ -274,6 +303,15 @@ export default async function InvoiceDetailPage({
 
       {sp.invalid ? (
         <p className="text-destructive text-sm">Chyba: {sp.invalid}</p>
+      ) : null}
+
+      {showPdfPreview ? (
+        <div className="overflow-hidden rounded-md border">
+          <InvoicePdfPreview
+            emptyLabel="PDF zatím není k dispozici."
+            url={`/api/invoices/${id}/pdf?disposition=inline`}
+          />
+        </div>
       ) : null}
 
       <dl className="grid gap-3 text-sm sm:grid-cols-2">
@@ -322,7 +360,7 @@ export default async function InvoiceDetailPage({
 
       {archive ? (
         <p className="text-muted-foreground rounded-md border p-3 text-sm">
-          Archivní import — položky nejsou k dispozici. Stáhněte originální PDF.
+          Archivní import — položky nejsou k dispozici. Originální PDF je výše.
         </p>
       ) : null}
 

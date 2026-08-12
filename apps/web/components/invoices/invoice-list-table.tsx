@@ -46,6 +46,10 @@ import {
 } from "@/lib/invoices/list-query";
 import { DISPLAY_STATUS_ROW_ACCENT } from "@/lib/invoice-status-ui";
 import { cn } from "@/lib/utils";
+import {
+  ORIGIN_PROVIDER_LABELS,
+  type InvoiceOriginProvider,
+} from "@invoicey/invoice-core/import";
 import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
 import {
   CopyIcon,
@@ -128,6 +132,7 @@ export function InvoiceListTable({
       status: parseAsString,
       issuerId: parseAsString,
       clientId: parseAsString,
+      originProvider: parseAsString,
       q: parseAsString,
       from: parseAsString,
       to: parseAsString,
@@ -157,6 +162,7 @@ export function InvoiceListTable({
       status?: string;
       issuerId?: string;
       clientId?: string;
+      originProvider?: string;
       q?: string;
       from?: string;
       to?: string;
@@ -166,6 +172,7 @@ export function InvoiceListTable({
         status: next.status ?? null,
         issuerId: next.issuerId ?? null,
         clientId: next.clientId ?? null,
+        originProvider: next.originProvider ?? null,
         q: next.q ?? null,
         from: next.from ?? null,
         to: next.to ?? null,
@@ -205,15 +212,27 @@ export function InvoiceListTable({
                 archiv
               </span>
             ) : null}
-            {row.original.originProvider ? (
-              <span className="text-muted-foreground ml-2 text-[0.65rem]">
-                · {row.original.originProvider}
-              </span>
-            ) : null}
           </div>
         ),
         meta: { headerTitle: "Číslo" },
         size: 105,
+      },
+      {
+        id: "originProvider",
+        accessorFn: (row) => row.originProvider ?? "invoicey",
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Zdroj" />
+        ),
+        cell: ({ row }) => {
+          const provider = row.original.originProvider ?? "invoicey";
+          const label =
+            ORIGIN_PROVIDER_LABELS[provider as InvoiceOriginProvider] ??
+            provider;
+          return <span className="text-muted-foreground text-xs">{label}</span>;
+        },
+        meta: { headerTitle: "Zdroj" },
+        size: 110,
       },
       {
         accessorKey: "issueDate",
@@ -376,6 +395,7 @@ export function InvoiceListTable({
         issuerId={params.issuerId ?? undefined}
         issuers={issuers}
         onFiltersChange={onFiltersChange}
+        originProvider={params.originProvider ?? undefined}
         q={params.q ?? undefined}
         status={params.status ?? undefined}
         to={params.to ?? undefined}

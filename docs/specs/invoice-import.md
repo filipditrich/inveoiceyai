@@ -26,12 +26,20 @@ Bulk-import previously issued invoices (PDF) into a workspace so Invoicey can ma
 
 ## Flow
 
-1. Pick issuer (workspace business that issued the PDFs)
-2. Set batch defaults (origin provider, paid?)
-3. Upload PDFs via UploadThing `importedInvoicePdf` (up to 40 per drop, 16 MB)
-4. Server classifies: `extractIsdocFromPdf` → `parseIsdoc` or archive stub
-5. Review grid: edit archive header fields; toggle paid
-6. Commit → `insertIssuedImport` (issued, historical `issuedAt`, no numbering allocation) + numbering counter sync
+Web UI is a three-step wizard on `/invoices/import` (same route, client step state):
+
+1. **Nastavení** — pick issuer; set batch default origin / label / version and default paid
+2. **Nahrání** — UploadThing `importedInvoicePdf` (up to 40 per drop, 16 MB)
+3. **Kontrola** — review grid + commit
+
+Server classifies each PDF (`extractIsdocFromPdf` → `parseIsdoc` or archive stub) and runs `detectInvoiceOrigin`.
+
+### Provenance on commit
+
+- Each review row has its own **Zdroj** (seeded from `detectedOrigin.provider`).
+- Batch origin is the **fallback** when a row stays `custom`, and supports “apply default to all”.
+- If the user has not manually changed the batch select, classify sets it from the **majority** non-`custom` detected provider among newly uploaded rows.
+- Commit writes per-item `origin` into `insertIssuedImport` (issued, historical `issuedAt`, no numbering allocation) + numbering counter sync.
 
 ## Idempotency
 

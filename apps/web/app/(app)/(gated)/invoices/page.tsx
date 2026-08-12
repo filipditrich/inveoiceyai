@@ -33,6 +33,7 @@ type Search = Promise<{
   status?: string;
   issuerId?: string;
   clientId?: string;
+  originProvider?: string;
   q?: string;
   from?: string;
   to?: string;
@@ -145,6 +146,7 @@ export default async function InvoicesPage({
   const filterBase = {
     issuerId: sp.issuerId,
     clientId: sp.clientId,
+    originProvider: sp.originProvider,
     q: sp.q,
     from: sp.from,
     to: sp.to,
