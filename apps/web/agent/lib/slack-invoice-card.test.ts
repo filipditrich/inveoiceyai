@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { pendingCardFromToolResult } from "./slack-invoice-card";
+import {
+  formatInvoiceAmount,
+  pendingCardFromToolResult,
+} from "./slack-invoice-card";
 import {
   actionRequestsNeedApproval,
   invoiceyActionLabel,
   invoiceyActionsLabel,
+  thinkingTaskId,
+  thinkingTaskIdForTool,
   truncateTypingStatus,
 } from "./slack-tool-labels";
 
@@ -17,7 +22,8 @@ describe("pendingCardFromToolResult", () => {
       total: "1210.00",
       currency: "CZK",
       invoiceId: "11111111-1111-4111-8111-111111111111",
-      webUrl: "https://invoicey.ditrich.me/invoices/11111111-1111-4111-8111-111111111111",
+      webUrl:
+        "https://invoicey.ditrich.me/invoices/11111111-1111-4111-8111-111111111111",
     });
     expect(card).toMatchObject({
       kind: "invoice",
@@ -31,6 +37,20 @@ describe("pendingCardFromToolResult", () => {
         { label: "Status", value: "Draft" },
         { label: "Total", value: "1210.00 CZK" },
       ]),
+    );
+  });
+
+  it("formats numeric totals from invoice-core", () => {
+    expect(formatInvoiceAmount(48400, "CZK")).toBe("48400 CZK");
+    const card = pendingCardFromToolResult("create_invoice", {
+      ok: true,
+      number: "DRAFT-1",
+      clientName: "NFCtron a.s.",
+      total: 48400,
+      currency: "CZK",
+    });
+    expect(card?.fields).toEqual(
+      expect.arrayContaining([{ label: "Total", value: "48400 CZK" }]),
     );
   });
 
@@ -119,5 +139,27 @@ describe("slack tool labels", () => {
     expect(truncateTypingStatus("Working…")).toBe("Working…");
     expect(truncateTypingStatus("a".repeat(60)).length).toBe(50);
     expect(invoiceyActionsLabel([]).length).toBeLessThanOrEqual(50);
+  });
+
+  it("collapses create_invoice retries onto one thinking task id", () => {
+    expect(
+      thinkingTaskId({
+        kind: "tool-call",
+        callId: "call-a",
+        toolName: "create_invoice",
+        input: {},
+      }),
+    ).toBe("tool:create_invoice");
+    expect(thinkingTaskIdForTool("create_invoice", "call-b")).toBe(
+      "tool:create_invoice",
+    );
+    expect(
+      thinkingTaskId({
+        kind: "tool-call",
+        callId: "call-c",
+        toolName: "search_business",
+        input: {},
+      }),
+    ).toBe("call-c");
   });
 });

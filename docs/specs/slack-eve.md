@@ -29,14 +29,14 @@ flowchart TB
 
 Invoicey’s Slack channel overrides Eve defaults for richer UX (Linear-style progress):
 
-| Phase        | Mechanism                                                                                                       |
-| ------------ | --------------------------------------------------------------------------------------------------------------- |
-| Turn start   | Typing `Working…`; Thinking Steps stream opens on the **first tool batch** (clarify-only turns stay quiet)      |
-| Tool calls   | `chat.appendStream` `task_update` chunks with domain labels (ARES, create draft, upload, …)                     |
-| HITL         | Stream stops with “Waiting for approval…” **before** Eve Allow/Deny cards; `session.waiting` is a safety net    |
-| Tool results | Stash invoice/list Card payload; mark tasks complete (optional `sources` → View in Invoicey)                    |
-| Final reply  | Stop stream with markdown + Card blocks, **or** `thread.post(Card)` with View button when streaming unavailable |
-| Artifacts    | PDF/ISDOC file uploads stay separate thread messages                                                            |
+| Phase        | Mechanism                                                                                                                                    |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Turn start   | Typing `Working…`; Thinking Steps stream opens on the **first tool batch** (clarify-only turns stay quiet)                                   |
+| Tool calls   | `chat.appendStream` `task_update` chunks with domain labels (ARES, create draft, upload, …)                                                  |
+| HITL         | Stream stops with “Waiting for approval…” **before** Eve Allow/Deny cards; `session.waiting` is a safety net                                 |
+| Tool results | Stash invoice/list Card payload; mark tasks complete with a short result snippet (no View link on the step)                                  |
+| Final reply  | Stop stream with **Card only** when a card exists (no model markdown, no extra View task); otherwise markdown. Fallback: `thread.post(Card)` |
+| Artifacts    | PDF/ISDOC file uploads stay separate thread messages                                                                                         |
 
 Helpers: `agent/lib/slack-thinking-stream.ts`, `slack-invoice-card.ts`, `slack-tool-labels.ts`, `slack-channel-extras.ts`.
 

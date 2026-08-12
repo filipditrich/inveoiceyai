@@ -25,29 +25,16 @@ import {
   invoiceyActionsLabel,
   actionRequestsNeedApproval,
   thinkingTaskId,
+  thinkingTaskIdForTool,
   truncateTypingStatus,
 } from "../lib/slack-tool-labels";
+import { toolOutputSnippet } from "../lib/slack-tool-output";
 
 function firstNonEmptyLine(text: string): string | undefined {
   for (const line of text.split(/\r?\n/u)) {
     const trimmed = line.trim();
     if (trimmed.length > 0) return trimmed;
   }
-  return undefined;
-}
-
-function toolOutputSnippet(output: unknown): string | undefined {
-  if (!output || typeof output !== "object") return undefined;
-  const record = output as Record<string, unknown>;
-  if (record.ok === false && typeof record.error === "string") {
-    return record.error.slice(0, 200);
-  }
-  if (typeof record.number === "string") return record.number;
-  if (typeof record.clientName === "string") return record.clientName;
-  if (Array.isArray(record.invoices)) {
-    return `${record.invoices.length} invoice(s)`;
-  }
-  if (record.ok === true) return "ok";
   return undefined;
 }
 
@@ -99,11 +86,18 @@ export default slackChannel({
       const pending = state.pendingToolCallMessage;
       state.pendingToolCallMessage = null;
 
-      const tasks = data.actions.map((action) => ({
-        id: thinkingTaskId(action),
-        title: invoiceyActionLabel(action),
-        status: "in_progress" as const,
-      }));
+      const tasks = [];
+      const seenTaskIds = new Set<string>();
+      for (const action of data.actions) {
+        const id = thinkingTaskId(action);
+        if (seenTaskIds.has(id)) continue;
+        seenTaskIds.add(id);
+        tasks.push({
+          id,
+          title: invoiceyActionLabel(action),
+          status: "in_progress" as const,
+        });
+      }
 
       let streaming = hasActiveThinkingStream(channel);
       if (!streaming) {
@@ -149,10 +143,9 @@ export default slackChannel({
           (output as { ok?: unknown }).ok === false);
 
       await completeThinkingTask(channel, {
-        id: result.callId,
+        id: thinkingTaskIdForTool(result.toolName, result.callId),
         status: isError ? "error" : "complete",
-        output: toolOutputSnippet(output),
-        webUrl: pending?.webUrl,
+        output: toolOutputSnippet(result.toolName, output),
       });
     },
 
@@ -170,7 +163,7 @@ export default slackChannel({
 
       if (hasActiveThinkingStream(channel)) {
         const stopped = await stopThinkingStream(channel, {
-          markdown: data.message,
+          markdown: pendingCard ? null : data.message,
           card: pendingCard,
         });
         if (stopped) {
@@ -184,20 +177,6 @@ export default slackChannel({
           card: buildInvoiceCard(pendingCard),
           fallbackText: pendingCard.fallbackText,
         });
-        if (data.message && data.message.trim().length > 0) {
-          /** keep short model narration when it adds context beyond the card */
-          const cardHints = [
-            pendingCard.title,
-            pendingCard.webUrl,
-            ...pendingCard.fields.map((f) => f.value),
-          ].filter((v): v is string => typeof v === "string" && v.length > 0);
-          const addsContext = !cardHints.some((hint) =>
-            data.message!.includes(hint),
-          );
-          if (addsContext && data.message.length < 500) {
-            await channel.thread.post(data.message);
-          }
-        }
         await channel.thread.startTyping();
         return;
       }

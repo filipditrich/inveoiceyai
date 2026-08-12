@@ -234,14 +234,13 @@ export function normalizeDraftToInvoice(
         issues: [{ path: `items.${i}`, message: "line must be object" }],
       };
     }
-    const pos = row.position;
+    const pos = typeof row.position === "number" ? row.position : i + 1;
     const desc = row.description;
     const qty = row.quantity;
     const unit = row.unit;
     const unitPrice = row.unitPriceWithoutVat;
     const vatRate = row.vatRate;
     if (
-      typeof pos !== "number" ||
       typeof desc !== "string" ||
       typeof qty !== "number" ||
       typeof unit !== "string" ||
@@ -254,7 +253,7 @@ export function normalizeDraftToInvoice(
           {
             path: `items.${i}`,
             message:
-              "each line needs position, description, quantity, unit, unitPriceWithoutVat, vatRate",
+              "each line needs description, quantity, unit, unitPriceWithoutVat, vatRate",
           },
         ],
       };

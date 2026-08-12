@@ -41,6 +41,40 @@ describe("normalizeDraftToInvoice", () => {
     }
   });
 
+  it("assigns line position when omitted", () => {
+    const issuer = getDemoIssuer();
+    const draft = {
+      meta: { docType: "invoice" as const },
+      client: {
+        name: "Test s.r.o.",
+        ico: "44444444",
+        address: {
+          street: "Nákupní 1",
+          city: "Ostrava",
+          zip: "709 00",
+          country: "CZ",
+        },
+      },
+      vat: { mode: "regular" as const, suppliesAbroad: "none" as const },
+      payment: { method: "transfer" as const, variableSymbol: "1" },
+      items: [
+        {
+          description: "Konzultace",
+          quantity: 1,
+          unit: "ks",
+          unitPriceWithoutVat: 10_000,
+          vatRate: 21,
+        },
+      ],
+    };
+
+    const r = normalizeDraftToInvoice(draft, issuer);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.invoice.items[0]?.position).toBe(1);
+    }
+  });
+
   it("infers vat from vatPreset when vat is missing", () => {
     const issuer = getDemoIssuer();
     const draft = {

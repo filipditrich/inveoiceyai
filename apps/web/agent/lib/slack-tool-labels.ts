@@ -26,6 +26,9 @@ const TOOL_LABELS: Record<string, string> = {
   send_invoice_email: "Sending invoice email…",
 };
 
+/** Tools whose retries share one Thinking Steps row (last result wins). */
+const COLLAPSE_TOOL_TASKS = new Set(["create_invoice", "upload_invoice_files"]);
+
 /** Human-readable typing / task title for one Eve action request. */
 export function invoiceyActionLabel(action: ActionRequest): string {
   switch (action.kind) {
@@ -73,6 +76,17 @@ export function invoiceyActionsLabel(
 }
 
 /** Stable task id for Thinking Steps task_update chunks. */
+export function thinkingTaskIdForTool(
+  toolName: string,
+  callId: string,
+): string {
+  if (COLLAPSE_TOOL_TASKS.has(toolName)) return `tool:${toolName}`;
+  return callId;
+}
+
 export function thinkingTaskId(action: ActionRequest): string {
+  if (action.kind === "tool-call") {
+    return thinkingTaskIdForTool(action.toolName, action.callId);
+  }
   return action.callId;
 }

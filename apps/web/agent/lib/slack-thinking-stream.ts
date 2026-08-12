@@ -27,7 +27,8 @@ type StreamChunk =
   | { type: "blocks"; blocks: unknown[] };
 
 function streamTs(state: InvoiceySlackState): string | null {
-  return state.thinkingActive === true && typeof state.thinkingStreamTs === "string"
+  return state.thinkingActive === true &&
+    typeof state.thinkingStreamTs === "string"
     ? state.thinkingStreamTs
     : null;
 }
@@ -135,13 +136,11 @@ export async function completeThinkingTask(
     title?: string;
     status?: "complete" | "error";
     output?: string;
-    webUrl?: string | null;
   },
 ): Promise<void> {
   const state = asInvoiceyState(channel.state);
   if (!streamTs(state)) return;
-  const title =
-    input.title ?? state.thinkingOpenTasks?.[input.id] ?? "Done";
+  const title = input.title ?? state.thinkingOpenTasks?.[input.id] ?? "Done";
   if (state.thinkingOpenTasks) {
     delete state.thinkingOpenTasks[input.id];
   }
@@ -152,15 +151,10 @@ export async function completeThinkingTask(
     status: input.status ?? "complete",
   };
   if (input.output) chunk.output = input.output;
-  if (input.webUrl) {
-    chunk.sources = [
-      { type: "url", text: "View in Invoicey", url: input.webUrl },
-    ];
-  }
   await appendChunks(channel, [chunk]);
 }
 
-/** Finalize the stream with optional markdown + invoice card blocks. */
+/** Finalize the stream with a card, or markdown when there is no card. */
 export async function stopThinkingStream(
   channel: SlackEventContext,
   input?: {
@@ -177,27 +171,11 @@ export async function stopThinkingStream(
   }
 
   const chunks: StreamChunk[] = [];
-  if (input?.markdown && input.markdown.trim().length > 0) {
-    chunks.push({ type: "markdown_text", text: input.markdown });
-  }
   if (input?.card) {
     const card = buildInvoiceCard(input.card);
     chunks.push({ type: "blocks", blocks: cardToBlocks(card) });
-    if (input.card.webUrl) {
-      chunks.push({
-        type: "task_update",
-        id: `invoice-link-${Date.now()}`,
-        title: input.card.title,
-        status: "complete",
-        sources: [
-          {
-            type: "url",
-            text: "View in Invoicey",
-            url: input.card.webUrl,
-          },
-        ],
-      });
-    }
+  } else if (input?.markdown && input.markdown.trim().length > 0) {
+    chunks.push({ type: "markdown_text", text: input.markdown });
   }
 
   try {

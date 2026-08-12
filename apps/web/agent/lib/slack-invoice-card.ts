@@ -10,13 +10,26 @@ import {
 
 import type { PendingInvoiceCard } from "./slack-channel-extras";
 
+/** Format tool totals that may be a number (invoice-core) or a string (DB summary). */
+export function formatInvoiceAmount(total: unknown, currency: unknown): string {
+  let amount = "—";
+  if (typeof total === "number" && Number.isFinite(total)) {
+    amount = String(total);
+  } else if (typeof total === "string" && total.trim().length > 0) {
+    amount = total.trim();
+  }
+  const cur = typeof currency === "string" ? currency.trim() : "";
+  if (amount === "—" || cur.length === 0) return amount;
+  return `${amount} ${cur}`;
+}
+
 /** Build an Eve Card from a pending invoice/list snapshot. */
 export function buildInvoiceCard(pending: PendingInvoiceCard): CardElement {
   const children: CardChild[] = [
     Fields(
-      pending.fields.slice(0, 8).map((field) =>
-        Field({ label: field.label, value: field.value }),
-      ),
+      pending.fields
+        .slice(0, 8)
+        .map((field) => Field({ label: field.label, value: field.value })),
     ),
   ];
   if (pending.webUrl) {
@@ -49,10 +62,8 @@ export function invoiceCardFromCreateResult(output: {
   const number = output.number;
   const clientName =
     typeof output.clientName === "string" ? output.clientName : "—";
-  const total = typeof output.total === "string" ? output.total : "—";
-  const currency = typeof output.currency === "string" ? output.currency : "";
+  const amount = formatInvoiceAmount(output.total, output.currency);
   const webUrl = typeof output.webUrl === "string" ? output.webUrl : null;
-  const amount = currency ? `${total} ${currency}` : total;
   return {
     kind: "invoice",
     title: number,
@@ -87,9 +98,7 @@ export function invoiceCardFromIssueResult(output: {
       : {};
   const clientName =
     typeof summary.clientName === "string" ? summary.clientName : "—";
-  const total = typeof summary.total === "string" ? summary.total : "—";
-  const currency = typeof summary.currency === "string" ? summary.currency : "";
-  const amount = currency ? `${total} ${currency}` : total;
+  const amount = formatInvoiceAmount(summary.total, summary.currency);
   const webUrl = typeof output.webUrl === "string" ? output.webUrl : null;
   return {
     kind: "invoice",
@@ -114,15 +123,13 @@ export function invoiceCardFromGetResult(output: {
   const number = typeof summary.number === "string" ? summary.number : "—";
   const clientName =
     typeof summary.clientName === "string" ? summary.clientName : "—";
-  const total = typeof summary.total === "string" ? summary.total : "—";
-  const currency = typeof summary.currency === "string" ? summary.currency : "";
   const displayStatus =
     typeof summary.displayStatus === "string"
       ? summary.displayStatus
       : typeof summary.status === "string"
         ? summary.status
         : "—";
-  const amount = currency ? `${total} ${currency}` : total;
+  const amount = formatInvoiceAmount(summary.total, summary.currency);
   const webUrl = typeof output.webUrl === "string" ? output.webUrl : null;
   return {
     kind: "invoice",
@@ -145,21 +152,21 @@ export function invoiceCardFromListResult(output: {
     return null;
   }
   const rows = output.invoices
-    .filter((row): row is Record<string, unknown> => !!row && typeof row === "object")
+    .filter(
+      (row): row is Record<string, unknown> => !!row && typeof row === "object",
+    )
     .slice(0, 5);
   if (rows.length === 0) return null;
   const fields = rows.map((row) => {
     const number = typeof row.number === "string" ? row.number : "—";
     const client = typeof row.clientName === "string" ? row.clientName : "—";
-    const total = typeof row.total === "string" ? row.total : "—";
-    const currency = typeof row.currency === "string" ? row.currency : "";
     const status =
       typeof row.displayStatus === "string"
         ? row.displayStatus
         : typeof row.status === "string"
           ? row.status
           : "—";
-    const amount = currency ? `${total} ${currency}` : total;
+    const amount = formatInvoiceAmount(row.total, row.currency);
     return {
       label: number,
       value: `${client} · ${amount} · ${status}`,
@@ -188,9 +195,7 @@ export function invoiceCardFromPaidResult(output: {
   const number = typeof summary.number === "string" ? summary.number : "—";
   const clientName =
     typeof summary.clientName === "string" ? summary.clientName : "—";
-  const total = typeof summary.total === "string" ? summary.total : "—";
-  const currency = typeof summary.currency === "string" ? summary.currency : "";
-  const amount = currency ? `${total} ${currency}` : total;
+  const amount = formatInvoiceAmount(summary.total, summary.currency);
   return {
     kind: "invoice",
     title: number,

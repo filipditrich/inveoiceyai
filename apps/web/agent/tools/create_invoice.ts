@@ -1,33 +1,16 @@
 import { createAndRenderInvoice } from "@invoicey/invoice-tools";
 import { resolveDefaultIssuer } from "@invoicey/invoice-tools/ops";
 import { defineTool } from "eve/tools";
-import { z } from "zod";
 
+import { CreateInvoiceInputSchema } from "../lib/create-invoice-input";
 import { appOrigin, slackThreadFromCtx } from "../lib/slack-thread";
 import { withEveToolWorkspace } from "../lib/tool-workspace";
 import { uploadInvoiceArtifacts } from "../lib/upload-slack-files";
 
 export default defineTool({
   description:
-    "Assemble a draft invoice, persist to Neon when DATABASE_URL is set, and render PDF + ISDOC. Issuer is locked server-side. Uploads files automatically in a Slack thread.",
-  inputSchema: z.object({
-    draft: z
-      .record(z.string(), z.unknown())
-      .optional()
-      .describe(
-        "Partial invoice: meta, client, vat, payment, items (issuer ignored). meta.language is cs|en (PDF/ISDOC labels; default cs). vat is required: { mode: regular|reverse_charge|oss, suppliesAbroad: none|eu|non_eu }. Domestic default: { mode: regular, suppliesAbroad: none }. Line vatRate does not replace vat.",
-      ),
-    issuerPresetId: z
-      .string()
-      .uuid()
-      .optional()
-      .describe("Preset id of kind issuer"),
-    templatePresetId: z
-      .string()
-      .uuid()
-      .optional()
-      .describe("Preset id of kind invoice_template"),
-  }),
+    "Assemble a draft invoice, persist to Neon when DATABASE_URL is set, and render PDF + ISDOC. Issuer is locked server-side. Uploads files automatically in a Slack thread. Call only with a complete draft: meta, client (structured address from ARES), vat, payment.method, and items. Do not omit vat or payment to probe validation.",
+  inputSchema: CreateInvoiceInputSchema,
   async execute({ draft, issuerPresetId, templatePresetId }, ctx) {
     return withEveToolWorkspace(ctx, async () => {
       const issuer = issuerPresetId ? undefined : await resolveDefaultIssuer();
@@ -55,7 +38,7 @@ export default defineTool({
         ok: true as const,
         invoiceId: result.invoiceId ?? null,
         number: result.invoice.meta.number,
-        total: result.invoice.totals.total,
+        total: String(result.invoice.totals.total),
         currency: result.invoice.meta.currency,
         clientName: result.invoice.client.name,
         filenamePdf: result.filenamePdf,
