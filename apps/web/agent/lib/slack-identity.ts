@@ -1,4 +1,9 @@
-import type { SlackIdentityRecord } from "@invoicey/db";
+import {
+  resolveLinkedSlackPrincipal,
+  tryCreateDbFromEnv,
+  type LinkedSlackPrincipal,
+  type SlackIdentityRecord,
+} from "@invoicey/db";
 
 import {
   attrString,
@@ -62,4 +67,68 @@ export function slackToolAuthError(
 ): "not_linked" | null {
   if (!isSlackSession(auth)) return null;
   return linkedSlackWorkspace(auth) ? null : "not_linked";
+}
+
+export type SlackSessionAuthPair = {
+  current?: MeteringAuth | null;
+  initiator?: MeteringAuth | null;
+};
+
+export type SlackPrincipalLookup = (ids: {
+  slackTeamId: string;
+  slackUserId: string;
+}) => Promise<LinkedSlackPrincipal>;
+
+function identityFromOverlay(
+  auth: MeteringAuth | null | undefined,
+  linked: { userId: string; workspaceId: string },
+): SlackIdentityRecord {
+  const ids = slackIdsFromAuth(auth);
+  return {
+    userId: linked.userId,
+    workspaceId: linked.workspaceId,
+    slackTeamId: ids?.slackTeamId ?? "",
+    slackUserId: ids?.slackUserId ?? "",
+  };
+}
+
+/**
+ * HITL / button resumes re-derive Slack auth without Invoicey overlay
+ * attributes. Prefer overlay on current, then look up `slack_identities`.
+ */
+export async function resolveSlackToolPrincipal(
+  sessionAuth: SlackSessionAuthPair,
+  lookup?: SlackPrincipalLookup,
+): Promise<LinkedSlackPrincipal | { status: "not_slack" }> {
+  const current = sessionAuth.current;
+  const initiator = sessionAuth.initiator;
+  if (!isSlackSession(current) && !isSlackSession(initiator)) {
+    return { status: "not_slack" };
+  }
+
+  const currentLinked = linkedSlackWorkspace(current);
+  if (currentLinked) {
+    return {
+      status: "linked",
+      identity: identityFromOverlay(current, currentLinked),
+    };
+  }
+
+  const ids = slackIdsFromAuth(current) ?? slackIdsFromAuth(initiator);
+  if (ids) {
+    if (lookup) return lookup(ids);
+    const database = tryCreateDbFromEnv();
+    if (!database) return { status: "unlinked" };
+    return resolveLinkedSlackPrincipal(database, ids);
+  }
+
+  const initiatorLinked = linkedSlackWorkspace(initiator);
+  if (initiatorLinked) {
+    return {
+      status: "linked",
+      identity: identityFromOverlay(initiator, initiatorLinked),
+    };
+  }
+
+  return { status: "unlinked" };
 }

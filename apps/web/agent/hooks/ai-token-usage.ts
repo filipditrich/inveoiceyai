@@ -11,6 +11,7 @@ import {
   isSlackSession,
   meteringIdentityFromAuth,
 } from "../lib/metering-identity";
+import { resolveSlackToolPrincipal } from "../lib/slack-identity";
 
 /**
  * Gate Slack/Eve turns when the workspace has no AI tokens, and meter each
@@ -22,7 +23,7 @@ export default defineHook({
       const database = tryCreateDbFromEnv();
       if (!database) return;
 
-      const workspaceId = workspaceFromCtx(ctx);
+      const workspaceId = await workspaceFromCtx(ctx);
       /** unlinked Slack has no workspace; throwing here becomes Eve FatalError after retries */
       if (!workspaceId) return;
       try {
@@ -46,10 +47,7 @@ export default defineHook({
       const completionTokens = usage?.outputTokens ?? 0;
       if (promptTokens + completionTokens <= 0) return;
 
-      const identity = meteringIdentityFromAuth(
-        ctx.session.auth.current,
-        getDefaultWorkspaceId(),
-      );
+      const identity = await meteringIdentityFromCtx(ctx);
       if (!identity.workspaceId) return;
 
       const model =
@@ -80,9 +78,28 @@ export default defineHook({
   },
 });
 
-function workspaceFromCtx(ctx: HookContext): string | null {
+async function meteringIdentityFromCtx(ctx: HookContext) {
   const current = ctx.session.auth.current;
+  const initiator = ctx.session.auth.initiator;
   const identity = meteringIdentityFromAuth(current, getDefaultWorkspaceId());
-  if (isSlackSession(current) && !identity.workspaceId) return null;
+  if (!isSlackSession(current) && !isSlackSession(initiator)) {
+    return identity;
+  }
+  const principal = await resolveSlackToolPrincipal({ current, initiator });
+  if (principal.status !== "linked") {
+    return { ...identity, workspaceId: "", userId: undefined };
+  }
+  return {
+    ...identity,
+    workspaceId: principal.identity.workspaceId,
+    userId: principal.identity.userId,
+  };
+}
+
+async function workspaceFromCtx(ctx: HookContext): Promise<string | null> {
+  const identity = await meteringIdentityFromCtx(ctx);
+  if (isSlackSession(ctx.session.auth.current) && !identity.workspaceId) {
+    return null;
+  }
   return identity.workspaceId || null;
 }
