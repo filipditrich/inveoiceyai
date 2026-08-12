@@ -10,8 +10,9 @@ import { cache } from "react";
 import { auth } from "./auth";
 import { ForbiddenError, UnauthorizedError } from "./errors";
 import { loadPlatformRole } from "./platform-admin";
+import type { WorkspaceRole } from "./workspace-types";
 
-export type WorkspaceRole = "owner" | "admin" | "member";
+export type { WorkspaceRole } from "./workspace-types";
 
 export interface SessionUser {
   id: string;

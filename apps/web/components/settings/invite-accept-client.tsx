@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { recordAccountSecurityEventAction } from "@/actions/security";
+import { acceptWorkspaceInviteAction } from "@/actions/workspace";
 import { authClient } from "@/lib/auth/client";
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +18,7 @@ export function InviteAcceptClient({
   canAct: boolean;
 }) {
   const t = useTranslations("Invite");
+  const tErrors = useTranslations("App.workspaceErrors");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [busy, setBusy] = useState<"accept" | "decline" | null>(null);
@@ -27,21 +29,13 @@ export function InviteAcceptClient({
     setBusy("accept");
     startTransition(async () => {
       try {
-        const res = await authClient.organization.acceptInvitation({
-          invitationId,
-        });
-        if (res.error) {
-          toast.error(res.error.message || t("acceptFailed"));
+        const result = await acceptWorkspaceInviteAction(invitationId);
+        if (result && !result.ok) {
+          toast.error(tErrors(result.errorCode));
           return;
         }
-        await recordAccountSecurityEventAction({
-          type: "invite_accept",
-          metadata: { invitationId },
-        });
+        /** success redirects to /dashboard from the server action */
         setDone("accepted");
-        toast.success(t("acceptSuccess"));
-        router.push("/dashboard");
-        router.refresh();
       } finally {
         setBusy(null);
       }

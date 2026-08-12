@@ -32,6 +32,7 @@ export function SiteHeader() {
     issuers: t("breadcrumb.issuers"),
     settings: t("breadcrumb.settings"),
     security: t("breadcrumb.security"),
+    workspace: t("breadcrumb.workspace"),
     members: t("breadcrumb.members"),
     referrals: t("breadcrumb.referrals"),
     "api-keys": t("breadcrumb.api-keys"),

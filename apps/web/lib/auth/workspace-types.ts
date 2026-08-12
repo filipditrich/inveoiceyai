@@ -1,0 +1,8 @@
+export type WorkspaceRole = "owner" | "admin" | "member";
+
+export interface WorkspaceListItem {
+  id: string;
+  name: string;
+  slug: string;
+  role: WorkspaceRole;
+}

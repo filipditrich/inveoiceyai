@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
+  Building2Icon,
   GiftIcon,
   KeyRoundIcon,
   PaletteIcon,
@@ -20,6 +21,12 @@ const LINKS = [
     key: "appearance" as const,
     exact: true,
     icon: PaletteIcon,
+  },
+  {
+    href: "/settings/workspace",
+    key: "workspace" as const,
+    exact: false,
+    icon: Building2Icon,
   },
   {
     href: "/settings/security",

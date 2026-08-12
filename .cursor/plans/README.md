@@ -16,6 +16,7 @@ Plans complement [`docs/roadmap.md`](../docs/roadmap.md): roadmap owns phase goa
 | [`plan-16-account-security.md`](./plan-16-account-security.md)       | Plan 16 — Account security & settings        |
 | [`plan-18-platform-admin.md`](./plan-18-platform-admin.md)           | Plan 18 — Global platform admin              |
 | [`plan-19-invites-referrals.md`](./plan-19-invites-referrals.md)     | Plan 19 — Invites + referral attribution     |
+| [`plan-20-multi-workspace.md`](./plan-20-multi-workspace.md)         | Plan 20 — Multi-workspace product UX         |
 
 **Naming:** `plan-NN-short-slug.md` matching roadmap Plan N. When a roadmap phase splits into sub-phases (e.g. 13a / 13b), the file name keeps the parent number and the slug disambiguates.
 

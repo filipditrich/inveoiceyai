@@ -40,6 +40,10 @@ curl -X POST https://your-host/api/mcp \
 
 A personal key resolves to **your user**, and operates against **your default workspace**.
 
+Switching workspaces in the sidebar updates that default so automation follows where you work.
+**Settings → API keys** also lets you set the default without changing the browser session — useful
+when you want MCP pointed at one workspace while you browse another.
+
 Within that workspace it is full access. There are no scopes and no read-only variant: a holder can
 list invoices, create them, issue them, mark them paid, and email them to your clients.
 
@@ -50,8 +54,8 @@ Treat the key like a password: it can change financial records and send email to
   title="A key is not limited to the workspace you are looking at"
 >
   It binds to your **default** workspace, not whichever one your browser session
-  currently has active. If you belong to several, check which one that is before
-  assuming an automation is writing where you think it is.
+  currently has active. If those differ, the API keys settings page shows both.
+  Switching in the sidebar keeps them aligned.
 </Callout>
 
 The one real containment: `create_invoice` injects the issuer from a server-side

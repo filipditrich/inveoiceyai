@@ -26,6 +26,8 @@ flowchart LR
     P14 --> P16["Plan 16<br/>account security<br/>done"]
     P16 --> P17["Plan 17<br/>public shell<br/>implementation done"]
     P16 --> P18["Plan 18<br/>platform admin<br/>done"]
+    P16 --> P19["Plan 19<br/>invites + referrals<br/>done"]
+    P16 --> P20["Plan 20<br/>multi-workspace UX<br/>done"]
     P12a -.feeds.-> P13b
     P13a -.upgrades to.-> P13b
 ```
@@ -487,6 +489,25 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 - [x] Plan 19 SQL applied on Neon (`packages/db/sql/2026-08-11-plan19-invites-referrals.sql`)
 
 **Out of v1:** Referral rewards, auto-join workspace, bilingual invite emails, MCP referral tools.
+
+### Plan 20 — Multi-workspace product UX
+
+**Status:** Done  
+**Completed:** 2026-08-12  
+**Plan:** [plan-20-multi-workspace.md](../.cursor/plans/plan-20-multi-workspace.md) · ADR [0019](./decisions/0019-workspaces-are-better-auth-organizations.md)
+
+**Goal:** Product UX for multiple workspaces per user — switcher, create, rename, invite landing, and PAT default alignment — on top of existing Better Auth organization tenancy.
+
+**Exit criteria:**
+
+- [x] Sidebar workspace switcher (list + switch active + update `defaultWorkspaceId`)
+- [x] Create additional workspace → active + default → dashboard
+- [x] Settings → Workspace rename (owner/admin); slug read-only
+- [x] Settings → API keys shows/sets default workspace for PAT/MCP
+- [x] Invite accept sets active (BA) + default workspace
+- [x] Docs updated (`workspaces.mdx`); typecheck / lint / test green
+
+**Out of scope:** workspace delete/leave/transfer, slug edit, ops-key multi-tenant picker, Slack multi-workspace remap, Postgres RLS.
 
 ## Plans not yet promised
 

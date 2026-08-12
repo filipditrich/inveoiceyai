@@ -4,6 +4,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { ToastFromSearchParams } from "@/components/toast-from-search-params";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 import type { CSSProperties, ReactNode } from "react";
 
 export interface AppShellUser {
@@ -16,10 +17,16 @@ export function AppShell({
   children,
   user,
   isPlatformAdmin = false,
+  activeWorkspaceId,
+  defaultWorkspaceId,
+  workspaces,
 }: Readonly<{
   children: ReactNode;
   user: AppShellUser;
   isPlatformAdmin?: boolean;
+  activeWorkspaceId: string;
+  defaultWorkspaceId: string | null;
+  workspaces: WorkspaceListItem[];
 }>) {
   return (
     <SidebarProvider
@@ -30,7 +37,13 @@ export function AppShell({
         } as CSSProperties
       }
     >
-      <AppSidebar isPlatformAdmin={isPlatformAdmin} user={user} />
+      <AppSidebar
+        activeWorkspaceId={activeWorkspaceId}
+        defaultWorkspaceId={defaultWorkspaceId}
+        isPlatformAdmin={isPlatformAdmin}
+        user={user}
+        workspaces={workspaces}
+      />
       <SidebarInset className="bg-background flex min-h-0 flex-1 flex-col overflow-hidden">
         <SiteHeader />
         <ToastFromSearchParams />

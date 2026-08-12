@@ -24,7 +24,8 @@ to exactly one **workspace**. Nothing is shared across workspaces, and no query 
 workspace you are not a member of.
 
 Your first sign-in creates a personal workspace automatically, so you never start on an empty
-setup screen.
+setup screen. You can create more workspaces from the sidebar switcher whenever you need a separate
+tenancy boundary (different people, different books).
 
 <Callout title="Workspace, not company">
   A workspace is not the same thing as an *issuer*. One workspace can hold
@@ -32,6 +33,19 @@ setup screen.
   independent numbering and bank accounts. Use separate workspaces only when
   different **people** need separate access.
 </Callout>
+
+## Switching and creating workspaces
+
+The sidebar shows your **active workspace**. Open the switcher to:
+
+- Jump to another workspace you belong to
+- Create a new workspace (you become its owner)
+
+Switching reloads the app for that tenancy and also updates your **default** workspace (see API
+keys below). Creating a workspace switches you into it immediately.
+
+**Settings → Workspace** lets owners and admins rename the current workspace. The slug is fixed
+after creation.
 
 ## Members and roles
 
@@ -42,19 +56,22 @@ setup screen.
 | **member** | Day-to-day work: issuers, clients, invoices, sending                              |
 
 Invite someone by email address. They get an email with a link; accepting adds them to the
-workspace with the role you chose. If the invitation email fails to send — for example on a
+workspace with the role you chose, sets that workspace as active (and as their API-key default),
+and sends them to the dashboard. If the invitation email fails to send — for example on a
 deployment with no mail configured — the invitation row is still created and the link stays
 copyable from settings, so you can pass it along yourself.
 
-## Active workspace
+## Active workspace vs default workspace
 
-Your session carries one **active workspace**, resolved when the session is created. Every page,
-server action and tool call independently re-checks it — the redirect you see when signed out is a
-convenience, not the security boundary.
+Your **browser session** carries one **active workspace**, resolved when the session is created and
+updated when you switch. Every page, server action and tool call independently re-checks it — the
+redirect you see when signed out is a convenience, not the security boundary.
 
 A personal [API key](/docs/integrations/api-keys) binds to your **default** workspace instead — not
-to whichever one a browser session has active, since a key has no session. If you belong to several
-workspaces, check which one that is before pointing an automation at it.
+to a cookie. Switching workspaces in the UI updates that default so automation follows where you
+work. **Settings → API keys** also lets you set the default without changing the browser session.
+Ops deployment keys (`MCP_API_KEY`) still target the seeded environment default, not a user
+default.
 
 ## Security settings
 

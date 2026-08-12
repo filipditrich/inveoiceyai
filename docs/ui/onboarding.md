@@ -4,12 +4,12 @@
 
 ## Routes
 
-| Route                                                       | Role                                                                                                                                      |
-| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `/welcome`                                                  | First-issuer wizard (authenticated). Soft-gated from dashboard / invoices / clients when issuer count is 0 and welcome was not dismissed. |
-| `/onboarding`                                               | **Workspace recovery only** — signed-in user with no membership. Unrelated to issuer setup.                                               |
-| `/issuers/new`                                              | Additional issuer create (same minimum fields as welcome).                                                                                |
-| `/issuers/[id]/edit/{identity,bank,assets,numbering,email}` | Sectioned issuer settings (Settings-nav pattern).                                                                                         |
+| Route                                                       | Role                                                                                                                                                              |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/welcome`                                                  | First-issuer wizard (authenticated). Soft-gated from dashboard / invoices / clients when issuer count is 0 and welcome was not dismissed.                         |
+| `/onboarding`                                               | **Workspace recovery only** — signed-in user with no membership. Unrelated to issuer setup or creating additional workspaces (use the sidebar switcher for that). |
+| `/issuers/new`                                              | Additional issuer create (same minimum fields as welcome).                                                                                                        |
+| `/issuers/[id]/edit/{identity,bank,assets,numbering,email}` | Sectioned issuer settings (Settings-nav pattern).                                                                                                                 |
 
 ## Welcome steps
 

@@ -36,7 +36,8 @@ Streamable HTTP at `/api/mcp` on your deployment. Create a personal key under
 This is the useful one: it reaches your real database, so `list_invoices`, `get_invoice`,
 `mark_invoice_paid` and `send_invoice_email` all work, and invoices you create are actually saved.
 
-Your key resolves to your user and binds every tool call to **your default workspace**. The
+Your key resolves to your user and binds every tool call to **your default workspace**
+(updated when you switch workspaces or change it under **Settings → API keys**). The
 deployment-wide `MCP_API_KEY` is also accepted, operating against the configured default workspace
 instead.
 
@@ -122,8 +123,8 @@ Storage follows the environment: Postgres when `DATABASE_URL` is set, otherwise 
 
 ## Limitations
 
-- **One workspace per key.** A personal key binds to your default workspace; there is no way to
-  target a different one per call.
+- **One workspace per key.** A personal key binds to your **default** workspace; there is no
+  per-call override. Change the default via the sidebar switcher or **Settings → API keys**.
 - **No scopes.** A key is full access to that workspace, including sending email.
 - **No import tool.** [Historical import](/docs/guides/importing-history) is web-only by design.
 - **No `unmark_invoice_paid`.** Web only.

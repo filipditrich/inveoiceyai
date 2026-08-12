@@ -437,6 +437,7 @@
       "client": "Klient",
       "detail": "Detail",
       "security": "Zabezpečení",
+      "workspace": "Pracovní prostor",
       "members": "Členové",
       "referrals": "Doporučení",
       "api-keys": "API klíče",
@@ -452,6 +453,7 @@
       "navigationLabel": "Sekce nastavení",
       "nav": {
         "appearance": "Vzhled",
+        "workspace": "Pracovní prostor",
         "security": "Zabezpečení",
         "members": "Členové",
         "referrals": "Doporučení",
@@ -460,11 +462,34 @@
       },
       "navDescriptions": {
         "appearance": "Motiv a jazyk rozhraní",
+        "workspace": "Název a identita tohoto prostoru",
         "security": "Přihlášení, relace a zařízení",
         "members": "Lidé a oprávnění",
         "referrals": "Pozvěte přátele do Invoicey",
         "apiKeys": "Přístup pro automatizaci",
         "integrations": "Slack, MCP a další nástroje"
+      },
+      "workspace": {
+        "pageTitle": "Pracovní prostor",
+        "pageDescription": "Přejmenujte tento pracovní prostor. Slug zůstává pevný pro odkazy a integrace.",
+        "nameLabel": "Název",
+        "slugLabel": "Slug",
+        "slugHint": "Slug nelze po vytvoření změnit.",
+        "save": "Uložit název",
+        "saving": "Ukládám…",
+        "saved": "Název pracovního prostoru uložen",
+        "membersLink": "Spravovat členy",
+        "readOnly": "Přejmenovat může jen vlastník nebo správce."
+      },
+      "apiKeysDefault": {
+        "title": "Výchozí pracovní prostor pro API klíče",
+        "description": "Osobní API klíče vždy používají váš výchozí pracovní prostor — ne ten, který má prohlížeč právě aktivní. Přepnutí v postranním panelu výchozí prostor také nastaví.",
+        "current": "Aktuální výchozí",
+        "setDefault": "Použít pro API klíče",
+        "alreadyDefault": "Používáno pro API klíče",
+        "updated": "Výchozí pracovní prostor aktualizován",
+        "activeDiffers": "Prohlížeč je teď v „{name}“. API klíče dál používají výchozí výše, dokud ho nezměníte nebo nepřepnete pracovní prostor.",
+        "browserActive": "aktivní v prohlížeči"
       },
       "appearance": {
         "pageTitle": "Vzhled a jazyk",
@@ -486,6 +511,34 @@
       "platformAdmin": "Platformní admin",
       "logOut": "Odhlásit se",
       "signingOut": "Odhlašuji…"
+    },
+    "workspaceSwitcher": {
+      "label": "Pracovní prostory",
+      "create": "Vytvořit pracovní prostor…",
+      "createTitle": "Nový pracovní prostor",
+      "createDescription": "Nový prostor má vlastní dodavatele, klienty a faktury. Přepnutí zároveň nastaví výchozí prostor pro API klíče.",
+      "nameLabel": "Název",
+      "namePlaceholder": "např. Acme s.r.o.",
+      "cancel": "Zrušit",
+      "createSubmit": "Vytvořit",
+      "apiKeysDefaultBadge": "API klíče",
+      "defaultDivergesShort": "API klíče → {name}",
+      "defaultDivergesHint": "API klíče stále míří do „{name}“. Přepnutí pracovního prostoru výchozí také aktualizuje.",
+      "roles": {
+        "owner": "Vlastník",
+        "admin": "Správce",
+        "member": "Člen"
+      }
+    },
+    "workspaceErrors": {
+      "name_required": "Zadejte název pracovního prostoru",
+      "switch_failed": "Nepodařilo se přepnout pracovní prostor",
+      "create_failed": "Nepodařilo se vytvořit pracovní prostor",
+      "update_failed": "Nepodařilo se uložit název",
+      "default_failed": "Nepodařilo se nastavit výchozí pracovní prostor",
+      "invite_failed": "Přijetí pozvánky selhalo",
+      "invite_missing_workspace": "Pozvánka neobsahuje pracovní prostor",
+      "forbidden": "Pro tuto akci nemáte oprávnění"
     },
     "search": {
       "label": "Hledat",

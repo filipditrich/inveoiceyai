@@ -437,6 +437,7 @@
       "client": "Client",
       "detail": "Detail",
       "security": "Security",
+      "workspace": "Workspace",
       "members": "Members",
       "referrals": "Referrals",
       "api-keys": "API Keys",
@@ -452,6 +453,7 @@
       "navigationLabel": "Settings sections",
       "nav": {
         "appearance": "Appearance",
+        "workspace": "Workspace",
         "security": "Security",
         "members": "Members",
         "referrals": "Referrals",
@@ -460,11 +462,34 @@
       },
       "navDescriptions": {
         "appearance": "Theme and interface language",
+        "workspace": "Name and identity of this workspace",
         "security": "Sign-in, sessions, and devices",
         "members": "People and permissions",
         "referrals": "Invite friends to Invoicey",
         "apiKeys": "Access for automation",
         "integrations": "Slack, MCP, and other tools"
+      },
+      "workspace": {
+        "pageTitle": "Workspace",
+        "pageDescription": "Rename this workspace. The slug stays fixed for links and integrations.",
+        "nameLabel": "Name",
+        "slugLabel": "Slug",
+        "slugHint": "Slug cannot be changed after creation.",
+        "save": "Save name",
+        "saving": "Saving…",
+        "saved": "Workspace name saved",
+        "membersLink": "Manage members",
+        "readOnly": "Only owners and admins can rename this workspace."
+      },
+      "apiKeysDefault": {
+        "title": "Default workspace for API keys",
+        "description": "Personal API keys always use your default workspace — not whichever one the browser has active. Switching workspaces in the sidebar also updates this default.",
+        "current": "Current default",
+        "setDefault": "Use for API keys",
+        "alreadyDefault": "Used for API keys",
+        "updated": "Default workspace updated",
+        "activeDiffers": "Your browser is currently in “{name}”. API keys still use the default above until you change it or switch workspaces.",
+        "browserActive": "active in browser"
       },
       "appearance": {
         "pageTitle": "Appearance and language",
@@ -486,6 +511,34 @@
       "platformAdmin": "Platform admin",
       "logOut": "Log out",
       "signingOut": "Signing out…"
+    },
+    "workspaceSwitcher": {
+      "label": "Workspaces",
+      "create": "Create workspace…",
+      "createTitle": "Create workspace",
+      "createDescription": "A new workspace keeps its own issuers, clients, and invoices. Switching also updates your API key default.",
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. Acme s.r.o.",
+      "cancel": "Cancel",
+      "createSubmit": "Create",
+      "apiKeysDefaultBadge": "API keys",
+      "defaultDivergesShort": "API keys → {name}",
+      "defaultDivergesHint": "API keys still target “{name}”. Switching a workspace updates that default.",
+      "roles": {
+        "owner": "Owner",
+        "admin": "Admin",
+        "member": "Member"
+      }
+    },
+    "workspaceErrors": {
+      "name_required": "Enter a workspace name",
+      "switch_failed": "Could not switch workspace",
+      "create_failed": "Could not create workspace",
+      "update_failed": "Could not save the name",
+      "default_failed": "Could not set the default workspace",
+      "invite_failed": "Could not accept the invitation",
+      "invite_missing_workspace": "Invitation is missing a workspace",
+      "forbidden": "You do not have permission for this action"
     },
     "search": {
       "label": "Search",

@@ -1,6 +1,7 @@
 "use server";
 
 import { createPersonalWorkspace } from "@/lib/auth/workspace-bootstrap";
+import { setUserDefaultWorkspace } from "@/lib/auth/workspaces";
 import { getOptionalWorkspace, requireSession } from "@/lib/auth/session";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
@@ -24,6 +25,7 @@ export async function createFirstWorkspace(): Promise<void> {
     headers: await headers(),
     body: { organizationId: workspaceId },
   });
+  await setUserDefaultWorkspace(user.id, workspaceId);
 
   redirect("/dashboard");
 }

@@ -4,6 +4,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
+import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +16,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { APP_GIT_SHA, APP_VERSION } from "@/lib/app-build-info";
+import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 import {
   ArchiveRestoreIcon,
   BookOpenIcon,
@@ -37,10 +39,16 @@ import * as React from "react";
 export function AppSidebar({
   user,
   isPlatformAdmin = false,
+  activeWorkspaceId,
+  defaultWorkspaceId,
+  workspaces,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: { name: string; email: string; avatar: string };
   isPlatformAdmin?: boolean;
+  activeWorkspaceId: string;
+  defaultWorkspaceId: string | null;
+  workspaces: WorkspaceListItem[];
 }) {
   const pathname = usePathname();
   const t = useTranslations("App");
@@ -133,6 +141,11 @@ export function AppSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
         <div className="from-brand/25 via-brand/10 bg-linear-to-r mx-2 hidden h-px to-transparent group-data-[collapsible=icon]:hidden sm:block" />
+        <WorkspaceSwitcher
+          activeWorkspaceId={activeWorkspaceId}
+          defaultWorkspaceId={defaultWorkspaceId}
+          workspaces={workspaces}
+        />
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
