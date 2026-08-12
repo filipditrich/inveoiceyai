@@ -397,6 +397,13 @@
     "retry": "Try again",
     "backToDashboard": "Back to dashboard"
   },
+  "AppNotFound": {
+    "code": "404",
+    "title": "Page not found",
+    "description": "This link may be outdated, or the record was removed or is in another workspace.",
+    "backToInvoices": "Back to invoices",
+    "backToDashboard": "Back to dashboard"
+  },
   "App": {
     "meta": {
       "title": "Invoicey",

@@ -400,6 +400,13 @@ declare const messages: {
     retry: "Zkusit znovu";
     backToDashboard: "Zpět na přehled";
   };
+  AppNotFound: {
+    code: "404";
+    title: "Stránka nenalezena";
+    description: "Odkaz mohl zastarat, nebo záznam byl smazán či je v jiném workspace.";
+    backToInvoices: "Zpět na faktury";
+    backToDashboard: "Zpět na přehled";
+  };
   App: {
     meta: {
       title: "Invoicey";
