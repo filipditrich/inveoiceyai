@@ -1,26 +1,48 @@
 "use client";
 
-import { issueInvoice, saveInvoiceDraft } from "@/actions/invoices";
+import {
+  getLastInvoiceSuggestionsAction,
+  issueInvoice,
+  saveInvoiceDraft,
+} from "@/actions/invoices";
 import {
   collectFormErrorMessages,
   Field,
   selectClassName,
 } from "@/components/invoices/field";
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
+import { LastValueHint } from "@/components/invoices/last-value-hint";
+import { lookupMessageFromInvalid } from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   addDaysIso,
+  diffDaysIso,
   todayIsoDate,
   tryBuildInvoicePayload,
   type BuilderLineInput,
 } from "@/lib/build-invoice";
 import { formatMoney } from "@/lib/format";
 import type { ClientOption, IssuerOption } from "@/lib/invoice-party-types";
+import {
+  truncateHint,
+  type LastInvoiceSuggestions,
+} from "@/lib/last-invoice-suggestions";
+import type { AppLocale } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 import { nextInvoiceNumber } from "@invoicey/invoice-core/numbering";
 import type { Invoice } from "@invoicey/invoice-core/schema";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { PlusIcon, Trash2Icon } from "lucide-react";
 import * as React from "react";
 import {
   useFieldArray,
@@ -30,8 +52,6 @@ import {
 } from "react-hook-form";
 import { z } from "zod";
 import { useTranslations, useLocale } from "next-intl";
-import type { AppLocale } from "@/i18n/config";
-import { lookupMessageFromInvalid } from "@/components/issuers/issuer-form-shared";
 
 const STANDARD_VAT_RATES = [0, 12, 21] as const;
 
@@ -93,6 +113,40 @@ function defaultLineVatRate(vatPayer: boolean): number {
   return vatPayer ? 21 : 0;
 }
 
+function FormSection({
+  title,
+  description,
+  action,
+  children,
+  footer,
+}: {
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardHeader className={description ? "border-b" : undefined}>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1">
+            <CardTitle>{title}</CardTitle>
+            {description ? (
+              <CardDescription>{description}</CardDescription>
+            ) : null}
+          </div>
+          {action}
+        </div>
+      </CardHeader>
+      <CardContent className="pt-4">{children}</CardContent>
+      {footer ? (
+        <CardFooter className="justify-end">{footer}</CardFooter>
+      ) : null}
+    </Card>
+  );
+}
+
 export type { ClientOption, IssuerOption };
 
 export interface InvoiceBuilderFormProps {
@@ -101,6 +155,7 @@ export interface InvoiceBuilderFormProps {
   invalidQuery?: string | null;
   issuers: IssuerOption[];
   clients: ClientOption[];
+  lastInvoice?: LastInvoiceSuggestions | null;
   initial?: Partial<BuilderFormValues> & { numberPreview?: string };
 }
 
@@ -129,6 +184,7 @@ export function InvoiceBuilderForm({
   invalidQuery,
   issuers,
   clients,
+  lastInvoice: initialLastInvoice = null,
   initial,
 }: InvoiceBuilderFormProps) {
   const t = useTranslations("Invoices.builder");
@@ -174,7 +230,7 @@ export function InvoiceBuilderForm({
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control: form.control,
     name: "items",
   });
@@ -208,6 +264,9 @@ export function InvoiceBuilderForm({
     });
     return map;
   });
+  const [lastInvoice, setLastInvoice] =
+    React.useState<LastInvoiceSuggestions | null>(initialLastInvoice);
+  const skipLastFetchRef = React.useRef(true);
 
   const selectedIssuer = issuers.find((i) => i.id === watched.issuerId);
   const issuerVatPayer = selectedIssuer?.snapshot.vatPayer ?? true;
@@ -295,6 +354,45 @@ export function InvoiceBuilderForm({
       setNumberPreview("—");
     }
   }, [issuers, t, watched.issuerId, watched.docType, watched.issueDate]);
+
+  React.useEffect(() => {
+    if (skipLastFetchRef.current) {
+      skipLastFetchRef.current = false;
+      return;
+    }
+    const issuerId = watched.issuerId;
+    const clientId = watched.clientId;
+    let cancelled = false;
+    void getLastInvoiceSuggestionsAction({
+      issuerId,
+      clientId,
+      excludeId: invoiceId,
+    }).then((next) => {
+      if (!cancelled) {
+        setLastInvoice(next);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [watched.issuerId, watched.clientId, invoiceId]);
+
+  const applyLastLines = React.useCallback(
+    (items: BuilderLineInput[]) => {
+      if (items.length === 0) {
+        return;
+      }
+      replace(items);
+      const custom: Record<number, boolean> = {};
+      items.forEach((it, idx) => {
+        if (!isStandardVatRate(Number(it.vatRate))) {
+          custom[idx] = true;
+        }
+      });
+      setCustomVatRateLines(custom);
+    },
+    [replace],
+  );
 
   const previewBuild = React.useMemo(() => {
     const issuer = issuers.find((i) => i.id === watched.issuerId)?.snapshot;
@@ -539,6 +637,40 @@ export function InvoiceBuilderForm({
     );
   }
 
+  const currentDueDays = diffDaysIso(watched.issueDate, watched.dueDate);
+
+  function lastVatModeLabel(mode: LastInvoiceSuggestions["vatMode"]): string {
+    switch (mode) {
+      case "regular":
+        return issuerVatPayer ? t("vatRegularPayer") : t("vatNonPayer");
+      case "reverse_charge":
+        return t("vatReverseCharge");
+      case "oss":
+        return t("vatOss");
+      default: {
+        const _exhaustive: never = mode;
+        return _exhaustive;
+      }
+    }
+  }
+
+  function lastSuppliesLabel(
+    value: LastInvoiceSuggestions["suppliesAbroad"],
+  ): string {
+    switch (value) {
+      case "none":
+        return t("suppliesNone");
+      case "eu":
+        return t("suppliesEu");
+      case "non_eu":
+        return t("suppliesNonEu");
+      default: {
+        const _exhaustive: never = value;
+        return _exhaustive;
+      }
+    }
+  }
+
   const alertMessages = [
     ...(invalidQuery
       ? [lookupMessageFromInvalid(invalidQuery, tErr)].filter(
@@ -551,7 +683,7 @@ export function InvoiceBuilderForm({
   return (
     <div className="grid gap-8 xl:grid-cols-2">
       <form
-        className="space-y-6"
+        className="space-y-5"
         onSubmit={(e) => {
           e.preventDefault();
         }}
@@ -570,8 +702,10 @@ export function InvoiceBuilderForm({
           </div>
         ) : null}
 
-        <section className="space-y-3">
-          <h2 className="text-sm font-medium">{t("sectionParties")}</h2>
+        <FormSection
+          description={t("sectionPartiesDescription")}
+          title={t("sectionParties")}
+        >
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
               description={t("issuerDescription")}
@@ -615,10 +749,12 @@ export function InvoiceBuilderForm({
               </select>
             </Field>
           </div>
-        </section>
+        </FormSection>
 
-        <section className="space-y-3">
-          <h2 className="text-sm font-medium">{t("sectionDocument")}</h2>
+        <FormSection
+          description={t("sectionDocumentDescription")}
+          title={t("sectionDocument")}
+        >
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
               description={t("docTypeDescription")}
@@ -639,14 +775,30 @@ export function InvoiceBuilderForm({
               description={t("numberPreviewDescription")}
               label={t("numberPreview")}
             >
-              <p className="text-sm font-medium tabular-nums">
-                {numberPreview}
-              </p>
+              <div className="border-input bg-muted/40 flex h-9 items-center rounded-md border px-3">
+                <p className="text-sm font-medium tabular-nums">
+                  {numberPreview}
+                </p>
+              </div>
             </Field>
             <Field
               description={t("languageDescription")}
               error={fieldError(errors, "language")}
               label={t("language")}
+              suggestion={
+                lastInvoice && lastInvoice.language !== watched.language ? (
+                  <LastValueHint
+                    value={
+                      lastInvoice.language === "cs"
+                        ? t("languageCs")
+                        : t("languageEn")
+                    }
+                    onApply={() =>
+                      form.setValue("language", lastInvoice.language)
+                    }
+                  />
+                ) : undefined
+              }
             >
               <select
                 className={selectClassName()}
@@ -660,6 +812,20 @@ export function InvoiceBuilderForm({
               description={t("currencyDescription")}
               error={fieldError(errors, "currency")}
               label={t("currency")}
+              suggestion={
+                lastInvoice && lastInvoice.currency !== watched.currency ? (
+                  <LastValueHint
+                    value={
+                      lastInvoice.currency === "CZK"
+                        ? t("currencyCzk")
+                        : lastInvoice.currency
+                    }
+                    onApply={() =>
+                      form.setValue("currency", lastInvoice.currency)
+                    }
+                  />
+                ) : undefined
+              }
             >
               <select
                 className={selectClassName()}
@@ -670,11 +836,26 @@ export function InvoiceBuilderForm({
                 <option value="USD">USD</option>
               </select>
             </Field>
+            {watched.docType === "credit_note" ? (
+              <Field
+                className="sm:col-span-2"
+                description={t("correctedInvoiceDescription")}
+                error={fieldError(errors, "correctedInvoiceNumber")}
+                label={t("correctedInvoice")}
+              >
+                <Input
+                  placeholder="20260001"
+                  {...form.register("correctedInvoiceNumber")}
+                />
+              </Field>
+            ) : null}
           </div>
-        </section>
+        </FormSection>
 
-        <section className="space-y-3">
-          <h2 className="text-sm font-medium">{t("sectionDates")}</h2>
+        <FormSection
+          description={t("sectionDatesDescription")}
+          title={t("sectionDates")}
+        >
           <div className="grid gap-4 sm:grid-cols-3">
             <Field
               description={t("issueDateDescription")}
@@ -691,6 +872,19 @@ export function InvoiceBuilderForm({
               description={t("dueDateDescription")}
               error={fieldError(errors, "dueDate")}
               label={t("dueDate")}
+              suggestion={
+                lastInvoice && lastInvoice.dueDays !== currentDueDays ? (
+                  <LastValueHint
+                    label={t("useLastDueDays", { days: lastInvoice.dueDays })}
+                    onApply={() =>
+                      form.setValue(
+                        "dueDate",
+                        addDaysIso(watched.issueDate, lastInvoice.dueDays),
+                      )
+                    }
+                  />
+                ) : undefined
+              }
             >
               <Input
                 aria-invalid={Boolean(fieldError(errors, "dueDate"))}
@@ -710,15 +904,32 @@ export function InvoiceBuilderForm({
               />
             </Field>
           </div>
-        </section>
+        </FormSection>
 
-        <section className="space-y-3">
-          <h2 className="text-sm font-medium">{t("sectionVat")}</h2>
+        <FormSection
+          description={t("sectionVatDescription")}
+          title={t("sectionVat")}
+        >
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
               description={t("vatModeDescription")}
               error={fieldError(errors, "vatMode")}
               label={t("vatMode")}
+              suggestion={
+                lastInvoice &&
+                issuerVatPayer &&
+                lastInvoice.vatMode !== watched.vatMode ? (
+                  <LastValueHint
+                    value={lastVatModeLabel(lastInvoice.vatMode)}
+                    onApply={() => {
+                      if (lastInvoice.vatMode === "oss") {
+                        setShowAdvancedVat(true);
+                      }
+                      form.setValue("vatMode", lastInvoice.vatMode);
+                    }}
+                  />
+                ) : undefined
+              }
             >
               <select
                 className={selectClassName()}
@@ -757,6 +968,20 @@ export function InvoiceBuilderForm({
               description={t("suppliesAbroadDescription")}
               error={fieldError(errors, "suppliesAbroad")}
               label={t("suppliesAbroad")}
+              suggestion={
+                lastInvoice &&
+                lastInvoice.suppliesAbroad !== watched.suppliesAbroad ? (
+                  <LastValueHint
+                    value={lastSuppliesLabel(lastInvoice.suppliesAbroad)}
+                    onApply={() =>
+                      form.setValue(
+                        "suppliesAbroad",
+                        lastInvoice.suppliesAbroad,
+                      )
+                    }
+                  />
+                ) : undefined
+              }
             >
               <select
                 className={selectClassName()}
@@ -767,57 +992,64 @@ export function InvoiceBuilderForm({
                 <option value="non_eu">{t("suppliesNonEu")}</option>
               </select>
             </Field>
+            {watched.vatMode === "reverse_charge" ? (
+              <>
+                <Field
+                  description={t("legalNoteDescription")}
+                  error={fieldError(errors, "legalNote")}
+                  label={t("legalNote")}
+                  suggestion={
+                    lastInvoice?.legalNote &&
+                    lastInvoice.legalNote !== (watched.legalNote ?? "") ? (
+                      <LastValueHint
+                        value={truncateHint(lastInvoice.legalNote)}
+                        onApply={() =>
+                          form.setValue(
+                            "legalNote",
+                            lastInvoice.legalNote ?? "",
+                          )
+                        }
+                      />
+                    ) : undefined
+                  }
+                >
+                  <Input
+                    placeholder={t("legalNotePlaceholder")}
+                    {...form.register("legalNote")}
+                  />
+                </Field>
+                <Field
+                  description={t("reverseChargeCodeDescription")}
+                  error={fieldError(errors, "localReverseChargeCode")}
+                  label={t("reverseChargeCode")}
+                  suggestion={
+                    lastInvoice?.localReverseChargeCode &&
+                    lastInvoice.localReverseChargeCode !==
+                      (watched.localReverseChargeCode ?? "") ? (
+                      <LastValueHint
+                        value={lastInvoice.localReverseChargeCode}
+                        onApply={() =>
+                          form.setValue(
+                            "localReverseChargeCode",
+                            lastInvoice.localReverseChargeCode ?? "",
+                          )
+                        }
+                      />
+                    ) : undefined
+                  }
+                >
+                  <Input
+                    placeholder={t("reverseChargeCodePlaceholder")}
+                    {...form.register("localReverseChargeCode")}
+                  />
+                </Field>
+              </>
+            ) : null}
           </div>
-        </section>
+        </FormSection>
 
-        {watched.vatMode === "reverse_charge" ? (
-          <section className="grid gap-4 sm:grid-cols-2">
-            <Field
-              description={t("legalNoteDescription")}
-              error={fieldError(errors, "legalNote")}
-              label={t("legalNote")}
-            >
-              <Input
-                placeholder={t("legalNotePlaceholder")}
-                {...form.register("legalNote")}
-              />
-            </Field>
-            <Field
-              description={t("reverseChargeCodeDescription")}
-              error={fieldError(errors, "localReverseChargeCode")}
-              label={t("reverseChargeCode")}
-            >
-              <Input
-                placeholder={t("reverseChargeCodePlaceholder")}
-                {...form.register("localReverseChargeCode")}
-              />
-            </Field>
-          </section>
-        ) : null}
-
-        {watched.docType === "credit_note" ? (
-          <Field
-            description={t("correctedInvoiceDescription")}
-            error={fieldError(errors, "correctedInvoiceNumber")}
-            label={t("correctedInvoice")}
-          >
-            <Input
-              placeholder="20260001"
-              {...form.register("correctedInvoiceNumber")}
-            />
-          </Field>
-        ) : null}
-
-        <section className="space-y-3">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 className="font-medium">{t("itemsTitle")}</h2>
-              <p className="text-muted-foreground text-xs">
-                {watched.pricesIncludeVat
-                  ? t("itemsDescriptionIncl")
-                  : t("itemsDescription")}
-              </p>
-            </div>
+        <FormSection
+          action={
             <div className="flex flex-wrap items-center gap-2">
               <select
                 aria-label={t("pricesModeAria")}
@@ -830,12 +1062,22 @@ export function InvoiceBuilderForm({
                 <option value="excl">{t("pricesExcl")}</option>
                 <option value="incl">{t("pricesIncl")}</option>
               </select>
+              {lastInvoice && lastInvoice.items.length > 0 ? (
+                <Button
+                  onClick={() => applyLastLines(lastInvoice.items)}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  {t("copyLastLines")}
+                </Button>
+              ) : null}
               <Button
                 onClick={() => {
                   append({
                     description: "",
                     quantity: 1,
-                    unit: "ks",
+                    unit: lastInvoice?.items[0]?.unit ?? "ks",
                     unitPriceWithoutVat: 0,
                     vatRate: hideRatePicker
                       ? 0
@@ -846,125 +1088,252 @@ export function InvoiceBuilderForm({
                 type="button"
                 variant="secondary"
               >
+                <PlusIcon data-icon="inline-start" />
                 {t("addRow")}
               </Button>
             </div>
-          </div>
+          }
+          description={
+            watched.pricesIncludeVat
+              ? t("itemsDescriptionIncl")
+              : t("itemsDescription")
+          }
+          footer={
+            totalsPreview ? (
+              <p className="text-sm font-medium tabular-nums">
+                {t("totalLine", {
+                  total: formatMoney(
+                    totalsPreview.total,
+                    watched.currency,
+                    locale,
+                  ),
+                  vat: formatMoney(
+                    totalsPreview.vatTotal,
+                    watched.currency,
+                    locale,
+                  ),
+                })}
+              </p>
+            ) : undefined
+          }
+          title={t("itemsTitle")}
+        >
           {fieldError(errors, "items") ? (
-            <p className="text-destructive text-xs">
+            <p className="text-destructive mb-3 text-xs">
               {fieldError(errors, "items")}
             </p>
           ) : null}
-          {fields.map((field, index) => {
-            const line = watched.items[index];
-            const qty = Number(line?.quantity) || 0;
-            const unitPrice = Number(line?.unitPriceWithoutVat) || 0;
-            const rate = Number(line?.vatRate) || 0;
-            const lineTotal = watched.pricesIncludeVat
-              ? qty * unitPrice
-              : qty * unitPrice * (1 + rate / 100);
-            const descErr = fieldError(
-              errors,
-              `items.${index}.description` as FieldPath<BuilderFormValues>,
-            );
-            const showCustomRate =
-              customVatRateLines[index] === true ||
-              (line?.vatRate != null &&
-                !isStandardVatRate(Number(line.vatRate)));
-            return (
-              <div
-                className={cn(
-                  "grid gap-2 rounded-md border p-3 sm:grid-cols-6",
-                  (descErr ||
-                    fieldError(
-                      errors,
-                      `items.${index}.quantity` as FieldPath<BuilderFormValues>,
-                    )) &&
-                    "border-destructive/50",
-                )}
-                key={field.id}
-              >
-                <div className="space-y-1 sm:col-span-2">
-                  <Input
-                    aria-label={t("itemDescriptionAria", {
-                      n: String(index + 1),
-                    })}
-                    aria-invalid={Boolean(descErr)}
-                    placeholder={t("descriptionPlaceholder")}
-                    {...form.register(`items.${index}.description`)}
-                  />
-                  {descErr ? (
-                    <p className="text-destructive text-xs">{descErr}</p>
-                  ) : null}
-                </div>
-                <div className="space-y-1">
-                  <Input
-                    aria-label={t("itemQuantityAria", { n: String(index + 1) })}
-                    aria-invalid={Boolean(
-                      fieldError(
+          <div className="space-y-4">
+            {fields.map((field, index) => {
+              const line = watched.items[index];
+              const lastLine = lastInvoice?.items[index];
+              const qty = Number(line?.quantity) || 0;
+              const unitPrice = Number(line?.unitPriceWithoutVat) || 0;
+              const rate = Number(line?.vatRate) || 0;
+              const lineTotal = watched.pricesIncludeVat
+                ? qty * unitPrice
+                : qty * unitPrice * (1 + rate / 100);
+              const descErr = fieldError(
+                errors,
+                `items.${index}.description` as FieldPath<BuilderFormValues>,
+              );
+              const qtyErr = fieldError(
+                errors,
+                `items.${index}.quantity` as FieldPath<BuilderFormValues>,
+              );
+              const showCustomRate =
+                customVatRateLines[index] === true ||
+                (line?.vatRate != null &&
+                  !isStandardVatRate(Number(line.vatRate)));
+              return (
+                <div
+                  className={cn(
+                    "bg-muted/20 space-y-4 rounded-lg border p-4",
+                    (descErr || qtyErr) && "border-destructive/50",
+                  )}
+                  key={field.id}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-medium">
+                      {t("itemN", { n: String(index + 1) })}
+                    </p>
+                    <Button
+                      aria-label={t("removeItem", { n: String(index + 1) })}
+                      disabled={fields.length <= 1}
+                      onClick={() => {
+                        if (fields.length > 1) {
+                          remove(index);
+                        }
+                      }}
+                      size="icon-sm"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <Trash2Icon />
+                    </Button>
+                  </div>
+                  <Field
+                    error={descErr}
+                    label={t("itemDescription")}
+                    suggestion={
+                      lastLine?.description &&
+                      lastLine.description !== (line?.description ?? "") ? (
+                        <LastValueHint
+                          value={truncateHint(lastLine.description)}
+                          onApply={() =>
+                            form.setValue(
+                              `items.${index}.description`,
+                              lastLine.description,
+                            )
+                          }
+                        />
+                      ) : undefined
+                    }
+                  >
+                    <Input
+                      aria-invalid={Boolean(descErr)}
+                      placeholder={t("descriptionPlaceholder")}
+                      {...form.register(`items.${index}.description`)}
+                    />
+                  </Field>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <Field
+                      error={qtyErr}
+                      label={t("itemQuantity")}
+                      suggestion={
+                        lastLine && lastLine.quantity !== qty ? (
+                          <LastValueHint
+                            value={String(lastLine.quantity)}
+                            onApply={() =>
+                              form.setValue(
+                                `items.${index}.quantity`,
+                                lastLine.quantity,
+                                { shouldValidate: true },
+                              )
+                            }
+                          />
+                        ) : undefined
+                      }
+                    >
+                      <Input
+                        aria-invalid={Boolean(qtyErr)}
+                        placeholder={t("quantityPlaceholder")}
+                        step="any"
+                        type="number"
+                        {...form.register(`items.${index}.quantity`, {
+                          valueAsNumber: true,
+                        })}
+                      />
+                    </Field>
+                    <Field
+                      error={fieldError(
                         errors,
-                        `items.${index}.quantity` as FieldPath<BuilderFormValues>,
-                      ),
-                    )}
-                    placeholder={t("quantityPlaceholder")}
-                    step="any"
-                    type="number"
-                    {...form.register(`items.${index}.quantity`, {
-                      valueAsNumber: true,
-                    })}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Input
-                    aria-label={t("itemUnitAria", { n: String(index + 1) })}
-                    placeholder={t("unitPlaceholder")}
-                    {...form.register(`items.${index}.unit`)}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Input
-                    aria-label={
-                      watched.pricesIncludeVat
-                        ? t("itemPriceInclAria", { n: String(index + 1) })
-                        : t("itemPriceExclAria", { n: String(index + 1) })
-                    }
-                    placeholder={
-                      watched.pricesIncludeVat
-                        ? t("priceInclPlaceholder")
-                        : t("pricePlaceholder")
-                    }
-                    step="any"
-                    type="number"
-                    {...form.register(`items.${index}.unitPriceWithoutVat`, {
-                      valueAsNumber: true,
-                    })}
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <div className="flex gap-1">
-                    {hideRatePicker ? (
-                      <>
-                        <Input
-                          aria-label={t("itemVatAria", {
-                            n: String(index + 1),
-                          })}
-                          disabled
-                          readOnly
-                          value="0 %"
-                        />
-                        <input
-                          type="hidden"
-                          {...form.register(`items.${index}.vatRate`, {
-                            valueAsNumber: true,
-                          })}
-                        />
-                      </>
-                    ) : (
-                      <div className="flex min-w-0 flex-1 flex-col gap-1">
+                        `items.${index}.unit` as FieldPath<BuilderFormValues>,
+                      )}
+                      label={t("itemUnit")}
+                      suggestion={
+                        lastLine?.unit &&
+                        lastLine.unit !== (line?.unit ?? "") ? (
+                          <LastValueHint
+                            value={lastLine.unit}
+                            onApply={() =>
+                              form.setValue(
+                                `items.${index}.unit`,
+                                lastLine.unit,
+                              )
+                            }
+                          />
+                        ) : undefined
+                      }
+                    >
+                      <Input
+                        placeholder={t("unitPlaceholder")}
+                        {...form.register(`items.${index}.unit`)}
+                      />
+                    </Field>
+                    <Field
+                      error={fieldError(
+                        errors,
+                        `items.${index}.unitPriceWithoutVat` as FieldPath<BuilderFormValues>,
+                      )}
+                      label={
+                        watched.pricesIncludeVat
+                          ? t("itemPriceIncl")
+                          : t("itemPriceExcl")
+                      }
+                      suggestion={
+                        lastLine &&
+                        lastLine.unitPriceWithoutVat !== unitPrice ? (
+                          <LastValueHint
+                            value={formatMoney(
+                              lastLine.unitPriceWithoutVat,
+                              watched.currency,
+                              locale,
+                            )}
+                            onApply={() =>
+                              form.setValue(
+                                `items.${index}.unitPriceWithoutVat`,
+                                lastLine.unitPriceWithoutVat,
+                                { shouldValidate: true },
+                              )
+                            }
+                          />
+                        ) : undefined
+                      }
+                    >
+                      <Input
+                        placeholder={
+                          watched.pricesIncludeVat
+                            ? t("priceInclPlaceholder")
+                            : t("pricePlaceholder")
+                        }
+                        step="any"
+                        type="number"
+                        {...form.register(
+                          `items.${index}.unitPriceWithoutVat`,
+                          { valueAsNumber: true },
+                        )}
+                      />
+                    </Field>
+                    <Field
+                      error={fieldError(
+                        errors,
+                        `items.${index}.vatRate` as FieldPath<BuilderFormValues>,
+                      )}
+                      label={t("itemVat")}
+                      suggestion={
+                        !hideRatePicker &&
+                        lastLine &&
+                        lastLine.vatRate !== rate ? (
+                          <LastValueHint
+                            value={`${lastLine.vatRate} %`}
+                            onApply={() => {
+                              if (!isStandardVatRate(lastLine.vatRate)) {
+                                setCustomVatRateLines((prev) => ({
+                                  ...prev,
+                                  [index]: true,
+                                }));
+                              } else {
+                                setCustomVatRateLines((prev) => {
+                                  const next = { ...prev };
+                                  delete next[index];
+                                  return next;
+                                });
+                              }
+                              form.setValue(
+                                `items.${index}.vatRate`,
+                                lastLine.vatRate,
+                                { shouldValidate: true },
+                              );
+                            }}
+                          />
+                        ) : undefined
+                      }
+                    >
+                      {hideRatePicker ? (
+                        <Input disabled readOnly value="0 %" />
+                      ) : (
                         <select
-                          aria-label={t("itemVatAria", {
-                            n: String(index + 1),
-                          })}
                           className={selectClassName()}
                           onChange={(ev) => {
                             const v = ev.target.value;
@@ -995,77 +1364,65 @@ export function InvoiceBuilderForm({
                           <option value="21">21 %</option>
                           <option value="other">{t("vatOther")}</option>
                         </select>
-                        {showCustomRate ? (
-                          <Input
-                            aria-label={t("itemVatCustomAria", {
-                              n: String(index + 1),
-                            })}
-                            placeholder="%"
-                            step="1"
-                            type="number"
-                            {...form.register(`items.${index}.vatRate`, {
-                              valueAsNumber: true,
-                            })}
-                          />
-                        ) : (
-                          <input
-                            type="hidden"
-                            {...form.register(`items.${index}.vatRate`, {
-                              valueAsNumber: true,
-                            })}
-                          />
-                        )}
-                      </div>
-                    )}
-                    <Button
-                      aria-label={t("removeItem", { n: String(index + 1) })}
-                      onClick={() => {
-                        if (fields.length > 1) {
-                          remove(index);
-                        }
-                      }}
-                      size="sm"
-                      type="button"
-                      variant="ghost"
-                    >
-                      <span aria-hidden="true">×</span>
-                    </Button>
+                      )}
+                      {hideRatePicker || !showCustomRate ? (
+                        <input
+                          type="hidden"
+                          {...form.register(`items.${index}.vatRate`, {
+                            valueAsNumber: true,
+                          })}
+                        />
+                      ) : (
+                        <Input
+                          aria-label={t("itemVatCustomAria", {
+                            n: String(index + 1),
+                          })}
+                          placeholder="%"
+                          step="1"
+                          type="number"
+                          {...form.register(`items.${index}.vatRate`, {
+                            valueAsNumber: true,
+                          })}
+                        />
+                      )}
+                    </Field>
                   </div>
-                  <p className="text-muted-foreground text-xs tabular-nums">
+                  <p className="text-muted-foreground text-right text-sm tabular-nums">
+                    {t("itemLineTotal")}:{" "}
                     {formatMoney(lineTotal, watched.currency, locale)}
                   </p>
                 </div>
-              </div>
-            );
-          })}
-          {totalsPreview ? (
-            <p className="text-sm font-medium tabular-nums">
-              {t("totalLine", {
-                total: formatMoney(
-                  totalsPreview.total,
-                  watched.currency,
-                  locale,
-                ),
-                vat: formatMoney(
-                  totalsPreview.vatTotal,
-                  watched.currency,
-                  locale,
-                ),
-              })}
-            </p>
-          ) : null}
-        </section>
+              );
+            })}
+          </div>
+        </FormSection>
 
-        <Field
+        <FormSection
           description={t("notesDescription")}
-          error={fieldError(errors, "notes")}
-          label={t("notes")}
+          title={t("sectionNotes")}
         >
-          <Input
-            placeholder={t("notesPlaceholder")}
-            {...form.register("notes")}
-          />
-        </Field>
+          <Field
+            error={fieldError(errors, "notes")}
+            label={t("notes")}
+            suggestion={
+              lastInvoice?.notes &&
+              lastInvoice.notes !== (watched.notes ?? "") ? (
+                <LastValueHint
+                  value={truncateHint(lastInvoice.notes)}
+                  onApply={() =>
+                    form.setValue("notes", lastInvoice.notes ?? "")
+                  }
+                />
+              ) : undefined
+            }
+          >
+            <Textarea
+              placeholder={t("notesPlaceholder")}
+              rows={3}
+              {...form.register("notes")}
+            />
+          </Field>
+        </FormSection>
 
         <div className="bg-background/95 sticky bottom-0 z-20 -mx-4 flex flex-wrap gap-2 border-t px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
           <Button

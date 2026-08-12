@@ -12,19 +12,24 @@ import {
 export function Field({
   label,
   description,
+  suggestion,
   error,
   className,
   children,
 }: {
   label: string;
   description?: string;
+  suggestion?: ReactNode;
   error?: string;
   className?: string;
   children: ReactNode;
 }) {
   const generatedId = useId();
   const controlId = `invoice-field-${generatedId.replaceAll(":", "")}`;
-  const descriptionId = description ? `${controlId}-description` : undefined;
+  const showDescription = Boolean(description) && !suggestion;
+  const descriptionId = showDescription
+    ? `${controlId}-description`
+    : undefined;
   const errorId = error ? `${controlId}-error` : undefined;
   const describedBy = [descriptionId, errorId].filter(Boolean).join(" ");
   let controlFound = false;
@@ -48,7 +53,8 @@ export function Field({
     <div className={cn("space-y-1.5", className)}>
       <Label htmlFor={controlId}>{label}</Label>
       {labelledChildren}
-      {description ? (
+      {suggestion}
+      {showDescription ? (
         <p className="text-muted-foreground text-xs" id={descriptionId}>
           {description}
         </p>

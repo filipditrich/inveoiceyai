@@ -174,3 +174,13 @@ export function addDaysIso(iso: string, days: number): string {
   const day = String(d.getUTCDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 }
+
+/** Whole days from `from` to `to` (ISO dates). Invalid input → 0. */
+export function diffDaysIso(from: string, to: string): number {
+  const start = Date.parse(`${from}T12:00:00.000Z`);
+  const end = Date.parse(`${to}T12:00:00.000Z`);
+  if (Number.isNaN(start) || Number.isNaN(end)) {
+    return 0;
+  }
+  return Math.round((end - start) / 86_400_000);
+}

@@ -1,4 +1,5 @@
 import { InvoiceBuilderForm } from "@/components/invoices/invoice-builder-form";
+import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import { requireWorkspace } from "@/lib/auth/session";
 import { InvoiceSchema } from "@invoicey/invoice-core/schema";
@@ -40,9 +41,14 @@ export default async function InvoiceEditPage({
     notFound();
   }
 
-  const [issuers, clients] = await Promise.all([
+  const [issuers, clients, lastInvoice] = await Promise.all([
     loadIssuerOptions(workspaceId),
     loadClientOptions(workspaceId),
+    loadLastInvoiceSuggestions(workspaceId, {
+      issuerId: row.issuerId,
+      clientId: row.clientId,
+      excludeId: id,
+    }),
   ]);
 
   const inv = payload.data;
@@ -60,6 +66,7 @@ export default async function InvoiceEditPage({
         invalidQuery={sp.invalid ?? null}
         invoiceId={id}
         issuers={issuers}
+        lastInvoice={lastInvoice}
         mode="edit"
         initial={{
           issuerId: row.issuerId,

@@ -7,6 +7,8 @@ import {
   type BuilderLineInput,
 } from "@/lib/build-invoice";
 import { requireWorkspace } from "@/lib/auth/session";
+import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
+import type { LastInvoiceSuggestions } from "@/lib/last-invoice-suggestions";
 import {
   ClientSnapshotSchema,
   InvoiceSchema,
@@ -809,4 +811,27 @@ export async function sendInvoiceEmail(formData: FormData): Promise<void> {
 
   revalidatePath(`/invoices/${id}`);
   redirect(`/invoices/${id}?toast=invoice_emailed`);
+}
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function optionalUuid(value: string | undefined): string | undefined {
+  if (!value || !UUID_RE.test(value)) {
+    return undefined;
+  }
+  return value;
+}
+
+export async function getLastInvoiceSuggestionsAction(input: {
+  issuerId?: string;
+  clientId?: string;
+  excludeId?: string;
+}): Promise<LastInvoiceSuggestions | null> {
+  const { workspaceId } = await requireWorkspace();
+  return loadLastInvoiceSuggestions(workspaceId, {
+    issuerId: optionalUuid(input.issuerId),
+    clientId: optionalUuid(input.clientId),
+    excludeId: optionalUuid(input.excludeId),
+  });
 }

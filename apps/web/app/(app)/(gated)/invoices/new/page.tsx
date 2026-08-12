@@ -1,5 +1,6 @@
 import { InvoiceBuilderForm } from "@/components/invoices/invoice-builder-form";
 import { requireWorkspace } from "@/lib/auth/session";
+import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import { getTranslations } from "next-intl/server";
 
@@ -17,6 +18,10 @@ export default async function InvoiceNewPage({
     loadIssuerOptions(workspaceId),
     loadClientOptions(workspaceId),
   ]);
+  const lastInvoice = await loadLastInvoiceSuggestions(workspaceId, {
+    issuerId: issuers[0]?.id,
+    clientId: clients[0]?.id,
+  });
 
   return (
     <div className="space-y-6 px-4 py-6 lg:px-6">
@@ -28,6 +33,7 @@ export default async function InvoiceNewPage({
         clients={clients}
         invalidQuery={sp.invalid ?? null}
         issuers={issuers}
+        lastInvoice={lastInvoice}
         mode="create"
       />
     </div>
