@@ -6,7 +6,7 @@ Per-feature implementation specs. Written **just-in-time** before the plan that 
 
 **Plan 3 specs:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md).
 
-**Shipped specs:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md), [`ares.md`](./ares.md), [`uploads.md`](./uploads.md), [`data-grid.md`](./data-grid.md), [`slack-bot.md`](./slack-bot.md), [`mcp.md`](./mcp.md), [`db-schema.md`](./db-schema.md), [`invoice-import.md`](./invoice-import.md), [`email.md`](./email.md), [`public-shell.md`](./public-shell.md).
+**Shipped specs:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md), [`ares.md`](./ares.md), [`uploads.md`](./uploads.md), [`data-grid.md`](./data-grid.md), [`slack-bot.md`](./slack-bot.md), [`mcp.md`](./mcp.md), [`db-schema.md`](./db-schema.md), [`invoice-import.md`](./invoice-import.md), [`email.md`](./email.md), [`public-shell.md`](./public-shell.md), [`recurring.md`](./recurring.md).
 
 Just-in-time convention: write the remaining specs before the plan that consumes them ([lifecycle](../README.md#lifecycle-conventions)).
 
@@ -24,6 +24,7 @@ Just-in-time convention: write the remaining specs before the plan that consumes
 | `data-grid.md`     | Plan 7               | ReUI Data Grid columns, filter/sort/search wiring, virtualization, row actions                                        |
 | `email.md`         | Plan 11              | Resend + react-email templates, From/Reply-To, webhooks, invoice send, lifecycle                                      |
 | `public-shell.md`  | Plan 17              | Public homepage, auth entry shell, essential legal routes, consent UX, and launch metadata                            |
+| `recurring.md`     | Plan 10              | Invoice templates, monthly/quarterly schedules, cron drafts (HITL)                                                    |
 
 ## Spec format conventions
 

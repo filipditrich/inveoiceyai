@@ -18,7 +18,7 @@ flowchart LR
     P3 -.parallel.-> P13a["Plan 13a<br/>Slack bot<br/>done"]
     P3 -.parallel.-> P12a["Plan 12a<br/>MCP local<br/>done"]
     P9 -.MVP.-> Post["post-MVP"]
-    Post --> P10["Plan 10<br/>recurring"]
+    Post --> P10["Plan 10<br/>recurring<br/>done"]
     Post --> P11["Plan 11<br/>email"]
     P12a --> P12b["Plan 12b<br/>MCP + DB<br/>done"]
     P7 -.parallel.-> P13b["Plan 13b<br/>Eve Slack<br/>in progress"]
@@ -239,13 +239,25 @@ Plans listed here do not block the MVP and can be picked up in parallel with Pla
 
 ## Post-MVP plans
 
-### Plan 10 — Recurring invoices
+### Plan 10 — Recurring invoice drafts
 
-**Status:** Post-MVP backlog
+**Status:** Done (implementation; apply SQL on Neon)  
+**Completed:** 2026-08-12  
+**Spec:** [`specs/recurring.md`](./specs/recurring.md) · [ADR 0027](./decisions/0027-recurring-drafts-only.md) · [plan](../.cursor/plans/plan-10-recurring.md)
 
-- New tables: `invoice_templates` (saved invoice payloads), `recurring_schedules` (cadence + next-run + linkage)
-- Vercel Cron Job that runs daily and issues due recurrences
-- UI to create a template from an existing invoice and to manage recurrences
+**Goal:** Save an invoice as a template, attach a monthly/quarterly schedule, and have a daily cron create a **draft** (HITL). The original “cron issues invoices” wording is superseded by ADR 0027.
+
+**Exit criteria:**
+
+- [x] Spec + ADR 0027 + this roadmap section
+- [x] `invoice_templates` + `recurring_schedules` + `invoices.recurring_schedule_id`
+- [x] Ops: create from invoice, pause/resume/skip/delete, run now, `runDueRecurringForWorkspace`
+- [x] Cron `/api/cron/recurring-drafts` (`CRON_SECRET`) + `0 6 * * *`
+- [x] `/invoices/recurring` + save-from-invoice; cs/en
+- [x] Vitest for next-run / materialize / skip; typecheck / lint / test
+- [ ] Apply `packages/db/sql/2026-08-12-plan10-recurring.sql` (or `bun db:push`) on Neon
+
+**Out of v1:** auto-issue, auto-email, MCP/Eve tools, day 29–31 / last-of-month, template line editor.
 
 ### Plan 11 — Email delivery
 
