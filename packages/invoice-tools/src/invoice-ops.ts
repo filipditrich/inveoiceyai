@@ -457,7 +457,7 @@ export async function bulkDeleteDraftInvoices(options: {
       failed += 1;
       continue;
     }
-    if (row.issuedAt) {
+    if (row.issuedAt && !row.cancelledAt) {
       skipped += 1;
       continue;
     }

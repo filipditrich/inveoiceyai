@@ -8,6 +8,7 @@ import {
   pauseRecurringSchedule,
   runScheduleNow,
   skipNextRecurring,
+  RecurringCadenceSchema,
   type RecurringCadence,
 } from "@invoicey/invoice-tools/ops";
 import { revalidatePath } from "next/cache";
@@ -26,10 +27,8 @@ function fail(path: string, code: string): never {
 }
 
 function parseCadence(raw: string | undefined): RecurringCadence | null {
-  if (raw === "monthly" || raw === "quarterly") {
-    return raw;
-  }
-  return null;
+  const parsed = RecurringCadenceSchema.safeParse(raw);
+  return parsed.success ? parsed.data : null;
 }
 
 export async function saveRecurringFromInvoice(

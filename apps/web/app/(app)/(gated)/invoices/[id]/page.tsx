@@ -330,7 +330,7 @@ export default async function InvoiceDetailPage({
               </SubmitButton>
             </form>
           ) : null}
-          {displayStatus === "draft" ? (
+          {displayStatus === "draft" || displayStatus === "cancelled" ? (
             <form action={deleteInvoice}>
               <input name="id" type="hidden" value={id} />
               <SubmitButton
@@ -353,12 +353,10 @@ export default async function InvoiceDetailPage({
       ) : null}
 
       {showPdfPreview ? (
-        <div className="overflow-hidden rounded-md border">
-          <InvoicePdfPreview
-            emptyLabel={t("pdfEmpty")}
-            url={`/api/invoices/${id}/pdf?disposition=inline`}
-          />
-        </div>
+        <InvoicePdfPreview
+          emptyLabel={t("pdfEmpty")}
+          url={`/api/invoices/${id}/pdf?disposition=inline`}
+        />
       ) : null}
 
       <dl className="grid gap-3 text-sm sm:grid-cols-2">

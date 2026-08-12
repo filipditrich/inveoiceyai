@@ -50,8 +50,14 @@ export async function RecurringTable({
               </td>
               <td className="p-3">{row.clientName}</td>
               <td className="p-3">
-                {t(cadenceKey(row.cadence))} ·{" "}
-                {t("list.day", { day: String(row.dayOfMonth) })}
+                {t(cadenceKey(row.cadence))}
+                {row.cadence === "weekly"
+                  ? null
+                  : ` · ${dayLabel(row.dayOfMonth, {
+                      first: t("list.dayFirst"),
+                      last: t("list.dayLast"),
+                      nth: t("list.day", { day: String(row.dayOfMonth) }),
+                    })}`}
               </td>
               <td className="p-3 tabular-nums">
                 {formatInvoiceDate(row.nextRunOn, locale)}
@@ -172,15 +178,32 @@ export async function RecurringEmpty({
 
 function cadenceKey(
   cadence: RecurringCadence,
-): "list.monthly" | "list.quarterly" {
+): "list.weekly" | "list.monthly" | "list.quarterly" | "list.yearly" {
   switch (cadence) {
+    case "weekly":
+      return "list.weekly";
     case "monthly":
       return "list.monthly";
     case "quarterly":
       return "list.quarterly";
+    case "yearly":
+      return "list.yearly";
     default: {
       const _exhaustive: never = cadence;
       return _exhaustive;
     }
   }
+}
+
+function dayLabel(
+  dayOfMonth: number,
+  labels: { first: string; last: string; nth: string },
+): string {
+  if (dayOfMonth >= 31) {
+    return labels.last;
+  }
+  if (dayOfMonth === 1) {
+    return labels.first;
+  }
+  return labels.nth;
 }

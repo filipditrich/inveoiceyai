@@ -44,13 +44,13 @@ describe("createRecurringFromInvoice guards", () => {
     }
   });
 
-  it("rejects day 29", async () => {
+  it("rejects day 0", async () => {
     const result = await createRecurringFromInvoice({
       workspaceId: "ws_test",
       invoiceId: "00000000-0000-4000-8000-000000000099",
       name: "Monthly",
       cadence: "monthly",
-      dayOfMonth: 29,
+      dayOfMonth: 0,
       todayIso: "2026-08-12",
     });
     expect(result.ok).toBe(false);

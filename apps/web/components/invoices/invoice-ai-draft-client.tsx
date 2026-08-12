@@ -221,7 +221,7 @@ export function InvoiceAiDraftClient({
         ) : null}
       </div>
 
-      <div className="min-h-80">
+      <div>
         <InvoicePdfPreview
           url={pdfUrl}
           emptyLabel={t("previewEmpty")}

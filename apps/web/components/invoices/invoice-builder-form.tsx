@@ -570,179 +570,204 @@ export function InvoiceBuilderForm({
           </div>
         ) : null}
 
-        <section className="grid gap-4 sm:grid-cols-2">
-          <Field
-            description={t("issuerDescription")}
-            error={fieldError(errors, "issuerId")}
-            label={t("issuer")}
-          >
-            <select
-              aria-invalid={Boolean(fieldError(errors, "issuerId"))}
-              className={selectClassName(
-                Boolean(fieldError(errors, "issuerId")),
-              )}
-              {...form.register("issuerId")}
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium">{t("sectionParties")}</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              description={t("issuerDescription")}
+              error={fieldError(errors, "issuerId")}
+              label={t("issuer")}
             >
-              {issuers.map((i) => (
-                <option key={i.id} value={i.id}>
-                  {i.snapshot.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field
-            description={t("clientDescription")}
-            error={fieldError(errors, "clientId")}
-            label={t("client")}
-          >
-            <select
-              aria-invalid={Boolean(fieldError(errors, "clientId"))}
-              className={selectClassName(
-                Boolean(fieldError(errors, "clientId")),
-              )}
-              {...form.register("clientId")}
+              <select
+                aria-invalid={Boolean(fieldError(errors, "issuerId"))}
+                className={selectClassName(
+                  Boolean(fieldError(errors, "issuerId")),
+                )}
+                {...form.register("issuerId")}
+              >
+                {issuers.map((i) => (
+                  <option key={i.id} value={i.id}>
+                    {i.snapshot.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field
+              description={t("clientDescription")}
+              error={fieldError(errors, "clientId")}
+              label={t("client")}
             >
-              {clients.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.snapshot.name}
-                  {c.snapshot.ico
-                    ? t("icoSuffix", { ico: c.snapshot.ico })
-                    : ""}
-                </option>
-              ))}
-            </select>
-          </Field>
+              <select
+                aria-invalid={Boolean(fieldError(errors, "clientId"))}
+                className={selectClassName(
+                  Boolean(fieldError(errors, "clientId")),
+                )}
+                {...form.register("clientId")}
+              >
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.snapshot.name}
+                    {c.snapshot.ico
+                      ? t("icoSuffix", { ico: c.snapshot.ico })
+                      : ""}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </div>
         </section>
 
-        <section className="grid gap-4 sm:grid-cols-2">
-          <Field
-            description={t("docTypeDescription")}
-            error={fieldError(errors, "docType")}
-            label={t("docType")}
-          >
-            <select className={selectClassName()} {...form.register("docType")}>
-              <option value="invoice">{t("docTypeInvoice")}</option>
-              <option value="proforma">{t("docTypeProforma")}</option>
-              <option value="advance">{t("docTypeAdvance")}</option>
-              <option value="credit_note">{t("docTypeCreditNote")}</option>
-            </select>
-          </Field>
-          <Field
-            description={t("numberPreviewDescription")}
-            label={t("numberPreview")}
-          >
-            <p className="text-sm font-medium tabular-nums">{numberPreview}</p>
-          </Field>
-          <Field
-            description={t("issueDateDescription")}
-            error={fieldError(errors, "issueDate")}
-            label={t("issueDate")}
-          >
-            <Input
-              aria-invalid={Boolean(fieldError(errors, "issueDate"))}
-              type="date"
-              {...form.register("issueDate")}
-            />
-          </Field>
-          <Field
-            description={t("dueDateDescription")}
-            error={fieldError(errors, "dueDate")}
-            label={t("dueDate")}
-          >
-            <Input
-              aria-invalid={Boolean(fieldError(errors, "dueDate"))}
-              type="date"
-              {...form.register("dueDate")}
-            />
-          </Field>
-          <Field
-            description={t("duzpDescription")}
-            error={fieldError(errors, "duzp")}
-            label={t("duzp")}
-          >
-            <Input
-              aria-invalid={Boolean(fieldError(errors, "duzp"))}
-              type="date"
-              {...form.register("duzp")}
-            />
-          </Field>
-          <Field
-            description={t("currencyDescription")}
-            error={fieldError(errors, "currency")}
-            label={t("currency")}
-          >
-            <select
-              className={selectClassName()}
-              {...form.register("currency")}
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium">{t("sectionDocument")}</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              description={t("docTypeDescription")}
+              error={fieldError(errors, "docType")}
+              label={t("docType")}
             >
-              <option value="CZK">{t("currencyCzk")}</option>
-              <option value="EUR">EUR</option>
-              <option value="USD">USD</option>
-            </select>
-          </Field>
-          <Field
-            description={t("languageDescription")}
-            error={fieldError(errors, "language")}
-            label={t("language")}
-          >
-            <select
-              className={selectClassName()}
-              {...form.register("language")}
+              <select
+                className={selectClassName()}
+                {...form.register("docType")}
+              >
+                <option value="invoice">{t("docTypeInvoice")}</option>
+                <option value="proforma">{t("docTypeProforma")}</option>
+                <option value="advance">{t("docTypeAdvance")}</option>
+                <option value="credit_note">{t("docTypeCreditNote")}</option>
+              </select>
+            </Field>
+            <Field
+              description={t("numberPreviewDescription")}
+              label={t("numberPreview")}
             >
-              <option value="cs">{t("languageCs")}</option>
-              <option value="en">{t("languageEn")}</option>
-            </select>
-          </Field>
-          <Field
-            description={t("vatModeDescription")}
-            error={fieldError(errors, "vatMode")}
-            label={t("vatMode")}
-          >
-            <select
-              className={selectClassName()}
-              disabled={!issuerVatPayer}
-              {...form.register("vatMode")}
+              <p className="text-sm font-medium tabular-nums">
+                {numberPreview}
+              </p>
+            </Field>
+            <Field
+              description={t("languageDescription")}
+              error={fieldError(errors, "language")}
+              label={t("language")}
             >
-              <option value="regular">
-                {issuerVatPayer ? t("vatRegularPayer") : t("vatNonPayer")}
-              </option>
+              <select
+                className={selectClassName()}
+                {...form.register("language")}
+              >
+                <option value="cs">{t("languageCs")}</option>
+                <option value="en">{t("languageEn")}</option>
+              </select>
+            </Field>
+            <Field
+              description={t("currencyDescription")}
+              error={fieldError(errors, "currency")}
+              label={t("currency")}
+            >
+              <select
+                className={selectClassName()}
+                {...form.register("currency")}
+              >
+                <option value="CZK">{t("currencyCzk")}</option>
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+              </select>
+            </Field>
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium">{t("sectionDates")}</h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Field
+              description={t("issueDateDescription")}
+              error={fieldError(errors, "issueDate")}
+              label={t("issueDate")}
+            >
+              <Input
+                aria-invalid={Boolean(fieldError(errors, "issueDate"))}
+                type="date"
+                {...form.register("issueDate")}
+              />
+            </Field>
+            <Field
+              description={t("dueDateDescription")}
+              error={fieldError(errors, "dueDate")}
+              label={t("dueDate")}
+            >
+              <Input
+                aria-invalid={Boolean(fieldError(errors, "dueDate"))}
+                type="date"
+                {...form.register("dueDate")}
+              />
+            </Field>
+            <Field
+              description={t("duzpDescription")}
+              error={fieldError(errors, "duzp")}
+              label={t("duzp")}
+            >
+              <Input
+                aria-invalid={Boolean(fieldError(errors, "duzp"))}
+                type="date"
+                {...form.register("duzp")}
+              />
+            </Field>
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium">{t("sectionVat")}</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              description={t("vatModeDescription")}
+              error={fieldError(errors, "vatMode")}
+              label={t("vatMode")}
+            >
+              <select
+                className={selectClassName()}
+                disabled={!issuerVatPayer}
+                {...form.register("vatMode")}
+              >
+                <option value="regular">
+                  {issuerVatPayer ? t("vatRegularPayer") : t("vatNonPayer")}
+                </option>
+                {issuerVatPayer ? (
+                  <option value="reverse_charge">
+                    {t("vatReverseCharge")}
+                  </option>
+                ) : null}
+                {issuerVatPayer && showAdvancedVat ? (
+                  <option value="oss">{t("vatOss")}</option>
+                ) : null}
+              </select>
               {issuerVatPayer ? (
-                <option value="reverse_charge">{t("vatReverseCharge")}</option>
+                <label className="text-muted-foreground flex items-center gap-2 text-xs">
+                  <input
+                    checked={showAdvancedVat}
+                    onChange={(ev) => {
+                      setShowAdvancedVat(ev.target.checked);
+                      if (!ev.target.checked && watched.vatMode === "oss") {
+                        form.setValue("vatMode", "regular");
+                      }
+                    }}
+                    type="checkbox"
+                  />
+                  {t("vatAdvanced")}
+                </label>
               ) : null}
-              {issuerVatPayer && showAdvancedVat ? (
-                <option value="oss">{t("vatOss")}</option>
-              ) : null}
-            </select>
-            {issuerVatPayer ? (
-              <label className="text-muted-foreground flex items-center gap-2 text-xs">
-                <input
-                  checked={showAdvancedVat}
-                  onChange={(ev) => {
-                    setShowAdvancedVat(ev.target.checked);
-                    if (!ev.target.checked && watched.vatMode === "oss") {
-                      form.setValue("vatMode", "regular");
-                    }
-                  }}
-                  type="checkbox"
-                />
-                {t("vatAdvanced")}
-              </label>
-            ) : null}
-          </Field>
-          <Field
-            description={t("suppliesAbroadDescription")}
-            error={fieldError(errors, "suppliesAbroad")}
-            label={t("suppliesAbroad")}
-          >
-            <select
-              className={selectClassName()}
-              {...form.register("suppliesAbroad")}
+            </Field>
+            <Field
+              description={t("suppliesAbroadDescription")}
+              error={fieldError(errors, "suppliesAbroad")}
+              label={t("suppliesAbroad")}
             >
-              <option value="none">{t("suppliesNone")}</option>
-              <option value="eu">{t("suppliesEu")}</option>
-              <option value="non_eu">{t("suppliesNonEu")}</option>
-            </select>
-          </Field>
+              <select
+                className={selectClassName()}
+                {...form.register("suppliesAbroad")}
+              >
+                <option value="none">{t("suppliesNone")}</option>
+                <option value="eu">{t("suppliesEu")}</option>
+                <option value="non_eu">{t("suppliesNonEu")}</option>
+              </select>
+            </Field>
+          </div>
         </section>
 
         {watched.vatMode === "reverse_charge" ? (

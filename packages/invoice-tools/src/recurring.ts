@@ -7,10 +7,16 @@ import {
 } from "@invoicey/invoice-core/schema";
 import { z } from "zod";
 
-export const RecurringCadenceSchema = z.enum(["monthly", "quarterly"]);
+export const RecurringCadenceSchema = z.enum([
+  "weekly",
+  "monthly",
+  "quarterly",
+  "yearly",
+]);
 export type RecurringCadence = z.infer<typeof RecurringCadenceSchema>;
 
-export const RecurringDayOfMonthSchema = z.number().int().min(1).max(28);
+/** 1–30 = that day (clamped to the month); 31 = last day of the month. */
+export const RecurringDayOfMonthSchema = z.number().int().min(1).max(31);
 
 const MS_PER_DAY = 86_400_000;
 
@@ -20,6 +26,16 @@ function pad2(n: number): string {
 
 function ymd(year: number, month: number, day: number): string {
   return `${year}-${pad2(month)}-${pad2(day)}`;
+}
+
+function daysInUtcMonth(year: number, month: number): number {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+function ymdOnDay(year: number, month: number, dayOfMonth: number): string {
+  const last = daysInUtcMonth(year, month);
+  const day = dayOfMonth >= 31 ? last : Math.min(Math.max(1, dayOfMonth), last);
+  return ymd(year, month, day);
 }
 
 function parseYmd(value: string): { year: number; month: number; day: number } {
@@ -37,19 +53,19 @@ export function paymentDueDays(issueDate: string, dueDate: string): number {
   return Math.max(0, Math.round((due - issue) / MS_PER_DAY));
 }
 
-/** Next `dayOfMonth` on or after `minYmd` (1–28, so every month is valid). */
+/** Next occurrence of `dayOfMonth` on or after `minYmd` (31 = last of month). */
 export function nextOccurrenceOnOrAfter(
   minYmd: string,
   dayOfMonth: number,
 ): string {
   const { year, month } = parseYmd(minYmd);
-  const candidate = ymd(year, month, dayOfMonth);
+  const candidate = ymdOnDay(year, month, dayOfMonth);
   if (candidate >= minYmd) {
     return candidate;
   }
   const nextMonth = month === 12 ? 1 : month + 1;
   const nextYear = month === 12 ? year + 1 : year;
-  return ymd(nextYear, nextMonth, dayOfMonth);
+  return ymdOnDay(nextYear, nextMonth, dayOfMonth);
 }
 
 export function addCadence(
@@ -57,6 +73,9 @@ export function addCadence(
   cadence: RecurringCadence,
   dayOfMonth: number,
 ): string {
+  if (cadence === "weekly") {
+    return addCalendarDaysYmd(fromYmd, 7);
+  }
   let months: number;
   switch (cadence) {
     case "monthly":
@@ -64,6 +83,9 @@ export function addCadence(
       break;
     case "quarterly":
       months = 3;
+      break;
+    case "yearly":
+      months = 12;
       break;
     default: {
       const _exhaustive: never = cadence;
@@ -74,7 +96,7 @@ export function addCadence(
   const total = year * 12 + (month - 1) + months;
   const nextYear = Math.floor(total / 12);
   const nextMonth = (total % 12) + 1;
-  return ymd(nextYear, nextMonth, dayOfMonth);
+  return ymdOnDay(nextYear, nextMonth, dayOfMonth);
 }
 
 /** After creating a draft for `nextRunOn`, jump to the next future occurrence. */
@@ -105,7 +127,14 @@ export function tomorrowIso(todayIso: string): string {
   return addCalendarDaysYmd(todayIso, 1);
 }
 
-export function defaultNextRunOn(todayIso: string, dayOfMonth: number): string {
+export function defaultNextRunOn(
+  todayIso: string,
+  dayOfMonth: number,
+  cadence: RecurringCadence = "monthly",
+): string {
+  if (cadence === "weekly") {
+    return tomorrowIso(todayIso);
+  }
   return nextOccurrenceOnOrAfter(tomorrowIso(todayIso), dayOfMonth);
 }
 

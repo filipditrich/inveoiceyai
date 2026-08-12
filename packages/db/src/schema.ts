@@ -163,7 +163,7 @@ export const recurringSchedules = pgTable(
     templateId: uuid("template_id")
       .notNull()
       .references(() => invoiceTemplates.id, { onDelete: "cascade" }),
-    /** monthly | quarterly */
+    /** weekly | monthly | quarterly | yearly */
     cadence: text("cadence").notNull(),
     dayOfMonth: integer("day_of_month").notNull(),
     nextRunOn: text("next_run_on").notNull(),

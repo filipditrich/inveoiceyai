@@ -370,6 +370,9 @@ export function InvoiceListTable({
   const selectedDrafts = selectedRows.filter(
     (r) => r.displayStatus === "draft",
   ).length;
+  const selectedDeletable = selectedRows.filter(
+    (r) => r.displayStatus === "draft" || r.displayStatus === "cancelled",
+  ).length;
 
   const runBulk = (
     key: Exclude<BulkKey, null>,
@@ -473,7 +476,7 @@ export function InvoiceListTable({
             </div>
             <div className="flex flex-wrap gap-2">
               <Button
-                disabled={pending || selectedDrafts === 0}
+                disabled={pending || selectedDeletable === 0}
                 loading={pending && bulkKey === "issue"}
                 onClick={() => runBulk("issue", bulkIssueInvoice)}
                 size="sm"
@@ -689,7 +692,8 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
               />
             </>
           ) : null}
-          {row.displayStatus === "draft" ? (
+          {row.displayStatus === "draft" ||
+          row.displayStatus === "cancelled" ? (
             <>
               <DropdownMenuSeparator />
               <InvoiceActionMenuForm

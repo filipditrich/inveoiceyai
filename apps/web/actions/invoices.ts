@@ -713,7 +713,7 @@ export async function deleteInvoice(formData: FormData): Promise<void> {
   if (!rows[0]) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_row")}`);
   }
-  if (rows[0].issuedAt) {
+  if (rows[0].issuedAt && !rows[0].cancelledAt) {
     redirect(`/invoices?invalid=${encodeURIComponent("not_draft")}`);
   }
   await db.delete(invoices).where(eq(invoices.id, id));

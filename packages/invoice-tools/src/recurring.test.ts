@@ -124,6 +124,20 @@ describe("addCadence", () => {
     expect(addCadence("2026-01-28", "quarterly", 28)).toBe("2026-04-28");
     expect(addCadence("2026-11-01", "quarterly", 1)).toBe("2027-02-01");
   });
+
+  it("adds seven days for weekly", () => {
+    expect(addCadence("2026-08-12", "weekly", 1)).toBe("2026-08-19");
+  });
+
+  it("adds twelve months for yearly", () => {
+    expect(addCadence("2026-08-12", "yearly", 12)).toBe("2027-08-12");
+  });
+
+  it("clamps last-of-month through short months", () => {
+    expect(addCadence("2026-01-31", "monthly", 31)).toBe("2026-02-28");
+    expect(nextOccurrenceOnOrAfter("2026-01-01", 31)).toBe("2026-01-31");
+    expect(nextOccurrenceOnOrAfter("2026-02-01", 31)).toBe("2026-02-28");
+  });
 });
 
 describe("advanceNextRunUntilFuture", () => {
@@ -150,6 +164,10 @@ describe("defaultNextRunOn", () => {
   it("never schedules same-day", () => {
     expect(defaultNextRunOn("2026-08-12", 12)).toBe("2026-09-12");
     expect(defaultNextRunOn("2026-08-12", 13)).toBe("2026-08-13");
+  });
+
+  it("uses tomorrow for weekly", () => {
+    expect(defaultNextRunOn("2026-08-12", 1, "weekly")).toBe("2026-08-13");
   });
 });
 

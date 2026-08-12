@@ -297,7 +297,7 @@ export async function createRecurringFromInvoice(options: {
       const dueDays = paymentDueDays(row.issueDate, row.dueDate);
       const nextRunOn =
         options.nextRunOn?.trim() ||
-        defaultNextRunOn(options.todayIso, dayParsed.data);
+        defaultNextRunOn(options.todayIso, dayParsed.data, cadenceParsed.data);
 
       await tx.insert(invoiceTemplates).values({
         id: templateId,
