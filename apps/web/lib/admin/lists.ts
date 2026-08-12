@@ -14,7 +14,7 @@ import {
   type PlatformRole,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { asc, count, desc, eq, inArray, sql } from "drizzle-orm";
 
 export type AdminUserRow = {
   id: string;
@@ -133,34 +133,63 @@ export async function adminListUsers(): Promise<AdminUserRow[]> {
 }
 
 export async function adminListWorkspaces(): Promise<AdminWorkspaceRow[]> {
+  /** correlated sql`` subselects render unqualified "id" (text = uuid on invoices) */
   const rows = await db
     .select({
       id: workspaces.id,
       name: workspaces.name,
       slug: workspaces.slug,
       createdAt: workspaces.createdAt,
-      memberCount: sql<number>`(
-        select cast(count(*) as int) from ${member}
-        where ${member.organizationId} = ${workspaces.id}
-      )`,
-      invoiceCount: sql<number>`(
-        select cast(count(*) as int) from ${invoices}
-        where ${invoices.workspaceId} = ${workspaces.id}
-      )`,
-      issuerCount: sql<number>`(
-        select cast(count(*) as int) from ${issuerBusinesses}
-        where ${issuerBusinesses.workspaceId} = ${workspaces.id}
-      )`,
     })
     .from(workspaces)
     .orderBy(asc(workspaces.name))
     .limit(ADMIN_LIST_CAP);
 
+  if (rows.length === 0) return [];
+
+  const workspaceIds = rows.map((row) => row.id);
+  const [memberCounts, invoiceCounts, issuerCounts] = await Promise.all([
+    db
+      .select({
+        workspaceId: member.organizationId,
+        value: count(),
+      })
+      .from(member)
+      .where(inArray(member.organizationId, workspaceIds))
+      .groupBy(member.organizationId),
+    db
+      .select({
+        workspaceId: invoices.workspaceId,
+        value: count(),
+      })
+      .from(invoices)
+      .where(inArray(invoices.workspaceId, workspaceIds))
+      .groupBy(invoices.workspaceId),
+    db
+      .select({
+        workspaceId: issuerBusinesses.workspaceId,
+        value: count(),
+      })
+      .from(issuerBusinesses)
+      .where(inArray(issuerBusinesses.workspaceId, workspaceIds))
+      .groupBy(issuerBusinesses.workspaceId),
+  ]);
+
+  const membersByWorkspace = new Map(
+    memberCounts.map((row) => [row.workspaceId, Number(row.value)]),
+  );
+  const invoicesByWorkspace = new Map(
+    invoiceCounts.map((row) => [row.workspaceId, Number(row.value)]),
+  );
+  const issuersByWorkspace = new Map(
+    issuerCounts.map((row) => [row.workspaceId, Number(row.value)]),
+  );
+
   return rows.map((r) => ({
     ...r,
-    memberCount: Number(r.memberCount ?? 0),
-    invoiceCount: Number(r.invoiceCount ?? 0),
-    issuerCount: Number(r.issuerCount ?? 0),
+    memberCount: membersByWorkspace.get(r.id) ?? 0,
+    invoiceCount: invoicesByWorkspace.get(r.id) ?? 0,
+    issuerCount: issuersByWorkspace.get(r.id) ?? 0,
   }));
 }
 
