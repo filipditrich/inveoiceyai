@@ -27,6 +27,7 @@ import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { getDemoIssuer } from "./demo-issuer";
 import { tryPersistInvoiceArtifacts } from "./invoice-artifacts";
+import { variableSymbolFromNumber } from "./recurring";
 import { sendPaymentReceivedEmailIfEnabled } from "./send-invoice-email";
 import { resolveWorkspaceId } from "./workspace-context";
 
@@ -578,6 +579,9 @@ export async function issueInvoiceById(options: {
         nextYear = year;
       }
 
+      const variableSymbol =
+        draftParsed.data.payment.variableSymbol ??
+        variableSymbolFromNumber(number);
       const invoice: Invoice = {
         ...draftParsed.data,
         meta: {
@@ -586,6 +590,9 @@ export async function issueInvoiceById(options: {
         },
         issuer: issuerSnap.data,
         client: clientSnap.data,
+        payment: variableSymbol
+          ? { ...draftParsed.data.payment, variableSymbol }
+          : draftParsed.data.payment,
       };
 
       const parsed = InvoiceSchema.safeParse(invoice);
@@ -704,3 +711,21 @@ export async function bulkIssueInvoices(options: {
   }
   return { ok, skipped, failed };
 }
+
+export {
+  createRecurringFromInvoice,
+  deleteRecurringTemplate,
+  listRecurring,
+  pauseRecurringSchedule,
+  runDueRecurringForWorkspace,
+  runScheduleNow,
+  skipNextRecurring,
+  type RecurringListItem,
+  type RecurringOpError,
+} from "./recurring-ops";
+export {
+  RecurringCadenceSchema,
+  RecurringDayOfMonthSchema,
+  variableSymbolFromNumber,
+  type RecurringCadence,
+} from "./recurring";
