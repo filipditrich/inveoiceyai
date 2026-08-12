@@ -16,9 +16,15 @@ erDiagram
   workspaces ||--o{ issuer_businesses : has
   workspaces ||--o{ clients : has
   workspaces ||--o{ invoices : has
+  workspaces ||--o{ invoice_templates : has
+  workspaces ||--o{ recurring_schedules : has
   workspaces ||--o{ presets : has
   issuer_businesses ||--o{ invoices : from
   clients ||--o{ invoices : to
+  issuer_businesses ||--o{ invoice_templates : from
+  clients ||--o{ invoice_templates : to
+  invoice_templates ||--o| recurring_schedules : schedule
+  recurring_schedules ||--o{ invoices : drafts
   issuer_businesses ||--o{ issuer_numbering_schemes : has
   invoices ||--o{ invoice_items : has
   workspaces ||--o{ email_messages : has
@@ -84,6 +90,30 @@ erDiagram
     text pdf_url
     text isdoc_url
     timestamptz pdf_generated_at
+    uuid recurring_schedule_id FK
+  }
+
+  invoice_templates {
+    uuid id PK
+    text workspace_id
+    uuid issuer_id FK
+    uuid client_id FK
+    text name
+    text doc_type
+    int payment_due_days
+    jsonb payload_json
+  }
+
+  recurring_schedules {
+    uuid id PK
+    text workspace_id
+    uuid template_id FK
+    text cadence
+    int day_of_month
+    text next_run_on
+    int paused
+    text last_run_on
+    uuid last_invoice_id
   }
 
   invoice_items {

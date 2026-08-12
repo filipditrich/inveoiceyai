@@ -121,6 +121,69 @@ export const issuerNumberingSchemes = pgTable(
   ],
 );
 
+/** Saved invoice payload for recurrence (Plan 10). Dates/number ignored at materialize. */
+export const invoiceTemplates = pgTable(
+  "invoice_templates",
+  {
+    id: uuid("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    issuerId: uuid("issuer_id")
+      .notNull()
+      .references(() => issuerBusinesses.id),
+    clientId: uuid("client_id")
+      .notNull()
+      .references(() => clients.id),
+    name: text("name").notNull(),
+    /** invoice only in v1 */
+    docType: text("doc_type").notNull(),
+    paymentDueDays: integer("payment_due_days").notNull(),
+    payloadJson: jsonb("payload_json")
+      .notNull()
+      .$type<Record<string, unknown>>(),
+    sourceInvoiceId: uuid("source_invoice_id"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    unique("invoice_templates_workspace_name").on(t.workspaceId, t.name),
+    index("invoice_templates_workspace_idx").on(t.workspaceId),
+  ],
+);
+
+/** 1:1 schedule for a template. `last_invoice_id` has no FK (cycle with invoices). */
+export const recurringSchedules = pgTable(
+  "recurring_schedules",
+  {
+    id: uuid("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    templateId: uuid("template_id")
+      .notNull()
+      .references(() => invoiceTemplates.id, { onDelete: "cascade" }),
+    /** monthly | quarterly */
+    cadence: text("cadence").notNull(),
+    dayOfMonth: integer("day_of_month").notNull(),
+    nextRunOn: text("next_run_on").notNull(),
+    paused: integer("paused").notNull().default(0),
+    lastRunOn: text("last_run_on"),
+    lastInvoiceId: uuid("last_invoice_id"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    unique("recurring_schedules_template").on(t.templateId),
+    index("recurring_schedules_due_idx").on(t.paused, t.nextRunOn),
+    index("recurring_schedules_workspace_idx").on(t.workspaceId),
+  ],
+);
+
 /**
  * Invoice header — facts for deriveStatus + payload_json for round-trip/PDF.
  * `number` null while draft; unique (issuer_id, number) allows many null drafts.
@@ -181,6 +244,10 @@ export const invoices = pgTable(
     externalKey: text("external_key"),
     /** When true, never regenerate PDF/ISDOC over stored originals. */
     artifactsImmutable: integer("artifacts_immutable").notNull().default(0),
+    recurringScheduleId: uuid("recurring_schedule_id").references(
+      () => recurringSchedules.id,
+      { onDelete: "set null" },
+    ),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -199,6 +266,7 @@ export const invoices = pgTable(
       t.workspaceId,
       t.externalKey,
     ),
+    index("invoices_recurring_schedule_idx").on(t.recurringScheduleId),
   ],
 );
 

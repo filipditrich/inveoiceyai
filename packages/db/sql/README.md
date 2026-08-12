@@ -43,5 +43,7 @@ two steps (add nullable + backfill, then tighten), as
 | `2026-08-11-plan14-*.sql`                 | Plan 14 auth / workspaces                    |
 | `2026-08-11-plan16-account-security.sql`  | Plan 16 trusted devices + audit              |
 | `2026-08-11-plan19-invites-referrals.sql` | Plan 19 referral columns + `referral_events` |
+| `2026-08-12-ai-token-usage.sql`           | Plan 21 AI token balances + usage            |
+| `2026-08-12-plan10-recurring.sql`         | Plan 10 templates + recurring schedules      |
 
 Apply Plan 19 before deploying referral routes (`/r/*`, `/settings/referrals`, admin users list).
