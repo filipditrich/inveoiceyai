@@ -101,7 +101,7 @@ curl -sS https://invoicey.ditrich.me/eve/v1/health
 # {"ok":true,"status":"ready",...}
 ```
 
-Connect is **not** attached yet — complete the **You must** steps above before Slack E2E.
+**Turbo remote cache:** `@invoicey/web` build must not be turbo-cached on Vercel. A cache hit can skip the `withEve` nitro packaging, leave `/eve/v1/*` as Next HTML, and make Slack Connect look “healthy” (HTTP 200 HTML) while Eve never runs. Guard: `apps/web/turbo.json` sets `build.cache: false` and includes `.eve/**` in outputs. Symptom of a bad deploy: `GET /eve/v1/health` returns marketing HTML/`404` instead of JSON `ready`, and `lambdaRuntimeStats.nodejs` drops (e.g. 4 instead of 7). Fix: promote the last Eve-good deployment or `vercel redeploy <id> --target production` (full rebuild).
 
 ## Local smoke
 
