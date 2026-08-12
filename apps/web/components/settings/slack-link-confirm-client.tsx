@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { Link2Icon } from "lucide-react";
 
 import { confirmSlackLinkAction } from "@/actions/slack-link";
 import { Button } from "@/components/ui/button";
@@ -58,8 +59,10 @@ export function SlackLinkConfirmClient({
       className="w-full"
       disabled={done || pending}
       loading={pending}
+      size="lg"
       onClick={confirm}
     >
+      <Link2Icon data-icon="inline-start" />
       {done ? t("confirmed") : pending ? t("confirming") : t("confirm")}
     </Button>
   );

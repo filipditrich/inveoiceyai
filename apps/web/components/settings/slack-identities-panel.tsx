@@ -4,12 +4,14 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Link2Icon, UnlinkIcon } from "lucide-react";
+import { Link2Icon, MessageSquareIcon, UnlinkIcon } from "lucide-react";
 
 import {
   rebindSlackIdentityAction,
   unlinkSlackIdentityAction,
 } from "@/actions/slack-link";
+import { SlackConnectionParties } from "@/components/settings/slack-connection-parties";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -94,7 +96,15 @@ export function SlackIdentitiesPanel({
       </CardHeader>
       <CardContent className="space-y-4 pt-5">
         {identities.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("empty")}</p>
+          <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center">
+            <span className="bg-muted flex size-11 items-center justify-center rounded-2xl">
+              <MessageSquareIcon className="text-muted-foreground size-5" />
+            </span>
+            <p className="font-medium">{t("emptyTitle")}</p>
+            <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
+              {t("empty")}
+            </p>
+          </div>
         ) : (
           <ul className="space-y-3">
             {identities.map((row) => {
@@ -102,33 +112,47 @@ export function SlackIdentitiesPanel({
               return (
                 <li
                   key={keyOf(row)}
-                  className="flex flex-col gap-3 rounded-lg border px-3 py-3 sm:flex-row sm:items-center sm:justify-between"
+                  className="overflow-hidden rounded-xl border"
                 >
-                  <div className="min-w-0 space-y-1 text-sm">
-                    <p className="font-medium">
-                      {t("slackUser", { id: row.slackUserId })}
-                    </p>
-                    <p className="text-muted-foreground text-xs">
-                      {t("team", { id: row.slackTeamId })} · {row.workspaceName}
-                    </p>
+                  <div className="flex items-center justify-between gap-2 border-b px-3 py-2.5">
+                    <Badge variant="secondary">{t("connected")}</Badge>
+                    {sameWorkspace ? (
+                      <span className="text-muted-foreground text-xs">
+                        {t("currentWorkspace")}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">
+                        {t("otherWorkspace")}
+                      </span>
+                    )}
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="px-3 py-3">
+                    <SlackConnectionParties
+                      slackCaption={`${t("team", { id: row.slackTeamId })} · ${row.slackUserId}`}
+                      slackEyebrow={t("fromSlack")}
+                      slackTitle={t("slackAccount")}
+                      workspaceCaption={t("invoicesGoTo")}
+                      workspaceEyebrow={t("toWorkspace")}
+                      workspaceTitle={row.workspaceName}
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-2 border-t px-3 py-2.5">
+                    {sameWorkspace ? null : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={pending}
+                        loading={busyKey === `rebind:${keyOf(row)}`}
+                        onClick={() => rebind(row)}
+                      >
+                        {t("useCurrentWorkspace", {
+                          name: currentWorkspaceName,
+                        })}
+                      </Button>
+                    )}
                     <Button
                       size="sm"
-                      variant="outline"
-                      disabled={pending || sameWorkspace}
-                      loading={busyKey === `rebind:${keyOf(row)}`}
-                      onClick={() => rebind(row)}
-                    >
-                      {sameWorkspace
-                        ? t("currentWorkspace")
-                        : t("useCurrentWorkspace", {
-                            name: currentWorkspaceName,
-                          })}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
+                      variant="destructive"
                       disabled={pending}
                       loading={busyKey === `unlink:${keyOf(row)}`}
                       onClick={() => unlink(row)}

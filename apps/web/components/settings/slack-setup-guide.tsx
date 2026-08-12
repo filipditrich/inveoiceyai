@@ -4,9 +4,12 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
+  AtSignIcon,
   ChevronDownIcon,
   CopyIcon,
   ExternalLinkIcon,
+  FileTextIcon,
+  Link2Icon,
   MessageSquareIcon,
   TriangleAlertIcon,
 } from "lucide-react";
@@ -26,6 +29,29 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+
+const HOW_IT_WORKS = [
+  {
+    icon: MessageSquareIcon,
+    title: "Pozvěte bota",
+    body: "Přidejte Invoicey do kanálu, nebo mu napište DM.",
+  },
+  {
+    icon: Link2Icon,
+    title: "Potvrďte účet",
+    body: "Nespárovaný Slack účet dostane soukromou zprávu s odkazem do Invoicey.",
+  },
+  {
+    icon: AtSignIcon,
+    title: "Zmiňte @Invoicey",
+    body: "Zmínka nebo DM spustí relaci. Ve stejném vlákně už zmínka není potřeba.",
+  },
+  {
+    icon: FileTextIcon,
+    title: "Návrh s přílohami",
+    body: "Bot připraví fakturu, připojí PDF a ISDOC a odkaz do webové aplikace.",
+  },
+] as const;
 
 const HITL_TOOLS = [
   {
@@ -88,21 +114,30 @@ export function SlackSetupGuide() {
       <CardContent className="space-y-6 pt-5">
         <section className="space-y-3">
           <h3 className="text-sm font-medium">Jak funguje</h3>
-          <ul className="text-muted-foreground list-inside list-disc space-y-1.5 text-sm leading-relaxed">
-            <li>Pozvěte bota do kanálu, nebo mu napište DM.</li>
-            <li>
-              Nespárovaný Slack účet nejdřív dostane DM s odkazem na potvrzení v
-              Invoicey.
-            </li>
-            <li>
-              Zmínka <code className="text-xs">@Invoicey</code> nebo DM spustí
-              relaci; v tom samém vlákně už zmínka není potřeba.
-            </li>
-            <li>
-              Bot připraví návrh, připojí PDF a ISDOC a přidá odkaz do webové
-              aplikace.
-            </li>
-          </ul>
+          <ol className="grid gap-2 sm:grid-cols-2">
+            {HOW_IT_WORKS.map((step, index) => {
+              const Icon = step.icon;
+              return (
+                <li
+                  key={step.title}
+                  className="bg-muted/35 flex gap-3 rounded-xl border px-3 py-3"
+                >
+                  <span className="bg-background text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-lg border text-xs font-medium">
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0 space-y-1">
+                    <p className="flex items-center gap-1.5 text-sm font-medium">
+                      <Icon className="text-muted-foreground size-3.5" />
+                      {step.title}
+                    </p>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      {step.body}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
         </section>
 
         <section className="space-y-3">
