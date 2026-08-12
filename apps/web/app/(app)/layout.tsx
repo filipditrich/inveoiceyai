@@ -1,8 +1,4 @@
 import {
-  isIssuerWelcomeGatePath,
-  shouldGateIssuerWelcome,
-} from "@/lib/issuer-welcome";
-import {
   isPlatformAdmin,
   requireSession,
   requireWorkspace,
@@ -13,8 +9,6 @@ import {
 } from "@/lib/auth/workspaces";
 import { getWorkspaceTokenSummary } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
 import { AppShell } from "./app-shell";
 
@@ -33,28 +27,28 @@ export default async function AppShellLayout({
       isPlatformAdmin(),
       listUserWorkspaces(user.id),
       getUserDefaultWorkspaceId(user.id),
-      getWorkspaceTokenSummary(db, workspaceId),
+      getWorkspaceTokenSummary(db, workspaceId).catch((error: unknown) => {
+        /** schema may lag deploy — do not 500/404 the whole app shell */
+        console.error("[app-shell] token summary unavailable", error);
+        return null;
+      }),
     ]);
-
-  const pathname = (await headers()).get("x-pathname") ?? "";
-  if (
-    isIssuerWelcomeGatePath(pathname) &&
-    (await shouldGateIssuerWelcome(workspaceId))
-  ) {
-    redirect("/welcome");
-  }
 
   return (
     <AppShell
       activeWorkspaceId={workspaceId}
       defaultWorkspaceId={defaultWorkspaceId}
       isPlatformAdmin={platformAdmin}
-      tokenBalance={{
-        giftedRemaining: tokenSummary.giftedRemaining,
-        monthlyRemaining: tokenSummary.monthlyRemaining,
-        purchasedRemaining: tokenSummary.purchasedRemaining,
-        totalAvailable: tokenSummary.totalAvailable,
-      }}
+      tokenBalance={
+        tokenSummary
+          ? {
+              giftedRemaining: tokenSummary.giftedRemaining,
+              monthlyRemaining: tokenSummary.monthlyRemaining,
+              purchasedRemaining: tokenSummary.purchasedRemaining,
+              totalAvailable: tokenSummary.totalAvailable,
+            }
+          : null
+      }
       user={{
         name: user.name,
         email: user.email,

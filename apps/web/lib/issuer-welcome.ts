@@ -75,8 +75,10 @@ export async function dismissIssuerWelcomeForWorkspace(
 }
 
 /**
- * Soft-gate paths that should send empty workspaces to /welcome.
- * Issuers, settings, and welcome itself are excluded.
+ * Soft-gate path helper (dashboard / invoices / clients).
+ * Enforcement lives in the `(gated)` route-group layout — do not reintroduce
+ * pathname-header checks in the app shell (stale `x-pathname` caused a
+ * `/welcome` RSC redirect loop).
  */
 export function isIssuerWelcomeGatePath(pathname: string): boolean {
   if (

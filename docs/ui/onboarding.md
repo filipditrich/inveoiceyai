@@ -21,9 +21,9 @@
 
 ## Soft gate
 
-Implemented in [`apps/web/app/(app)/layout.tsx`](<../../apps/web/app/(app)/layout.tsx>) using `x-pathname` from [`proxy.ts`](../../apps/web/proxy.ts).
+Implemented in [`apps/web/app/(app)/(gated)/layout.tsx`](<../../apps/web/app/(app)/(gated)/layout.tsx>) for the `(gated)` route group (`/dashboard`, `/invoices`, `/clients`). `/welcome` lives outside that group so RSC redirects cannot loop on a stale `x-pathname`.
 
-Excluded paths: `/welcome`, `/issuers/*`, `/settings/*`.
+Excluded (not gated): `/welcome`, `/issuers/*`, `/settings/*`.
 
 ## Issuer edit sections
 
