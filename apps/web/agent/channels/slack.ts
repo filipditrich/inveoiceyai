@@ -1,6 +1,5 @@
-import { resolveLinkedSlackPrincipal, tryCreateDbFromEnv } from "@invoicey/db";
 import { connectSlackCredentials } from "@vercel/connect/eve";
-import { defaultSlackAuth, slackChannel } from "eve/channels/slack";
+import { slackChannel } from "eve/channels/slack";
 
 import {
   asInvoiceyState,
@@ -8,16 +7,11 @@ import {
   clearThinkingState,
 } from "../lib/slack-channel-extras";
 import { SLACK_CONNECT_UID } from "../lib/slack-connect";
-import {
-  overlayInvoiceyIdentity,
-  slackDisplayNameFromAuth,
-  slackIdsFromAuth,
-} from "../lib/slack-identity";
+import { handleSlackInbound } from "../lib/slack-inbound";
 import {
   buildInvoiceCard,
   pendingCardFromToolResult,
 } from "../lib/slack-invoice-card";
-import { deliverSlackLinkInvite } from "../lib/slack-link";
 import {
   appendThinkingTasks,
   completeThinkingTask,
@@ -82,46 +76,12 @@ function resolveWebUrl(
 export default slackChannel({
   credentials: connectSlackCredentials(SLACK_CONNECT_UID),
   threadContext: { since: "last-agent-reply" },
-  async onMessage(ctx, message) {
-    if (message.author?.isBot) return null;
-    const isDirectMessage = message.raw.channel_type === "im";
-    const shouldHandle =
-      isDirectMessage || ctx.isBotMentioned() || (await ctx.isSubscribed());
-    if (!shouldHandle) return null;
-    await ctx.cancel();
-    const auth = defaultSlackAuth(message, ctx);
-    if (!auth) return null;
-
-    const ids = slackIdsFromAuth(auth);
-    if (!ids) {
-      await ctx.thread.post(
-        "I could not identify this Slack user, so I cannot start an Invoicey session.",
-      );
-      return null;
-    }
-
-    const database = tryCreateDbFromEnv();
-    const principal = database
-      ? await resolveLinkedSlackPrincipal(database, ids)
-      : { status: "unlinked" as const };
-
-    if (principal.status === "linked") {
-      return {
-        auth: overlayInvoiceyIdentity(auth, principal.identity),
-      };
-    }
-
-    await deliverSlackLinkInvite({
-      db: database,
-      thread: ctx.thread,
-      isDirectMessage,
-      slackTeamId: ids.slackTeamId,
-      slackUserId: ids.slackUserId,
-      slackUserName: slackDisplayNameFromAuth(auth),
-      reason: principal.status,
-    });
-    return null;
-  },
+  onAppMention: (ctx, message) =>
+    handleSlackInbound(ctx, message, { alwaysHandle: true }),
+  onDirectMessage: (ctx, message) =>
+    handleSlackInbound(ctx, message, { alwaysHandle: true }),
+  onMessage: (ctx, message) =>
+    handleSlackInbound(ctx, message, { alwaysHandle: false }),
   events: {
     async "turn.started"(_data, channel) {
       const state = asInvoiceyState(channel.state);

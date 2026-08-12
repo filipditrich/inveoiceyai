@@ -33,9 +33,11 @@ function PartyTile({
         <p className="text-muted-foreground text-[11px] font-medium uppercase tracking-wide">
           {eyebrow}
         </p>
-        <p className="truncate font-medium">{title}</p>
+        <p className="wrap-break-word font-medium">{title}</p>
         {caption ? (
-          <p className="text-muted-foreground truncate text-xs">{caption}</p>
+          <p className="text-muted-foreground wrap-break-word text-xs">
+            {caption}
+          </p>
         ) : null}
       </div>
     </div>
@@ -47,6 +49,7 @@ export function SlackConnectionParties({
   slackCaption,
   slackEyebrow,
   slackTitle,
+  stacked = false,
   workspaceCaption,
   workspaceEyebrow,
   workspaceTitle,
@@ -55,6 +58,7 @@ export function SlackConnectionParties({
   slackCaption?: string;
   slackEyebrow: string;
   slackTitle: string;
+  stacked?: boolean;
   workspaceCaption?: string;
   workspaceEyebrow: string;
   workspaceTitle: string;
@@ -62,7 +66,9 @@ export function SlackConnectionParties({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-3",
+        stacked
+          ? "grid grid-cols-1 gap-2"
+          : "grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-start sm:gap-3",
         className,
       )}
     >
@@ -78,12 +84,17 @@ export function SlackConnectionParties({
       />
       <ArrowDownIcon
         aria-hidden
-        className="text-muted-foreground mx-auto size-4 sm:hidden"
+        className={cn(
+          "text-muted-foreground mx-auto size-4",
+          !stacked && "sm:hidden",
+        )}
       />
-      <ArrowRightIcon
-        aria-hidden
-        className="text-muted-foreground hidden size-4 sm:block"
-      />
+      {stacked ? null : (
+        <ArrowRightIcon
+          aria-hidden
+          className="text-muted-foreground hidden size-4 sm:block"
+        />
+      )}
       <PartyTile
         caption={workspaceCaption}
         eyebrow={workspaceEyebrow}
@@ -116,9 +127,11 @@ export function SignedInUserRow({
         <p className="text-muted-foreground text-[11px] font-medium uppercase tracking-wide">
           {label}
         </p>
-        <p className="truncate text-sm font-medium">{display}</p>
+        <p className="wrap-break-word text-sm font-medium">{display}</p>
         {name?.trim() ? (
-          <p className="text-muted-foreground truncate text-xs">{email}</p>
+          <p className="text-muted-foreground wrap-break-word text-xs">
+            {email}
+          </p>
         ) : null}
       </div>
     </div>

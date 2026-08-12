@@ -66,7 +66,7 @@ export default async function SlackLinkPage({
         <LocaleSwitcher size="sm" />
       </header>
 
-      <div className="relative mx-auto flex w-full max-w-lg flex-1 flex-col justify-center p-6">
+      <div className="relative mx-auto flex w-full max-w-xl flex-1 flex-col justify-center p-6">
         <Card>
           <CardHeader className="border-b">
             <CardTitle>{t("title")}</CardTitle>
@@ -75,6 +75,7 @@ export default async function SlackLinkPage({
           <CardContent className="space-y-4 pt-5">
             {row ? (
               <SlackConnectionParties
+                stacked
                 slackCaption={slackCaption}
                 slackEyebrow={t("fromSlack")}
                 slackTitle={slackTitle}

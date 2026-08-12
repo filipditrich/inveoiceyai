@@ -23,11 +23,8 @@ export default defineHook({
       if (!database) return;
 
       const workspaceId = workspaceFromCtx(ctx);
-      if (!workspaceId) {
-        throw new Error(
-          "This Slack account is not linked to Invoicey. Open the DM link to confirm, then try again.",
-        );
-      }
+      /** unlinked Slack has no workspace; throwing here becomes Eve FatalError after retries */
+      if (!workspaceId) return;
       try {
         await assertHasTokens(database, workspaceId);
       } catch (err) {
