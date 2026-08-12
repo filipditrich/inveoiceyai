@@ -83,6 +83,9 @@ export const InvoiceVatSchema = z.object({
 export const InvoiceCurrencySchema = z.enum(["CZK", "EUR", "USD"]);
 export type InvoiceCurrency = z.infer<typeof InvoiceCurrencySchema>;
 
+export const InvoiceLanguageSchema = z.enum(["cs", "en"]);
+export type InvoiceLanguage = z.infer<typeof InvoiceLanguageSchema>;
+
 /** PDF amount suffix (Kč / EUR / USD). */
 export function currencyDisplaySuffix(currency: InvoiceCurrency): string {
   switch (currency) {
@@ -106,7 +109,7 @@ export const InvoiceMetaSchema = z
     issueDate: z.string().date(),
     dueDate: z.string().date(),
     duzp: z.string().date(),
-    language: z.literal("cs"),
+    language: InvoiceLanguageSchema.default("cs"),
     currency: InvoiceCurrencySchema,
     correctedInvoiceNumber: z.string().min(1).max(64).optional(),
   })

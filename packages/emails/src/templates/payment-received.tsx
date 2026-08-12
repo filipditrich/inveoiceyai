@@ -1,6 +1,7 @@
 import { Text } from "@react-email/components";
 import * as React from "react";
 
+import { invoiceEmailCopy, type EmailLocale } from "../copy";
 import { EmailShell } from "../components/email-shell";
 import { InvoiceSummary } from "../components/invoice-summary";
 
@@ -12,22 +13,25 @@ export type PaymentReceivedEmailProps = {
   clientName: string;
   issuerName: string;
   invoiceUrl?: string;
+  locale?: EmailLocale;
 };
 
 export function PaymentReceivedEmail(props: PaymentReceivedEmailProps) {
-  const title = `Platba přijata — ${props.number}`;
+  const locale = props.locale ?? "cs";
+  const copy = invoiceEmailCopy(locale);
+  const title = copy.paidTitle(props.number);
 
   return (
     <EmailShell
-      preview={`Platba za fakturu ${props.number} byla zaznamenána`}
+      locale={locale}
+      preview={copy.paidPreview(props.number)}
       title={title}
       variant="invoice"
     >
       <Text style={bodyText}>
-        Dobrý den, potvrzujeme přijetí platby za fakturu{" "}
-        <strong>{props.number}</strong> od {props.issuerName}.
+        {copy.paidBody(props.number, props.issuerName)}
       </Text>
-      <InvoiceSummary {...props} />
+      <InvoiceSummary {...props} locale={locale} />
     </EmailShell>
   );
 }

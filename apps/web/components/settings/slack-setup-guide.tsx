@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
   AtSignIcon,
@@ -33,93 +34,82 @@ import { cn } from "@/lib/utils";
 const HOW_IT_WORKS = [
   {
     icon: MessageSquareIcon,
-    title: "Pozvěte bota",
-    body: "Přidejte Invoicey do kanálu, nebo mu napište DM.",
+    titleKey: "howInviteTitle",
+    bodyKey: "howInviteBody",
   },
   {
     icon: Link2Icon,
-    title: "Potvrďte účet",
-    body: "Nespárovaný Slack účet dostane soukromou zprávu s odkazem do Invoicey.",
+    titleKey: "howLinkTitle",
+    bodyKey: "howLinkBody",
   },
   {
     icon: AtSignIcon,
-    title: "Zmiňte @Invoicey",
-    body: "Zmínka nebo DM spustí relaci. Ve stejném vlákně už zmínka není potřeba.",
+    titleKey: "howMentionTitle",
+    bodyKey: "howMentionBody",
   },
   {
     icon: FileTextIcon,
-    title: "Návrh s přílohami",
-    body: "Bot připraví fakturu, připojí PDF a ISDOC a odkaz do webové aplikace.",
+    titleKey: "howDraftTitle",
+    bodyKey: "howDraftBody",
   },
 ] as const;
 
 const HITL_TOOLS = [
-  {
-    name: "issue_invoice",
-    why: "Přidělí číslo a zmrazí fakturu — nevratné",
-  },
-  {
-    name: "mark_invoice_paid",
-    why: "Tvrdí, že peníze dorazily",
-  },
-  {
-    name: "send_invoice_email",
-    why: "Odešle e-mail skutečnému klientovi",
-  },
+  { name: "issue_invoice", whyKey: "hitlIssue" },
+  { name: "mark_invoice_paid", whyKey: "hitlPaid" },
+  { name: "send_invoice_email", whyKey: "hitlEmail" },
 ] as const;
 
 const OPERATOR_STEPS = [
   {
-    title: "Deploy s Eve flagem",
-    body: "Nastavte VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1 a Node 24+. Bez toho se /eve/v1/* nevygeneruje a Slack tiše nefunguje.",
+    titleKey: "step1Title",
+    bodyKey: "step1Body",
     code: "VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1 vercel deploy --prod",
   },
   {
-    title: "Vercel Connect → /eve/v1/slack",
-    body: "Connect drží Slack credentials (žádné ruční SLACK_*). UID musí sedět s agentem (slack/invoicey).",
+    titleKey: "step2Title",
+    bodyKey: "step2Body",
     code: "vercel connect create slack --triggers\nvercel connect attach <uid> --triggers --trigger-path /eve/v1/slack --yes",
   },
   {
-    title: "Scopes a eventy + reinstall",
-    body: "message.channels (a message.groups pro privátní kanály); scopes mimo jiné channels:history, groups:history, im:history, im:write, chat:write, app_mentions:read, files:write, files:read. Po změně scopes vždy reinstall Slack app.",
+    titleKey: "step3Title",
+    bodyKey: "step3Body",
   },
   {
-    title: "Env a healthcheck",
-    body: "DATABASE_URL, AI Gateway / OIDC, NEXT_PUBLIC_APP_URL, UPLOADTHING_TOKEN dle potřeby. Eve HTTP používá EVE_API_KEY nebo MCP_API_KEY — ne osobní PAT ze Settings.",
+    titleKey: "step4Title",
+    bodyKey: "step4Body",
     code: "curl -sS https://your-host/eve/v1/health",
   },
 ] as const;
 
-async function copyText(text: string) {
-  await navigator.clipboard.writeText(text);
-  toast.success("Zkopírováno");
-}
-
 export function SlackSetupGuide() {
+  const t = useTranslations("Settings.slack");
   const [operatorOpen, setOperatorOpen] = useState(false);
+
+  async function copyText(text: string) {
+    await navigator.clipboard.writeText(text);
+    toast.success(t("copied"));
+  }
 
   return (
     <Card>
       <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2">
           <MessageSquareIcon className="text-muted-foreground size-4" />
-          Invoicey pro Slack
+          {t("title")}
           <Badge variant="secondary">Eve</Badge>
         </CardTitle>
-        <CardDescription>
-          Připravujte faktury v konverzaci. Vystavení, odeslání a potvrzení
-          platby vždy vyžaduje souhlas.
-        </CardDescription>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 pt-5">
         <section className="space-y-3">
-          <h3 className="text-sm font-medium">Jak funguje</h3>
+          <h3 className="text-sm font-medium">{t("howTitle")}</h3>
           <ol className="grid gap-2 sm:grid-cols-2">
             {HOW_IT_WORKS.map((step, index) => {
               const Icon = step.icon;
               return (
                 <li
-                  key={step.title}
+                  key={step.titleKey}
                   className="bg-muted/35 flex gap-3 rounded-xl border px-3 py-3"
                 >
                   <span className="bg-background text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-lg border text-xs font-medium">
@@ -128,10 +118,10 @@ export function SlackSetupGuide() {
                   <div className="min-w-0 space-y-1">
                     <p className="flex items-center gap-1.5 text-sm font-medium">
                       <Icon className="text-muted-foreground size-3.5" />
-                      {step.title}
+                      {t(step.titleKey)}
                     </p>
                     <p className="text-muted-foreground text-xs leading-relaxed">
-                      {step.body}
+                      {t(step.bodyKey)}
                     </p>
                   </div>
                 </li>
@@ -141,10 +131,8 @@ export function SlackSetupGuide() {
         </section>
 
         <section className="space-y-3">
-          <h3 className="text-sm font-medium">Akce vyžadující potvrzení</h3>
-          <p className="text-muted-foreground text-sm">
-            U těchto kroků se agent vždy zastaví a požádá o schválení:
-          </p>
+          <h3 className="text-sm font-medium">{t("hitlTitle")}</h3>
+          <p className="text-muted-foreground text-sm">{t("hitlIntro")}</p>
           <div className="space-y-2">
             {HITL_TOOLS.map((tool) => (
               <div
@@ -153,7 +141,7 @@ export function SlackSetupGuide() {
               >
                 <code className="text-xs font-medium">{tool.name}</code>
                 <span className="text-muted-foreground text-xs">
-                  {tool.why}
+                  {t(tool.whyKey)}
                 </span>
               </div>
             ))}
@@ -167,14 +155,10 @@ export function SlackSetupGuide() {
           <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-400" />
           <div className="space-y-1 leading-relaxed">
             <p className="font-medium text-amber-900 dark:text-amber-200">
-              Přístup po propojení Slacku
+              {t("accessTitle")}
             </p>
             <p className="text-muted-foreground text-xs">
-              Nespárovaní Slack uživatelé nedostanou žádnou relaci — bot jim
-              pošle DM s odkazem na potvrzení v Invoicey. Propojení platí pro
-              jeden Invoicey účet a jeden workspace. Allow/Deny ve vlákně může
-              kliknout kdokoli v kanálu; držte bota v soukromém kanálu s lidmi,
-              kteří smí fakturovat.
+              {t("accessBody")}
             </p>
           </div>
         </div>
@@ -186,7 +170,7 @@ export function SlackSetupGuide() {
             )}
           >
             <span className="flex items-center gap-2">
-              Technické nastavení nasazení
+              {t("operatorTitle")}
               <Badge variant="outline">CLI</Badge>
             </span>
             <ChevronDownIcon
@@ -198,19 +182,18 @@ export function SlackSetupGuide() {
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-3 space-y-4">
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Tato část je určená správci nasazení. Připojení probíhá přes
-              Vercel CLI; osobní API klíč Slack neautorizuje.
+              {t("operatorIntro")}
             </p>
             <ol className="space-y-4">
               {OPERATOR_STEPS.map((step, index) => (
-                <li key={step.title} className="flex gap-3 text-sm">
+                <li key={step.titleKey} className="flex gap-3 text-sm">
                   <span className="bg-muted flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium">
                     {index + 1}
                   </span>
                   <div className="min-w-0 flex-1 space-y-2">
-                    <p className="font-medium">{step.title}</p>
+                    <p className="font-medium">{t(step.titleKey)}</p>
                     <p className="text-muted-foreground text-xs leading-relaxed">
-                      {step.body}
+                      {t(step.bodyKey)}
                     </p>
                     {"code" in step && step.code ? (
                       <div className="space-y-2">
@@ -223,7 +206,7 @@ export function SlackSetupGuide() {
                           onClick={() => copyText(step.code)}
                         >
                           <CopyIcon data-icon="inline-start" />
-                          Kopírovat
+                          {t("copy")}
                         </Button>
                       </div>
                     ) : null}
@@ -238,7 +221,7 @@ export function SlackSetupGuide() {
           href="/docs/integrations/slack"
           className="text-primary inline-flex items-center gap-1 text-sm hover:underline"
         >
-          Podrobný návod pro Slack
+          {t("docsLink")}
           <ExternalLinkIcon className="size-3.5" />
         </Link>
       </CardContent>

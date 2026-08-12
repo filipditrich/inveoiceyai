@@ -1,11 +1,10 @@
 import { DISPLAY_STATUS_CARD_ACCENT } from "@/lib/invoice-status-ui";
 import { formatMoney } from "@/lib/format";
-import {
-  DISPLAY_STATUS_LABELS,
-  type InvoiceDisplayStatus,
-} from "@invoicey/invoice-core/status-display";
+import type { AppLocale } from "@/i18n/config";
+import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export type StatusSummaryBucket = {
   status: InvoiceDisplayStatus;
@@ -28,7 +27,7 @@ function hrefFor(
   return `/invoices?${params.toString()}`;
 }
 
-export function InvoiceStatusSummary({
+export async function InvoiceStatusSummary({
   buckets,
   activeStatus,
   filterBase,
@@ -37,6 +36,10 @@ export function InvoiceStatusSummary({
   activeStatus: InvoiceDisplayStatus | null;
   filterBase: Record<string, string | undefined>;
 }) {
+  const locale = (await getLocale()) as AppLocale;
+  const tStatus = await getTranslations("Status.invoice");
+  const tCount = await getTranslations("Status.invoiceCount");
+
   return (
     <div className="@xl/main:grid-cols-3 @5xl/main:grid-cols-6 grid grid-cols-2 gap-3">
       {buckets.map((b) => {
@@ -57,18 +60,13 @@ export function InvoiceStatusSummary({
                 DISPLAY_STATUS_CARD_ACCENT[b.status],
               )}
             >
-              {DISPLAY_STATUS_LABELS[b.status]}
+              {tStatus(b.status)}
             </div>
             <div className="mt-1 text-xl font-semibold tabular-nums">
-              {formatMoney(b.total)}
+              {formatMoney(b.total, "CZK", locale)}
             </div>
             <div className="text-muted-foreground text-xs tabular-nums">
-              {b.count}{" "}
-              {b.count === 1
-                ? "faktura"
-                : b.count >= 2 && b.count <= 4
-                  ? "faktury"
-                  : "faktur"}
+              {tCount("label", { count: b.count })}
             </div>
           </Link>
         );

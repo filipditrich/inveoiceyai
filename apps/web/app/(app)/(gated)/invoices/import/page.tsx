@@ -2,8 +2,10 @@ import { InvoiceImportForm } from "@/components/invoices/invoice-import-form";
 import { requireWorkspace } from "@/lib/auth/session";
 import { loadIssuerOptions } from "@/lib/load-parties";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 export default async function InvoiceImportPage() {
+  const t = await getTranslations("Invoices.import");
   const { workspaceId } = await requireWorkspace();
   const issuers = await loadIssuerOptions(workspaceId);
 
@@ -13,15 +15,14 @@ export default async function InvoiceImportPage() {
         <div>
           <p className="text-muted-foreground mb-1 text-sm">
             <Link className="hover:underline" href="/invoices">
-              ← Faktury
+              {t("backLink")}
             </Link>
           </p>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Import historických faktur
+            {t("title")}
           </h1>
           <p className="text-muted-foreground max-w-2xl text-sm">
-            Nahrajte PDF. Pokud obsahují ISDOC, údaje načteme automaticky. Bez
-            ISDOC uložíme originál jako archiv a hlavičku doplníte ručně.
+            {t("subtitle")}
           </p>
         </div>
       </div>

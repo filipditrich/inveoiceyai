@@ -4,13 +4,15 @@ import { createIssuer } from "@/actions/issuers";
 import {
   BankAccountFields,
   FieldGroup,
+  formatAresLookupError,
   lookupAresByIco,
-  lookupMessageFromInvalid,
   SubmitRow,
   useCzechIbanSuggest,
+  useInvalidQueryMessage,
 } from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import * as React from "react";
 
@@ -20,6 +22,8 @@ export function IssuerCreateForm(props: {
   /** When set, createIssuer redirects to welcome done step. */
   next?: "welcome";
 }) {
+  const t = useTranslations("Issuers.form");
+  const tAres = useTranslations("Issuers.ares");
   const [createdId] = React.useState(() => crypto.randomUUID());
   const [pending, startTransition] = React.useTransition();
   const [source, setSource] = React.useState<"ares" | "manual">("manual");
@@ -34,9 +38,7 @@ export function IssuerCreateForm(props: {
   const [bic, setBic] = React.useState("");
   const [vatPayer, setVatPayer] = React.useState(true);
   const [lookupPending, setLookupPending] = React.useState(false);
-  const [lookupMsg, setLookupMsg] = React.useState<string | null>(() =>
-    lookupMessageFromInvalid(props.invalidQuery),
-  );
+  const [lookupMsg, setLookupMsg] = React.useState<string | null>(null);
 
   async function onLookupFromAres() {
     setLookupMsg(null);
@@ -44,7 +46,7 @@ export function IssuerCreateForm(props: {
     try {
       const result = await lookupAresByIco(icoInput);
       if (!result.ok) {
-        setLookupMsg(result.message);
+        setLookupMsg(formatAresLookupError(result, tAres));
         return;
       }
       const { draft } = result;
@@ -93,16 +95,16 @@ export function IssuerCreateForm(props: {
     });
   }
 
-  const userMsg =
-    lookupMsg ?? lookupMessageFromInvalid(props.invalidQuery ?? undefined);
+  const invalidFromQuery = useInvalidQueryMessage(props.invalidQuery);
+  const userMsg = lookupMsg ?? invalidFromQuery;
 
   return (
     <form className="mx-auto max-w-2xl space-y-8" onSubmit={onSubmit}>
       {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
 
       <section className="space-y-4">
-        <h2 className="text-lg font-medium">Identita</h2>
-        <FieldGroup label="IČO (ARES)">
+        <h2 className="text-lg font-medium">{t("identitySection")}</h2>
+        <FieldGroup label={t("icoAres")}>
           <div className="flex flex-wrap gap-2">
             <Input
               className="max-w-xs"
@@ -122,12 +124,12 @@ export function IssuerCreateForm(props: {
               type="button"
               variant="secondary"
             >
-              {lookupPending ? "Hledám…" : "Načíst z ARES"}
+              {lookupPending ? t("lookingUp") : t("lookup")}
             </Button>
           </div>
         </FieldGroup>
 
-        <FieldGroup label="Název">
+        <FieldGroup label={t("name")}>
           <Input
             onChange={(ev) => {
               setName(ev.target.value);
@@ -137,7 +139,7 @@ export function IssuerCreateForm(props: {
           />
         </FieldGroup>
 
-        <FieldGroup label="DIČ">
+        <FieldGroup label={t("dic")}>
           <Input
             onChange={(ev) => {
               setDic(ev.target.value);
@@ -148,7 +150,7 @@ export function IssuerCreateForm(props: {
         </FieldGroup>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <FieldGroup label="Ulice a číslo">
+          <FieldGroup label={t("street")}>
             <Input
               onChange={(ev) => {
                 setStreet(ev.target.value);
@@ -157,7 +159,7 @@ export function IssuerCreateForm(props: {
               value={street}
             />
           </FieldGroup>
-          <FieldGroup label="Město">
+          <FieldGroup label={t("city")}>
             <Input
               onChange={(ev) => {
                 setCity(ev.target.value);
@@ -169,7 +171,7 @@ export function IssuerCreateForm(props: {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <FieldGroup label="PSČ">
+          <FieldGroup label={t("zip")}>
             <Input
               onChange={(ev) => {
                 setZip(ev.target.value);
@@ -178,7 +180,7 @@ export function IssuerCreateForm(props: {
               value={zip}
             />
           </FieldGroup>
-          <FieldGroup label="Kontaktní e-mail">
+          <FieldGroup label={t("contactEmail")}>
             <Input
               onChange={(ev) => {
                 setContactEmail(ev.target.value);
@@ -198,12 +200,12 @@ export function IssuerCreateForm(props: {
             }}
             type="checkbox"
           />
-          Plátce DPH
+          {t("vatPayer")}
         </label>
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-lg font-medium">Banka</h2>
+        <h2 className="text-lg font-medium">{t("bankSection")}</h2>
         <BankAccountFields
           accountHint={bank.accountHint}
           accountNumber={bank.accountNumber}
@@ -217,15 +219,12 @@ export function IssuerCreateForm(props: {
         />
       </section>
 
-      <p className="text-muted-foreground text-xs">
-        Číslování a e-mailové šablony nastavíme výchozími hodnotami — upravíte
-        je později v nastavení vystavovatele.
-      </p>
+      <p className="text-muted-foreground text-xs">{t("defaultsHint")}</p>
 
       <SubmitRow
-        label="Vytvořit vystavovatele"
+        label={t("create")}
         pending={pending}
-        sourceLabel={source === "ares" ? "ARES" : "Ručně"}
+        sourceLabel={source === "ares" ? t("sourceAres") : t("sourceManual")}
       />
     </form>
   );

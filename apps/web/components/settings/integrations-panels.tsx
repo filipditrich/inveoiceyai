@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   ArrowRightIcon,
   CheckCircle2Icon,
@@ -29,6 +32,12 @@ export function IntegrationsPanels({
   currentWorkspaceId: string;
   currentWorkspaceName: string;
 }) {
+  const t = useTranslations("Settings.integrations");
+  const features = [
+    t("mcpFeatureDrafts"),
+    t("mcpFeatureAres"),
+    t("mcpFeatureIssued"),
+  ];
   return (
     <div className="flex flex-col gap-6">
       <SlackIdentitiesPanel
@@ -42,20 +51,13 @@ export function IntegrationsPanels({
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2">
             <TerminalIcon className="text-muted-foreground size-4" />
-            Remote MCP
+            {t("mcpTitle")}
           </CardTitle>
-          <CardDescription>
-            Používejte nástroje Invoicey přímo z Cursoru, Claude Code nebo
-            jiného MCP klienta.
-          </CardDescription>
+          <CardDescription>{t("mcpDescription")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5 pt-5">
           <div className="grid gap-3 sm:grid-cols-3">
-            {[
-              "Vytváření validovaných návrhů",
-              "ARES dohledání klientů",
-              "Správa vystavených faktur",
-            ].map((item) => (
+            {features.map((item) => (
               <div
                 className="bg-muted/35 flex items-start gap-2 rounded-lg border px-3 py-3 text-sm"
                 key={item}
@@ -67,14 +69,14 @@ export function IntegrationsPanels({
           </div>
           <div className="flex flex-wrap gap-2">
             <Button render={<Link href="/settings/api-keys#mcp" />}>
-              Připojit MCP klienta
+              {t("connectMcp")}
               <ArrowRightIcon data-icon="inline-end" />
             </Button>
             <Button
               variant="outline"
               render={<Link href="/docs/integrations/mcp" />}
             >
-              Dokumentace MCP
+              {t("docsMcp")}
               <ExternalLinkIcon data-icon="inline-end" />
             </Button>
           </div>

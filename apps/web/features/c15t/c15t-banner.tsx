@@ -3,6 +3,7 @@
 import { ConsentBanner } from "@c15t/react";
 import { CookieIcon } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils";
  * focus semantics, and actions; Invoicey owns the markup and presentation.
  */
 export function C15tBanner() {
+  const t = useTranslations("Consent.banner");
   return (
     <ConsentBanner.Root
       noStyle
@@ -26,16 +28,15 @@ export function C15tBanner() {
           </span>
           <div className="min-w-0">
             <ConsentBanner.Title className="text-sm font-semibold tracking-tight">
-              Vaše soukromí, vaše volba
+              {t("title")}
             </ConsentBanner.Title>
             <ConsentBanner.Description className="text-muted-foreground mt-1 max-w-2xl text-sm leading-relaxed">
-              Nezbytné cookies drží Invoicey v chodu. Anonymní měření nám můžete
-              povolit zvlášť. Žádné reklamní cookies.{" "}
+              {t("description")}{" "}
               <Link
                 href="/cookies"
                 className="text-foreground decoration-border underline-offset-3 hover:decoration-foreground underline"
               >
-                Podrobnosti
+                {t("details")}
               </Link>
             </ConsentBanner.Description>
           </div>
@@ -47,7 +48,7 @@ export function C15tBanner() {
               "h-10 px-4",
             )}
           >
-            Nastavení
+            {t("customize")}
           </ConsentBanner.CustomizeButton>
           <ConsentBanner.RejectButton
             className={cn(
@@ -55,7 +56,7 @@ export function C15tBanner() {
               "h-10 px-4",
             )}
           >
-            Pouze nezbytné
+            {t("rejectAll")}
           </ConsentBanner.RejectButton>
           <ConsentBanner.AcceptButton
             className={cn(
@@ -63,7 +64,7 @@ export function C15tBanner() {
               "h-10 px-4",
             )}
           >
-            Povolit analytiku
+            {t("acceptAnalytics")}
           </ConsentBanner.AcceptButton>
         </ConsentBanner.Footer>
       </ConsentBanner.Card>

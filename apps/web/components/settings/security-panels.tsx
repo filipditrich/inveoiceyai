@@ -74,11 +74,14 @@ const AUDIT_TYPE_KEYS = [
   "slack_rebind",
 ] as const;
 
-function summarizeUa(ua?: string | null): string {
+function summarizeUa(
+  ua: string | null | undefined,
+  labels: { unknownDevice: string; browser: string },
+): string {
   const raw = ua?.trim() || "";
-  if (!raw) return "Neznámé zařízení";
+  if (!raw) return labels.unknownDevice;
 
-  let browser = "Prohlížeč";
+  let browser = labels.browser;
   if (/Edg\//i.test(raw)) browser = "Edge";
   else if (/Chrome\//i.test(raw) && !/Edg\//i.test(raw)) browser = "Chrome";
   else if (/Firefox\//i.test(raw)) browser = "Firefox";
@@ -135,6 +138,7 @@ export function LinkedAccountsPanel({
 }: {
   configuredProviders: Array<"google" | "github">;
 }) {
+  const t = useTranslations("Settings.security.linkedAccounts");
   const [accounts, setAccounts] = useState<AccountRow[]>([]);
   const [pending, startTransition] = useTransition();
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -143,7 +147,7 @@ export function LinkedAccountsPanel({
     startTransition(async () => {
       const res = await authClient.listAccounts();
       if (res.error) {
-        toast.error(res.error.message || "Nepodařilo se načíst účty");
+        toast.error(res.error.message || t("loadFailed"));
         return;
       }
       setAccounts((res.data ?? []) as AccountRow[]);
@@ -158,7 +162,7 @@ export function LinkedAccountsPanel({
 
   const unlink = (providerId: string) => {
     if (accounts.length <= 1) {
-      toast.error("Nelze odpojit poslední způsob přihlášení");
+      toast.error(t("unlinkLastError"));
       return;
     }
     setBusyKey(`unlink:${providerId}`);
@@ -166,14 +170,14 @@ export function LinkedAccountsPanel({
       try {
         const res = await authClient.unlinkAccount({ providerId });
         if (res.error) {
-          toast.error(res.error.message || "Odpojení selhalo");
+          toast.error(res.error.message || t("unlinkFailed"));
           return;
         }
         await recordAccountSecurityEventAction({
           type: "account_unlink",
           metadata: { providerId },
         });
-        toast.success("Poskytovatel odpojen");
+        toast.success(t("unlinkSuccess"));
         reload();
       } finally {
         setBusyKey(null);
@@ -200,23 +204,18 @@ export function LinkedAccountsPanel({
       <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2">
           <Link2Icon className="text-muted-foreground size-4" />
-          Způsoby přihlášení
+          {t("title")}
         </CardTitle>
-        <CardDescription>
-          OAuth přes Google nebo GitHub. Poslední poskytovatel nelze odpojit.
-        </CardDescription>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 pt-5">
         {pending && accounts.length === 0 ? (
           <div className="text-muted-foreground flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-6 text-sm">
             <LoaderCircleIcon className="size-4 animate-spin" />
-            Načítám přihlášení…
+            {t("loading")}
           </div>
         ) : configuredProviders.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            Žádný poskytovatel není na serveru nastavený. Doplňte OAuth údaje a
-            obnovte stránku.
-          </p>
+          <p className="text-muted-foreground text-sm">{t("noProviders")}</p>
         ) : (
           configuredProviders.map((provider) => {
             const isLinked = linked.has(provider);
@@ -232,13 +231,13 @@ export function LinkedAccountsPanel({
                   <div className="text-sm">
                     <div className="font-medium">{providerLabel(provider)}</div>
                     <div className="text-muted-foreground">
-                      {isLinked ? "Propojeno s účtem" : "Zatím nepropojeno"}
+                      {isLinked ? t("linked") : t("notLinked")}
                     </div>
                   </div>
                 </div>
                 {isLinked ? (
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Aktivní</Badge>
+                    <Badge variant="secondary">{t("active")}</Badge>
                     <Button
                       variant="outline"
                       size="sm"
@@ -247,8 +246,8 @@ export function LinkedAccountsPanel({
                       onClick={() => unlink(provider)}
                     >
                       {busyKey === `unlink:${provider}`
-                        ? "Odpojuji…"
-                        : "Odpojit"}
+                        ? t("unlinking")
+                        : t("unlink")}
                     </Button>
                   </div>
                 ) : (
@@ -258,9 +257,7 @@ export function LinkedAccountsPanel({
                     loading={busyKey === `link:${provider}`}
                     onClick={() => link(provider)}
                   >
-                    {busyKey === `link:${provider}`
-                      ? "Přesměrovávám…"
-                      : "Propojit"}
+                    {busyKey === `link:${provider}` ? t("linking") : t("link")}
                   </Button>
                 )}
               </div>
@@ -279,6 +276,12 @@ export function SessionsPanel({
   currentToken?: string;
   revokeOthersOnMount?: boolean;
 }) {
+  const t = useTranslations("Settings.security.sessions");
+  const locale = useLocale() as AppLocale;
+  const uaLabels = {
+    unknownDevice: t("unknownDevice"),
+    browser: t("browser"),
+  };
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [pending, startTransition] = useTransition();
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -287,7 +290,7 @@ export function SessionsPanel({
     startTransition(async () => {
       const res = await authClient.listSessions();
       if (res.error) {
-        toast.error(res.error.message || "Nepodařilo se načíst relace");
+        toast.error(res.error.message || t("loadFailed"));
         return;
       }
       setSessions((res.data ?? []) as SessionRow[]);
@@ -306,19 +309,19 @@ export function SessionsPanel({
           type: "session_revoke",
           metadata: { scope: "others", reason: "post_link" },
         });
-        toast.success("Ostatní relace odvolány po propojení účtu");
+        toast.success(t("revokeAfterLink"));
         const url = new URL(window.location.href);
         url.searchParams.delete("linked");
         window.history.replaceState({}, "", url.pathname + url.search);
       }
       const res = await authClient.listSessions();
       if (res.error) {
-        toast.error(res.error.message || "Nepodařilo se načíst relace");
+        toast.error(res.error.message || t("loadFailed"));
         return;
       }
       setSessions((res.data ?? []) as SessionRow[]);
     });
-  }, [revokeOthersOnMount]);
+  }, [revokeOthersOnMount, t]);
 
   const revoke = (token: string) => {
     setBusyKey(`revoke:${token}`);
@@ -326,14 +329,14 @@ export function SessionsPanel({
       try {
         const res = await authClient.revokeSession({ token });
         if (res.error) {
-          toast.error(res.error.message || "Odvolání selhalo");
+          toast.error(res.error.message || t("revokeFailed"));
           return;
         }
         await recordAccountSecurityEventAction({
           type: "session_revoke",
           metadata: { scope: "one" },
         });
-        toast.success("Relace odvolána");
+        toast.success(t("revokeSuccess"));
         reload();
       } finally {
         setBusyKey(null);
@@ -347,14 +350,14 @@ export function SessionsPanel({
       try {
         const res = await authClient.revokeOtherSessions();
         if (res.error) {
-          toast.error(res.error.message || "Odvolání selhalo");
+          toast.error(res.error.message || t("revokeFailed"));
           return;
         }
         await recordAccountSecurityEventAction({
           type: "session_revoke",
           metadata: { scope: "others" },
         });
-        toast.success("Ostatní relace odvolány");
+        toast.success(t("revokeOthersSuccess"));
         reload();
       } finally {
         setBusyKey(null);
@@ -368,11 +371,9 @@ export function SessionsPanel({
         <div className="space-y-1.5">
           <CardTitle className="flex items-center gap-2">
             <MonitorSmartphoneIcon className="text-muted-foreground size-4" />
-            Aktivní relace
+            {t("title")}
           </CardTitle>
-          <CardDescription>
-            Kde jste přihlášeni. Podezřelé relace odvolejte.
-          </CardDescription>
+          <CardDescription>{t("description")}</CardDescription>
         </div>
         <Button
           variant="outline"
@@ -381,21 +382,19 @@ export function SessionsPanel({
           loading={busyKey === "revoke-others"}
           onClick={revokeOthers}
         >
-          {busyKey === "revoke-others" ? "Odvolávám…" : "Odvolat ostatní"}
+          {busyKey === "revoke-others" ? t("revoking") : t("revokeOthers")}
         </Button>
       </CardHeader>
       <CardContent className="space-y-3 pt-5">
         {pending && sessions.length === 0 ? (
           <div className="text-muted-foreground flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
             <LoaderCircleIcon className="size-4 animate-spin" />
-            Načítám relace…
+            {t("loading")}
           </div>
         ) : sessions.length === 0 ? (
           <div className="text-muted-foreground flex items-start gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
             <MonitorSmartphoneIcon className="mt-0.5 size-4 shrink-0" />
-            <p>
-              Žádné aktivní relace. Po přihlášení se tu objeví tento prohlížeč.
-            </p>
+            <p>{t("emptyHint")}</p>
           </div>
         ) : (
           sessions.map((s) => {
@@ -408,14 +407,15 @@ export function SessionsPanel({
                 <div className="space-y-1 text-sm">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium">
-                      {summarizeUa(s.userAgent)}
+                      {summarizeUa(s.userAgent, uaLabels)}
                     </span>
                     {isCurrent ? (
-                      <Badge variant="secondary">Tato relace</Badge>
+                      <Badge variant="secondary">{t("currentSession")}</Badge>
                     ) : null}
                   </div>
                   <div className="text-muted-foreground">
-                    {s.ipAddress || "IP neznámá"} · od {formatWhen(s.createdAt)}
+                    {s.ipAddress || t("unknownIp")} ·{" "}
+                    {t("since", { when: formatWhen(s.createdAt, locale) })}
                   </div>
                 </div>
                 {!isCurrent ? (
@@ -426,7 +426,9 @@ export function SessionsPanel({
                     loading={busyKey === `revoke:${s.token}`}
                     onClick={() => revoke(s.token)}
                   >
-                    {busyKey === `revoke:${s.token}` ? "Odvolávám…" : "Odvolat"}
+                    {busyKey === `revoke:${s.token}`
+                      ? t("revoking")
+                      : t("revoke")}
                   </Button>
                 ) : null}
               </div>
@@ -439,6 +441,13 @@ export function SessionsPanel({
 }
 
 export function TrustedDevicesPanel() {
+  const t = useTranslations("Settings.security.trustedDevices");
+  const tSessions = useTranslations("Settings.security.sessions");
+  const locale = useLocale() as AppLocale;
+  const uaLabels = {
+    unknownDevice: tSessions("unknownDevice"),
+    browser: tSessions("browser"),
+  };
   const [devices, setDevices] = useState<
     Awaited<ReturnType<typeof getTrustedDevicesAction>>
   >([]);
@@ -461,10 +470,10 @@ export function TrustedDevicesPanel() {
       try {
         const res = await revokeTrustedDeviceAction(deviceId);
         if (!res.ok) {
-          toast.error("Odvolání zařízení selhalo");
+          toast.error(t("revokeFailed"));
           return;
         }
-        toast.success("Zařízení odvoláno");
+        toast.success(t("revokeSuccess"));
         reload();
       } finally {
         setBusyKey(null);
@@ -477,26 +486,20 @@ export function TrustedDevicesPanel() {
       <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2">
           <ShieldCheckIcon className="text-muted-foreground size-4" />
-          Důvěryhodná zařízení
+          {t("title")}
         </CardTitle>
-        <CardDescription>
-          Na přihlášení z nového zařízení vás upozorníme e-mailem. Přístup tím
-          není blokován. Odkaz v e-mailu zařízení označí jako důvěryhodné.
-        </CardDescription>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 pt-5">
         {pending && devices.length === 0 ? (
           <div className="text-muted-foreground flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
             <LoaderCircleIcon className="size-4 animate-spin" />
-            Načítám zařízení…
+            {t("loading")}
           </div>
         ) : devices.length === 0 ? (
           <div className="text-muted-foreground flex items-start gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
             <ShieldCheckIcon className="mt-0.5 size-4 shrink-0" />
-            <p>
-              Zatím žádná důvěryhodná zařízení. Po přihlášení z nového místa
-              použijte odkaz „Důvěřovat“ v e-mailu.
-            </p>
+            <p>{t("emptyHint")}</p>
           </div>
         ) : (
           devices.map((d) => (
@@ -506,11 +509,11 @@ export function TrustedDevicesPanel() {
             >
               <div className="space-y-1 text-sm">
                 <div className="font-medium">
-                  {d.label || summarizeUa(d.userAgent)}
+                  {d.label || summarizeUa(d.userAgent, uaLabels)}
                 </div>
                 <div className="text-muted-foreground">
-                  {d.lastIp || "IP neznámá"} · naposledy{" "}
-                  {formatWhen(d.lastSeenAt)}
+                  {d.lastIp || tSessions("unknownIp")} · {t("lastSeen")}{" "}
+                  {formatWhen(d.lastSeenAt, locale)}
                 </div>
               </div>
               <Button
@@ -520,7 +523,7 @@ export function TrustedDevicesPanel() {
                 loading={busyKey === `revoke:${d.id}`}
                 onClick={() => revoke(d.id)}
               >
-                {busyKey === `revoke:${d.id}` ? "Odvolávám…" : "Odvolat"}
+                {busyKey === `revoke:${d.id}` ? t("revoking") : t("revoke")}
               </Button>
             </div>
           ))

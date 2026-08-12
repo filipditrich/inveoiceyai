@@ -26,6 +26,7 @@ import {
 } from "@tanstack/react-table";
 import { SearchIcon } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 export type ClientTableItem = {
@@ -34,18 +35,23 @@ export type ClientTableItem = {
   snapshot: ClientSnapshot;
 };
 
-const filterFields: FilterFieldConfig<string>[] = [
-  {
-    key: "q",
-    label: "Hledat",
-    type: "text",
-    icon: <SearchIcon className="size-3.5" />,
-    placeholder: "jméno, IČO, město…",
-    defaultOperator: "contains",
-  },
-];
-
 export function ClientsDataGrid({ items }: { items: ClientTableItem[] }) {
+  const t = useTranslations("Clients");
+  const tTable = useTranslations("Clients.table");
+  const tCommon = useTranslations("Common");
+  const filterFields = useMemo<FilterFieldConfig<string>[]>(
+    () => [
+      {
+        key: "q",
+        label: tCommon("search"),
+        type: "text",
+        icon: <SearchIcon className="size-3.5" />,
+        placeholder: tTable("searchPlaceholder"),
+        defaultOperator: "contains",
+      },
+    ],
+    [tCommon, tTable],
+  );
   const [filters, setFilters] = useState<Filter<string>[]>(() =>
     filtersFromRecord({}, filterFields),
   );
@@ -74,43 +80,47 @@ export function ClientsDataGrid({ items }: { items: ClientTableItem[] }) {
         id: "name",
         accessorFn: (row) => row.snapshot.name,
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Jméno" />
+          <DataGridColumnHeader column={column} title={tTable("name")} />
         ),
-        meta: { headerTitle: "Jméno", autoSize: true },
+        meta: { headerTitle: tTable("name"), autoSize: true },
       },
       {
         id: "ico",
         accessorFn: (row) => row.snapshot.ico ?? "",
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="IČO" />
+          <DataGridColumnHeader column={column} title={tTable("ico")} />
         ),
-        cell: ({ row }) => row.original.snapshot.ico ?? "—",
-        meta: { headerTitle: "IČO" },
+        cell: ({ row }) => row.original.snapshot.ico ?? tCommon("emptyDash"),
+        meta: { headerTitle: tTable("ico") },
       },
       {
         id: "city",
         accessorFn: (row) => row.snapshot.address.city,
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Město" />
+          <DataGridColumnHeader column={column} title={tTable("city")} />
         ),
-        meta: { headerTitle: "Město" },
+        meta: { headerTitle: tTable("city") },
       },
       {
         accessorKey: "source",
         id: "source",
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Zdroj" />
+          <DataGridColumnHeader column={column} title={tTable("source")} />
         ),
         cell: ({ row }) => (
-          <span>{row.original.source === "ares" ? "ARES" : "Ručně"}</span>
+          <span>
+            {row.original.source === "ares"
+              ? tTable("sourceAres")
+              : tTable("sourceManual")}
+          </span>
         ),
-        meta: { headerTitle: "Zdroj" },
+        meta: { headerTitle: tTable("source") },
       },
       {
         id: "actions",
         enableSorting: false,
         enableHiding: false,
-        header: () => <span className="sr-only">Akce</span>,
+        header: () => <span className="sr-only">{tTable("actions")}</span>,
         cell: ({ row }) => (
           <div className="flex justify-end gap-2">
             <Button
@@ -120,24 +130,24 @@ export function ClientsDataGrid({ items }: { items: ClientTableItem[] }) {
               size="sm"
               variant="outline"
             >
-              Upravit
+              {tTable("edit")}
             </Button>
             <form action={deleteClient}>
               <input name="id" type="hidden" value={row.original.rowId} />
               <SubmitButton
-                pendingLabel="Mazání…"
+                pendingLabel={tTable("deleting")}
                 size="sm"
                 variant="destructive"
               >
-                Smazat
+                {tTable("delete")}
               </SubmitButton>
             </form>
           </div>
         ),
-        meta: { headerTitle: "Akce" },
+        meta: { headerTitle: tTable("actions") },
       },
     ],
-    [],
+    [tCommon, tTable],
   );
 
   const table = useTable({
@@ -176,7 +186,7 @@ export function ClientsDataGrid({ items }: { items: ClientTableItem[] }) {
 
   return (
     <AppDataGrid
-      emptyMessage="Žádní klienti."
+      emptyMessage={t("empty")}
       recordCount={table.getFilteredRowModel().rows.length}
       table={table}
       toolbar={

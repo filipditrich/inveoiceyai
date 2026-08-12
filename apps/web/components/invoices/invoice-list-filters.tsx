@@ -12,10 +12,7 @@ import {
   ORIGIN_PROVIDER_LABELS,
   type InvoiceOriginProvider,
 } from "@invoicey/invoice-core/import";
-import {
-  DISPLAY_STATUS_LABELS,
-  INVOICE_DISPLAY_STATUSES,
-} from "@invoicey/invoice-core/status-display";
+import { INVOICE_DISPLAY_STATUSES } from "@invoicey/invoice-core/status-display";
 import {
   Building2Icon,
   CalendarIcon,
@@ -24,6 +21,7 @@ import {
   UserIcon,
 } from "lucide-react";
 import { useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 export type PartyOption = { id: string; name: string };
 
@@ -64,30 +62,32 @@ export function InvoiceListFilters({
   clients,
   onFiltersChange,
 }: InvoiceListFiltersProps) {
+  const t = useTranslations("Invoices.filter");
+  const tStatus = useTranslations("Status.invoice");
   const fields = useMemo<FilterFieldConfig<string>[]>(
     () => [
       {
         key: "q",
-        label: "Hledat",
+        label: t("search"),
         type: "text",
         icon: <SearchIcon className="size-3.5" />,
-        placeholder: "číslo, klient…",
+        placeholder: t("searchPlaceholder"),
         defaultOperator: "contains",
       },
       {
         key: "status",
-        label: "Stav",
+        label: t("status"),
         type: "select",
         icon: <CalendarIcon className="size-3.5" />,
         defaultOperator: "is",
         options: INVOICE_DISPLAY_STATUSES.map((s) => ({
           value: s,
-          label: DISPLAY_STATUS_LABELS[s],
+          label: tStatus(s),
         })),
       },
       {
         key: "originProvider",
-        label: "Zdroj",
+        label: t("source"),
         type: "select",
         icon: <TagIcon className="size-3.5" />,
         defaultOperator: "is",
@@ -98,7 +98,7 @@ export function InvoiceListFilters({
       },
       {
         key: "issuerId",
-        label: "Dodavatel",
+        label: t("issuer"),
         type: "select",
         icon: <Building2Icon className="size-3.5" />,
         defaultOperator: "is",
@@ -107,7 +107,7 @@ export function InvoiceListFilters({
       },
       {
         key: "clientId",
-        label: "Odběratel",
+        label: t("client"),
         type: "select",
         icon: <UserIcon className="size-3.5" />,
         defaultOperator: "is",
@@ -115,7 +115,7 @@ export function InvoiceListFilters({
         options: clients.map((c) => ({ value: c.id, label: c.name })),
       },
     ],
-    [issuers, clients],
+    [issuers, clients, t, tStatus],
   );
 
   const filters = useMemo(
@@ -157,7 +157,7 @@ export function InvoiceListFilters({
       <div className="flex flex-wrap items-end gap-2">
         <div className="space-y-1">
           <Label className="text-muted-foreground text-xs" htmlFor="inv-from">
-            Od
+            {t("from")}
           </Label>
           <Input
             className="h-8 w-36"
@@ -172,7 +172,7 @@ export function InvoiceListFilters({
         </div>
         <div className="space-y-1">
           <Label className="text-muted-foreground text-xs" htmlFor="inv-to">
-            Do
+            {t("to")}
           </Label>
           <Input
             className="h-8 w-36"

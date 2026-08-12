@@ -113,7 +113,7 @@ export function registerInvoiceyMcpTools(
       draft: jsonObjectSchema
         .optional()
         .describe(
-          'Partial invoice draft (issuer ignored — locked server-side). Required: meta, client, payment, items. VAT: prefer top-level `vat: { mode, suppliesAbroad }` OR high-level `vatPreset` (`neplatce`|`regular`|`reverse_charge`|`oss`) which invents `{ mode, suppliesAbroad: "none" }` when `vat` is missing. Line amounts are stored exclusive: `unitPriceWithoutVat` + line `vatRate`. Set `pricesIncludeVat: true` if spoken/unit prices include VAT — normalizer converts to exclusive using line vatRate (0 for reverse_charge / neplátce). Do not invent legalNote or localReverseChargeCode; reverse_charge fails without localReverseChargeCode. Domestic default: vat `{ mode: "regular", suppliesAbroad: "none" }` with vatRate 21 (or 0 if issuer is non–VAT-payer).',
+          'Partial invoice draft (issuer ignored — locked server-side). Required: meta, client, payment, items. Optional meta.language: `cs` | `en` (PDF/ISDOC labels; omitted → cs). VAT: prefer top-level `vat: { mode, suppliesAbroad }` OR high-level `vatPreset` (`neplatce`|`regular`|`reverse_charge`|`oss`) which invents `{ mode, suppliesAbroad: "none" }` when `vat` is missing. Line amounts are stored exclusive: `unitPriceWithoutVat` + line `vatRate`. Set `pricesIncludeVat: true` if spoken/unit prices include VAT — normalizer converts to exclusive using line vatRate (0 for reverse_charge / neplátce). Do not invent legalNote or localReverseChargeCode; reverse_charge fails without localReverseChargeCode. Domestic default: vat `{ mode: "regular", suppliesAbroad: "none" }` with vatRate 21 (or 0 if issuer is non–VAT-payer).',
         ),
       issuerPresetId: z
         .string()

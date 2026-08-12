@@ -1,6 +1,7 @@
 import { Text } from "@react-email/components";
 import * as React from "react";
 
+import { invoiceEmailCopy, type EmailLocale } from "../copy";
 import { EmailShell } from "../components/email-shell";
 import { InvoiceSummary } from "../components/invoice-summary";
 
@@ -13,15 +14,19 @@ export type InvoiceSentEmailProps = {
   clientName: string;
   issuerName: string;
   invoiceUrl?: string;
+  locale?: EmailLocale;
 };
 
 export function InvoiceSentEmail(props: InvoiceSentEmailProps) {
-  const title = `Faktura ${props.number}`;
+  const locale = props.locale ?? "cs";
+  const copy = invoiceEmailCopy(locale);
+  const title = copy.sentTitle(props.number);
   const lines = props.coverText.split("\n");
 
   return (
     <EmailShell
-      preview={`Faktura ${props.number} od ${props.issuerName}`}
+      locale={locale}
+      preview={copy.sentPreview(props.number, props.issuerName)}
       title={title}
       variant="invoice"
     >
@@ -31,6 +36,7 @@ export function InvoiceSentEmail(props: InvoiceSentEmailProps) {
         </Text>
       ))}
       <InvoiceSummary
+        locale={locale}
         number={props.number}
         issueDate={props.issueDate}
         dueDate={props.dueDate}

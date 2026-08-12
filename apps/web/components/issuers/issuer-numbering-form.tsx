@@ -3,8 +3,8 @@
 import { saveIssuerNumbering } from "@/actions/issuers";
 import {
   FieldGroup,
-  lookupMessageFromInvalid,
   SubmitRow,
+  useInvalidQueryMessage,
 } from "@/components/issuers/issuer-form-shared";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,6 +15,27 @@ import {
 import { nextInvoiceNumber } from "@invoicey/invoice-core/numbering";
 import type { FormEvent } from "react";
 import * as React from "react";
+import { useTranslations } from "next-intl";
+
+function numberingDocTypeLabel(
+  docType: (typeof DOC_TYPES)[number]["key"],
+  t: ReturnType<typeof useTranslations<"Issuers.numbering">>,
+): string {
+  switch (docType) {
+    case "invoice":
+      return t("docTypes.invoice");
+    case "proforma":
+      return t("docTypes.proforma");
+    case "advance":
+      return t("docTypes.advance");
+    case "credit_note":
+      return t("docTypes.credit_note");
+    default: {
+      const _exhaustive: never = docType;
+      return _exhaustive;
+    }
+  }
+}
 
 export function IssuerNumberingForm(props: {
   issuerId: string;
@@ -22,6 +43,7 @@ export function IssuerNumberingForm(props: {
   schemes: NumberingSchemeDraft[];
   invalidQuery?: string | null;
 }) {
+  const t = useTranslations("Issuers.numbering");
   const [pending, startTransition] = React.useTransition();
   const yearNow = new Date().getFullYear();
   const [schemeState, setSchemeState] = React.useState(() => {
@@ -38,7 +60,7 @@ export function IssuerNumberingForm(props: {
       };
     });
   });
-  const userMsg = lookupMessageFromInvalid(props.invalidQuery);
+  const userMsg = useInvalidQueryMessage(props.invalidQuery);
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -62,12 +84,11 @@ export function IssuerNumberingForm(props: {
     <form className="max-w-2xl space-y-6" onSubmit={onSubmit}>
       {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
       <p className="text-muted-foreground text-xs">
-        Tokeny: {"{YYYY}"} {"{YY}"} {"{MM}"} {"{DD}"} {"{####}"} {"{ISSUER}"}{" "}
-        {"{TYPE}"}. Ruční změna counteru může vytvořit mezery v řadě.
+        {t("tokensHint")} {"{YYYY}"} {"{YY}"} {"{MM}"} {"{DD}"} {"{####}"}{" "}
+        {"{ISSUER}"} {"{TYPE}"}.
       </p>
       {schemeState.map((s, idx) => {
-        const label =
-          DOC_TYPES.find((d) => d.key === s.docType)?.label ?? s.docType;
+        const label = numberingDocTypeLabel(s.docType, t);
         const initialCounter =
           props.schemes.find((x) => x.docType === s.docType)?.counter ?? 0;
         let nextPreview = "—";
@@ -85,27 +106,23 @@ export function IssuerNumberingForm(props: {
             new Date(),
           );
         } catch {
-          nextPreview = "(neplatná šablona)";
+          nextPreview = t("invalidTemplate");
         }
         return (
           <div className="space-y-2 rounded-md border p-3" key={s.docType}>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <p className="text-sm font-medium">{label}</p>
               <p className="text-muted-foreground text-xs tabular-nums">
-                Další číslo:{" "}
-                <span className="text-foreground font-medium">
-                  {nextPreview}
-                </span>
+                {t("nextNumber", { preview: nextPreview })}
               </p>
             </div>
             {s.counter !== initialCounter ? (
               <p className="text-xs text-amber-700 dark:text-amber-400">
-                Counter byl změněn — zkontrolujte, že nevzniknou duplicity nebo
-                mezery.
+                {t("counterChanged")}
               </p>
             ) : null}
             <div className="grid gap-3 sm:grid-cols-2">
-              <FieldGroup label="Šablona">
+              <FieldGroup label={t("template")}>
                 <Input
                   onChange={(ev) => {
                     setSchemeState((prev) => {
@@ -121,7 +138,7 @@ export function IssuerNumberingForm(props: {
                   value={s.template}
                 />
               </FieldGroup>
-              <FieldGroup label="Padding (#)">
+              <FieldGroup label={t("padding")}>
                 <Input
                   min={1}
                   max={10}
@@ -144,7 +161,7 @@ export function IssuerNumberingForm(props: {
                   value={s.padding}
                 />
               </FieldGroup>
-              <FieldGroup label="Reset">
+              <FieldGroup label={t("reset")}>
                 <select
                   className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
                   onChange={(ev) => {
@@ -161,11 +178,11 @@ export function IssuerNumberingForm(props: {
                   }}
                   value={s.resetPeriod}
                 >
-                  <option value="yearly">Roční</option>
-                  <option value="never">Nikdy</option>
+                  <option value="yearly">{t("resetYearly")}</option>
+                  <option value="never">{t("resetNever")}</option>
                 </select>
               </FieldGroup>
-              <FieldGroup label="Counter">
+              <FieldGroup label={t("counter")}>
                 <Input
                   min={0}
                   onChange={(ev) => {
@@ -188,7 +205,7 @@ export function IssuerNumberingForm(props: {
                 />
               </FieldGroup>
               {s.resetPeriod === "yearly" ? (
-                <FieldGroup label="Counter year">
+                <FieldGroup label={t("counterYear")}>
                   <Input
                     onChange={(ev) => {
                       const n = Number(ev.target.value);

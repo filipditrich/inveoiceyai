@@ -1,5 +1,6 @@
 import { render } from "@react-email/render";
 
+import { invoiceEmailCopy, systemEmailCopy } from "./copy";
 import {
   InvoiceSentEmail,
   type InvoiceSentEmailProps,
@@ -46,7 +47,10 @@ export async function renderInvoiceSentEmail(
     render(element, { plainText: true }),
   ]);
   return {
-    subject: `Faktura ${props.number} — ${props.issuerName}`,
+    subject: invoiceEmailCopy(props.locale ?? "cs").sentSubject(
+      props.number,
+      props.issuerName,
+    ),
     html,
     text,
   };
@@ -60,11 +64,13 @@ export async function renderWorkspaceInviteEmail(
     render(element),
     render(element, { plainText: true }),
   ]);
+  const locale = props.locale ?? "cs";
+  const copy = systemEmailCopy(locale);
   const expiryNote = props.expiresAtLabel
-    ? ` (platí do ${props.expiresAtLabel})`
+    ? copy.inviteExpiryNote(props.expiresAtLabel)
     : "";
   return {
-    subject: `Pozvánka do ${props.workspaceName}${expiryNote}`,
+    subject: copy.inviteSubject(props.workspaceName, expiryNote),
     html,
     text,
   };
@@ -79,7 +85,9 @@ export async function renderOverdueReminderEmail(
     render(element, { plainText: true }),
   ]);
   return {
-    subject: `Připomínka: faktura ${props.number}`,
+    subject: invoiceEmailCopy(props.locale ?? "cs").overdueSubject(
+      props.number,
+    ),
     html,
     text,
   };
@@ -94,7 +102,7 @@ export async function renderPaymentReceivedEmail(
     render(element, { plainText: true }),
   ]);
   return {
-    subject: `Platba přijata — ${props.number}`,
+    subject: invoiceEmailCopy(props.locale ?? "cs").paidSubject(props.number),
     html,
     text,
   };
@@ -109,7 +117,7 @@ export async function renderNewSignInEmail(
     render(element, { plainText: true }),
   ]);
   return {
-    subject: "Nové přihlášení do Invoicey",
+    subject: systemEmailCopy(props.locale ?? "cs").signInSubject,
     html,
     text,
   };

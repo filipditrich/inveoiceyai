@@ -36,7 +36,7 @@ const InvoiceMetaSchema = z.object({
   dueDate: z.string().date(),
   /** Datum uskutečnění zdanitelného plnění */
   duzp: z.string().date(),
-  language: z.literal("cs"),
+  language: z.enum(["cs", "en"]),
   currency: z.enum(["CZK", "EUR", "USD"]),
   /** Reference to the original invoice (only for credit_note) */
   correctedInvoiceNumber: z.string().min(1).max(64).optional(),
@@ -51,6 +51,7 @@ const InvoiceMetaSchema = z.object({
 - `dueDate >= issueDate`
 - `duzp` may be ≤ or ≥ `issueDate` (DUZP can precede issue date in practice when invoicing for past work)
 - `number` is opaque text — formatting is decided by the issuer's [numbering scheme](./numbering.md), but at the schema level any non-empty string ≤ 64 chars is valid
+- `language` is the document language for PDF/ISDOC/client email labels (`cs` | `en`). It is not the web UI locale.
 
 ## `issuer` — the supplier (snapshot at issue time)
 
@@ -138,7 +139,7 @@ Notes:
 
 - `ico` is optional because clients can be foreign or natural persons without an IČO
 - For Czech B2B invoices, IČO is effectively mandatory and the UI enforces it; the _schema_ allows omission so OBO/self-billing and foreign clients fit
-- Address allows non-CZ ZIP/format because we want to model invoicing abroad even though MVP language is Czech-only
+- Address allows non-CZ ZIP/format so foreign clients can be invoiced; PDF labels follow `meta.language` ([ADR 0028](../decisions/0028-per-invoice-language.md)), independent of UI locale
 
 Like `issuer`, `client` is a snapshot — see [`snapshots.md`](./snapshots.md).
 

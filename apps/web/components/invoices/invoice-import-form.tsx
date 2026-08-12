@@ -27,6 +27,7 @@ import {
 } from "@invoicey/invoice-core/import";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo, useState, useTransition } from "react";
 
 type IssuerOption = { id: string; name: string };
@@ -40,12 +41,6 @@ type ReviewRow = ClassifiedImportFile & {
 const PROVIDERS = Object.keys(
   ORIGIN_PROVIDER_LABELS,
 ) as InvoiceOriginProvider[];
-
-const STEPS: Array<{ id: ImportStep; label: string }> = [
-  { id: "settings", label: "Nastavení" },
-  { id: "upload", label: "Nahrání" },
-  { id: "review", label: "Kontrola" },
-];
 
 function archiveReady(row: ClassifiedImportFile): boolean {
   if (row.status === "ready_full" && row.invoice) {
@@ -117,6 +112,8 @@ function resolveRowOrigin(
 }
 
 export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
+  const t = useTranslations("Invoices.import");
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const [step, setStep] = useState<ImportStep>("settings");
   const [issuerId, setIssuerId] = useState(issuers[0]?.id ?? "");
@@ -273,7 +270,11 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
           items,
         });
         setMessage(
-          `Import hotov: ${result.created} vytvořeno, ${result.skipped} přeskočeno, ${result.failed} chyb.`,
+          t("done", {
+            created: String(result.created),
+            skipped: String(result.skipped),
+            failed: String(result.failed),
+          }),
         );
         if (result.created > 0) {
           router.push(
@@ -290,19 +291,27 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
   if (issuers.length === 0) {
     return (
       <p className="text-muted-foreground text-sm">
-        Nejprve vytvořte{" "}
-        <Link className="underline" href="/issuers">
-          dodavatele
-        </Link>
-        .
+        {t.rich("missingIssuer", {
+          issuer: () => (
+            <Link className="underline" href="/issuers">
+              {t("issuerLink")}
+            </Link>
+          ),
+        })}
       </p>
     );
   }
 
   return (
     <div className="space-y-6">
-      <nav aria-label="Kroky importu" className="flex flex-wrap gap-2">
-        {STEPS.map((s, index) => {
+      <nav aria-label={t("stepsAria")} className="flex flex-wrap gap-2">
+        {(
+          [
+            { id: "settings", label: t("stepSettings") },
+            { id: "upload", label: t("stepUpload") },
+            { id: "review", label: t("stepReview") },
+          ] as const
+        ).map((s, index) => {
           const active = step === s.id;
           const done =
             (s.id === "settings" && step !== "settings") ||
@@ -337,7 +346,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
         <div className="space-y-4">
           <div className="grid gap-4 rounded-md border p-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="issuerId">Dodavatel (vystavitel)</Label>
+              <Label htmlFor="issuerId">{t("issuer")}</Label>
               <select
                 className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
                 id="issuerId"
@@ -352,9 +361,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="originProvider">
-                Výchozí zdroj (pro nerozpoznané)
-              </Label>
+              <Label htmlFor="originProvider">{t("defaultOrigin")}</Label>
               <select
                 className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
                 id="originProvider"
@@ -371,25 +378,24 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
                 ))}
               </select>
               <p className="text-muted-foreground text-xs">
-                Po nahrání se u každého PDF použije detekovaný zdroj; tento
-                výběr je záloha a hromadná úprava.
+                {t("defaultOriginHint")}
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="originVersion">Verze (volitelné)</Label>
+              <Label htmlFor="originVersion">{t("originVersion")}</Label>
               <Input
                 id="originVersion"
                 onChange={(e) => setOriginVersion(e.target.value)}
-                placeholder="např. 0.4.0"
+                placeholder={t("originVersionPlaceholder")}
                 value={originVersion}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="originLabel">Vlastní popisek (volitelné)</Label>
+              <Label htmlFor="originLabel">{t("originLabel")}</Label>
               <Input
                 id="originLabel"
                 onChange={(e) => setOriginLabel(e.target.value)}
-                placeholder="např. stará šablona ve Wordu"
+                placeholder={t("originLabelPlaceholder")}
                 value={originLabel}
               />
             </div>
@@ -398,12 +404,12 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
                 checked={defaultPaid}
                 onCheckedChange={(v) => setDefaultPaid(v === true)}
               />
-              Výchozí: označit importované jako zaplacené
+              {t("defaultPaid")}
             </label>
           </div>
           <div className="flex justify-end">
             <Button onClick={() => setStep("upload")} type="button">
-              Pokračovat k nahrání
+              {t("continueUpload")}
             </Button>
           </div>
         </div>
@@ -412,9 +418,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
       {step === "upload" ? (
         <div className="space-y-4">
           <div className="rounded-md border p-4">
-            <p className="mb-3 text-sm font-medium">
-              Nahrajte PDF faktury (až 40 najednou)
-            </p>
+            <p className="mb-3 text-sm font-medium">{t("uploadTitle")}</p>
             <UploadDropzone
               endpoint="importedInvoicePdf"
               onClientUploadComplete={(res) => {
@@ -437,11 +441,11 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
               type="button"
               variant="outline"
             >
-              Zpět
+              {tCommon("back")}
             </Button>
             {rows.length > 0 ? (
               <Button onClick={() => setStep("review")} type="button">
-                Ke kontrole ({rows.length})
+                {t("toReview", { count: String(rows.length) })}
               </Button>
             ) : null}
           </div>
@@ -452,7 +456,10 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
         <div className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm">
-              K importu připraveno: {readyCount} / {rows.length}
+              {t("readyCount", {
+                ready: String(readyCount),
+                total: String(rows.length),
+              })}
             </p>
             <div className="flex flex-wrap gap-2">
               <Button
@@ -461,7 +468,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
                 type="button"
                 variant="outline"
               >
-                Použít výchozí zdroj na všechny
+                {t("applyOrigin")}
               </Button>
               <Button
                 disabled={pending || readyCount === 0}
@@ -469,20 +476,20 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
                 onClick={onCommit}
               >
                 {busyKey === "commit"
-                  ? "Importuji…"
-                  : `Importovat ${readyCount} faktur`}
+                  ? t("importing")
+                  : t("importN", { count: String(readyCount) })}
               </Button>
             </div>
           </div>
           {rows.length === 0 ? (
             <p className="text-muted-foreground text-sm">
-              Zatím žádné soubory.{" "}
+              {t("emptyFiles")}{" "}
               <button
                 className="underline"
                 onClick={() => setStep("upload")}
                 type="button"
               >
-                Nahrajte PDF
+                {t("uploadPdfs")}
               </button>
               .
             </p>
@@ -491,14 +498,14 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Soubor</TableHead>
-                    <TableHead>Stav</TableHead>
-                    <TableHead>Zdroj</TableHead>
-                    <TableHead>Číslo</TableHead>
-                    <TableHead>Klient</TableHead>
-                    <TableHead>Datum</TableHead>
-                    <TableHead>Celkem</TableHead>
-                    <TableHead>Zaplaceno</TableHead>
+                    <TableHead>{t("colFile")}</TableHead>
+                    <TableHead>{t("colStatus")}</TableHead>
+                    <TableHead>{t("colOrigin")}</TableHead>
+                    <TableHead>{t("colNumber")}</TableHead>
+                    <TableHead>{t("colClient")}</TableHead>
+                    <TableHead>{t("colDate")}</TableHead>
+                    <TableHead>{t("colTotal")}</TableHead>
+                    <TableHead>{t("colPaid")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -509,10 +516,10 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
                       </TableCell>
                       <TableCell className="text-xs">
                         {row.status === "ready_full"
-                          ? "ISDOC"
+                          ? t("statusIsdoc")
                           : row.status === "needs_archive_fields"
-                            ? "Archiv"
-                            : `Chyba: ${row.error ?? "?"}`}
+                            ? t("statusArchive")
+                            : t("statusError", { error: row.error ?? "?" })}
                       </TableCell>
                       <TableCell>
                         <select
@@ -545,7 +552,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
                                 a.meta.number = e.target.value;
                               })
                             }
-                            placeholder="číslo"
+                            placeholder={t("numberPlaceholder")}
                             value={row.archive?.meta.number ?? ""}
                           />
                         )}
@@ -563,7 +570,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
                                 a.client.name = e.target.value;
                               })
                             }
-                            placeholder="odběratel"
+                            placeholder={t("clientPlaceholder")}
                             value={row.archive?.client.name ?? ""}
                           />
                         )}
@@ -628,10 +635,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
             </div>
           )}
           {rows.some((r) => r.status === "needs_archive_fields") ? (
-            <p className="text-muted-foreground text-xs">
-              Řádky bez ISDOC: doplňte číslo, odběratele, datum a částku. Uloží
-              se originální PDF (archiv).
-            </p>
+            <p className="text-muted-foreground text-xs">{t("archiveHint")}</p>
           ) : null}
           <div className="flex flex-wrap gap-2">
             <Button
@@ -639,14 +643,14 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
               type="button"
               variant="outline"
             >
-              Přidat další PDF
+              {t("addMore")}
             </Button>
             <Button
               onClick={() => setStep("settings")}
               type="button"
               variant="ghost"
             >
-              Upravit nastavení
+              {t("editSettings")}
             </Button>
           </div>
         </div>
@@ -657,7 +661,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
       ) : null}
       {pending ? (
         <p className="text-muted-foreground text-sm">
-          {busyKey === "commit" ? "Importuji…" : "Pracuji…"}
+          {busyKey === "commit" ? t("importing") : t("working")}
         </p>
       ) : null}
     </div>

@@ -1,6 +1,8 @@
 import { Button, Text } from "@react-email/components";
 import * as React from "react";
 
+import { invoiceEmailCopy, type EmailLocale } from "../copy";
+
 export type InvoiceSummaryProps = {
   number: string;
   issueDate: string;
@@ -9,32 +11,34 @@ export type InvoiceSummaryProps = {
   clientName: string;
   issuerName: string;
   invoiceUrl?: string;
+  locale?: EmailLocale;
 };
 
 export function InvoiceSummary(props: InvoiceSummaryProps) {
+  const copy = invoiceEmailCopy(props.locale ?? "cs");
   return (
     <>
       <Text style={row}>
-        <strong>Číslo:</strong> {props.number}
+        <strong>{copy.number}:</strong> {props.number}
       </Text>
       <Text style={row}>
-        <strong>Odběratel:</strong> {props.clientName}
+        <strong>{copy.customer}:</strong> {props.clientName}
       </Text>
       <Text style={row}>
-        <strong>Dodavatel:</strong> {props.issuerName}
+        <strong>{copy.supplier}:</strong> {props.issuerName}
       </Text>
       <Text style={row}>
-        <strong>Vystaveno:</strong> {props.issueDate}
+        <strong>{copy.issued}:</strong> {props.issueDate}
       </Text>
       <Text style={row}>
-        <strong>Splatnost:</strong> {props.dueDate}
+        <strong>{copy.due}:</strong> {props.dueDate}
       </Text>
       <Text style={row}>
-        <strong>Celkem:</strong> {props.totalLabel}
+        <strong>{copy.total}:</strong> {props.totalLabel}
       </Text>
       {props.invoiceUrl ? (
         <Button href={props.invoiceUrl} style={button}>
-          Otevřít fakturu
+          {copy.openInvoice}
         </Button>
       ) : null}
     </>

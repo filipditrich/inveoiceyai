@@ -3,28 +3,24 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
-const LINKS = [
-  { href: "identity", label: "Identita" },
-  { href: "bank", label: "Banka" },
-  { href: "assets", label: "Assety" },
-  { href: "numbering", label: "Číslování" },
-  { href: "email", label: "E-mail" },
-] as const;
+const LINKS = ["identity", "bank", "assets", "numbering", "email"] as const;
 
 export function IssuerEditNav({ issuerId }: { issuerId: string }) {
   const pathname = usePathname();
+  const t = useTranslations("Issuers.nav");
   const base = `/issuers/${issuerId}/edit`;
 
   return (
     <nav className="flex flex-wrap gap-2 border-b pb-3">
-      {LINKS.map((link) => {
-        const href = `${base}/${link.href}`;
-        const active = pathname === href || pathname.startsWith(`${href}/`);
+      {LINKS.map((href) => {
+        const path = `${base}/${href}`;
+        const active = pathname === path || pathname.startsWith(`${path}/`);
         return (
           <Link
-            key={link.href}
-            href={href}
+            key={href}
+            href={path}
             className={cn(
               "rounded-md px-3 py-1.5 text-sm transition-colors",
               active
@@ -33,7 +29,7 @@ export function IssuerEditNav({ issuerId }: { issuerId: string }) {
             )}
             aria-current={active ? "page" : undefined}
           >
-            {link.label}
+            {t(href)}
           </Link>
         );
       })}

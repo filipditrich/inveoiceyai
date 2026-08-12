@@ -271,6 +271,47 @@ describe("InvoiceSchema", () => {
     expect(() => buildInvoice({})).not.toThrow();
   });
 
+  it("defaults missing meta.language to cs", () => {
+    const metaWithoutLanguage: Omit<InvoiceMeta, "language"> = {
+      docType: metaBase.docType,
+      number: metaBase.number,
+      issueDate: metaBase.issueDate,
+      dueDate: metaBase.dueDate,
+      duzp: metaBase.duzp,
+      currency: metaBase.currency,
+    };
+    const res = InvoiceSchema.safeParse({
+      meta: metaWithoutLanguage,
+      issuer: issuerBase,
+      client: clientBase,
+      vat: { mode: "regular", suppliesAbroad: "none" },
+      payment: paymentBase,
+      items: [
+        {
+          position: 1,
+          description: "x",
+          quantity: 1,
+          unit: "ks",
+          unitPriceWithoutVat: 100,
+          vatRate: 21,
+          lineSubtotal: 100,
+          lineVat: 21,
+          lineTotal: 121,
+        },
+      ],
+      totals: {
+        subtotal: 100,
+        vatBreakdown: [{ rate: 21, base: 100, vat: 21 }],
+        vatTotal: 21,
+        total: 121,
+      },
+    });
+    expect(res.success).toBe(true);
+    if (res.success) {
+      expect(res.data.meta.language).toBe("cs");
+    }
+  });
+
   it("rejects credit_note without correctedInvoiceNumber", () => {
     const res = InvoiceSchema.safeParse({
       meta: {

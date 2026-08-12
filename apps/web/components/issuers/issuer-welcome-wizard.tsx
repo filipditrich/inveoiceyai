@@ -8,13 +8,15 @@ import {
 import {
   BankAccountFields,
   FieldGroup,
+  formatAresLookupError,
   lookupAresByIco,
-  lookupMessageFromInvalid,
   useCzechIbanSuggest,
+  useInvalidQueryMessage,
 } from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import * as React from "react";
 
@@ -24,6 +26,11 @@ export function IssuerWelcomeWizard(props: {
   invalidQuery?: string | null;
   doneIssuerId?: string | null;
 }) {
+  const t = useTranslations("Issuers.welcome");
+  const tForm = useTranslations("Issuers.form");
+  const tAres = useTranslations("Issuers.ares");
+  const tCommon = useTranslations("Common");
+  const invalidFromQuery = useInvalidQueryMessage(props.invalidQuery);
   const [step, setStep] = React.useState<Step>(
     props.doneIssuerId ? "done" : "identity",
   );
@@ -45,9 +52,7 @@ export function IssuerWelcomeWizard(props: {
   const [vatPayer, setVatPayer] = React.useState(true);
   const bank = useCzechIbanSuggest();
   const [bic, setBic] = React.useState("");
-  const [msg, setMsg] = React.useState<string | null>(() =>
-    lookupMessageFromInvalid(props.invalidQuery),
-  );
+  const [msg, setMsg] = React.useState<string | null>(null);
 
   async function onUploadIssuedPdf(file: File | null) {
     if (!file) {
@@ -90,7 +95,7 @@ export function IssuerWelcomeWizard(props: {
     try {
       const result = await lookupAresByIco(icoInput);
       if (!result.ok) {
-        setMsg(result.message);
+        setMsg(formatAresLookupError(result, tAres));
         return;
       }
       const { draft } = result;
@@ -122,7 +127,7 @@ export function IssuerWelcomeWizard(props: {
       !zip.trim() ||
       !contactEmail.trim()
     ) {
-      setMsg("Vyplňte povinná pole identity.");
+      setMsg(t("identityRequired"));
       return;
     }
     setStep("bank");
@@ -132,7 +137,7 @@ export function IssuerWelcomeWizard(props: {
     e.preventDefault();
     setMsg(null);
     if (!bank.accountNumber.trim() || !bank.iban.trim()) {
-      setMsg("Vyplňte bankovní účet a IBAN.");
+      setMsg(t("bankRequired"));
       return;
     }
     const fd = new FormData();
@@ -165,17 +170,17 @@ export function IssuerWelcomeWizard(props: {
     return (
       <div className="mx-auto max-w-lg space-y-6">
         <div className="space-y-2">
-          <p className="text-muted-foreground text-sm">Krok 3 / 3</p>
-          <h1 className="text-2xl font-semibold tracking-tight">Hotovo</h1>
           <p className="text-muted-foreground text-sm">
-            Vystavovatel je vytvořen. Číslování a e-mailové šablony mají výchozí
-            hodnoty — logo, razítko a další detaily doplníte kdykoli v
-            nastavení.
+            {t("step", { current: "3", total: "3" })}
           </p>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {t("doneTitle")}
+          </h1>
+          <p className="text-muted-foreground text-sm">{t("doneBody")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button render={<Link href="/dashboard" prefetch />} size="sm">
-            Přejít na přehled
+            {t("goDashboard")}
           </Button>
           {issuerId ? (
             <Button
@@ -185,7 +190,7 @@ export function IssuerWelcomeWizard(props: {
               size="sm"
               variant="outline"
             >
-              Upravit vystavovatele
+              {t("editIssuer")}
             </Button>
           ) : null}
         </div>
@@ -198,15 +203,16 @@ export function IssuerWelcomeWizard(props: {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <p className="text-muted-foreground text-sm">
-            Krok {step === "identity" ? "1" : "2"} / 3
+            {t("step", {
+              current: step === "identity" ? "1" : "2",
+              total: "3",
+            })}
           </p>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Váš první vystavovatel
+            {t("title")}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {step === "identity"
-              ? "Načtěte firmu z ARES podle IČO, nebo nahrajte vystavenou fakturu s ISDOC, a potvrďte kontaktní e-mail."
-              : "Doplňte bankovní účet — potřebujeme ho pro QR platby na fakturách."}
+            {step === "identity" ? t("identityHint") : t("bankHint")}
           </p>
         </div>
         <Button
@@ -220,7 +226,7 @@ export function IssuerWelcomeWizard(props: {
           type="button"
           variant="ghost"
         >
-          {skipPending ? "Přeskakuji…" : "Přeskočit pro teď"}
+          {skipPending ? t("skipping") : t("skip")}
         </Button>
       </div>
 
@@ -228,7 +234,7 @@ export function IssuerWelcomeWizard(props: {
 
       {step === "identity" ? (
         <form className="space-y-4" onSubmit={onIdentityNext}>
-          <FieldGroup label="Rychlý start — nahrát vystavenou fakturu">
+          <FieldGroup label={t("uploadLabel")}>
             <Input
               accept="application/pdf,.pdf"
               disabled={uploadPending}
@@ -239,12 +245,10 @@ export function IssuerWelcomeWizard(props: {
               type="file"
             />
             <p className="text-muted-foreground text-xs">
-              {uploadPending
-                ? "Načítám údaje z PDF…"
-                : "Pouze PDF s vloženým ISDOC (bez OCR). Údaje dodavatele a banky se předvyplní."}
+              {uploadPending ? t("uploadPending") : t("uploadHint")}
             </p>
           </FieldGroup>
-          <FieldGroup label="IČO">
+          <FieldGroup label={tForm("ico")}>
             <div className="flex flex-wrap gap-2">
               <Input
                 className="max-w-xs"
@@ -264,11 +268,11 @@ export function IssuerWelcomeWizard(props: {
                 type="button"
                 variant="secondary"
               >
-                {lookupPending ? "Hledám…" : "Načíst z ARES"}
+                {lookupPending ? tForm("lookingUp") : tForm("lookup")}
               </Button>
             </div>
           </FieldGroup>
-          <FieldGroup label="Název">
+          <FieldGroup label={tForm("name")}>
             <Input
               onChange={(ev) => {
                 setName(ev.target.value);
@@ -277,7 +281,7 @@ export function IssuerWelcomeWizard(props: {
               value={name}
             />
           </FieldGroup>
-          <FieldGroup label="DIČ">
+          <FieldGroup label={tForm("dic")}>
             <Input
               onChange={(ev) => {
                 setDic(ev.target.value);
@@ -286,7 +290,7 @@ export function IssuerWelcomeWizard(props: {
               value={dic}
             />
           </FieldGroup>
-          <FieldGroup label="Ulice a číslo">
+          <FieldGroup label={tForm("street")}>
             <Input
               onChange={(ev) => {
                 setStreet(ev.target.value);
@@ -296,7 +300,7 @@ export function IssuerWelcomeWizard(props: {
             />
           </FieldGroup>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FieldGroup label="Město">
+            <FieldGroup label={tForm("city")}>
               <Input
                 onChange={(ev) => {
                   setCity(ev.target.value);
@@ -305,7 +309,7 @@ export function IssuerWelcomeWizard(props: {
                 value={city}
               />
             </FieldGroup>
-            <FieldGroup label="PSČ">
+            <FieldGroup label={tForm("zip")}>
               <Input
                 onChange={(ev) => {
                   setZip(ev.target.value);
@@ -315,7 +319,7 @@ export function IssuerWelcomeWizard(props: {
               />
             </FieldGroup>
           </div>
-          <FieldGroup label="Kontaktní e-mail">
+          <FieldGroup label={tForm("contactEmail")}>
             <Input
               onChange={(ev) => {
                 setContactEmail(ev.target.value);
@@ -333,10 +337,10 @@ export function IssuerWelcomeWizard(props: {
               }}
               type="checkbox"
             />
-            Plátce DPH
+            {tForm("vatPayer")}
           </label>
           <div className="flex gap-2">
-            <Button type="submit">Pokračovat</Button>
+            <Button type="submit">{t("continue")}</Button>
           </div>
         </form>
       ) : (
@@ -361,10 +365,10 @@ export function IssuerWelcomeWizard(props: {
               type="button"
               variant="outline"
             >
-              Zpět
+              {tCommon("back")}
             </Button>
             <Button disabled={pending} type="submit">
-              {pending ? "Vytvářím…" : "Vytvořit vystavovatele"}
+              {pending ? tForm("creating") : tForm("create")}
             </Button>
           </div>
         </form>

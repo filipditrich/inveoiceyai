@@ -68,10 +68,10 @@ export default async function InvoiceDetailPage({
 }) {
   const { id } = await params;
   const sp = await searchParams;
-  const { workspaceId } = await requireWorkspace();
   const t = await getTranslations("Invoices.detail");
   const tErrors = await getTranslations("Errors.invalid");
   const locale = (await getLocale()) as AppLocale;
+  const { workspaceId } = await requireWorkspace();
   const rows = await db
     .select()
     .from(invoices)
@@ -111,7 +111,10 @@ export default async function InvoiceDetailPage({
       ),
     )
     .limit(1);
-  const emailSettings = resolveIssuerEmailSettings(issuerRow?.emailSettings);
+  const emailSettings = resolveIssuerEmailSettings(
+    issuerRow?.emailSettings,
+    payload?.success ? payload.data.meta.language : "cs",
+  );
   const clientEmail =
     payload?.success && typeof payload.data.client.contactEmail === "string"
       ? payload.data.client.contactEmail

@@ -15,6 +15,7 @@ import {
   isValidCzIban,
   suggestCzIban,
 } from "@invoicey/invoice-core/schema";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 
 export { DEFAULT_TEMPLATES, DOC_TYPES, type NumberingSchemeDraft };
@@ -33,6 +34,7 @@ export function FieldGroup(props: {
 
 /** Suggest CZ IBAN from account number; preserve manual IBAN edits. */
 export function useCzechIbanSuggest(initialAccount = "", initialIban = "") {
+  const t = useTranslations("Issuers.form");
   const [accountNumber, setAccountNumber] = React.useState(initialAccount);
   const [iban, setIban] = React.useState(initialIban);
   const [ibanTouched, setIbanTouched] = React.useState(false);
@@ -73,13 +75,13 @@ export function useCzechIbanSuggest(initialAccount = "", initialIban = "") {
 
   const accountHint =
     accountNumber.trim() && !suggestCzIban(accountNumber)
-      ? "Zadejte účet ve tvaru 123456789/0100 nebo 19-2000145399/0800."
+      ? t("accountHint")
       : null;
   const ibanHint =
     iban.trim() && !isValidCzIban(iban)
-      ? "IBAN má neplatný kontrolní součet."
+      ? t("ibanInvalid")
       : autoIban && iban === autoIban
-        ? "IBAN doplněn z čísla účtu."
+        ? t("ibanFilled")
         : null;
 
   return {
@@ -104,9 +106,10 @@ export function BankAccountFields(props: {
   ibanHint?: string | null;
   required?: boolean;
 }) {
+  const t = useTranslations("Issuers.form");
   return (
     <>
-      <FieldGroup label="Číslo účtu (např. 123456789/0100)">
+      <FieldGroup label={t("accountNumber")}>
         <Input
           onChange={(ev) => {
             props.onAccountNumber(ev.target.value);
@@ -118,7 +121,7 @@ export function BankAccountFields(props: {
           <p className="text-muted-foreground text-xs">{props.accountHint}</p>
         ) : null}
       </FieldGroup>
-      <FieldGroup label="IBAN">
+      <FieldGroup label={t("iban")}>
         <Input
           onChange={(ev) => {
             props.onIban(ev.target.value);
@@ -130,7 +133,7 @@ export function BankAccountFields(props: {
           <p className="text-muted-foreground text-xs">{props.ibanHint}</p>
         ) : null}
       </FieldGroup>
-      <FieldGroup label="BIC (volitelné)">
+      <FieldGroup label={t("bic")}>
         <Input
           onChange={(ev) => {
             props.onBic(ev.target.value);
@@ -149,6 +152,7 @@ export function AssetField(props: {
   endpoint: "issuerLogo" | "issuerStamp" | "issuerSignature";
   uploadConfigured: boolean;
 }) {
+  const t = useTranslations("Issuers.form");
   const [showUrl, setShowUrl] = React.useState(false);
   const hasUrl = props.url.trim().length > 0;
 
@@ -175,7 +179,7 @@ export function AssetField(props: {
               type="button"
               variant="outline"
             >
-              Odebrat
+              {t("removeAsset")}
             </Button>
           </div>
         </div>
@@ -199,7 +203,7 @@ export function AssetField(props: {
         />
       ) : (
         <p className="text-muted-foreground text-xs">
-          Upload není k dispozici — vložte URL níže.
+          {t("uploadUnavailable")}
         </p>
       )}
       <div className="space-y-2">
@@ -210,7 +214,7 @@ export function AssetField(props: {
           }}
           type="button"
         >
-          {showUrl ? "Skrýt URL" : "Vložit URL ručně"}
+          {showUrl ? t("hideUrl") : t("pasteUrl")}
         </button>
         {showUrl || !props.uploadConfigured ? (
           <Input
@@ -227,34 +231,68 @@ export function AssetField(props: {
   );
 }
 
+const INVALID_MESSAGE_KEYS = [
+  "required_fields",
+  "missing_parties",
+  "validation",
+  "missing_scheme",
+  "already_issued",
+  "not_draft",
+  "cannot_issue",
+  "has_invoices",
+  "bad_ico",
+  "bad_dic",
+  "bad_bank",
+  "snapshot_validation",
+  "missing_row",
+  "save_failed",
+] as const;
+
 export function lookupMessageFromInvalid(
   inv: string | null | undefined,
+  t: (key: "generic", values: { code: string }) => string,
 ): string | null {
   if (!inv) {
     return null;
   }
-  const map: Record<string, string> = {
-    required_fields: "Vyplňte povinná pole.",
-    bad_ico: "Neplatné IČO.",
-    bad_dic: "Neplatné DIČ.",
-    bad_bank: "Neplatný účet / IBAN.",
-    snapshot_validation: "Údaje neodpovídají schématu vystavovatele.",
-    missing_row: "Záznam nenalezen.",
-    has_invoices: "Nelze smazat — existují faktury tohoto vystavovatele.",
-    save_failed: "Uložení se nezdařilo.",
-  };
-  return map[inv] ?? `Chyba: ${inv}`;
+  if ((INVALID_MESSAGE_KEYS as readonly string[]).includes(inv)) {
+    return (t as (key: string) => string)(inv);
+  }
+  return t("generic", { code: inv });
 }
 
-export function aresErrorHuman(payload: unknown): string {
+export function useInvalidQueryMessage(
+  invalidQuery?: string | null,
+): string | null {
+  const t = useTranslations("Errors.invalid");
+  return lookupMessageFromInvalid(invalidQuery, t);
+}
+
+export type AresLookupCode =
+  "invalid_ico" | "ares_no_json" | "ares_no_data" | "ares_failed";
+
+export type AresLookupResult =
+  | { ok: true; draft: ClientDraft }
+  | { ok: false; code: AresLookupCode; serverMessage?: string };
+
+export function formatAresLookupError(
+  result: Extract<AresLookupResult, { ok: false }>,
+  t: (key: AresLookupCode) => string,
+): string {
+  return result.serverMessage ?? t(result.code);
+}
+
+function aresErrorFromPayload(
+  payload: unknown,
+): Extract<AresLookupResult, { ok: false }> {
   if (!payload || typeof payload !== "object") {
-    return "ARES nevrátila data.";
+    return { ok: false, code: "ares_no_data" };
   }
   const maybe = payload as { message?: unknown };
   if (typeof maybe.message === "string") {
-    return maybe.message;
+    return { ok: false, code: "ares_failed", serverMessage: maybe.message };
   }
-  return "Vyhledání v ARES se nezdařilo.";
+  return { ok: false, code: "ares_failed" };
 }
 
 export type AresFillResult = {
@@ -264,18 +302,18 @@ export type AresFillResult = {
 /** Shared ARES IČO lookup used by identity / create / welcome forms. */
 export async function lookupAresByIco(
   icoInput: string,
-): Promise<{ ok: true; draft: ClientDraft } | { ok: false; message: string }> {
+): Promise<AresLookupResult> {
   const raw = (icoInput ?? "").replace(/\s/g, "");
   const parsed = IcoSchema.safeParse(raw);
   if (!parsed.success) {
-    return { ok: false, message: "Zadejte platné osmimístné IČO." };
+    return { ok: false, code: "invalid_ico" };
   }
   const res = await fetch(`/api/ares/${parsed.data}`);
   let payload: unknown;
   try {
     payload = await res.json();
   } catch {
-    return { ok: false, message: "ARES nevrátila JSON." };
+    return { ok: false, code: "ares_no_json" };
   }
   if (
     payload &&
@@ -286,7 +324,7 @@ export async function lookupAresByIco(
   ) {
     return { ok: true, draft: (payload as { draft: ClientDraft }).draft };
   }
-  return { ok: false, message: aresErrorHuman(payload) };
+  return aresErrorFromPayload(payload);
 }
 
 export function SubmitRow(props: {
@@ -294,14 +332,15 @@ export function SubmitRow(props: {
   sourceLabel?: string;
   label?: string;
 }) {
+  const t = useTranslations("Issuers.form");
   return (
     <div className="flex gap-2">
       <Button disabled={props.pending} type="submit">
-        {props.pending ? "Ukládám…" : (props.label ?? "Uložit")}
+        {props.pending ? t("saving") : (props.label ?? t("save"))}
       </Button>
       {props.sourceLabel ? (
         <span className="text-muted-foreground flex items-center text-xs">
-          Zdroj: {props.sourceLabel}
+          {t("source", { source: props.sourceLabel })}
         </span>
       ) : null}
     </div>

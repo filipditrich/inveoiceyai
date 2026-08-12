@@ -16,6 +16,7 @@ export const ArchiveInvoicePayloadSchema = z.object({
     dueDate: z.string().date(),
     duzp: z.string().date().optional(),
     currency: z.enum(["CZK", "EUR", "USD"]).default("CZK"),
+    language: z.enum(["cs", "en"]).default("cs"),
     correctedInvoiceNumber: z.string().min(1).max(64).optional(),
   }),
   client: z.object({

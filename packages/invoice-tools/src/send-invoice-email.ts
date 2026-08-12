@@ -9,6 +9,9 @@ import {
   type IssuerEmailSettings,
 } from "@invoicey/db";
 import {
+  defaultInvoiceCoverTemplate,
+  defaultInvoiceSubjectTemplate,
+  emailLocale,
   renderInvoiceSentEmail,
   renderPaymentReceivedEmail,
 } from "@invoicey/emails";
@@ -16,6 +19,7 @@ import {
   InvoiceSchema,
   renderInvoicePdf,
   renderIsdoc,
+  toInvoiceIntlLocale,
   type Invoice,
 } from "@invoicey/invoice-core";
 import { and, desc, eq } from "drizzle-orm";
@@ -26,17 +30,17 @@ import {
   resolveWorkspaceId,
 } from "./workspace-context";
 
-const DEFAULT_COVER =
-  "Dobrý den,\n\nv příloze zasílám fakturu {number}.\n\nS pozdravem";
-const DEFAULT_SUBJECT = "Faktura {number} — {issuerName}";
-
 function applyTemplate(template: string, vars: Record<string, string>): string {
   return template.replace(/\{(\w+)\}/g, (_, key: string) => vars[key] ?? "");
 }
 
-function formatTotalLabel(total: string | number, currency: string): string {
+function formatTotalLabel(
+  total: string | number,
+  currency: string,
+  language: Invoice["meta"]["language"],
+): string {
   const n = typeof total === "number" ? total : Number(total);
-  const formatted = new Intl.NumberFormat("cs-CZ", {
+  const formatted = new Intl.NumberFormat(toInvoiceIntlLocale(language), {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(Number.isFinite(n) ? n : 0);
@@ -45,6 +49,7 @@ function formatTotalLabel(total: string | number, currency: string): string {
 
 export function resolveIssuerEmailSettings(
   raw: IssuerEmailSettings | null | undefined,
+  language: Invoice["meta"]["language"] = "cs",
 ): Required<
   Pick<
     IssuerEmailSettings,
@@ -57,9 +62,12 @@ export function resolveIssuerEmailSettings(
     | "sendPaymentReceivedEmail"
   >
 > {
+  const locale = emailLocale(language);
   return {
-    defaultSubject: raw?.defaultSubject?.trim() || DEFAULT_SUBJECT,
-    defaultCoverText: raw?.defaultCoverText?.trim() || DEFAULT_COVER,
+    defaultSubject:
+      raw?.defaultSubject?.trim() || defaultInvoiceSubjectTemplate(locale),
+    defaultCoverText:
+      raw?.defaultCoverText?.trim() || defaultInvoiceCoverTemplate(locale),
     attachIsdocByDefault: raw?.attachIsdocByDefault !== false,
     displayNameTemplate:
       raw?.displayNameTemplate?.trim() || "{issuerName} via Invoicey",
@@ -177,7 +185,10 @@ export async function sendInvoiceEmailById(
     )
     .limit(1);
 
-  const settings = resolveIssuerEmailSettings(issuerRow?.emailSettings);
+  const settings = resolveIssuerEmailSettings(
+    issuerRow?.emailSettings,
+    invoice.meta.language,
+  );
   const clientEmail =
     typeof invoice.client.contactEmail === "string"
       ? invoice.client.contactEmail
@@ -211,10 +222,15 @@ export async function sendInvoiceEmailById(
     number,
     issueDate: row.issueDate,
     dueDate: row.dueDate,
-    totalLabel: formatTotalLabel(row.total, row.currency),
+    totalLabel: formatTotalLabel(
+      row.total,
+      row.currency,
+      invoice.meta.language,
+    ),
     clientName: row.clientName,
     issuerName: invoice.issuer.name,
     invoiceUrl: appUrl ? `${appUrl}/invoices/${row.id}` : undefined,
+    locale: invoice.meta.language,
   });
 
   const attachments = await buildAttachments({
@@ -331,12 +347,15 @@ export async function sendPaymentReceivedEmailIfEnabled(opts: {
       ),
     )
     .limit(1);
-  const settings = resolveIssuerEmailSettings(issuerRow?.emailSettings);
-  if (!settings.sendPaymentReceivedEmail) return;
-
   const parsed = InvoiceSchema.safeParse(row.payloadJson);
   if (!parsed.success) return;
   const invoice = parsed.data;
+  const settings = resolveIssuerEmailSettings(
+    issuerRow?.emailSettings,
+    invoice.meta.language,
+  );
+  if (!settings.sendPaymentReceivedEmail) return;
+
   const to = invoice.client.contactEmail?.trim().toLowerCase();
   if (!to || !isValidEmailAddress(to)) return;
 
@@ -350,10 +369,15 @@ export async function sendPaymentReceivedEmailIfEnabled(opts: {
     number,
     issueDate: row.issueDate,
     dueDate: row.dueDate,
-    totalLabel: formatTotalLabel(row.total, row.currency),
+    totalLabel: formatTotalLabel(
+      row.total,
+      row.currency,
+      invoice.meta.language,
+    ),
     clientName: row.clientName,
     issuerName: invoice.issuer.name,
     invoiceUrl: appUrl ? `${appUrl}/invoices/${row.id}` : undefined,
+    locale: invoice.meta.language,
   });
 
   await sendTransactionalEmail({

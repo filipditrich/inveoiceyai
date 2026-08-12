@@ -3,13 +3,15 @@
 import { saveIssuerIdentity } from "@/actions/issuers";
 import {
   FieldGroup,
+  formatAresLookupError,
   lookupAresByIco,
-  lookupMessageFromInvalid,
   SubmitRow,
+  useInvalidQueryMessage,
 } from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { IssuerSnapshot } from "@invoicey/invoice-core/schema";
+import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import * as React from "react";
 
@@ -18,6 +20,8 @@ export function IssuerIdentityForm(props: {
   source: string;
   invalidQuery?: string | null;
 }) {
+  const t = useTranslations("Issuers.form");
+  const tAres = useTranslations("Issuers.ares");
   const { snapshot } = props;
   const [pending, startTransition] = React.useTransition();
   const [source, setSource] = React.useState<"ares" | "manual">(
@@ -36,9 +40,7 @@ export function IssuerIdentityForm(props: {
     snapshot.registryNote ?? "",
   );
   const [lookupPending, setLookupPending] = React.useState(false);
-  const [lookupMsg, setLookupMsg] = React.useState<string | null>(() =>
-    lookupMessageFromInvalid(props.invalidQuery),
-  );
+  const [lookupMsg, setLookupMsg] = React.useState<string | null>(null);
 
   async function onLookupFromAres() {
     setLookupMsg(null);
@@ -46,7 +48,7 @@ export function IssuerIdentityForm(props: {
     try {
       const result = await lookupAresByIco(icoInput);
       if (!result.ok) {
-        setLookupMsg(result.message);
+        setLookupMsg(formatAresLookupError(result, tAres));
         return;
       }
       const { draft } = result;
@@ -92,15 +94,15 @@ export function IssuerIdentityForm(props: {
     });
   }
 
-  const userMsg =
-    lookupMsg ?? lookupMessageFromInvalid(props.invalidQuery ?? undefined);
+  const invalidFromQuery = useInvalidQueryMessage(props.invalidQuery);
+  const userMsg = lookupMsg ?? invalidFromQuery;
 
   return (
     <form className="max-w-2xl space-y-6" onSubmit={onSubmit}>
       {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
 
       <div className="space-y-2">
-        <FieldGroup label="IČO (ARES)">
+        <FieldGroup label={t("icoAres")}>
           <div className="flex flex-wrap gap-2">
             <Input
               className="max-w-xs"
@@ -120,13 +122,13 @@ export function IssuerIdentityForm(props: {
               type="button"
               variant="secondary"
             >
-              {lookupPending ? "Hledám…" : "Načíst z ARES"}
+              {lookupPending ? t("lookingUp") : t("lookup")}
             </Button>
           </div>
         </FieldGroup>
       </div>
 
-      <FieldGroup label="Název">
+      <FieldGroup label={t("name")}>
         <Input
           onChange={(ev) => {
             setName(ev.target.value);
@@ -136,7 +138,7 @@ export function IssuerIdentityForm(props: {
         />
       </FieldGroup>
 
-      <FieldGroup label="DIČ">
+      <FieldGroup label={t("dic")}>
         <Input
           onChange={(ev) => {
             setDic(ev.target.value);
@@ -147,7 +149,7 @@ export function IssuerIdentityForm(props: {
       </FieldGroup>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <FieldGroup label="Ulice a číslo">
+        <FieldGroup label={t("street")}>
           <Input
             onChange={(ev) => {
               setStreet(ev.target.value);
@@ -156,7 +158,7 @@ export function IssuerIdentityForm(props: {
             value={street}
           />
         </FieldGroup>
-        <FieldGroup label="Město">
+        <FieldGroup label={t("city")}>
           <Input
             onChange={(ev) => {
               setCity(ev.target.value);
@@ -168,7 +170,7 @@ export function IssuerIdentityForm(props: {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <FieldGroup label="PSČ">
+        <FieldGroup label={t("zip")}>
           <Input
             onChange={(ev) => {
               setZip(ev.target.value);
@@ -177,7 +179,7 @@ export function IssuerIdentityForm(props: {
             value={zip}
           />
         </FieldGroup>
-        <FieldGroup label="Stát (ISO)">
+        <FieldGroup label={t("country")}>
           <Input
             maxLength={2}
             onChange={(ev) => {
@@ -189,7 +191,7 @@ export function IssuerIdentityForm(props: {
         </FieldGroup>
       </div>
 
-      <FieldGroup label="Kontaktní e-mail">
+      <FieldGroup label={t("contactEmail")}>
         <Input
           onChange={(ev) => {
             setContactEmail(ev.target.value);
@@ -208,10 +210,10 @@ export function IssuerIdentityForm(props: {
           }}
           type="checkbox"
         />
-        Plátce DPH
+        {t("vatPayer")}
       </label>
 
-      <FieldGroup label="Zápis v OR (volitelné)">
+      <FieldGroup label={t("courtRecord")}>
         <Input
           onChange={(ev) => {
             setRegistryNote(ev.target.value);
@@ -222,7 +224,7 @@ export function IssuerIdentityForm(props: {
 
       <SubmitRow
         pending={pending}
-        sourceLabel={source === "ares" ? "ARES" : "Ručně"}
+        sourceLabel={source === "ares" ? t("sourceAres") : t("sourceManual")}
       />
     </form>
   );

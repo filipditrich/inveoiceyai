@@ -53,8 +53,8 @@ Conceptual background: [an invoice is data](/docs/concepts/invoice-as-data).
       description: "Date of taxable supply. ISO date",
       required: true,
     },
-    language: { type: "'cs'", required: true },
-    currency: { type: "'CZK'", required: true },
+    language: { type: "'cs' | 'en'", required: true },
+    currency: { type: "'CZK' | 'EUR' | 'USD'", required: true },
     correctedInvoiceNumber: {
       type: "string",
       description: "Required for credit_note",

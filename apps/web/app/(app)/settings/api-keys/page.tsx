@@ -8,6 +8,7 @@ import {
 } from "@/lib/auth/workspaces";
 import { env } from "@invoicey/env/server";
 import { KeyRoundIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 export default async function SettingsApiKeysPage() {
   const { workspaceId } = await requireWorkspace();
@@ -16,6 +17,7 @@ export default async function SettingsApiKeysPage() {
     listUserWorkspaces(user.id),
     getUserDefaultWorkspaceId(user.id),
   ]);
+  const t = await getTranslations("Settings.apiKeys");
   const appUrl = (env.BETTER_AUTH_URL ?? env.NEXT_PUBLIC_APP_URL).replace(
     /\/$/,
     "",
@@ -24,9 +26,9 @@ export default async function SettingsApiKeysPage() {
   return (
     <div className="space-y-6">
       <SettingsPageHeader
-        description="Vytvářejte osobní přístupové klíče pro remote MCP. Každý klíč používá váš výchozí pracovní prostor (níže)."
+        description={t("description")}
         icon={<KeyRoundIcon />}
-        title="API klíče"
+        title={t("title")}
       />
       <ApiKeysDefaultWorkspacePanel
         activeWorkspaceId={workspaceId}

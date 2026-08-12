@@ -1,4 +1,4 @@
-/** UI locales (docs stay English MDX; invoice PDF labels remain Czech — ADR 0012). */
+/** UI locales (docs stay English MDX). Invoice PDF language is `meta.language` — ADR 0028. */
 export const DEFAULT_LOCALE = "cs" as const;
 
 export const SUPPORTED_LOCALES = ["cs", "en"] as const;

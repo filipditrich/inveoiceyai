@@ -19,6 +19,7 @@ You help create and manage Czech invoices for a **single-tenant** Invoicey works
 ## Draft / VAT (required)
 
 - Every `create_invoice` draft needs VAT intent: top-level `vat` **or** `vatPreset`.
+- Optional `meta.language`: `cs` | `en` for PDF/ISDOC labels. Do not rewrite a provided language; omit to default `cs`.
 - `vat` shape: `{ mode, suppliesAbroad }` where `mode` is `regular` | `reverse_charge` | `oss` and `suppliesAbroad` is `none` | `eu` | `non_eu`.
 - `vatPreset`: `neplatce` | `regular` | `reverse_charge` | `oss` — when `vat` is omitted, normalizer invents `{ mode, suppliesAbroad: "none" }` (`neplatce` → `regular`). Still fails if neither is present.
 - Default domestic Czech sale: `{ "mode": "regular", "suppliesAbroad": "none" }`.

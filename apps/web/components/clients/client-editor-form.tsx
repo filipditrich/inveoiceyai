@@ -1,12 +1,16 @@
 "use client";
 
 import { saveClient } from "@/actions/clients";
+import {
+  formatAresLookupError,
+  lookupAresByIco,
+  lookupMessageFromInvalid,
+} from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { ClientDraft } from "@invoicey/ares";
 import type { ClientSnapshot } from "@invoicey/invoice-core/schema";
-import { IcoSchema } from "@invoicey/invoice-core/schema";
+import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import * as React from "react";
 
@@ -21,6 +25,9 @@ export function ClientEditorForm({
   invalidQuery,
   snapshot,
 }: ClientEditorFormProps) {
+  const t = useTranslations("Clients.form");
+  const tErr = useTranslations("Errors.invalid");
+  const tAres = useTranslations("Issuers.ares");
   const [createdId] = React.useState(() => crypto.randomUUID());
   const persistedId = mode === "edit" ? (snapshot?.id ?? "") : createdId;
 
@@ -41,9 +48,7 @@ export function ClientEditorForm({
   const [contactEmail, setContactEmail] = React.useState(
     snapshot?.contactEmail ?? "",
   );
-  const [lookupMsg, setLookupMsg] = React.useState<string | null>(() =>
-    lookupMessageFromInvalid(invalidQuery),
-  );
+  const [lookupMsg, setLookupMsg] = React.useState<string | null>(null);
   const [lookingUp, setLookingUp] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
 
@@ -52,44 +57,25 @@ export function ClientEditorForm({
       return;
     }
     setLookupMsg(null);
-    const raw = (icoInput ?? "").replace(/\s/g, "");
-    const parsed = IcoSchema.safeParse(raw);
-    if (!parsed.success) {
-      setLookupMsg("Zadejte platné osmimístné IČO.");
-      return;
-    }
     setLookingUp(true);
     try {
-      const res = await fetch(`/api/ares/${parsed.data}`);
-      let payload: unknown;
-      try {
-        payload = await res.json();
-      } catch {
-        setLookupMsg("ARES nevrátila JSON.");
+      const result = await lookupAresByIco(icoInput);
+      if (!result.ok) {
+        setLookupMsg(formatAresLookupError(result, tAres));
         return;
       }
-      if (
-        payload &&
-        typeof payload === "object" &&
-        "ok" in payload &&
-        payload.ok === true &&
-        "draft" in payload
-      ) {
-        const draft = (payload as { draft: ClientDraft }).draft;
-        setSource("ares");
-        setName(draft.name);
-        setDic(draft.dic ?? "");
-        setStreet(draft.address.street);
-        setCity(draft.address.city);
-        setZip(draft.address.zip);
-        setCountry(draft.address.country);
-        setContactEmail(draft.contactEmail ?? "");
-        if (draft.ico !== undefined && draft.ico.length > 0) {
-          setIcoInput(draft.ico);
-        }
-        return;
+      const { draft } = result;
+      setSource("ares");
+      setName(draft.name);
+      setDic(draft.dic ?? "");
+      setStreet(draft.address.street);
+      setCity(draft.address.city);
+      setZip(draft.address.zip);
+      setCountry(draft.address.country);
+      setContactEmail(draft.contactEmail ?? "");
+      if (draft.ico !== undefined && draft.ico.length > 0) {
+        setIcoInput(draft.ico);
       }
-      setLookupMsg(aresErrorHuman(payload));
     } finally {
       setLookingUp(false);
     }
@@ -126,14 +112,14 @@ export function ClientEditorForm({
   }
 
   const userMsg =
-    lookupMsg ?? lookupMessageFromInvalid(invalidQuery ?? undefined);
+    lookupMsg ?? lookupMessageFromInvalid(invalidQuery ?? undefined, tErr);
 
   return (
     <form className="mx-auto max-w-xl space-y-6" onSubmit={onSubmit}>
       {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
 
       <div className="space-y-2">
-        <Label htmlFor="client-ico">IČO (ARES)</Label>
+        <Label htmlFor="client-ico">{t("ico")}</Label>
         <div className="flex flex-wrap gap-2">
           <Input
             id="client-ico"
@@ -154,16 +140,13 @@ export function ClientEditorForm({
             type="button"
             variant="secondary"
           >
-            {lookingUp ? "Hledám…" : "Vyhledat v ARES"}
+            {lookingUp ? t("lookingUp") : t("lookup")}
           </Button>
         </div>
-        <p className="text-muted-foreground text-xs">
-          Údaje můžete načíst z ARES nebo zadat ručně, například u zahraničního
-          klienta.
-        </p>
+        <p className="text-muted-foreground text-xs">{t("icoHint")}</p>
       </div>
 
-      <FieldGroup label="Název">
+      <FieldGroup label={t("name")}>
         <Input
           onChange={(ev) => {
             setName(ev.target.value);
@@ -173,7 +156,7 @@ export function ClientEditorForm({
         />
       </FieldGroup>
 
-      <FieldGroup label="DIČ">
+      <FieldGroup label={t("dic")}>
         <Input
           onChange={(ev) => {
             setDic(ev.target.value);
@@ -183,7 +166,7 @@ export function ClientEditorForm({
       </FieldGroup>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <FieldGroup label="Ulice a číslo">
+        <FieldGroup label={t("street")}>
           <Input
             onChange={(ev) => {
               setStreet(ev.target.value);
@@ -192,7 +175,7 @@ export function ClientEditorForm({
             value={street}
           />
         </FieldGroup>
-        <FieldGroup label="Město">
+        <FieldGroup label={t("city")}>
           <Input
             onChange={(ev) => {
               setCity(ev.target.value);
@@ -204,7 +187,7 @@ export function ClientEditorForm({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <FieldGroup label="PSČ">
+        <FieldGroup label={t("zip")}>
           <Input
             onChange={(ev) => {
               setZip(ev.target.value);
@@ -213,7 +196,7 @@ export function ClientEditorForm({
             value={zip}
           />
         </FieldGroup>
-        <FieldGroup label="Stát (ISO)">
+        <FieldGroup label={t("country")}>
           <Input
             maxLength={2}
             onChange={(ev) => {
@@ -225,7 +208,7 @@ export function ClientEditorForm({
         </FieldGroup>
       </div>
 
-      <FieldGroup label="Kontaktní e-mail">
+      <FieldGroup label={t("contactEmail")}>
         <Input
           onChange={(ev) => {
             setContactEmail(ev.target.value);
@@ -237,10 +220,12 @@ export function ClientEditorForm({
 
       <div className="flex gap-2">
         <Button disabled={lookingUp} loading={saving} type="submit">
-          {saving ? "Ukládám…" : "Uložit"}
+          {saving ? t("saving") : t("save")}
         </Button>
         <span className="text-muted-foreground flex items-center text-xs">
-          Zdroj: {source === "ares" ? "ARES" : "Ručně"}
+          {t("source", {
+            source: source === "ares" ? t("sourceAres") : t("sourceManual"),
+          })}
         </span>
       </div>
     </form>
@@ -266,41 +251,4 @@ function FieldGroup(props: { label: string; children: React.ReactNode }) {
       {children}
     </div>
   );
-}
-
-function lookupMessageFromInvalid(
-  inv: string | null | undefined,
-): string | null {
-  if (!inv) {
-    return null;
-  }
-  if (inv === "required_fields") {
-    return "Vyplňte povinná pole.";
-  }
-  if (inv === "bad_ico") {
-    return "Neplatné IČO.";
-  }
-  if (inv === "bad_dic") {
-    return "Neplatné DIČ.";
-  }
-  if (inv === "snapshot_validation") {
-    return "Údaje neodpovídají fakturačnímu schématu.";
-  }
-  if (inv === "missing_row") {
-    return "Záznam nenalezen.";
-  }
-  return `Chyba: ${inv}`;
-}
-
-function aresErrorHuman(payload: unknown): string {
-  if (!payload || typeof payload !== "object") {
-    return "ARES nevrátila data.";
-  }
-  const maybe = payload as {
-    message?: unknown;
-  };
-  if ("message" in maybe && typeof maybe.message === "string") {
-    return maybe.message;
-  }
-  return "Vyhledání v ARES se nezdařilo.";
 }

@@ -9,12 +9,14 @@ import {
 import {
   ClientSnapshotSchema,
   InvoiceCurrencySchema,
+  InvoiceLanguageSchema,
   InvoiceMetaSchema,
   InvoiceSchema,
   InvoiceVatSchema,
   PaymentSchema,
   type Invoice,
   type InvoiceCurrency,
+  type InvoiceLanguage,
   type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
 
@@ -102,7 +104,10 @@ export function normalizeDraftToInvoice(
       typeof metaRaw.duzp === "string" && metaRaw.duzp.length > 0
         ? metaRaw.duzp
         : issueDate,
-    language: "cs" as const,
+    language: (() => {
+      const parsed = InvoiceLanguageSchema.safeParse(metaRaw.language);
+      return parsed.success ? parsed.data : ("cs" as InvoiceLanguage);
+    })(),
     currency: (() => {
       const parsed = InvoiceCurrencySchema.safeParse(metaRaw.currency);
       return parsed.success ? parsed.data : ("CZK" as InvoiceCurrency);

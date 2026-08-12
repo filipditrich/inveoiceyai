@@ -3,14 +3,18 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { getOptionalWorkspace, requireSession } from "@/lib/auth/session";
 import { Building2Icon, CheckCircle2Icon } from "lucide-react";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { createFirstWorkspace } from "./actions";
 
-export const metadata: Metadata = {
-  title: "Nastavení pracovního prostoru",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Onboarding.meta");
+  return {
+    title: t("title"),
+    robots: { index: false, follow: false },
+  };
+}
 
 /**
  * Reached only when a signed-in user has no workspace at all. Normally
@@ -22,6 +26,7 @@ export default async function OnboardingPage() {
   if (await getOptionalWorkspace()) {
     redirect("/dashboard");
   }
+  const t = await getTranslations("Onboarding");
 
   return (
     <AuthShell>
@@ -30,20 +35,13 @@ export default async function OnboardingPage() {
           <Building2Icon className="size-5" />
         </span>
         <h1 className="mt-6 text-3xl font-semibold tracking-[-0.035em]">
-          Dokončete pracovní prostor
+          {t("title")}
         </h1>
         <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
-          Účet{" "}
-          <strong className="text-foreground font-medium">{user.email}</strong>{" "}
-          je přihlášený, ale nemá pracovní prostor. Obvykle jej vytvoříme
-          automaticky; tímto krokem dokončíte přerušené nastavení.
+          {t("subtitle", { email: user.email })}
         </p>
         <div className="bg-muted/30 mt-6 space-y-2 rounded-2xl border p-4 text-sm">
-          {[
-            "Soukromý prostor pro vaše faktury",
-            "Role vlastníka pracovního prostoru",
-            "Možnost přidat první dodavatelskou firmu",
-          ].map((item) => (
+          {[t("benefit1"), t("benefit2"), t("benefit3")].map((item) => (
             <p key={item} className="flex items-center gap-2">
               <CheckCircle2Icon className="text-primary size-4" />
               {item}
@@ -51,8 +49,8 @@ export default async function OnboardingPage() {
           ))}
         </div>
         <form action={createFirstWorkspace} className="mt-7">
-          <SubmitButton className="h-11 w-full" pendingLabel="Vytvářím…">
-            Vytvořit můj pracovní prostor
+          <SubmitButton className="h-11 w-full" pendingLabel={t("creating")}>
+            {t("submit")}
           </SubmitButton>
         </form>
       </div>

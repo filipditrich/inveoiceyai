@@ -1,6 +1,7 @@
 import { Button, Text } from "@react-email/components";
 import * as React from "react";
 
+import { systemEmailCopy, type EmailLocale } from "../copy";
 import { EmailShell } from "../components/email-shell";
 
 export type WorkspaceInviteEmailProps = {
@@ -8,61 +9,54 @@ export type WorkspaceInviteEmailProps = {
   inviterName: string;
   inviteUrl: string;
   role: string;
-  /** prague-local expiry label for czech copy */
   expiresAtLabel?: string | null;
+  locale?: EmailLocale;
 };
 
-function roleLabel(role: string): string {
+function roleLabel(role: string, locale: EmailLocale): string {
+  const copy = systemEmailCopy(locale);
   switch (role) {
     case "admin":
-      return "správce";
+      return copy.roleAdmin;
     case "owner":
-      return "vlastník";
+      return copy.roleOwner;
     case "member":
-      return "člen";
+      return copy.roleMember;
     default:
       return role;
   }
 }
 
 export function WorkspaceInviteEmail(props: WorkspaceInviteEmailProps) {
-  const title = `Pozvánka do ${props.workspaceName}`;
-  const role = roleLabel(props.role);
+  const locale = props.locale ?? "cs";
+  const copy = systemEmailCopy(locale);
+  const title = copy.inviteTitle(props.workspaceName);
+  const role = roleLabel(props.role, locale);
 
   return (
     <EmailShell
-      preview={`${props.inviterName} vás zve do workspace ${props.workspaceName}`}
+      locale={locale}
+      preview={copy.invitePreview(props.inviterName, props.workspaceName)}
       title={title}
       variant="system"
     >
       <Text style={bodyText}>
-        Dobrý den, <strong>{props.inviterName}</strong> vás zve do pracovního
-        prostoru <strong>{props.workspaceName}</strong> v Invoicey jako{" "}
-        <strong>{role}</strong>.
+        {copy.inviteBody1(props.inviterName, props.workspaceName, role)}
       </Text>
-      <Text style={bodyText}>
-        Po přijetí uvidíte faktury, klienty a nastavení tohoto pracovního
-        prostoru podle své role. Přihlaste se účtem se stejným e-mailem, na
-        který přišla tato pozvánka.
-      </Text>
+      <Text style={bodyText}>{copy.inviteBody2}</Text>
       {props.expiresAtLabel ? (
-        <Text style={bodyText}>
-          Pozvánka platí do <strong>{props.expiresAtLabel}</strong> (časové
-          pásmo Evropa/Praha).
-        </Text>
+        <Text style={bodyText}>{copy.inviteExpiry(props.expiresAtLabel)}</Text>
       ) : null}
-      <Text style={bodyText}>Kliknutím na tlačítko pozvánku otevřete:</Text>
+      <Text style={bodyText}>{copy.inviteCtaLead}</Text>
       <Button href={props.inviteUrl} style={button}>
-        Přijmout pozvánku
+        {copy.inviteAccept}
       </Button>
       <Text style={muted}>
-        Pokud tlačítko nefunguje, otevřete odkaz v prohlížeči:
+        {copy.inviteLinkFallback}
         <br />
         {props.inviteUrl}
       </Text>
-      <Text style={muted}>
-        Pokud jste tuto pozvánku neočekávali, e-mail můžete ignorovat.
-      </Text>
+      <Text style={muted}>{copy.inviteIgnore}</Text>
     </EmailShell>
   );
 }

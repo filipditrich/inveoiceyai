@@ -1,6 +1,7 @@
 import { Text } from "@react-email/components";
 import * as React from "react";
 
+import { invoiceEmailCopy, type EmailLocale } from "../copy";
 import { EmailShell } from "../components/email-shell";
 import { InvoiceSummary } from "../components/invoice-summary";
 
@@ -12,23 +13,25 @@ export type OverdueReminderEmailProps = {
   clientName: string;
   issuerName: string;
   invoiceUrl?: string;
+  locale?: EmailLocale;
 };
 
 export function OverdueReminderEmail(props: OverdueReminderEmailProps) {
-  const title = `Připomínka: faktura ${props.number}`;
+  const locale = props.locale ?? "cs";
+  const copy = invoiceEmailCopy(locale);
+  const title = copy.overdueTitle(props.number);
 
   return (
     <EmailShell
-      preview={`Faktura ${props.number} je po splatnosti`}
+      locale={locale}
+      preview={copy.overduePreview(props.number)}
       title={title}
       variant="invoice"
     >
       <Text style={bodyText}>
-        Dobrý den, dovolujeme si připomenout, že faktura{" "}
-        <strong>{props.number}</strong> od {props.issuerName} je po splatnosti (
-        {props.dueDate}).
+        {copy.overdueBody(props.number, props.issuerName, props.dueDate)}
       </Text>
-      <InvoiceSummary {...props} />
+      <InvoiceSummary {...props} locale={locale} />
     </EmailShell>
   );
 }

@@ -2,7 +2,7 @@
 
 ## Status
 
-Superseded in part by [ADR 0026](0026-multi-currency-without-fx.md) for currency enum (language still Czech-only).
+Superseded in part by [ADR 0026](0026-multi-currency-without-fx.md) for currency and [ADR 0028](0028-per-invoice-language.md) for invoice language.
 
 ## Context
 

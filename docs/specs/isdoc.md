@@ -6,8 +6,8 @@ Serialize a validated [`Invoice`](../../packages/invoice-core/src/schema.ts) to 
 
 ## XSD vendoring
 
-| File | Source |
-| --- | --- |
+| File                                                           | Source                                                                                                                                                                                                                 |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/invoice-core/assets/schemas/isdoc-invoice-6.0.2.xsd` | Official schema from MVČR distribution; mirrored at `https://raw.githubusercontent.com/isdoc/isdoc.github.io/main/xsd/isdoc-invoice-6.0.2.xsd` (same checksum as bundled file; update when MV publishes new revision). |
 
 The schema is **self-contained** (no external `xs:import`). Root element **`Invoice`** in the default namespace `http://isdoc.cz/namespace/2013`; `xmlns:xsi`, `xmlns:xs` omitted except `xsi` if needed — follow generated pattern with default namespace prefixes.
@@ -21,8 +21,8 @@ If wasm init fails unexpectedly, CI should fail visibly (no silent skip).
 
 ## API
 
-| Name | Output |
-| --- | --- |
+| Name                   | Output                                                                |
+| ---------------------- | --------------------------------------------------------------------- |
 | `renderIsdoc(invoice)` | `string` (XML declaration + document), UTF-8, Unix `LF` only, no BOM. |
 
 ## Stable serialization
@@ -34,12 +34,12 @@ If wasm init fails unexpectedly, CI should fail visibly (no silent skip).
 
 ## `DocumentType` mapping (`meta.docType`)
 
-| Invoicey | ISDOC `DocumentType` (integer) |
-| --- | --- |
-| `invoice` | `1` |
-| `credit_note` | `2` (dobropis) |
-| `proforma` | `4` (nedaňový zálohový list) |
-| `advance` | `5` (daňový zálohový list) |
+| Invoicey      | ISDOC `DocumentType` (integer) |
+| ------------- | ------------------------------ |
+| `invoice`     | `1`                            |
+| `credit_note` | `2` (dobropis)                 |
+| `proforma`    | `4` (nedaňový zálohový list)   |
+| `advance`     | `5` (daňový zálohový list)     |
 
 `3` (vrubopis) and `6`/`7` unused in MVP.
 
@@ -47,24 +47,24 @@ If wasm init fails unexpectedly, CI should fail visibly (no silent skip).
 
 Per XSD `Invoice` sequence (non-exhaustive — implementation fills all **required** elements):
 
-| Element | Rule |
-| --- | --- |
-| `DocumentType` | Above mapping |
-| `ID` | `meta.number` |
-| `UUID` | Deterministic UUID **v5** from namespace URL + `issuer.id` + `meta.number` + `meta.issueDate` (stable across re-renders) |
-| `IssueDate` | `meta.issueDate` |
-| `TaxPointDate` | `meta.duzp` for doc types **1–3,5–6**; for `proforma` (4) **omit** `TaxPointDate` (`minOccurs=0`) |
-| `VATApplicable` | `issuer.vatPayer` mapped to XSD boolean lexical (`true` / `false`) |
+| Element                                   | Rule                                                                                                                            |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `DocumentType`                            | Above mapping                                                                                                                   |
+| `ID`                                      | `meta.number`                                                                                                                   |
+| `UUID`                                    | Deterministic UUID **v5** from namespace URL + `issuer.id` + `meta.number` + `meta.issueDate` (stable across re-renders)        |
+| `IssueDate`                               | `meta.issueDate`                                                                                                                |
+| `TaxPointDate`                            | `meta.duzp` for doc types **1–3,5–6**; for `proforma` (4) **omit** `TaxPointDate` (`minOccurs=0`)                               |
+| `VATApplicable`                           | `issuer.vatPayer` mapped to XSD boolean lexical (`true` / `false`)                                                              |
 | `ElectronicPossibilityAgreementReference` | **Required** in XSD → emit empty string (`<ElectronicPossibilityAgreementReference></ElectronicPossibilityAgreementReference>`) |
 
 ## Monetary / currency defaults
 
 For MVP invoices are **always CZK** (`meta.currency === 'CZK'`):
 
-| Element | Value |
-| --- | --- |
-| `LocalCurrencyCode` | `CZK` |
-| `CurrRate` / `RefCurrRate` | `1` |
+| Element                    | Value |
+| -------------------------- | ----- |
+| `LocalCurrencyCode`        | `CZK` |
+| `CurrRate` / `RefCurrRate` | `1`   |
 | Omit `ForeignCurrencyCode` |
 
 ## Parties
@@ -102,17 +102,17 @@ For each `items[]` (sorted by `position`):
 
 ## `PaymentMeans`
 
-| `payment.method` | `PaymentMeansCode` | `Details` |
-| --- | --- | --- |
-| `transfer` | `42` | Transfer branch: `PaymentDueDate`, BankAccount group (`ID` = local account number, `BankCode`, `Name`, `IBAN`, `BIC` — empty string when BIC unknown; XSD requires the element), then optional `VariableSymbol` / `ConstantSymbol` / `SpecificSymbol` |
-| `cash` | `10` | Cash/card branch: stub `DocumentID` + `IssueDate` |
-| `card` | `48` | Same stub branch as cash |
+| `payment.method` | `PaymentMeansCode` | `Details`                                                                                                                                                                                                                                             |
+| ---------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transfer`       | `42`               | Transfer branch: `PaymentDueDate`, BankAccount group (`ID` = local account number, `BankCode`, `Name`, `IBAN`, `BIC` — empty string when BIC unknown; XSD requires the element), then optional `VariableSymbol` / `ConstantSymbol` / `SpecificSymbol` |
+| `cash`           | `10`               | Cash/card branch: stub `DocumentID` + `IssueDate`                                                                                                                                                                                                     |
+| `card`           | `48`               | Same stub branch as cash                                                                                                                                                                                                                              |
 
 `parseCzAccountNumber` splits `accountNumber` (`prefix-num/bank` or `num/bank`); invalid input **throws** (validated invoices already match `BankAccountSchema`).
 
 ## Notes
 
-- Concatenate `vat.legalNote`, `notes`, credit reference `correctedInvoiceNumber` into one `Note` (newlines).
+- Concatenate `vat.legalNote`, `notes`, credit reference `correctedInvoiceNumber` into one `Note` (newlines). Set `Note/@languageID` from `meta.language` (`cs` | `en`). Import reads `@languageID` when present; otherwise `cs`.
 - **Reverse charge / OSS:** `TaxSubTotal` + `Note` / `VATNote` carry legal text from `vat.legalNote` or defaults from [vat-czech.md](../domain/vat-czech.md).
 
 ## ISDOC embedded in PDF
@@ -127,11 +127,11 @@ Recommended download suffix: `-isdoc.pdf`. Standalone `.isdoc` via `renderIsdoc`
 
 ## Import (parse)
 
-| API | Role |
-| --- | --- |
-| `extractIsdocFromPdf(bytes)` | Read EmbeddedFiles / AF attachment named `invoice.isdoc` (or `*.isdoc`) |
-| `parseIsdoc(xml, { issuer })` | Map ISDOC 6.0.x → `InvoiceSchema` (issuer locked from workspace) |
-| `readPdfOriginHints(bytes)` | Producer/Creator/Keywords for origin heuristics |
+| API                           | Role                                                                    |
+| ----------------------------- | ----------------------------------------------------------------------- |
+| `extractIsdocFromPdf(bytes)`  | Read EmbeddedFiles / AF attachment named `invoice.isdoc` (or `*.isdoc`) |
+| `parseIsdoc(xml, { issuer })` | Map ISDOC 6.0.x → `InvoiceSchema` (issuer locked from workspace)        |
+| `readPdfOriginHints(bytes)`   | Producer/Creator/Keywords for origin heuristics                         |
 
 Round-trip tests: Invoicey fixtures `renderIsdoc` → `parseIsdoc`. Product flow: [`invoice-import.md`](./invoice-import.md).
 

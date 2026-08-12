@@ -12,6 +12,7 @@ import {
   InvoiceSchema,
   renderInvoicePdf,
   renderIsdoc,
+  toInvoiceIntlLocale,
   type Invoice,
 } from "@invoicey/invoice-core";
 import {
@@ -33,9 +34,13 @@ export {
   sendPaymentReceivedEmailIfEnabled,
 } from "@invoicey/invoice-tools/email";
 
-function formatTotalLabel(total: string | number, currency: string): string {
+function formatTotalLabel(
+  total: string | number,
+  currency: string,
+  language: Invoice["meta"]["language"],
+): string {
   const n = typeof total === "number" ? total : Number(total);
-  const formatted = new Intl.NumberFormat("cs-CZ", {
+  const formatted = new Intl.NumberFormat(toInvoiceIntlLocale(language), {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(Number.isFinite(n) ? n : 0);
@@ -126,14 +131,17 @@ export async function sendOverdueReminderForInvoice(opts: {
       ),
     )
     .limit(1);
-  const settings = resolveIssuerEmailSettings(issuerRow?.emailSettings);
+  const parsed = InvoiceSchema.safeParse(row.payloadJson);
+  if (!parsed.success) return { ok: false, error: "invalid_payload" };
+  const invoice = parsed.data;
+  const settings = resolveIssuerEmailSettings(
+    issuerRow?.emailSettings,
+    invoice.meta.language,
+  );
   if (!settings.overdueRemindersEnabled) {
     return { ok: false, error: "reminders_disabled" };
   }
 
-  const parsed = InvoiceSchema.safeParse(row.payloadJson);
-  if (!parsed.success) return { ok: false, error: "invalid_payload" };
-  const invoice = parsed.data;
   const to = invoice.client.contactEmail?.trim().toLowerCase();
   if (!to || !isValidEmailAddress(to)) {
     return { ok: false, error: "missing_recipient" };
@@ -166,10 +174,15 @@ export async function sendOverdueReminderForInvoice(opts: {
     number,
     issueDate: row.issueDate,
     dueDate: row.dueDate,
-    totalLabel: formatTotalLabel(row.total, row.currency),
+    totalLabel: formatTotalLabel(
+      row.total,
+      row.currency,
+      invoice.meta.language,
+    ),
     clientName: row.clientName,
     issuerName: invoice.issuer.name,
     invoiceUrl: appUrl ? `${appUrl}/invoices/${row.id}` : undefined,
+    locale: invoice.meta.language,
   });
 
   const attachments = await buildInvoiceAttachments({

@@ -3,10 +3,11 @@
 import { saveIssuerAssets } from "@/actions/issuers";
 import {
   AssetField,
-  lookupMessageFromInvalid,
   SubmitRow,
+  useInvalidQueryMessage,
 } from "@/components/issuers/issuer-form-shared";
 import type { IssuerSnapshot } from "@invoicey/invoice-core/schema";
+import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import * as React from "react";
 
@@ -15,6 +16,7 @@ export function IssuerAssetsForm(props: {
   uploadConfigured: boolean;
   invalidQuery?: string | null;
 }) {
+  const t = useTranslations("Issuers.form");
   const { snapshot, uploadConfigured } = props;
   const [pending, startTransition] = React.useTransition();
   const [logoUrl, setLogoUrl] = React.useState(snapshot.logoUrl ?? "");
@@ -22,7 +24,7 @@ export function IssuerAssetsForm(props: {
   const [signatureUrl, setSignatureUrl] = React.useState(
     snapshot.signatureUrl ?? "",
   );
-  const userMsg = lookupMessageFromInvalid(props.invalidQuery);
+  const userMsg = useInvalidQueryMessage(props.invalidQuery);
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -47,26 +49,25 @@ export function IssuerAssetsForm(props: {
       {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
       {!uploadConfigured ? (
         <p className="text-muted-foreground text-xs">
-          UploadThing není nakonfigurován (`UPLOADTHING_TOKEN`) — vložte URL
-          ručně, nebo nastavte token.
+          {t("uploadTokenMissing")}
         </p>
       ) : null}
       <AssetField
-        label="Logo"
+        label={t("logo")}
         onUrl={setLogoUrl}
         endpoint="issuerLogo"
         uploadConfigured={uploadConfigured}
         url={logoUrl}
       />
       <AssetField
-        label="Razítko"
+        label={t("stamp")}
         onUrl={setStampUrl}
         endpoint="issuerStamp"
         uploadConfigured={uploadConfigured}
         url={stampUrl}
       />
       <AssetField
-        label="Podpis"
+        label={t("signature")}
         onUrl={setSignatureUrl}
         endpoint="issuerSignature"
         uploadConfigured={uploadConfigured}

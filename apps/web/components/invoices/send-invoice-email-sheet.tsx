@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { MailIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import * as React from "react";
 
 export type SendInvoiceEmailSheetProps = {
@@ -29,6 +30,7 @@ export type SendInvoiceEmailSheetProps = {
 };
 
 export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
+  const t = useTranslations("Invoices.email");
   const [open, setOpen] = React.useState(false);
   const [to, setTo] = React.useState(props.defaultTo);
   const suppressedSet = new Set(
@@ -42,35 +44,30 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
         render={
           <Button size="sm" type="button" variant="outline">
             <MailIcon data-icon="inline-start" />
-            Odeslat e-mailem
+            {t("send")}
           </Button>
         }
       />
       <SheetContent className="overflow-y-auto sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>Odeslat fakturu</SheetTitle>
-          <SheetDescription>
-            PDF se připojí vždy. ISDOC lze vypnout.
-          </SheetDescription>
+          <SheetTitle>{t("title")}</SheetTitle>
+          <SheetDescription>{t("description")}</SheetDescription>
         </SheetHeader>
 
         {!props.emailConfigured ? (
-          <p className="text-destructive px-4 text-sm">
-            RESEND_API_KEY není nastavený — odeslání nebude fungovat.
-          </p>
+          <p className="text-destructive px-4 text-sm">{t("notConfigured")}</p>
         ) : null}
 
         {toSuppressed ? (
           <p className="text-muted-foreground px-4 text-sm">
-            Adresa je na suppress seznamu (bounce/complaint). Manuální odeslání
-            je stále možné.
+            {t("suppressed")}
           </p>
         ) : null}
 
         <form action={sendInvoiceEmail} className="space-y-4 px-4 pb-6">
           <input name="id" type="hidden" value={props.invoiceId} />
           <div className="space-y-1.5">
-            <Label htmlFor="email-to">Komu</Label>
+            <Label htmlFor="email-to">{t("to")}</Label>
             <Input
               id="email-to"
               name="to"
@@ -83,7 +80,7 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="email-cc">Kopie (volitelné)</Label>
+            <Label htmlFor="email-cc">{t("cc")}</Label>
             <Input
               id="email-cc"
               name="cc"
@@ -92,7 +89,7 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="email-subject">Předmět</Label>
+            <Label htmlFor="email-subject">{t("subject")}</Label>
             <Input
               defaultValue={props.defaultSubject}
               id="email-subject"
@@ -101,7 +98,7 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="email-cover">Text zprávy</Label>
+            <Label htmlFor="email-cover">{t("coverText")}</Label>
             <textarea
               className="border-input bg-background min-h-32 w-full rounded-md border px-3 py-2 text-sm"
               defaultValue={props.defaultCoverText}
@@ -117,21 +114,21 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
               type="checkbox"
               value="true"
             />
-            Přiložit ISDOC
+            {t("attachIsdoc")}
           </label>
           <div className="text-muted-foreground space-y-1 text-xs">
             <p>
-              <strong>From:</strong> {props.fromPreview}
+              <strong>{t("from")}:</strong> {props.fromPreview}
             </p>
             <p>
-              <strong>Reply-To:</strong> {props.replyTo}
+              <strong>{t("replyTo")}:</strong> {props.replyTo}
             </p>
           </div>
           <SubmitButton
             disabled={!props.emailConfigured}
-            pendingLabel="Odesílám…"
+            pendingLabel={t("sending")}
           >
-            Odeslat
+            {t("submit")}
           </SubmitButton>
         </form>
       </SheetContent>

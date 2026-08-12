@@ -1,8 +1,9 @@
 import "server-only";
 
-import { renderNewSignInEmail } from "@invoicey/emails";
+import { emailLocale, renderNewSignInEmail } from "@invoicey/emails";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
+import { getLocale } from "next-intl/server";
 
 import { getResendClient } from "./client";
 import { sendTransactionalEmail } from "./send";
@@ -28,6 +29,7 @@ export async function sendNewSignInEmail(opts: {
     signedInAt: opts.signedInAt,
     trustUrl: opts.trustUrl,
     securitySettingsUrl: opts.securitySettingsUrl,
+    locale: emailLocale(await getLocale()),
   });
 
   await sendTransactionalEmail({

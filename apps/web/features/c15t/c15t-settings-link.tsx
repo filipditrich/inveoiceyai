@@ -1,16 +1,18 @@
 "use client";
 
 import { useHeadlessConsentUI } from "@c15t/react";
+import { useTranslations } from "next-intl";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/lib/utils";
 
 export function C15tSettingsLink({
   className,
-  children = "Nastavení cookies",
+  children,
   onClick,
   ...props
 }: ComponentProps<"button">) {
+  const t = useTranslations("Marketing.footer");
   const { openDialog } = useHeadlessConsentUI();
 
   return (
@@ -23,7 +25,7 @@ export function C15tSettingsLink({
         if (!event.defaultPrevented) openDialog();
       }}
     >
-      {children}
+      {children ?? t("cookieSettings")}
     </button>
   );
 }

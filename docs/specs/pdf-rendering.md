@@ -2,15 +2,15 @@
 
 ## Goal
 
-Produce Czech-language invoice PDFs from a validated [`Invoice`](../../packages/invoice-core/src/schema.ts): readable layout with optional logo/stamp/signature, line table, VAT recap (when applicable), payment block, and embedded SPAYD QR. Single template; no template editor in MVP.
+Produce invoice PDFs from a validated [`Invoice`](../../packages/invoice-core/src/schema.ts): readable layout with optional logo/stamp/signature, line table, VAT recap (when applicable), payment block, and embedded SPAYD QR. Labels and `Intl` formatting follow `meta.language` (`cs` | `en`, [ADR 0028](../decisions/0028-per-invoice-language.md)). Single template; no template editor.
 
 ## Inputs / outputs
 
-| Name | Type | Notes |
-| --- | --- | --- |
-| `renderInvoicePdf(invoice)` | `Promise<Uint8Array>` | Visual PDF + embedded `invoice.isdoc`. Assumes `InvoiceSchema` already satisfied. |
-| `renderVisualInvoicePdf(invoice)` | `Promise<Uint8Array>` | Visual page only (no ISDOC attachment). |
-| `embedIsdocInPdf(pdf, xml)` | `Promise<Uint8Array>` | `pdf-lib` attach helper used by `renderInvoicePdf`. |
+| Name                              | Type                  | Notes                                                                             |
+| --------------------------------- | --------------------- | --------------------------------------------------------------------------------- |
+| `renderInvoicePdf(invoice)`       | `Promise<Uint8Array>` | Visual PDF + embedded `invoice.isdoc`. Assumes `InvoiceSchema` already satisfied. |
+| `renderVisualInvoicePdf(invoice)` | `Promise<Uint8Array>` | Visual page only (no ISDOC attachment).                                           |
+| `embedIsdocInPdf(pdf, xml)`       | `Promise<Uint8Array>` | `pdf-lib` attach helper used by `renderInvoicePdf`.                               |
 
 ## Stack
 

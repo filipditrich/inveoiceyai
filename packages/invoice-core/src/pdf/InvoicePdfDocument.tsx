@@ -12,6 +12,11 @@ import React from "react";
 
 import type { Invoice, InvoiceCurrency, InvoiceItem } from "../schema";
 import { currencyDisplaySuffix } from "../schema";
+import {
+  invoiceLabels,
+  toInvoiceIntlLocale,
+  type InvoiceLabels,
+} from "../labels";
 import { parseInlineMarkdown } from "./inline-markdown";
 
 const INVOICEY_SITE_URL = "https://ditrich.me/";
@@ -406,31 +411,35 @@ const styles = StyleSheet.create({
   },
 });
 
-function fmtMoneyAmount(n: number): string {
-  return new Intl.NumberFormat("cs-CZ", {
+function fmtMoneyAmount(n: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(n);
 }
 
-function fmtMoneyWithCurrency(n: number, currency: InvoiceCurrency): string {
-  return `${fmtMoneyAmount(n)}\u00a0${currencyDisplaySuffix(currency)}`;
+function fmtMoneyWithCurrency(
+  n: number,
+  currency: InvoiceCurrency,
+  locale: string,
+): string {
+  return `${fmtMoneyAmount(n, locale)}\u00a0${currencyDisplaySuffix(currency)}`;
 }
 
-function fmtDateIsoLocal(dateIso: string): string {
+function fmtDateIsoLocal(dateIso: string, locale: string): string {
   const value = new Date(dateIso);
   if (Number.isNaN(value.getTime())) {
     return dateIso;
   }
-  return new Intl.DateTimeFormat("cs-CZ", {
+  return new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   }).format(value);
 }
 
-function fmtQty(n: number): string {
-  const s = n.toLocaleString("cs-CZ", {
+function fmtQty(n: number, locale: string): string {
+  const s = n.toLocaleString(locale, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 3,
   });
@@ -446,14 +455,17 @@ function formatIbanDisplay(iban: string): string {
   return chunks.join("\u00a0");
 }
 
-function paymentMethodLabel(method: Invoice["payment"]["method"]): string {
+function paymentMethodLabel(
+  method: Invoice["payment"]["method"],
+  labels: InvoiceLabels,
+): string {
   switch (method) {
     case "transfer":
-      return "Převodem";
+      return labels.payTransfer;
     case "cash":
-      return "Hotově";
+      return labels.payCashShort;
     case "card":
-      return "Kartou";
+      return labels.payCardShort;
     default: {
       const _never: never = method;
       return _never;
@@ -461,20 +473,20 @@ function paymentMethodLabel(method: Invoice["payment"]["method"]): string {
   }
 }
 
-function countryHuman(code: string): string {
-  return code === "CZ" ? "Česká republika" : code;
+function countryHuman(code: string, labels: InvoiceLabels): string {
+  return code === "CZ" ? labels.countryCz : code;
 }
 
-function docKindUpper(inv: Invoice): string {
+function docKindUpper(inv: Invoice, labels: InvoiceLabels): string {
   switch (inv.meta.docType) {
     case "invoice":
-      return "DAŇOVÝ DOKLAD";
+      return labels.docKindInvoice;
     case "credit_note":
-      return "DOBROPIS";
+      return labels.docKindCreditNote;
     case "proforma":
-      return "PROFORMA FAKTURA";
+      return labels.docKindProforma;
     case "advance":
-      return "ZÁLOHOVÁ FAKTURA";
+      return labels.docKindAdvance;
     default: {
       const _never: never = inv.meta.docType;
       return _never;
@@ -482,16 +494,16 @@ function docKindUpper(inv: Invoice): string {
   }
 }
 
-function invoicePdfMainTitle(inv: Invoice): string {
+function invoicePdfMainTitle(inv: Invoice, labels: InvoiceLabels): string {
   switch (inv.meta.docType) {
     case "invoice":
-      return `Faktura ${inv.meta.number}`;
+      return `${labels.titleInvoice} ${inv.meta.number}`;
     case "credit_note":
-      return `Dobropis ${inv.meta.number}`;
+      return `${labels.titleCreditNote} ${inv.meta.number}`;
     case "proforma":
-      return `Proforma faktura ${inv.meta.number}`;
+      return `${labels.titleProforma} ${inv.meta.number}`;
     case "advance":
-      return `Zálohová faktura ${inv.meta.number}`;
+      return `${labels.titleAdvance} ${inv.meta.number}`;
     default: {
       const _never: never = inv.meta.docType;
       return _never;
@@ -588,7 +600,12 @@ function PdfMarkdownText({
 function PdfInvoiceLineRow({
   item,
   currency,
-}: Readonly<{ item: InvoiceItem; currency: InvoiceCurrency }>) {
+  locale,
+}: Readonly<{
+  item: InvoiceItem;
+  currency: InvoiceCurrency;
+  locale: string;
+}>) {
   const { title, detail } = splitDescription(item.description);
   return (
     <View style={styles.lineRow}>
@@ -597,17 +614,17 @@ function PdfInvoiceLineRow({
         {detail ? <Text style={styles.lineSub}>{detail}</Text> : null}
       </View>
       <Text style={[styles.thQty, styles.cellFig, styles.cellRight]}>
-        {fmtQty(item.quantity)}
+        {fmtQty(item.quantity, locale)}
       </Text>
       <Text style={[styles.thUnit, styles.cellFig]}>{item.unit}</Text>
       <Text style={[styles.thUnitPx, styles.cellFig, styles.cellRight]}>
-        {fmtMoneyWithCurrency(item.unitPriceWithoutVat, currency)}
+        {fmtMoneyWithCurrency(item.unitPriceWithoutVat, currency, locale)}
       </Text>
       <Text
         style={[styles.thVat, styles.cellFig, styles.cellRight]}
       >{`${String(item.vatRate)}\u00a0%`}</Text>
       <Text style={[styles.thTot, styles.cellFigStrong, styles.cellRight]}>
-        {fmtMoneyWithCurrency(item.lineTotal, currency)}
+        {fmtMoneyWithCurrency(item.lineTotal, currency, locale)}
       </Text>
     </View>
   );
@@ -622,6 +639,8 @@ export function InvoicePdfDocument({
   invoice: inv,
   assets,
 }: InvoicePdfDocumentProps) {
+  const labels = invoiceLabels(inv.meta.language);
+  const intlLocale = toInvoiceIntlLocale(inv.meta.language);
   const showStamp = inv.customization?.showStamp === true;
   const showSignature = inv.customization?.showSignature === true;
 
@@ -636,8 +655,8 @@ export function InvoicePdfDocument({
 
   const sortedItems = [...inv.items].sort((a, b) => a.position - b.position);
 
-  const issuerCountry = countryHuman(inv.issuer.address.country);
-  const clientCountry = countryHuman(inv.client.address.country);
+  const issuerCountry = countryHuman(inv.issuer.address.country, labels);
+  const clientCountry = countryHuman(inv.client.address.country, labels);
 
   const transfer = inv.payment.method === "transfer" && inv.payment.bankAccount;
   const hasQr = Boolean(assets.qrDataUrl);
@@ -649,7 +668,7 @@ export function InvoicePdfDocument({
     Boolean(inv.client.contactEmail);
 
   return (
-    <Document title={invoicePdfMainTitle(inv)} creator="Invoicey">
+    <Document title={invoicePdfMainTitle(inv, labels)} creator="Invoicey">
       <Page size="A4" style={styles.page}>
         <View style={styles.mainColumn}>
           <View style={styles.upperSheet}>
@@ -665,9 +684,11 @@ export function InvoicePdfDocument({
                 <View style={styles.heroMin}>
                   <View style={styles.titleColRule} />
                   <Text style={styles.invoiceTitle}>
-                    {invoicePdfMainTitle(inv)}
+                    {invoicePdfMainTitle(inv, labels)}
                   </Text>
-                  <Text style={styles.docKindMicro}>{docKindUpper(inv)}</Text>
+                  <Text style={styles.docKindMicro}>
+                    {docKindUpper(inv, labels)}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -675,7 +696,7 @@ export function InvoicePdfDocument({
             <View style={styles.partyPairRow}>
               <View style={styles.partyCol}>
                 <View style={styles.sectionHairShort} />
-                <Text style={styles.sectionCaps}>DODAVATEL</Text>
+                <Text style={styles.sectionCaps}>{labels.supplier}</Text>
                 <Text style={styles.partyName}>{inv.issuer.name}</Text>
                 <Text style={styles.partyAddr}>
                   {inv.issuer.address.street}
@@ -687,12 +708,14 @@ export function InvoicePdfDocument({
                 </Text>
                 <Text style={styles.partyAddrTight}>{issuerCountry}</Text>
                 <View style={styles.kvBlock}>
-                  <PdfKv first k="IČO" v={inv.issuer.ico} />
+                  <PdfKv first k={labels.ico} v={inv.issuer.ico} />
                   {inv.issuer.vatPayer && inv.issuer.dic ? (
-                    <PdfKv k="DIČ" v={inv.issuer.dic} />
+                    <PdfKv k={labels.dic} v={inv.issuer.dic} />
                   ) : null}
-                  {!inv.issuer.vatPayer ? <PdfKv k="DPH" v="Neplátce" /> : null}
-                  <PdfKv k="Kontaktní email" v={inv.issuer.contactEmail} />
+                  {!inv.issuer.vatPayer ? (
+                    <PdfKv k={labels.vat} v={labels.nonVatPayer} />
+                  ) : null}
+                  <PdfKv k={labels.contactEmail} v={inv.issuer.contactEmail} />
                 </View>
                 {inv.issuer.registryNote ? (
                   <Text style={[styles.partyAddrTight, { marginTop: 6 }]}>
@@ -701,26 +724,30 @@ export function InvoicePdfDocument({
                 ) : null}
                 <View style={styles.kvBlockGap}>
                   {transfer ? (
-                    <PdfKv first k="Bankovní účet" v={transfer.accountNumber} />
+                    <PdfKv
+                      first
+                      k={labels.bankAccount}
+                      v={transfer.accountNumber}
+                    />
                   ) : null}
                   {transfer && inv.payment.variableSymbol ? (
                     <PdfKv
                       first={false}
-                      k="Variabilní symbol"
+                      k={labels.variableSymbol}
                       v={inv.payment.variableSymbol}
                     />
                   ) : null}
                   <PdfKv
                     first={!transfer}
-                    k="Způsob platby"
-                    v={paymentMethodLabel(inv.payment.method)}
+                    k={labels.paymentMethod}
+                    v={paymentMethodLabel(inv.payment.method, labels)}
                   />
                 </View>
               </View>
 
               <View style={styles.partyCol}>
                 <View style={styles.sectionHairShort} />
-                <Text style={styles.sectionCaps}>ODBĚRATEL</Text>
+                <Text style={styles.sectionCaps}>{labels.customer}</Text>
                 <Text style={styles.partyName}>{inv.client.name}</Text>
                 <Text style={styles.partyAddr}>
                   {inv.client.address.street}
@@ -734,19 +761,19 @@ export function InvoicePdfDocument({
                 {showClientIdentifiers ? (
                   <View style={styles.kvBlock}>
                     {inv.client.ico ? (
-                      <PdfKv first k="IČO" v={inv.client.ico} />
+                      <PdfKv first k={labels.ico} v={inv.client.ico} />
                     ) : null}
                     {inv.client.dic ? (
                       <PdfKv
                         first={!inv.client.ico}
-                        k="DIČ"
+                        k={labels.dic}
                         v={inv.client.dic}
                       />
                     ) : null}
                     {inv.client.contactEmail ? (
                       <PdfKv
                         first={!inv.client.ico && !inv.client.dic}
-                        k="Kontaktní email"
+                        k={labels.contactEmail}
                         v={inv.client.contactEmail}
                       />
                     ) : null}
@@ -755,17 +782,17 @@ export function InvoicePdfDocument({
                 <View style={styles.kvBlockGap}>
                   <PdfKv
                     first
-                    k="Datum vystavení"
-                    v={fmtDateIsoLocal(inv.meta.issueDate)}
+                    k={labels.issueDate}
+                    v={fmtDateIsoLocal(inv.meta.issueDate, intlLocale)}
                   />
                   <PdfKv
-                    k="Datum splatnosti"
-                    v={fmtDateIsoLocal(inv.meta.dueDate)}
+                    k={labels.dueDate}
+                    v={fmtDateIsoLocal(inv.meta.dueDate, intlLocale)}
                   />
                   {showDuzp ? (
                     <PdfKv
-                      k="Datum zdan. plnění"
-                      v={fmtDateIsoLocal(inv.meta.duzp)}
+                      k={labels.taxPointDate}
+                      v={fmtDateIsoLocal(inv.meta.duzp, intlLocale)}
                     />
                   ) : null}
                 </View>
@@ -776,7 +803,7 @@ export function InvoicePdfDocument({
           {inv.meta.docType === "credit_note" &&
           inv.meta.correctedInvoiceNumber ? (
             <Text style={[styles.partyAddr, { marginTop: 8 }]}>
-              Opravuje doklad č.:{" "}
+              {labels.correctsDocument}{" "}
               <Text style={styles.creditInline}>
                 {inv.meta.correctedInvoiceNumber}
               </Text>
@@ -785,12 +812,16 @@ export function InvoicePdfDocument({
 
           <View style={styles.tableWrap}>
             <View style={styles.tableHeadRow}>
-              <Text style={[styles.th, styles.thDesc]}>POPIS</Text>
-              <Text style={[styles.th, styles.thQty]}>MN.</Text>
-              <Text style={[styles.th, styles.thUnit]}>{"J."}</Text>
-              <Text style={[styles.th, styles.thUnitPx]}>{"CENA ZA MJ"}</Text>
-              <Text style={[styles.th, styles.thVat]}>DPH</Text>
-              <Text style={[styles.th, styles.thTot]}>{"CELKEM"}</Text>
+              <Text style={[styles.th, styles.thDesc]}>
+                {labels.colDescription}
+              </Text>
+              <Text style={[styles.th, styles.thQty]}>{labels.colQty}</Text>
+              <Text style={[styles.th, styles.thUnit]}>{labels.colUnit}</Text>
+              <Text style={[styles.th, styles.thUnitPx]}>
+                {labels.colUnitPrice}
+              </Text>
+              <Text style={[styles.th, styles.thVat]}>{labels.colVat}</Text>
+              <Text style={[styles.th, styles.thTot]}>{labels.colTotal}</Text>
             </View>
             <View style={styles.tableRowsRule}>
               {sortedItems.map((it) => (
@@ -798,6 +829,7 @@ export function InvoicePdfDocument({
                   key={it.position}
                   currency={inv.meta.currency}
                   item={it}
+                  locale={intlLocale}
                 />
               ))}
             </View>
@@ -807,11 +839,12 @@ export function InvoicePdfDocument({
             {inv.issuer.vatPayer ? (
               <>
                 <View style={styles.totalLine}>
-                  <Text style={styles.totalLbl}>Celkem bez DPH</Text>
+                  <Text style={styles.totalLbl}>{labels.totalExVat}</Text>
                   <Text style={styles.totalFig}>
                     {fmtMoneyWithCurrency(
                       inv.totals.subtotal,
                       inv.meta.currency,
+                      intlLocale,
                     )}
                   </Text>
                 </View>
@@ -820,17 +853,20 @@ export function InvoicePdfDocument({
                       <PdfVatRow
                         key={`${row.rate}`}
                         currency={inv.meta.currency}
+                        labels={labels}
+                        locale={intlLocale}
                         row={row}
                       />
                     ))
                   : null}
                 {!showRecapDetail ? (
                   <View style={styles.totalLine}>
-                    <Text style={styles.totalLbl}>DPH</Text>
+                    <Text style={styles.totalLbl}>{labels.vat}</Text>
                     <Text style={styles.totalFig}>
                       {fmtMoneyWithCurrency(
                         inv.totals.vatTotal,
                         inv.meta.currency,
+                        intlLocale,
                       )}
                     </Text>
                   </View>
@@ -845,33 +881,35 @@ export function InvoicePdfDocument({
                   : [styles.totalGrand, styles.totalGrandNoVatIssuer]
               }
             >
-              <Text style={styles.totalGrandLbl}>K úhradě</Text>
+              <Text style={styles.totalGrandLbl}>{labels.amountDue}</Text>
               <Text style={styles.totalGrandFig}>
-                {fmtMoneyWithCurrency(inv.totals.total, inv.meta.currency)}
+                {fmtMoneyWithCurrency(
+                  inv.totals.total,
+                  inv.meta.currency,
+                  intlLocale,
+                )}
               </Text>
             </View>
           </View>
 
           {!inv.issuer.vatPayer ? (
-            <Text style={styles.legalMini}>Nejsem plátce DPH.</Text>
+            <Text style={styles.legalMini}>{labels.notVatPayerLegal}</Text>
           ) : null}
 
           {inv.vat.mode === "reverse_charge" ? (
             <View style={{ marginTop: 6 }}>
-              <Text style={styles.asideTitle}>Přenesená daňová povinnost</Text>
+              <Text style={styles.asideTitle}>{labels.reverseChargeTitle}</Text>
               <Text style={[styles.legalMini, { color: MUTED }]}>
-                {inv.vat.legalNote ??
-                  "Daň odvede zákazník dle § 92a zákona č. 235/2004 Sb."}
+                {inv.vat.legalNote ?? labels.reverseChargeDefault}
               </Text>
             </View>
           ) : null}
 
           {inv.vat.mode === "oss" ? (
             <View style={{ marginTop: 6 }}>
-              <Text style={styles.asideTitle}>Režim OSS</Text>
+              <Text style={styles.asideTitle}>{labels.ossTitle}</Text>
               <Text style={[styles.legalMini, { color: MUTED }]}>
-                {inv.vat.legalNote ??
-                  "Zdaněno v režimu jednoho registračního místa OSS (země příjemce)."}
+                {inv.vat.legalNote ?? labels.ossDefault}
               </Text>
             </View>
           ) : null}
@@ -901,12 +939,14 @@ export function InvoicePdfDocument({
                   : styles.paymentNoteCol
               }
             >
-              <Text style={styles.paySectionHeading}>PLATEBNÍ ÚDAJE</Text>
+              <Text style={styles.paySectionHeading}>
+                {labels.paymentDetails}
+              </Text>
               {transfer ? (
                 <View style={[styles.kvBlock, styles.paymentDetailKv]}>
                   <PdfPaymentKv
                     first
-                    k="Bankovní účet"
+                    k={labels.bankAccount}
                     v={transfer.accountNumber}
                   />
                   <PdfPaymentKv k="IBAN" v={formatIbanDisplay(transfer.iban)} />
@@ -915,36 +955,34 @@ export function InvoicePdfDocument({
                   ) : null}
                   {inv.payment.variableSymbol ? (
                     <PdfPaymentKv
-                      k="Variabilní symbol"
+                      k={labels.variableSymbol}
                       v={inv.payment.variableSymbol}
                     />
                   ) : null}
                   {inv.payment.constantSymbol ? (
                     <PdfPaymentKv
-                      k="Konstantní symbol"
+                      k={labels.constantSymbol}
                       v={inv.payment.constantSymbol}
                     />
                   ) : null}
                   {inv.payment.specificSymbol ? (
                     <PdfPaymentKv
-                      k="Specifický symbol"
+                      k={labels.specificSymbol}
                       v={inv.payment.specificSymbol}
                     />
                   ) : null}
                   <PdfPaymentKv
-                    k="Způsob platby"
-                    v={paymentMethodLabel(inv.payment.method)}
+                    k={labels.paymentMethod}
+                    v={paymentMethodLabel(inv.payment.method, labels)}
                   />
                   {hasQr ? (
-                    <Text style={styles.paymentHint}>
-                      Úhradu můžete provést naskenováním QR kódu.
-                    </Text>
+                    <Text style={styles.paymentHint}>{labels.qrHint}</Text>
                   ) : null}
                 </View>
               ) : inv.payment.method === "cash" ? (
-                <Text style={styles.payMethodTxt}>Platba v hotovosti</Text>
+                <Text style={styles.payMethodTxt}>{labels.payCash}</Text>
               ) : (
-                <Text style={styles.payMethodTxt}>Platba kartou</Text>
+                <Text style={styles.payMethodTxt}>{labels.payCard}</Text>
               )}
             </View>
           </View>
@@ -957,7 +995,7 @@ export function InvoicePdfDocument({
 
           {inv.notes ? (
             <View style={{ marginTop: 10 }}>
-              <Text style={styles.asideTitle}>Poznámka</Text>
+              <Text style={styles.asideTitle}>{labels.notes}</Text>
               <Text style={styles.legalMini}>{inv.notes}</Text>
             </View>
           ) : null}
@@ -981,7 +1019,7 @@ export function InvoicePdfDocument({
 
         <View fixed style={styles.footerRow} wrap={false}>
           <Link src={INVOICEY_SITE_URL} style={styles.footerBrand}>
-            Vystaveno přes{" "}
+            {labels.issuedVia}{" "}
             <Text style={styles.footerBrandStrong}>Invoicey</Text>
           </Link>
         </View>
@@ -993,12 +1031,21 @@ export function InvoicePdfDocument({
 function PdfVatRow({
   row,
   currency,
-}: Readonly<{ row: InvoiceVatBreakdownRowModel; currency: InvoiceCurrency }>) {
+  labels,
+  locale,
+}: Readonly<{
+  row: InvoiceVatBreakdownRowModel;
+  currency: InvoiceCurrency;
+  labels: InvoiceLabels;
+  locale: string;
+}>) {
   return (
     <View style={styles.totalLine}>
-      <Text style={styles.totalLbl}>{`DPH ${String(row.rate)}\u00a0%`}</Text>
+      <Text
+        style={styles.totalLbl}
+      >{`${labels.vat} ${String(row.rate)}\u00a0%`}</Text>
       <Text style={styles.totalFig}>
-        {fmtMoneyWithCurrency(row.vat, currency)}
+        {fmtMoneyWithCurrency(row.vat, currency, locale)}
       </Text>
     </View>
   );

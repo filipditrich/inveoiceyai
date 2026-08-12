@@ -1,9 +1,11 @@
 import {
   InvoiceCurrencySchema,
+  InvoiceLanguageSchema,
   InvoiceSchema,
   type ClientSnapshot,
   type Invoice,
   type InvoiceCurrency,
+  type InvoiceLanguage,
   type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
 import {
@@ -26,6 +28,7 @@ export type BuilderInvoiceInput = {
   dueDate: string;
   duzp: string;
   currency?: InvoiceCurrency;
+  language?: InvoiceLanguage;
   issuer: IssuerSnapshot;
   client: ClientSnapshot;
   vatMode: Invoice["vat"]["mode"];
@@ -113,7 +116,7 @@ export function buildInvoicePayload(input: BuilderInvoiceInput): Invoice {
       issueDate: input.issueDate,
       dueDate: input.dueDate,
       duzp: input.duzp,
-      language: "cs" as const,
+      language: InvoiceLanguageSchema.parse(input.language ?? "cs"),
       currency: InvoiceCurrencySchema.parse(input.currency ?? "CZK"),
       ...(input.docType === "credit_note" && input.correctedInvoiceNumber
         ? { correctedInvoiceNumber: input.correctedInvoiceNumber }

@@ -142,6 +142,7 @@ function formToBuilderFields(formData: FormData): {
   dueDate: string;
   duzp: string;
   currency: Invoice["meta"]["currency"];
+  language: Invoice["meta"]["language"];
   vatMode: VatMode;
   pricesIncludeVat: boolean;
   suppliesAbroad: SuppliesAbroad;
@@ -167,6 +168,9 @@ function formToBuilderFields(formData: FormData): {
   const currencyRaw = optionalTrim(formData.get("currency")) ?? "CZK";
   const currency: Invoice["meta"]["currency"] =
     currencyRaw === "EUR" || currencyRaw === "USD" ? currencyRaw : "CZK";
+  const languageRaw = optionalTrim(formData.get("language")) ?? "cs";
+  const language: Invoice["meta"]["language"] =
+    languageRaw === "en" ? "en" : "cs";
   const vatModeRaw = optionalTrim(formData.get("vatMode")) ?? "regular";
   const vatMode: VatMode =
     vatModeRaw === "reverse_charge" || vatModeRaw === "oss"
@@ -194,6 +198,7 @@ function formToBuilderFields(formData: FormData): {
     dueDate,
     duzp,
     currency,
+    language,
     vatMode,
     pricesIncludeVat,
     suppliesAbroad,
@@ -298,6 +303,7 @@ export async function saveInvoiceDraft(formData: FormData): Promise<void> {
       dueDate: fields.dueDate,
       duzp: fields.duzp,
       currency: fields.currency,
+      language: fields.language,
       issuer: parties.issuer,
       client: parties.client,
       vatMode: fields.vatMode,
@@ -485,6 +491,7 @@ export async function issueInvoice(formData: FormData): Promise<void> {
         dueDate: fields.dueDate,
         duzp: fields.duzp,
         currency: fields.currency,
+        language: fields.language,
         issuer: issuerSnap.data,
         client: clientSnap.data,
         vatMode: fields.vatMode,

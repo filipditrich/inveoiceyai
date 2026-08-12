@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { formatDateCs, formatMoney } from "@/lib/format";
+import type { AppLocale } from "@/i18n/config";
 import {
   INVOICE_SORT_KEYS,
   parseInvoiceSort,
@@ -73,6 +74,7 @@ import {
 } from "@tanstack/react-table";
 import Link from "next/link";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
+import { useTranslations, useLocale } from "next-intl";
 import {
   type ReactNode,
   useCallback,
@@ -127,6 +129,8 @@ export function InvoiceListTable({
   issuers,
   clients,
 }: InvoiceListTableProps) {
+  const t = useTranslations("Invoices.list");
+  const locale = useLocale() as AppLocale;
   const [params, setParams] = useQueryStates(
     {
       status: parseAsString,
@@ -196,25 +200,25 @@ export function InvoiceListTable({
         accessorKey: "number",
         id: "number",
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Číslo" />
+          <DataGridColumnHeader column={column} title={t("number")} />
         ),
         cell: ({ row }) => (
           <div className="truncate pr-2 font-medium tabular-nums">
             <Link
               className="underline-offset-4 hover:underline"
               href={`/invoices/${row.original.id}`}
-              title={row.original.number ?? "Návrh bez čísla"}
+              title={row.original.number ?? t("untitledDraft")}
             >
-              {row.original.number ?? "DRAFT"}
+              {row.original.number ?? t("draft")}
             </Link>
             {row.original.importCompleteness === "archive" ? (
               <span className="text-muted-foreground ml-2 text-[0.65rem] uppercase tracking-wide">
-                archiv
+                {t("archive")}
               </span>
             ) : null}
           </div>
         ),
-        meta: { headerTitle: "Číslo" },
+        meta: { headerTitle: t("number") },
         size: 105,
       },
       {
@@ -222,7 +226,7 @@ export function InvoiceListTable({
         accessorFn: (row) => row.originProvider ?? "invoicey",
         enableSorting: false,
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Zdroj" />
+          <DataGridColumnHeader column={column} title={t("source")} />
         ),
         cell: ({ row }) => {
           const provider = row.original.originProvider ?? "invoicey";
@@ -231,61 +235,62 @@ export function InvoiceListTable({
             provider;
           return <span className="text-muted-foreground text-xs">{label}</span>;
         },
-        meta: { headerTitle: "Zdroj" },
+        meta: { headerTitle: t("source") },
         size: 110,
       },
       {
         accessorKey: "issueDate",
         id: "issueDate",
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Vystaveno" />
+          <DataGridColumnHeader column={column} title={t("issued")} />
         ),
         cell: ({ row }) => (
           <span className="tabular-nums">
-            {formatDateCs(row.original.issueDate)}
+            {formatDateCs(row.original.issueDate, locale)}
           </span>
         ),
-        meta: { headerTitle: "Vystaveno" },
+        meta: { headerTitle: t("issued") },
         size: 84,
       },
       {
         accessorKey: "dueDate",
         id: "dueDate",
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Splatnost" />
+          <DataGridColumnHeader column={column} title={t("due")} />
         ),
         cell: ({ row }) => (
           <span className="tabular-nums">
-            {formatDateCs(row.original.dueDate)}
+            {formatDateCs(row.original.dueDate, locale)}
           </span>
         ),
-        meta: { headerTitle: "Splatnost" },
+        meta: { headerTitle: t("due") },
         size: 84,
       },
       {
         accessorKey: "clientName",
         id: "clientName",
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Klient" />
+          <DataGridColumnHeader column={column} title={t("client")} />
         ),
-        meta: { headerTitle: "Klient", cellClassName: "truncate" },
+        meta: { headerTitle: t("client"), cellClassName: "truncate" },
         size: 100,
       },
       {
         accessorKey: "total",
         id: "total",
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Celkem" />
+          <DataGridColumnHeader column={column} title={t("total")} />
         ),
         cell: ({ row }) => (
           <span className="tabular-nums">
             {formatMoney(
               Number(row.original.total) || 0,
               row.original.currency || "CZK",
+              locale,
             )}
           </span>
         ),
-        meta: { headerTitle: "Celkem" },
+        meta: { headerTitle: t("total") },
         size: 94,
       },
       {
@@ -293,29 +298,29 @@ export function InvoiceListTable({
         id: "displayStatus",
         enableSorting: false,
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Stav" />
+          <DataGridColumnHeader column={column} title={t("status")} />
         ),
         cell: ({ row }) => (
           <InvoiceStatusBadge status={row.original.displayStatus} />
         ),
-        meta: { headerTitle: "Stav" },
+        meta: { headerTitle: t("status") },
         size: 64,
       },
       {
         id: "actions",
         enableSorting: false,
         enableHiding: false,
-        header: () => <span className="sr-only">Akce</span>,
+        header: () => <span className="sr-only">{t("actions")}</span>,
         cell: ({ row }) => <InvoiceRowActions row={row.original} />,
         meta: {
-          headerTitle: "Akce",
+          headerTitle: t("actions"),
           headerClassName: "text-right",
           cellClassName: "pr-2",
         },
         size: 120,
       },
     ],
-    [],
+    [t, locale],
   );
 
   const table = useTable({
@@ -406,9 +411,9 @@ export function InvoiceListTable({
           rows.map((row) => <InvoiceMobileCard key={row.id} row={row} />)
         ) : (
           <p className="text-muted-foreground rounded-md border px-4 py-8 text-center text-sm">
-            Žádné faktury.{" "}
+            {t("empty")}{" "}
             <Link className="text-primary underline" href="/invoices/new">
-              Vytvořit první fakturu
+              {t("createFirst")}
             </Link>
             .
           </p>
@@ -422,10 +427,13 @@ export function InvoiceListTable({
               type="button"
               variant="outline"
             >
-              Předchozí
+              {t("previous")}
             </Button>
             <span className="text-muted-foreground text-xs">
-              Strana {params.page} z {Math.ceil(total / params.pageSize)}
+              {t("pageMobile", {
+                current: String(params.page),
+                total: String(Math.ceil(total / params.pageSize)),
+              })}
             </span>
             <Button
               disabled={params.page * params.pageSize >= total}
@@ -434,7 +442,7 @@ export function InvoiceListTable({
               type="button"
               variant="outline"
             >
-              Další
+              {t("next")}
             </Button>
           </div>
         ) : null}
@@ -442,7 +450,7 @@ export function InvoiceListTable({
 
       <div className="hidden min-w-0 md:block">
         <AppDataGrid
-          emptyMessage="Žádné faktury."
+          emptyMessage={t("empty")}
           recordCount={total}
           table={table}
         />
@@ -453,13 +461,13 @@ export function InvoiceListTable({
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3">
             <div className="min-w-0 flex-1 text-sm">
               <span className="font-medium tabular-nums">
-                {selectedIds.length} vybraných
+                {t("selected", { count: String(selectedIds.length) })}
               </span>
               <span className="text-muted-foreground">
                 {" "}
-                · {formatMoney(selectedTotal)}
+                · {formatMoney(selectedTotal, "CZK", locale)}
                 {selectedDrafts > 0
-                  ? ` · ${selectedDrafts} ${selectedDrafts === 1 ? "návrh" : selectedDrafts >= 2 && selectedDrafts <= 4 ? "návrhy" : "návrhů"}`
+                  ? ` · ${t("selectedDrafts", { count: selectedDrafts })}`
                   : null}
               </span>
             </div>
@@ -471,7 +479,7 @@ export function InvoiceListTable({
                 size="sm"
                 type="button"
               >
-                {pending && bulkKey === "issue" ? "Vystavuji…" : "Vystavit"}
+                {pending && bulkKey === "issue" ? t("issuing") : t("bulkIssue")}
               </Button>
               <Button
                 disabled={pending}
@@ -481,7 +489,7 @@ export function InvoiceListTable({
                 type="button"
                 variant="secondary"
               >
-                {pending && bulkKey === "paid" ? "Ukládám…" : "Zaplaceno"}
+                {pending && bulkKey === "paid" ? t("saving") : t("bulkPaid")}
               </Button>
               <Button
                 disabled={pending}
@@ -492,8 +500,8 @@ export function InvoiceListTable({
                 variant="secondary"
               >
                 {pending && bulkKey === "unpaid"
-                  ? "Ukládám…"
-                  : "Zrušit zaplaceno"}
+                  ? t("saving")
+                  : t("bulkUnpaid")}
               </Button>
               <Button
                 disabled={pending}
@@ -503,7 +511,9 @@ export function InvoiceListTable({
                 type="button"
                 variant="secondary"
               >
-                {pending && bulkKey === "cancel" ? "Stornuji…" : "Stornovat"}
+                {pending && bulkKey === "cancel"
+                  ? t("cancelling")
+                  : t("bulkCancel")}
               </Button>
               <Button
                 disabled={pending}
@@ -513,7 +523,9 @@ export function InvoiceListTable({
                 type="button"
                 variant="destructive"
               >
-                {pending && bulkKey === "delete" ? "Mazání…" : "Smazat návrhy"}
+                {pending && bulkKey === "delete"
+                  ? t("deleting")
+                  : t("bulkDelete")}
               </Button>
               <Button
                 disabled={pending}
@@ -522,7 +534,7 @@ export function InvoiceListTable({
                 type="button"
                 variant="ghost"
               >
-                Zrušit výběr
+                {t("cancelSelection")}
               </Button>
             </div>
           </div>
@@ -533,6 +545,8 @@ export function InvoiceListTable({
 }
 
 function InvoiceMobileCard({ row }: { row: InvoiceListRow }) {
+  const t = useTranslations("Invoices.list");
+  const locale = useLocale() as AppLocale;
   return (
     <article
       className={cn(
@@ -546,7 +560,7 @@ function InvoiceMobileCard({ row }: { row: InvoiceListRow }) {
             className="font-semibold tabular-nums underline-offset-4 hover:underline"
             href={`/invoices/${row.id}`}
           >
-            {row.number ?? "Návrh bez čísla"}
+            {row.number ?? t("untitledDraft")}
           </Link>
           <p className="text-muted-foreground truncate text-sm">
             {row.clientName}
@@ -556,17 +570,19 @@ function InvoiceMobileCard({ row }: { row: InvoiceListRow }) {
       </div>
       <dl className="grid grid-cols-2 gap-3 text-sm">
         <div>
-          <dt className="text-muted-foreground text-xs">Vystaveno</dt>
-          <dd className="tabular-nums">{formatDateCs(row.issueDate)}</dd>
+          <dt className="text-muted-foreground text-xs">{t("issued")}</dt>
+          <dd className="tabular-nums">
+            {formatDateCs(row.issueDate, locale)}
+          </dd>
         </div>
         <div>
-          <dt className="text-muted-foreground text-xs">Splatnost</dt>
-          <dd className="tabular-nums">{formatDateCs(row.dueDate)}</dd>
+          <dt className="text-muted-foreground text-xs">{t("due")}</dt>
+          <dd className="tabular-nums">{formatDateCs(row.dueDate, locale)}</dd>
         </div>
         <div className="col-span-2">
-          <dt className="text-muted-foreground text-xs">Celkem</dt>
+          <dt className="text-muted-foreground text-xs">{t("total")}</dt>
           <dd className="font-medium tabular-nums">
-            {formatMoney(Number(row.total) || 0, row.currency || "CZK")}
+            {formatMoney(Number(row.total) || 0, row.currency || "CZK", locale)}
           </dd>
         </div>
       </dl>
@@ -576,14 +592,15 @@ function InvoiceMobileCard({ row }: { row: InvoiceListRow }) {
 }
 
 function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
+  const t = useTranslations("Invoices.list");
   return (
     <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
       {row.displayStatus === "draft" ? (
         <form action={issueSavedInvoice}>
           <input name="id" type="hidden" value={row.id} />
-          <SubmitButton pendingLabel="Vystavuji…" size="sm">
+          <SubmitButton pendingLabel={t("issuing")} size="sm">
             <StampIcon />
-            Vystavit
+            {t("issue")}
           </SubmitButton>
         </form>
       ) : (
@@ -593,7 +610,7 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
           variant="ghost"
         >
           <EyeIcon />
-          Detail
+          {t("detail")}
         </Button>
       )}
 
@@ -601,7 +618,9 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
         <DropdownMenuTrigger
           render={
             <Button
-              aria-label={`Další akce pro ${row.number ?? "návrh"}`}
+              aria-label={t("moreActions", {
+                number: row.number ?? t("untitledDraft"),
+              })}
               size="icon-sm"
               type="button"
               variant="ghost"
@@ -617,13 +636,13 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
                 render={<Link href={`/invoices/${row.id}`} prefetch />}
               >
                 <EyeIcon />
-                Detail faktury
+                {t("detailInvoice")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 render={<Link href={`/invoices/${row.id}/edit`} prefetch />}
               >
                 <PencilIcon />
-                Upravit návrh
+                {t("editDraft")}
               </DropdownMenuItem>
             </>
           ) : null}
@@ -631,13 +650,13 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
             render={<a download href={`/api/invoices/${row.id}/pdf`} />}
           >
             <FileDownIcon />
-            Stáhnout PDF
+            {t("downloadPdf")}
           </DropdownMenuItem>
           <InvoiceActionMenuForm
             action={duplicateInvoice}
             icon={<CopyIcon />}
             id={row.id}
-            label="Duplikovat"
+            label={t("duplicate")}
           />
 
           {row.displayStatus === "unpaid" ||
@@ -649,13 +668,13 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
                 action={markInvoicePaid}
                 icon={<WalletCardsIcon />}
                 id={row.id}
-                label="Označit jako zaplacenou"
+                label={t("markPaidFull")}
               />
               <InvoiceActionMenuForm
                 action={cancelInvoice}
                 icon={<XCircleIcon />}
                 id={row.id}
-                label="Stornovat fakturu"
+                label={t("cancelInvoice")}
               />
             </>
           ) : null}
@@ -666,7 +685,7 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
                 action={unmarkInvoicePaid}
                 icon={<RotateCcwIcon />}
                 id={row.id}
-                label="Zrušit zaplacení"
+                label={t("unmarkPaid")}
               />
             </>
           ) : null}
@@ -677,7 +696,7 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
                 action={deleteInvoice}
                 icon={<Trash2Icon />}
                 id={row.id}
-                label="Smazat návrh"
+                label={t("deleteDraft")}
                 variant="destructive"
               />
             </>

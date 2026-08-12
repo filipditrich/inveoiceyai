@@ -13,6 +13,9 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
+import type { EmailLocale } from "../copy";
+import { invoiceEmailCopy, systemEmailCopy } from "../copy";
+
 const DEFAULT_APP_ORIGIN = "https://invoicey.ditrich.me";
 
 export type EmailShellVariant = "invoice" | "system";
@@ -22,17 +25,21 @@ export type EmailShellProps = {
   title: string;
   children: React.ReactNode;
   variant?: EmailShellVariant;
+  locale?: EmailLocale;
   /** absolute origin for logo asset; defaults to production host */
   appOrigin?: string;
   footerLink?: { label: string; href: string };
 };
 
-function defaultFooterNote(variant: EmailShellVariant): string {
+function defaultFooterNote(
+  variant: EmailShellVariant,
+  locale: EmailLocale,
+): string {
   switch (variant) {
     case "invoice":
-      return "Odesláno přes Invoicey.";
+      return invoiceEmailCopy(locale).footerInvoice;
     case "system":
-      return "Toto je systémový e-mail od Invoicey.";
+      return systemEmailCopy(locale).footerSystem;
     default: {
       const _exhaustive: never = variant;
       return _exhaustive;
@@ -46,6 +53,7 @@ export function EmailShell({
   title,
   children,
   variant = "system",
+  locale = "cs",
   appOrigin = DEFAULT_APP_ORIGIN,
   footerLink,
 }: EmailShellProps) {
@@ -53,7 +61,7 @@ export function EmailShell({
   const logoSrc = `${origin}/brand/invoicey-logo-192.png`;
 
   return (
-    <Html lang="cs">
+    <Html lang={locale}>
       <Head />
       <Preview>{preview}</Preview>
       <Body style={body}>
@@ -72,7 +80,9 @@ export function EmailShell({
           <Heading style={heading}>{title}</Heading>
           <Section>{children}</Section>
           <Hr style={hr} />
-          <Text style={footerNoteStyle}>{defaultFooterNote(variant)}</Text>
+          <Text style={footerNoteStyle}>
+            {defaultFooterNote(variant, locale)}
+          </Text>
           <Text style={footer}>
             Invoicey ·{" "}
             <Link href={origin} style={footerLinkStyle}>

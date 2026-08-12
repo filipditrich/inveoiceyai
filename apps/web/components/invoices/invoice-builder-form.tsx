@@ -29,49 +29,59 @@ import {
   type FieldPath,
 } from "react-hook-form";
 import { z } from "zod";
-
-const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Zadejte platné datum");
+import { useTranslations, useLocale } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
+import { lookupMessageFromInvalid } from "@/components/issuers/issuer-form-shared";
 
 const STANDARD_VAT_RATES = [0, 12, 21] as const;
 
-const BuilderFormSchema = z
-  .object({
-    issuerId: z.string().uuid("Vyberte vystavovatele"),
-    clientId: z.string().uuid("Vyberte odběratele"),
-    docType: z.enum(["invoice", "proforma", "advance", "credit_note"]),
-    issueDate: isoDate,
-    dueDate: isoDate,
-    duzp: isoDate,
-    currency: z.enum(["CZK", "EUR", "USD"]),
-    vatMode: z.enum(["regular", "reverse_charge", "oss"]),
-    pricesIncludeVat: z.boolean(),
-    suppliesAbroad: z.enum(["none", "eu", "non_eu"]),
-    legalNote: z.string().optional(),
-    localReverseChargeCode: z.string().optional(),
-    correctedInvoiceNumber: z.string().optional(),
-    notes: z.string().optional(),
-    items: z
-      .array(
-        z.object({
-          description: z.string().min(1, "Popis je povinný"),
-          quantity: z
-            .number({ error: "Zadejte množství" })
-            .refine((q) => q !== 0, "Množství nesmí být 0"),
-          unit: z.string().min(1, "Jednotka je povinná"),
-          unitPriceWithoutVat: z
-            .number({ error: "Zadejte cenu" })
-            .nonnegative("Cena nesmí být záporná"),
-          vatRate: z.number({ error: "Zadejte sazbu DPH" }).min(0).max(100),
-        }),
-      )
-      .min(1, "Přidejte alespoň jednu položku"),
-  })
-  .refine((d) => d.dueDate >= d.issueDate, {
-    message: "Splatnost nesmí být před datem vystavení",
-    path: ["dueDate"],
-  });
+function createBuilderFormSchema(t: (key: string) => string) {
+  const isoDate = z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, t("errors.invalidDate"));
+  return z
+    .object({
+      issuerId: z.string().uuid(t("errors.selectIssuer")),
+      clientId: z.string().uuid(t("errors.selectClient")),
+      docType: z.enum(["invoice", "proforma", "advance", "credit_note"]),
+      issueDate: isoDate,
+      dueDate: isoDate,
+      duzp: isoDate,
+      currency: z.enum(["CZK", "EUR", "USD"]),
+      language: z.enum(["cs", "en"]),
+      vatMode: z.enum(["regular", "reverse_charge", "oss"]),
+      pricesIncludeVat: z.boolean(),
+      suppliesAbroad: z.enum(["none", "eu", "non_eu"]),
+      legalNote: z.string().optional(),
+      localReverseChargeCode: z.string().optional(),
+      correctedInvoiceNumber: z.string().optional(),
+      notes: z.string().optional(),
+      items: z
+        .array(
+          z.object({
+            description: z.string().min(1, t("errors.descriptionRequired")),
+            quantity: z
+              .number({ error: t("errors.quantityRequired") })
+              .refine((q) => q !== 0, t("errors.quantityZero")),
+            unit: z.string().min(1, t("errors.unitRequired")),
+            unitPriceWithoutVat: z
+              .number({ error: t("errors.priceRequired") })
+              .nonnegative(t("errors.priceNegative")),
+            vatRate: z
+              .number({ error: t("errors.vatRequired") })
+              .min(0)
+              .max(100),
+          }),
+        )
+        .min(1, t("errors.itemsMin")),
+    })
+    .refine((d) => d.dueDate >= d.issueDate, {
+      message: t("errors.dueBeforeIssue"),
+      path: ["dueDate"],
+    });
+}
 
-type BuilderFormValues = z.infer<typeof BuilderFormSchema>;
+type BuilderFormValues = z.infer<ReturnType<typeof createBuilderFormSchema>>;
 
 function isStandardVatRate(
   rate: number,
@@ -121,13 +131,20 @@ export function InvoiceBuilderForm({
   clients,
   initial,
 }: InvoiceBuilderFormProps) {
+  const t = useTranslations("Invoices.builder");
+  const tErr = useTranslations("Errors.invalid");
+  const locale = useLocale() as AppLocale;
+  const schema = React.useMemo(
+    () => createBuilderFormSchema((key) => t(key as never)),
+    [t],
+  );
   const defaultIssue = initial?.issueDate ?? todayIsoDate();
   const firstIssuer = issuers[0];
   const initialIssuer =
     issuers.find((i) => i.id === (initial?.issuerId ?? firstIssuer?.id)) ??
     firstIssuer;
   const form = useForm<BuilderFormValues>({
-    resolver: standardSchemaResolver(BuilderFormSchema),
+    resolver: standardSchemaResolver(schema),
     mode: "onBlur",
     defaultValues: {
       issuerId: initial?.issuerId ?? firstIssuer?.id ?? "",
@@ -137,6 +154,7 @@ export function InvoiceBuilderForm({
       dueDate: initial?.dueDate ?? addDaysIso(defaultIssue, 14),
       duzp: initial?.duzp ?? defaultIssue,
       currency: initial?.currency ?? "CZK",
+      language: initial?.language ?? "cs",
       vatMode: initial?.vatMode ?? "regular",
       pricesIncludeVat: initial?.pricesIncludeVat ?? false,
       suppliesAbroad: initial?.suppliesAbroad ?? "none",
@@ -256,7 +274,7 @@ export function InvoiceBuilderForm({
     }
     const scheme = issuer.schemes.find((s) => s.docType === watched.docType);
     if (!scheme) {
-      setNumberPreview("(chybí schéma)");
+      setNumberPreview(t("missingScheme"));
       return;
     }
     try {
@@ -276,7 +294,7 @@ export function InvoiceBuilderForm({
     } catch {
       setNumberPreview("—");
     }
-  }, [issuers, watched.issuerId, watched.docType, watched.issueDate]);
+  }, [issuers, t, watched.issuerId, watched.docType, watched.issueDate]);
 
   const previewBuild = React.useMemo(() => {
     const issuer = issuers.find((i) => i.id === watched.issuerId)?.snapshot;
@@ -301,6 +319,7 @@ export function InvoiceBuilderForm({
       dueDate: watched.dueDate,
       duzp: watched.duzp,
       currency: watched.currency,
+      language: watched.language,
       issuer,
       client,
       vatMode: watched.vatMode,
@@ -327,6 +346,7 @@ export function InvoiceBuilderForm({
     watched.dueDate,
     watched.duzp,
     watched.currency,
+    watched.language,
     watched.vatMode,
     watched.pricesIncludeVat,
     watched.suppliesAbroad,
@@ -377,9 +397,7 @@ export function InvoiceBuilderForm({
           if (e instanceof Error && e.name === "AbortError") {
             return;
           }
-          setPreviewError(
-            e instanceof Error ? e.message : "Náhled se nepodařilo vytvořit",
-          );
+          setPreviewError(e instanceof Error ? e.message : t("previewError"));
         })
         .finally(() => {
           if (!controller.signal.aborted) {
@@ -392,7 +410,7 @@ export function InvoiceBuilderForm({
       window.clearTimeout(handle);
       controller.abort();
     };
-  }, [previewKey, previewBuild.error, previewBuild.invoice]);
+  }, [previewKey, previewBuild.error, previewBuild.invoice, t]);
 
   const totalsPreview = React.useMemo(() => {
     const issuer = issuers.find((i) => i.id === watched.issuerId)?.snapshot;
@@ -407,6 +425,7 @@ export function InvoiceBuilderForm({
       dueDate: watched.dueDate,
       duzp: watched.duzp,
       currency: watched.currency,
+      language: watched.language,
       issuer,
       client,
       vatMode: watched.vatMode,
@@ -431,7 +450,7 @@ export function InvoiceBuilderForm({
     }
     const ok = await form.trigger();
     const values = form.getValues();
-    const parsed = BuilderFormSchema.safeParse(values);
+    const parsed = schema.safeParse(values);
     if (!ok || !parsed.success) {
       const msgs = collectFormErrorMessages(
         form.formState.errors as Record<string, unknown>,
@@ -445,11 +464,7 @@ export function InvoiceBuilderForm({
           }
         }
       }
-      setFormErrorList(
-        msgs.length > 0
-          ? msgs
-          : ["Vyplň povinná pole a alespoň jednu validní položku."],
-      );
+      setFormErrorList(msgs.length > 0 ? msgs : [t("formFallback")]);
       const firstKey = Object.keys(form.formState.errors)[0] as
         FieldPath<BuilderFormValues> | undefined;
       if (firstKey) {
@@ -470,6 +485,7 @@ export function InvoiceBuilderForm({
     fd.set("dueDate", values.dueDate);
     fd.set("duzp", values.duzp);
     fd.set("currency", values.currency);
+    fd.set("language", values.language);
     fd.set("vatMode", values.vatMode);
     fd.set("pricesIncludeVat", values.pricesIncludeVat ? "true" : "false");
     fd.set("suppliesAbroad", values.suppliesAbroad);
@@ -500,25 +516,35 @@ export function InvoiceBuilderForm({
   if (issuers.length === 0 || clients.length === 0) {
     return (
       <p className="text-muted-foreground text-sm">
-        Nejprve vytvořte{" "}
-        {issuers.length === 0 ? (
-          <a className="underline" href="/issuers/new">
-            vystavovatele
-          </a>
-        ) : null}
-        {issuers.length === 0 && clients.length === 0 ? " a " : null}
-        {clients.length === 0 ? (
-          <a className="underline" href="/clients/new">
-            odběratele
-          </a>
-        ) : null}
-        .
+        {t.rich("missingParties", {
+          entities: () => (
+            <>
+              {issuers.length === 0 ? (
+                <a className="underline" href="/issuers/new">
+                  {t("missingIssuer")}
+                </a>
+              ) : null}
+              {issuers.length === 0 && clients.length === 0
+                ? t("missingAnd")
+                : null}
+              {clients.length === 0 ? (
+                <a className="underline" href="/clients/new">
+                  {t("missingClient")}
+                </a>
+              ) : null}
+            </>
+          ),
+        })}
       </p>
     );
   }
 
   const alertMessages = [
-    ...(invalidQuery ? [humanInvalid(invalidQuery)] : []),
+    ...(invalidQuery
+      ? [lookupMessageFromInvalid(invalidQuery, tErr)].filter(
+          (m): m is string => m != null,
+        )
+      : []),
     ...formErrorList,
   ];
 
@@ -535,7 +561,7 @@ export function InvoiceBuilderForm({
             className="border-destructive/40 bg-destructive/10 text-destructive space-y-1 rounded-md border px-3 py-2 text-sm"
             role="alert"
           >
-            <p className="font-medium">Opravte chyby ve formuláři</p>
+            <p className="font-medium">{t("formErrors")}</p>
             <ul className="list-inside list-disc text-xs">
               {alertMessages.slice(0, 8).map((m) => (
                 <li key={m}>{m}</li>
@@ -546,9 +572,9 @@ export function InvoiceBuilderForm({
 
         <section className="grid gap-4 sm:grid-cols-2">
           <Field
-            description="Vaše firma uvedená na faktuře jako dodavatel."
+            description={t("issuerDescription")}
             error={fieldError(errors, "issuerId")}
-            label="Vystavovatel"
+            label={t("issuer")}
           >
             <select
               aria-invalid={Boolean(fieldError(errors, "issuerId"))}
@@ -565,9 +591,9 @@ export function InvoiceBuilderForm({
             </select>
           </Field>
           <Field
-            description="Odběratel z registru klientů (ARES)."
+            description={t("clientDescription")}
             error={fieldError(errors, "clientId")}
-            label="Odběratel"
+            label={t("client")}
           >
             <select
               aria-invalid={Boolean(fieldError(errors, "clientId"))}
@@ -579,7 +605,9 @@ export function InvoiceBuilderForm({
               {clients.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.snapshot.name}
-                  {c.snapshot.ico ? ` · IČO ${c.snapshot.ico}` : ""}
+                  {c.snapshot.ico
+                    ? t("icoSuffix", { ico: c.snapshot.ico })
+                    : ""}
                 </option>
               ))}
             </select>
@@ -588,27 +616,27 @@ export function InvoiceBuilderForm({
 
         <section className="grid gap-4 sm:grid-cols-2">
           <Field
-            description="Typ daňového / platebního dokladu."
+            description={t("docTypeDescription")}
             error={fieldError(errors, "docType")}
-            label="Typ dokladu"
+            label={t("docType")}
           >
             <select className={selectClassName()} {...form.register("docType")}>
-              <option value="invoice">Faktura</option>
-              <option value="proforma">Proforma</option>
-              <option value="advance">Záloha</option>
-              <option value="credit_note">Dobropis</option>
+              <option value="invoice">{t("docTypeInvoice")}</option>
+              <option value="proforma">{t("docTypeProforma")}</option>
+              <option value="advance">{t("docTypeAdvance")}</option>
+              <option value="credit_note">{t("docTypeCreditNote")}</option>
             </select>
           </Field>
           <Field
-            description="Číslo se přiřadí až při vystavení."
-            label="Náhled čísla"
+            description={t("numberPreviewDescription")}
+            label={t("numberPreview")}
           >
             <p className="text-sm font-medium tabular-nums">{numberPreview}</p>
           </Field>
           <Field
-            description="Datum, kdy fakturu vystavujete."
+            description={t("issueDateDescription")}
             error={fieldError(errors, "issueDate")}
-            label="Datum vystavení"
+            label={t("issueDate")}
           >
             <Input
               aria-invalid={Boolean(fieldError(errors, "issueDate"))}
@@ -617,9 +645,9 @@ export function InvoiceBuilderForm({
             />
           </Field>
           <Field
-            description="Poslední den pro včasnou úhradu."
+            description={t("dueDateDescription")}
             error={fieldError(errors, "dueDate")}
-            label="Splatnost"
+            label={t("dueDate")}
           >
             <Input
               aria-invalid={Boolean(fieldError(errors, "dueDate"))}
@@ -628,9 +656,9 @@ export function InvoiceBuilderForm({
             />
           </Field>
           <Field
-            description="Datum uskutečnění zdanitelného plnění."
+            description={t("duzpDescription")}
             error={fieldError(errors, "duzp")}
-            label="DUZP"
+            label={t("duzp")}
           >
             <Input
               aria-invalid={Boolean(fieldError(errors, "duzp"))}
@@ -639,23 +667,36 @@ export function InvoiceBuilderForm({
             />
           </Field>
           <Field
-            description="Měna faktury. QR platba (SPAYD) je dostupná jen pro CZK."
+            description={t("currencyDescription")}
             error={fieldError(errors, "currency")}
-            label="Měna"
+            label={t("currency")}
           >
             <select
               className={selectClassName()}
               {...form.register("currency")}
             >
-              <option value="CZK">CZK (Kč)</option>
+              <option value="CZK">{t("currencyCzk")}</option>
               <option value="EUR">EUR</option>
               <option value="USD">USD</option>
             </select>
           </Field>
           <Field
-            description="Režim DPH (běžný / přenesení / OSS). U neplátce je vždy běžný se sazbou 0 %."
+            description={t("languageDescription")}
+            error={fieldError(errors, "language")}
+            label={t("language")}
+          >
+            <select
+              className={selectClassName()}
+              {...form.register("language")}
+            >
+              <option value="cs">{t("languageCs")}</option>
+              <option value="en">{t("languageEn")}</option>
+            </select>
+          </Field>
+          <Field
+            description={t("vatModeDescription")}
             error={fieldError(errors, "vatMode")}
-            label="Režim DPH"
+            label={t("vatMode")}
           >
             <select
               className={selectClassName()}
@@ -663,13 +704,13 @@ export function InvoiceBuilderForm({
               {...form.register("vatMode")}
             >
               <option value="regular">
-                {issuerVatPayer ? "Běžný (plátce)" : "Neplátce DPH"}
+                {issuerVatPayer ? t("vatRegularPayer") : t("vatNonPayer")}
               </option>
               {issuerVatPayer ? (
-                <option value="reverse_charge">Přenesení DPH</option>
+                <option value="reverse_charge">{t("vatReverseCharge")}</option>
               ) : null}
               {issuerVatPayer && showAdvancedVat ? (
-                <option value="oss">OSS</option>
+                <option value="oss">{t("vatOss")}</option>
               ) : null}
             </select>
             {issuerVatPayer ? (
@@ -684,22 +725,22 @@ export function InvoiceBuilderForm({
                   }}
                   type="checkbox"
                 />
-                Zobrazit rozšířený režim OSS
+                {t("vatAdvanced")}
               </label>
             ) : null}
           </Field>
           <Field
-            description="Pro B2B dodání zboží/služeb do zahraničí."
+            description={t("suppliesAbroadDescription")}
             error={fieldError(errors, "suppliesAbroad")}
-            label="Dodání do zahraničí"
+            label={t("suppliesAbroad")}
           >
             <select
               className={selectClassName()}
               {...form.register("suppliesAbroad")}
             >
-              <option value="none">Ne</option>
-              <option value="eu">EU</option>
-              <option value="non_eu">Mimo EU</option>
+              <option value="none">{t("suppliesNone")}</option>
+              <option value="eu">{t("suppliesEu")}</option>
+              <option value="non_eu">{t("suppliesNonEu")}</option>
             </select>
           </Field>
         </section>
@@ -707,22 +748,22 @@ export function InvoiceBuilderForm({
         {watched.vatMode === "reverse_charge" ? (
           <section className="grid gap-4 sm:grid-cols-2">
             <Field
-              description="Text doložky na faktuře (např. Daň odvede zákazník)."
+              description={t("legalNoteDescription")}
               error={fieldError(errors, "legalNote")}
-              label="Právní doložka"
+              label={t("legalNote")}
             >
               <Input
-                placeholder="Daň odvede zákazník"
+                placeholder={t("legalNotePlaceholder")}
                 {...form.register("legalNote")}
               />
             </Field>
             <Field
-              description="Kód režimu přenesení daňové povinnosti."
+              description={t("reverseChargeCodeDescription")}
               error={fieldError(errors, "localReverseChargeCode")}
-              label="Kód přenesení DPH"
+              label={t("reverseChargeCode")}
             >
               <Input
-                placeholder="např. 15"
+                placeholder={t("reverseChargeCodePlaceholder")}
                 {...form.register("localReverseChargeCode")}
               />
             </Field>
@@ -731,9 +772,9 @@ export function InvoiceBuilderForm({
 
         {watched.docType === "credit_note" ? (
           <Field
-            description="Číslo původní faktury, kterou opravuješ."
+            description={t("correctedInvoiceDescription")}
             error={fieldError(errors, "correctedInvoiceNumber")}
-            label="Opravovaná faktura"
+            label={t("correctedInvoice")}
           >
             <Input
               placeholder="20260001"
@@ -745,24 +786,24 @@ export function InvoiceBuilderForm({
         <section className="space-y-3">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="font-medium">Položky</h2>
+              <h2 className="font-medium">{t("itemsTitle")}</h2>
               <p className="text-muted-foreground text-xs">
                 {watched.pricesIncludeVat
-                  ? "Ceny zadáváš včetně DPH; před uložením se převedou na bez DPH."
-                  : "Ceny zadáváš bez DPH; celkem se počítá automaticky."}
+                  ? t("itemsDescriptionIncl")
+                  : t("itemsDescription")}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <select
-                aria-label="Zadávání cen s DPH nebo bez DPH"
+                aria-label={t("pricesModeAria")}
                 className={selectClassName()}
                 onChange={(ev) => {
                   form.setValue("pricesIncludeVat", ev.target.value === "incl");
                 }}
                 value={watched.pricesIncludeVat ? "incl" : "excl"}
               >
-                <option value="excl">Ceny bez DPH</option>
-                <option value="incl">Ceny s DPH</option>
+                <option value="excl">{t("pricesExcl")}</option>
+                <option value="incl">{t("pricesIncl")}</option>
               </select>
               <Button
                 onClick={() => {
@@ -780,7 +821,7 @@ export function InvoiceBuilderForm({
                 type="button"
                 variant="secondary"
               >
-                Přidat řádek
+                {t("addRow")}
               </Button>
             </div>
           </div>
@@ -820,9 +861,11 @@ export function InvoiceBuilderForm({
               >
                 <div className="space-y-1 sm:col-span-2">
                   <Input
-                    aria-label={`Popis položky ${index + 1}`}
+                    aria-label={t("itemDescriptionAria", {
+                      n: String(index + 1),
+                    })}
                     aria-invalid={Boolean(descErr)}
-                    placeholder="Popis služby / zboží"
+                    placeholder={t("descriptionPlaceholder")}
                     {...form.register(`items.${index}.description`)}
                   />
                   {descErr ? (
@@ -831,14 +874,14 @@ export function InvoiceBuilderForm({
                 </div>
                 <div className="space-y-1">
                   <Input
-                    aria-label={`Množství položky ${index + 1}`}
+                    aria-label={t("itemQuantityAria", { n: String(index + 1) })}
                     aria-invalid={Boolean(
                       fieldError(
                         errors,
                         `items.${index}.quantity` as FieldPath<BuilderFormValues>,
                       ),
                     )}
-                    placeholder="Množství"
+                    placeholder={t("quantityPlaceholder")}
                     step="any"
                     type="number"
                     {...form.register(`items.${index}.quantity`, {
@@ -848,8 +891,8 @@ export function InvoiceBuilderForm({
                 </div>
                 <div className="space-y-1">
                   <Input
-                    aria-label={`Jednotka položky ${index + 1}`}
-                    placeholder="ks / hod"
+                    aria-label={t("itemUnitAria", { n: String(index + 1) })}
+                    placeholder={t("unitPlaceholder")}
                     {...form.register(`items.${index}.unit`)}
                   />
                 </div>
@@ -857,11 +900,13 @@ export function InvoiceBuilderForm({
                   <Input
                     aria-label={
                       watched.pricesIncludeVat
-                        ? `Cena s DPH položky ${index + 1}`
-                        : `Cena bez DPH položky ${index + 1}`
+                        ? t("itemPriceInclAria", { n: String(index + 1) })
+                        : t("itemPriceExclAria", { n: String(index + 1) })
                     }
                     placeholder={
-                      watched.pricesIncludeVat ? "Cena s DPH" : "Cena bez DPH"
+                      watched.pricesIncludeVat
+                        ? t("priceInclPlaceholder")
+                        : t("pricePlaceholder")
                     }
                     step="any"
                     type="number"
@@ -875,7 +920,9 @@ export function InvoiceBuilderForm({
                     {hideRatePicker ? (
                       <>
                         <Input
-                          aria-label={`Sazba DPH položky ${index + 1}`}
+                          aria-label={t("itemVatAria", {
+                            n: String(index + 1),
+                          })}
                           disabled
                           readOnly
                           value="0 %"
@@ -890,7 +937,9 @@ export function InvoiceBuilderForm({
                     ) : (
                       <div className="flex min-w-0 flex-1 flex-col gap-1">
                         <select
-                          aria-label={`Sazba DPH položky ${index + 1}`}
+                          aria-label={t("itemVatAria", {
+                            n: String(index + 1),
+                          })}
                           className={selectClassName()}
                           onChange={(ev) => {
                             const v = ev.target.value;
@@ -919,11 +968,13 @@ export function InvoiceBuilderForm({
                           <option value="0">0 %</option>
                           <option value="12">12 %</option>
                           <option value="21">21 %</option>
-                          <option value="other">Jiná…</option>
+                          <option value="other">{t("vatOther")}</option>
                         </select>
                         {showCustomRate ? (
                           <Input
-                            aria-label={`Vlastní sazba DPH položky ${index + 1}`}
+                            aria-label={t("itemVatCustomAria", {
+                              n: String(index + 1),
+                            })}
                             placeholder="%"
                             step="1"
                             type="number"
@@ -942,7 +993,7 @@ export function InvoiceBuilderForm({
                       </div>
                     )}
                     <Button
-                      aria-label={`Odebrat položku ${index + 1}`}
+                      aria-label={t("removeItem", { n: String(index + 1) })}
                       onClick={() => {
                         if (fields.length > 1) {
                           remove(index);
@@ -956,7 +1007,7 @@ export function InvoiceBuilderForm({
                     </Button>
                   </div>
                   <p className="text-muted-foreground text-xs tabular-nums">
-                    {formatMoney(lineTotal, watched.currency)}
+                    {formatMoney(lineTotal, watched.currency, locale)}
                   </p>
                 </div>
               </div>
@@ -964,19 +1015,29 @@ export function InvoiceBuilderForm({
           })}
           {totalsPreview ? (
             <p className="text-sm font-medium tabular-nums">
-              Celkem: {formatMoney(totalsPreview.total, watched.currency)} (DPH{" "}
-              {formatMoney(totalsPreview.vatTotal, watched.currency)})
+              {t("totalLine", {
+                total: formatMoney(
+                  totalsPreview.total,
+                  watched.currency,
+                  locale,
+                ),
+                vat: formatMoney(
+                  totalsPreview.vatTotal,
+                  watched.currency,
+                  locale,
+                ),
+              })}
             </p>
           ) : null}
         </section>
 
         <Field
-          description="Volitelný text na PDF pod položkami."
+          description={t("notesDescription")}
           error={fieldError(errors, "notes")}
-          label="Poznámka"
+          label={t("notes")}
         >
           <Input
-            placeholder="Např. děkujeme za spolupráci"
+            placeholder={t("notesPlaceholder")}
             {...form.register("notes")}
           />
         </Field>
@@ -989,7 +1050,7 @@ export function InvoiceBuilderForm({
             type="button"
             variant="outline"
           >
-            {submitting === "draft" ? "Ukládám…" : "Uložit návrh"}
+            {submitting === "draft" ? t("savingDraft") : t("saveDraft")}
           </Button>
           <Button
             disabled={submitting !== null}
@@ -997,10 +1058,10 @@ export function InvoiceBuilderForm({
             onClick={() => void submit("issue")}
             type="button"
           >
-            {submitting === "issue" ? "Vystavuji…" : "Vystavit"}
+            {submitting === "issue" ? t("issuing") : t("issue")}
           </Button>
           <span className="text-muted-foreground self-center text-xs">
-            {mode === "edit" ? "Úprava návrhu" : "Nová faktura"}
+            {mode === "edit" ? t("modeEdit") : t("modeCreate")}
           </span>
         </div>
       </form>
@@ -1050,18 +1111,4 @@ async function refreshPreview(
   }
   const blob = await res.blob();
   return URL.createObjectURL(blob);
-}
-
-function humanInvalid(code: string): string {
-  const map: Record<string, string> = {
-    required_fields:
-      "Vyberte vystavovatele, odběratele a alespoň jednu položku.",
-    missing_parties: "Vystavovatel nebo odběratel nenalezen.",
-    validation: "Faktura neprošla validací schématu.",
-    missing_scheme: "Chybí číslovací schéma pro typ dokladu.",
-    already_issued: "Faktura už je vystavená.",
-    not_draft: "Lze upravit jen návrh.",
-    cannot_issue: "Návrh nelze vystavit.",
-  };
-  return map[code] ?? `Chyba: ${code}`;
 }

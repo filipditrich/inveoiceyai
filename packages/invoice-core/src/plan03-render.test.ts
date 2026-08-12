@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import creditNoteFixture from "./__fixtures__/invoices/credit-note.json";
 import domesticFixture from "./__fixtures__/invoices/domestic-transfer.json";
+import enDomesticFixture from "./__fixtures__/invoices/domestic-transfer-en.json";
 import neplatceFixture from "./__fixtures__/invoices/neplatce-regular.json";
 import proformaFixture from "./__fixtures__/invoices/proforma.json";
 import reverseFixture from "./__fixtures__/invoices/reverse-charge.json";
@@ -72,6 +73,14 @@ describe("ISDOC XSD + snapshots", () => {
   it.each(fixturesLabel)("snapshot renderIsdoc (%s)", (_label, fixture) => {
     const invoice = parseInvoice(fixture);
     expect(renderIsdoc(invoice)).toMatchSnapshot();
+  });
+
+  it("english invoice sets Note languageID and country name", () => {
+    const invoice = parseInvoice(enDomesticFixture);
+    const xml = renderIsdoc(invoice);
+    expect(xml).toContain('languageID="en"');
+    expect(xml).toContain("Czech Republic");
+    expect(invoice.meta.language).toBe("en");
   });
 });
 

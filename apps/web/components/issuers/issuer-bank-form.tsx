@@ -3,9 +3,9 @@
 import { saveIssuerBank } from "@/actions/issuers";
 import {
   BankAccountFields,
-  lookupMessageFromInvalid,
   SubmitRow,
   useCzechIbanSuggest,
+  useInvalidQueryMessage,
 } from "@/components/issuers/issuer-form-shared";
 import type { IssuerSnapshot } from "@invoicey/invoice-core/schema";
 import type { FormEvent } from "react";
@@ -22,7 +22,7 @@ export function IssuerBankForm(props: {
     snapshot.bank.iban,
   );
   const [bic, setBic] = React.useState(snapshot.bank.bic ?? "");
-  const userMsg = lookupMessageFromInvalid(props.invalidQuery);
+  const userMsg = useInvalidQueryMessage(props.invalidQuery);
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();

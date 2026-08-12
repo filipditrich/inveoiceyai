@@ -3,19 +3,21 @@
 import { saveIssuerEmail } from "@/actions/issuers";
 import {
   FieldGroup,
-  lookupMessageFromInvalid,
   SubmitRow,
+  useInvalidQueryMessage,
 } from "@/components/issuers/issuer-form-shared";
 import { Input } from "@/components/ui/input";
 import type { IssuerEmailSettings } from "@invoicey/db";
 import type { FormEvent } from "react";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 export function IssuerEmailForm(props: {
   issuerId: string;
   emailSettings: IssuerEmailSettings | null;
   invalidQuery?: string | null;
 }) {
+  const t = useTranslations("Issuers.emailForm");
   const emailSettings = props.emailSettings;
   const [pending, startTransition] = React.useTransition();
   const [emailSubject, setEmailSubject] = React.useState(
@@ -40,7 +42,7 @@ export function IssuerEmailForm(props: {
   const [emailPaymentReceived, setEmailPaymentReceived] = React.useState(
     emailSettings?.sendPaymentReceivedEmail === true,
   );
-  const userMsg = lookupMessageFromInvalid(props.invalidQuery);
+  const userMsg = useInvalidQueryMessage(props.invalidQuery);
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -64,7 +66,7 @@ export function IssuerEmailForm(props: {
   return (
     <form className="max-w-2xl space-y-6" onSubmit={onSubmit}>
       {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
-      <FieldGroup label="Předmět šablona">
+      <FieldGroup label={t("subject")}>
         <Input
           onChange={(ev) => {
             setEmailSubject(ev.target.value);
@@ -72,7 +74,7 @@ export function IssuerEmailForm(props: {
           value={emailSubject}
         />
       </FieldGroup>
-      <FieldGroup label="Text zprávy">
+      <FieldGroup label={t("body")}>
         <textarea
           className="border-input bg-background min-h-28 w-full rounded-md border px-3 py-2 text-sm"
           onChange={(ev) => {
@@ -81,7 +83,7 @@ export function IssuerEmailForm(props: {
           value={emailCover}
         />
       </FieldGroup>
-      <FieldGroup label="From display šablona">
+      <FieldGroup label={t("displayName")}>
         <Input
           onChange={(ev) => {
             setEmailDisplayName(ev.target.value);
@@ -98,7 +100,7 @@ export function IssuerEmailForm(props: {
           }}
           type="checkbox"
         />
-        Přikládat ISDOC ve výchozím stavu
+        {t("attachIsdoc")}
       </label>
       <label className="flex items-center gap-2 text-sm">
         <input
@@ -108,10 +110,10 @@ export function IssuerEmailForm(props: {
           }}
           type="checkbox"
         />
-        Posílat připomínky po splatnosti
+        {t("overdueReminders")}
       </label>
       {emailOverdue ? (
-        <FieldGroup label="Interval připomínek (dny)">
+        <FieldGroup label={t("reminderInterval")}>
           <Input
             min={1}
             onChange={(ev) => {
@@ -130,7 +132,7 @@ export function IssuerEmailForm(props: {
           }}
           type="checkbox"
         />
-        Posílat potvrzení o přijetí platby
+        {t("paymentReceived")}
       </label>
       <SubmitRow pending={pending} />
     </form>

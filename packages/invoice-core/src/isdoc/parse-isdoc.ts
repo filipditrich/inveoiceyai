@@ -4,8 +4,17 @@
 import { convert } from "xmlbuilder2";
 import { randomUUID } from "node:crypto";
 
-import type { Invoice, InvoiceCurrency, IssuerSnapshot } from "../schema";
-import { InvoiceCurrencySchema, InvoiceSchema } from "../schema";
+import type {
+  Invoice,
+  InvoiceCurrency,
+  InvoiceLanguage,
+  IssuerSnapshot,
+} from "../schema";
+import {
+  InvoiceCurrencySchema,
+  InvoiceLanguageSchema,
+  InvoiceSchema,
+} from "../schema";
 import { czechAccountToIban } from "../bank/czech-iban";
 import { ISDOC_XML_NAMESPACE } from "./render-isdoc";
 
@@ -53,6 +62,25 @@ function textOf(value: unknown): string {
     const t = textOf(v);
     if (t) {
       return t;
+    }
+  }
+  return "";
+}
+
+function attrOf(value: unknown, name: string): string {
+  const rec = asRecord(value);
+  if (!rec) {
+    return "";
+  }
+  const direct = rec[`@${name}`];
+  if (typeof direct === "string" || typeof direct === "number") {
+    return String(direct).trim();
+  }
+  for (const [k, v] of Object.entries(rec)) {
+    if (k === `@${name}` || k.endsWith(`:${name}`) || k.endsWith(`}${name}`)) {
+      if (typeof v === "string" || typeof v === "number") {
+        return String(v).trim();
+      }
     }
   }
   return "";
@@ -398,7 +426,14 @@ export function parseIsdoc(
     ),
   );
 
-  const note = textOf(child(root, "Note")) || undefined;
+  const noteNode = child(root, "Note");
+  const note = textOf(noteNode) || undefined;
+  const languageParsed = InvoiceLanguageSchema.safeParse(
+    attrOf(noteNode, "languageID"),
+  );
+  const language: InvoiceLanguage = languageParsed.success
+    ? languageParsed.data
+    : "cs";
 
   const firstLineTax = child(
     children(child(root, "InvoiceLines"), "InvoiceLine")[0],
@@ -421,7 +456,7 @@ export function parseIsdoc(
       issueDate,
       dueDate: dueDate || issueDate,
       duzp: duzp || issueDate,
-      language: "cs",
+      language,
       currency,
       correctedInvoiceNumber:
         docType === "credit_note" ? corrected || number : undefined,

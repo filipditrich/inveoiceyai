@@ -21,7 +21,7 @@ The product targets three concrete scenarios. Every feature must serve at least 
 
 ### UC2 — OBO (on-behalf-of) / self-billing
 
-> "Sometimes I issue an invoice in the name of *my client* to *myself* (self-billing model — the buyer issues the invoice). The document is legally identical to a normal invoice, but the issuer is the client and the recipient is me."
+> "Sometimes I issue an invoice in the name of _my client_ to _myself_ (self-billing model — the buyer issues the invoice). The document is legally identical to a normal invoice, but the issuer is the client and the recipient is me."
 
 - "Issuer" and "client" are symmetric concepts at schema level — both are `BusinessEntity` rows; an invoice picks one of each
 - Any saved business entity (whether normally an issuer or a client) can play either role
@@ -81,22 +81,22 @@ The MVP cut, ordered roughly by user-facing importance:
 
 ## Out of scope (MVP)
 
-These are explicitly deferred. They are *not* prohibited future work — they're just not part of the MVP cut. Each has a placeholder in the roadmap.
+These are explicitly deferred. They are _not_ prohibited future work — they're just not part of the MVP cut. Each has a placeholder in the roadmap.
 
-| Capability | Why deferred | Where it lands |
-| --- | --- | --- |
-| Recurring invoices / scheduled issuance | Needs cron + tracking + lifecycle UI | Plan 10 |
-| Email delivery to clients | Needs Resend wiring + bounce handling + audit trail | Plan 11 |
-| MCP + DB (list/mark paid, durable presets) | Local MCP already ships; persistence next | Plan 12b |
-| Slack bot (DB-persisted drafts) | Eve agent in `apps/web/agent` ([slack-eve.md](./specs/slack-eve.md)) | Plan 13b |
-| Authentication / multi-user | Single user is enough for personal use; Clerk integrates cleanly later | Plan 14 |
-| Multi-currency (EUR, USD) | CZK-only is sufficient for the personal use case; ARES is CZ-only anyway | Post-MVP |
-| Multi-language invoice render (CZ + EN) | Needed for invoicing abroad; Czech-only covers UC1 + UC2 | Post-MVP |
-| Accounting export (Pohoda, Money S3, iDoklad) | ISDOC already covers most importers — see [TODO below](#todoplan-3-isdoc-compatibility) | Validate after Plan 3 |
-| Bank-statement import / payment matching | Out of scope for an invoice-issuance tool | Possibly never |
-| Client-side payment portal (pay-by-link) | Out of scope for this product | Possibly never |
-| Advanced templates (custom PDF layouts) | One good template is better than ten mediocre ones | Post-MVP |
-| Tax reporting / kontrolní hlášení / DPH přiznání | Adjacent product; ISDOC export covers the upstream piece | Possibly never |
+| Capability                                           | Why deferred                                                                                           | Where it lands        |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------- |
+| Recurring invoices / scheduled issuance              | Needs cron + tracking + lifecycle UI                                                                   | Plan 10               |
+| Email delivery to clients                            | Needs Resend wiring + bounce handling + audit trail                                                    | Plan 11               |
+| MCP + DB (list/mark paid, durable presets)           | Local MCP already ships; persistence next                                                              | Plan 12b              |
+| Slack bot (DB-persisted drafts)                      | Eve agent in `apps/web/agent` ([slack-eve.md](./specs/slack-eve.md))                                   | Plan 13b              |
+| Authentication / multi-user                          | Single user is enough for personal use; Clerk integrates cleanly later                                 | Plan 14               |
+| Multi-currency (EUR, USD)                            | CZK-only is sufficient for the personal use case; ARES is CZ-only anyway                               | Post-MVP              |
+| Dual-label bilingual invoice PDF (CS+EN on one page) | Per-invoice `cs` \| `en` covers foreign clients ([ADR 0028](./decisions/0028-per-invoice-language.md)) | Post-MVP              |
+| Accounting export (Pohoda, Money S3, iDoklad)        | ISDOC already covers most importers — see [TODO below](#todoplan-3-isdoc-compatibility)                | Validate after Plan 3 |
+| Bank-statement import / payment matching             | Out of scope for an invoice-issuance tool                                                              | Possibly never        |
+| Client-side payment portal (pay-by-link)             | Out of scope for this product                                                                          | Possibly never        |
+| Advanced templates (custom PDF layouts)              | One good template is better than ten mediocre ones                                                     | Post-MVP              |
+| Tax reporting / kontrolní hlášení / DPH přiznání     | Adjacent product; ISDOC export covers the upstream piece                                               | Possibly never        |
 
 ## Success criteria (MVP)
 

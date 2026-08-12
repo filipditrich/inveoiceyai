@@ -11,7 +11,7 @@ Accepted (2026-08-12)
 ## Decision
 
 - `InvoiceMetaSchema.currency` is `z.enum(["CZK", "EUR", "USD"])`.
-- Invoice language remains `cs`.
+- Invoice language is independent of currency; see [ADR 0028](0028-per-invoice-language.md) (`cs` | `en`).
 - No exchange-rate fetch or snapshot in this pass (`CurrRate` stays `1`; no `ForeignCurrencyCode`).
 - SPAYD / payment QR is emitted **only** when `currency === "CZK"`.
 - Dashboard aggregates amounts **per currency** (never sum mixed codes into one pile). Monthly chart remains CZK-only.
@@ -20,4 +20,4 @@ Accepted (2026-08-12)
 
 - Builder exposes a currency picker; PDF uses `currencyDisplaySuffix`.
 - AI / MCP / import may supply `meta.currency`; default remains `CZK`.
-- Full FX (CNB + ISDOC foreign currency) and bilingual PDF remain follow-ups.
+- Full FX (CNB + ISDOC foreign currency) remains a follow-up. Dual-label bilingual PDFs remain out of scope (0028).

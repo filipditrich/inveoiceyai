@@ -4,6 +4,7 @@
  */
 
 import type { Invoice } from "../schema";
+import { invoiceLabels, isdocCountryName } from "../labels";
 import { stripInlineMarkdown } from "../pdf/inline-markdown";
 import { create } from "xmlbuilder2";
 import { v5 as uuidv5 } from "uuid";
@@ -16,18 +17,11 @@ type Xm = any;
 
 const UUID_NAMESPACE = uuidv5("invoicey.isdoc_invoice.v1", uuidv5.DNS);
 
-function countryName(alpha2: string): string {
-  const labels: Record<string, string> = {
-    CZ: "Česká republika",
-    SK: "Slovensko",
-    DE: "Německo",
-    PL: "Polsko",
-    AT: "Rakousko",
-    GB: "Spojené království",
-    US: "Spojené státy",
-    FR: "Francie",
-  };
-  return labels[alpha2] ?? alpha2;
+function countryName(
+  alpha2: string,
+  language: Invoice["meta"]["language"],
+): string {
+  return isdocCountryName(alpha2, language);
 }
 
 function postalZone(zip: string): string {
@@ -109,7 +103,9 @@ function headerNote(inv: Invoice): string {
     inv.meta.docType === "credit_note" &&
     inv.meta.correctedInvoiceNumber?.trim()
   ) {
-    parts.push(`Opravuje doklad č. ${inv.meta.correctedInvoiceNumber.trim()}`);
+    parts.push(
+      `${invoiceLabels(inv.meta.language).correctsDocumentIsdoc} ${inv.meta.correctedInvoiceNumber.trim()}`,
+    );
   }
   return parts.join("\n").trim();
 }
@@ -128,6 +124,7 @@ function appendPostalAddress(
   city: string,
   zip: string,
   countryAlpha2: string,
+  language: Invoice["meta"]["language"],
 ) {
   const cc = countryAlpha2.trim().toUpperCase();
 
@@ -137,7 +134,7 @@ function appendPostalAddress(
   el.ele(NSDOC, "PostalZone").txt(postalZone(zip)).up();
   const cn = el.ele(NSDOC, "Country");
   cn.ele(NSDOC, "IdentificationCode").txt(cc).up();
-  cn.ele(NSDOC, "Name").txt(countryName(cc)).up();
+  cn.ele(NSDOC, "Name").txt(countryName(cc, language)).up();
   cn.up();
 }
 
@@ -163,6 +160,7 @@ function appendAccountingSupplierParty(root: Xm, invoice: Invoice) {
     invoice.issuer.address.city,
     invoice.issuer.address.zip,
     invoice.issuer.address.country,
+    invoice.meta.language,
   );
   addr.up();
 
@@ -215,6 +213,7 @@ function appendAccountingCustomerParty(root: Xm, invoice: Invoice) {
     invoice.client.address.city,
     invoice.client.address.zip,
     invoice.client.address.country,
+    invoice.meta.language,
   );
   addr.up();
 
@@ -476,10 +475,11 @@ export function renderIsdoc(invoice: Invoice): string {
 
   invoiceEl.ele(NSDOC, "ElectronicPossibilityAgreementReference").txt("").up();
 
-  const combinedNote = headerNote(invoice);
-  if (combinedNote.length > 0) {
-    invoiceEl.ele(NSDOC, "Note").txt(combinedNote).up();
-  }
+  invoiceEl
+    .ele(NSDOC, "Note")
+    .att("languageID", invoice.meta.language)
+    .txt(headerNote(invoice))
+    .up();
 
   invoiceEl.ele(NSDOC, "LocalCurrencyCode").txt(invoice.meta.currency).up();
   invoiceEl.ele(NSDOC, "CurrRate").txt("1").up();

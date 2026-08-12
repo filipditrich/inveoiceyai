@@ -29,6 +29,17 @@ describe("email renders", () => {
     expect(out.text.length).toBeGreaterThan(20);
   });
 
+  it("renders invoice_sent in English", async () => {
+    const out = await renderInvoiceSentEmail({
+      ...invoiceFixture,
+      locale: "en",
+      coverText: "Hello,\n\nplease find the invoice attached.",
+    });
+    expect(out.subject).toContain("Invoice");
+    expect(out.html).toContain("Customer");
+    expect(out.html).toContain("Sent with Invoicey.");
+  });
+
   it("renders workspace_invite", async () => {
     const out = await renderWorkspaceInviteEmail({
       workspaceName: "Invoicey",

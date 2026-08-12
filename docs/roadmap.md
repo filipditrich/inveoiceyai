@@ -543,7 +543,7 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 
 These are tracked here for traceability but not currently slotted:
 
-- Multi-currency (EUR / USD) + bilingual invoices (CZ / EN)
+- Dual-label bilingual invoices (CS + EN on one PDF)
 - Custom PDF templates / template editor
 - Bank-statement reconciliation
 - Tax-period reporting (kontrolní hlášení / DPH přiznání) — adjacent product

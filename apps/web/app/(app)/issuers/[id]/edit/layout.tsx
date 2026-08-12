@@ -2,6 +2,7 @@ import { IssuerEditNav } from "@/components/issuers/issuer-edit-nav";
 import { loadIssuerForEdit } from "@/lib/load-issuer";
 import { requireWorkspace } from "@/lib/auth/session";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 type Params = Promise<{ id: string }>;
 
@@ -12,6 +13,7 @@ export default async function IssuerEditLayout({
   children: React.ReactNode;
   params: Params;
 }) {
+  const t = await getTranslations("Issuers");
   const { id } = await params;
   const { workspaceId } = await requireWorkspace();
   const issuer = await loadIssuerForEdit(workspaceId, id);
@@ -24,15 +26,13 @@ export default async function IssuerEditLayout({
             className="hover:text-foreground underline-offset-4 hover:underline"
             href="/issuers"
           >
-            Dodavatelé
+            {t("title")}
           </Link>
         </p>
         <h1 className="text-2xl font-semibold tracking-tight">
           {issuer.snapshot.name}
         </h1>
-        <p className="text-muted-foreground text-sm">
-          Upravte jednotlivé části vystavovatele — uložení je po sekcích.
-        </p>
+        <p className="text-muted-foreground text-sm">{t("editSectionsHint")}</p>
       </div>
       <IssuerEditNav issuerId={id} />
       {children}

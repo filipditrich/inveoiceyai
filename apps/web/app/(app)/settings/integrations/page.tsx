@@ -1,12 +1,14 @@
 import { getWorkspaceName, listSlackIdentitiesForUser } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { PlugZapIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { IntegrationsPanels } from "@/components/settings/integrations-panels";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { requireWorkspace } from "@/lib/auth/session";
 
 export default async function SettingsIntegrationsPage() {
+  const t = await getTranslations("Settings.integrations");
   const { userId, workspaceId } = await requireWorkspace();
   const identities = await listSlackIdentitiesForUser(db, userId);
   const currentWorkspaceName =
@@ -15,9 +17,9 @@ export default async function SettingsIntegrationsPage() {
   return (
     <div className="space-y-6">
       <SettingsPageHeader
-        description="Propojte Invoicey se Slackem, Cursorem nebo Claude Code. Citlivé operace zůstávají pod vaším potvrzením."
+        description={t("pageDescription")}
         icon={<PlugZapIcon />}
-        title="Integrace a automatizace"
+        title={t("pageTitle")}
       />
       <IntegrationsPanels
         currentWorkspaceId={workspaceId}

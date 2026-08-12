@@ -26,6 +26,7 @@ import {
 } from "@tanstack/react-table";
 import { SearchIcon } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 export type IssuerTableItem = {
@@ -34,18 +35,23 @@ export type IssuerTableItem = {
   snapshot: IssuerSnapshot;
 };
 
-const filterFields: FilterFieldConfig<string>[] = [
-  {
-    key: "q",
-    label: "Hledat",
-    type: "text",
-    icon: <SearchIcon className="size-3.5" />,
-    placeholder: "název, IČO, DIČ…",
-    defaultOperator: "contains",
-  },
-];
-
 export function IssuersDataGrid({ items }: { items: IssuerTableItem[] }) {
+  const t = useTranslations("Issuers");
+  const tTable = useTranslations("Issuers.table");
+  const tCommon = useTranslations("Common");
+  const filterFields = useMemo<FilterFieldConfig<string>[]>(
+    () => [
+      {
+        key: "q",
+        label: tCommon("search"),
+        type: "text",
+        icon: <SearchIcon className="size-3.5" />,
+        placeholder: tTable("searchPlaceholder"),
+        defaultOperator: "contains",
+      },
+    ],
+    [tCommon, tTable],
+  );
   const [filters, setFilters] = useState<Filter<string>[]>(() =>
     filtersFromRecord({}, filterFields),
   );
@@ -74,40 +80,41 @@ export function IssuersDataGrid({ items }: { items: IssuerTableItem[] }) {
         id: "name",
         accessorFn: (row) => row.snapshot.name,
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Název" />
+          <DataGridColumnHeader column={column} title={tTable("name")} />
         ),
-        meta: { headerTitle: "Název", autoSize: true },
+        meta: { headerTitle: tTable("name"), autoSize: true },
       },
       {
         id: "ico",
         accessorFn: (row) => row.snapshot.ico,
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="IČO" />
+          <DataGridColumnHeader column={column} title={tTable("ico")} />
         ),
-        meta: { headerTitle: "IČO" },
+        meta: { headerTitle: tTable("ico") },
       },
       {
         id: "dic",
         accessorFn: (row) => row.snapshot.dic ?? "",
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="DIČ" />
+          <DataGridColumnHeader column={column} title={tTable("dic")} />
         ),
-        cell: ({ row }) => row.original.snapshot.dic ?? "—",
-        meta: { headerTitle: "DIČ" },
+        cell: ({ row }) => row.original.snapshot.dic ?? tCommon("emptyDash"),
+        meta: { headerTitle: tTable("dic") },
       },
       {
         id: "vatPayer",
-        accessorFn: (row) => (row.snapshot.vatPayer ? "Plátce" : "Neplátce"),
+        accessorFn: (row) =>
+          row.snapshot.vatPayer ? tTable("vatPayer") : tTable("vatNonPayer"),
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="DPH" />
+          <DataGridColumnHeader column={column} title={tTable("vat")} />
         ),
-        meta: { headerTitle: "DPH" },
+        meta: { headerTitle: tTable("vat") },
       },
       {
         id: "actions",
         enableSorting: false,
         enableHiding: false,
-        header: () => <span className="sr-only">Akce</span>,
+        header: () => <span className="sr-only">{tTable("actions")}</span>,
         cell: ({ row }) => (
           <div className="flex justify-end gap-2">
             <Button
@@ -120,24 +127,24 @@ export function IssuersDataGrid({ items }: { items: IssuerTableItem[] }) {
               size="sm"
               variant="outline"
             >
-              Upravit
+              {tTable("edit")}
             </Button>
             <form action={deleteIssuer}>
               <input name="id" type="hidden" value={row.original.rowId} />
               <SubmitButton
-                pendingLabel="Mazání…"
+                pendingLabel={t("deleting")}
                 size="sm"
                 variant="destructive"
               >
-                Smazat
+                {tTable("delete")}
               </SubmitButton>
             </form>
           </div>
         ),
-        meta: { headerTitle: "Akce" },
+        meta: { headerTitle: tTable("actions") },
       },
     ],
-    [],
+    [t, tCommon, tTable],
   );
 
   const table = useTable({
@@ -175,7 +182,7 @@ export function IssuersDataGrid({ items }: { items: IssuerTableItem[] }) {
 
   return (
     <AppDataGrid
-      emptyMessage="Žádní vystavovatelé."
+      emptyMessage={t("empty")}
       recordCount={table.getFilteredRowModel().rows.length}
       table={table}
       toolbar={

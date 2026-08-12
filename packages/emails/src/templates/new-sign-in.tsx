@@ -1,6 +1,7 @@
 import { Button, Text } from "@react-email/components";
 import * as React from "react";
 
+import { systemEmailCopy, type EmailLocale } from "../copy";
 import { EmailShell } from "../components/email-shell";
 
 export type NewSignInEmailProps = {
@@ -10,42 +11,42 @@ export type NewSignInEmailProps = {
   signedInAt: string;
   trustUrl: string;
   securitySettingsUrl: string;
+  locale?: EmailLocale;
 };
 
 export function NewSignInEmail(props: NewSignInEmailProps) {
-  const title = "Nové přihlášení do Invoicey";
+  const locale = props.locale ?? "cs";
+  const copy = systemEmailCopy(locale);
+  const unknownBrowser = locale === "en" ? "unknown" : "neznámý";
 
   return (
     <EmailShell
-      preview="Detekovali jsme přihlášení z nového zařízení"
-      title={title}
+      locale={locale}
+      preview={copy.signInPreview}
+      title={copy.signInTitle}
       variant="system"
       footerLink={{
-        label: "Nastavení zabezpečení",
+        label: copy.securitySettings,
         href: props.securitySettingsUrl,
       }}
     >
+      <Text style={bodyText}>{copy.signInHello(props.userName)}</Text>
       <Text style={bodyText}>
-        Ahoj{props.userName.trim() ? ` ${props.userName.trim()}` : ""},
-        zaznamenali jsme přihlášení z zařízení, které zatím není důvěryhodné.
-      </Text>
-      <Text style={bodyText}>
-        <strong>Čas:</strong> {props.signedInAt}
+        <strong>{copy.signInTime}:</strong> {props.signedInAt}
         <br />
-        <strong>IP:</strong> {props.ipAddress?.trim() || "neznámá"}
+        <strong>{copy.signInIp}:</strong>{" "}
+        {props.ipAddress?.trim() || copy.unknown}
         <br />
-        <strong>Prohlížeč:</strong> {props.userAgent?.trim() || "neznámý"}
+        <strong>{copy.signInBrowser}:</strong>{" "}
+        {props.userAgent?.trim() || unknownBrowser}
       </Text>
-      <Text style={bodyText}>
-        Pokud jste to byli vy, můžete zařízení označit jako důvěryhodné. Pokud
-        ne, odvolejte relace v nastavení zabezpečení.
-      </Text>
+      <Text style={bodyText}>{copy.signInTrustLead}</Text>
       <Button href={props.trustUrl} style={button}>
-        Důvěřovat tomuto zařízení
+        {copy.signInTrust}
       </Button>
       <Text style={muted}>
         <a href={props.securitySettingsUrl} style={link}>
-          Otevřít nastavení zabezpečení
+          {copy.securitySettings}
         </a>
       </Text>
     </EmailShell>

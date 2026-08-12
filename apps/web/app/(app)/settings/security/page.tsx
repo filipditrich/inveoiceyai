@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 import {
   CheckCircle2Icon,
   ShieldCheckIcon,
@@ -21,6 +22,7 @@ export default async function SettingsSecurityPage({
   searchParams: Promise<{ trust?: string; linked?: string }>;
 }) {
   const sp = await searchParams;
+  const t = await getTranslations("Settings.security");
   const session = await auth.api.getSession({ headers: await headers() });
   const configuredProviders: Array<"google" | "github"> = [];
   if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
@@ -33,9 +35,9 @@ export default async function SettingsSecurityPage({
   return (
     <div className="flex flex-col gap-6">
       <SettingsPageHeader
-        description="Spravujte způsoby přihlášení, aktivní relace a důvěryhodná zařízení. Invoicey používá pouze OAuth — žádné další heslo."
+        description={t("pageDescription")}
         icon={<ShieldCheckIcon />}
-        title="Zabezpečení účtu"
+        title={t("pageTitle")}
       />
 
       {sp.trust === "ok" ? (
@@ -44,7 +46,7 @@ export default async function SettingsSecurityPage({
           className="flex items-start gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5 text-sm text-emerald-800 dark:text-emerald-300"
         >
           <CheckCircle2Icon className="mt-0.5 size-4 shrink-0" />
-          <p>Zařízení bylo označeno jako důvěryhodné.</p>
+          <p>{t("trustOk")}</p>
         </div>
       ) : null}
       {sp.trust === "invalid" ? (
@@ -53,7 +55,7 @@ export default async function SettingsSecurityPage({
           className="border-destructive/25 bg-destructive/5 text-destructive flex items-start gap-2 rounded-lg border px-3 py-2.5 text-sm"
         >
           <TriangleAlertIcon className="mt-0.5 size-4 shrink-0" />
-          <p>Odkaz pro důvěru zařízení je neplatný nebo vypršel.</p>
+          <p>{t("trustInvalid")}</p>
         </div>
       ) : null}
       {sp.linked === "1" ? (
@@ -62,10 +64,7 @@ export default async function SettingsSecurityPage({
           className="flex items-start gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5 text-sm text-emerald-800 dark:text-emerald-300"
         >
           <CheckCircle2Icon className="mt-0.5 size-4 shrink-0" />
-          <p>
-            Poskytovatel propojen. Ostatní relace se odvolávají kvůli
-            bezpečnosti.
-          </p>
+          <p>{t("linkedAfter")}</p>
         </div>
       ) : null}
 

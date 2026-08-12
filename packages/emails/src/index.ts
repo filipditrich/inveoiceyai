@@ -9,6 +9,14 @@ export {
   type RenderedEmail,
 } from "./render";
 export {
+  defaultInvoiceCoverTemplate,
+  defaultInvoiceSubjectTemplate,
+  emailLocale,
+  invoiceEmailCopy,
+  systemEmailCopy,
+  type EmailLocale,
+} from "./copy";
+export {
   InvoiceSentEmail,
   type InvoiceSentEmailProps,
 } from "./templates/invoice-sent";
