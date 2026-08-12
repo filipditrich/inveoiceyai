@@ -4,6 +4,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
+import { TokenBalanceChip } from "@/components/settings/token-balance-chip";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 import {
   Sidebar,
@@ -29,6 +30,7 @@ import {
   PlugZapIcon,
   PlusIcon,
   Settings2Icon,
+  SparklesIcon,
   UsersIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -42,6 +44,7 @@ export function AppSidebar({
   activeWorkspaceId,
   defaultWorkspaceId,
   workspaces,
+  tokenBalance = null,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: { name: string; email: string; avatar: string };
@@ -49,6 +52,12 @@ export function AppSidebar({
   activeWorkspaceId: string;
   defaultWorkspaceId: string | null;
   workspaces: WorkspaceListItem[];
+  tokenBalance?: {
+    giftedRemaining: number;
+    monthlyRemaining: number;
+    purchasedRemaining: number;
+    totalAvailable: number;
+  } | null;
 }) {
   const pathname = usePathname();
   const t = useTranslations("App");
@@ -77,6 +86,7 @@ export function AppSidebar({
             pathname === "/invoices" ||
             (pathname.startsWith("/invoices/") &&
               !pathname.startsWith("/invoices/new") &&
+              !pathname.startsWith("/invoices/ai") &&
               !pathname.startsWith("/invoices/from-json") &&
               !pathname.startsWith("/invoices/import")),
         },
@@ -85,6 +95,12 @@ export function AppSidebar({
           url: "/invoices/new",
           icon: <FilePlus2Icon />,
           isActive: pathname === "/invoices/new",
+        },
+        {
+          title: t("nav.invoicesAi"),
+          url: "/invoices/ai",
+          icon: <SparklesIcon />,
+          isActive: pathname === "/invoices/ai",
         },
         {
           title: t("nav.invoicesImport"),
@@ -195,6 +211,11 @@ export function AppSidebar({
         />
       </SidebarContent>
       <SidebarFooter className="gap-3">
+        {tokenBalance ? (
+          <div className="px-2 group-data-[collapsible=icon]:hidden">
+            <TokenBalanceChip {...tokenBalance} />
+          </div>
+        ) : null}
         <NavUser isPlatformAdmin={isPlatformAdmin} user={user} />
         {process.env.NODE_ENV !== "production" ? (
           <p

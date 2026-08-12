@@ -37,3 +37,4 @@ When a decision changes:
 | [0023](./0023-account-security-soft-devices.md)            | Soft trusted devices + PAT cutover for machine auth        | Accepted                   |
 | [0024](./0024-platform-admin-user-flag.md)                 | Platform admin is a user flag, not a workspace role        | Accepted                   |
 | [0025](./0025-referral-attribution.md)                     | Referral links are signup attribution only                 | Accepted                   |
+| [0026](./0026-workspace-ai-tokens.md)                      | Workspace AI tokens as entitlement unit                    | Accepted                   |

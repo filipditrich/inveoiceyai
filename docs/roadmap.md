@@ -509,6 +509,24 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 
 **Out of scope:** workspace delete/leave/transfer, slug edit, ops-key multi-tenant picker, Slack multi-workspace remap, Postgres RLS.
 
+### Plan 21 — In-app AI draft + workspace token usage
+
+**Status:** Implemented  
+**Completed:** 2026-08-12  
+**ADR:** [0026](./decisions/0026-workspace-ai-tokens.md) · [spec](./specs/ai-usage.md) · [plan](../.cursor/plans/plan-21-ai-usage.md)
+
+**Goal:** Prompt → InvoiceSchema in the web app; workspace-scoped AI token balances with per-product usage (web / slack / mcp activity) and Usage settings UI.
+
+**Exit criteria:**
+
+- [x] Schema + grant on workspace create; gifted / monthly / purchased buckets
+- [x] Meter Web + Eve LLM tokens; log MCP tool calls without debit
+- [x] Cron renewal (no monthly rollover) + ops script
+- [x] `/invoices/ai`, Settings → Usage, sidebar balance chip
+- [x] Spec + ADR
+
+**Out of v1:** Payments / top-up, billing MCP client LLM tokens.
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:
@@ -517,3 +535,4 @@ These are tracked here for traceability but not currently slotted:
 - Custom PDF templates / template editor
 - Bank-statement reconciliation
 - Tax-period reporting (kontrolní hlášení / DPH přiznání) — adjacent product
+- AI token top-up via payment

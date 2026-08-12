@@ -13,6 +13,13 @@ export interface AppShellUser {
   avatar: string;
 }
 
+export type AppShellTokenBalance = {
+  giftedRemaining: number;
+  monthlyRemaining: number;
+  purchasedRemaining: number;
+  totalAvailable: number;
+};
+
 export function AppShell({
   children,
   user,
@@ -20,6 +27,7 @@ export function AppShell({
   activeWorkspaceId,
   defaultWorkspaceId,
   workspaces,
+  tokenBalance,
 }: Readonly<{
   children: ReactNode;
   user: AppShellUser;
@@ -27,6 +35,7 @@ export function AppShell({
   activeWorkspaceId: string;
   defaultWorkspaceId: string | null;
   workspaces: WorkspaceListItem[];
+  tokenBalance?: AppShellTokenBalance | null;
 }>) {
   return (
     <SidebarProvider
@@ -41,6 +50,7 @@ export function AppShell({
         activeWorkspaceId={activeWorkspaceId}
         defaultWorkspaceId={defaultWorkspaceId}
         isPlatformAdmin={isPlatformAdmin}
+        tokenBalance={tokenBalance}
         user={user}
         workspaces={workspaces}
       />

@@ -11,6 +11,8 @@ import {
   getUserDefaultWorkspaceId,
   listUserWorkspaces,
 } from "@/lib/auth/workspaces";
+import { getWorkspaceTokenSummary } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -26,11 +28,13 @@ export default async function AppShellLayout({
   // boundary, since route handlers and actions do not pass through it.
   const user = await requireSession();
   const { workspaceId } = await requireWorkspace();
-  const [platformAdmin, workspaces, defaultWorkspaceId] = await Promise.all([
-    isPlatformAdmin(),
-    listUserWorkspaces(user.id),
-    getUserDefaultWorkspaceId(user.id),
-  ]);
+  const [platformAdmin, workspaces, defaultWorkspaceId, tokenSummary] =
+    await Promise.all([
+      isPlatformAdmin(),
+      listUserWorkspaces(user.id),
+      getUserDefaultWorkspaceId(user.id),
+      getWorkspaceTokenSummary(db, workspaceId),
+    ]);
 
   const pathname = (await headers()).get("x-pathname") ?? "";
   if (
@@ -45,6 +49,12 @@ export default async function AppShellLayout({
       activeWorkspaceId={workspaceId}
       defaultWorkspaceId={defaultWorkspaceId}
       isPlatformAdmin={platformAdmin}
+      tokenBalance={{
+        giftedRemaining: tokenSummary.giftedRemaining,
+        monthlyRemaining: tokenSummary.monthlyRemaining,
+        purchasedRemaining: tokenSummary.purchasedRemaining,
+        totalAvailable: tokenSummary.totalAvailable,
+      }}
       user={{
         name: user.name,
         email: user.email,

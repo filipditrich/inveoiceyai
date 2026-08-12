@@ -20,32 +20,66 @@ import { sendInvoiceEmailById } from "./send-invoice-email";
 const presetKindSchema = z.enum(["issuer", "invoice_template"]);
 const jsonObjectSchema = z.record(z.string(), z.any());
 
+type ToolResult = {
+  content: Array<{ type: "text"; text: string }>;
+  isError?: boolean;
+};
+
 /** Narrowed registrar — full McpServer.tool() generics blow TS instantiation depth. */
 type ToolRegistrar = {
   tool: (
     name: string,
     description: string,
     schema: Record<string, z.ZodTypeAny>,
-    handler: (args: Record<string, unknown>) => Promise<{
-      content: Array<{ type: "text"; text: string }>;
-      isError?: boolean;
-    }>,
+    handler: (args: Record<string, unknown>) => Promise<ToolResult>,
   ) => unknown;
 };
 
+export type RegisterInvoiceyMcpToolsOptions = {
+  /** Fired after each tool completes (success or error). Used for MCP activity metering. */
+  onToolCall?: (info: {
+    toolName: string;
+    isError: boolean;
+  }) => void | Promise<void>;
+};
+
 /** Registers Plan 12a tools on an MCP server (stdio or HTTP). */
-export function registerInvoiceyMcpTools(server: McpServer): void {
+export function registerInvoiceyMcpTools(
+  server: McpServer,
+  options?: RegisterInvoiceyMcpToolsOptions,
+): void {
   const s = server as unknown as ToolRegistrar;
+  const onToolCall = options?.onToolCall;
+
+  const wrap = (
+    toolName: string,
+    handler: (args: Record<string, unknown>) => Promise<ToolResult>,
+  ) => {
+    return async (args: Record<string, unknown>): Promise<ToolResult> => {
+      const result = await handler(args);
+      if (onToolCall) {
+        try {
+          await onToolCall({
+            toolName,
+            isError: result.isError === true,
+          });
+        } catch {
+          /** metering must not break tools */
+        }
+      }
+      return result;
+    };
+  };
 
   s.tool(
     "lookup_business",
     "Look up a Czech economic subject by IČO (8 digits) via ARES. Returns draft client fields (no `id`). Prefer this once IČO is known.",
     { ico: z.string().describe("Eight-digit IČO") },
-    async (args) => {
+    wrap("lookup_business", async (args) => {
       const ico = String(args.ico ?? "");
       const r = await lookupBusiness(ico);
       return jsonToolResult(r, !r.ok);
-    },
+    }),
   );
 
   s.tool(
@@ -61,7 +95,7 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
         .optional()
         .describe("Max matches (default 5)"),
     },
-    async (args) => {
+    wrap("search_business", async (args) => {
       const query = String(args.query ?? "");
       const limit =
         typeof args.limit === "number" && Number.isFinite(args.limit)
@@ -69,7 +103,7 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
           : undefined;
       const r = await searchBusiness(query, { limit });
       return jsonToolResult(r, !r.ok);
-    },
+    }),
   );
 
   s.tool(
@@ -92,7 +126,7 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
         .optional()
         .describe("Preset id of kind invoice_template"),
     },
-    async (args) => {
+    wrap("create_invoice", async (args) => {
       const r = await createAndRenderInvoice({
         draft: args.draft,
         issuerPresetId:
@@ -105,7 +139,7 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
             : undefined,
       });
       return jsonToolResult(r, !r.ok);
-    },
+    }),
   );
 
   s.tool(
@@ -124,7 +158,7 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
         .optional()
         .describe("Only open issued invoices (unpaid / overdue / future)"),
     },
-    async (args) => {
+    wrap("list_invoices", async (args) => {
       try {
         const limit =
           typeof args.limit === "number" && Number.isFinite(args.limit)
@@ -138,14 +172,14 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
         const message = err instanceof Error ? err.message : String(err);
         return jsonToolResult({ ok: false as const, error: message }, true);
       }
-    },
+    }),
   );
 
   s.tool(
     "get_invoice",
     "Get one invoice by id from Neon (requires DATABASE_URL). Includes summary with status/displayStatus and validated payload when present.",
     { id: z.string().uuid().describe("Invoice row id") },
-    async (args) => {
+    wrap("get_invoice", async (args) => {
       try {
         const r = await getInvoice({ id: String(args.id ?? "") });
         return jsonToolResult(r, !r.ok);
@@ -153,14 +187,14 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
         const message = err instanceof Error ? err.message : String(err);
         return jsonToolResult({ ok: false as const, error: message }, true);
       }
-    },
+    }),
   );
 
   s.tool(
     "mark_invoice_paid",
     "Mark an issued unpaid invoice as paid (requires DATABASE_URL). Sets paidAt.",
     { id: z.string().uuid().describe("Invoice row id") },
-    async (args) => {
+    wrap("mark_invoice_paid", async (args) => {
       try {
         const r = await markInvoicePaidById({ id: String(args.id ?? "") });
         return jsonToolResult(r, !r.ok);
@@ -168,7 +202,7 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
         const message = err instanceof Error ? err.message : String(err);
         return jsonToolResult({ ok: false as const, error: message }, true);
       }
-    },
+    }),
   );
 
   s.tool(
@@ -192,7 +226,7 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
         .describe("Attach ISDOC (default from issuer settings / true)"),
       subject: z.string().optional(),
     },
-    async (args) => {
+    wrap("send_invoice_email", async (args) => {
       try {
         const r = await sendInvoiceEmailById({
           id: String(args.id ?? ""),
@@ -213,7 +247,7 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
         const message = err instanceof Error ? err.message : String(err);
         return jsonToolResult({ ok: false as const, error: message }, true);
       }
-    },
+    }),
   );
 
   s.tool(
@@ -224,24 +258,24 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
         .optional()
         .describe("Filter by issuer or invoice_template"),
     },
-    async (args) => {
+    wrap("list_presets", async (args) => {
       const kind =
         args.kind === "issuer" || args.kind === "invoice_template"
           ? (args.kind as PresetKind)
           : undefined;
       const r = await listPresets({ kind });
       return jsonToolResult(r);
-    },
+    }),
   );
 
   s.tool(
     "get_preset",
     "Get one preset by id.",
     { id: z.string().uuid() },
-    async (args) => {
+    wrap("get_preset", async (args) => {
       const r = await getPreset({ id: String(args.id ?? "") });
       return jsonToolResult(r, !r.ok);
-    },
+    }),
   );
 
   s.tool(
@@ -255,7 +289,7 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
         "IssuerSnapshot or partial invoice draft object",
       ),
     },
-    async (args) => {
+    wrap("save_preset", async (args) => {
       const kind = args.kind as PresetKind;
       const r = await savePreset({
         id: typeof args.id === "string" ? args.id : undefined,
@@ -264,16 +298,16 @@ export function registerInvoiceyMcpTools(server: McpServer): void {
         data: args.data,
       });
       return jsonToolResult(r, !r.ok);
-    },
+    }),
   );
 
   s.tool(
     "delete_preset",
     "Delete a local preset by id.",
     { id: z.string().uuid() },
-    async (args) => {
+    wrap("delete_preset", async (args) => {
       const r = await deletePreset({ id: String(args.id ?? "") });
       return jsonToolResult(r, !r.ok);
-    },
+    }),
   );
 }

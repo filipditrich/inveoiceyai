@@ -6,6 +6,23 @@ export {
   getDefaultWorkspaceId,
 } from "./workspace";
 export {
+  OutOfAiTokensError,
+  aggregateAiUsageByDay,
+  assertHasTokens,
+  ensureAiTokenBalance,
+  getWorkspaceTokenSummary,
+  listAiUsageEvents,
+  recordLlmUsage,
+  recordToolActivity,
+  renewDueAiTokenPeriods,
+  renewMonthlyPeriod,
+  type AiTokenSummary,
+  type RecordLlmUsageInput,
+  type RecordLlmUsageResult,
+  type RecordToolActivityInput,
+  type UsageEventListItem,
+} from "./ai-tokens";
+export {
   deletePresetDb,
   getPresetDb,
   listPresetsDb,

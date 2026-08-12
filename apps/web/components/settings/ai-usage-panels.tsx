@@ -1,0 +1,233 @@
+"use client";
+
+import { formatTokenCount } from "@/lib/ai/format-tokens";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useFormatter, useTranslations } from "next-intl";
+
+import { AiUsageChart, type UsageDayPoint } from "./ai-usage-chart";
+
+export type UsageBalanceProps = {
+  giftedRemaining: number;
+  monthlyRemaining: number;
+  monthlyLimit: number;
+  purchasedRemaining: number;
+  totalAvailable: number;
+  daysUntilRenewal: number;
+  periodEndIso: string;
+  monthlyIncluded: number;
+};
+
+export type UsageHistoryRow = {
+  id: string;
+  product: string;
+  kind: string;
+  model: string | null;
+  totalTokens: number;
+  toolName: string | null;
+  createdAtIso: string;
+};
+
+export function AiUsagePanels({
+  balance,
+  chart,
+  history,
+}: {
+  balance: UsageBalanceProps;
+  chart: UsageDayPoint[];
+  history: UsageHistoryRow[];
+}) {
+  const t = useTranslations("App.settings.usage");
+  const format = useFormatter();
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="border-b">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle>{t("plan.title")}</CardTitle>
+              <CardDescription>{t("plan.description")}</CardDescription>
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" disabled>
+                {t("plan.viewPlans")}
+              </Button>
+              <Button type="button" disabled>
+                {t("plan.upgrade")}
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-5">
+          <p className="text-lg font-medium">{t("plan.freeName")}</p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            {t("plan.freeIncludes", {
+              monthly: formatTokenCount(balance.monthlyIncluded),
+            })}
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="border-b">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle>{t("balance.title")}</CardTitle>
+              <CardDescription>
+                {t("balance.renewal", { days: balance.daysUntilRenewal })}
+              </CardDescription>
+            </div>
+            <Button type="button" variant="outline" disabled>
+              {t("plan.upgrade")}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-6 pt-5 md:grid-cols-[minmax(0,220px)_1fr]">
+          <div className="bg-foreground text-background flex flex-col justify-between rounded-xl p-5">
+            <p className="text-xs uppercase tracking-wide opacity-70">
+              {t("balance.cardLabel")}
+            </p>
+            <p className="mt-6 text-3xl font-semibold tracking-tight">
+              {formatTokenCount(balance.totalAvailable)}
+            </p>
+            <p className="mt-2 text-xs opacity-70">{t("balance.totalLabel")}</p>
+          </div>
+          <dl className="space-y-3 text-sm">
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">{t("balance.gifted")}</dt>
+              <dd className="font-medium">
+                {formatTokenCount(balance.giftedRemaining)}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">{t("balance.monthly")}</dt>
+              <dd className="font-medium">
+                {formatTokenCount(balance.monthlyRemaining)} /{" "}
+                {formatTokenCount(balance.monthlyLimit)}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">
+                {t("balance.purchased")}
+              </dt>
+              <dd className="font-medium">
+                {formatTokenCount(balance.purchasedRemaining)}
+              </dd>
+            </div>
+            <div className="border-border flex justify-between gap-4 border-t pt-3">
+              <dt className="font-medium">{t("balance.totalLabel")}</dt>
+              <dd className="font-semibold">
+                {formatTokenCount(balance.totalAvailable)}
+              </dd>
+            </div>
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              {t("balance.noRollover")}
+            </p>
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              {t("balance.expiresOn", {
+                date: format.dateTime(new Date(balance.periodEndIso), {
+                  dateStyle: "medium",
+                }),
+              })}
+            </p>
+          </dl>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>{t("chart.title")}</CardTitle>
+          <CardDescription>{t("chart.subtitle")}</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-5">
+          <AiUsageChart data={chart} />
+          <p className="text-muted-foreground mt-3 text-xs">
+            {t("chart.mcpNote")}
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>{t("history.title")}</CardTitle>
+          <CardDescription>{t("history.subtitle")}</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {history.length === 0 ? (
+            <p className="text-muted-foreground py-6 text-sm">
+              {t("history.empty")}
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("history.when")}</TableHead>
+                  <TableHead>{t("history.product")}</TableHead>
+                  <TableHead>{t("history.detail")}</TableHead>
+                  <TableHead className="text-right">
+                    {t("history.tokens")}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {history.map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell className="whitespace-nowrap">
+                      {format.dateTime(new Date(row.createdAtIso), {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </TableCell>
+                    <TableCell>
+                      {t(`products.${row.product}` as never)}
+                    </TableCell>
+                    <TableCell className="max-w-56 truncate">
+                      {row.kind === "tool_call"
+                        ? (row.toolName ?? "—")
+                        : (row.model ?? "llm")}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {row.kind === "tool_call"
+                        ? "—"
+                        : formatTokenCount(row.totalTokens)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>{t("topup.title")}</CardTitle>
+          <CardDescription>{t("topup.subtitle")}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2 pt-5">
+          <Button type="button" variant="outline" disabled>
+            {t("topup.redeem")}
+          </Button>
+          <Button type="button" disabled>
+            {t("topup.buy")}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

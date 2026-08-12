@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 
+import { ensureAiTokenBalance } from "./ai-tokens";
 import type { InvoiceyDb } from "./create-db";
 import { workspaces } from "./schema";
 
@@ -30,6 +31,7 @@ export async function ensureDefaultWorkspace(
     .where(eq(workspaces.id, id))
     .limit(1);
   if (existing[0]) {
+    await ensureAiTokenBalance(database, id);
     return { id };
   }
 
@@ -41,5 +43,6 @@ export async function ensureDefaultWorkspace(
     // 14 stage 6, once callers resolve the workspace from the session instead.
     slug: `ws-${id}`,
   });
+  await ensureAiTokenBalance(database, id);
   return { id };
 }

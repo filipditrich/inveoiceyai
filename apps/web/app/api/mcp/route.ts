@@ -1,6 +1,10 @@
+import { recordToolActivity, tryCreateDbFromEnv } from "@invoicey/db";
 import { env } from "@invoicey/env/server";
 import { registerInvoiceyMcpTools } from "@invoicey/invoice-tools/mcp";
-import { enterInvoiceyContext } from "@invoicey/invoice-tools/workspace-context";
+import {
+  enterInvoiceyContext,
+  getInvoiceyRequestContext,
+} from "@invoicey/invoice-tools/workspace-context";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
 
@@ -11,7 +15,20 @@ export const maxDuration = 120;
 
 const mcpHandler = createMcpHandler(
   (server) => {
-    registerInvoiceyMcpTools(server);
+    registerInvoiceyMcpTools(server, {
+      onToolCall: async ({ toolName, isError }) => {
+        const ctx = getInvoiceyRequestContext();
+        const database = tryCreateDbFromEnv();
+        if (!ctx?.workspaceId || !database) return;
+        await recordToolActivity(database, {
+          workspaceId: ctx.workspaceId,
+          userId: ctx.userId,
+          product: "mcp",
+          toolName,
+          metadata: { isError },
+        });
+      },
+    });
   },
   {
     serverInfo: {

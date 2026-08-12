@@ -411,6 +411,7 @@
       "invoices": "Faktury",
       "invoicesList": "Všechny faktury",
       "invoicesNew": "Nová faktura",
+      "invoicesAi": "AI koncept",
       "invoicesImport": "Import historie",
       "invoicesFromJson": "Vytvořit z JSON",
       "clients": "Klienti",
@@ -429,6 +430,7 @@
       "issuers": "Dodavatelé",
       "settings": "Nastavení",
       "fromJson": "Z JSON",
+      "ai": "AI koncept",
       "import": "Import",
       "new": "Nová",
       "edit": "Upravit",
@@ -441,7 +443,8 @@
       "members": "Členové",
       "referrals": "Doporučení",
       "api-keys": "API klíče",
-      "integrations": "Integrace"
+      "integrations": "Integrace",
+      "usage": "Využití"
     },
     "a11y": {
       "toggleSidebar": "Přepnout postranní panel"
@@ -456,6 +459,7 @@
         "workspace": "Pracovní prostor",
         "security": "Zabezpečení",
         "members": "Členové",
+        "usage": "Využití",
         "referrals": "Doporučení",
         "apiKeys": "API klíče",
         "integrations": "Integrace"
@@ -465,6 +469,7 @@
         "workspace": "Název a identita tohoto prostoru",
         "security": "Přihlášení, relace a zařízení",
         "members": "Lidé a oprávnění",
+        "usage": "AI tokeny, grafy a historie",
         "referrals": "Pozvěte přátele do Invoicey",
         "apiKeys": "Přístup pro automatizaci",
         "integrations": "Slack, MCP a další nástroje"
@@ -498,6 +503,65 @@
         "description": "Světlý, tmavý, nebo podle systému. Preference se ukládá v tomto prohlížeči.",
         "languageDescription": "Zvolte jazyk ovládacích prvků a systémových zpráv. Dokumentace zůstává anglicky.",
         "deviceNote": "Motiv a jazyk se ukládají v tomto prohlížeči. Na jiném zařízení je můžete nastavit nezávisle."
+      },
+      "usage": {
+        "pageTitle": "Využití AI",
+        "pageDescription": "Přehledný zůstatek tokenů a aktivita pro tento pracovní prostor. Sdílené všemi členy.",
+        "products": {
+          "web": "Web AI",
+          "slack": "Slack",
+          "mcp": "MCP"
+        },
+        "plan": {
+          "title": "Aktuální plán",
+          "description": "Free plán zahrnuje měsíční AI tokeny pro modely hostované Invoicey.",
+          "freeName": "Free",
+          "freeIncludes": "Každý měsíc {monthly} tokenů plus jednorázový dárek při založení prostoru.",
+          "viewPlans": "Zobrazit plány",
+          "upgrade": "Upgrade"
+        },
+        "balance": {
+          "title": "Zůstatek tokenů",
+          "renewal": "Měsíční tokeny se obnoví za {days, plural, one {# den} few {# dny} other {# dní}}. Nevyužité měsíční tokeny se nepřenášejí.",
+          "cardLabel": "Prostor",
+          "gifted": "Dárkové tokeny",
+          "monthly": "Měsíční tokeny",
+          "purchased": "Zakoupené tokeny",
+          "totalLabel": "Celkem dostupných",
+          "noRollover": "Nevyužité měsíční tokeny na konci období propadají. Dárkové a zakoupené zůstávají, dokud je nevyčerpáte.",
+          "expiresOn": "Aktuální měsíční období končí {date}."
+        },
+        "chart": {
+          "title": "Využití (30 dní)",
+          "subtitle": "Web a Slack ukazují tokeny. MCP ukazuje volání nástrojů (klientský LLM účtuje klient).",
+          "web": "Web",
+          "slack": "Slack",
+          "mcp": "MCP volání",
+          "mcpNote": "MCP neodečítá tokeny Invoicey — jazykový model běží v Cursoru nebo vašem MCP klientovi."
+        },
+        "history": {
+          "title": "Historie aktivity",
+          "subtitle": "Nedávné LLM využití a MCP volání nástrojů v tomto prostoru.",
+          "empty": "Zatím žádná AI aktivita.",
+          "when": "Kdy",
+          "product": "Produkt",
+          "detail": "Detail",
+          "tokens": "Tokeny"
+        },
+        "topup": {
+          "title": "Dobití",
+          "subtitle": "Nákup tokenů a kódy přijdou později. Tlačítka jsou zatím jen zástupné.",
+          "redeem": "Uplatnit kód",
+          "buy": "Koupit tokeny"
+        },
+        "chip": {
+          "title": "Zůstatek tokenů",
+          "gifted": "Dárkové",
+          "monthly": "Měsíční",
+          "purchased": "Zakoupené",
+          "viewUsage": "Zobrazit využití",
+          "upgrade": "Upgrade"
+        }
       }
     },
     "theme": {
@@ -750,6 +814,24 @@
       "emptyPreview": "Náhled zobrazíte tlačítkem „Vytvořit náhled PDF“.",
       "parseError": "JSON se nepodařilo zpracovat: opravte syntaxi a zkuste znovu.",
       "validationHelp": "InvoiceSchema ověří strukturu a zvýrazní chyby před vytvořením PDF."
+    },
+    "ai": {
+      "eyebrow": "AI koncept",
+      "title": "Popište fakturu",
+      "subtitle": "Popište klienta, položky a částky běžným jazykem. Vytvoříme validovaný koncept a náhled PDF. Spotřebovává AI tokeny pracovního prostoru.",
+      "backToInvoices": "← Zpět na faktury",
+      "placeholder": "např. Faktura pro NFCtron a.s. za konzultace 12 500 Kč, splatnost 14 dní, DPH 21 %",
+      "generate": "Vygenerovat koncept",
+      "generating": "Generuji…",
+      "tokensAvailable": "Dostupných tokenů: {available}",
+      "viewUsage": "Využití a limity",
+      "lastUsage": "Poslední běh spotřeboval {tokens} tokenů",
+      "outOfTokens": "Tento pracovní prostor nemá zbývající AI tokeny.",
+      "errorGeneric": "Generování konceptu se nezdařilo. Zkuste to znovu.",
+      "invalidDraft": "Model vrátil neplatný koncept. Upravte popis a zkuste znovu.",
+      "openDraft": "Otevřít koncept",
+      "editInBuilder": "Upravit ve formuláři",
+      "previewEmpty": "Vygenerujte koncept pro náhled PDF…"
     },
     "email": {
       "send": "Odeslat e-mailem",

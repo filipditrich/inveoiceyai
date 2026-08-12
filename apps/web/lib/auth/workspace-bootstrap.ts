@@ -1,6 +1,12 @@
 import "server-only";
 
-import { member, user as userTable, workspaces } from "@invoicey/db";
+import {
+  initialAiTokenBalanceValues,
+  member,
+  user as userTable,
+  workspaces,
+  aiTokenBalances,
+} from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { withDbTransaction } from "@invoicey/db/transaction";
 import { asc, eq } from "drizzle-orm";
@@ -75,6 +81,10 @@ export async function createPersonalWorkspace(
           role: "owner",
           createdAt: new Date(),
         });
+
+        await tx
+          .insert(aiTokenBalances)
+          .values(initialAiTokenBalanceValues(workspaceId));
 
         await tx
           .update(userTable)

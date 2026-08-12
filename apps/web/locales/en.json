@@ -411,6 +411,7 @@
       "invoices": "Invoices",
       "invoicesList": "All invoices",
       "invoicesNew": "New invoice",
+      "invoicesAi": "AI draft",
       "invoicesImport": "Import history",
       "invoicesFromJson": "Create from JSON",
       "clients": "Clients",
@@ -429,6 +430,7 @@
       "issuers": "Issuers",
       "settings": "Settings",
       "fromJson": "From JSON",
+      "ai": "AI draft",
       "import": "Import",
       "new": "New",
       "edit": "Edit",
@@ -441,7 +443,8 @@
       "members": "Members",
       "referrals": "Referrals",
       "api-keys": "API Keys",
-      "integrations": "Integrations"
+      "integrations": "Integrations",
+      "usage": "Usage"
     },
     "a11y": {
       "toggleSidebar": "Toggle sidebar"
@@ -456,6 +459,7 @@
         "workspace": "Workspace",
         "security": "Security",
         "members": "Members",
+        "usage": "Usage",
         "referrals": "Referrals",
         "apiKeys": "API Keys",
         "integrations": "Integrations"
@@ -465,6 +469,7 @@
         "workspace": "Name and identity of this workspace",
         "security": "Sign-in, sessions, and devices",
         "members": "People and permissions",
+        "usage": "AI tokens, charts, and history",
         "referrals": "Invite friends to Invoicey",
         "apiKeys": "Access for automation",
         "integrations": "Slack, MCP, and other tools"
@@ -498,6 +503,65 @@
         "description": "Light, dark, or match system. Preference is stored in this browser.",
         "languageDescription": "Choose the language for controls and system messages. Documentation stays in English.",
         "deviceNote": "Theme and language are stored in this browser. You can choose different settings on another device."
+      },
+      "usage": {
+        "pageTitle": "AI usage",
+        "pageDescription": "Transparent token balance and activity for this workspace. Shared by all members.",
+        "products": {
+          "web": "Web AI",
+          "slack": "Slack",
+          "mcp": "MCP"
+        },
+        "plan": {
+          "title": "Current plan",
+          "description": "Free tier includes monthly AI tokens for Invoicey-hosted models.",
+          "freeName": "Free",
+          "freeIncludes": "Includes {monthly} tokens every month, plus a one-time signup gift.",
+          "viewPlans": "View plans",
+          "upgrade": "Upgrade"
+        },
+        "balance": {
+          "title": "Token balance",
+          "renewal": "Your monthly tokens renew in {days, plural, one {# day} other {# days}}. Unused monthly tokens do not roll over.",
+          "cardLabel": "Workspace",
+          "gifted": "Gifted tokens",
+          "monthly": "Monthly tokens",
+          "purchased": "Purchased tokens",
+          "totalLabel": "Total available",
+          "noRollover": "Unused monthly tokens expire at period end. Gifted and purchased tokens remain until used.",
+          "expiresOn": "Current monthly period ends {date}."
+        },
+        "chart": {
+          "title": "Usage (30 days)",
+          "subtitle": "Web and Slack show tokens. MCP shows tool-call activity (client LLM is billed by the client).",
+          "web": "Web",
+          "slack": "Slack",
+          "mcp": "MCP calls",
+          "mcpNote": "MCP does not debit Invoicey tokens — the language model runs in Cursor or your MCP client."
+        },
+        "history": {
+          "title": "Activity history",
+          "subtitle": "Recent LLM usage and MCP tool calls for this workspace.",
+          "empty": "No AI activity yet.",
+          "when": "When",
+          "product": "Product",
+          "detail": "Detail",
+          "tokens": "Tokens"
+        },
+        "topup": {
+          "title": "Top up",
+          "subtitle": "Buying extra tokens and redeeming codes will arrive later. Buttons are placeholders for now.",
+          "redeem": "Redeem code",
+          "buy": "Buy tokens"
+        },
+        "chip": {
+          "title": "Token balance",
+          "gifted": "Gifted",
+          "monthly": "Monthly",
+          "purchased": "Purchased",
+          "viewUsage": "View usage",
+          "upgrade": "Upgrade"
+        }
       }
     },
     "theme": {
@@ -750,6 +814,24 @@
       "emptyPreview": "Press “Render PDF” for a preview…",
       "parseError": "Could not parse JSON: fix syntax errors and try again.",
       "validationHelp": "InvoiceSchema validates the structure and highlights errors before creating the PDF."
+    },
+    "ai": {
+      "eyebrow": "AI draft",
+      "title": "Describe an invoice",
+      "subtitle": "Describe the client, lines, and amounts in plain language. We generate a validated draft and PDF preview. Uses workspace AI tokens.",
+      "backToInvoices": "← Back to Invoices",
+      "placeholder": "e.g. Invoice NFCtron a.s. for consulting 12 500 CZK, due in 14 days, VAT 21%",
+      "generate": "Generate draft",
+      "generating": "Generating…",
+      "tokensAvailable": "{available} tokens available",
+      "viewUsage": "Usage & limits",
+      "lastUsage": "Last run used {tokens} tokens",
+      "outOfTokens": "This workspace has no AI tokens left.",
+      "errorGeneric": "Something went wrong generating the draft. Try again.",
+      "invalidDraft": "The model returned an invalid draft. Try refining the prompt.",
+      "openDraft": "Open draft",
+      "editInBuilder": "Edit in builder",
+      "previewEmpty": "Generate a draft to preview the PDF…"
     },
     "email": {
       "send": "Send by email",

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
+  ActivityIcon,
   Building2Icon,
   GiftIcon,
   KeyRoundIcon,
@@ -39,6 +40,12 @@ const LINKS = [
     key: "members" as const,
     exact: false,
     icon: UsersRoundIcon,
+  },
+  {
+    href: "/settings/usage",
+    key: "usage" as const,
+    exact: false,
+    icon: ActivityIcon,
   },
   {
     href: "/settings/referrals",

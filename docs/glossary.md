@@ -162,11 +162,15 @@ The webhook URL Slack provides on every slash-command and interactive payload. O
 
 ### AI SDK
 
-[Vercel AI SDK](https://ai-sdk.dev/) — TypeScript SDK that abstracts LLM providers behind one `generateText` / `streamText` API and provides first-class tool calling via `tool({ description, parameters: ZodSchema, execute })`. The Plan 13a worker uses `generateText({ tools, maxSteps })` for the loop.
+[Vercel AI SDK](https://ai-sdk.dev/) — TypeScript SDK that abstracts LLM providers behind one `generateText` / `streamText` API and provides first-class tool calling via `tool({ description, parameters: ZodSchema, execute })`. Web `/api/ai/invoice` and Eve use the Gateway model string; Plan 13a’s hand-rolled loop was retired.
 
 ### AI Gateway
 
 [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) — provider-agnostic router with one API key (`AI_GATEWAY_API_KEY`) that forwards to OpenAI / Anthropic / Google / etc. Lets us swap models via env (`INVOICEY_AI_MODEL`) without code changes.
+
+### Workspace AI tokens
+
+Entitlement unit for Invoicey-hosted LLM usage (ADR 0026). Buckets: gifted / monthly / purchased; products: web, slack, mcp (activity). See [ai-usage.md](./specs/ai-usage.md).
 
 ### Tool calling
 
