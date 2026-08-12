@@ -5,6 +5,7 @@ import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
 
 import { getResendClient } from "./client";
+import { buildViaInvoiceyDisplayName } from "./from";
 import { sendTransactionalEmail } from "./send";
 
 export async function sendWorkspaceInviteEmail(opts: {
@@ -39,7 +40,7 @@ export async function sendWorkspaceInviteEmail(opts: {
     template: "workspace_invite",
     to: opts.to,
     replyTo,
-    displayName: opts.inviterName,
+    displayName: buildViaInvoiceyDisplayName(opts.inviterName),
     subject: rendered.subject,
     html: rendered.html,
     text: rendered.text,

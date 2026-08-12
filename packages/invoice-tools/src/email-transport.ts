@@ -9,8 +9,18 @@ import type { EmailTemplateId } from "@invoicey/emails";
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 
-const DEFAULT_FROM = "Invoicey <invoices@invoicey.ditrich.me>";
+const DEFAULT_INVOICE_FROM = "Invoicey <invoices@invoicey.ditrich.me>";
+const DEFAULT_SYSTEM_FROM = "Invoicey <noreply@invoicey.ditrich.me>";
+const DEFAULT_INVOICE_ADDRESS = "invoices@invoicey.ditrich.me";
+const DEFAULT_SYSTEM_ADDRESS = "noreply@invoicey.ditrich.me";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const SYSTEM_TEMPLATES = new Set<EmailTemplateId>([
+  "new_sign_in",
+  "workspace_invite",
+]);
+
+export type EmailFromFamily = "invoice" | "system";
 
 export type EmailAttachment = {
   filename: string;
@@ -43,6 +53,13 @@ export type SendTransactionalEmailResult = {
   status: EmailMessageStatus;
 };
 
+export type ResolvedEmailFrom = {
+  family: EmailFromFamily;
+  display: string;
+  address: string;
+  header: string;
+};
+
 function isValidEmailAddress(email: string): boolean {
   return EMAIL_RE.test(email.trim());
 }
@@ -54,13 +71,13 @@ function buildViaDisplay(name: string): string {
   return `${cleaned} via Invoicey`;
 }
 
-function parseFrom(raw: string | undefined | null): {
-  display: string;
-  address: string;
-} {
+function parseFrom(
+  raw: string | undefined | null,
+  fallbackAddress: string,
+): { display: string; address: string } {
   const fallback = {
     display: "Invoicey",
-    address: "invoices@invoicey.ditrich.me",
+    address: fallbackAddress,
   };
   if (!raw?.trim()) return fallback;
   const match = raw.trim().match(/^(.*?)\s*<([^>]+)>$/);
@@ -74,6 +91,45 @@ function parseFrom(raw: string | undefined | null): {
     return { display: "Invoicey", address: raw.trim().toLowerCase() };
   }
   return fallback;
+}
+
+export function emailFromFamily(template: EmailTemplateId): EmailFromFamily {
+  return SYSTEM_TEMPLATES.has(template) ? "system" : "invoice";
+}
+
+export function resolveTransactionalFrom(input: {
+  template: EmailTemplateId;
+  displayName: string;
+  emailFrom?: string | null;
+  emailSystemFrom?: string | null;
+}): ResolvedEmailFrom {
+  const family = emailFromFamily(input.template);
+  if (family === "system") {
+    const parts = parseFrom(
+      input.emailSystemFrom ?? DEFAULT_SYSTEM_FROM,
+      DEFAULT_SYSTEM_ADDRESS,
+    );
+    const display =
+      input.displayName.trim().replace(/\s+/g, " ") || parts.display;
+    return {
+      family,
+      display,
+      address: parts.address,
+      header: `${display} <${parts.address}>`,
+    };
+  }
+
+  const parts = parseFrom(
+    input.emailFrom ?? DEFAULT_INVOICE_FROM,
+    DEFAULT_INVOICE_ADDRESS,
+  );
+  const display = buildViaDisplay(input.displayName);
+  return {
+    family,
+    display,
+    address: parts.address,
+    header: `${display} <${parts.address}>`,
+  };
 }
 
 /** Shared Resend transport (web + MCP/Eve). Key check runs before DB insert. */
@@ -99,9 +155,12 @@ export async function sendTransactionalEmail(
     throw new Error("Invalid reply-to email");
   }
 
-  const fromParts = parseFrom(process.env.EMAIL_FROM ?? DEFAULT_FROM);
-  const fromDisplay = buildViaDisplay(input.displayName);
-  const fromHeader = `${fromDisplay} <${fromParts.address}>`;
+  const from = resolveTransactionalFrom({
+    template: input.template,
+    displayName: input.displayName,
+    emailFrom: process.env.EMAIL_FROM,
+    emailSystemFrom: process.env.EMAIL_SYSTEM_FROM,
+  });
   const messageId = randomUUID();
   const now = new Date();
 
@@ -113,8 +172,8 @@ export async function sendTransactionalEmail(
     toEmail: to,
     ccEmails: cc,
     replyTo,
-    fromDisplay,
-    fromAddress: fromParts.address,
+    fromDisplay: from.display,
+    fromAddress: from.address,
     subject: input.subject,
     coverText: input.coverText ?? null,
     attachPdf: input.attachPdf ?? false,
@@ -137,7 +196,7 @@ export async function sendTransactionalEmail(
   }
 
   const { data, error } = await resend.emails.send({
-    from: fromHeader,
+    from: from.header,
     to: [to],
     cc: cc.length > 0 ? cc : undefined,
     replyTo: replyTo ?? undefined,

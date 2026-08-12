@@ -19,6 +19,11 @@ export function NewSignInEmail(props: NewSignInEmailProps) {
     <EmailShell
       preview="Detekovali jsme přihlášení z nového zařízení"
       title={title}
+      variant="system"
+      footerLink={{
+        label: "Nastavení zabezpečení",
+        href: props.securitySettingsUrl,
+      }}
     >
       <Text style={bodyText}>
         Ahoj{props.userName.trim() ? ` ${props.userName.trim()}` : ""},

@@ -119,6 +119,11 @@ export const privateEnvSchema = z.object({
     z.string().min(1).optional(),
   ),
   EMAIL_FROM: z.preprocess(emptyEnvToUndefined, z.string().min(1).optional()),
+  /** Invites + security; default `Invoicey <noreply@invoicey.ditrich.me>`. */
+  EMAIL_SYSTEM_FROM: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
   /** Bearer for `/api/cron/overdue-reminders`. */
   CRON_SECRET: z.preprocess(emptyEnvToUndefined, z.string().min(1).optional()),
 });

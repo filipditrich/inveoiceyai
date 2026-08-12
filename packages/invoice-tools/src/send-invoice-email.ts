@@ -370,8 +370,12 @@ export async function sendPaymentReceivedEmailIfEnabled(opts: {
 }
 
 export {
+  emailFromFamily,
+  resolveTransactionalFrom,
   sendTransactionalEmail,
   type EmailAttachment,
+  type EmailFromFamily,
+  type ResolvedEmailFrom,
   type SendTransactionalEmailInput,
   type SendTransactionalEmailResult,
 } from "./email-transport";

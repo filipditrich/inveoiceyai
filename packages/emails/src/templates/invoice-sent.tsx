@@ -23,6 +23,7 @@ export function InvoiceSentEmail(props: InvoiceSentEmailProps) {
     <EmailShell
       preview={`Faktura ${props.number} od ${props.issuerName}`}
       title={title}
+      variant="invoice"
     >
       {lines.map((line, i) => (
         <Text key={i} style={bodyText}>

@@ -19,7 +19,7 @@ Alternatives considered:
 1. **Resend** is the only transactional transport for Plan 11.
 2. **`@invoicey/emails`** holds react-email templates and `render*()` helpers (source-exported like `@invoicey/ares`).
 3. **Send + webhook** live in `apps/web` (`lib/email/*`, `/api/webhooks/resend`); lifecycle rows in Neon (`email_messages`, `email_events`).
-4. **From** is always our verified domain; only the display name is customized (`"{Name} via Invoicey"`). **Reply-To** carries the issuer/user address.
+4. **From** is always our verified domain (`invoicey.ditrich.me`). Invoice mail uses `invoices@` with a customized `"{Name} via Invoicey"` display. System mail (invites, security) uses `noreply@` with a plain product or inviter display name (no forced `via` append). **Reply-To** carries the issuer/user address.
 
 ## Consequences
 

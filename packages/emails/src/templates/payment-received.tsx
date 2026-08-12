@@ -21,6 +21,7 @@ export function PaymentReceivedEmail(props: PaymentReceivedEmailProps) {
     <EmailShell
       preview={`Platba za fakturu ${props.number} byla zaznamenána`}
       title={title}
+      variant="invoice"
     >
       <Text style={bodyText}>
         Dobrý den, potvrzujeme přijetí platby za fakturu{" "}

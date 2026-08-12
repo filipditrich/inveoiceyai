@@ -24,6 +24,8 @@ describe("email renders", () => {
     const out = await renderInvoiceSentEmail(invoiceFixture);
     expect(out.subject).toContain("2026-0001");
     expect(out.html).toContain("Klient s.r.o.");
+    expect(out.html).toContain("/brand/invoicey-logo-192.png");
+    expect(out.html).toContain("Odesláno přes Invoicey.");
     expect(out.text.length).toBeGreaterThan(20);
   });
 
@@ -40,6 +42,7 @@ describe("email renders", () => {
     expect(out.html).toContain("Přijmout pozvánku");
     expect(out.html).toContain("člen");
     expect(out.html).toContain("platí do");
+    expect(out.html).toContain("Toto je systémový e-mail od Invoicey.");
     expect(out.text).toContain("invite/xyz");
   });
 
@@ -47,6 +50,7 @@ describe("email renders", () => {
     const out = await renderOverdueReminderEmail(invoiceFixture);
     expect(out.subject).toContain("Připomínka");
     expect(out.html).toContain("po splatnosti");
+    expect(out.html).toContain("Odesláno přes Invoicey.");
   });
 
   it("renders payment_received", async () => {
@@ -66,6 +70,9 @@ describe("email renders", () => {
     });
     expect(out.subject).toContain("přihlášení");
     expect(out.html).toContain("Důvěřovat tomuto zařízení");
+    expect(out.html).toContain("/brand/invoicey-logo-192.png");
+    expect(out.html).toContain("Nastavení zabezpečení");
+    expect(out.html).toContain("Toto je systémový e-mail od Invoicey.");
     expect(out.text).toContain("settings/security");
   });
 });

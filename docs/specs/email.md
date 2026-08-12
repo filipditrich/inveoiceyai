@@ -30,9 +30,12 @@ Czech copy for MVP. Preview: `bun --cwd packages/emails email:dev`.
 
 ## From / Reply-To
 
-- **From address:** always `invoices@invoicey.ditrich.me` (override via `EMAIL_FROM`).
-- **From display:** `"{Name} via Invoicey"` — issuer name, user name, or send-time override. Never arbitrary From addresses.
+- **Invoice From address:** `invoices@invoicey.ditrich.me` (override via `EMAIL_FROM`).
+- **System From address:** `noreply@invoicey.ditrich.me` (override via `EMAIL_SYSTEM_FROM`) for `new_sign_in` and `workspace_invite`.
+- **Invoice From display:** `"{Name} via Invoicey"` — issuer name or send-time override (transport appends `via Invoicey` when missing).
+- **System From display:** as provided (no auto `via` append). Security alerts use plain `Invoicey`; invites pass `{inviterName} via Invoicey` at the call site.
 - **Reply-To:** issuer `contactEmail` (invoice sends) or inviter email (invites).
+- Never arbitrary From domains — only addresses on the verified `invoicey.ditrich.me` domain.
 
 ## UI / MCP contracts
 
@@ -87,13 +90,14 @@ Table `email_suppressions`: `(workspace_id, email)` + `reason` (`bounce` | `comp
 | ----------------------- | --------------------------------------------------------------- |
 | `RESEND_API_KEY`        | Send API (optional in schema; send fails closed when unset)     |
 | `RESEND_WEBHOOK_SECRET` | Svix webhook secret (optional; webhook fails closed when unset) |
-| `EMAIL_FROM`            | Default `Invoicey <invoices@invoicey.ditrich.me>`               |
+| `EMAIL_FROM`            | Invoice From (`Invoicey <invoices@invoicey.ditrich.me>`)        |
+| `EMAIL_SYSTEM_FROM`     | System From (`Invoicey <noreply@invoicey.ditrich.me>`)          |
 | `CRON_SECRET`           | Bearer for `/api/cron/overdue-reminders` (11d)                  |
 
 ## Go-live checklist (operator)
 
 1. Add and verify domain `invoicey.ditrich.me` in Resend (DNS on ditrich.me).
-2. Set `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET`, `EMAIL_FROM` on Vercel.
+2. Set `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET`, `EMAIL_FROM`, and optionally `EMAIL_SYSTEM_FROM` on Vercel. `noreply@` needs no separate mailbox once the domain is verified.
 3. Point Resend webhook to `https://invoicey.ditrich.me/api/webhooks/resend` with the subscribed events.
 4. Set `CRON_SECRET` and schedule daily hit to `/api/cron/overdue-reminders`.
 

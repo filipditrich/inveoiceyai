@@ -21,6 +21,7 @@ export function OverdueReminderEmail(props: OverdueReminderEmailProps) {
     <EmailShell
       preview={`Faktura ${props.number} je po splatnosti`}
       title={title}
+      variant="invoice"
     >
       <Text style={bodyText}>
         Dobrý den, dovolujeme si připomenout, že faktura{" "}

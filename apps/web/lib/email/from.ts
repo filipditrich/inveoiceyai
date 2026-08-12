@@ -1,4 +1,5 @@
 const DEFAULT_FROM_ADDRESS = "invoices@invoicey.ditrich.me";
+const DEFAULT_SYSTEM_FROM_ADDRESS = "noreply@invoicey.ditrich.me";
 const DEFAULT_FROM_NAME = "Invoicey";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -9,13 +10,14 @@ export type ParsedEmailFrom = {
   header: string;
 };
 
-export function parseEmailFrom(
+function parseNamedFrom(
   raw: string | undefined | null,
+  fallbackAddress: string,
 ): ParsedEmailFrom {
   const fallback: ParsedEmailFrom = {
     display: DEFAULT_FROM_NAME,
-    address: DEFAULT_FROM_ADDRESS,
-    header: `${DEFAULT_FROM_NAME} <${DEFAULT_FROM_ADDRESS}>`,
+    address: fallbackAddress,
+    header: `${DEFAULT_FROM_NAME} <${fallbackAddress}>`,
   };
   if (!raw || raw.trim() === "") return fallback;
 
@@ -23,7 +25,7 @@ export function parseEmailFrom(
   const match = trimmed.match(/^(.*?)\s*<([^>]+)>$/);
   if (match) {
     const display = match[1]?.trim() || DEFAULT_FROM_NAME;
-    const address = match[2]?.trim().toLowerCase() || DEFAULT_FROM_ADDRESS;
+    const address = match[2]?.trim().toLowerCase() || fallbackAddress;
     if (!EMAIL_RE.test(address)) return fallback;
     return { display, address, header: `${display} <${address}>` };
   }
@@ -37,6 +39,18 @@ export function parseEmailFrom(
   }
 
   return fallback;
+}
+
+export function parseEmailFrom(
+  raw: string | undefined | null,
+): ParsedEmailFrom {
+  return parseNamedFrom(raw, DEFAULT_FROM_ADDRESS);
+}
+
+export function parseEmailSystemFrom(
+  raw: string | undefined | null,
+): ParsedEmailFrom {
+  return parseNamedFrom(raw, DEFAULT_SYSTEM_FROM_ADDRESS);
 }
 
 /** `"Name via Invoicey"` display — does not change the From address. */

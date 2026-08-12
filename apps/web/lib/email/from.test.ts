@@ -4,6 +4,7 @@ import {
   applyDisplayNameTemplate,
   buildViaInvoiceyDisplayName,
   parseEmailFrom,
+  parseEmailSystemFrom,
 } from "./from";
 
 describe("from helpers", () => {
@@ -19,6 +20,15 @@ describe("from helpers", () => {
     const parsed = parseEmailFrom("Invoicey <invoices@invoicey.ditrich.me>");
     expect(parsed.address).toBe("invoices@invoicey.ditrich.me");
     expect(parsed.display).toBe("Invoicey");
+  });
+
+  it("parses EMAIL_SYSTEM_FROM with noreply default", () => {
+    expect(parseEmailSystemFrom(undefined).address).toBe(
+      "noreply@invoicey.ditrich.me",
+    );
+    expect(
+      parseEmailSystemFrom("Invoicey <noreply@invoicey.ditrich.me>").address,
+    ).toBe("noreply@invoicey.ditrich.me");
   });
 
   it("applies display name templates", () => {

@@ -5,30 +5,87 @@ import {
   Heading,
   Hr,
   Html,
+  Img,
+  Link,
   Preview,
   Section,
   Text,
 } from "@react-email/components";
 import * as React from "react";
 
+const DEFAULT_APP_ORIGIN = "https://invoicey.ditrich.me";
+
+export type EmailShellVariant = "invoice" | "system";
+
 export type EmailShellProps = {
   preview: string;
   title: string;
   children: React.ReactNode;
+  variant?: EmailShellVariant;
+  /** absolute origin for logo asset; defaults to production host */
+  appOrigin?: string;
+  footerLink?: { label: string; href: string };
 };
 
+function defaultFooterNote(variant: EmailShellVariant): string {
+  switch (variant) {
+    case "invoice":
+      return "Odesláno přes Invoicey.";
+    case "system":
+      return "Toto je systémový e-mail od Invoicey.";
+    default: {
+      const _exhaustive: never = variant;
+      return _exhaustive;
+    }
+  }
+}
+
 /** Shared transactional email chrome. */
-export function EmailShell({ preview, title, children }: EmailShellProps) {
+export function EmailShell({
+  preview,
+  title,
+  children,
+  variant = "system",
+  appOrigin = DEFAULT_APP_ORIGIN,
+  footerLink,
+}: EmailShellProps) {
+  const origin = appOrigin.replace(/\/$/, "");
+  const logoSrc = `${origin}/brand/invoicey-logo-192.png`;
+
   return (
     <Html lang="cs">
       <Head />
       <Preview>{preview}</Preview>
       <Body style={body}>
         <Container style={container}>
+          <Section style={brandRow}>
+            <Link href={origin} style={brandLink}>
+              <Img
+                src={logoSrc}
+                width={36}
+                height={36}
+                alt="Invoicey"
+                style={logo}
+              />
+            </Link>
+          </Section>
           <Heading style={heading}>{title}</Heading>
           <Section>{children}</Section>
           <Hr style={hr} />
-          <Text style={footer}>Invoicey · invoicey.ditrich.me</Text>
+          <Text style={footerNoteStyle}>{defaultFooterNote(variant)}</Text>
+          <Text style={footer}>
+            Invoicey ·{" "}
+            <Link href={origin} style={footerLinkStyle}>
+              invoicey.ditrich.me
+            </Link>
+          </Text>
+          {footerLink ? (
+            <Text style={footer}>
+              <Link href={footerLink.href} style={footerLinkStyle}>
+                {footerLink.label}
+              </Link>
+            </Text>
+          ) : null}
         </Container>
       </Body>
     </Html>
@@ -51,6 +108,21 @@ const container: React.CSSProperties = {
   padding: "28px 24px",
 };
 
+const brandRow: React.CSSProperties = {
+  margin: "0 0 16px",
+};
+
+const brandLink: React.CSSProperties = {
+  display: "inline-block",
+  lineHeight: 0,
+  textDecoration: "none",
+};
+
+const logo: React.CSSProperties = {
+  borderRadius: "8px",
+  display: "block",
+};
+
 const heading: React.CSSProperties = {
   color: "#111111",
   fontSize: "22px",
@@ -65,9 +137,21 @@ const hr: React.CSSProperties = {
   margin: "24px 0 12px",
 };
 
+const footerNoteStyle: React.CSSProperties = {
+  color: "#888888",
+  fontSize: "12px",
+  lineHeight: "1.5",
+  margin: "0 0 6px",
+};
+
 const footer: React.CSSProperties = {
   color: "#888888",
   fontSize: "12px",
   lineHeight: "1.5",
-  margin: 0,
+  margin: "0 0 4px",
+};
+
+const footerLinkStyle: React.CSSProperties = {
+  color: "#666666",
+  textDecoration: "underline",
 };

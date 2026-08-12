@@ -33,6 +33,7 @@ export function WorkspaceInviteEmail(props: WorkspaceInviteEmailProps) {
     <EmailShell
       preview={`${props.inviterName} vás zve do workspace ${props.workspaceName}`}
       title={title}
+      variant="system"
     >
       <Text style={bodyText}>
         Dobrý den, <strong>{props.inviterName}</strong> vás zve do pracovního
