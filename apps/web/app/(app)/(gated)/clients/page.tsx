@@ -26,10 +26,12 @@ export default async function ClientsPage({
 }: {
   searchParams: Search;
 }) {
-  const t = await getTranslations("Clients");
-  const tErrors = await getTranslations("Errors.invalid");
-  const sp = await searchParams;
-  const { workspaceId } = await requireWorkspace();
+  const [t, tErrors, sp, { workspaceId }] = await Promise.all([
+    getTranslations("Clients"),
+    getTranslations("Errors.invalid"),
+    searchParams,
+    requireWorkspace(),
+  ]);
   const rows = await db
     .select()
     .from(clients)

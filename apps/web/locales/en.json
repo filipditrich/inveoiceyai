@@ -534,7 +534,8 @@
     "a11y": {
       "toggleSidebar": "Toggle sidebar",
       "sidebarTitle": "Sidebar",
-      "sidebarDescription": "Main app navigation"
+      "sidebarDescription": "Main app navigation",
+      "navigating": "Loading page"
     },
     "settings": {
       "title": "Settings",

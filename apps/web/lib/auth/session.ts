@@ -82,8 +82,11 @@ export async function getOptionalWorkspace(): Promise<WorkspaceContext | null> {
  * server action, route handler). Everything below that boundary should take
  * `workspaceId` as an explicit argument rather than reading ambient state —
  * that is what keeps the `workspace_id` predicate in ADR 0007 honest.
+ *
+ * Memoised per request so layout + page can both call it without a second
+ * membership lookup.
  */
-export async function requireWorkspace(): Promise<WorkspaceContext> {
+export const requireWorkspace = cache(async (): Promise<WorkspaceContext> => {
   const session = await getSession();
   if (!session) {
     redirect("/sign-in");
@@ -97,7 +100,7 @@ export async function requireWorkspace(): Promise<WorkspaceContext> {
     redirect("/onboarding");
   }
   return context;
-}
+});
 
 /** Asserts membership of an explicitly supplied workspace id. */
 export async function assertWorkspaceMember(
@@ -186,59 +189,61 @@ export async function assertPlatformAdmin(): Promise<PlatformAdminContext> {
  * exists — a user removed from a workspace keeps the id in their session cookie
  * until it expires, and must not keep reading that workspace's data.
  */
-async function resolveWorkspace(
-  userId: string,
-  activeOrganizationId: string | null | undefined,
-): Promise<WorkspaceContext | null> {
-  if (activeOrganizationId) {
-    const [row] = await db
-      .select({ role: member.role })
-      .from(member)
-      .where(
-        and(
-          eq(member.userId, userId),
-          eq(member.organizationId, activeOrganizationId),
-        ),
-      )
-      .limit(1);
-    if (row) {
-      return {
-        userId,
-        workspaceId: activeOrganizationId,
-        role: row.role as WorkspaceRole,
-      };
+const resolveWorkspace = cache(
+  async (
+    userId: string,
+    activeOrganizationId: string | null | undefined,
+  ): Promise<WorkspaceContext | null> => {
+    if (activeOrganizationId) {
+      const [row] = await db
+        .select({ role: member.role })
+        .from(member)
+        .where(
+          and(
+            eq(member.userId, userId),
+            eq(member.organizationId, activeOrganizationId),
+          ),
+        )
+        .limit(1);
+      if (row) {
+        return {
+          userId,
+          workspaceId: activeOrganizationId,
+          role: row.role as WorkspaceRole,
+        };
+      }
     }
-  }
 
-  // No active workspace, or membership revoked: fall back to the oldest one.
-  const [fallback] = await db
-    .select({ organizationId: member.organizationId, role: member.role })
-    .from(member)
-    .where(eq(member.userId, userId))
-    .orderBy(asc(member.createdAt))
-    .limit(1);
+    // No active workspace, or membership revoked: fall back to the oldest one.
+    const [fallback] = await db
+      .select({ organizationId: member.organizationId, role: member.role })
+      .from(member)
+      .where(eq(member.userId, userId))
+      .orderBy(asc(member.createdAt))
+      .limit(1);
 
-  if (!fallback) {
-    return null;
-  }
+    if (!fallback) {
+      return null;
+    }
 
-  // Repair stale/missing workspace state so the next request and API-key calls
-  // resolve the same tenant instead of repeating an implicit fallback forever.
-  try {
-    await Promise.all([
-      auth.api.setActiveOrganization({
-        headers: await headers(),
-        body: { organizationId: fallback.organizationId },
-      }),
-      setUserDefaultWorkspace(userId, fallback.organizationId),
-    ]);
-  } catch (error) {
-    console.error("[workspace] failed to persist fallback workspace", error);
-  }
+    // Repair stale/missing workspace state so the next request and API-key calls
+    // resolve the same tenant instead of repeating an implicit fallback forever.
+    try {
+      await Promise.all([
+        auth.api.setActiveOrganization({
+          headers: await headers(),
+          body: { organizationId: fallback.organizationId },
+        }),
+        setUserDefaultWorkspace(userId, fallback.organizationId),
+      ]);
+    } catch (error) {
+      console.error("[workspace] failed to persist fallback workspace", error);
+    }
 
-  return {
-    userId,
-    workspaceId: fallback.organizationId,
-    role: fallback.role as WorkspaceRole,
-  };
-}
+    return {
+      userId,
+      workspaceId: fallback.organizationId,
+      role: fallback.role as WorkspaceRole,
+    };
+  },
+);

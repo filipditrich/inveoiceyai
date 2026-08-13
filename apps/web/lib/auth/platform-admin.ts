@@ -4,6 +4,7 @@ import { user as userTable, type PlatformRole } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
 import { eq } from "drizzle-orm";
+import { cache } from "react";
 
 import { parsePlatformAdminEmails } from "./platform-admin-emails";
 
@@ -46,11 +47,13 @@ export async function maybePromotePlatformAdminFromAllowlist(
   }
 }
 
-export async function loadPlatformRole(userId: string): Promise<PlatformRole> {
-  const [row] = await db
-    .select({ platformRole: userTable.platformRole })
-    .from(userTable)
-    .where(eq(userTable.id, userId))
-    .limit(1);
-  return row?.platformRole === "admin" ? "admin" : "none";
-}
+export const loadPlatformRole = cache(
+  async (userId: string): Promise<PlatformRole> => {
+    const [row] = await db
+      .select({ platformRole: userTable.platformRole })
+      .from(userTable)
+      .where(eq(userTable.id, userId))
+      .limit(1);
+    return row?.platformRole === "admin" ? "admin" : "none";
+  },
+);

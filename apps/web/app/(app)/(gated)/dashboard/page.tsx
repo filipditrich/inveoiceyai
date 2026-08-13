@@ -17,9 +17,11 @@ export default async function DashboardPage({
 }: {
   searchParams: Search;
 }) {
-  const t = await getTranslations("Dashboard");
-  const { workspaceId } = await requireWorkspace();
-  const sp = await searchParams;
+  const [t, { workspaceId }, sp] = await Promise.all([
+    getTranslations("Dashboard"),
+    requireWorkspace(),
+    searchParams,
+  ]);
   const issuerId = sp.issuerId?.trim() || undefined;
   const [issuers, metrics] = await Promise.all([
     loadIssuerOptions(workspaceId),

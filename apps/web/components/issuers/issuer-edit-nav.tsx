@@ -1,5 +1,6 @@
 "use client";
 
+import { NavLinkPending } from "@/components/navigation/nav-link-pending";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -21,8 +22,9 @@ export function IssuerEditNav({ issuerId }: { issuerId: string }) {
           <Link
             key={href}
             href={path}
+            prefetch
             className={cn(
-              "rounded-md px-3 py-1.5 text-sm transition-colors",
+              "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors",
               active
                 ? "bg-muted text-foreground font-medium"
                 : "text-muted-foreground hover:text-foreground",
@@ -30,6 +32,7 @@ export function IssuerEditNav({ issuerId }: { issuerId: string }) {
             aria-current={active ? "page" : undefined}
           >
             {t(href)}
+            <NavLinkPending className="ml-0 size-3" />
           </Link>
         );
       })}

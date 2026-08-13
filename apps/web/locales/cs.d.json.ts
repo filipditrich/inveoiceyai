@@ -538,6 +538,7 @@ declare const messages: {
       toggleSidebar: "Přepnout postranní panel";
       sidebarTitle: "Postranní panel";
       sidebarDescription: "Hlavní navigace aplikace";
+      navigating: "Načítání stránky";
     };
     settings: {
       title: "Nastavení";

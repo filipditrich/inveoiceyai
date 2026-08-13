@@ -20,8 +20,10 @@ export default async function AppShellLayout({
   // Redirects signed-out users. Individual pages still call
   // `requireWorkspace()` themselves — a layout is not an authorization
   // boundary, since route handlers and actions do not pass through it.
-  const user = await requireSession();
-  const { workspaceId } = await requireWorkspace();
+  const [user, { workspaceId }] = await Promise.all([
+    requireSession(),
+    requireWorkspace(),
+  ]);
   const [platformAdmin, workspaces, defaultWorkspaceId, tokenSummary] =
     await Promise.all([
       isPlatformAdmin(),

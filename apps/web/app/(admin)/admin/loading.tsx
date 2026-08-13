@@ -1,5 +1,5 @@
 import { PageLoading } from "@/components/page-loading";
 
-export default function AppLoading() {
+export default function AdminLoading() {
   return <PageLoading />;
 }

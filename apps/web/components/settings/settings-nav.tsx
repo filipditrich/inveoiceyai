@@ -14,6 +14,7 @@ import {
   UsersRoundIcon,
 } from "lucide-react";
 
+import { NavLinkPending } from "@/components/navigation/nav-link-pending";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -85,6 +86,7 @@ export function SettingsNav() {
           <Link
             key={link.href}
             href={link.href}
+            prefetch
             className={cn(
               "group flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors md:items-start md:gap-3 md:px-3 md:py-2.5",
               active
@@ -107,6 +109,7 @@ export function SettingsNav() {
                 {t(`navDescriptions.${link.key}`)}
               </span>
             </span>
+            <NavLinkPending className="hidden md:inline" />
           </Link>
         );
       })}

@@ -26,10 +26,12 @@ export default async function IssuersPage({
 }: {
   searchParams: Search;
 }) {
-  const t = await getTranslations("Issuers");
-  const tErrors = await getTranslations("Errors.invalid");
-  const sp = await searchParams;
-  const { workspaceId } = await requireWorkspace();
+  const [t, tErrors, sp, { workspaceId }] = await Promise.all([
+    getTranslations("Issuers"),
+    getTranslations("Errors.invalid"),
+    searchParams,
+    requireWorkspace(),
+  ]);
   const rows = await db
     .select()
     .from(issuerBusinesses)

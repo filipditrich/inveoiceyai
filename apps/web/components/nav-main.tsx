@@ -21,6 +21,8 @@ import {
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 
+import { NavLinkPending } from "@/components/navigation/nav-link-pending";
+
 function renderNavAnchor(url: string) {
   const isAppPath = url.startsWith("/");
   if (isAppPath) {
@@ -73,6 +75,7 @@ export function NavMain({
                 {item.icon}
               </span>
               <span>{item.title}</span>
+              <NavLinkPending />
             </SidebarMenuButton>
             {item.items?.length ? (
               <>
@@ -101,6 +104,7 @@ export function NavMain({
                             </span>
                           ) : null}
                           <span>{subItem.title}</span>
+                          <NavLinkPending className="size-3" />
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     ))}

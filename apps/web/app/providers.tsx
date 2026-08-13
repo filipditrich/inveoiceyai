@@ -2,6 +2,7 @@
 
 import type { PropsWithChildren } from "react";
 
+import { NavigationProgressProvider } from "@/components/navigation/navigation-progress";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
@@ -28,7 +29,9 @@ export default function Providers({ children }: PropsWithChildren) {
         <TooltipProvider delay={0}>
           <ModalsProvider modals={registeredModals}>
             <C15tProvider>
-              {children}
+              <NavigationProgressProvider>
+                {children}
+              </NavigationProgressProvider>
               <ConsentAwareAnalytics />
               <C15tBanner />
               <C15tDialog />

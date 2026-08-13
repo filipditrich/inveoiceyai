@@ -47,11 +47,13 @@ export default async function InvoicesPage({
 }: {
   searchParams: Search;
 }) {
-  const sp = await searchParams;
-  const t = await getTranslations("Invoices.list");
-  const tErrors = await getTranslations("Errors.invalid");
-  const tToasts = await getTranslations("Toasts");
-  const { workspaceId } = await requireWorkspace();
+  const [sp, t, tErrors, tToasts, { workspaceId }] = await Promise.all([
+    searchParams,
+    getTranslations("Invoices.list"),
+    getTranslations("Errors.invalid"),
+    getTranslations("Toasts"),
+    requireWorkspace(),
+  ]);
   const page = parsePage(sp.page);
   const pageSize = parsePageSize(sp.pageSize);
   const sort = parseInvoiceSort(sp.sort);
@@ -69,17 +71,10 @@ export default async function InvoicesPage({
 
   const whereClause = and(...listConditions);
   const summaryWhere = and(...baseConditions);
+  const offset = (page - 1) * pageSize;
 
-  const [totalRow] = await db
-    .select({ value: count() })
-    .from(invoices)
-    .where(whereClause);
-  const total = Number(totalRow?.value ?? 0);
-  const pageCount = Math.max(1, Math.ceil(total / pageSize) || 1);
-  const safePage = Math.min(page, pageCount);
-  const offset = (safePage - 1) * pageSize;
-
-  const [rows, summaryRows, issuers, clients] = await Promise.all([
+  const [totalRows, rows, summaryRows, issuers, clients] = await Promise.all([
+    db.select({ value: count() }).from(invoices).where(whereClause),
     db
       .select()
       .from(invoices)
@@ -91,6 +86,7 @@ export default async function InvoicesPage({
     loadIssuerOptions(workspaceId),
     loadClientOptions(workspaceId),
   ]);
+  const total = Number(totalRows[0]?.value ?? 0);
 
   const tally: Record<
     InvoiceDisplayStatus,

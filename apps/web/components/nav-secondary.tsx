@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 
+import { NavLinkPending } from "@/components/navigation/nav-link-pending";
+
 function renderSecondaryAnchor(url: string) {
   if (url.startsWith("/")) {
     return <Link prefetch href={url} />;
@@ -50,6 +52,7 @@ export function NavSecondary({
                   {item.icon}
                 </span>
                 <span>{item.title}</span>
+                <NavLinkPending />
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
