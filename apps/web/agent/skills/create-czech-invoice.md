@@ -10,7 +10,7 @@ description: Step-by-step Czech invoice creation via ARES, draft render, Slack u
    - Name only → `search_business`; if several hits, ask the user to pick (`Name (IČO) — address`).
    - Then `lookup_business` with the IČO (or reuse `match.address` when present).
    - Never invent street / city / ZIP / country.
-3. `create_invoice` with a **complete** partial draft (tool schema rejects empty/partial bags). Issuer is locked server-side. Required:
+3. `create_invoice` with a **complete** draft only (tool schema rejects empty/partial bags). Issuer is locked server-side — do not pass preset ids or invent UUIDs. Do not call `list_presets`. Required:
    - `meta`, `client`, `vat`, `payment`, `items`
    - `client.address` must be `{ street, city, zip, country: "CZ" }`
    - `vat` is a **top-level object** (not line `vatRate`): `{ mode, suppliesAbroad }`

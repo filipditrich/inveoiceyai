@@ -58,4 +58,17 @@ describe("CreateInvoiceInputSchema", () => {
       }).success,
     ).toBe(false);
   });
+
+  it("strips invented preset ids instead of looking them up", () => {
+    const parsed = CreateInvoiceInputSchema.safeParse({
+      draft: validDraft,
+      issuerPresetId: "00000000-0000-0000-0000-000000000000",
+      templatePresetId: "ffffffff-ffff-ffff-ffff-ffffffffffff",
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data).not.toHaveProperty("issuerPresetId");
+      expect(parsed.data).not.toHaveProperty("templatePresetId");
+    }
+  });
 });

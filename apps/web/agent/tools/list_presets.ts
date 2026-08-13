@@ -6,7 +6,7 @@ import { withEveToolWorkspace } from "../lib/tool-workspace";
 
 export default defineTool({
   description:
-    "List saved issuer and invoice_template presets (Neon when DATABASE_URL is set).",
+    "List saved issuer and invoice_template presets. Do not call this when creating or issuing an invoice — the seller is injected server-side. Use only if the user explicitly asks to inspect presets.",
   inputSchema: z.object({
     kind: z
       .enum(["issuer", "invoice_template"])

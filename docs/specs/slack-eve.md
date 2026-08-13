@@ -61,17 +61,17 @@ Helpers: `agent/lib/slack-thinking-stream.ts`, `slack-invoice-card.ts`, `slack-t
 
 ## Tools
 
-| Tool                                          | Notes                                                           |
-| --------------------------------------------- | --------------------------------------------------------------- |
-| `search_business`                             | ARES by company name → matches with IČO + address               |
-| `lookup_business`                             | ARES by IČO → full client draft                                 |
-| `list_presets` / `get_preset` / `save_preset` | Neon when `DATABASE_URL` set                                    |
-| `create_invoice`                              | Draft persist + render; auto-uploads PDF/ISDOC in Slack threads |
-| `upload_invoice_files`                        | Explicit upload (by `invoiceId` or base64)                      |
-| `list_invoices` / `get_invoice`               | Workspace-scoped follow-ups                                     |
-| `issue_invoice`                               | `approval: always()` HITL; numbering + re-upload                |
-| `mark_invoice_paid`                           | `approval: always()` HITL                                       |
-| `send_invoice_email`                          | `approval: always()` HITL; PDF + optional ISDOC via Resend      |
+| Tool                                          | Notes                                                                                        |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `search_business`                             | ARES by company name → matches with IČO + address                                            |
+| `lookup_business`                             | ARES by IČO → full client draft                                                              |
+| `list_presets` / `get_preset` / `save_preset` | Preset CRUD only when the user asks; never during invoice create. Placeholder UUIDs rejected |
+| `create_invoice`                              | Draft persist + render; workspace issuer locked; no preset id args; auto-uploads in Slack    |
+| `upload_invoice_files`                        | Explicit upload (by `invoiceId` or base64)                                                   |
+| `list_invoices` / `get_invoice`               | Workspace-scoped follow-ups                                                                  |
+| `issue_invoice`                               | `approval: always()` HITL; numbering + re-upload                                             |
+| `mark_invoice_paid`                           | `approval: always()` HITL                                                                    |
+| `send_invoice_email`                          | `approval: always()` HITL; PDF + optional ISDOC via Resend                                   |
 
 Skill: `skills/create-czech-invoice.md`.
 

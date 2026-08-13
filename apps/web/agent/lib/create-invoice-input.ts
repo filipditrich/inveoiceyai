@@ -102,14 +102,4 @@ export const CreateInvoiceInputSchema = z.object({
       .describe("True when spoken amounts include VAT"),
     notes: z.string().max(2000).optional(),
   }),
-  issuerPresetId: z
-    .string()
-    .uuid()
-    .optional()
-    .describe("Preset id of kind issuer"),
-  templatePresetId: z
-    .string()
-    .uuid()
-    .optional()
-    .describe("Preset id of kind invoice_template"),
 });

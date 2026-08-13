@@ -9,15 +9,13 @@ import { uploadInvoiceArtifacts } from "../lib/upload-slack-files";
 
 export default defineTool({
   description:
-    "Assemble a draft invoice, persist to Neon when DATABASE_URL is set, and render PDF + ISDOC. Issuer is locked server-side. Uploads files automatically in a Slack thread. Call only with a complete draft: meta, client (structured address from ARES), vat, payment.method, and items. Do not omit vat or payment to probe validation.",
+    "Assemble a draft invoice, persist to Neon when DATABASE_URL is set, and render PDF + ISDOC. Issuer is locked server-side (do not pass issuer, issuerPresetId, or templatePresetId — those fields do not exist). Uploads files automatically in a Slack thread. Call only with draft: meta, client (structured address from ARES), vat, payment.method, and items.",
   inputSchema: CreateInvoiceInputSchema,
-  async execute({ draft, issuerPresetId, templatePresetId }, ctx) {
+  async execute({ draft }, ctx) {
     return withEveToolWorkspace(ctx, async () => {
-      const issuer = issuerPresetId ? undefined : await resolveDefaultIssuer();
+      const issuer = await resolveDefaultIssuer();
       const result = await createAndRenderInvoice({
         draft,
-        issuerPresetId,
-        templatePresetId,
         issuer,
       });
       if (!result.ok) return result;
