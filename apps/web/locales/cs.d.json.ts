@@ -28,16 +28,37 @@ declare const messages: {
       en: "English";
     };
   };
+  Filters: {
+    addFilter: "Přidat filtr";
+    searchFields: "Hledat pole…";
+    noFieldsFound: "Žádná pole";
+    noResultsFound: "Nic nenalezeno";
+    select: "Vybrat";
+    addFilterTitle: "Přidat filtr";
+  };
+  DataGrid: {
+    empty: "Žádné záznamy.";
+    columns: "Sloupce";
+    rowsPerPage: "Řádků na stránku";
+    nextPage: "Další stránka";
+    previousPage: "Předchozí stránka";
+    info: "{from} – {to} z {count}";
+  };
+  PdfPreview: {
+    updating: "Aktualizuji…";
+    empty: "Vyplň položky pro náhled…";
+    title: "Náhled faktury PDF";
+  };
   Errors: {
     invalid: {
       required_fields: "Vyplňte povinná pole.";
-      missing_parties: "Vystavovatel nebo odběratel nenalezen.";
+      missing_parties: "Dodavatel nebo odběratel nenalezen.";
       validation: "Faktura neprošla validací schématu.";
       missing_scheme: "Chybí číslovací schéma pro typ dokladu.";
       already_issued: "Faktura už je vystavená.";
       not_draft: "Lze upravit jen návrh.";
       cannot_issue: "Návrh nelze vystavit.";
-      has_invoices: "Nelze smazat vystavovatele s existujícími fakturami.";
+      has_invoices: "Nelze smazat dodavatele s existujícími fakturami.";
       missing_id: "Chybí identifikátor.";
       missing_name: "Název je povinný.";
       duplicate_name: "Šablona s tímto názvem už existuje.";
@@ -59,8 +80,8 @@ declare const messages: {
     };
   };
   Toasts: {
-    issuer_saved: "Vystavovatel uložen";
-    issuer_deleted: "Vystavovatel smazán";
+    issuer_saved: "Dodavatel uložen";
+    issuer_deleted: "Dodavatel smazán";
     client_saved: "Klient uložen";
     client_deleted: "Klient smazán";
     invoice_saved: "Návrh uložen";
@@ -686,7 +707,7 @@ declare const messages: {
     empty: {
       title: "Vítejte v Invoicey";
       description: "Vytvořte prvního dodavatele (vaši firmu) a začněte vystavovat faktury s ARES ověřením, číslováním a PDF / ISDOC exportem.";
-      cta: "Vytvořit prvního vystavovatele";
+      cta: "Vytvořit prvního dodavatele";
     };
     issuerFilter: {
       label: "Dodavatel";
@@ -724,6 +745,7 @@ declare const messages: {
       title: "Vystavené faktury";
       subtitle: "Stavy, filtry a akce nad fakturami.";
       newButton: "+ Vystavit fakturu";
+      aiButton: "AI koncept";
       importButton: "Import";
       fromJsonButton: "Z JSON";
       empty: "Žádné faktury.";
@@ -788,11 +810,26 @@ declare const messages: {
       sortDateAsc: "Datum ↑";
       submit: "Filtrovat";
     };
+    origin: {
+      invoicey: "Invoicey";
+      fakturaonline: "FakturaOnline.cz";
+      idoklad: "iDoklad";
+      fakturoid: "Fakturoid";
+      pohoda: "Pohoda";
+      money_s3: "Money S3";
+      vyfakturuj: "VyFakturuj.cz";
+      superfaktura: "SuperFaktura";
+      custom: "Jiné / vlastní";
+    };
     detail: {
       issueDate: "Datum vystavení";
       dueDate: "Splatnost";
       duzp: "DUZP";
       currency: "Měna";
+      documentLanguage: "Jazyk dokladu";
+      languageCs: "Čeština";
+      languageEn: "English";
+      emailHeading: "E-maily";
       currencyNote: "(zatím pouze CZK)";
       total: "Celkem";
       paidAt: "Zaplaceno";
@@ -840,7 +877,7 @@ declare const messages: {
       subtitle: "Nejprve vytvořte návrh, potom jej zkontrolujte a vystavte. Náhled PDF najdete vedle formuláře nebo pod ním.";
       editTitle: "Úprava návrhu";
       sectionParties: "Strany";
-      sectionPartiesDescription: "Vystavovatel a odběratel na dokladu.";
+      sectionPartiesDescription: "Dodavatel a odběratel na dokladu.";
       sectionDocument: "Doklad";
       sectionDocumentDescription: "Typ dokladu, jazyk PDF a měna.";
       sectionDates: "Data";
@@ -848,7 +885,7 @@ declare const messages: {
       sectionVat: "DPH a měna";
       sectionVatDescription: "Jak se na dokladu počítá DPH.";
       sectionNotes: "Poznámka";
-      issuer: "Vystavovatel";
+      issuer: "Dodavatel";
       issuerDescription: "Vaše firma uvedená na faktuře jako dodavatel.";
       client: "Odběratel";
       clientDescription: "Odběratel z registru klientů (ARES).";
@@ -918,7 +955,7 @@ declare const messages: {
       modeEdit: "Úprava návrhu";
       modeCreate: "Nová faktura";
       missingParties: "Nejprve vytvořte <entities></entities>.";
-      missingIssuer: "vystavovatele";
+      missingIssuer: "dodavatele";
       missingClient: "odběratele";
       missingAnd: " a ";
       missingScheme: "(chybí schéma)";
@@ -949,7 +986,7 @@ declare const messages: {
       removeItem: "Odebrat položku {n}";
       errors: {
         invalidDate: "Zadejte platné datum";
-        selectIssuer: "Vyberte vystavovatele";
+        selectIssuer: "Vyberte dodavatele";
         selectClient: "Vyberte odběratele";
         descriptionRequired: "Popis je povinný";
         quantityRequired: "Zadejte množství";
@@ -972,7 +1009,7 @@ declare const messages: {
       stepSettings: "Nastavení";
       stepUpload: "Nahrání";
       stepReview: "Kontrola";
-      issuer: "Dodavatel (vystavitel)";
+      issuer: "Dodavatel";
       defaultOrigin: "Výchozí zdroj (pro nerozpoznané)";
       defaultOriginHint: "Po nahrání se u každého PDF použije detekovaný zdroj; tento výběr je záloha a hromadná úprava.";
       originVersion: "Verze (volitelné)";
@@ -1160,11 +1197,11 @@ declare const messages: {
   Issuers: {
     title: "Dodavatelé";
     subtitle: "Vaše firmy — ARES, banka, DPH, číslování, logo.";
-    newButton: "Nový vystavovatel";
+    newButton: "Nový dodavatel";
     empty: "Zatím žádní dodavatelé. Přidejte firmu a začněte fakturovat.";
-    createFirst: "Vytvořit prvního vystavovatele";
+    createFirst: "Vytvořit prvního dodavatele";
     deleting: "Mazání…";
-    editSectionsHint: "Upravte jednotlivé části vystavovatele — uložení je po sekcích.";
+    editSectionsHint: "Upravte jednotlivé části dodavatele — uložení je po sekcích.";
     nav: {
       identity: "Identita";
       bank: "Banka";
@@ -1183,8 +1220,10 @@ declare const messages: {
       searchPlaceholder: "název, IČO, DIČ…";
       edit: "Upravit";
       delete: "Smazat";
+      defaultBadge: "Výchozí";
+      setDefault: "Nastavit jako výchozí";
     };
-    newTitle: "Nový vystavovatel";
+    newTitle: "Nový dodavatel";
     newSubtitle: "IČO přes ARES, kontaktní e-mail a banka. Ostatní nastavení doplníte v sekcích po vytvoření.";
     editTitle: "Upravit dodavatele";
     editSubtitle: "Aktualizujte firemní údaje, banku a číslování.";
@@ -1210,11 +1249,11 @@ declare const messages: {
       ibanFilled: "IBAN doplněn z čísla účtu.";
       save: "Uložit";
       saving: "Ukládám…";
-      create: "Vytvořit vystavovatele";
+      create: "Vytvořit dodavatele";
       creating: "Vytvářím…";
       identitySection: "Identita";
       bankSection: "Banka";
-      defaultsHint: "Číslování a e-mailové šablony nastavíme výchozími hodnotami — upravíte je později v nastavení vystavovatele.";
+      defaultsHint: "Číslování a e-mailové šablony nastavíme výchozími hodnotami — upravíte je později v nastavení dodavatele.";
       source: "Zdroj: {source}";
       sourceAres: "ARES";
       sourceManual: "Ručně";
@@ -1235,7 +1274,7 @@ declare const messages: {
     };
     welcome: {
       step: "Krok {current} / {total}";
-      title: "Váš první vystavovatel";
+      title: "Váš první dodavatel";
       identityHint: "Načtěte firmu z ARES podle IČO, nebo nahrajte vystavenou fakturu s ISDOC, a potvrďte kontaktní e-mail.";
       bankHint: "Doplňte bankovní účet — potřebujeme ho pro QR platby na fakturách.";
       skip: "Přeskočit pro teď";
@@ -1247,9 +1286,9 @@ declare const messages: {
       identityRequired: "Vyplňte povinná pole identity.";
       bankRequired: "Vyplňte bankovní účet a IBAN.";
       doneTitle: "Hotovo";
-      doneBody: "Vystavovatel je vytvořen. Číslování a e-mailové šablony mají výchozí hodnoty — logo, razítko a další detaily doplníte kdykoli v nastavení.";
+      doneBody: "Dodavatel je vytvořen. Číslování a e-mailové šablony mají výchozí hodnoty — logo, razítko a další detaily doplníte kdykoli v nastavení.";
       goDashboard: "Přejít na přehled";
-      editIssuer: "Upravit vystavovatele";
+      editIssuer: "Upravit dodavatele";
     };
     emailForm: {
       subject: "Předmět šablona";

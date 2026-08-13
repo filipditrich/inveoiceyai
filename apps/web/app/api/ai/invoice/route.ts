@@ -97,6 +97,16 @@ export async function POST(request: Request): Promise<Response> {
 
   return runWithInvoiceyContext({ workspaceId, userId }, async () => {
     const issuer = await resolveDefaultIssuer({ workspaceId });
+    if (!issuer) {
+      return Response.json(
+        {
+          error: "no_issuer",
+          message:
+            "This workspace has no issuer. Create one before using AI draft.",
+        },
+        { status: 422 },
+      );
+    }
 
     type CreateOk = {
       ok: true;
@@ -186,19 +196,6 @@ export async function POST(request: Request): Promise<Response> {
     const promptTokens = usage.inputTokens ?? 0;
     const completionTokens = usage.outputTokens ?? 0;
 
-    const metered = await recordLlmUsage({
-      workspaceId,
-      userId,
-      product: "web",
-      model: modelId,
-      promptTokens,
-      completionTokens,
-      metadata: {
-        finishReason: result.finishReason,
-        steps: result.steps.length,
-      },
-    });
-
     const lastCreate = lastCreateRef.current;
     const invoicePayload =
       lastCreate?.ok === true
@@ -211,6 +208,46 @@ export async function POST(request: Request): Promise<Response> {
             clientName: lastCreate.clientName,
           }
         : null;
+
+    let metered;
+    try {
+      metered = await recordLlmUsage({
+        workspaceId,
+        userId,
+        product: "web",
+        model: modelId,
+        promptTokens,
+        completionTokens,
+        metadata: {
+          finishReason: result.finishReason,
+          steps: result.steps.length,
+        },
+      });
+    } catch (err) {
+      if (!(err instanceof OutOfAiTokensError)) {
+        throw err;
+      }
+      return Response.json(
+        {
+          error: "out_of_ai_tokens",
+          message:
+            "This workspace has no AI tokens left. Check Settings → Usage.",
+          text: result.text,
+          invoice: invoicePayload,
+          createResult: lastCreate,
+          usage: err.usage
+            ? {
+                promptTokens,
+                completionTokens,
+                totalTokens: promptTokens + completionTokens,
+                debited: err.usage.debited,
+              }
+            : undefined,
+          balance: err.usage?.summary,
+        },
+        { status: 402 },
+      );
+    }
 
     return Response.json({
       ok: true,

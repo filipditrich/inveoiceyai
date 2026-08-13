@@ -1,7 +1,22 @@
 import type { AppLocale } from "@/i18n/config";
 import { toIntlLocale } from "@/i18n/config";
 
-/** Locale-aware money (MVP currency is usually CZK). */
+/** Format one or more currency totals (never mix into a single CZK figure). */
+export function formatMoneyByCurrency(
+  totalsByCurrency: Record<string, number>,
+  locale: AppLocale = "cs",
+): string {
+  const entries = Object.entries(totalsByCurrency);
+  if (entries.length === 0) {
+    return formatMoney(0, "CZK", locale);
+  }
+  return entries
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([currency, total]) => formatMoney(total, currency, locale))
+    .join(" · ");
+}
+
+/** Locale-aware money. */
 export function formatMoney(
   amount: number,
   currency: string = "CZK",

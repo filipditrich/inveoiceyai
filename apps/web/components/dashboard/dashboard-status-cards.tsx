@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { AppLocale } from "@/i18n/config";
-import { formatMoney } from "@/lib/format";
+import { formatMoneyByCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -19,20 +19,6 @@ function hrefFor(status: StatusBucket["status"], issuerId?: string): string {
     params.set("issuerId", issuerId);
   }
   return `/invoices?${params.toString()}`;
-}
-
-function formatBucketTotals(
-  totalsByCurrency: Record<string, number>,
-  locale: AppLocale,
-): string {
-  const entries = Object.entries(totalsByCurrency);
-  if (entries.length === 0) {
-    return formatMoney(0, "CZK", locale);
-  }
-  return entries
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([currency, total]) => formatMoney(total, currency, locale))
-    .join(" · ");
 }
 
 export async function DashboardStatusCards({
@@ -62,7 +48,7 @@ export async function DashboardStatusCards({
                 {tStatus(b.status)}
               </CardDescription>
               <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-                {formatBucketTotals(b.totalsByCurrency, locale)}
+                {formatMoneyByCurrency(b.totalsByCurrency, locale)}
               </CardTitle>
             </CardHeader>
             <CardFooter className="text-muted-foreground text-sm tabular-nums">

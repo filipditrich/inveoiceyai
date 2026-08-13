@@ -23,7 +23,7 @@ import {
   resolveDisplayStatus,
   type InvoiceDisplayStatus,
 } from "@invoicey/invoice-core/status-display";
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { getDemoIssuer } from "./demo-issuer";
 import { tryPersistInvoiceArtifacts } from "./invoice-artifacts";
@@ -103,28 +103,41 @@ function rowToSummary(row: typeof invoices.$inferSelect): InvoiceSummary {
   };
 }
 
-/** Prefer first Neon issuer; else demo issuer. */
+/** Workspace default issuer, else oldest. Null when Neon has no issuer. File-only MCP still uses the demo snapshot. */
 export async function resolveDefaultIssuer(options?: {
   workspaceId?: string;
-}): Promise<IssuerSnapshot> {
+}): Promise<IssuerSnapshot | null> {
   const database = tryCreateDbFromEnv();
   if (!database) {
     return getDemoIssuer();
   }
   const workspaceId = resolveWorkspaceId(options?.workspaceId);
-  const rows = await database
+  const defaultRows = await database
     .select()
     .from(issuerBusinesses)
-    .where(eq(issuerBusinesses.workspaceId, workspaceId))
-    .orderBy(desc(issuerBusinesses.updatedAt))
+    .where(
+      and(
+        eq(issuerBusinesses.workspaceId, workspaceId),
+        eq(issuerBusinesses.isDefault, true),
+      ),
+    )
     .limit(1);
+  const rows =
+    defaultRows[0] != null
+      ? defaultRows
+      : await database
+          .select()
+          .from(issuerBusinesses)
+          .where(eq(issuerBusinesses.workspaceId, workspaceId))
+          .orderBy(asc(issuerBusinesses.createdAt))
+          .limit(1);
   const snap = rows[0]
     ? IssuerSnapshotSchema.safeParse(rows[0].snapshot)
     : null;
   if (snap?.success) {
     return snap.data;
   }
-  return getDemoIssuer();
+  return null;
 }
 
 export async function listInvoices(options?: {

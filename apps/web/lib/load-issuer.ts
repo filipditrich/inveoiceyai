@@ -19,6 +19,7 @@ export type LoadedIssuer = {
   snapshot: IssuerSnapshot;
   emailSettings: IssuerEmailSettings;
   schemes: NumberingSchemeDraft[];
+  isDefault: boolean;
 };
 
 /** Load issuer for edit section pages; 404 when missing or snapshot invalid. */
@@ -80,5 +81,6 @@ export const loadIssuerForEdit = cache(async function loadIssuerForEdit(
     snapshot: snapshot.data,
     emailSettings: row.emailSettings ?? {},
     schemes,
+    isDefault: row.isDefault,
   };
 });

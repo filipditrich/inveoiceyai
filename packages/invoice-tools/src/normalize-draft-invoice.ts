@@ -52,7 +52,7 @@ function vatFromPreset(preset: unknown): Record<string, unknown> | undefined {
     case "reverse_charge":
       return { mode: "reverse_charge", suppliesAbroad: "none" };
     case "oss":
-      return { mode: "oss", suppliesAbroad: "none" };
+      return { mode: "oss", suppliesAbroad: "eu" };
     default:
       return undefined;
   }

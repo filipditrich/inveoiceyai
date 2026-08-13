@@ -92,15 +92,17 @@ export default async function InvoicesPage({
     loadClientOptions(workspaceId),
   ]);
 
-  const tally: Record<InvoiceDisplayStatus, { count: number; total: number }> =
-    {
-      draft: { count: 0, total: 0 },
-      unpaid: { count: 0, total: 0 },
-      overdue: { count: 0, total: 0 },
-      paid: { count: 0, total: 0 },
-      future: { count: 0, total: 0 },
-      cancelled: { count: 0, total: 0 },
-    };
+  const tally: Record<
+    InvoiceDisplayStatus,
+    { count: number; totalsByCurrency: Record<string, number> }
+  > = {
+    draft: { count: 0, totalsByCurrency: {} },
+    unpaid: { count: 0, totalsByCurrency: {} },
+    overdue: { count: 0, totalsByCurrency: {} },
+    paid: { count: 0, totalsByCurrency: {} },
+    future: { count: 0, totalsByCurrency: {} },
+    cancelled: { count: 0, totalsByCurrency: {} },
+  };
   for (const row of summaryRows) {
     const display = resolveDisplayStatus(
       {
@@ -113,12 +115,15 @@ export default async function InvoicesPage({
       todayIso,
     );
     tally[display].count += 1;
-    tally[display].total += Number(row.total) || 0;
+    const currency = row.currency || "CZK";
+    const amount = Number(row.total) || 0;
+    tally[display].totalsByCurrency[currency] =
+      (tally[display].totalsByCurrency[currency] ?? 0) + amount;
   }
   const summaryBuckets = INVOICE_DISPLAY_STATUSES.map((status) => ({
     status,
     count: tally[status].count,
-    total: tally[status].total,
+    totalsByCurrency: tally[status].totalsByCurrency,
   }));
 
   const pageItems = rows.map((row) => ({
@@ -173,7 +178,14 @@ export default async function InvoicesPage({
           <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <div className="flex gap-2">
-          <Button render={<Link href="/invoices/new" prefetch />} size="sm">
+          <Button render={<Link href="/invoices/ai" prefetch />} size="sm">
+            {t("aiButton")}
+          </Button>
+          <Button
+            render={<Link href="/invoices/new" prefetch />}
+            size="sm"
+            variant="outline"
+          >
             {t("newButton")}
           </Button>
           <Button

@@ -8,10 +8,7 @@ import {
 import type { Filter, FilterFieldConfig } from "@/components/reui/filters";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  ORIGIN_PROVIDER_LABELS,
-  type InvoiceOriginProvider,
-} from "@invoicey/invoice-core/import";
+import { InvoiceOriginProviderSchema } from "@invoicey/invoice-core/import";
 import { INVOICE_DISPLAY_STATUSES } from "@invoicey/invoice-core/status-display";
 import {
   Building2Icon,
@@ -25,9 +22,7 @@ import { useTranslations } from "next-intl";
 
 export type PartyOption = { id: string; name: string };
 
-const ORIGIN_PROVIDERS = Object.keys(
-  ORIGIN_PROVIDER_LABELS,
-) as InvoiceOriginProvider[];
+const ORIGIN_PROVIDERS = InvoiceOriginProviderSchema.options;
 
 type InvoiceListFiltersProps = {
   status?: string;
@@ -64,6 +59,7 @@ export function InvoiceListFilters({
 }: InvoiceListFiltersProps) {
   const t = useTranslations("Invoices.filter");
   const tStatus = useTranslations("Status.invoice");
+  const tOrigin = useTranslations("Invoices.origin");
   const fields = useMemo<FilterFieldConfig<string>[]>(
     () => [
       {
@@ -93,7 +89,7 @@ export function InvoiceListFilters({
         defaultOperator: "is",
         options: ORIGIN_PROVIDERS.map((p) => ({
           value: p,
-          label: ORIGIN_PROVIDER_LABELS[p],
+          label: tOrigin(p),
         })),
       },
       {
@@ -115,7 +111,7 @@ export function InvoiceListFilters({
         options: clients.map((c) => ({ value: c.id, label: c.name })),
       },
     ],
-    [issuers, clients, t, tStatus],
+    [issuers, clients, t, tStatus, tOrigin],
   );
 
   const filters = useMemo(

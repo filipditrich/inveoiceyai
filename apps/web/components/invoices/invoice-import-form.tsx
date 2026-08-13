@@ -21,7 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { UploadDropzone } from "@/lib/uploadthing";
 import {
-  ORIGIN_PROVIDER_LABELS,
+  InvoiceOriginProviderSchema,
   buildExternalKey,
   type InvoiceOriginProvider,
 } from "@invoicey/invoice-core/import";
@@ -38,9 +38,7 @@ type ReviewRow = ClassifiedImportFile & {
   originProvider: InvoiceOriginProvider;
 };
 
-const PROVIDERS = Object.keys(
-  ORIGIN_PROVIDER_LABELS,
-) as InvoiceOriginProvider[];
+const PROVIDERS = InvoiceOriginProviderSchema.options;
 
 function archiveReady(row: ClassifiedImportFile): boolean {
   if (row.status === "ready_full" && row.invoice) {
@@ -113,6 +111,7 @@ function resolveRowOrigin(
 
 export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
   const t = useTranslations("Invoices.import");
+  const tOrigin = useTranslations("Invoices.origin");
   const tCommon = useTranslations("Common");
   const router = useRouter();
   const [step, setStep] = useState<ImportStep>("settings");
@@ -373,7 +372,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
               >
                 {PROVIDERS.map((p) => (
                   <option key={p} value={p}>
-                    {ORIGIN_PROVIDER_LABELS[p]}
+                    {tOrigin(p)}
                   </option>
                 ))}
               </select>
@@ -534,7 +533,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
                         >
                           {PROVIDERS.map((p) => (
                             <option key={p} value={p}>
-                              {ORIGIN_PROVIDER_LABELS[p]}
+                              {tOrigin(p)}
                             </option>
                           ))}
                         </select>

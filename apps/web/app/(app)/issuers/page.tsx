@@ -16,6 +16,7 @@ type IssuerTableItem = {
   rowId: string;
   source: string;
   snapshot: IssuerSnapshot;
+  isDefault: boolean;
 };
 
 type Search = Promise<{ invalid?: string }>;
@@ -45,6 +46,7 @@ export default async function IssuersPage({
       rowId: r.id,
       source: r.source,
       snapshot: parsed.data,
+      isDefault: r.isDefault,
     });
   }
 

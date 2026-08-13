@@ -187,6 +187,42 @@ describe("normalizeDraftToInvoice", () => {
     }
   });
 
+  it("maps vatPreset oss to suppliesAbroad eu", () => {
+    const issuer = getDemoIssuer();
+    const draft = {
+      meta: { docType: "invoice" as const },
+      client: {
+        name: "EU Client GmbH",
+        ico: "44444444",
+        address: {
+          street: "Hauptstr. 1",
+          city: "Berlin",
+          zip: "10115",
+          country: "DE",
+        },
+      },
+      vatPreset: "oss" as const,
+      payment: { method: "transfer" as const, variableSymbol: "1" },
+      items: [
+        {
+          position: 1,
+          description: "SaaS",
+          quantity: 1,
+          unit: "ks",
+          unitPriceWithoutVat: 10_000,
+          vatRate: 19,
+        },
+      ],
+    };
+
+    const r = normalizeDraftToInvoice(draft, issuer);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.invoice.vat.mode).toBe("oss");
+      expect(r.invoice.vat.suppliesAbroad).toBe("eu");
+    }
+  });
+
   it("coerces non–VAT-payer issuer to regular mode and zero rates", () => {
     const issuer = { ...getDemoIssuer(), vatPayer: false, dic: undefined };
     const draft = {

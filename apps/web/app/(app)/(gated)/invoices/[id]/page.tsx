@@ -33,7 +33,6 @@ import {
 import { env } from "@invoicey/env/server";
 import {
   isArchivePayload,
-  ORIGIN_PROVIDER_LABELS,
   type InvoiceOriginProvider,
 } from "@invoicey/invoice-core/import";
 import { InvoiceSchema } from "@invoicey/invoice-core/schema";
@@ -69,6 +68,7 @@ export default async function InvoiceDetailPage({
   const { id } = await params;
   const sp = await searchParams;
   const t = await getTranslations("Invoices.detail");
+  const tOrigin = await getTranslations("Invoices.origin");
   const tErrors = await getTranslations("Errors.invalid");
   const locale = (await getLocale()) as AppLocale;
   const { workspaceId } = await requireWorkspace();
@@ -97,9 +97,7 @@ export default async function InvoiceDetailPage({
   const originProvider = (row.originProvider ??
     (row.issuedAt ? "invoicey" : null)) as InvoiceOriginProvider | null;
   const originLabel =
-    originProvider != null
-      ? (ORIGIN_PROVIDER_LABELS[originProvider] ?? row.originLabel)
-      : row.originLabel;
+    originProvider != null ? tOrigin(originProvider) : row.originLabel;
 
   const [issuerRow] = await db
     .select()
@@ -161,7 +159,9 @@ export default async function InvoiceDetailPage({
 
   const canEmail =
     Boolean(row.issuedAt) && !row.cancelledAt && displayStatus !== "draft";
-  const showPdfPreview = Boolean(row.issuedAt);
+  const showPdfPreview = Boolean(row.issuedAt) || Boolean(payload?.success);
+  const documentLanguage =
+    payload?.success && payload.data.meta.language === "en" ? "en" : "cs";
   const showIsdoc =
     Boolean(row.isdocUrl) ||
     (!row.importCompleteness && Boolean(payload?.success));
@@ -280,7 +280,7 @@ export default async function InvoiceDetailPage({
             ) : (
               <SaveRecurringSheet
                 defaultDayOfMonth={Math.min(
-                  28,
+                  31,
                   Math.max(1, Number(row.issueDate.slice(8, 10)) || 1),
                 )}
                 defaultName={`${row.clientName} · ${row.number ?? "DRAFT"}`}
@@ -382,6 +382,14 @@ export default async function InvoiceDetailPage({
           <dt className="text-muted-foreground">{t("currency")}</dt>
           <dd className="tabular-nums">{row.currency}</dd>
         </div>
+        {payload?.success ? (
+          <div>
+            <dt className="text-muted-foreground">{t("documentLanguage")}</dt>
+            <dd>
+              {documentLanguage === "en" ? t("languageEn") : t("languageCs")}
+            </dd>
+          </div>
+        ) : null}
         <div>
           <dt className="text-muted-foreground">{t("total")}</dt>
           <dd className="tabular-nums">

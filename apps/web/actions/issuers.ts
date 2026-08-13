@@ -27,7 +27,7 @@ import {
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { withDbTransaction } from "@invoicey/db/transaction";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -224,6 +224,26 @@ function revalidateIssuerPaths(issuerId?: string): void {
   }
 }
 
+async function assignDefaultIssuer(
+  tx: Parameters<Parameters<typeof withDbTransaction>[0]>[0],
+  workspaceId: string,
+  issuerId: string,
+): Promise<void> {
+  await tx
+    .update(issuerBusinesses)
+    .set({ isDefault: false })
+    .where(eq(issuerBusinesses.workspaceId, workspaceId));
+  await tx
+    .update(issuerBusinesses)
+    .set({ isDefault: true })
+    .where(
+      and(
+        eq(issuerBusinesses.id, issuerId),
+        eq(issuerBusinesses.workspaceId, workspaceId),
+      ),
+    );
+}
+
 function parseIdentityFromForm(formData: FormData):
   | {
       ok: true;
@@ -356,12 +376,18 @@ export async function createIssuer(formData: FormData): Promise<void> {
 
   try {
     await withDbTransaction(async (tx) => {
+      const [existing] = await tx
+        .select({ id: issuerBusinesses.id })
+        .from(issuerBusinesses)
+        .where(eq(issuerBusinesses.workspaceId, workspaceId))
+        .limit(1);
       await tx.insert(issuerBusinesses).values({
         id: snapshot.id,
         workspaceId,
         source: identity.source,
         snapshot: snapshot as Record<string, unknown>,
         emailSettings: defaultEmailSettings(),
+        isDefault: existing == null,
       });
 
       for (const docType of ISSUER_DOC_TYPES) {
@@ -661,6 +687,45 @@ export async function saveIssuerEmail(formData: FormData): Promise<void> {
   redirect(`/issuers/${issuerId}/edit/email?toast=issuer_saved`);
 }
 
+/** Mark this issuer as the workspace default for Eve / MCP / AI drafts. */
+export async function setDefaultIssuer(formData: FormData): Promise<void> {
+  const issuerId = optionalTrim(formData.get("id"));
+  const { workspaceId } = await requireWorkspace();
+  if (!issuerId) {
+    redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
+  }
+
+  const existing = await db
+    .select({ id: issuerBusinesses.id })
+    .from(issuerBusinesses)
+    .where(
+      and(
+        eq(issuerBusinesses.id, issuerId),
+        eq(issuerBusinesses.workspaceId, workspaceId),
+      ),
+    )
+    .limit(1);
+  if (!existing[0]) {
+    redirect(`/issuers?invalid=${encodeURIComponent("missing_row")}`);
+  }
+
+  try {
+    await withDbTransaction(async (tx) => {
+      await assignDefaultIssuer(tx, workspaceId, issuerId);
+    });
+  } catch (err) {
+    console.error("[setDefaultIssuer] failed", err);
+    redirect(`/issuers?invalid=${encodeURIComponent("save_failed")}`);
+  }
+
+  revalidateIssuerPaths(issuerId);
+  const from = optionalTrim(formData.get("from"));
+  if (from === "edit") {
+    redirect(`/issuers/${issuerId}/edit/identity?toast=issuer_saved`);
+  }
+  redirect(`/issuers?toast=issuer_saved`);
+}
+
 /** Skip first-issuer welcome for this workspace. */
 export async function dismissIssuerWelcome(): Promise<void> {
   const { workspaceId } = await requireWorkspace();
@@ -710,6 +775,30 @@ export async function deleteIssuer(formData: FormData): Promise<void> {
           eq(issuerBusinesses.workspaceId, workspaceId),
         ),
       );
+    const [stillDefault] = await tx
+      .select({ id: issuerBusinesses.id })
+      .from(issuerBusinesses)
+      .where(
+        and(
+          eq(issuerBusinesses.workspaceId, workspaceId),
+          eq(issuerBusinesses.isDefault, true),
+        ),
+      )
+      .limit(1);
+    if (!stillDefault) {
+      const [next] = await tx
+        .select({ id: issuerBusinesses.id })
+        .from(issuerBusinesses)
+        .where(eq(issuerBusinesses.workspaceId, workspaceId))
+        .orderBy(asc(issuerBusinesses.createdAt))
+        .limit(1);
+      if (next) {
+        await tx
+          .update(issuerBusinesses)
+          .set({ isDefault: true })
+          .where(eq(issuerBusinesses.id, next.id));
+      }
+    }
     return null;
   });
 
@@ -789,7 +878,7 @@ export async function parseIssuerFromWelcomePdf(
     };
     return {
       ok: false,
-      message: map[code] ?? "Nepodařilo se načíst vystavovatele z PDF.",
+      message: map[code] ?? "Nepodařilo se načíst dodavatele z PDF.",
     };
   }
 }

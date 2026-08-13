@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteIssuer } from "@/actions/issuers";
+import { deleteIssuer, setDefaultIssuer } from "@/actions/issuers";
 import { AppDataGrid } from "@/components/data-grid/app-data-grid";
 import {
   AppFilters,
@@ -13,6 +13,7 @@ import {
   type DataGridFeatures,
 } from "@/components/reui/data-grid/data-grid";
 import { DataGridColumnHeader } from "@/components/reui/data-grid/data-grid-column-header";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import type { IssuerSnapshot } from "@invoicey/invoice-core/schema";
@@ -33,6 +34,7 @@ export type IssuerTableItem = {
   rowId: string;
   source: string;
   snapshot: IssuerSnapshot;
+  isDefault: boolean;
 };
 
 export function IssuersDataGrid({ items }: { items: IssuerTableItem[] }) {
@@ -82,6 +84,14 @@ export function IssuersDataGrid({ items }: { items: IssuerTableItem[] }) {
         header: ({ column }) => (
           <DataGridColumnHeader column={column} title={tTable("name")} />
         ),
+        cell: ({ row }) => (
+          <span className="flex flex-wrap items-center gap-2">
+            <span>{row.original.snapshot.name}</span>
+            {row.original.isDefault ? (
+              <Badge variant="secondary">{tTable("defaultBadge")}</Badge>
+            ) : null}
+          </span>
+        ),
         meta: { headerTitle: tTable("name"), autoSize: true },
       },
       {
@@ -117,6 +127,18 @@ export function IssuersDataGrid({ items }: { items: IssuerTableItem[] }) {
         header: () => <span className="sr-only">{tTable("actions")}</span>,
         cell: ({ row }) => (
           <div className="flex justify-end gap-2">
+            {row.original.isDefault ? null : (
+              <form action={setDefaultIssuer}>
+                <input name="id" type="hidden" value={row.original.rowId} />
+                <SubmitButton
+                  pendingLabel={tTable("setDefault")}
+                  size="sm"
+                  variant="outline"
+                >
+                  {tTable("setDefault")}
+                </SubmitButton>
+              </form>
+            )}
             <Button
               render={
                 <Link

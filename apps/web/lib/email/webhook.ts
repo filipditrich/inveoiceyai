@@ -47,6 +47,10 @@ function tagsToRecord(
   return tags;
 }
 
+/**
+ * Apply a signed Resend event. Duplicate `provider_event_id`s still re-apply
+ * the message status patch so a failed update can recover on retry.
+ */
 export async function applyResendWebhookEvent(opts: {
   db: InvoiceyDb;
   providerEventId: string;
@@ -56,15 +60,6 @@ export async function applyResendWebhookEvent(opts: {
 > {
   const kind = stripResendEventType(opts.payload.type);
   if (!kind) {
-    return { ok: true, kind: "ignored" };
-  }
-
-  const [existing] = await opts.db
-    .select({ id: emailEvents.id })
-    .from(emailEvents)
-    .where(eq(emailEvents.providerEventId, opts.providerEventId))
-    .limit(1);
-  if (existing) {
     return { ok: true, kind: "ignored" };
   }
 
@@ -120,16 +115,20 @@ export async function applyResendWebhookEvent(opts: {
     patch.clickedAt = occurredAt;
   }
 
-  await opts.db.insert(emailEvents).values({
-    id: randomUUID(),
-    workspaceId: message.workspaceId,
-    messageId: message.id,
-    type: kind,
-    providerEventId: opts.providerEventId,
-    payloadJson: opts.payload as unknown as Record<string, unknown>,
-    occurredAt,
-  });
+  await opts.db
+    .insert(emailEvents)
+    .values({
+      id: randomUUID(),
+      workspaceId: message.workspaceId,
+      messageId: message.id,
+      type: kind,
+      providerEventId: opts.providerEventId,
+      payloadJson: opts.payload as unknown as Record<string, unknown>,
+      occurredAt,
+    })
+    .onConflictDoNothing({ target: emailEvents.providerEventId });
 
+  /** re-apply even when the event row already existed from a partial retry */
   await opts.db
     .update(emailMessages)
     .set(patch)

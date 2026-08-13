@@ -6,7 +6,13 @@ import {
   lookupBusiness,
   searchBusiness,
 } from "./handlers";
-import { getInvoice, listInvoices, markInvoicePaidById } from "./invoice-ops";
+import {
+  getInvoice,
+  issueInvoiceById,
+  listInvoices,
+  markInvoicePaidById,
+  resolveDefaultIssuer,
+} from "./invoice-ops";
 import { jsonToolResult } from "./mcp-json-result";
 import {
   deletePreset,
@@ -108,35 +114,29 @@ export function registerInvoiceyMcpTools(
 
   s.tool(
     "create_invoice",
-    "Assemble a draft invoice (optional issuer/template presets), validate against InvoiceSchema, and render PDF + ISDOC. Issuer is locked server-side.",
+    "Assemble a draft invoice, validate against InvoiceSchema, and render PDF + ISDOC. Issuer is locked to the workspace default (do not pass issuer or preset ids).",
     {
       draft: jsonObjectSchema
         .optional()
         .describe(
-          'Partial invoice draft (issuer ignored — locked server-side). Required: meta, client, payment, items. Optional meta.language: `cs` | `en` (PDF/ISDOC labels; omitted → cs). VAT: prefer top-level `vat: { mode, suppliesAbroad }` OR high-level `vatPreset` (`neplatce`|`regular`|`reverse_charge`|`oss`) which invents `{ mode, suppliesAbroad: "none" }` when `vat` is missing. Line amounts are stored exclusive: `unitPriceWithoutVat` + line `vatRate`. Set `pricesIncludeVat: true` if spoken/unit prices include VAT — normalizer converts to exclusive using line vatRate (0 for reverse_charge / neplátce). Do not invent legalNote or localReverseChargeCode; reverse_charge fails without localReverseChargeCode. Domestic default: vat `{ mode: "regular", suppliesAbroad: "none" }` with vatRate 21 (or 0 if issuer is non–VAT-payer).',
+          'Partial invoice draft (issuer ignored — locked server-side). Required: meta, client, payment, items. Optional meta.language: `cs` | `en` (PDF/ISDOC labels; omitted → cs). VAT: prefer top-level `vat: { mode, suppliesAbroad }` OR high-level `vatPreset` (`neplatce`|`regular`|`reverse_charge`|`oss`). oss invents `{ mode: "oss", suppliesAbroad: "eu" }` when `vat` is missing; other presets invent suppliesAbroad `"none"`. Line amounts are stored exclusive: `unitPriceWithoutVat` + line `vatRate`. Set `pricesIncludeVat: true` if spoken/unit prices include VAT — normalizer converts to exclusive using line vatRate (0 for reverse_charge / neplátce). Do not invent legalNote or localReverseChargeCode; reverse_charge fails without localReverseChargeCode. Domestic default: vat `{ mode: "regular", suppliesAbroad: "none" }` with vatRate 21 (or 0 if issuer is non–VAT-payer).',
         ),
-      issuerPresetId: z
-        .string()
-        .uuid()
-        .optional()
-        .describe("Preset id of kind issuer"),
-      templatePresetId: z
-        .string()
-        .uuid()
-        .optional()
-        .describe("Preset id of kind invoice_template"),
     },
     wrap("create_invoice", async (args) => {
+      const issuer = await resolveDefaultIssuer();
+      if (!issuer) {
+        return jsonToolResult(
+          {
+            ok: false as const,
+            error:
+              "no issuer in this workspace — create one in Invoicey before drafting",
+          },
+          true,
+        );
+      }
       const r = await createAndRenderInvoice({
         draft: args.draft,
-        issuerPresetId:
-          typeof args.issuerPresetId === "string"
-            ? args.issuerPresetId
-            : undefined,
-        templatePresetId:
-          typeof args.templatePresetId === "string"
-            ? args.templatePresetId
-            : undefined,
+        issuer,
       });
       return jsonToolResult(r, !r.ok);
     }),
@@ -197,6 +197,21 @@ export function registerInvoiceyMcpTools(
     wrap("mark_invoice_paid", async (args) => {
       try {
         const r = await markInvoicePaidById({ id: String(args.id ?? "") });
+        return jsonToolResult(r, !r.ok);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return jsonToolResult({ ok: false as const, error: message }, true);
+      }
+    }),
+  );
+
+  s.tool(
+    "issue_invoice",
+    "Issue a draft invoice (atomic numbering). Requires DATABASE_URL. Idempotent if already issued.",
+    { id: z.string().uuid().describe("Draft invoice id") },
+    wrap("issue_invoice", async (args) => {
+      try {
+        const r = await issueInvoiceById({ id: String(args.id ?? "") });
         return jsonToolResult(r, !r.ok);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);

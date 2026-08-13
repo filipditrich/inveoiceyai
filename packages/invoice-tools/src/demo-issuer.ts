@@ -3,9 +3,12 @@ import {
   type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
 
+/** Fixed demo UUID — never persist this row into a real workspace. */
+export const DEMO_ISSUER_ID = "e5555555-5555-5555-5555-555555555555";
+
 /** Demo issuer — mirrors packages/invoice-core proforma fixture issuer fields. */
 const FALLBACK_ISSUER: IssuerSnapshot = {
-  id: "e5555555-5555-5555-5555-555555555555",
+  id: DEMO_ISSUER_ID,
   name: "Služby s.r.o.",
   ico: "33333333",
   dic: "CZ3333333356",

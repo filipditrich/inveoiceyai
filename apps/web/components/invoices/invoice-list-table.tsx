@@ -47,10 +47,7 @@ import {
 } from "@/lib/invoices/list-query";
 import { DISPLAY_STATUS_ROW_ACCENT } from "@/lib/invoice-status-ui";
 import { cn } from "@/lib/utils";
-import {
-  ORIGIN_PROVIDER_LABELS,
-  type InvoiceOriginProvider,
-} from "@invoicey/invoice-core/import";
+import { InvoiceOriginProviderSchema } from "@invoicey/invoice-core/import";
 import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
 import {
   CopyIcon,
@@ -130,6 +127,7 @@ export function InvoiceListTable({
   clients,
 }: InvoiceListTableProps) {
   const t = useTranslations("Invoices.list");
+  const tOrigin = useTranslations("Invoices.origin");
   const locale = useLocale() as AppLocale;
   const [params, setParams] = useQueryStates(
     {
@@ -230,9 +228,8 @@ export function InvoiceListTable({
         ),
         cell: ({ row }) => {
           const provider = row.original.originProvider ?? "invoicey";
-          const label =
-            ORIGIN_PROVIDER_LABELS[provider as InvoiceOriginProvider] ??
-            provider;
+          const parsed = InvoiceOriginProviderSchema.safeParse(provider);
+          const label = parsed.success ? tOrigin(parsed.data) : provider;
           return <span className="text-muted-foreground text-xs">{label}</span>;
         },
         meta: { headerTitle: t("source") },
@@ -320,7 +317,7 @@ export function InvoiceListTable({
         size: 120,
       },
     ],
-    [t, locale],
+    [t, tOrigin, locale],
   );
 
   const table = useTable({

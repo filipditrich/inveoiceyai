@@ -4,17 +4,8 @@ import {
   Filters,
   type Filter,
   type FilterFieldConfig,
-  type FilterI18nConfig,
 } from "@/components/reui/filters";
-
-export const FILTERS_CS: Partial<FilterI18nConfig> = {
-  addFilter: "Přidat filtr",
-  searchFields: "Hledat pole…",
-  noFieldsFound: "Žádná pole",
-  noResultsFound: "Nic nenalezeno",
-  select: "Vybrat",
-  addFilterTitle: "Přidat filtr",
-};
+import { useTranslations } from "next-intl";
 
 type AppFiltersProps<T = string> = {
   fields: FilterFieldConfig<T>[];
@@ -31,12 +22,20 @@ export function AppFilters<T = string>({
   className,
   size = "sm",
 }: AppFiltersProps<T>) {
+  const t = useTranslations("Filters");
   return (
     <Filters
       className={className}
       fields={fields}
       filters={filters}
-      i18n={FILTERS_CS}
+      i18n={{
+        addFilter: t("addFilter"),
+        searchFields: t("searchFields"),
+        noFieldsFound: t("noFieldsFound"),
+        noResultsFound: t("noResultsFound"),
+        select: t("select"),
+        addFilterTitle: t("addFilterTitle"),
+      }}
       onChange={onChange}
       size={size}
       variant="default"

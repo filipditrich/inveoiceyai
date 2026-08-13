@@ -76,6 +76,8 @@ export const issuerBusinesses = pgTable(
       .$type<IssuerEmailSettings>()
       .default({})
       .notNull(),
+    /** Workspace default for Eve / MCP / in-app AI drafts. */
+    isDefault: boolean("is_default").default(false).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -88,6 +90,9 @@ export const issuerBusinesses = pgTable(
       t.workspaceId,
       t.updatedAt,
     ),
+    uniqueIndex("issuer_businesses_workspace_default_uidx")
+      .on(t.workspaceId)
+      .where(sql`${t.isDefault}`),
   ],
 );
 

@@ -12,6 +12,7 @@ import { DataGridTable } from "@/components/reui/data-grid/data-grid-table";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Columns3Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 type AppDataGridProps<TData extends object> = {
@@ -33,22 +34,23 @@ type AppDataGridProps<TData extends object> = {
 
 /**
  * Shared ReUI Data Grid shell: sticky dense header, optional toolbar,
- * column visibility, scroll area, Czech pagination labels by default.
+ * column visibility, scroll area, locale-aware chrome.
  */
 export function AppDataGrid<TData extends object>({
   table,
   recordCount,
   toolbar,
-  emptyMessage = "Žádné záznamy.",
+  emptyMessage,
   className,
   showColumnVisibility = true,
   showPagination = true,
-  columnsLabel = "Sloupce",
+  columnsLabel,
   paginationLabels,
 }: AppDataGridProps<TData>) {
+  const t = useTranslations("DataGrid");
   return (
     <DataGrid
-      emptyMessage={emptyMessage}
+      emptyMessage={emptyMessage ?? t("empty")}
       recordCount={recordCount}
       table={table}
       tableLayout={{
@@ -70,7 +72,7 @@ export function AppDataGrid<TData extends object>({
                 trigger={
                   <Button size="sm" variant="outline">
                     <Columns3Icon className="size-4" />
-                    {columnsLabel}
+                    {columnsLabel ?? t("columns")}
                   </Button>
                 }
               />
@@ -86,13 +88,13 @@ export function AppDataGrid<TData extends object>({
 
         {showPagination ? (
           <DataGridPagination
-            info={paginationLabels?.info ?? "{from} – {to} z {count}"}
-            nextPageLabel={paginationLabels?.nextPageLabel ?? "Další stránka"}
+            info={paginationLabels?.info ?? t.raw("info")}
+            nextPageLabel={paginationLabels?.nextPageLabel ?? t("nextPage")}
             previousPageLabel={
-              paginationLabels?.previousPageLabel ?? "Předchozí stránka"
+              paginationLabels?.previousPageLabel ?? t("previousPage")
             }
             rowsPerPageLabel={
-              paginationLabels?.rowsPerPageLabel ?? "Řádků na stránku"
+              paginationLabels?.rowsPerPageLabel ?? t("rowsPerPage")
             }
             sizes={[25, 50, 100]}
           />

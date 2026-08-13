@@ -14,6 +14,13 @@ export default defineTool({
   async execute({ draft }, ctx) {
     return withEveToolWorkspace(ctx, async () => {
       const issuer = await resolveDefaultIssuer();
+      if (!issuer) {
+        return {
+          ok: false as const,
+          error:
+            "no issuer in this workspace — create one in Invoicey before drafting",
+        };
+      }
       const result = await createAndRenderInvoice({
         draft,
         issuer,

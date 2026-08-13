@@ -1,6 +1,9 @@
+"use client";
+
 import type { EmailMessageStatus } from "@invoicey/db";
 
 import { Badge } from "@/components/ui/badge";
+import { useTranslations } from "next-intl";
 
 export type EmailTimelineEvent = {
   type: string;
@@ -15,28 +18,6 @@ export type EmailTimelineItem = {
   template: string;
   createdAt: Date;
   events: EmailTimelineEvent[];
-};
-
-const STATUS_LABEL: Record<EmailMessageStatus, string> = {
-  queued: "Ve frontě",
-  sent: "Odesláno",
-  delivered: "Doručeno",
-  delayed: "Zpožděno",
-  bounced: "Nedoručeno",
-  failed: "Selhalo",
-  complained: "Spam",
-};
-
-const EVENT_LABEL: Record<string, string> = {
-  sent: "odesláno",
-  delivered: "doručeno",
-  delivery_delayed: "zpožděno",
-  delayed: "zpožděno",
-  bounced: "nedoručeno",
-  failed: "selhalo",
-  complained: "spam",
-  opened: "otevřeno",
-  clicked: "klik",
 };
 
 function statusVariant(
@@ -61,18 +42,45 @@ function statusVariant(
   }
 }
 
+const EMAIL_LABEL_KEYS = [
+  "queued",
+  "sent",
+  "delivered",
+  "delayed",
+  "failed",
+  "opened",
+  "clicked",
+  "bounced",
+  "complained",
+] as const;
+
+type EmailLabelKey = (typeof EMAIL_LABEL_KEYS)[number];
+
+function isEmailLabelKey(value: string): value is EmailLabelKey {
+  return (EMAIL_LABEL_KEYS as readonly string[]).includes(value);
+}
+
+function emailEventKey(type: string): string {
+  if (type === "delivery_delayed") {
+    return "delayed";
+  }
+  return type;
+}
+
 export function InvoiceEmailTimeline({
   items,
 }: {
   items: EmailTimelineItem[];
 }) {
+  const t = useTranslations("Invoices.detail");
+  const tEmail = useTranslations("Status.email");
   if (items.length === 0) {
     return null;
   }
 
   return (
     <section className="space-y-3">
-      <h2 className="text-sm font-medium">E-maily</h2>
+      <h2 className="text-sm font-medium">{t("emailHeading")}</h2>
       <ul className="space-y-2">
         {items.map((item) => (
           <li className="space-y-2 rounded-md border p-3 text-sm" key={item.id}>
@@ -87,20 +95,23 @@ export function InvoiceEmailTimeline({
                 </p>
               </div>
               <Badge variant={statusVariant(item.status)}>
-                {STATUS_LABEL[item.status]}
+                {tEmail(item.status)}
               </Badge>
             </div>
             {item.events.length > 0 ? (
               <ol className="text-muted-foreground border-t pt-2 text-xs">
-                {item.events.map((ev, i) => (
-                  <li
-                    className="tabular-nums"
-                    key={`${item.id}-${i}-${ev.type}`}
-                  >
-                    {ev.occurredAt.toISOString()} —{" "}
-                    {EVENT_LABEL[ev.type] ?? ev.type}
-                  </li>
-                ))}
+                {item.events.map((ev, i) => {
+                  const key = emailEventKey(ev.type);
+                  return (
+                    <li
+                      className="tabular-nums"
+                      key={`${item.id}-${i}-${ev.type}`}
+                    >
+                      {ev.occurredAt.toISOString()} —{" "}
+                      {isEmailLabelKey(key) ? tEmail(key) : ev.type}
+                    </li>
+                  );
+                })}
               </ol>
             ) : null}
           </li>

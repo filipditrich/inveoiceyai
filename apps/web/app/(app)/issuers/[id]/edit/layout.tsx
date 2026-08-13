@@ -1,4 +1,7 @@
+import { setDefaultIssuer } from "@/actions/issuers";
 import { IssuerEditNav } from "@/components/issuers/issuer-edit-nav";
+import { Badge } from "@/components/ui/badge";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { loadIssuerForEdit } from "@/lib/load-issuer";
 import { requireWorkspace } from "@/lib/auth/session";
 import Link from "next/link";
@@ -14,6 +17,7 @@ export default async function IssuerEditLayout({
   params: Params;
 }) {
   const t = await getTranslations("Issuers");
+  const tTable = await getTranslations("Issuers.table");
   const { id } = await params;
   const { workspaceId } = await requireWorkspace();
   const issuer = await loadIssuerForEdit(workspaceId, id);
@@ -29,9 +33,26 @@ export default async function IssuerEditLayout({
             {t("title")}
           </Link>
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {issuer.snapshot.name}
-        </h1>
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {issuer.snapshot.name}
+          </h1>
+          {issuer.isDefault ? (
+            <Badge variant="secondary">{tTable("defaultBadge")}</Badge>
+          ) : (
+            <form action={setDefaultIssuer}>
+              <input name="from" type="hidden" value="edit" />
+              <input name="id" type="hidden" value={id} />
+              <SubmitButton
+                pendingLabel={tTable("setDefault")}
+                size="sm"
+                variant="outline"
+              >
+                {tTable("setDefault")}
+              </SubmitButton>
+            </form>
+          )}
+        </div>
         <p className="text-muted-foreground text-sm">{t("editSectionsHint")}</p>
       </div>
       <IssuerEditNav issuerId={id} />

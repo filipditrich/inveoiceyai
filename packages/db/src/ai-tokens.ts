@@ -22,10 +22,15 @@ type DbOrTx = InvoiceyDb | DbTransaction;
 
 export class OutOfAiTokensError extends Error {
   readonly code = "out_of_ai_tokens" as const;
+  readonly usage?: RecordLlmUsageResult;
 
-  constructor(message = "Workspace has no AI tokens remaining") {
+  constructor(
+    message = "Workspace has no AI tokens remaining",
+    usage?: RecordLlmUsageResult,
+  ) {
     super(message);
     this.name = "OutOfAiTokensError";
+    this.usage = usage;
   }
 }
 
@@ -178,7 +183,7 @@ export async function recordLlmUsage(
   const completionTokens = Math.max(0, Math.floor(input.completionTokens));
   const totalTokens = promptTokens + completionTokens;
 
-  return withDbTransaction(async (tx) => {
+  const recorded = await withDbTransaction(async (tx) => {
     const userId = await existingUserId(tx, input.userId);
     await ensureAiTokenBalance(tx, input.workspaceId);
 
@@ -194,6 +199,10 @@ export async function recordLlmUsage(
     }
 
     const next = allocateDebit(locked, totalTokens);
+    if (totalTokens > 0 && next.debited === 0) {
+      throw new OutOfAiTokensError();
+    }
+
     const now = new Date();
 
     await tx
@@ -238,6 +247,14 @@ export async function recordLlmUsage(
       summary,
     };
   });
+
+  if (recorded.debited < totalTokens) {
+    throw new OutOfAiTokensError(
+      "Workspace AI token balance is less than this usage",
+      recorded,
+    );
+  }
+  return recorded;
 }
 
 export type RecordToolActivityInput = {

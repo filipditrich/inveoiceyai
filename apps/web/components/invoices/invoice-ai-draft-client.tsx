@@ -104,17 +104,6 @@ export function InvoiceAiDraftClient({
       if (data.balance) setBalance(data.balance);
       if (data.usage) setLastUsage(data.usage);
 
-      if (!res.ok) {
-        setError(
-          data.error === "out_of_ai_tokens"
-            ? t("outOfTokens")
-            : (data.message ?? data.error ?? t("errorGeneric")),
-        );
-        return;
-      }
-
-      setAssistantText(data.text ?? null);
-
       if (data.invoice?.invoice) {
         const parsed = InvoiceSchema.safeParse(data.invoice.invoice);
         if (parsed.success) {
@@ -124,12 +113,23 @@ export function InvoiceAiDraftClient({
           const next = await renderPdf(parsed.data);
           setPdfUrl(next);
           if (prev) URL.revokeObjectURL(prev);
-        } else {
+        } else if (res.ok) {
           setError(t("invalidDraft"));
         }
-      } else {
+      } else if (res.ok) {
         setInvoice(null);
         setInvoiceId(null);
+      }
+
+      if (data.text) setAssistantText(data.text);
+
+      if (!res.ok) {
+        setError(
+          data.error === "out_of_ai_tokens"
+            ? t("outOfTokens")
+            : (data.message ?? data.error ?? t("errorGeneric")),
+        );
+        return;
       }
     } catch {
       setError(t("errorGeneric"));

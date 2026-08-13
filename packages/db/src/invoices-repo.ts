@@ -1,7 +1,7 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
-import { ensureClient } from "./clients-repo";
+import { ensureClient, normalizeIco } from "./clients-repo";
 import type { InvoiceyDb } from "./create-db";
 import { invoiceItems, invoices, issuerBusinesses } from "./schema";
 import { ensureDefaultWorkspace, getDefaultWorkspaceId } from "./workspace";
@@ -79,6 +79,107 @@ async function replaceInvoiceItems(
   );
 }
 
+async function findIssuerIdByIco(
+  database: InvoiceyDb,
+  workspaceId: string,
+  ico: string | undefined,
+): Promise<string | null> {
+  const icoNorm = normalizeIco(ico);
+  if (!icoNorm) {
+    return null;
+  }
+  const rows = await database
+    .select({ id: issuerBusinesses.id })
+    .from(issuerBusinesses)
+    .where(
+      and(
+        eq(issuerBusinesses.workspaceId, workspaceId),
+        sql`regexp_replace(coalesce(${issuerBusinesses.snapshot}->>'ico', ''), '\\D', '', 'g') = ${icoNorm}`,
+      ),
+    )
+    .limit(1);
+  return rows[0]?.id ?? null;
+}
+
+/**
+ * Upsert an issuer in this workspace only. Never updates another tenant's row;
+ * mint a new id when the preferred UUID belongs to a different workspace.
+ */
+async function ensureIssuer(
+  database: InvoiceyDb,
+  workspaceId: string,
+  issuerSnapshot: Record<string, unknown>,
+): Promise<string> {
+  const preferredId =
+    typeof issuerSnapshot.id === "string" && issuerSnapshot.id.length > 0
+      ? issuerSnapshot.id
+      : undefined;
+  const ico = normalizeIco(issuerSnapshot.ico);
+  const now = new Date();
+  const source = ico !== undefined ? "ares" : "manual";
+
+  let existingId: string | null = null;
+  if (preferredId) {
+    const found = await database
+      .select({ id: issuerBusinesses.id })
+      .from(issuerBusinesses)
+      .where(
+        and(
+          eq(issuerBusinesses.id, preferredId),
+          eq(issuerBusinesses.workspaceId, workspaceId),
+        ),
+      )
+      .limit(1);
+    if (found[0]) {
+      existingId = found[0].id;
+    }
+  }
+  if (!existingId) {
+    existingId = await findIssuerIdByIco(database, workspaceId, ico);
+  }
+
+  if (existingId) {
+    const snapshot = { ...issuerSnapshot, id: existingId };
+    await database
+      .update(issuerBusinesses)
+      .set({
+        snapshot,
+        source,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(issuerBusinesses.id, existingId),
+          eq(issuerBusinesses.workspaceId, workspaceId),
+        ),
+      );
+    return existingId;
+  }
+
+  let id = preferredId ?? randomUUID();
+  if (preferredId) {
+    const [taken] = await database
+      .select({ id: issuerBusinesses.id })
+      .from(issuerBusinesses)
+      .where(eq(issuerBusinesses.id, preferredId))
+      .limit(1);
+    if (taken) {
+      id = randomUUID();
+    }
+  }
+
+  const snapshot = { ...issuerSnapshot, id };
+  await database.insert(issuerBusinesses).values({
+    id,
+    workspaceId,
+    source,
+    snapshot,
+    createdAt: now,
+    updatedAt: now,
+  });
+  return id;
+}
+
 /** Upsert issuer/client snapshots and insert/update draft by workspace+number. */
 export async function persistDraftInvoice(
   database: InvoiceyDb,
@@ -88,35 +189,17 @@ export async function persistDraftInvoice(
   const workspaceId = options?.workspaceId ?? getDefaultWorkspaceId();
   await ensureDefaultWorkspace(database, { id: workspaceId });
 
-  const issuerId = invoice.issuer.id;
   const now = new Date();
-  const issuerSnapshot = invoice.issuer as Record<string, unknown>;
   const clientSnapshotBase = invoice.client as Record<string, unknown>;
-
-  const existingIssuer = await database
-    .select({ id: issuerBusinesses.id })
-    .from(issuerBusinesses)
-    .where(eq(issuerBusinesses.id, issuerId))
-    .limit(1);
-
-  if (existingIssuer[0]) {
-    await database
-      .update(issuerBusinesses)
-      .set({
-        snapshot: issuerSnapshot,
-        updatedAt: now,
-      })
-      .where(eq(issuerBusinesses.id, issuerId));
-  } else {
-    await database.insert(issuerBusinesses).values({
-      id: issuerId,
-      workspaceId,
-      source: invoice.issuer.ico ? "ares" : "manual",
-      snapshot: issuerSnapshot,
-      createdAt: now,
-      updatedAt: now,
-    });
-  }
+  const issuerId = await ensureIssuer(
+    database,
+    workspaceId,
+    invoice.issuer as Record<string, unknown>,
+  );
+  const issuerSnapshot = {
+    ...(invoice.issuer as Record<string, unknown>),
+    id: issuerId,
+  };
 
   const clientId = await ensureClient(
     database,
@@ -130,6 +213,7 @@ export async function persistDraftInvoice(
   const clientSnapshot = { ...clientSnapshotBase, id: clientId };
   const payloadJson = {
     ...(invoice as unknown as Record<string, unknown>),
+    issuer: issuerSnapshot,
     client: clientSnapshot,
   };
 

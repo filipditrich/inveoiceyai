@@ -1,5 +1,5 @@
 import { DISPLAY_STATUS_CARD_ACCENT } from "@/lib/invoice-status-ui";
-import { formatMoney } from "@/lib/format";
+import { formatMoneyByCurrency } from "@/lib/format";
 import type { AppLocale } from "@/i18n/config";
 import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 export type StatusSummaryBucket = {
   status: InvoiceDisplayStatus;
   count: number;
-  total: number;
+  totalsByCurrency: Record<string, number>;
 };
 
 function hrefFor(
@@ -63,7 +63,7 @@ export async function InvoiceStatusSummary({
               {tStatus(b.status)}
             </div>
             <div className="mt-1 text-xl font-semibold tabular-nums">
-              {formatMoney(b.total, "CZK", locale)}
+              {formatMoneyByCurrency(b.totalsByCurrency, locale)}
             </div>
             <div className="text-muted-foreground text-xs tabular-nums">
               {tCount("label", { count: b.count })}

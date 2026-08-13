@@ -10,7 +10,8 @@ import {
   type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
 
-import { getDemoIssuer } from "./demo-issuer";
+import { DEMO_ISSUER_ID } from "./demo-issuer";
+import { resolveDefaultIssuer } from "./invoice-ops";
 import {
   normalizeDraftToInvoice,
   type NormalizedIssue,
@@ -95,7 +96,7 @@ export async function createAndRenderInvoice(options: {
   issuer?: IssuerSnapshot;
   presetsPath?: string;
 }): Promise<CreateAndRenderResult> {
-  let issuer = options.issuer ?? getDemoIssuer();
+  let issuer = options.issuer;
 
   if (options.issuerPresetId) {
     const loaded = await getPreset({
@@ -116,6 +117,17 @@ export async function createAndRenderInvoice(options: {
       return { ok: false, error: "issuer preset data failed validation" };
     }
     issuer = parsed.data;
+  }
+
+  if (!issuer) {
+    issuer = (await resolveDefaultIssuer()) ?? undefined;
+  }
+  if (!issuer) {
+    return {
+      ok: false,
+      error:
+        "no issuer in this workspace — create one in Invoicey before drafting",
+    };
   }
 
   let draft: unknown = options.draft ?? {};
@@ -146,16 +158,22 @@ export async function createAndRenderInvoice(options: {
     return { ok: false, issues: normalized.issues };
   }
 
-  const invoice = normalized.invoice;
+  let invoice = normalized.invoice;
 
   let invoiceId: string | undefined;
   const database = tryCreateDbFromEnv();
-  if (database) {
+  if (database && invoice.issuer.id !== DEMO_ISSUER_ID) {
     try {
       const persisted = await persistDraftInvoice(database, invoice, {
         workspaceId: resolveWorkspaceId(),
       });
       invoiceId = persisted.invoiceId;
+      if (persisted.issuerId !== invoice.issuer.id) {
+        invoice = {
+          ...invoice,
+          issuer: { ...invoice.issuer, id: persisted.issuerId },
+        };
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       return {

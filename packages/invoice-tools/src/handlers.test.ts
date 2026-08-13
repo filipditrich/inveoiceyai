@@ -68,4 +68,49 @@ describe("createAndRenderInvoice", () => {
       expect(r.filenameIsdoc).toMatch(/\.isdoc$/);
     }
   });
+
+  it("locks the passed issuer instead of the demo fallback", async () => {
+    const issuer = {
+      ...getDemoIssuer(),
+      id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      name: "Workspace Dodavatel s.r.o.",
+      ico: "87654321",
+    };
+
+    const r = await createAndRenderInvoice({
+      issuer,
+      draft: {
+        meta: { docType: "invoice" },
+        client: {
+          name: "Odberatel s.r.o.",
+          ico: "12345678",
+          address: {
+            street: "Ulice 1",
+            city: "Praha",
+            zip: "110 00",
+            country: "CZ",
+          },
+        },
+        vat: { mode: "regular", suppliesAbroad: "none" },
+        payment: { method: "transfer", variableSymbol: "1" },
+        items: [
+          {
+            position: 1,
+            description: "Prace",
+            quantity: 1,
+            unit: "ks",
+            unitPriceWithoutVat: 1000,
+            vatRate: 21,
+          },
+        ],
+      },
+    });
+
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.invoice.issuer.id).toBe(issuer.id);
+      expect(r.invoice.issuer.name).toBe("Workspace Dodavatel s.r.o.");
+      expect(r.invoice.issuer.ico).toBe("87654321");
+    }
+  });
 });

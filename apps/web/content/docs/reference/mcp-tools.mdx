@@ -55,23 +55,20 @@ invoice, base64 PDF and ISDOC XML — or the list of validation issues.
   type={{
     draft: {
       type: "object",
-      description: "Partial invoice: meta, client, vat, payment, items",
-    },
-    issuerPresetId: { type: "string", description: "UUID of an issuer preset" },
-    templatePresetId: {
-      type: "string",
-      description: "UUID of an invoice_template preset",
+      description:
+        "Partial invoice: meta, client, vat, payment, items. Issuer is ignored.",
     },
   }}
 />
 
 <Callout type="warn" title="The issuer is locked server-side">
-  Any `issuer` inside `draft` is **ignored**. The issuer comes from
-  `issuerPresetId`, or from a demo issuer when none is given. A model cannot put
-  a bank account or IČO on your invoice.
+  Any `issuer` inside `draft` is **ignored**. The issuer is the workspace
+  default (`is_default`). If the workspace has no issuer, the tool fails — a
+  demo issuer is never written to Neon. A model cannot put a bank account or IČO
+  on your invoice.
 </Callout>
 
-Merge order: template preset → your `draft` on top → issuer injected last.
+Do not pass `issuerPresetId` or `templatePresetId` — those arguments do not exist.
 
 Nothing is silently defaulted. Omitting `duzp` is an error, not an invoice dated today. Field rules:
 [invoice schema](/docs/reference/invoice-schema).
@@ -99,6 +96,16 @@ One invoice: summary with status, plus the validated payload when present.
 <TypeTable
   type={{
     id: { type: "string", description: "Invoice row UUID", required: true },
+  }}
+/>
+
+## issue_invoice <span data-badge>DB</span>
+
+Issues a draft with atomic numbering. Idempotent if the invoice is already issued.
+
+<TypeTable
+  type={{
+    id: { type: "string", description: "Draft invoice UUID", required: true },
   }}
 />
 

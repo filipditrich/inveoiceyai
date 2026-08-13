@@ -72,6 +72,10 @@ export default defineHook({
           },
         });
       } catch (err) {
+        if (err instanceof OutOfAiTokensError) {
+          /** remaining was debited; next turn is gated */
+          return;
+        }
         console.error("[invoicey-slack] AI token metering failed", err);
       }
     },

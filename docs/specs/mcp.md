@@ -21,9 +21,10 @@ Slack Eve reuses the same handlers in-process (`apps/web/agent/tools`) — see [
 | --------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
 | `lookup_business`                                               | `{ ico }`                                              | ARES draft client fields or error                                                               |
 | `search_business`                                               | `{ query, limit? }`                                    | ARES name search → matches with IČO + address                                                   |
-| `create_invoice`                                                | `{ draft?, issuerPresetId?, templatePresetId? }`       | Validated invoice + PDF base64 + ISDOC XML, or issues                                           |
+| `create_invoice`                                                | `{ draft? }`                                           | Validated invoice + PDF base64 + ISDOC XML, or issues. Issuer is the workspace default.         |
 | `list_invoices`                                                 | `{ limit?, unpaidOnly? }`                              | Summaries with `status` + `displayStatus` (needs `DATABASE_URL`)                                |
 | `get_invoice`                                                   | `{ id }`                                               | Summary + validated payload when present (needs DB)                                             |
+| `issue_invoice`                                                 | `{ id }`                                               | Issues a draft (atomic numbering; idempotent if already issued). Needs DB                       |
 | `mark_invoice_paid`                                             | `{ id }`                                               | Sets `paidAt` (needs DB)                                                                        |
 | `send_invoice_email`                                            | `{ id, to?, cc?, coverText?, attachIsdoc?, subject? }` | Emails PDF (+ ISDOC); needs DB + `RESEND_API_KEY`. Pass `to` when client has no `contactEmail`. |
 | `list_presets` / `get_preset` / `save_preset` / `delete_preset` | preset ids / kind / data                               | Preset records on disk                                                                          |
@@ -48,7 +49,7 @@ flowchart LR
 
 - **Local:** `@modelcontextprotocol/sdk` stdio.
 - **Remote:** `mcp-handler`, Node runtime, `maxDuration` 120. Bearer must match env ops `MCP_API_KEY` **or** a Better Auth user PAT (Plan 16). Ops key → `INVOICEY_DEFAULT_WORKSPACE_ID`; user PAT → `users.defaultWorkspaceId`. Fails closed when neither matches.
-- **Issuer lock:** `create_invoice` injects issuer from preset or `getDemoIssuer()` / `INVOICEY_DEMO_ISSUER_JSON`.
+- **Issuer lock:** `create_invoice` injects the workspace default issuer (`is_default`, else oldest). File-only MCP (no `DATABASE_URL`) still uses `getDemoIssuer()`. Missing issuer with a database fails closed — demo is never persisted to Neon.
 - **Presets file:** `INVOICEY_PRESETS_PATH` or `~/.invoicey/presets.json` (on Vercel: `/tmp/…` — ephemeral until Plan 12b).
 
 ## Cursor local setup

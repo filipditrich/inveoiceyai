@@ -25,6 +25,27 @@
       "en": "English"
     }
   },
+  "Filters": {
+    "addFilter": "Add filter",
+    "searchFields": "Search fields…",
+    "noFieldsFound": "No fields",
+    "noResultsFound": "No results",
+    "select": "Select",
+    "addFilterTitle": "Add filter"
+  },
+  "DataGrid": {
+    "empty": "No records.",
+    "columns": "Columns",
+    "rowsPerPage": "Rows per page",
+    "nextPage": "Next page",
+    "previousPage": "Previous page",
+    "info": "{from} – {to} of {count}"
+  },
+  "PdfPreview": {
+    "updating": "Updating…",
+    "empty": "Fill in line items for a preview…",
+    "title": "Invoice PDF preview"
+  },
   "Errors": {
     "invalid": {
       "required_fields": "Fill in the required fields.",
@@ -721,6 +742,7 @@
       "title": "Issued Invoices",
       "subtitle": "Statuses, filters, and actions for invoices.",
       "newButton": "+ Issue invoice",
+      "aiButton": "AI draft",
       "importButton": "Import",
       "fromJsonButton": "From JSON",
       "empty": "No invoices.",
@@ -785,11 +807,26 @@
       "sortDateAsc": "Date ↑",
       "submit": "Filter"
     },
+    "origin": {
+      "invoicey": "Invoicey",
+      "fakturaonline": "FakturaOnline.cz",
+      "idoklad": "iDoklad",
+      "fakturoid": "Fakturoid",
+      "pohoda": "Pohoda",
+      "money_s3": "Money S3",
+      "vyfakturuj": "VyFakturuj.cz",
+      "superfaktura": "SuperFaktura",
+      "custom": "Other / custom"
+    },
     "detail": {
       "issueDate": "Issue date",
       "dueDate": "Due date",
       "duzp": "Tax point date",
       "currency": "Currency",
+      "documentLanguage": "Document language",
+      "languageCs": "Czech",
+      "languageEn": "English",
+      "emailHeading": "Emails",
       "currencyNote": "(MVP: CZK only)",
       "total": "Total",
       "paidAt": "Paid",
@@ -1179,7 +1216,9 @@
       "actions": "Actions",
       "searchPlaceholder": "name, IČO, DIČ…",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "defaultBadge": "Default",
+      "setDefault": "Set as default"
     },
     "newTitle": "New issuer",
     "newSubtitle": "IČO via ARES, contact email, and bank. Other settings can be completed in sections after creation.",
