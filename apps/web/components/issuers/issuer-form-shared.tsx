@@ -153,7 +153,6 @@ export function AssetField(props: {
   uploadConfigured: boolean;
 }) {
   const t = useTranslations("Issuers.form");
-  const [showUrl, setShowUrl] = React.useState(false);
   const hasUrl = props.url.trim().length > 0;
 
   return (
@@ -206,27 +205,6 @@ export function AssetField(props: {
           {t("uploadUnavailable")}
         </p>
       )}
-      <div className="space-y-2">
-        <button
-          className="text-muted-foreground text-xs underline-offset-2 hover:underline"
-          onClick={() => {
-            setShowUrl((v) => !v);
-          }}
-          type="button"
-        >
-          {showUrl ? t("hideUrl") : t("pasteUrl")}
-        </button>
-        {showUrl || !props.uploadConfigured ? (
-          <Input
-            onChange={(ev) => {
-              props.onUrl(ev.target.value);
-            }}
-            placeholder="https://…"
-            type="url"
-            value={props.url}
-          />
-        ) : null}
-      </div>
     </div>
   );
 }

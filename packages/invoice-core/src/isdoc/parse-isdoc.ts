@@ -553,7 +553,7 @@ export function parseIssuerFromIsdoc(xml: string): ParsedIssuerFromIsdoc {
     .toUpperCase();
   const bic = textOf(child(details, "BIC")) || undefined;
 
-  let accountNumber = accountNumberRaw || undefined;
+  const accountNumber = accountNumberRaw || undefined;
   let iban = /^CZ\d{22}$/.test(ibanRaw) ? ibanRaw : undefined;
 
   if (accountNumber && !iban) {

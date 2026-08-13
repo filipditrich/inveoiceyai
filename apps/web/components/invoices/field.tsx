@@ -25,25 +25,28 @@ export function Field({
   children: ReactNode;
 }) {
   const generatedId = useId();
-  const controlId = `invoice-field-${generatedId.replaceAll(":", "")}`;
+  const generatedControlId = `invoice-field-${generatedId.replaceAll(":", "")}`;
+  const childArray = Children.toArray(children);
+  const controlIndex = childArray.findIndex(isValidElement);
+  const control = childArray[controlIndex] as
+    ReactElement<{ id?: string; "aria-describedby"?: string }> | undefined;
+  const controlId = control?.props.id ?? generatedControlId;
   const showDescription = Boolean(description) && !suggestion;
   const descriptionId = showDescription
     ? `${controlId}-description`
     : undefined;
   const errorId = error ? `${controlId}-error` : undefined;
   const describedBy = [descriptionId, errorId].filter(Boolean).join(" ");
-  let controlFound = false;
-  const labelledChildren = Children.map(children, (child) => {
-    if (controlFound || !isValidElement(child)) {
+  const labelledChildren = childArray.map((child, index) => {
+    if (index !== controlIndex || !isValidElement(child)) {
       return child;
     }
-    controlFound = true;
     const element = child as ReactElement<{
       id?: string;
       "aria-describedby"?: string;
     }>;
     return cloneElement(element, {
-      id: element.props.id ?? controlId,
+      id: controlId,
       "aria-describedby":
         element.props["aria-describedby"] ?? (describedBy || undefined),
     });

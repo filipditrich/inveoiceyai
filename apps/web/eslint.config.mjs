@@ -9,6 +9,16 @@ const eslintConfig = [
     ignores: [".eve/**", ".output/**", ".next/**"],
   },
   ...nextEslintConfig,
+  {
+    // ReUI is vendored component-library code whose imperative table/virtualizer
+    // integrations are intentionally outside React Compiler's supported subset.
+    files: ["components/reui/**/*.{ts,tsx}"],
+    rules: {
+      "react-hooks/refs": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/use-memo": "off",
+    },
+  },
 ];
 
 export default eslintConfig;

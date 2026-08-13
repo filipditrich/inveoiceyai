@@ -61,7 +61,9 @@ export async function createPersonalWorkspace(
   user: CreatedUser,
 ): Promise<string> {
   const workspaceId = crypto.randomUUID();
-  const name = user.name ? `${user.name}'s workspace` : "Personal workspace";
+  const name = user.name
+    ? `${user.name} – pracovní prostor`
+    : "Můj pracovní prostor";
   const base = slugBase(user);
 
   // The slug retry wraps the transaction rather than sitting inside it: a

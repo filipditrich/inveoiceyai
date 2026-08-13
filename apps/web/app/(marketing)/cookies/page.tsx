@@ -27,7 +27,7 @@ export default async function CookiesPage() {
         <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
           {t("changeChoiceDescription")}
         </p>
-        <Button className="mt-4" render={<C15tSettingsLink />}>
+        <Button className="mt-4" nativeButton render={<C15tSettingsLink />}>
           {t("changeChoiceButton")}
         </Button>
       </div>

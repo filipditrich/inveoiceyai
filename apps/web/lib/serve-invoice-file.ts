@@ -1,4 +1,4 @@
-import { ensureInvoiceArtifacts } from "@invoicey/invoice-tools/artifacts";
+import { createHash } from "node:crypto";
 import {
   InvoiceSchema,
   isArchivePayload,
@@ -9,6 +9,7 @@ import type { invoices } from "@invoicey/db";
 import { NextResponse } from "next/server";
 
 type InvoiceRow = typeof invoices.$inferSelect;
+const MAX_ARTIFACT_BYTES = 25 * 1024 * 1024;
 
 export type FileDisposition = "attachment" | "inline";
 
@@ -16,7 +17,21 @@ function contentDisposition(
   disposition: FileDisposition,
   filename: string,
 ): string {
-  return `${disposition}; filename="${filename}"`;
+  const unicodeName = filename
+    .replace(/[\u0000-\u001f\u007f/\\]/gu, "-")
+    .replace(/\s+/gu, " ")
+    .trim()
+    .slice(0, 160);
+  const asciiName =
+    unicodeName
+      .normalize("NFKD")
+      .replace(/[^\x20-\x7e]/gu, "")
+      .replace(/["\\]/gu, "-") || "invoice";
+  const encodedName = encodeURIComponent(unicodeName || "invoice").replace(
+    /['()*]/gu,
+    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+  return `${disposition}; filename="${asciiName}"; filename*=UTF-8''${encodedName}`;
 }
 
 async function proxyStoredFile(
@@ -24,12 +39,42 @@ async function proxyStoredFile(
   filename: string,
   contentType: string,
   disposition: FileDisposition = "attachment",
+  expectedSha256?: string | null,
 ): Promise<NextResponse> {
   const upstream = await fetch(url);
   if (!upstream.ok || !upstream.body) {
     throw new Error(`artifact fetch failed: ${upstream.status}`);
   }
-  return new NextResponse(upstream.body, {
+  const declaredLength = Number(upstream.headers.get("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_ARTIFACT_BYTES) {
+    throw new Error("artifact exceeds size limit");
+  }
+
+  const reader = upstream.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let length = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      length += value.byteLength;
+      if (length > MAX_ARTIFACT_BYTES) {
+        await reader.cancel();
+        throw new Error("artifact exceeds size limit");
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const bytes = Buffer.concat(chunks, length);
+  if (expectedSha256) {
+    const actualSha256 = createHash("sha256").update(bytes).digest("hex");
+    if (actualSha256 !== expectedSha256) {
+      throw new Error("artifact integrity check failed");
+    }
+  }
+  return new NextResponse(bytes, {
     status: 200,
     headers: {
       "Content-Type": contentType,
@@ -82,6 +127,7 @@ export async function serveInvoicePdf(
         filename,
         "application/pdf",
         disposition,
+        null,
       );
     } catch {
       return NextResponse.json(
@@ -97,34 +143,25 @@ export async function serveInvoicePdf(
   }
 
   if (row.issuedAt) {
-    if (row.pdfUrl) {
-      try {
-        return await proxyStoredFile(
-          row.pdfUrl,
-          filename,
-          "application/pdf",
-          disposition,
-        );
-      } catch {
-        /** regenerate below */
-      }
+    if (!row.pdfUrl) {
+      return NextResponse.json(
+        { error: "issued_pdf_missing" },
+        { status: 409 },
+      );
     }
-    const artifacts = await ensureInvoiceArtifacts({
-      id: row.id,
-      workspaceId: row.workspaceId,
-      invoice: parsed.data,
-    }).catch(() => null);
-    if (artifacts?.pdfUrl) {
-      try {
-        return await proxyStoredFile(
-          artifacts.pdfUrl,
-          filename,
-          "application/pdf",
-          disposition,
-        );
-      } catch {
-        /** live render below */
-      }
+    try {
+      return await proxyStoredFile(
+        row.pdfUrl,
+        filename,
+        "application/pdf",
+        disposition,
+        row.pdfSha256,
+      );
+    } catch {
+      return NextResponse.json(
+        { error: "issued_pdf_unavailable" },
+        { status: 502 },
+      );
     }
   }
 
@@ -134,7 +171,7 @@ export async function serveInvoicePdf(
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": contentDisposition(disposition, filename),
-      "Cache-Control": row.issuedAt ? "private, max-age=300" : "no-store",
+      "Cache-Control": "no-store",
     },
   });
 }
@@ -158,6 +195,7 @@ export async function serveInvoiceIsdoc(
         filename,
         "application/xml; charset=utf-8",
         disposition,
+        null,
       );
     } catch {
       return NextResponse.json(
@@ -173,34 +211,25 @@ export async function serveInvoiceIsdoc(
   }
 
   if (row.issuedAt) {
-    if (row.isdocUrl) {
-      try {
-        return await proxyStoredFile(
-          row.isdocUrl,
-          filename,
-          "application/xml; charset=utf-8",
-          disposition,
-        );
-      } catch {
-        /** regenerate below */
-      }
+    if (!row.isdocUrl) {
+      return NextResponse.json(
+        { error: "issued_isdoc_missing" },
+        { status: 409 },
+      );
     }
-    const artifacts = await ensureInvoiceArtifacts({
-      id: row.id,
-      workspaceId: row.workspaceId,
-      invoice: parsed.data,
-    }).catch(() => null);
-    if (artifacts?.isdocUrl) {
-      try {
-        return await proxyStoredFile(
-          artifacts.isdocUrl,
-          filename,
-          "application/xml; charset=utf-8",
-          disposition,
-        );
-      } catch {
-        /** live render below */
-      }
+    try {
+      return await proxyStoredFile(
+        row.isdocUrl,
+        filename,
+        "application/xml; charset=utf-8",
+        disposition,
+        row.isdocSha256,
+      );
+    } catch {
+      return NextResponse.json(
+        { error: "issued_isdoc_unavailable" },
+        { status: 502 },
+      );
     }
   }
 
@@ -210,7 +239,7 @@ export async function serveInvoiceIsdoc(
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
       "Content-Disposition": contentDisposition(disposition, filename),
-      "Cache-Control": row.issuedAt ? "private, max-age=300" : "no-store",
+      "Cache-Control": "no-store",
     },
   });
 }

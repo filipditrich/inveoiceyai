@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
@@ -101,7 +107,7 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
     [mcpUrl, createdRaw],
   );
 
-  const reload = () => {
+  const reload = useCallback(() => {
     startTransition(async () => {
       const res = await authClient.apiKey.list();
       if (res.error) {
@@ -110,11 +116,11 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
       }
       setKeys(asKeyList(res.data));
     });
-  };
+  }, [t]);
 
   useEffect(() => {
     reload();
-  }, []);
+  }, [reload]);
 
   const create = () => {
     setBusyKey("create");

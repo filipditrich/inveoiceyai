@@ -64,6 +64,7 @@ export function MembersPanel({
   const [invites, setInvites] = useState<InviteRow[]>([]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("member");
+  const [mountedAt] = useState(Date.now);
   const [pending, startTransition] = useTransition();
   const [busyKey, setBusyKey] = useState<string | null>(null);
 
@@ -78,7 +79,7 @@ export function MembersPanel({
     if (Number.isNaN(date.getTime())) return null;
     return {
       label: formatDateTime(date.toISOString(), locale),
-      expired: date.getTime() < Date.now(),
+      expired: date.getTime() < mountedAt,
     };
   };
 

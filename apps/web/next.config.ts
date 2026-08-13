@@ -20,7 +20,7 @@ loadDotEnv({ path: path.join(repoRoot, ".env") });
 loadDotEnv({ path: path.join(repoRoot, ".env.local"), override: true });
 
 const require = createRequire(import.meta.url);
-const webPackage = require("./package.json") as { version: string };
+const rootPackage = require("../../package.json") as { version: string };
 
 /** Prefer Vercel system SHA; fall back to local git for `bun dev` / local builds. */
 function resolveGitCommitSha(): string {
@@ -55,10 +55,43 @@ const withNextIntl = createNextIntlPlugin({
 });
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy-Report-Only",
+            value: [
+              "default-src 'self'",
+              "base-uri 'self'",
+              "object-src 'none'",
+              "frame-ancestors 'none'",
+              "form-action 'self' https://accounts.google.com https://github.com",
+              "img-src 'self' data: blob: https:",
+              "font-src 'self' data:",
+              "style-src 'self' 'unsafe-inline'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
+              "connect-src 'self' https: wss:",
+              "frame-src 'self' blob: https:",
+            ].join("; "),
+          },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
+    ];
+  },
   /** so NFT can follow `../../packages/invoice-core/assets/**` outside apps/web */
   outputFileTracingRoot: repoRoot,
   env: {
-    NEXT_PUBLIC_APP_VERSION: webPackage.version,
+    NEXT_PUBLIC_APP_VERSION: rootPackage.version,
     NEXT_PUBLIC_GIT_COMMIT_SHA: resolveGitCommitSha(),
   },
   transpilePackages: [

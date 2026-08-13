@@ -31,6 +31,8 @@ non-interactively, so it cannot be scripted safely.
 4. Record the result here, dated, and apply it.
 5. Verify with `bun run --cwd packages/db scripts/row-counts.ts` before and
    after — row counts must match unless the change intends otherwise.
+6. Before deploying the matching web build, run
+   `bun run --cwd apps/web check:runtime-schema` against the target database.
 
 Split anything that adds a `NOT NULL UNIQUE` column to a populated table into
 two steps (add nullable + backfill, then tighten), as
@@ -46,5 +48,6 @@ two steps (add nullable + backfill, then tighten), as
 | `2026-08-12-ai-token-usage.sql`           | Plan 21 AI token balances + usage            |
 | `2026-08-12-plan10-recurring.sql`         | Plan 10 templates + recurring schedules      |
 | `2026-08-13-default-issuer.sql`           | `issuer_businesses.is_default`               |
+| `2026-08-13-issued-artifact-hashes.sql`   | Immutable issued artifact SHA-256 metadata   |
 
 Apply Plan 19 before deploying referral routes (`/r/*`, `/settings/referrals`, admin users list).

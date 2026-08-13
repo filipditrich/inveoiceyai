@@ -109,7 +109,9 @@ export default async function HomePage() {
             </Badge>
             <h1 className="mt-7 text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-[4.5rem]">
               {t("hero.titleLine1")}
-              <span className="text-primary block">{t("hero.titleLine2")}</span>
+              <span className="dark:text-primary block text-[#914522]">
+                {t("hero.titleLine2")}
+              </span>
             </h1>
             <p className="text-muted-foreground mt-7 max-w-xl text-pretty text-lg leading-relaxed sm:text-xl">
               {t("hero.subtitle")}
@@ -307,7 +309,7 @@ export default async function HomePage() {
                   </div>
                 </div>
               </div>
-              <div className="text-background/45 dark:border-border dark:text-muted-foreground flex items-center gap-2 border-t border-white/10 pt-4 text-[0.65rem]">
+              <div className="text-background/75 dark:border-border dark:text-muted-foreground flex items-center gap-2 border-t border-white/10 pt-4 text-[0.65rem]">
                 <LandmarkIcon className="size-3.5" />
                 {t("automation.chatDisclaimer")}
               </div>
@@ -368,7 +370,7 @@ export default async function HomePage() {
         >
           <CircleDollarSignIcon className="text-primary/15 absolute -bottom-12 -right-8 size-64 -rotate-12" />
           <div className="relative max-w-2xl">
-            <p className="text-primary text-sm font-semibold uppercase tracking-wide">
+            <p className="dark:text-primary text-sm font-semibold uppercase tracking-wide text-[#914522]">
               {t("cta.eyebrow")}
             </p>
             <h2 className="mt-4 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
@@ -409,7 +411,7 @@ function SectionIntro({
         align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-xl"
       }`}
     >
-      <p className="text-primary text-sm font-semibold uppercase tracking-wide">
+      <p className="dark:text-primary text-sm font-semibold uppercase tracking-wide text-[#914522]">
         {eyebrow}
       </p>
       <h2 className="mt-4 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
@@ -437,7 +439,7 @@ function WorkflowStep({
     <div
       className={`${motionStyles.liftCard} bg-card shadow-xs relative rounded-3xl border p-6 sm:p-8`}
     >
-      <span className="text-muted-foreground/35 absolute right-7 top-6 font-mono text-4xl font-semibold tracking-tighter">
+      <span className="text-muted-foreground/75 absolute right-7 top-6 font-mono text-4xl font-semibold tracking-tighter">
         {number}
       </span>
       <span className="bg-brand/12 grid size-11 place-items-center rounded-2xl [&_svg]:size-5">
@@ -454,7 +456,7 @@ function WorkflowStep({
 function ChatRow({ label, value }: Readonly<{ label: string; value: string }>) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <span className="opacity-65">{label}</span>
+      <span>{label}</span>
       <span className="text-right font-medium">{value}</span>
     </div>
   );
@@ -480,7 +482,7 @@ function FeaturePanel({
       <span className="bg-brand/12 grid size-11 place-items-center rounded-2xl [&_svg]:size-5">
         {icon}
       </span>
-      <p className="text-primary mt-8 text-xs font-semibold uppercase tracking-wide">
+      <p className="dark:text-primary mt-8 text-xs font-semibold uppercase tracking-wide text-[#914522]">
         {eyebrow}
       </p>
       <h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.035em]">

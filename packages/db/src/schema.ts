@@ -232,6 +232,10 @@ export const invoices = pgTable(
     pdfUrl: text("pdf_url"),
     /** Standalone ISDOC XML URL — set at issue / lazy backfill. */
     isdocUrl: text("isdoc_url"),
+    /** SHA-256 of the immutable issued PDF bytes (hex). */
+    pdfSha256: text("pdf_sha256"),
+    /** SHA-256 of the immutable issued ISDOC bytes (hex). */
+    isdocSha256: text("isdoc_sha256"),
     pdfGeneratedAt: timestamp("pdf_generated_at", { withTimezone: true }),
     /**
      * Provenance for imported invoices.

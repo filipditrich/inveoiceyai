@@ -234,20 +234,23 @@ export function ClientEditorForm({
 
 function FieldGroup(props: { label: string; children: React.ReactNode }) {
   const generatedId = React.useId();
-  const id = `client-field-${generatedId.replaceAll(":", "")}`;
-  let controlFound = false;
-  const children = React.Children.map(props.children, (child) => {
-    if (controlFound || !React.isValidElement(child)) {
+  const generatedControlId = `client-field-${generatedId.replaceAll(":", "")}`;
+  const childArray = React.Children.toArray(props.children);
+  const controlIndex = childArray.findIndex(React.isValidElement);
+  const control = childArray[controlIndex] as
+    React.ReactElement<{ id?: string }> | undefined;
+  const controlId = control?.props.id ?? generatedControlId;
+  const children = childArray.map((child, index) => {
+    if (index !== controlIndex || !React.isValidElement(child)) {
       return child;
     }
-    controlFound = true;
     const element = child as React.ReactElement<{ id?: string }>;
-    return React.cloneElement(element, { id: element.props.id ?? id });
+    return React.cloneElement(element, { id: controlId });
   });
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{props.label}</Label>
+      <Label htmlFor={controlId}>{props.label}</Label>
       {children}
     </div>
   );

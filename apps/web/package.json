@@ -12,7 +12,9 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "check:auth-schema": "NODE_ENV=development bun --conditions react-server scripts/check-auth-schema.ts"
+    "test:e2e": "playwright test",
+    "check:auth-schema": "NODE_ENV=development bun --conditions react-server scripts/check-auth-schema.ts",
+    "check:runtime-schema": "NODE_ENV=development bun --conditions react-server scripts/check-runtime-schema.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "4.0.46",
@@ -72,6 +74,8 @@
     "zod": "4.4.2"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/cookie": "1.0.0",
     "@types/mdx": "2.0.14",

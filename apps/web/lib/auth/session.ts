@@ -11,6 +11,7 @@ import { auth } from "./auth";
 import { ForbiddenError, UnauthorizedError } from "./errors";
 import { loadPlatformRole } from "./platform-admin";
 import type { WorkspaceRole } from "./workspace-types";
+import { setUserDefaultWorkspace } from "./workspaces";
 
 export type { WorkspaceRole } from "./workspace-types";
 
@@ -220,6 +221,21 @@ async function resolveWorkspace(
   if (!fallback) {
     return null;
   }
+
+  // Repair stale/missing workspace state so the next request and API-key calls
+  // resolve the same tenant instead of repeating an implicit fallback forever.
+  try {
+    await Promise.all([
+      auth.api.setActiveOrganization({
+        headers: await headers(),
+        body: { organizationId: fallback.organizationId },
+      }),
+      setUserDefaultWorkspace(userId, fallback.organizationId),
+    ]);
+  } catch (error) {
+    console.error("[workspace] failed to persist fallback workspace", error);
+  }
+
   return {
     userId,
     workspaceId: fallback.organizationId,

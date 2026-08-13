@@ -22,7 +22,9 @@ export default function DocsRootLayout({
       theme={{ enabled: false }}
     >
       <DocsLayout tree={source.getPageTree()} {...docsBaseOptions()}>
-        {children}
+        <main id="main-content" lang="en">
+          {children}
+        </main>
       </DocsLayout>
     </RootProvider>
   );

@@ -1,5 +1,36 @@
 # Platform hardening audit — 2026-08-13
 
+## Remediation status
+
+Implemented in the follow-up hardening pass:
+
+- build/type errors repaired; root lint now exits successfully with narrow,
+  documented ReUI compiler exceptions;
+- trusted, bounded PDF image loading with redirect, MIME/signature, byte,
+  timeout, and decoded-dimension checks plus regression tests;
+- bounded public demo requests with BotID, rate limiting, collection/body caps,
+  concurrency backpressure, and generic failures;
+- PR CI for lint, typecheck, unit tests, production build, Better Auth schema
+  compatibility, and desktop/mobile Playwright + axe smoke tests;
+- baseline response headers and CSP report-only policy;
+- immutable issued artifact serving, SHA-256 persistence/verification, safe
+  download filenames, and no silent issued-document regeneration;
+- generic error UI and persisted workspace fallback;
+- docs/auth landmarks and headings, cookie primitive contract, localized
+  breadcrumbs, release-version source, bootstrap workspace naming, and durable
+  sitemap metadata;
+- a maintained [launch-readiness checklist](../launch-readiness.md) for facts and
+  operational controls that cannot be safely invented in code.
+
+Still requires an explicit operator action before deployment:
+
+- review and apply the two 2026-08-13 additive SQL files to the intended
+  database, then run `bun run --cwd apps/web check:runtime-schema`;
+- supply and approve the legal operator/commercial facts in the launch
+  checklist;
+- make CI required in GitHub branch protection and review CSP telemetry before
+  enforcing it.
+
 ## Outcome
 
 Invoicey has a strong product surface and several important controls already fail closed, but it is not ready for deeper feature work or an unattended production release in the audited workspace state. The immediate sequence should be:

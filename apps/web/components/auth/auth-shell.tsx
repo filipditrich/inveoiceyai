@@ -44,9 +44,9 @@ export async function AuthShell({
           <p className="text-brand text-sm font-semibold uppercase tracking-wide">
             {t("eyebrow")}
           </p>
-          <h1 className="mt-5 text-balance text-5xl font-semibold leading-[1.02] tracking-[-0.05em]">
+          <h2 className="mt-5 text-balance text-5xl font-semibold leading-[1.02] tracking-[-0.05em]">
             {t("title")}
-          </h1>
+          </h2>
           <p className="text-background/60 dark:text-muted-foreground mt-6 max-w-lg text-lg leading-relaxed">
             {t("description")}
           </p>
@@ -58,7 +58,7 @@ export async function AuthShell({
           </div>
         </div>
 
-        <div className="text-background/45 dark:text-muted-foreground relative flex items-center gap-2 text-xs">
+        <div className="text-background/75 dark:text-muted-foreground relative flex items-center gap-2 text-xs">
           <CheckCircle2Icon className="size-3.5" />
           {t("oauthNote")}
         </div>

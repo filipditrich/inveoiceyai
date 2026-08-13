@@ -12,6 +12,7 @@
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo run test",
+    "test:e2e": "bun run --cwd apps/web test:e2e",
     "email:dev": "bun run --cwd packages/emails email:dev",
     "db:push": "turbo run db:push --filter=@invoicey/db",
     "format": "prettier --write .",

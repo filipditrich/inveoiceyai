@@ -21,7 +21,7 @@ export default function AppError({
     <div className="flex flex-1 flex-col items-start gap-4 px-4 py-10 lg:px-6">
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="text-muted-foreground max-w-lg text-sm">
-        {error.message || t("description")}
+        {t("description")}
         {error.digest ? ` (ref ${error.digest})` : null}
       </p>
       <div className="flex gap-2">

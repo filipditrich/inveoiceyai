@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { invoices, tryCreateDbFromEnv } from "@invoicey/db";
 import {
   InvoiceSchema,
@@ -14,7 +15,13 @@ export type InvoiceArtifactUrls = {
   pdfUrl: string;
   isdocUrl: string;
   pdfGeneratedAt: Date;
+  pdfSha256?: string;
+  isdocSha256?: string;
 };
+
+function sha256(bytes: Uint8Array | string): string {
+  return createHash("sha256").update(bytes).digest("hex");
+}
 
 function hasUploadToken(): boolean {
   return Boolean(process.env.UPLOADTHING_TOKEN?.trim());
@@ -68,6 +75,8 @@ export async function ensureInvoiceArtifacts(options: {
       pdfUrl: row.pdfUrl,
       isdocUrl: row.isdocUrl,
       pdfGeneratedAt: row.pdfGeneratedAt ?? row.issuedAt,
+      pdfSha256: row.pdfSha256 ?? undefined,
+      isdocSha256: row.isdocSha256 ?? undefined,
     };
   }
 
@@ -77,6 +86,8 @@ export async function ensureInvoiceArtifacts(options: {
         pdfUrl: row.pdfUrl,
         isdocUrl: row.isdocUrl ?? row.pdfUrl,
         pdfGeneratedAt: row.pdfGeneratedAt ?? row.issuedAt,
+        pdfSha256: row.pdfSha256 ?? undefined,
+        isdocSha256: row.isdocSha256 ?? undefined,
       };
     }
     return null;
@@ -96,9 +107,12 @@ export async function ensureInvoiceArtifacts(options: {
   const number = parsed.data.meta.number || row.number || options.id;
   let pdfUrl = row.pdfUrl;
   let isdocUrl = row.isdocUrl;
+  let pdfSha256 = row.pdfSha256 ?? undefined;
+  let isdocSha256 = row.isdocSha256 ?? undefined;
 
   if (!pdfUrl) {
     const pdfBytes = await renderInvoicePdf(parsed.data);
+    pdfSha256 = sha256(pdfBytes);
     pdfUrl = await uploadBytes(
       pdfBytes,
       `${number}-isdoc.pdf`,
@@ -107,6 +121,7 @@ export async function ensureInvoiceArtifacts(options: {
   }
   if (!isdocUrl) {
     const xml = renderIsdoc(parsed.data);
+    isdocSha256 = sha256(xml);
     isdocUrl = await uploadBytes(xml, `${number}.isdoc`, "application/xml");
   }
 
@@ -116,12 +131,14 @@ export async function ensureInvoiceArtifacts(options: {
     .set({
       pdfUrl,
       isdocUrl,
+      pdfSha256,
+      isdocSha256,
       pdfGeneratedAt,
       updatedAt: pdfGeneratedAt,
     })
     .where(eq(invoices.id, options.id));
 
-  return { pdfUrl, isdocUrl, pdfGeneratedAt };
+  return { pdfUrl, isdocUrl, pdfGeneratedAt, pdfSha256, isdocSha256 };
 }
 
 /** Best-effort persist after issue — never throws to the issue caller. */

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
@@ -143,7 +143,7 @@ export function LinkedAccountsPanel({
   const [pending, startTransition] = useTransition();
   const [busyKey, setBusyKey] = useState<string | null>(null);
 
-  const reload = () => {
+  const reload = useCallback(() => {
     startTransition(async () => {
       const res = await authClient.listAccounts();
       if (res.error) {
@@ -152,11 +152,11 @@ export function LinkedAccountsPanel({
       }
       setAccounts((res.data ?? []) as AccountRow[]);
     });
-  };
+  }, [t]);
 
   useEffect(() => {
     reload();
-  }, []);
+  }, [reload]);
 
   const linked = new Set(accounts.map((a) => a.providerId));
 
