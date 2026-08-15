@@ -43,6 +43,7 @@ export async function GET(request: Request): Promise<Response> {
 
   let imported = 0;
   let proposed = 0;
+  let autoMatched = 0;
   const errors: Array<{ connectionId: string; code: string }> = [];
   for (const connection of due) {
     const result = await syncFioConnection({
@@ -51,6 +52,7 @@ export async function GET(request: Request): Promise<Response> {
     });
     imported += result.imported;
     proposed += result.proposed;
+    autoMatched += result.autoMatched;
     if (!result.ok) {
       errors.push({
         connectionId: connection.id,
@@ -63,6 +65,7 @@ export async function GET(request: Request): Promise<Response> {
     connections: due.length,
     imported,
     proposed,
+    autoMatched,
     errors,
   });
 }

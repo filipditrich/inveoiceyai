@@ -16,6 +16,7 @@ import { requireWorkspace, requireWorkspaceRole } from "@/lib/auth/session";
 import {
   createFioConnection,
   deleteFioConnection,
+  setFioAutoMatch,
   syncFioConnection,
   testFioToken,
 } from "@/lib/payments/fio-service";
@@ -54,10 +55,9 @@ export async function connectFio(formData: FormData): Promise<void> {
   if (!isValidFioTokenShape(token)) {
     settingsRedirect({ error: "fio_token_contains_whitespace" });
   }
-  let connectionId: string;
   try {
     const batch = await testFioToken(token);
-    connectionId = await createFioConnection({
+    await createFioConnection({
       workspaceId,
       userId,
       issuerId,
@@ -71,7 +71,7 @@ export async function connectFio(formData: FormData): Promise<void> {
   }
   revalidatePath("/settings/bank-connections");
   revalidatePath("/payments");
-  settingsRedirect({ connected: connectionId });
+  settingsRedirect({ toast: "bank_connected" });
 }
 
 export async function syncFio(formData: FormData): Promise<void> {
@@ -87,6 +87,8 @@ export async function syncFio(formData: FormData): Promise<void> {
           synced: connectionId,
           imported: String(result.imported),
           proposed: String(result.proposed),
+          autoMatched: String(result.autoMatched),
+          toast: "bank_synced",
         }
       : { error: result.error ?? "fio_sync_failed" },
   );
@@ -103,7 +105,30 @@ export async function disconnectFio(formData: FormData): Promise<void> {
   });
   revalidatePath("/settings/bank-connections");
   settingsRedirect(
-    disconnected ? { disconnected: connectionId } : { error: "not_found" },
+    disconnected ? { toast: "bank_disconnected" } : { error: "not_found" },
+  );
+}
+
+export async function toggleFioAutoMatch(formData: FormData): Promise<void> {
+  const { workspaceId, userId } = await requireWorkspaceRole("admin");
+  const connectionId = field(formData, "connectionId");
+  if (!connectionId) settingsRedirect({ error: "missing_connection" });
+  const enabled = field(formData, "enabled") === "true";
+  const updated = await setFioAutoMatch({
+    workspaceId,
+    connectionId,
+    userId,
+    enabled,
+  });
+  revalidatePath("/settings/bank-connections");
+  settingsRedirect(
+    updated
+      ? {
+          toast: enabled
+            ? "bank_auto_match_enabled"
+            : "bank_auto_match_disabled",
+        }
+      : { error: "not_found" },
   );
 }
 
@@ -130,7 +155,7 @@ export async function confirmPaymentProposal(
     }
   }
   revalidatePayments(result.invoiceId);
-  paymentRedirect({ confirmed: proposalId });
+  paymentRedirect({ toast: "payment_confirmed" });
 }
 
 export async function rejectPaymentProposal(formData: FormData): Promise<void> {
@@ -142,7 +167,9 @@ export async function rejectPaymentProposal(formData: FormData): Promise<void> {
     actorUserId: userId,
   });
   revalidatePayments();
-  paymentRedirect(rejected ? { rejected: proposalId } : { error: "not_found" });
+  paymentRedirect(
+    rejected ? { toast: "payment_rejected" } : { error: "not_found" },
+  );
 }
 
 export async function addManualPayment(formData: FormData): Promise<void> {
@@ -176,7 +203,7 @@ export async function addManualPayment(formData: FormData): Promise<void> {
     }
   }
   revalidatePayments(invoiceId);
-  paymentRedirect({ added: result.allocationId });
+  paymentRedirect({ toast: "payment_added" });
 }
 
 export async function reversePayment(formData: FormData): Promise<void> {
@@ -194,5 +221,5 @@ export async function reversePayment(formData: FormData): Promise<void> {
   if (/^\/invoices\/[0-9a-f-]{36}$/u.test(returnTo)) {
     redirect(`${returnTo}?toast=payment_reversed`);
   }
-  paymentRedirect({ reversed: allocationId });
+  paymentRedirect({ toast: "payment_reversed" });
 }

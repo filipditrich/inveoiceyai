@@ -1,0 +1,81 @@
+---
+title: Bank connections
+description: Why Invoicey supports Fio first, and what we researched for other Czech banks.
+icon: Building2
+---
+
+Invoicey reconciles invoices through a **payment ledger**. Bank feeds are optional adapters on top
+of that ledger — the same place manual payments land.
+
+Today the only live bank adapter is **Fio banka**. Everything else stays on [manual
+payments](/docs/guides/reconciling-payments#manual-payments) until a bank offers a setup as simple
+and free as Fio.
+
+## Why Fio
+
+Fio’s API Bankovnictví is built for exactly this use case:
+
+| Need                        | Fio                                                               |
+| --------------------------- | ----------------------------------------------------------------- |
+| Read movements / statements | Yes                                                               |
+| Cost                        | Free                                                              |
+| Credentials                 | Monitoring token from Internetbanking (paste into Invoicey)       |
+| Licence for Invoicey        | None — the account holder issues the token                        |
+| Workspace configuration     | One encrypted token per connection, owned by the active workspace |
+
+Setup: [Reconcile payments → Connect Fio](/docs/guides/reconciling-payments#connect-fio-banka).
+
+## What we looked at (and deferred)
+
+We reviewed common Czech banks and fintechs for a **workspace-configurable** history API — ideally
+free, without Invoicey needing a ČNB open-banking (AISP) licence.
+
+Two access models keep showing up:
+
+| Model                          | Who creates access                           | Invoicey needs AISP? | Fit for Invoicey   |
+| ------------------------------ | -------------------------------------------- | -------------------- | ------------------ |
+| Account-holder / “Premium” API | You create a token or certificate in your IB | No                   | Possible if simple |
+| PSD2 open banking (AISP)       | You consent to a licensed third party        | Yes                  | Not planned        |
+
+### Comparison
+
+| Bank / provider              | Live history API for account holders? | Typical cost                         | Setup pain                   | Invoicey status |
+| ---------------------------- | ------------------------------------- | ------------------------------------ | ---------------------------- | --------------- |
+| **Fio**                      | Yes                                   | Free                                 | Paste monitoring token       | **Supported**   |
+| MONETA                       | Yes                                   | Free                                 | Token + service contract     | Deferred        |
+| ČSOB Business Connector      | Yes (business CEB)                    | Free                                 | Client certificate / mTLS    | Deferred        |
+| CREDITAS                     | Unclear after 2025 PSD2 move          | Historically free                    | Re-check before any work     | Deferred        |
+| Komerční banka (ADAA/STATDA) | Yes                                   | Free ≤50 uses/mo; then 100–500 Kč/mo | App registration + OAuth     | Deferred        |
+| Raiffeisenbank Premium API   | Yes                                   | ~500 Kč/mo + possible yearly fees    | Certificate + yearly unblock | Deferred        |
+| Česká spořitelna Premium API | Yes                                   | ~300 Kč / account / mo               | Bank onboarding              | Deferred        |
+| Revolut Business             | Yes (Grow+ plans)                     | Grow ~850–1 000 Kč/mo                | Certificate + OAuth          | Deferred        |
+| Partners Banka               | PSD2 only                             | TPP path                             | Needs licensed AISP          | Not planned     |
+| mBank CZ                     | PSD2 only                             | TPP path                             | Needs licensed AISP          | Not planned     |
+| Air Bank                     | PSD2 only                             | TPP path (CSV/email workarounds)     | Needs licensed AISP          | Not planned     |
+
+**Deferred** means the ledger can grow another adapter later; we are not building those
+integrations now. Paid plans, certificates, OAuth app registration, and AISP licensing are a poor
+fit next to Fio’s free token.
+
+## If you bank elsewhere
+
+Use **Mark paid** on the invoice or **Add a manual payment** on Payments. Those write the same
+ledger as Fio matches, so dashboards and outstanding balances stay consistent.
+
+A future **statement import** (CSV / CAMT / etc.) may cover non-Fio accounts without pretending
+those banks have a Fio-class API.
+
+## Related
+
+<Cards>
+  <Card
+    title="Reconcile payments"
+    href="/docs/guides/reconciling-payments"
+    description="Connect Fio, review proposals, confirm allocations."
+  />
+  <Card
+    title="Issue & get paid"
+    href="/docs/guides/issuing-and-payment"
+    description="Issue lifecycle, overdue and downloads."
+  />
+</Cards>

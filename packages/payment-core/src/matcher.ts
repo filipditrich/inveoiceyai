@@ -39,6 +39,30 @@ export interface MatchProposal {
   blockers: MatchBlocker[];
 }
 
+/**
+ * The deliberately narrow boundary for unattended reconciliation.
+ * Heuristic, partial, overpaid, or ambiguous proposals always stay manual.
+ */
+export function isExactAutoMatchProposal(
+  proposal: Pick<
+    MatchProposal,
+    "score" | "confidence" | "reasons" | "blockers"
+  >,
+): boolean {
+  const requiredReasons: MatchReason[] = [
+    "receiving_account",
+    "currency",
+    "exact_variable_symbol",
+    "exact_outstanding_amount",
+  ];
+  return (
+    proposal.score === 100 &&
+    proposal.confidence === "high" &&
+    proposal.blockers.length === 0 &&
+    requiredReasons.every((reason) => proposal.reasons.includes(reason))
+  );
+}
+
 function normalizeAccount(value: string | null): string | null {
   if (!value) return null;
   return value.replace(/\s+/gu, "").toUpperCase();

@@ -1,11 +1,13 @@
 import { setDefaultIssuer } from "@/actions/issuers";
 import { IssuerEditNav } from "@/components/issuers/issuer-edit-nav";
+import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { loadIssuerForEdit } from "@/lib/load-issuer";
 import { requireWorkspace } from "@/lib/auth/session";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { BriefcaseBusinessIcon } from "lucide-react";
 
 type Params = Promise<{ id: string }>;
 
@@ -24,20 +26,9 @@ export default async function IssuerEditLayout({
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 lg:px-6">
-      <div className="space-y-1">
-        <p className="text-muted-foreground text-sm">
-          <Link
-            className="hover:text-foreground underline-offset-4 hover:underline"
-            href="/issuers"
-          >
-            {t("title")}
-          </Link>
-        </p>
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {issuer.snapshot.name}
-          </h1>
-          {issuer.isDefault ? (
+      <PageHeader
+        actions={
+          issuer.isDefault ? (
             <Badge variant="secondary">{tTable("defaultBadge")}</Badge>
           ) : (
             <form action={setDefaultIssuer}>
@@ -51,10 +42,20 @@ export default async function IssuerEditLayout({
                 {tTable("setDefault")}
               </SubmitButton>
             </form>
-          )}
-        </div>
-        <p className="text-muted-foreground text-sm">{t("editSectionsHint")}</p>
-      </div>
+          )
+        }
+        description={t("editSectionsHint")}
+        eyebrow={
+          <Link
+            className="hover:text-foreground underline-offset-4 hover:underline"
+            href="/issuers"
+          >
+            {t("title")}
+          </Link>
+        }
+        icon={<BriefcaseBusinessIcon />}
+        title={issuer.snapshot.name}
+      />
       <IssuerEditNav issuerId={id} />
       {children}
     </div>

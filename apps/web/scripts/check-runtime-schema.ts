@@ -17,7 +17,10 @@ const required = new Map([
       "payment_variable_symbol",
     ]),
   ],
-  ["bank_connections", new Set(["secret_ciphertext", "lease_until"])],
+  [
+    "bank_connections",
+    new Set(["secret_ciphertext", "lease_until", "auto_confirm_exact_matches"]),
+  ],
   ["bank_accounts", new Set(["iban", "currency"])],
   ["bank_transactions", new Set(["provider_transaction_id", "amount"])],
   ["payment_match_proposals", new Set(["matcher_version", "status"])],

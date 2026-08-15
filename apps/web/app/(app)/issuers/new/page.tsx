@@ -1,6 +1,8 @@
 import { IssuerCreateForm } from "@/components/issuers/issuer-create-form";
+import { PageHeader } from "@/components/layout/page-header";
 import { requireWorkspace } from "@/lib/auth/session";
 import { getTranslations } from "next-intl/server";
+import { BriefcaseBusinessIcon } from "lucide-react";
 
 type Search = Promise<{ invalid?: string }>;
 
@@ -15,10 +17,11 @@ export default async function IssuersNewPage({
 
   return (
     <div className="space-y-6 px-4 py-6 lg:px-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{t("newTitle")}</h1>
-        <p className="text-muted-foreground">{t("newSubtitle")}</p>
-      </div>
+      <PageHeader
+        description={t("newSubtitle")}
+        icon={<BriefcaseBusinessIcon />}
+        title={t("newTitle")}
+      />
       <IssuerCreateForm invalidQuery={sp.invalid ?? null} />
     </div>
   );

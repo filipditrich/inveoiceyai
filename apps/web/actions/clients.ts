@@ -1,10 +1,12 @@
 "use server";
 
 import { requireWorkspace } from "@/lib/auth/session";
+import { lookupAresByIcoCached } from "@/lib/cached-ares";
 import {
   ClientSnapshotSchema,
   ClientVatIdSchema,
   IcoSchema,
+  type ClientSnapshot,
 } from "@invoicey/invoice-core/schema";
 import {
   clients,
@@ -14,7 +16,7 @@ import {
   mergeDuplicateClients,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -32,6 +34,88 @@ function normalizeZip(zipRaw: string): string {
     return `${compact.slice(0, 3)} ${compact.slice(3)}`;
   }
   return zipRaw.trim();
+}
+
+export type CreateClientFromAresResult =
+  | {
+      ok: true;
+      client: {
+        id: string;
+        snapshot: ClientSnapshot;
+      };
+      existing: boolean;
+    }
+  | {
+      ok: false;
+      code: "invalid_ico" | "ares_no_data" | "ares_failed";
+      message?: string;
+    };
+
+/** Resolve an IČO in the active workspace, creating the client from ARES when needed. */
+export async function createClientFromAres(
+  icoInput: string,
+): Promise<CreateClientFromAresResult> {
+  const { workspaceId } = await requireWorkspace();
+  const parsedIco = IcoSchema.safeParse((icoInput ?? "").replaceAll(/\s/g, ""));
+  if (!parsedIco.success) {
+    return { ok: false, code: "invalid_ico" };
+  }
+
+  const [existingRow] = await db
+    .select({ id: clients.id, snapshot: clients.snapshot })
+    .from(clients)
+    .where(
+      and(
+        eq(clients.workspaceId, workspaceId),
+        sql`regexp_replace(coalesce(${clients.snapshot}->>'ico', ''), '\\D', '', 'g') = ${parsedIco.data}`,
+      ),
+    )
+    .limit(1);
+  if (existingRow) {
+    const existingSnapshot = ClientSnapshotSchema.safeParse(
+      existingRow.snapshot,
+    );
+    if (existingSnapshot.success) {
+      return {
+        ok: true,
+        client: { id: existingRow.id, snapshot: existingSnapshot.data },
+        existing: true,
+      };
+    }
+  }
+
+  const lookup = await lookupAresByIcoCached(parsedIco.data);
+  if (!lookup.ok) {
+    return {
+      ok: false,
+      code: lookup.kind === "not_found" ? "ares_no_data" : "ares_failed",
+      message: lookup.message,
+    };
+  }
+
+  const preferredId = crypto.randomUUID();
+  const parsedSnapshot = ClientSnapshotSchema.safeParse({
+    id: preferredId,
+    ...lookup.draft,
+  });
+  if (!parsedSnapshot.success) {
+    return { ok: false, code: "ares_failed" };
+  }
+  const clientId = await ensureClient(
+    db,
+    workspaceId,
+    parsedSnapshot.data as Record<string, unknown>,
+    { preferredId, source: "ares" },
+  );
+  const snapshot = { ...parsedSnapshot.data, id: clientId };
+
+  revalidatePath("/clients");
+  revalidatePath("/invoices/new");
+  return {
+    ok: true,
+    client: { id: clientId, snapshot },
+    existing: false,
+  };
 }
 
 /** UPSERT validated `ClientSnapshot` in default workspace. */
@@ -167,7 +251,7 @@ export async function deleteClient(formData: FormData): Promise<void> {
   redirect("/clients?toast=client_deleted");
 }
 
-/** Collapse duplicate clients (by IČO, else by name when IČO absent). */
+/** Collapse duplicate clients by IČO or normalized legal name + full address. */
 export async function mergeClientsAction(): Promise<void> {
   const { workspaceId } = await requireWorkspace();
   const result = await mergeDuplicateClients(db, workspaceId);

@@ -1,4 +1,5 @@
 import { AdminUsersGrid } from "@/components/admin/admin-users-grid";
+import { PageHeader } from "@/components/layout/page-header";
 import { adminListUsers } from "@/lib/admin/lists";
 import { requirePlatformAdmin } from "@/lib/auth/session";
 import { getTranslations } from "next-intl/server";
@@ -10,10 +11,7 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
-      </div>
+      <PageHeader description={t("subtitle")} title={t("title")} />
       <AdminUsersGrid
         currentUserId={admin.userId}
         items={rows.map((r) => ({

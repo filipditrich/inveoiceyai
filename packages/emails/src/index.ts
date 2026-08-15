@@ -1,5 +1,6 @@
 export {
   EMAIL_TEMPLATES,
+  renderBankPaymentAutoMatchedEmail,
   renderInvoiceSentEmail,
   renderNewSignInEmail,
   renderOverdueReminderEmail,
@@ -16,6 +17,10 @@ export {
   systemEmailCopy,
   type EmailLocale,
 } from "./copy";
+export {
+  BankPaymentAutoMatchedEmail,
+  type BankPaymentAutoMatchedEmailProps,
+} from "./templates/bank-payment-auto-matched";
 export {
   InvoiceSentEmail,
   type InvoiceSentEmailProps,

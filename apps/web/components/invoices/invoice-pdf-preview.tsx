@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
-const PDF_VIEW_HASH = "#toolbar=0&navpanes=0&scrollbar=0&view=FitH";
+const PDF_VIEW_HASH = "#page=1&toolbar=0&navpanes=0&scrollbar=0&view=Fit";
 
 export function InvoicePdfPreview({
   url,

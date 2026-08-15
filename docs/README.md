@@ -34,7 +34,8 @@ If a doc disagrees with the code, the doc is right and the code is a bug — or 
 ## Current product research
 
 - [Payment ledger and bank integration](./research/payment-ledger-bank-integration.md)
-  — selected for the provider-neutral Plan 22 with Fio first.
+  — Fio shipped; Czech bank API matrix concludes other direct adapters are
+  deferred (paid, cert/OAuth-heavy, or PSD2-TPP-only).
 - [Czech OSVČ companion](./research/osvc-companion.md) — exploratory and not
   scheduled.
 

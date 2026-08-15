@@ -1,4 +1,5 @@
 import { IssuersDataGrid } from "@/components/issuers/issuers-data-grid";
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
 import { invalidMessage } from "@/lib/invalid-message";
@@ -11,6 +12,7 @@ import { db } from "@invoicey/db/client";
 import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { BriefcaseBusinessIcon } from "lucide-react";
 
 type IssuerTableItem = {
   rowId: string;
@@ -56,17 +58,16 @@ export default async function IssuersPage({
 
   return (
     <div className="space-y-4 px-4 py-6 lg:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t("title")}
-          </h1>
-          <p className="text-muted-foreground">{t("subtitle")}</p>
-        </div>
-        <Button render={<Link href="/issuers/new" prefetch />} size="sm">
-          {t("newButton")}
-        </Button>
-      </div>
+      <PageHeader
+        actions={
+          <Button render={<Link href="/issuers/new" prefetch />} size="sm">
+            {t("newButton")}
+          </Button>
+        }
+        description={t("subtitle")}
+        icon={<BriefcaseBusinessIcon />}
+        title={t("title")}
+      />
 
       {err ? <p className="text-destructive text-sm">{err}</p> : null}
 

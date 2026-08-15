@@ -23,9 +23,7 @@ import {
   BookOpenIcon,
   BracesIcon,
   Building2Icon,
-  FilePlus2Icon,
   FileTextIcon,
-  ListIcon,
   LayoutDashboardIcon,
   LandmarkIcon,
   PlugZapIcon,
@@ -65,7 +63,13 @@ export function AppSidebar({
   const t = useTranslations("App");
 
   const invoicesOpen =
-    pathname === "/invoices" || pathname.startsWith("/invoices/");
+    pathname === "/invoices" ||
+    (pathname.startsWith("/invoices/") &&
+      !pathname.startsWith("/invoices/new") &&
+      !pathname.startsWith("/invoices/ai") &&
+      !pathname.startsWith("/invoices/from-json") &&
+      !pathname.startsWith("/invoices/import") &&
+      !pathname.startsWith("/invoices/recurring"));
 
   const navMain = [
     {
@@ -79,52 +83,6 @@ export function AppSidebar({
       url: "/invoices",
       icon: <FileTextIcon />,
       isActive: invoicesOpen,
-      defaultOpen: true,
-      items: [
-        {
-          title: t("nav.invoicesList"),
-          url: "/invoices",
-          icon: <ListIcon />,
-          isActive:
-            pathname === "/invoices" ||
-            (pathname.startsWith("/invoices/") &&
-              !pathname.startsWith("/invoices/new") &&
-              !pathname.startsWith("/invoices/ai") &&
-              !pathname.startsWith("/invoices/from-json") &&
-              !pathname.startsWith("/invoices/import") &&
-              !pathname.startsWith("/invoices/recurring")),
-        },
-        {
-          title: t("nav.invoicesNew"),
-          url: "/invoices/new",
-          icon: <FilePlus2Icon />,
-          isActive: pathname === "/invoices/new",
-        },
-        {
-          title: t("nav.invoicesAi"),
-          url: "/invoices/ai",
-          icon: <SparklesIcon />,
-          isActive: pathname === "/invoices/ai",
-        },
-        {
-          title: t("nav.invoicesRecurring"),
-          url: "/invoices/recurring",
-          icon: <RepeatIcon />,
-          isActive: pathname === "/invoices/recurring",
-        },
-        {
-          title: t("nav.invoicesImport"),
-          url: "/invoices/import",
-          icon: <ArchiveRestoreIcon />,
-          isActive: pathname === "/invoices/import",
-        },
-        {
-          title: t("nav.invoicesFromJson"),
-          url: "/invoices/from-json",
-          icon: <BracesIcon />,
-          isActive: pathname === "/invoices/from-json",
-        },
-      ],
     },
     {
       title: t("nav.payments"),
@@ -197,6 +155,40 @@ export function AppSidebar({
           collapseLabel={(title) => t("nav.collapseToggle", { title })}
           groupLabel={t("nav.group")}
           items={navMain}
+        />
+        <NavSecondary
+          groupLabel={t("nav.automationGroup")}
+          items={[
+            {
+              title: t("nav.invoicesAi"),
+              url: "/invoices/ai",
+              icon: <SparklesIcon />,
+              isActive: pathname === "/invoices/ai",
+            },
+            {
+              title: t("nav.invoicesRecurring"),
+              url: "/invoices/recurring",
+              icon: <RepeatIcon />,
+              isActive: pathname === "/invoices/recurring",
+            },
+          ]}
+        />
+        <NavSecondary
+          groupLabel={t("nav.toolsGroup")}
+          items={[
+            {
+              title: t("nav.invoicesImport"),
+              url: "/invoices/import",
+              icon: <ArchiveRestoreIcon />,
+              isActive: pathname === "/invoices/import",
+            },
+            {
+              title: t("nav.invoicesFromJson"),
+              url: "/invoices/from-json",
+              icon: <BracesIcon />,
+              isActive: pathname === "/invoices/from-json",
+            },
+          ]}
         />
         <NavSecondary
           groupLabel={t("nav.manageGroup")}

@@ -1,5 +1,6 @@
 import { InvoiceListTable } from "@/components/invoices/invoice-list-table";
 import { InvoiceStatusSummary } from "@/components/invoices/invoice-status-summary";
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
 import {
@@ -23,6 +24,7 @@ import { db } from "@invoicey/db/client";
 import { and, count } from "drizzle-orm";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { FilesIcon } from "lucide-react";
 
 type Search = Promise<{
   invalid?: string;
@@ -171,40 +173,39 @@ export default async function InvoicesPage({
 
   return (
     <div className="@container/main space-y-4 px-4 py-6 lg:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t("title")}
-          </h1>
-          <p className="text-muted-foreground">{t("subtitle")}</p>
-        </div>
-        <div className="flex gap-2">
-          <Button render={<Link href="/invoices/ai" prefetch />} size="sm">
-            {t("aiButton")}
-          </Button>
-          <Button
-            render={<Link href="/invoices/new" prefetch />}
-            size="sm"
-            variant="outline"
-          >
-            {t("newButton")}
-          </Button>
-          <Button
-            render={<Link href="/invoices/import" prefetch />}
-            size="sm"
-            variant="outline"
-          >
-            {t("importButton")}
-          </Button>
-          <Button
-            render={<Link href="/invoices/from-json" prefetch />}
-            size="sm"
-            variant="outline"
-          >
-            {t("fromJsonButton")}
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        actions={
+          <>
+            <Button render={<Link href="/invoices/ai" prefetch />} size="sm">
+              {t("aiButton")}
+            </Button>
+            <Button
+              render={<Link href="/invoices/new" prefetch />}
+              size="sm"
+              variant="outline"
+            >
+              {t("newButton")}
+            </Button>
+            <Button
+              render={<Link href="/invoices/import" prefetch />}
+              size="sm"
+              variant="outline"
+            >
+              {t("importButton")}
+            </Button>
+            <Button
+              render={<Link href="/invoices/from-json" prefetch />}
+              size="sm"
+              variant="outline"
+            >
+              {t("fromJsonButton")}
+            </Button>
+          </>
+        }
+        description={t("subtitle")}
+        icon={<FilesIcon />}
+        title={t("title")}
+      />
 
       {sp.invalid ? (
         <p className="text-destructive text-sm">

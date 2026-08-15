@@ -1,7 +1,9 @@
 import { getTranslations } from "next-intl/server";
 
 import { SettingsNav } from "@/components/settings/settings-nav";
+import { PageHeader } from "@/components/layout/page-header";
 import { requireSession } from "@/lib/auth/session";
+import { Settings2Icon } from "lucide-react";
 
 export default async function SettingsLayout({
   children,
@@ -13,17 +15,12 @@ export default async function SettingsLayout({
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-7">
-      <div className="space-y-1.5">
-        <p className="text-brand text-xs font-medium uppercase tracking-[0.14em]">
-          {t("eyebrow")}
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {t("title")}
-        </h1>
-        <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
-          {t("subtitle")}
-        </p>
-      </div>
+      <PageHeader
+        description={t("subtitle")}
+        eyebrow={t("eyebrow")}
+        icon={<Settings2Icon />}
+        title={t("title")}
+      />
       <div className="grid min-w-0 items-start gap-6 md:grid-cols-[14rem_minmax(0,1fr)] lg:gap-10">
         <SettingsNav />
         <div className="min-w-0">{children}</div>

@@ -1,8 +1,24 @@
 import { issuerBusinesses } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { LandmarkIcon, RefreshCwIcon, Trash2Icon } from "lucide-react";
+import {
+  Building2Icon,
+  CircleDotDashedIcon,
+  ExternalLinkIcon,
+  LandmarkIcon,
+  LockKeyholeIcon,
+  RefreshCwIcon,
+  ShieldCheckIcon,
+  Trash2Icon,
+  ZapIcon,
+} from "lucide-react";
+import Image from "next/image";
 
-import { connectFio, disconnectFio, syncFio } from "@/actions/payments";
+import {
+  connectFio,
+  disconnectFio,
+  syncFio,
+  toggleFioAutoMatch,
+} from "@/actions/payments";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,30 +34,21 @@ import { Label } from "@/components/ui/label";
 import { requireWorkspace } from "@/lib/auth/session";
 import { listFioConnections } from "@/lib/payments/fio-service";
 import { isBankTokenEncryptionConfigured } from "@/lib/payments/token-crypto";
-import { and, asc, eq } from "drizzle-orm";
-
-type SearchParams = {
-  connected?: string;
-  disconnected?: string;
-  synced?: string;
-  imported?: string;
-  proposed?: string;
-  error?: string;
-};
+import { asc, eq } from "drizzle-orm";
 
 function issuerName(snapshot: Record<string, unknown>): string {
   return typeof snapshot.name === "string" ? snapshot.name : "Unnamed issuer";
 }
 
-export default async function BankConnectionsPage({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}) {
-  const [{ workspaceId, role }, params] = await Promise.all([
-    requireWorkspace(),
-    searchParams,
-  ]);
+const PLANNED_BANKS = [
+  { name: "Komerční banka", short: "KB", color: "bg-red-600 text-white" },
+  { name: "MONETA Money Bank", short: "M", color: "bg-teal-700 text-white" },
+  { name: "Česká spořitelna", short: "ČS", color: "bg-blue-700 text-white" },
+  { name: "ČSOB", short: "ČSOB", color: "bg-blue-900 text-white" },
+] as const;
+
+export default async function BankConnectionsPage() {
+  const { workspaceId, role } = await requireWorkspace();
   const [connections, issuers] = await Promise.all([
     listFioConnections(workspaceId),
     db
@@ -61,30 +68,31 @@ export default async function BankConnectionsPage({
         title="Bank connections"
       />
 
-      {params.error && params.error !== "NEXT_REDIRECT" ? (
-        <p className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border px-4 py-3 text-sm">
-          Connection error: {params.error.replaceAll("_", " ")}
-        </p>
-      ) : null}
-      {params.connected || params.synced || params.disconnected ? (
-        <p className="border-brand/20 bg-brand/5 rounded-lg border px-4 py-3 text-sm">
-          {params.connected
-            ? "Fio account connected."
-            : params.disconnected
-              ? "Fio access disconnected; imported ledger history was preserved."
-              : `Sync complete: ${params.imported ?? "0"} new transactions, ${params.proposed ?? "0"} proposals.`}
-        </p>
-      ) : null}
-
       {connections.map((connection) => (
-        <Card key={connection.id}>
-          <CardHeader>
+        <Card key={connection.id} className="overflow-hidden">
+          <CardHeader className="bg-muted/20 border-b">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <CardTitle>Fio banka</CardTitle>
-                <CardDescription className="mt-1 font-mono">
-                  {connection.accountNumber} · {connection.iban}
-                </CardDescription>
+              <div className="flex min-w-0 items-center gap-4">
+                <div className="shadow-xs flex h-14 w-36 shrink-0 items-center rounded-xl border bg-white px-3">
+                  <Image
+                    alt="Fio banka"
+                    src="/banks/fio.svg"
+                    width={180}
+                    height={64}
+                    className="h-auto w-full"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <CardTitle>Fio banka</CardTitle>
+                    <Badge variant="outline" className="gap-1">
+                      <LockKeyholeIcon className="size-3" /> Read-only
+                    </Badge>
+                  </div>
+                  <CardDescription className="mt-1 truncate font-mono">
+                    {connection.accountNumber} · {connection.iban}
+                  </CardDescription>
+                </div>
               </div>
               <Badge
                 variant={
@@ -95,15 +103,19 @@ export default async function BankConnectionsPage({
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <dl className="grid gap-3 text-sm sm:grid-cols-2">
-              <div>
-                <dt className="text-muted-foreground">Currency</dt>
-                <dd>{connection.currency}</dd>
+          <CardContent className="space-y-5 pt-5">
+            <dl className="grid gap-3 text-sm sm:grid-cols-3">
+              <div className="bg-muted/35 rounded-xl p-3">
+                <dt className="text-muted-foreground text-xs">
+                  Imported currency
+                </dt>
+                <dd className="mt-1 font-medium">{connection.currency}</dd>
               </div>
-              <div>
-                <dt className="text-muted-foreground">Last successful sync</dt>
-                <dd>
+              <div className="bg-muted/35 rounded-xl p-3 sm:col-span-2">
+                <dt className="text-muted-foreground text-xs">
+                  Last successful sync
+                </dt>
+                <dd className="mt-1 font-medium">
                   {connection.lastSyncSucceededAt?.toLocaleString("cs-CZ") ??
                     "Not synced yet"}
                 </dd>
@@ -114,6 +126,61 @@ export default async function BankConnectionsPage({
                 Last error: {connection.lastSyncErrorCode.replaceAll("_", " ")}
               </p>
             ) : null}
+            <div className="border-brand/15 bg-brand/[0.05] flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 gap-3">
+                <span className="bg-brand/10 text-brand flex size-10 shrink-0 items-center justify-center rounded-xl">
+                  <ZapIcon className="size-5" />
+                </span>
+                <div>
+                  <p className="font-medium">Automatic exact matching</p>
+                  <p className="text-muted-foreground mt-0.5 max-w-2xl text-sm leading-relaxed">
+                    When the receiving account, CZK currency, variable symbol,
+                    and full amount due all match exactly, mark the invoice paid
+                    and email you. Partial or ambiguous payments always wait for
+                    review.
+                  </p>
+                </div>
+              </div>
+              <form action={toggleFioAutoMatch} className="shrink-0">
+                <input
+                  type="hidden"
+                  name="connectionId"
+                  value={connection.id}
+                />
+                <input
+                  type="hidden"
+                  name="enabled"
+                  value={connection.autoConfirmExactMatches ? "false" : "true"}
+                />
+                <Button
+                  type="submit"
+                  variant={
+                    connection.autoConfirmExactMatches ? "default" : "outline"
+                  }
+                  disabled={!canManage || connection.status !== "active"}
+                  role="switch"
+                  aria-checked={connection.autoConfirmExactMatches}
+                >
+                  <span
+                    aria-hidden
+                    className={`relative h-5 w-9 rounded-full transition-colors ${
+                      connection.autoConfirmExactMatches
+                        ? "bg-primary-foreground/25"
+                        : "bg-muted-foreground/25"
+                    }`}
+                  >
+                    <span
+                      className={`bg-background absolute top-0.5 size-4 rounded-full shadow-sm transition-transform ${
+                        connection.autoConfirmExactMatches
+                          ? "translate-x-[18px]"
+                          : "translate-x-0.5"
+                      }`}
+                    />
+                  </span>
+                  {connection.autoConfirmExactMatches ? "On" : "Off"}
+                </Button>
+              </form>
+            </div>
             {canManage && connection.status === "active" ? (
               <div className="flex flex-wrap gap-2">
                 <form action={syncFio}>
@@ -145,8 +212,17 @@ export default async function BankConnectionsPage({
       {connections.some(
         (connection) => connection.status === "active",
       ) ? null : (
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader>
+            <div className="shadow-xs mb-2 flex h-14 w-36 items-center rounded-xl border bg-white px-3">
+              <Image
+                alt="Fio banka"
+                src="/banks/fio.svg"
+                width={180}
+                height={64}
+                className="h-auto w-full"
+              />
+            </div>
             <CardTitle>Connect Fio read-only API</CardTitle>
             <CardDescription>
               Create a read-only API token in Fio Internetbanking and paste it
@@ -201,6 +277,15 @@ export default async function BankConnectionsPage({
                     The connection belongs to this workspace. We never display
                     the token again and never request write access.
                   </p>
+                  <a
+                    className="text-brand inline-flex items-center gap-1 text-xs font-medium hover:underline"
+                    href="https://www.fio.cz/bank-services/internetbanking-api"
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    How to create a Fio API token
+                    <ExternalLinkIcon className="size-3" />
+                  </a>
                 </div>
                 <Button type="submit" disabled={!canManage}>
                   Connect and verify
@@ -215,6 +300,51 @@ export default async function BankConnectionsPage({
           </CardContent>
         </Card>
       )}
+
+      <section className="space-y-3">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h2 className="flex items-center gap-2 text-lg font-semibold">
+              <CircleDotDashedIcon className="text-muted-foreground size-5" />
+              More bank integrations
+            </h2>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Fio is the first provider. These connections are being evaluated
+              next.
+            </p>
+          </div>
+          <Badge variant="secondary">Planned</Badge>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {PLANNED_BANKS.map((bank) => (
+            <Card key={bank.name} className="border-dashed">
+              <CardContent className="flex items-center gap-3 p-4">
+                <span
+                  className={`flex size-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold ${bank.color}`}
+                >
+                  {bank.short}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{bank.name}</p>
+                  <p className="text-muted-foreground flex items-center gap-1 text-xs">
+                    <Building2Icon className="size-3" /> Coming later
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <div className="border-border/70 bg-muted/25 flex gap-3 rounded-2xl border p-4 text-sm">
+        <ShieldCheckIcon className="text-brand mt-0.5 size-5 shrink-0" />
+        <p className="text-muted-foreground leading-relaxed">
+          Connections belong to the current workspace, not your user account. A
+          user in multiple workspaces connects and configures each workspace
+          independently. Invoicey imports incoming transactions only; it cannot
+          send money.
+        </p>
+      </div>
     </div>
   );
 }

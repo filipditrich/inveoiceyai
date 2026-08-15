@@ -16,6 +16,7 @@ const DEFAULT_SYSTEM_ADDRESS = "noreply@invoicey.ditrich.me";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const SYSTEM_TEMPLATES = new Set<EmailTemplateId>([
+  "bank_payment_auto_matched",
   "new_sign_in",
   "workspace_invite",
 ]);

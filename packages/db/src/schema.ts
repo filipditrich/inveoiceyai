@@ -45,9 +45,30 @@ export const clients = pgTable(
      * dupes) before applying this index in production.
      */
     uniqueIndex("clients_workspace_ico_uidx")
-      .using("btree", t.workspaceId, sql`(${t.snapshot}->>'ico')`)
+      .using(
+        "btree",
+        t.workspaceId,
+        sql`regexp_replace(coalesce(${t.snapshot}->>'ico', ''), '\\D', '', 'g')`,
+      )
       .where(
-        sql`${t.snapshot}->>'ico' IS NOT NULL AND btrim(${t.snapshot}->>'ico') <> ''`,
+        sql`regexp_replace(coalesce(${t.snapshot}->>'ico', ''), '\\D', '', 'g') <> ''`,
+      ),
+    /**
+     * Concurrency backstop for clients created without IČO. Application-level
+     * resolution uses this same normalized legal-name + address identity.
+     */
+    uniqueIndex("clients_workspace_address_identity_uidx")
+      .using(
+        "btree",
+        t.workspaceId,
+        sql`lower(regexp_replace(btrim(coalesce(${t.snapshot}->>'name', '')), '\\s+', ' ', 'g'))`,
+        sql`lower(regexp_replace(btrim(coalesce(${t.snapshot}->'address'->>'street', '')), '\\s+', ' ', 'g'))`,
+        sql`lower(regexp_replace(btrim(coalesce(${t.snapshot}->'address'->>'city', '')), '\\s+', ' ', 'g'))`,
+        sql`lower(regexp_replace(btrim(coalesce(${t.snapshot}->'address'->>'zip', '')), '\\s+', '', 'g'))`,
+        sql`lower(btrim(coalesce(${t.snapshot}->'address'->>'country', '')))`,
+      )
+      .where(
+        sql`regexp_replace(coalesce(${t.snapshot}->>'ico', ''), '\\D', '', 'g') = '' AND btrim(coalesce(${t.snapshot}->>'name', '')) <> '' AND btrim(coalesce(${t.snapshot}->'address'->>'street', '')) <> '' AND btrim(coalesce(${t.snapshot}->'address'->>'city', '')) <> '' AND btrim(coalesce(${t.snapshot}->'address'->>'zip', '')) <> '' AND btrim(coalesce(${t.snapshot}->'address'->>'country', '')) <> ''`,
       ),
   ],
 );
@@ -354,6 +375,10 @@ export const bankConnections = pgTable(
     provider: text("provider").notNull(),
     status: text("status").notNull().default("active"),
     accessMode: text("access_mode").notNull().default("read"),
+    /** Opt-in: confirm only blocker-free, exact matcher proposals. */
+    autoConfirmExactMatches: boolean("auto_confirm_exact_matches")
+      .notNull()
+      .default(false),
     secretCiphertext: text("secret_ciphertext").notNull(),
     secretFingerprint: text("secret_fingerprint").notNull(),
     keyVersion: integer("key_version").notNull(),

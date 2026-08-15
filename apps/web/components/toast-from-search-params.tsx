@@ -13,6 +13,7 @@ const TOAST_KEYS = [
   "invoice_saved",
   "invoice_issued",
   "invoice_paid",
+  "invoice_unpaid",
   "invoice_cancelled",
   "invoice_deleted",
   "invoice_duplicated",
@@ -23,6 +24,15 @@ const TOAST_KEYS = [
   "recurring_skipped",
   "recurring_drafted",
   "recurring_deleted",
+  "payment_confirmed",
+  "payment_rejected",
+  "payment_added",
+  "payment_reversed",
+  "bank_connected",
+  "bank_disconnected",
+  "bank_synced",
+  "bank_auto_match_enabled",
+  "bank_auto_match_disabled",
   "platform_admin_granted",
   "platform_admin_revoked",
   "platform_admin_last",
@@ -31,27 +41,37 @@ const TOAST_KEYS = [
 
 type ToastKey = (typeof TOAST_KEYS)[number];
 
-function isToastKey(value: string): value is ToastKey {
-  return (TOAST_KEYS as readonly string[]).includes(value);
+function isToastKey(value: string | null): value is ToastKey {
+  return value !== null && (TOAST_KEYS as readonly string[]).includes(value);
 }
 
 function ToastFromSearchParamsInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const t = useTranslations("Toasts");
+  const descriptions = useTranslations("ToastDescriptions");
   const toastKey = searchParams.get("toast");
+  const error = searchParams.get("error");
   const mergeGroups = searchParams.get("groups");
   const mergeRemoved = searchParams.get("removed");
   const mergeRepointed = searchParams.get("repointed");
   const ok = searchParams.get("ok");
   const skipped = searchParams.get("skipped");
   const failed = searchParams.get("failed");
+  const imported = searchParams.get("imported");
+  const proposed = searchParams.get("proposed");
+  const autoMatched = searchParams.get("autoMatched");
 
   useEffect(() => {
-    if (!toastKey) {
+    if (!toastKey && !error) {
       return;
     }
-    if (toastKey === "clients_merged") {
+    if (error && error !== "NEXT_REDIRECT") {
+      toast.error(t("action_failed"), {
+        description: error.replaceAll("_", " "),
+        duration: 6500,
+      });
+    } else if (toastKey === "clients_merged") {
       toast.success(
         t("clients_merged", {
           groups: mergeGroups ?? "0",
@@ -71,31 +91,58 @@ function ToastFromSearchParamsInner() {
       toastKey === "platform_admin_last" ||
       toastKey === "platform_admin_failed"
     ) {
-      toast.error(t(toastKey));
+      toast.error(t(toastKey), { description: descriptions(toastKey) });
     } else if (isToastKey(toastKey)) {
-      toast.success(t(toastKey));
+      const detail =
+        toastKey === "bank_synced"
+          ? descriptions("bank_synced", {
+              imported: String(Number(imported) || 0),
+              proposed: String(Number(proposed) || 0),
+              autoMatched: String(Number(autoMatched) || 0),
+            })
+          : descriptions(toastKey);
+      const warningKeys: ToastKey[] = [
+        "invoice_unpaid",
+        "payment_rejected",
+        "payment_reversed",
+        "bank_disconnected",
+        "bank_auto_match_disabled",
+      ];
+      const notify = warningKeys.includes(toastKey)
+        ? toast.warning
+        : toast.success;
+      notify(t(toastKey), { description: detail, duration: 5000 });
     }
     const url = new URL(window.location.href);
     url.searchParams.delete("toast");
+    url.searchParams.delete("error");
     url.searchParams.delete("groups");
     url.searchParams.delete("removed");
     url.searchParams.delete("repointed");
     url.searchParams.delete("ok");
     url.searchParams.delete("skipped");
     url.searchParams.delete("failed");
+    url.searchParams.delete("imported");
+    url.searchParams.delete("proposed");
+    url.searchParams.delete("autoMatched");
     router.replace(`${url.pathname}${url.search}${url.hash}`, {
       scroll: false,
     });
   }, [
     toastKey,
+    error,
     mergeGroups,
     mergeRemoved,
     mergeRepointed,
     ok,
     skipped,
     failed,
+    imported,
+    proposed,
+    autoMatched,
     router,
     t,
+    descriptions,
   ]);
 
   return null;

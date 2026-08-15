@@ -74,5 +74,6 @@ later multibank adapter from using the same reconciliation model.
 
 - [Payment ledger and Fio specification](../specs/payment-ledger-fio.md)
 - [Payment ledger and bank integration research](../research/payment-ledger-bank-integration.md)
+  (includes 2026-08-15 Czech bank/fintech API matrix; further direct adapters deferred)
 - [Status engine](../domain/status-engine.md)
 - [Fio API technical documentation](https://www2.fio.cz/docs/cz/API_Bankovnictvi.pdf)

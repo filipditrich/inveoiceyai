@@ -6,16 +6,17 @@ const SPAYD_KEY_ORDER = [
   "AM",
   "CC",
   "RN",
+  "X-VS",
+  "X-SS",
+  "X-KS",
+  "PT",
   "MSG",
-  "VS",
-  "KS",
-  "SS",
-  "DT",
+  "X-SELF",
 ] as const;
 
-/** Escape asterisks inside SPAYD values per ČBA conventions. */
+/** Escape asterisks inside SPAYD values using the standard's URL encoding. */
 function escapeSpaydValue(raw: string): string {
-  return raw.replaceAll("*", "**");
+  return raw.replaceAll("*", "%2A");
 }
 
 function stripDiacritics(input: string): string {
@@ -29,6 +30,33 @@ function truncateAscii(input: string, maxLen: number): string {
     return plain;
   }
   return plain.slice(0, maxLen);
+}
+
+type PaymentMessageVariables = {
+  number: string;
+  client: string;
+  issuer: string;
+};
+
+function renderPaymentMessageTemplate(
+  template: string,
+  variables: PaymentMessageVariables,
+): string {
+  return template
+    .replaceAll("{number}", variables.number)
+    .replaceAll("{client}", variables.client)
+    .replaceAll("{issuer}", variables.issuer)
+    .replaceAll(/\s+/g, " ")
+    .trim();
+}
+
+function defaultPaymentMessageTemplate(
+  language: Invoice["meta"]["language"],
+  audience: "beneficiary" | "payer",
+): string {
+  const label = language === "en" ? "Invoice" : "Faktura";
+  const party = audience === "beneficiary" ? "{client}" : "{issuer}";
+  return `${label} {number} | ${party}`;
 }
 
 /** Build ČZ IBAN+BIC ACC field (+ separator when BIC present). */
@@ -76,28 +104,42 @@ export function buildSpaydPayload(invoice: Invoice): string | null {
   const amountStr = formatSpaydAmCz(invoice.totals.total);
   const acc = buildAcc(invoice.payment.bankAccount);
   const parts = new Map<string, string>();
+  const messageVariables: PaymentMessageVariables = {
+    number: invoice.meta.number,
+    client: invoice.client.name,
+    issuer: invoice.issuer.name,
+  };
+  const beneficiaryMessage = renderPaymentMessageTemplate(
+    invoice.issuer.paymentQr?.beneficiaryMessageTemplate ??
+      defaultPaymentMessageTemplate(invoice.meta.language, "beneficiary"),
+    messageVariables,
+  );
+  const payerNote = renderPaymentMessageTemplate(
+    invoice.issuer.paymentQr?.payerNoteTemplate ??
+      defaultPaymentMessageTemplate(invoice.meta.language, "payer"),
+    messageVariables,
+  );
 
   parts.set("ACC", escapeSpaydValue(acc));
   parts.set("AM", escapeSpaydValue(amountStr));
   parts.set("CC", escapeSpaydValue(invoice.meta.currency));
-  parts.set("RN", escapeSpaydValue(truncateAscii(invoice.issuer.name, 36)));
-  parts.set(
-    "MSG",
-    escapeSpaydValue(truncateAscii(`${invoice.meta.number}`.trim(), 40)),
-  );
+  parts.set("RN", escapeSpaydValue(truncateAscii(invoice.issuer.name, 35)));
+  parts.set("MSG", escapeSpaydValue(truncateAscii(beneficiaryMessage, 60)));
+  parts.set("X-SELF", escapeSpaydValue(truncateAscii(payerNote, 60)));
 
   if (invoice.payment.variableSymbol) {
-    parts.set("VS", escapeSpaydValue(invoice.payment.variableSymbol));
+    parts.set("X-VS", escapeSpaydValue(invoice.payment.variableSymbol));
   }
   if (invoice.payment.constantSymbol) {
-    parts.set("KS", escapeSpaydValue(invoice.payment.constantSymbol));
+    parts.set("X-KS", escapeSpaydValue(invoice.payment.constantSymbol));
   }
   if (invoice.payment.specificSymbol) {
-    parts.set("SS", escapeSpaydValue(invoice.payment.specificSymbol));
+    parts.set("X-SS", escapeSpaydValue(invoice.payment.specificSymbol));
   }
 
-  const due = invoice.meta.dueDate.replaceAll("-", "");
-  parts.set("DT", escapeSpaydValue(due));
+  // Request an immediate payment when supported. Intentionally omit DT: a
+  // future due date would instruct banking apps to schedule the transfer.
+  parts.set("PT", "IP");
 
   let out = "SPD*1.0*";
   const segments: string[] = [];

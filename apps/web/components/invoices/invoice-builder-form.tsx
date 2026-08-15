@@ -5,6 +5,7 @@ import {
   issueInvoice,
   saveInvoiceDraft,
 } from "@/actions/invoices";
+import { createClientFromAres } from "@/actions/clients";
 import {
   collectFormErrorMessages,
   Field,
@@ -42,7 +43,24 @@ import { cn } from "@/lib/utils";
 import { nextInvoiceNumber } from "@invoicey/invoice-core/numbering";
 import type { Invoice } from "@invoicey/invoice-core/schema";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
-import { PlusIcon, Trash2Icon } from "lucide-react";
+import {
+  BookOpenIcon,
+  Building2Icon,
+  CalendarDaysIcon,
+  ExternalLinkIcon,
+  FileCheck2Icon,
+  FileTextIcon,
+  ListChecksIcon,
+  MessageSquareTextIcon,
+  PercentIcon,
+  PlusIcon,
+  SearchIcon,
+  SaveIcon,
+  Settings2Icon,
+  Trash2Icon,
+  UserPlusIcon,
+} from "lucide-react";
+import Link from "next/link";
 import * as React from "react";
 import {
   useFieldArray,
@@ -116,12 +134,14 @@ function defaultLineVatRate(vatPayer: boolean): number {
 function FormSection({
   title,
   description,
+  icon,
   action,
   children,
   footer,
 }: {
   title: string;
   description?: string;
+  icon?: React.ReactNode;
   action?: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
@@ -130,11 +150,18 @@ function FormSection({
     <Card>
       <CardHeader className={description ? "border-b" : undefined}>
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1">
-            <CardTitle>{title}</CardTitle>
-            {description ? (
-              <CardDescription>{description}</CardDescription>
+          <div className="flex min-w-0 items-start gap-3">
+            {icon ? (
+              <span className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg [&_svg]:size-4">
+                {icon}
+              </span>
             ) : null}
+            <div className="space-y-1">
+              <CardTitle>{title}</CardTitle>
+              {description ? (
+                <CardDescription>{description}</CardDescription>
+              ) : null}
+            </div>
           </div>
           {action}
         </div>
@@ -189,6 +216,7 @@ export function InvoiceBuilderForm({
 }: InvoiceBuilderFormProps) {
   const t = useTranslations("Invoices.builder");
   const tErr = useTranslations("Errors.invalid");
+  const tAres = useTranslations("Issuers.ares");
   const locale = useLocale() as AppLocale;
   const schema = React.useMemo(
     () => createBuilderFormSchema((key) => t(key as never)),
@@ -266,9 +294,18 @@ export function InvoiceBuilderForm({
   });
   const [lastInvoice, setLastInvoice] =
     React.useState<LastInvoiceSuggestions | null>(initialLastInvoice);
+  const [clientOptions, setClientOptions] =
+    React.useState<ClientOption[]>(clients);
+  const [clientIco, setClientIco] = React.useState("");
+  const [clientLookupMessage, setClientLookupMessage] = React.useState<
+    string | null
+  >(null);
+  const [clientLookupError, setClientLookupError] = React.useState(false);
+  const [addingClient, setAddingClient] = React.useState(false);
   const skipLastFetchRef = React.useRef(true);
 
   const selectedIssuer = issuers.find((i) => i.id === watched.issuerId);
+  const selectedClient = clientOptions.find((i) => i.id === watched.clientId);
   const issuerVatPayer = selectedIssuer?.snapshot.vatPayer ?? true;
   const hideRatePicker =
     !issuerVatPayer || watched.vatMode === "reverse_charge";
@@ -290,6 +327,12 @@ export function InvoiceBuilderForm({
     if (watched.vatMode !== "regular") {
       form.setValue("vatMode", "regular");
     }
+    if (watched.suppliesAbroad !== "none") {
+      form.setValue("suppliesAbroad", "none");
+    }
+    if (watched.pricesIncludeVat) {
+      form.setValue("pricesIncludeVat", false);
+    }
     const items = form.getValues("items");
     let changed = false;
     const next = items.map((it) => {
@@ -303,7 +346,14 @@ export function InvoiceBuilderForm({
       form.setValue("items", next);
       setCustomVatRateLines({});
     }
-  }, [watched.issuerId, issuers, form, watched.vatMode]);
+  }, [
+    watched.issuerId,
+    issuers,
+    form,
+    watched.vatMode,
+    watched.suppliesAbroad,
+    watched.pricesIncludeVat,
+  ]);
 
   /** reverse_charge: zero line rates */
   React.useEffect(() => {
@@ -382,21 +432,26 @@ export function InvoiceBuilderForm({
       if (items.length === 0) {
         return;
       }
-      replace(items);
+      const nextItems = issuerVatPayer
+        ? items
+        : items.map((item) => ({ ...item, vatRate: 0 }));
+      replace(nextItems);
       const custom: Record<number, boolean> = {};
-      items.forEach((it, idx) => {
+      nextItems.forEach((it, idx) => {
         if (!isStandardVatRate(Number(it.vatRate))) {
           custom[idx] = true;
         }
       });
       setCustomVatRateLines(custom);
     },
-    [replace],
+    [issuerVatPayer, replace],
   );
 
   const previewBuild = React.useMemo(() => {
     const issuer = issuers.find((i) => i.id === watched.issuerId)?.snapshot;
-    const client = clients.find((c) => c.id === watched.clientId)?.snapshot;
+    const client = clientOptions.find(
+      (c) => c.id === watched.clientId,
+    )?.snapshot;
     if (!issuer || !client) {
       return { invoice: null as Invoice | null, error: null as string | null };
     }
@@ -435,7 +490,7 @@ export function InvoiceBuilderForm({
     return { invoice: built.invoice, error: null };
   }, [
     issuers,
-    clients,
+    clientOptions,
     numberPreview,
     watched.issuerId,
     watched.clientId,
@@ -512,7 +567,9 @@ export function InvoiceBuilderForm({
 
   const totalsPreview = React.useMemo(() => {
     const issuer = issuers.find((i) => i.id === watched.issuerId)?.snapshot;
-    const client = clients.find((c) => c.id === watched.clientId)?.snapshot;
+    const client = clientOptions.find(
+      (c) => c.id === watched.clientId,
+    )?.snapshot;
     if (!issuer || !client) {
       return null;
     }
@@ -540,7 +597,7 @@ export function InvoiceBuilderForm({
       })),
     });
     return built.ok ? built.invoice.totals : null;
-  }, [watched, issuers, clients]);
+  }, [watched, issuers, clientOptions]);
 
   async function submit(action: "draft" | "issue") {
     if (submitting) {
@@ -611,26 +668,51 @@ export function InvoiceBuilderForm({
     }
   }
 
-  if (issuers.length === 0 || clients.length === 0) {
+  async function addClientFromAres() {
+    if (addingClient) {
+      return;
+    }
+    setClientLookupMessage(null);
+    setClientLookupError(false);
+    setAddingClient(true);
+    try {
+      const result = await createClientFromAres(clientIco);
+      if (!result.ok) {
+        setClientLookupError(true);
+        setClientLookupMessage(tAres(result.code));
+        return;
+      }
+      setClientOptions((current) =>
+        [
+          ...current.filter((item) => item.id !== result.client.id),
+          result.client,
+        ].toSorted((a, b) =>
+          a.snapshot.name.localeCompare(b.snapshot.name, "cs"),
+        ),
+      );
+      form.setValue("clientId", result.client.id, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      setClientIco(result.client.snapshot.ico ?? clientIco);
+      setClientLookupMessage(
+        result.existing
+          ? t("clientSelected", { name: result.client.snapshot.name })
+          : t("clientCreated", { name: result.client.snapshot.name }),
+      );
+    } finally {
+      setAddingClient(false);
+    }
+  }
+
+  if (issuers.length === 0) {
     return (
       <p className="text-muted-foreground text-sm">
         {t.rich("missingParties", {
           entities: () => (
-            <>
-              {issuers.length === 0 ? (
-                <a className="underline" href="/issuers/new">
-                  {t("missingIssuer")}
-                </a>
-              ) : null}
-              {issuers.length === 0 && clients.length === 0
-                ? t("missingAnd")
-                : null}
-              {clients.length === 0 ? (
-                <a className="underline" href="/clients/new">
-                  {t("missingClient")}
-                </a>
-              ) : null}
-            </>
+            <a className="underline" href="/issuers/new">
+              {t("missingIssuer")}
+            </a>
           ),
         })}
       </p>
@@ -681,7 +763,7 @@ export function InvoiceBuilderForm({
   ];
 
   return (
-    <div className="grid gap-8 xl:grid-cols-2">
+    <div className="grid items-start gap-8 xl:grid-cols-2">
       <form
         className="space-y-5"
         onSubmit={(e) => {
@@ -703,56 +785,207 @@ export function InvoiceBuilderForm({
         ) : null}
 
         <FormSection
+          action={
+            <Button
+              render={<Link href="/docs/domain/snapshots" prefetch />}
+              size="sm"
+              variant="ghost"
+            >
+              <BookOpenIcon />
+              {t("partyDocs")}
+            </Button>
+          }
           description={t("sectionPartiesDescription")}
+          icon={<Building2Icon />}
           title={t("sectionParties")}
         >
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field
-              description={t("issuerDescription")}
-              error={fieldError(errors, "issuerId")}
-              label={t("issuer")}
-            >
-              <select
-                aria-invalid={Boolean(fieldError(errors, "issuerId"))}
-                className={selectClassName(
-                  Boolean(fieldError(errors, "issuerId")),
-                )}
-                {...form.register("issuerId")}
+            <div className="space-y-3">
+              <Field
+                description={t("issuerDescription")}
+                error={fieldError(errors, "issuerId")}
+                label={t("issuer")}
               >
-                {issuers.map((i) => (
-                  <option key={i.id} value={i.id}>
-                    {i.snapshot.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field
-              description={t("clientDescription")}
-              error={fieldError(errors, "clientId")}
-              label={t("client")}
-            >
-              <select
-                aria-invalid={Boolean(fieldError(errors, "clientId"))}
-                className={selectClassName(
-                  Boolean(fieldError(errors, "clientId")),
-                )}
-                {...form.register("clientId")}
+                <select
+                  aria-invalid={Boolean(fieldError(errors, "issuerId"))}
+                  className={selectClassName(
+                    Boolean(fieldError(errors, "issuerId")),
+                  )}
+                  {...form.register("issuerId")}
+                >
+                  {issuers.map((i) => (
+                    <option key={i.id} value={i.id}>
+                      {i.snapshot.name}
+                      {i.snapshot.ico
+                        ? t("icoSuffix", { ico: i.snapshot.ico })
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              {selectedIssuer ? (
+                <div className="bg-muted/30 rounded-md border px-3 py-2 text-xs">
+                  <p className="font-medium">{selectedIssuer.snapshot.name}</p>
+                  <p className="text-muted-foreground mt-0.5">
+                    {t("partyIdentifiers", {
+                      ico: selectedIssuer.snapshot.ico ?? t("notSet"),
+                      dic: selectedIssuer.snapshot.dic ?? t("notSet"),
+                    })}
+                  </p>
+                </div>
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                {selectedIssuer ? (
+                  <Button
+                    render={
+                      <Link
+                        href={`/issuers/${selectedIssuer.id}/edit/identity`}
+                        prefetch
+                      />
+                    }
+                    size="sm"
+                    variant="outline"
+                  >
+                    <Settings2Icon />
+                    {t("configureIssuer")}
+                  </Button>
+                ) : null}
+                <Button
+                  render={<Link href="/issuers/new" prefetch />}
+                  size="sm"
+                  variant="ghost"
+                >
+                  <PlusIcon />
+                  {t("addIssuer")}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Field
+                description={t("clientDescription")}
+                error={fieldError(errors, "clientId")}
+                label={t("client")}
               >
-                {clients.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.snapshot.name}
-                    {c.snapshot.ico
-                      ? t("icoSuffix", { ico: c.snapshot.ico })
-                      : ""}
+                <select
+                  aria-invalid={Boolean(fieldError(errors, "clientId"))}
+                  className={selectClassName(
+                    Boolean(fieldError(errors, "clientId")),
+                  )}
+                  {...form.register("clientId")}
+                >
+                  <option disabled value="">
+                    {t("selectClient")}
                   </option>
-                ))}
-              </select>
-            </Field>
+                  {clientOptions.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.snapshot.name}
+                      {c.snapshot.ico
+                        ? t("icoSuffix", { ico: c.snapshot.ico })
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              {selectedClient ? (
+                <div className="bg-muted/30 rounded-md border px-3 py-2 text-xs">
+                  <p className="font-medium">{selectedClient.snapshot.name}</p>
+                  <p className="text-muted-foreground mt-0.5">
+                    {t("partyIdentifiers", {
+                      ico: selectedClient.snapshot.ico ?? t("notSet"),
+                      dic: selectedClient.snapshot.dic ?? t("notSet"),
+                    })}
+                  </p>
+                </div>
+              ) : null}
+              <Button
+                render={<Link href="/clients/new" prefetch />}
+                size="sm"
+                variant="ghost"
+              >
+                <UserPlusIcon />
+                {t("addClientManually")}
+              </Button>
+            </div>
+
+            <div className="bg-muted/20 space-y-3 rounded-lg border p-4 sm:col-span-2">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <span className="bg-background flex size-8 shrink-0 items-center justify-center rounded-md border">
+                    <SearchIcon className="size-4" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium">
+                      {t("quickClientTitle")}
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      {t("quickClientDescription")}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  render={
+                    <a
+                      href="https://ares.gov.cz/ekonomicke-subjekty"
+                      rel="noreferrer"
+                      target="_blank"
+                    />
+                  }
+                  size="sm"
+                  variant="ghost"
+                >
+                  {t("openAres")}
+                  <ExternalLinkIcon />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Input
+                  aria-invalid={clientLookupError}
+                  className="max-w-48"
+                  inputMode="numeric"
+                  maxLength={8}
+                  onChange={(event) => setClientIco(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      void addClientFromAres();
+                    }
+                  }}
+                  pattern="\d{0,8}"
+                  placeholder={t("clientIcoPlaceholder")}
+                  value={clientIco}
+                />
+                <Button
+                  disabled={addingClient}
+                  loading={addingClient}
+                  onClick={() => void addClientFromAres()}
+                  type="button"
+                  variant="secondary"
+                >
+                  <UserPlusIcon />
+                  {addingClient ? t("addingClient") : t("addClientFromAres")}
+                </Button>
+              </div>
+              {clientLookupMessage ? (
+                <p
+                  className={cn(
+                    "text-xs",
+                    clientLookupError
+                      ? "text-destructive"
+                      : "text-muted-foreground",
+                  )}
+                  role={clientLookupError ? "alert" : "status"}
+                >
+                  {clientLookupMessage}
+                </p>
+              ) : null}
+            </div>
           </div>
         </FormSection>
 
         <FormSection
           description={t("sectionDocumentDescription")}
+          icon={<FileTextIcon />}
           title={t("sectionDocument")}
         >
           <div className="grid gap-4 sm:grid-cols-2">
@@ -854,6 +1087,7 @@ export function InvoiceBuilderForm({
 
         <FormSection
           description={t("sectionDatesDescription")}
+          icon={<CalendarDaysIcon />}
           title={t("sectionDates")}
         >
           <div className="grid gap-4 sm:grid-cols-3">
@@ -907,161 +1141,191 @@ export function InvoiceBuilderForm({
         </FormSection>
 
         <FormSection
+          action={
+            <Button
+              render={<Link href="/docs/domain/vat-czech" prefetch />}
+              size="sm"
+              variant="ghost"
+            >
+              <BookOpenIcon />
+              {t("vatGuide")}
+            </Button>
+          }
           description={t("sectionVatDescription")}
+          icon={<PercentIcon />}
           title={t("sectionVat")}
         >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field
-              description={t("vatModeDescription")}
-              error={fieldError(errors, "vatMode")}
-              label={t("vatMode")}
-              suggestion={
-                lastInvoice &&
-                issuerVatPayer &&
-                lastInvoice.vatMode !== watched.vatMode ? (
-                  <LastValueHint
-                    value={lastVatModeLabel(lastInvoice.vatMode)}
-                    onApply={() => {
-                      if (lastInvoice.vatMode === "oss") {
-                        setShowAdvancedVat(true);
-                      }
-                      form.setValue("vatMode", lastInvoice.vatMode);
-                    }}
-                  />
-                ) : undefined
-              }
-            >
-              <select
-                className={selectClassName()}
-                disabled={!issuerVatPayer}
-                {...form.register("vatMode")}
+          {issuerVatPayer ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field
+                description={t("vatModeDescription")}
+                error={fieldError(errors, "vatMode")}
+                label={t("vatMode")}
+                suggestion={
+                  lastInvoice &&
+                  issuerVatPayer &&
+                  lastInvoice.vatMode !== watched.vatMode ? (
+                    <LastValueHint
+                      value={lastVatModeLabel(lastInvoice.vatMode)}
+                      onApply={() => {
+                        if (lastInvoice.vatMode === "oss") {
+                          setShowAdvancedVat(true);
+                        }
+                        form.setValue("vatMode", lastInvoice.vatMode);
+                      }}
+                    />
+                  ) : undefined
+                }
               >
-                <option value="regular">
-                  {issuerVatPayer ? t("vatRegularPayer") : t("vatNonPayer")}
-                </option>
-                {issuerVatPayer ? (
-                  <option value="reverse_charge">
-                    {t("vatReverseCharge")}
+                <select
+                  className={selectClassName()}
+                  disabled={!issuerVatPayer}
+                  {...form.register("vatMode")}
+                >
+                  <option value="regular">
+                    {issuerVatPayer ? t("vatRegularPayer") : t("vatNonPayer")}
                   </option>
+                  {issuerVatPayer ? (
+                    <option value="reverse_charge">
+                      {t("vatReverseCharge")}
+                    </option>
+                  ) : null}
+                  {issuerVatPayer && showAdvancedVat ? (
+                    <option value="oss">{t("vatOss")}</option>
+                  ) : null}
+                </select>
+                {issuerVatPayer ? (
+                  <label className="text-muted-foreground flex items-center gap-2 text-xs">
+                    <input
+                      checked={showAdvancedVat}
+                      onChange={(ev) => {
+                        setShowAdvancedVat(ev.target.checked);
+                        if (!ev.target.checked && watched.vatMode === "oss") {
+                          form.setValue("vatMode", "regular");
+                        }
+                      }}
+                      type="checkbox"
+                    />
+                    {t("vatAdvanced")}
+                  </label>
                 ) : null}
-                {issuerVatPayer && showAdvancedVat ? (
-                  <option value="oss">{t("vatOss")}</option>
-                ) : null}
-              </select>
-              {issuerVatPayer ? (
-                <label className="text-muted-foreground flex items-center gap-2 text-xs">
-                  <input
-                    checked={showAdvancedVat}
-                    onChange={(ev) => {
-                      setShowAdvancedVat(ev.target.checked);
-                      if (!ev.target.checked && watched.vatMode === "oss") {
-                        form.setValue("vatMode", "regular");
+              </Field>
+              <Field
+                description={t("suppliesAbroadDescription")}
+                error={fieldError(errors, "suppliesAbroad")}
+                label={t("suppliesAbroad")}
+                suggestion={
+                  lastInvoice &&
+                  lastInvoice.suppliesAbroad !== watched.suppliesAbroad ? (
+                    <LastValueHint
+                      value={lastSuppliesLabel(lastInvoice.suppliesAbroad)}
+                      onApply={() =>
+                        form.setValue(
+                          "suppliesAbroad",
+                          lastInvoice.suppliesAbroad,
+                        )
                       }
-                    }}
-                    type="checkbox"
-                  />
-                  {t("vatAdvanced")}
-                </label>
-              ) : null}
-            </Field>
-            <Field
-              description={t("suppliesAbroadDescription")}
-              error={fieldError(errors, "suppliesAbroad")}
-              label={t("suppliesAbroad")}
-              suggestion={
-                lastInvoice &&
-                lastInvoice.suppliesAbroad !== watched.suppliesAbroad ? (
-                  <LastValueHint
-                    value={lastSuppliesLabel(lastInvoice.suppliesAbroad)}
-                    onApply={() =>
-                      form.setValue(
-                        "suppliesAbroad",
-                        lastInvoice.suppliesAbroad,
-                      )
-                    }
-                  />
-                ) : undefined
-              }
-            >
-              <select
-                className={selectClassName()}
-                {...form.register("suppliesAbroad")}
+                    />
+                  ) : undefined
+                }
               >
-                <option value="none">{t("suppliesNone")}</option>
-                <option value="eu">{t("suppliesEu")}</option>
-                <option value="non_eu">{t("suppliesNonEu")}</option>
-              </select>
-            </Field>
-            {watched.vatMode === "reverse_charge" ? (
-              <>
-                <Field
-                  description={t("legalNoteDescription")}
-                  error={fieldError(errors, "legalNote")}
-                  label={t("legalNote")}
-                  suggestion={
-                    lastInvoice?.legalNote &&
-                    lastInvoice.legalNote !== (watched.legalNote ?? "") ? (
-                      <LastValueHint
-                        value={truncateHint(lastInvoice.legalNote)}
-                        onApply={() =>
-                          form.setValue(
-                            "legalNote",
-                            lastInvoice.legalNote ?? "",
-                          )
-                        }
-                      />
-                    ) : undefined
-                  }
+                <select
+                  className={selectClassName()}
+                  {...form.register("suppliesAbroad")}
                 >
-                  <Input
-                    placeholder={t("legalNotePlaceholder")}
-                    {...form.register("legalNote")}
-                  />
-                </Field>
-                <Field
-                  description={t("reverseChargeCodeDescription")}
-                  error={fieldError(errors, "localReverseChargeCode")}
-                  label={t("reverseChargeCode")}
-                  suggestion={
-                    lastInvoice?.localReverseChargeCode &&
-                    lastInvoice.localReverseChargeCode !==
-                      (watched.localReverseChargeCode ?? "") ? (
-                      <LastValueHint
-                        value={lastInvoice.localReverseChargeCode}
-                        onApply={() =>
-                          form.setValue(
-                            "localReverseChargeCode",
-                            lastInvoice.localReverseChargeCode ?? "",
-                          )
-                        }
-                      />
-                    ) : undefined
-                  }
-                >
-                  <Input
-                    placeholder={t("reverseChargeCodePlaceholder")}
-                    {...form.register("localReverseChargeCode")}
-                  />
-                </Field>
-              </>
-            ) : null}
-          </div>
+                  <option value="none">{t("suppliesNone")}</option>
+                  <option value="eu">{t("suppliesEu")}</option>
+                  <option value="non_eu">{t("suppliesNonEu")}</option>
+                </select>
+              </Field>
+              {watched.vatMode === "reverse_charge" ? (
+                <>
+                  <Field
+                    description={t("legalNoteDescription")}
+                    error={fieldError(errors, "legalNote")}
+                    label={t("legalNote")}
+                    suggestion={
+                      lastInvoice?.legalNote &&
+                      lastInvoice.legalNote !== (watched.legalNote ?? "") ? (
+                        <LastValueHint
+                          value={truncateHint(lastInvoice.legalNote)}
+                          onApply={() =>
+                            form.setValue(
+                              "legalNote",
+                              lastInvoice.legalNote ?? "",
+                            )
+                          }
+                        />
+                      ) : undefined
+                    }
+                  >
+                    <Input
+                      placeholder={t("legalNotePlaceholder")}
+                      {...form.register("legalNote")}
+                    />
+                  </Field>
+                  <Field
+                    description={t("reverseChargeCodeDescription")}
+                    error={fieldError(errors, "localReverseChargeCode")}
+                    label={t("reverseChargeCode")}
+                    suggestion={
+                      lastInvoice?.localReverseChargeCode &&
+                      lastInvoice.localReverseChargeCode !==
+                        (watched.localReverseChargeCode ?? "") ? (
+                        <LastValueHint
+                          value={lastInvoice.localReverseChargeCode}
+                          onApply={() =>
+                            form.setValue(
+                              "localReverseChargeCode",
+                              lastInvoice.localReverseChargeCode ?? "",
+                            )
+                          }
+                        />
+                      ) : undefined
+                    }
+                  >
+                    <Input
+                      placeholder={t("reverseChargeCodePlaceholder")}
+                      {...form.register("localReverseChargeCode")}
+                    />
+                  </Field>
+                </>
+              ) : null}
+            </div>
+          ) : (
+            <div className="bg-muted/30 flex items-start gap-3 rounded-lg border p-4">
+              <span className="bg-background flex size-8 shrink-0 items-center justify-center rounded-md border">
+                <PercentIcon className="size-4" />
+              </span>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">{t("nonVatPayerTitle")}</p>
+                <p className="text-muted-foreground text-xs">
+                  {t("nonVatPayerDescription")}
+                </p>
+              </div>
+            </div>
+          )}
         </FormSection>
 
         <FormSection
           action={
             <div className="flex flex-wrap items-center gap-2">
-              <select
-                aria-label={t("pricesModeAria")}
-                className={selectClassName()}
-                onChange={(ev) => {
-                  form.setValue("pricesIncludeVat", ev.target.value === "incl");
-                }}
-                value={watched.pricesIncludeVat ? "incl" : "excl"}
-              >
-                <option value="excl">{t("pricesExcl")}</option>
-                <option value="incl">{t("pricesIncl")}</option>
-              </select>
+              {issuerVatPayer ? (
+                <select
+                  aria-label={t("pricesModeAria")}
+                  className={selectClassName()}
+                  onChange={(ev) => {
+                    form.setValue(
+                      "pricesIncludeVat",
+                      ev.target.value === "incl",
+                    );
+                  }}
+                  value={watched.pricesIncludeVat ? "incl" : "excl"}
+                >
+                  <option value="excl">{t("pricesExcl")}</option>
+                  <option value="incl">{t("pricesIncl")}</option>
+                </select>
+              ) : null}
               {lastInvoice && lastInvoice.items.length > 0 ? (
                 <Button
                   onClick={() => applyLastLines(lastInvoice.items)}
@@ -1094,25 +1358,36 @@ export function InvoiceBuilderForm({
             </div>
           }
           description={
-            watched.pricesIncludeVat
-              ? t("itemsDescriptionIncl")
-              : t("itemsDescription")
+            !issuerVatPayer
+              ? t("itemsDescriptionNonPayer")
+              : watched.pricesIncludeVat
+                ? t("itemsDescriptionIncl")
+                : t("itemsDescription")
           }
+          icon={<ListChecksIcon />}
           footer={
             totalsPreview ? (
               <p className="text-sm font-medium tabular-nums">
-                {t("totalLine", {
-                  total: formatMoney(
-                    totalsPreview.total,
-                    watched.currency,
-                    locale,
-                  ),
-                  vat: formatMoney(
-                    totalsPreview.vatTotal,
-                    watched.currency,
-                    locale,
-                  ),
-                })}
+                {issuerVatPayer
+                  ? t("totalLine", {
+                      total: formatMoney(
+                        totalsPreview.total,
+                        watched.currency,
+                        locale,
+                      ),
+                      vat: formatMoney(
+                        totalsPreview.vatTotal,
+                        watched.currency,
+                        locale,
+                      ),
+                    })
+                  : t("totalLineNoVat", {
+                      total: formatMoney(
+                        totalsPreview.total,
+                        watched.currency,
+                        locale,
+                      ),
+                    })}
               </p>
             ) : undefined
           }
@@ -1196,7 +1471,12 @@ export function InvoiceBuilderForm({
                       {...form.register(`items.${index}.description`)}
                     />
                   </Field>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <div
+                    className={cn(
+                      "grid gap-3 sm:grid-cols-2",
+                      issuerVatPayer ? "lg:grid-cols-4" : "lg:grid-cols-3",
+                    )}
+                  >
                     <Field
                       error={qtyErr}
                       label={t("itemQuantity")}
@@ -1257,9 +1537,11 @@ export function InvoiceBuilderForm({
                         `items.${index}.unitPriceWithoutVat` as FieldPath<BuilderFormValues>,
                       )}
                       label={
-                        watched.pricesIncludeVat
-                          ? t("itemPriceIncl")
-                          : t("itemPriceExcl")
+                        !issuerVatPayer
+                          ? t("itemPrice")
+                          : watched.pricesIncludeVat
+                            ? t("itemPriceIncl")
+                            : t("itemPriceExcl")
                       }
                       suggestion={
                         lastLine &&
@@ -1283,9 +1565,11 @@ export function InvoiceBuilderForm({
                     >
                       <Input
                         placeholder={
-                          watched.pricesIncludeVat
-                            ? t("priceInclPlaceholder")
-                            : t("pricePlaceholder")
+                          !issuerVatPayer
+                            ? t("priceSimplePlaceholder")
+                            : watched.pricesIncludeVat
+                              ? t("priceInclPlaceholder")
+                              : t("pricePlaceholder")
                         }
                         step="any"
                         type="number"
@@ -1295,97 +1579,103 @@ export function InvoiceBuilderForm({
                         )}
                       />
                     </Field>
-                    <Field
-                      error={fieldError(
-                        errors,
-                        `items.${index}.vatRate` as FieldPath<BuilderFormValues>,
-                      )}
-                      label={t("itemVat")}
-                      suggestion={
-                        !hideRatePicker &&
-                        lastLine &&
-                        lastLine.vatRate !== rate ? (
-                          <LastValueHint
-                            value={`${lastLine.vatRate} %`}
-                            onApply={() => {
-                              if (!isStandardVatRate(lastLine.vatRate)) {
+                    {issuerVatPayer ? (
+                      <Field
+                        error={fieldError(
+                          errors,
+                          `items.${index}.vatRate` as FieldPath<BuilderFormValues>,
+                        )}
+                        label={t("itemVat")}
+                        suggestion={
+                          !hideRatePicker &&
+                          lastLine &&
+                          lastLine.vatRate !== rate ? (
+                            <LastValueHint
+                              value={`${lastLine.vatRate} %`}
+                              onApply={() => {
+                                if (!isStandardVatRate(lastLine.vatRate)) {
+                                  setCustomVatRateLines((prev) => ({
+                                    ...prev,
+                                    [index]: true,
+                                  }));
+                                } else {
+                                  setCustomVatRateLines((prev) => {
+                                    const next = { ...prev };
+                                    delete next[index];
+                                    return next;
+                                  });
+                                }
+                                form.setValue(
+                                  `items.${index}.vatRate`,
+                                  lastLine.vatRate,
+                                  { shouldValidate: true },
+                                );
+                              }}
+                            />
+                          ) : undefined
+                        }
+                      >
+                        {hideRatePicker ? (
+                          <Input disabled readOnly value="0 %" />
+                        ) : (
+                          <select
+                            className={selectClassName()}
+                            onChange={(ev) => {
+                              const v = ev.target.value;
+                              if (v === "other") {
                                 setCustomVatRateLines((prev) => ({
                                   ...prev,
                                   [index]: true,
                                 }));
-                              } else {
-                                setCustomVatRateLines((prev) => {
-                                  const next = { ...prev };
-                                  delete next[index];
-                                  return next;
-                                });
+                                return;
                               }
+                              setCustomVatRateLines((prev) => {
+                                const next = { ...prev };
+                                delete next[index];
+                                return next;
+                              });
                               form.setValue(
                                 `items.${index}.vatRate`,
-                                lastLine.vatRate,
-                                { shouldValidate: true },
+                                Number(v),
+                                {
+                                  shouldValidate: true,
+                                },
                               );
                             }}
-                          />
-                        ) : undefined
-                      }
-                    >
-                      {hideRatePicker ? (
-                        <Input disabled readOnly value="0 %" />
-                      ) : (
-                        <select
-                          className={selectClassName()}
-                          onChange={(ev) => {
-                            const v = ev.target.value;
-                            if (v === "other") {
-                              setCustomVatRateLines((prev) => ({
-                                ...prev,
-                                [index]: true,
-                              }));
-                              return;
+                            value={
+                              showCustomRate
+                                ? "other"
+                                : String(isStandardVatRate(rate) ? rate : 21)
                             }
-                            setCustomVatRateLines((prev) => {
-                              const next = { ...prev };
-                              delete next[index];
-                              return next;
-                            });
-                            form.setValue(`items.${index}.vatRate`, Number(v), {
-                              shouldValidate: true,
-                            });
-                          }}
-                          value={
-                            showCustomRate
-                              ? "other"
-                              : String(isStandardVatRate(rate) ? rate : 21)
-                          }
-                        >
-                          <option value="0">0 %</option>
-                          <option value="12">12 %</option>
-                          <option value="21">21 %</option>
-                          <option value="other">{t("vatOther")}</option>
-                        </select>
-                      )}
-                      {hideRatePicker || !showCustomRate ? (
-                        <input
-                          type="hidden"
-                          {...form.register(`items.${index}.vatRate`, {
-                            valueAsNumber: true,
-                          })}
-                        />
-                      ) : (
-                        <Input
-                          aria-label={t("itemVatCustomAria", {
-                            n: String(index + 1),
-                          })}
-                          placeholder="%"
-                          step="1"
-                          type="number"
-                          {...form.register(`items.${index}.vatRate`, {
-                            valueAsNumber: true,
-                          })}
-                        />
-                      )}
-                    </Field>
+                          >
+                            <option value="0">0 %</option>
+                            <option value="12">12 %</option>
+                            <option value="21">21 %</option>
+                            <option value="other">{t("vatOther")}</option>
+                          </select>
+                        )}
+                        {hideRatePicker || !showCustomRate ? (
+                          <input
+                            type="hidden"
+                            {...form.register(`items.${index}.vatRate`, {
+                              valueAsNumber: true,
+                            })}
+                          />
+                        ) : (
+                          <Input
+                            aria-label={t("itemVatCustomAria", {
+                              n: String(index + 1),
+                            })}
+                            placeholder="%"
+                            step="1"
+                            type="number"
+                            {...form.register(`items.${index}.vatRate`, {
+                              valueAsNumber: true,
+                            })}
+                          />
+                        )}
+                      </Field>
+                    ) : null}
                   </div>
                   <p className="text-muted-foreground text-right text-sm tabular-nums">
                     {t("itemLineTotal")}:{" "}
@@ -1399,6 +1689,7 @@ export function InvoiceBuilderForm({
 
         <FormSection
           description={t("notesDescription")}
+          icon={<MessageSquareTextIcon />}
           title={t("sectionNotes")}
         >
           <Field
@@ -1432,6 +1723,7 @@ export function InvoiceBuilderForm({
             type="button"
             variant="outline"
           >
+            <SaveIcon />
             {submitting === "draft" ? t("savingDraft") : t("saveDraft")}
           </Button>
           <Button
@@ -1440,6 +1732,7 @@ export function InvoiceBuilderForm({
             onClick={() => void submit("issue")}
             type="button"
           >
+            <FileCheck2Icon />
             {submitting === "issue" ? t("issuing") : t("issue")}
           </Button>
           <span className="text-muted-foreground self-center text-xs">
@@ -1448,11 +1741,14 @@ export function InvoiceBuilderForm({
         </div>
       </form>
 
-      <InvoicePdfPreview
-        error={previewError}
-        updating={previewUpdating}
-        url={previewUrl}
-      />
+      <aside className="xl:sticky xl:top-3 xl:self-start">
+        <InvoicePdfPreview
+          className="mx-auto xl:h-[calc(100dvh-var(--header-height)-1.5rem)] xl:w-auto xl:max-w-full"
+          error={previewError}
+          updating={previewUpdating}
+          url={previewUrl}
+        />
+      </aside>
     </div>
   );
 }

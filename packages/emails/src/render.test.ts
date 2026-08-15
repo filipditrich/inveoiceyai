@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  renderBankPaymentAutoMatchedEmail,
   renderInvoiceSentEmail,
   renderNewSignInEmail,
   renderOverdueReminderEmail,
@@ -20,6 +21,23 @@ const invoiceFixture = {
 };
 
 describe("email renders", () => {
+  it("renders an automatic bank payment notification", async () => {
+    const out = await renderBankPaymentAutoMatchedEmail({
+      userName: "Filip",
+      invoiceNumber: "2026-0018",
+      clientName: "Klient s.r.o.",
+      amountLabel: "1 210,00 Kč",
+      bookedDate: "15. 8. 2026",
+      variableSymbol: "20260018",
+      invoiceUrl: "https://invoicey.ditrich.me/invoices/abc",
+      paymentsUrl: "https://invoicey.ditrich.me/payments",
+    });
+    expect(out.subject).toContain("2026-0018");
+    expect(out.html).toContain("automaticky");
+    expect(out.html).toContain("1 210,00 Kč");
+    expect(out.text).toContain("20260018");
+  });
+
   it("renders invoice_sent", async () => {
     const out = await renderInvoiceSentEmail(invoiceFixture);
     expect(out.subject).toContain("2026-0001");

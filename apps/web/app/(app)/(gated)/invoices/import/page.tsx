@@ -1,8 +1,10 @@
 import { InvoiceImportForm } from "@/components/invoices/invoice-import-form";
+import { PageHeader } from "@/components/layout/page-header";
 import { requireWorkspace } from "@/lib/auth/session";
 import { loadIssuerOptions } from "@/lib/load-parties";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { FileUpIcon } from "lucide-react";
 
 export default async function InvoiceImportPage() {
   const t = await getTranslations("Invoices.import");
@@ -11,21 +13,18 @@ export default async function InvoiceImportPage() {
 
   return (
     <div className="@container/main space-y-4 px-4 py-6 lg:px-6">
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <p className="text-muted-foreground mb-1 text-sm">
+      <PageHeader
+        description={t("subtitle")}
+        eyebrow={
+          <span>
             <Link className="hover:underline" href="/invoices">
               {t("backLink")}
             </Link>
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t("title")}
-          </h1>
-          <p className="text-muted-foreground max-w-2xl text-sm">
-            {t("subtitle")}
-          </p>
-        </div>
-      </div>
+          </span>
+        }
+        icon={<FileUpIcon />}
+        title={t("title")}
+      />
       <InvoiceImportForm
         issuers={issuers.map((i) => ({
           id: i.id,

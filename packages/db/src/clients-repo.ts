@@ -2,7 +2,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
 import type { InvoiceyDb } from "./create-db";
-import { clients, invoices } from "./schema";
+import { clients, invoiceTemplates, invoices } from "./schema";
 
 /** Digits-only IČO for matching (empty → undefined). */
 export function normalizeIco(ico: unknown): string | undefined {
@@ -18,8 +18,41 @@ export function normalizeClientName(name: unknown): string | undefined {
   if (typeof name !== "string") {
     return undefined;
   }
-  const n = name.trim().toLowerCase();
+  const n = name.normalize("NFKC").trim().replaceAll(/\s+/g, " ").toLowerCase();
   return n.length > 0 ? n : undefined;
+}
+
+function normalizeIdentityPart(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const normalized = value
+    .normalize("NFKC")
+    .trim()
+    .replaceAll(/\s+/g, " ")
+    .toLowerCase();
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+/** Stable legal-name + full-address identity used when an IČO is unavailable. */
+export function clientAddressIdentity(
+  snapshot: Record<string, unknown>,
+): string | undefined {
+  const name = normalizeClientName(snapshot.name);
+  const address =
+    snapshot.address &&
+    typeof snapshot.address === "object" &&
+    !Array.isArray(snapshot.address)
+      ? (snapshot.address as Record<string, unknown>)
+      : null;
+  const street = normalizeIdentityPart(address?.street);
+  const city = normalizeIdentityPart(address?.city);
+  const zip = normalizeIdentityPart(address?.zip)?.replaceAll(/\s/g, "");
+  const country = normalizeIdentityPart(address?.country);
+  if (!name || !street || !city || !zip || !country) {
+    return undefined;
+  }
+  return [name, street, city, zip, country].join("|");
 }
 
 export type EnsureClientOptions = {
@@ -50,34 +83,58 @@ async function findClientIdByIco(
   return rows[0]?.id ?? null;
 }
 
-async function findClientIdByName(
+async function findClientIdByIdentity(
   database: InvoiceyDb,
   workspaceId: string,
-  name: string | undefined,
+  snapshot: Record<string, unknown>,
 ): Promise<string | null> {
-  const nameNorm = normalizeClientName(name);
-  if (!nameNorm) {
+  const identity = clientAddressIdentity(snapshot);
+  if (!identity) {
     return null;
   }
+  const [name, street, city, zip, country] = identity.split("|") as [
+    string,
+    string,
+    string,
+    string,
+    string,
+  ];
   const rows = await database
-    .select({ id: clients.id })
+    .select({ id: clients.id, snapshot: clients.snapshot })
     .from(clients)
     .where(
       and(
         eq(clients.workspaceId, workspaceId),
-        sql`lower(trim(coalesce(${clients.snapshot}->>'name', ''))) = ${nameNorm}`,
-        sql`(
-          ${clients.snapshot}->>'ico' IS NULL
-          OR btrim(${clients.snapshot}->>'ico') = ''
-        )`,
+        sql`lower(regexp_replace(btrim(coalesce(${clients.snapshot}->>'name', '')), '\\s+', ' ', 'g')) = ${name}`,
+        sql`lower(regexp_replace(btrim(coalesce(${clients.snapshot}->'address'->>'street', '')), '\\s+', ' ', 'g')) = ${street}`,
+        sql`lower(regexp_replace(btrim(coalesce(${clients.snapshot}->'address'->>'city', '')), '\\s+', ' ', 'g')) = ${city}`,
+        sql`lower(regexp_replace(btrim(coalesce(${clients.snapshot}->'address'->>'zip', '')), '\\s+', '', 'g')) = ${zip}`,
+        sql`lower(btrim(coalesce(${clients.snapshot}->'address'->>'country', ''))) = ${country}`,
       ),
     )
-    .limit(1);
-  return rows[0]?.id ?? null;
+    .limit(20);
+
+  const incomingIco = normalizeIco(snapshot.ico);
+  if (incomingIco) {
+    return (
+      rows.find((row) => normalizeIco(row.snapshot.ico) === incomingIco)?.id ??
+      rows.find((row) => !normalizeIco(row.snapshot.ico))?.id ??
+      null
+    );
+  }
+
+  const withoutIco = rows.find((row) => !normalizeIco(row.snapshot.ico));
+  if (withoutIco) return withoutIco.id;
+  const knownIcos = new Set(
+    rows
+      .map((row) => normalizeIco(row.snapshot.ico))
+      .filter((ico): ico is string => Boolean(ico)),
+  );
+  return knownIcos.size === 1 ? (rows[0]?.id ?? null) : null;
 }
 
 /**
- * Resolve a workspace client by existing id, then IČO, then name (no IČO).
+ * Resolve a workspace client by existing id, then IČO, then legal name + address.
  * Parse-time UUIDs that are not in the DB are not treated as identity.
  */
 export async function ensureClient(
@@ -88,8 +145,6 @@ export async function ensureClient(
 ): Promise<string> {
   const preferredId = options?.preferredId;
   const ico = normalizeIco(clientSnapshot.ico);
-  const name =
-    typeof clientSnapshot.name === "string" ? clientSnapshot.name : undefined;
   const now = new Date();
   const source = options?.source ?? (ico !== undefined ? "ares" : "manual");
 
@@ -109,12 +164,24 @@ export async function ensureClient(
   if (!existingId) {
     existingId = await findClientIdByIco(database, workspaceId, ico);
   }
-  if (!existingId && !ico) {
-    existingId = await findClientIdByName(database, workspaceId, name);
+  if (!existingId) {
+    existingId = await findClientIdByIdentity(
+      database,
+      workspaceId,
+      clientSnapshot,
+    );
   }
 
   if (existingId) {
+    const [stored] = await database
+      .select({ snapshot: clients.snapshot, source: clients.source })
+      .from(clients)
+      .where(
+        and(eq(clients.id, existingId), eq(clients.workspaceId, workspaceId)),
+      )
+      .limit(1);
     const snapshot = {
+      ...((stored?.snapshot as Record<string, unknown> | undefined) ?? {}),
       ...clientSnapshot,
       id: existingId,
       ...(ico !== undefined ? { ico } : {}),
@@ -123,7 +190,10 @@ export async function ensureClient(
       .update(clients)
       .set({
         snapshot,
-        source,
+        source:
+          normalizeIco(stored?.snapshot?.ico) && ico === undefined
+            ? (stored?.source ?? source)
+            : source,
         updatedAt: now,
       })
       .where(eq(clients.id, existingId));
@@ -146,9 +216,11 @@ export async function ensureClient(
       updatedAt: now,
     });
     return id;
-  } catch {
-    /** race on unique (workspace, ico) — reuse winner */
-    const raced = await findClientIdByIco(database, workspaceId, ico);
+  } catch (error) {
+    /** Race on a database identity index — reuse the winning row. */
+    const raced =
+      (await findClientIdByIco(database, workspaceId, ico)) ??
+      (await findClientIdByIdentity(database, workspaceId, clientSnapshot));
     if (raced) {
       await database
         .update(clients)
@@ -160,7 +232,7 @@ export async function ensureClient(
         .where(eq(clients.id, raced));
       return raced;
     }
-    throw new Error("client_insert_failed");
+    throw error;
   }
 }
 
@@ -170,22 +242,32 @@ export type ClientMergeRow = {
   snapshot: Record<string, unknown>;
 };
 
-/** Group key: `ico:<digits>` or `name:<normalized>` for IČO-less rows. */
+/** Strongest available merge key for display and stable test assertions. */
 export function clientMergeGroupKey(row: ClientMergeRow): string | null {
   const ico = normalizeIco(row.snapshot.ico);
   if (ico) {
     return `ico:${ico}`;
   }
-  const name = normalizeClientName(row.snapshot.name);
-  if (name) {
-    return `name:${name}`;
+  const identity = clientAddressIdentity(row.snapshot);
+  if (identity) {
+    return `identity:${identity}`;
+  }
+  const fallbackName = normalizeClientName(row.snapshot.name);
+  if (fallbackName) {
+    return `name:${fallbackName}`;
   }
   return null;
 }
 
-/** Keep oldest created_at; stable by id on ties. */
+/** Prefer a row with IČO, then keep oldest created_at; stable by id on ties. */
 export function pickMergeKeepId(rows: ClientMergeRow[]): string {
   const sorted = [...rows].sort((a, b) => {
+    const icoRank =
+      Number(Boolean(normalizeIco(b.snapshot.ico))) -
+      Number(Boolean(normalizeIco(a.snapshot.ico)));
+    if (icoRank !== 0) {
+      return icoRank;
+    }
     const t = a.createdAt.getTime() - b.createdAt.getTime();
     if (t !== 0) {
       return t;
@@ -198,18 +280,75 @@ export function pickMergeKeepId(rows: ClientMergeRow[]): string {
 export function groupClientsForMerge(
   rows: ClientMergeRow[],
 ): Map<string, ClientMergeRow[]> {
-  const groups = new Map<string, ClientMergeRow[]>();
+  const parents = new Map(rows.map((row) => [row.id, row.id]));
+  const ownerByKey = new Map<string, string>();
+  const keysById = new Map<string, string[]>();
+  const icosByIdentity = new Map<string, Set<string>>();
+
   for (const row of rows) {
-    const key = clientMergeGroupKey(row);
-    if (!key) {
-      continue;
+    const identity = clientAddressIdentity(row.snapshot);
+    const ico = normalizeIco(row.snapshot.ico);
+    if (identity && ico) {
+      const values = icosByIdentity.get(identity) ?? new Set<string>();
+      values.add(ico);
+      icosByIdentity.set(identity, values);
     }
-    const list = groups.get(key);
-    if (list) {
-      list.push(row);
-    } else {
-      groups.set(key, [row]);
+  }
+
+  const find = (id: string): string => {
+    const parent = parents.get(id) ?? id;
+    if (parent === id) return id;
+    const root = find(parent);
+    parents.set(id, root);
+    return root;
+  };
+  const union = (left: string, right: string) => {
+    const leftRoot = find(left);
+    const rightRoot = find(right);
+    if (leftRoot !== rightRoot) parents.set(rightRoot, leftRoot);
+  };
+
+  for (const row of rows) {
+    const keys: string[] = [];
+    const ico = normalizeIco(row.snapshot.ico);
+    const identity = clientAddressIdentity(row.snapshot);
+    if (ico) keys.push(`ico:${ico}`);
+    // Never merge two known, different legal entities merely because they
+    // share the same name and postal address.
+    if (identity && (icosByIdentity.get(identity)?.size ?? 0) <= 1) {
+      keys.push(`identity:${identity}`);
     }
+    if (keys.length === 0) {
+      const name = normalizeClientName(row.snapshot.name);
+      if (name) keys.push(`name:${name}`);
+    }
+    keysById.set(row.id, keys);
+    for (const key of keys) {
+      const owner = ownerByKey.get(key);
+      if (owner) union(row.id, owner);
+      else ownerByKey.set(key, row.id);
+    }
+  }
+
+  const components = new Map<string, ClientMergeRow[]>();
+  for (const row of rows) {
+    if ((keysById.get(row.id)?.length ?? 0) === 0) continue;
+    const root = find(row.id);
+    const component = components.get(root) ?? [];
+    component.push(row);
+    components.set(root, component);
+  }
+
+  const groups = new Map<string, ClientMergeRow[]>();
+  for (const component of components.values()) {
+    const key = component
+      .flatMap((row) => keysById.get(row.id) ?? [])
+      .sort((a, b) => {
+        const rank = (value: string) =>
+          value.startsWith("ico:") ? 0 : value.startsWith("identity:") ? 1 : 2;
+        return rank(a) - rank(b) || a.localeCompare(b);
+      })[0];
+    if (key) groups.set(key, component);
   }
   return groups;
 }
@@ -218,11 +357,12 @@ export type MergeDuplicateClientsResult = {
   mergedGroups: number;
   clientsRemoved: number;
   invoicesRepointed: number;
+  templatesRepointed: number;
 };
 
 /**
- * Collapse duplicate clients in a workspace (by IČO, else by name when IČO absent).
- * Re-points invoices to the kept row, then deletes extras.
+ * Collapse duplicate clients in a workspace by IČO and legal name + address.
+ * Re-points invoices and recurring templates before deleting extras.
  */
 export async function mergeDuplicateClients(
   database: InvoiceyDb,
@@ -248,6 +388,7 @@ export async function mergeDuplicateClients(
   let mergedGroups = 0;
   let clientsRemoved = 0;
   let invoicesRepointed = 0;
+  let templatesRepointed = 0;
 
   for (const group of groups.values()) {
     if (group.length < 2) {
@@ -271,6 +412,18 @@ export async function mergeDuplicateClients(
       )
       .returning({ id: invoices.id });
     invoicesRepointed += updated.length;
+
+    const updatedTemplates = await database
+      .update(invoiceTemplates)
+      .set({ clientId: keepId, updatedAt: new Date() })
+      .where(
+        and(
+          eq(invoiceTemplates.workspaceId, workspaceId),
+          inArray(invoiceTemplates.clientId, dropIds),
+        ),
+      )
+      .returning({ id: invoiceTemplates.id });
+    templatesRepointed += updatedTemplates.length;
 
     const keep = group.find((r) => r.id === keepId)!;
     const richest = group.reduce((best, cur) => {
@@ -297,5 +450,10 @@ export async function mergeDuplicateClients(
     clientsRemoved += dropIds.length;
   }
 
-  return { mergedGroups, clientsRemoved, invoicesRepointed };
+  return {
+    mergedGroups,
+    clientsRemoved,
+    invoicesRepointed,
+    templatesRepointed,
+  };
 }

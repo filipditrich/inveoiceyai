@@ -6,7 +6,17 @@ import {
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
-import { CheckIcon, LandmarkIcon, PlusIcon, XIcon } from "lucide-react";
+import {
+  ArrowRightIcon,
+  CalendarDaysIcon,
+  CheckCircle2Icon,
+  CheckIcon,
+  HashIcon,
+  LandmarkIcon,
+  PlusIcon,
+  SparklesIcon,
+  XIcon,
+} from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -15,6 +25,7 @@ import {
   rejectPaymentProposal,
   reversePayment,
 } from "@/actions/payments";
+import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,14 +38,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { requireWorkspace } from "@/lib/auth/session";
-
-type Search = Promise<{
-  error?: string;
-  confirmed?: string;
-  rejected?: string;
-  added?: string;
-  reversed?: string;
-}>;
 
 function todayPrague(): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -52,15 +55,45 @@ function money(value: string, currency: string): string {
   }).format(Number(value));
 }
 
-export default async function PaymentsPage({
-  searchParams,
-}: {
-  searchParams: Search;
-}) {
-  const [{ workspaceId }, params] = await Promise.all([
-    requireWorkspace(),
-    searchParams,
-  ]);
+const REASON_LABELS: Record<string, string> = {
+  receiving_account: "Receiving account matches",
+  currency: "Currency matches",
+  exact_variable_symbol: "Exact variable symbol",
+  exact_outstanding_amount: "Exact amount due",
+  partial_amount: "Partial payment",
+  overpayment: "Payment is higher than amount due",
+  known_client_account: "Recognized client account",
+  plausible_date: "Payment date fits",
+};
+
+function matchLabel(proposal: {
+  confidence: string;
+  score: number;
+  blockers: string[];
+  reasons: string[];
+}): string {
+  if (
+    proposal.score === 100 &&
+    proposal.confidence === "high" &&
+    proposal.blockers.length === 0 &&
+    proposal.reasons.includes("exact_variable_symbol") &&
+    proposal.reasons.includes("exact_outstanding_amount")
+  ) {
+    return "Exact match";
+  }
+  if (proposal.confidence === "high") return "Strong match";
+  if (proposal.confidence === "medium") return "Likely match";
+  return "Needs a careful review";
+}
+
+function allocationSource(source: string): string {
+  if (source === "bank_confirmed") return "Matched from bank";
+  if (source === "manual") return "Added manually";
+  return source.replaceAll("_", " ");
+}
+
+export default async function PaymentsPage() {
+  const { workspaceId } = await requireWorkspace();
   const [proposals, transactions, allocations, outstandingInvoices] =
     await Promise.all([
       db
@@ -156,40 +189,26 @@ export default async function PaymentsPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-brand text-xs font-medium uppercase tracking-[0.14em]">
-            Reconciliation
-          </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
-            Payments
-          </h1>
-          <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
+      <PageHeader
+        actions={
+          <Button
+            render={<Link href="/settings/bank-connections" />}
+            variant="outline"
+          >
+            <LandmarkIcon /> Bank connections
+          </Button>
+        }
+        description={
+          <>
             Bank transactions remain suggestions until you confirm an
             allocation. One invoice can receive partial payments and every
             reversal stays visible.
-          </p>
-        </div>
-        <Button
-          render={<Link href="/settings/bank-connections" />}
-          variant="outline"
-        >
-          <LandmarkIcon /> Bank connections
-        </Button>
-      </div>
-
-      {params.error ? (
-        <p className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border px-4 py-3 text-sm">
-          {params.error.replaceAll("_", " ")}
-        </p>
-      ) : params.confirmed ||
-        params.rejected ||
-        params.added ||
-        params.reversed ? (
-        <p className="border-brand/20 bg-brand/5 rounded-lg border px-4 py-3 text-sm">
-          Payment ledger updated.
-        </p>
-      ) : null}
+          </>
+        }
+        eyebrow="Reconciliation"
+        icon={<LandmarkIcon />}
+        title="Payments"
+      />
 
       <Card>
         <CardHeader>
@@ -208,65 +227,81 @@ export default async function PaymentsPage({
             proposals.map((proposal) => (
               <div
                 key={proposal.id}
-                className="flex flex-col gap-3 rounded-xl border p-4 lg:flex-row lg:items-center"
+                className="from-brand/[0.07] relative overflow-hidden rounded-2xl border bg-gradient-to-br via-transparent to-transparent p-4 sm:p-5"
               >
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold">
-                      {money(proposal.transactionAmount, proposal.currency)}
-                    </span>
-                    <Badge
-                      variant={
-                        proposal.confidence === "high" ? "default" : "secondary"
-                      }
-                    >
-                      {proposal.confidence} · {proposal.score}
-                    </Badge>
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xl font-semibold tabular-nums">
+                        {money(proposal.transactionAmount, proposal.currency)}
+                      </span>
+                      <Badge className="gap-1" variant="default">
+                        <SparklesIcon className="size-3" />
+                        {matchLabel(proposal)}
+                      </Badge>
+                    </div>
+                    <div className="mt-3 flex min-w-0 items-center gap-2 text-sm">
+                      <span className="truncate font-medium">
+                        {proposal.counterpartyName ?? "Unknown sender"}
+                      </span>
+                      <ArrowRightIcon className="text-muted-foreground size-4 shrink-0" />
+                      <Link
+                        href={`/invoices/${proposal.invoiceId}`}
+                        className="text-brand truncate font-medium hover:underline"
+                      >
+                        {proposal.invoiceNumber ?? "Draft"} ·{" "}
+                        {proposal.clientName}
+                      </Link>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <span className="bg-muted/70 text-muted-foreground inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs">
+                        <CalendarDaysIcon className="size-3.5" />
+                        {proposal.bookedDate}
+                      </span>
+                      <span className="bg-muted/70 text-muted-foreground inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs">
+                        <HashIcon className="size-3.5" />
+                        VS {proposal.variableSymbol ?? "missing"}
+                      </span>
+                      {proposal.reasons.map((reason) => (
+                        <span
+                          key={reason}
+                          className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-700 dark:text-emerald-400"
+                        >
+                          <CheckCircle2Icon className="size-3.5" />
+                          {REASON_LABELS[reason] ?? reason.replaceAll("_", " ")}
+                        </span>
+                      ))}
+                    </div>
+                    {proposal.blockers.length > 0 ? (
+                      <p className="text-destructive mt-3 text-xs">
+                        Please review:{" "}
+                        {proposal.blockers.join(", ").replaceAll("_", " ")}
+                      </p>
+                    ) : null}
                   </div>
-                  <p className="text-sm">
-                    {proposal.counterpartyName ?? "Unknown sender"} →{" "}
-                    <Link
-                      href={`/invoices/${proposal.invoiceId}`}
-                      className="text-brand hover:underline"
-                    >
-                      {proposal.invoiceNumber ?? "Draft"} ·{" "}
-                      {proposal.clientName}
-                    </Link>
-                  </p>
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    {proposal.bookedDate} · VS {proposal.variableSymbol ?? "—"}{" "}
-                    · {proposal.reasons.join(", ").replaceAll("_", " ")}
-                    {proposal.blockers.length
-                      ? ` · ${proposal.blockers.join(", ").replaceAll("_", " ")}`
-                      : ""}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <form action={confirmPaymentProposal}>
-                    <input
-                      type="hidden"
-                      name="proposalId"
-                      value={proposal.id}
-                    />
-                    <Button type="submit">
-                      <CheckIcon /> Confirm{" "}
-                      {money(proposal.amount, proposal.currency)}
-                    </Button>
-                  </form>
-                  <form action={rejectPaymentProposal}>
-                    <input
-                      type="hidden"
-                      name="proposalId"
-                      value={proposal.id}
-                    />
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      aria-label="Reject match"
-                    >
-                      <XIcon /> Reject
-                    </Button>
-                  </form>
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <form action={confirmPaymentProposal}>
+                      <input
+                        type="hidden"
+                        name="proposalId"
+                        value={proposal.id}
+                      />
+                      <Button type="submit">
+                        <CheckIcon /> Confirm{" "}
+                        {money(proposal.amount, proposal.currency)}
+                      </Button>
+                    </form>
+                    <form action={rejectPaymentProposal}>
+                      <input
+                        type="hidden"
+                        name="proposalId"
+                        value={proposal.id}
+                      />
+                      <Button type="submit" variant="outline">
+                        <XIcon /> Not this invoice
+                      </Button>
+                    </form>
+                  </div>
                 </div>
               </div>
             ))
@@ -368,9 +403,12 @@ export default async function PaymentsPage({
                     <p className="font-medium tabular-nums">
                       {money(transaction.amount, transaction.currency)}
                     </p>
-                    <p className="text-muted-foreground text-xs">
-                      {transaction.allocated ? "allocated" : "unallocated"}
-                    </p>
+                    <Badge
+                      className="mt-1"
+                      variant={transaction.allocated ? "secondary" : "outline"}
+                    >
+                      {transaction.allocated ? "Allocated" : "Ready to match"}
+                    </Badge>
                   </div>
                 </div>
               ))
@@ -405,8 +443,8 @@ export default async function PaymentsPage({
                     </Link>
                     <p className="text-muted-foreground text-xs">
                       {allocation.effectiveDate} ·{" "}
-                      {allocation.source.replaceAll("_", " ")}
-                      {allocation.reversedAt ? " · reversed" : ""}
+                      {allocationSource(allocation.source)}
+                      {allocation.reversedAt ? " · Reversed" : ""}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

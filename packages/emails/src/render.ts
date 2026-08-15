@@ -2,6 +2,10 @@ import { render } from "@react-email/render";
 
 import { invoiceEmailCopy, systemEmailCopy } from "./copy";
 import {
+  BankPaymentAutoMatchedEmail,
+  type BankPaymentAutoMatchedEmailProps,
+} from "./templates/bank-payment-auto-matched";
+import {
   InvoiceSentEmail,
   type InvoiceSentEmailProps,
 } from "./templates/invoice-sent";
@@ -33,6 +37,7 @@ export const EMAIL_TEMPLATES = [
   "workspace_invite",
   "overdue_reminder",
   "payment_received",
+  "bank_payment_auto_matched",
   "new_sign_in",
 ] as const;
 
@@ -118,6 +123,24 @@ export async function renderNewSignInEmail(
   ]);
   return {
     subject: systemEmailCopy(props.locale ?? "cs").signInSubject,
+    html,
+    text,
+  };
+}
+
+export async function renderBankPaymentAutoMatchedEmail(
+  props: BankPaymentAutoMatchedEmailProps,
+): Promise<RenderedEmail> {
+  const element = BankPaymentAutoMatchedEmail(props);
+  const [html, text] = await Promise.all([
+    render(element),
+    render(element, { plainText: true }),
+  ]);
+  return {
+    subject:
+      (props.locale ?? "cs") === "cs"
+        ? `Platba spárována — ${props.invoiceNumber}`
+        : `Payment matched — ${props.invoiceNumber}`,
     html,
     text,
   };

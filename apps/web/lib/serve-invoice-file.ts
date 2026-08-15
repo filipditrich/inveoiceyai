@@ -143,28 +143,27 @@ export async function serveInvoicePdf(
   }
 
   if (row.issuedAt) {
-    if (!row.pdfUrl) {
-      return NextResponse.json(
-        { error: "issued_pdf_missing" },
-        { status: 409 },
-      );
-    }
-    try {
-      return await proxyStoredFile(
-        row.pdfUrl,
-        filename,
-        "application/pdf",
-        disposition,
-        row.pdfSha256,
-      );
-    } catch {
-      return NextResponse.json(
-        { error: "issued_pdf_unavailable" },
-        { status: 502 },
-      );
+    if (row.pdfUrl) {
+      try {
+        return await proxyStoredFile(
+          row.pdfUrl,
+          filename,
+          "application/pdf",
+          disposition,
+          row.pdfSha256,
+        );
+      } catch {
+        return NextResponse.json(
+          { error: "issued_pdf_unavailable" },
+          { status: 502 },
+        );
+      }
     }
   }
 
+  // Native invoices have a frozen, validated payload at issue time. Local or
+  // self-hosted setups may intentionally omit UploadThing; render that frozen
+  // payload on demand instead of leaving the preview and download unusable.
   const pdfBytes = await renderInvoicePdf(parsed.data);
   return new NextResponse(Buffer.from(pdfBytes), {
     status: 200,
@@ -211,25 +210,21 @@ export async function serveInvoiceIsdoc(
   }
 
   if (row.issuedAt) {
-    if (!row.isdocUrl) {
-      return NextResponse.json(
-        { error: "issued_isdoc_missing" },
-        { status: 409 },
-      );
-    }
-    try {
-      return await proxyStoredFile(
-        row.isdocUrl,
-        filename,
-        "application/xml; charset=utf-8",
-        disposition,
-        row.isdocSha256,
-      );
-    } catch {
-      return NextResponse.json(
-        { error: "issued_isdoc_unavailable" },
-        { status: 502 },
-      );
+    if (row.isdocUrl) {
+      try {
+        return await proxyStoredFile(
+          row.isdocUrl,
+          filename,
+          "application/xml; charset=utf-8",
+          disposition,
+          row.isdocSha256,
+        );
+      } catch {
+        return NextResponse.json(
+          { error: "issued_isdoc_unavailable" },
+          { status: 502 },
+        );
+      }
     }
   }
 

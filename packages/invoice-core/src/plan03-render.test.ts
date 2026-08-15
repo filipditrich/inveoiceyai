@@ -108,7 +108,30 @@ describe("SPAYD", () => {
     expect(p).toContain("SPD*1.0*");
     expect(p).toContain("*ACC:CZ9708000000001920014539+GIBACZPX*");
     expect(p).toContain("*AM:1210*");
+    expect(p).toContain("*X-VS:20260001*");
+    expect(p).toContain("*PT:IP*");
+    expect(p).toContain("*MSG:Faktura 20260001 | NFCtron s.r.o.*");
+    expect(p).toContain("*X-SELF:Faktura 20260001 | Filip Ditrich*");
+    expect(p).not.toContain("*VS:");
+    expect(p).not.toContain("*DT:");
     expect(buildSpaydPayload(invoice)).toBe(p);
+  });
+
+  it("renders issuer QR message templates with invoice variables", () => {
+    const invoice = parseInvoice({
+      ...domesticFixture,
+      issuer: {
+        ...domesticFixture.issuer,
+        paymentQr: {
+          beneficiaryMessageTemplate: "Doklad {number} od {client}",
+          payerNoteTemplate: "Platba {number} pro {issuer}",
+        },
+      },
+    });
+    const payload = buildSpaydPayload(invoice);
+
+    expect(payload).toContain("*MSG:Doklad 20260001 od NFCtron s.r.o.*");
+    expect(payload).toContain("*X-SELF:Platba 20260001 pro Filip Ditrich*");
   });
 
   it("deterministic PNG data URL fingerprint for QR payload", async () => {

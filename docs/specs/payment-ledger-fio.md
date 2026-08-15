@@ -554,9 +554,12 @@ not sensitive payment contents:
 - false-positive rate reported by reversals/rematches;
 - unallocated incoming amount and stale connections.
 
-Automatic confirmation is not considered until exact-match acceptance is high,
-false positives are effectively zero in the pilot sample, and reversal recovery
-has been demonstrated.
+Automatic confirmation is implemented as a per-connection, default-off opt-in.
+It applies only to newly created, blocker-free score-100 proposals containing
+the receiving-account, currency, exact-variable-symbol, and exact-outstanding-
+amount reasons. Partial, overpaid, ambiguous, heuristic, and already queued
+proposals remain manual. Reversing the resulting allocation reopens the proposal
+instead of auto-confirming it again on a later sync.
 
 ## First pilot configuration
 

@@ -5,6 +5,8 @@ import {
   IssuerSnapshotSchema,
 } from "@invoicey/invoice-core/schema";
 import {
+  groupClientsForMerge,
+  pickMergeKeepId,
   clients,
   issuerBusinesses,
   issuerNumberingSchemes,
@@ -67,19 +69,27 @@ export async function loadClientOptions(
     .select()
     .from(clients)
     .where(eq(clients.workspaceId, workspaceId));
+  const duplicateIds = new Set<string>();
+  for (const group of groupClientsForMerge(
+    rows.map((row) => ({
+      id: row.id,
+      createdAt: row.createdAt,
+      snapshot: row.snapshot,
+    })),
+  ).values()) {
+    if (group.length < 2) continue;
+    const keepId = pickMergeKeepId(group);
+    for (const row of group) {
+      if (row.id !== keepId) duplicateIds.add(row.id);
+    }
+  }
+
   const out: ClientOption[] = [];
-  const seenIcos = new Set<string>();
   for (const r of rows) {
+    if (duplicateIds.has(r.id)) continue;
     const snap = ClientSnapshotSchema.safeParse(r.snapshot);
     if (!snap.success) {
       continue;
-    }
-    const normalizedIco = snap.data.ico?.replaceAll(/\D/g, "");
-    if (normalizedIco && seenIcos.has(normalizedIco)) {
-      continue;
-    }
-    if (normalizedIco) {
-      seenIcos.add(normalizedIco);
     }
     out.push({ id: r.id, snapshot: snap.data });
   }

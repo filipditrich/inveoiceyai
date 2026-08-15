@@ -1,4 +1,5 @@
 import { InvoiceBuilderForm } from "@/components/invoices/invoice-builder-form";
+import { PageHeader } from "@/components/layout/page-header";
 import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import { requireWorkspace } from "@/lib/auth/session";
@@ -8,6 +9,7 @@ import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
+import { FilePenLineIcon } from "lucide-react";
 
 type Params = Promise<{ id: string }>;
 type Search = Promise<{ invalid?: string }>;
@@ -55,12 +57,11 @@ export default async function InvoiceEditPage({
 
   return (
     <div className="space-y-6 px-4 py-6 lg:px-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t("editTitle")}
-        </h1>
-        <p className="text-muted-foreground">{t("subtitle")}</p>
-      </div>
+      <PageHeader
+        description={t("subtitle")}
+        icon={<FilePenLineIcon />}
+        title={t("editTitle")}
+      />
       <InvoiceBuilderForm
         clients={clients}
         invalidQuery={sp.invalid ?? null}

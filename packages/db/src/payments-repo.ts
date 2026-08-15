@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import {
   bankTransactions,
@@ -193,7 +193,8 @@ export async function createManualPaymentAllocation(input: {
 export async function confirmPaymentMatchProposal(input: {
   workspaceId: string;
   proposalId: string;
-  actorUserId: string;
+  actorUserId?: string;
+  actorType?: "user" | "system";
 }): Promise<AllocationMutationResult> {
   try {
     return await withDbTransaction(async (tx) => {
@@ -316,7 +317,7 @@ export async function confirmPaymentMatchProposal(input: {
       await addAuditEvent(tx, {
         workspaceId: input.workspaceId,
         action: "proposal.confirmed",
-        actorType: "user",
+        actorType: input.actorType ?? (input.actorUserId ? "user" : "system"),
         actorUserId: input.actorUserId,
         entityType: "payment_match_proposal",
         entityId: proposal.id,
@@ -384,6 +385,7 @@ export async function reversePaymentAllocation(input: {
         .select({
           id: invoicePaymentAllocations.id,
           invoiceId: invoicePaymentAllocations.invoiceId,
+          proposalId: invoicePaymentAllocations.proposalId,
         })
         .from(invoicePaymentAllocations)
         .where(
@@ -404,6 +406,17 @@ export async function reversePaymentAllocation(input: {
           reversalReason: input.reason?.trim() || null,
         })
         .where(eq(invoicePaymentAllocations.id, allocation.id));
+      if (allocation.proposalId) {
+        await tx
+          .update(paymentMatchProposals)
+          .set({
+            status: "pending",
+            reviewedByUserId: null,
+            reviewedAt: null,
+            updatedAt: new Date(),
+          })
+          .where(eq(paymentMatchProposals.id, allocation.proposalId));
+      }
       const projection = await refreshInvoicePaymentProjection(
         tx,
         input.workspaceId,
@@ -443,7 +456,10 @@ export async function reverseAllInvoicePaymentAllocations(input: {
   try {
     return await withDbTransaction(async (tx) => {
       const active = await tx
-        .select({ id: invoicePaymentAllocations.id })
+        .select({
+          id: invoicePaymentAllocations.id,
+          proposalId: invoicePaymentAllocations.proposalId,
+        })
         .from(invoicePaymentAllocations)
         .where(
           and(
@@ -470,6 +486,20 @@ export async function reverseAllInvoicePaymentAllocations(input: {
             isNull(invoicePaymentAllocations.reversedAt),
           ),
         );
+      const proposalIds = active
+        .map((row) => row.proposalId)
+        .filter((id): id is string => id !== null);
+      if (proposalIds.length > 0) {
+        await tx
+          .update(paymentMatchProposals)
+          .set({
+            status: "pending",
+            reviewedByUserId: null,
+            reviewedAt: null,
+            updatedAt: now,
+          })
+          .where(inArray(paymentMatchProposals.id, proposalIds));
+      }
       await refreshInvoicePaymentProjection(
         tx,
         input.workspaceId,

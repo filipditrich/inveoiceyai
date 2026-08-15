@@ -286,7 +286,9 @@ export async function cancelInvoiceById(options: {
   await database
     .update(invoices)
     .set({ cancelledAt: now, updatedAt: now })
-    .where(eq(invoices.id, options.id));
+    .where(
+      and(eq(invoices.id, options.id), eq(invoices.workspaceId, workspaceId)),
+    );
   return {
     ok: true,
     summary: rowToSummary({ ...row, cancelledAt: now, updatedAt: now }),
@@ -297,6 +299,7 @@ export async function cancelInvoiceById(options: {
 export async function unmarkInvoicePaidById(options: {
   id: string;
   workspaceId?: string;
+  actorUserId?: string;
 }): Promise<
   { ok: true; summary: InvoiceSummary } | { ok: false; error: string }
 > {
@@ -319,6 +322,7 @@ export async function unmarkInvoicePaidById(options: {
   const reversal = await reverseAllInvoicePaymentAllocations({
     workspaceId,
     invoiceId: options.id,
+    actorUserId: options.actorUserId,
     reason: "Marked unpaid",
   });
   if (!reversal.ok) {
@@ -431,7 +435,7 @@ export async function bulkCancelInvoices(options: {
     await database
       .update(invoices)
       .set({ cancelledAt: now, updatedAt: now })
-      .where(eq(invoices.id, id));
+      .where(and(eq(invoices.id, id), eq(invoices.workspaceId, workspaceId)));
     ok += 1;
   }
   return { ok, skipped, failed };
@@ -462,7 +466,9 @@ export async function bulkDeleteDraftInvoices(options: {
       skipped += 1;
       continue;
     }
-    await database.delete(invoices).where(eq(invoices.id, id));
+    await database
+      .delete(invoices)
+      .where(and(eq(invoices.id, id), eq(invoices.workspaceId, workspaceId)));
     ok += 1;
   }
   return { ok, skipped, failed };

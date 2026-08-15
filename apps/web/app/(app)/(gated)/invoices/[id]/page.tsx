@@ -12,6 +12,7 @@ import { InvoiceEmailTimeline } from "@/components/invoices/invoice-email-timeli
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
 import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
 import { SendInvoiceEmailSheet } from "@/components/invoices/send-invoice-email-sheet";
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -59,6 +60,7 @@ import {
   FileCodeIcon,
   FileDownIcon,
   PencilIcon,
+  ReceiptTextIcon,
   RepeatIcon,
   StampIcon,
   Trash2Icon,
@@ -183,186 +185,184 @@ export default async function InvoiceDetailPage({
   const showIsdoc =
     Boolean(row.isdocUrl) ||
     (!row.importCompleteness && Boolean(payload?.success));
+  const headerDescription = (
+    <div className="flex flex-wrap items-center gap-2">
+      <span>{row.clientName}</span>
+      <InvoiceStatusBadge status={displayStatus} />
+      {row.importCompleteness === "archive" ? (
+        <span className="rounded border px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide">
+          {t("archive")}
+        </span>
+      ) : null}
+      {row.importCompleteness === "full" ? (
+        <span className="rounded border px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide">
+          {t("import")}
+        </span>
+      ) : null}
+      {row.recurringScheduleId ? (
+        <Link className="text-xs underline" href="/invoices/recurring" prefetch>
+          {t("fromRecurring")}
+        </Link>
+      ) : null}
+      {originLabel ? (
+        <span className="text-xs">
+          {originLabel}
+          {row.originVersion ? ` @${row.originVersion}` : ""}
+        </span>
+      ) : null}
+    </div>
+  );
 
   return (
     <div className="space-y-6 px-4 py-6 lg:px-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tabular-nums tracking-tight">
-            {row.number ?? "DRAFT"}
-          </h1>
-          <p className="text-muted-foreground flex flex-wrap items-center gap-2">
-            <span>{row.clientName}</span>
-            <InvoiceStatusBadge status={displayStatus} />
-            {row.importCompleteness === "archive" ? (
-              <span className="rounded border px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide">
-                {t("archive")}
-              </span>
+      <PageHeader
+        actions={
+          <>
+            {displayStatus === "draft" ? (
+              <form action={issueSavedInvoice}>
+                <input name="id" type="hidden" value={id} />
+                <SubmitButton pendingLabel={t("issuingPending")} size="sm">
+                  <StampIcon data-icon="inline-start" />
+                  {t("issueButton")}
+                </SubmitButton>
+              </form>
             ) : null}
-            {row.importCompleteness === "full" ? (
-              <span className="rounded border px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide">
-                {t("import")}
-              </span>
+            {displayStatus === "unpaid" ||
+            displayStatus === "overdue" ||
+            displayStatus === "future" ? (
+              <form action={markInvoicePaid}>
+                <input name="id" type="hidden" value={id} />
+                <SubmitButton pendingLabel={t("savingPending")} size="sm">
+                  <WalletCardsIcon data-icon="inline-start" />
+                  {t("markPaidButton")}
+                </SubmitButton>
+              </form>
             ) : null}
-            {row.recurringScheduleId ? (
-              <Link
-                className="text-xs underline"
-                href="/invoices/recurring"
-                prefetch
-              >
-                {t("fromRecurring")}
-              </Link>
-            ) : null}
-            {originLabel ? (
-              <span className="text-xs">
-                {originLabel}
-                {row.originVersion ? ` @${row.originVersion}` : ""}
-              </span>
-            ) : null}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {displayStatus === "draft" ? (
-            <form action={issueSavedInvoice}>
-              <input name="id" type="hidden" value={id} />
-              <SubmitButton pendingLabel={t("issuingPending")} size="sm">
-                <StampIcon data-icon="inline-start" />
-                {t("issueButton")}
-              </SubmitButton>
-            </form>
-          ) : null}
-          {displayStatus === "unpaid" ||
-          displayStatus === "overdue" ||
-          displayStatus === "future" ? (
-            <form action={markInvoicePaid}>
-              <input name="id" type="hidden" value={id} />
-              <SubmitButton pendingLabel={t("savingPending")} size="sm">
-                <WalletCardsIcon data-icon="inline-start" />
-                {t("markPaidButton")}
-              </SubmitButton>
-            </form>
-          ) : null}
 
-          <ButtonGroup>
-            <Button
-              render={<a href={`/api/invoices/${id}/pdf`} download />}
-              size="sm"
-              variant="outline"
-            >
-              <FileDownIcon data-icon="inline-start" />
-              PDF
-            </Button>
-            {showIsdoc ? (
+            <ButtonGroup>
               <Button
-                render={<a href={`/api/invoices/${id}/isdoc`} download />}
+                render={<a href={`/api/invoices/${id}/pdf`} download />}
                 size="sm"
                 variant="outline"
               >
-                <FileCodeIcon data-icon="inline-start" />
-                ISDOC
+                <FileDownIcon data-icon="inline-start" />
+                PDF
               </Button>
-            ) : null}
-          </ButtonGroup>
+              {showIsdoc ? (
+                <Button
+                  render={<a href={`/api/invoices/${id}/isdoc`} download />}
+                  size="sm"
+                  variant="outline"
+                >
+                  <FileCodeIcon data-icon="inline-start" />
+                  ISDOC
+                </Button>
+              ) : null}
+            </ButtonGroup>
 
-          {displayStatus === "draft" ? (
-            <Button
-              render={<Link href={`/invoices/${id}/edit`} prefetch />}
-              size="sm"
-              variant="outline"
-            >
-              <PencilIcon data-icon="inline-start" />
-              {t("editButton")}
-            </Button>
-          ) : null}
-          <form action={duplicateInvoice}>
-            <input name="id" type="hidden" value={id} />
-            <SubmitButton
-              pendingLabel={t("duplicatingPending")}
-              size="sm"
-              variant="outline"
-            >
-              <CopyIcon data-icon="inline-start" />
-              {t("duplicateButton")}
-            </SubmitButton>
-          </form>
-          {row.docType === "invoice" && !archive ? (
-            row.recurringScheduleId ? (
+            {displayStatus === "draft" ? (
               <Button
-                render={<Link href="/invoices/recurring" prefetch />}
+                render={<Link href={`/invoices/${id}/edit`} prefetch />}
                 size="sm"
                 variant="outline"
               >
-                <RepeatIcon data-icon="inline-start" />
-                {t("viewSchedule")}
+                <PencilIcon data-icon="inline-start" />
+                {t("editButton")}
               </Button>
-            ) : (
-              <SaveRecurringSheet
-                defaultDayOfMonth={Math.min(
-                  31,
-                  Math.max(1, Number(row.issueDate.slice(8, 10)) || 1),
-                )}
-                defaultName={`${row.clientName} · ${row.number ?? "DRAFT"}`}
+            ) : null}
+            <form action={duplicateInvoice}>
+              <input name="id" type="hidden" value={id} />
+              <SubmitButton
+                pendingLabel={t("duplicatingPending")}
+                size="sm"
+                variant="outline"
+              >
+                <CopyIcon data-icon="inline-start" />
+                {t("duplicateButton")}
+              </SubmitButton>
+            </form>
+            {row.docType === "invoice" && !archive ? (
+              row.recurringScheduleId ? (
+                <Button
+                  render={<Link href="/invoices/recurring" prefetch />}
+                  size="sm"
+                  variant="outline"
+                >
+                  <RepeatIcon data-icon="inline-start" />
+                  {t("viewSchedule")}
+                </Button>
+              ) : (
+                <SaveRecurringSheet
+                  defaultDayOfMonth={Math.min(
+                    31,
+                    Math.max(1, Number(row.issueDate.slice(8, 10)) || 1),
+                  )}
+                  defaultName={`${row.clientName} · ${row.number ?? "DRAFT"}`}
+                  invoiceId={id}
+                />
+              )
+            ) : null}
+            {canEmail ? (
+              <SendInvoiceEmailSheet
+                defaultAttachIsdoc={emailSettings.attachIsdocByDefault}
+                defaultCoverText={defaultCover}
+                defaultSubject={defaultSubject}
+                defaultTo={clientEmail}
+                emailConfigured={isEmailConfigured()}
+                fromPreview={fromPreview}
                 invoiceId={id}
+                replyTo={replyTo}
+                suppressedEmails={suppressedEmails}
               />
-            )
-          ) : null}
-          {canEmail ? (
-            <SendInvoiceEmailSheet
-              defaultAttachIsdoc={emailSettings.attachIsdocByDefault}
-              defaultCoverText={defaultCover}
-              defaultSubject={defaultSubject}
-              defaultTo={clientEmail}
-              emailConfigured={isEmailConfigured()}
-              fromPreview={fromPreview}
-              invoiceId={id}
-              replyTo={replyTo}
-              suppressedEmails={suppressedEmails}
-            />
-          ) : null}
+            ) : null}
 
-          {displayStatus === "unpaid" ||
-          displayStatus === "overdue" ||
-          displayStatus === "future" ? (
-            <form action={cancelInvoice}>
-              <input name="id" type="hidden" value={id} />
-              <SubmitButton
-                pendingLabel={t("cancellingPending")}
-                size="sm"
-                variant="secondary"
-              >
-                <BanIcon data-icon="inline-start" />
-                {t("cancelButton")}
-              </SubmitButton>
-            </form>
-          ) : null}
-          {displayStatus === "paid" ? (
-            <form action={unmarkInvoicePaid}>
-              <input name="id" type="hidden" value={id} />
-              <SubmitButton
-                pendingLabel={t("savingPending")}
-                size="sm"
-                variant="secondary"
-              >
-                <WalletCardsIcon data-icon="inline-start" />
-                {t("unmarkPaidButton")}
-              </SubmitButton>
-            </form>
-          ) : null}
-          {displayStatus === "draft" || displayStatus === "cancelled" ? (
-            <form action={deleteInvoice}>
-              <input name="id" type="hidden" value={id} />
-              <SubmitButton
-                pendingLabel={t("deletingPending")}
-                size="sm"
-                variant="destructive"
-              >
-                <Trash2Icon data-icon="inline-start" />
-                {t("deleteButton")}
-              </SubmitButton>
-            </form>
-          ) : null}
-        </div>
-      </div>
+            {displayStatus === "unpaid" ||
+            displayStatus === "overdue" ||
+            displayStatus === "future" ? (
+              <form action={cancelInvoice}>
+                <input name="id" type="hidden" value={id} />
+                <SubmitButton
+                  pendingLabel={t("cancellingPending")}
+                  size="sm"
+                  variant="secondary"
+                >
+                  <BanIcon data-icon="inline-start" />
+                  {t("cancelButton")}
+                </SubmitButton>
+              </form>
+            ) : null}
+            {displayStatus === "paid" ? (
+              <form action={unmarkInvoicePaid}>
+                <input name="id" type="hidden" value={id} />
+                <SubmitButton
+                  pendingLabel={t("savingPending")}
+                  size="sm"
+                  variant="secondary"
+                >
+                  <WalletCardsIcon data-icon="inline-start" />
+                  {t("unmarkPaidButton")}
+                </SubmitButton>
+              </form>
+            ) : null}
+            {displayStatus === "draft" || displayStatus === "cancelled" ? (
+              <form action={deleteInvoice}>
+                <input name="id" type="hidden" value={id} />
+                <SubmitButton
+                  pendingLabel={t("deletingPending")}
+                  size="sm"
+                  variant="destructive"
+                >
+                  <Trash2Icon data-icon="inline-start" />
+                  {t("deleteButton")}
+                </SubmitButton>
+              </form>
+            ) : null}
+          </>
+        }
+        description={headerDescription}
+        icon={<ReceiptTextIcon />}
+        title={<span className="tabular-nums">{row.number ?? "DRAFT"}</span>}
+      />
 
       {sp.invalid ? (
         <p className="text-destructive text-sm">
@@ -370,14 +370,7 @@ export default async function InvoiceDetailPage({
         </p>
       ) : null}
 
-      {showPdfPreview ? (
-        <InvoicePdfPreview
-          emptyLabel={t("pdfEmpty")}
-          url={`/api/invoices/${id}/pdf?disposition=inline`}
-        />
-      ) : null}
-
-      <dl className="grid gap-3 text-sm sm:grid-cols-2">
+      <dl className="bg-card grid gap-x-8 gap-y-3 rounded-xl border p-4 text-sm shadow-sm sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <dt className="text-muted-foreground">{t("issueDate")}</dt>
           <dd className="tabular-nums">
@@ -585,6 +578,14 @@ export default async function InvoiceDetailPage({
           {t("backToList")}
         </Link>
       </p>
+
+      {showPdfPreview ? (
+        <InvoicePdfPreview
+          className="mx-auto max-w-xl shadow-sm"
+          emptyLabel={t("pdfEmpty")}
+          url={`/api/invoices/${id}/pdf?disposition=inline`}
+        />
+      ) : null}
     </div>
   );
 }

@@ -1,5 +1,12 @@
 {
   "title": "Connect & automate",
   "icon": "Plug",
-  "pages": ["api-keys", "mcp", "cursor", "claude-code", "slack"]
+  "pages": [
+    "api-keys",
+    "mcp",
+    "cursor",
+    "claude-code",
+    "slack",
+    "bank-connections"
+  ]
 }

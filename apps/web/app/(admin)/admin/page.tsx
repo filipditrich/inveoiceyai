@@ -1,4 +1,5 @@
 import { loadPlatformDashboardMetrics } from "@/lib/admin/metrics";
+import { PageHeader } from "@/components/layout/page-header";
 import { requirePlatformAdmin } from "@/lib/auth/session";
 import { formatMoney } from "@/lib/format";
 import type { AppLocale } from "@/i18n/config";
@@ -50,10 +51,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
-      </div>
+      <PageHeader description={t("subtitle")} title={t("title")} />
 
       <div className="@xl/main:grid-cols-2 @5xl/main:grid-cols-4 grid grid-cols-1 gap-4">
         {summaryCards.map((card) => (

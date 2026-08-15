@@ -2,6 +2,7 @@ import {
   RecurringEmpty,
   RecurringTable,
 } from "@/components/invoices/recurring-table";
+import { PageHeader } from "@/components/layout/page-header";
 import { requireWorkspace } from "@/lib/auth/session";
 import type { AppLocale } from "@/i18n/config";
 import { invalidMessage } from "@/lib/invalid-message";
@@ -10,6 +11,7 @@ import { db } from "@invoicey/db/client";
 import { listRecurring } from "@invoicey/invoice-tools/ops";
 import { and, eq, sql } from "drizzle-orm";
 import { getLocale, getTranslations } from "next-intl/server";
+import { Repeat2Icon } from "lucide-react";
 
 type Search = Promise<{ invalid?: string }>;
 
@@ -33,12 +35,11 @@ export default async function RecurringInvoicesPage({
 
   return (
     <div className="space-y-4 px-4 py-6 lg:px-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t("list.title")}
-        </h1>
-        <p className="text-muted-foreground">{t("list.subtitle")}</p>
-      </div>
+      <PageHeader
+        description={t("list.subtitle")}
+        icon={<Repeat2Icon />}
+        title={t("list.title")}
+      />
       {err ? <p className="text-destructive text-sm">{err}</p> : null}
       {items.length === 0 ? (
         <RecurringEmpty hasInvoices={hasInvoices} />

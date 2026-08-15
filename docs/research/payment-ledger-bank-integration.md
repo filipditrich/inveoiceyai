@@ -1,22 +1,28 @@
 # Research: Payment ledger and bank integration
 
-**Status:** Direction selected for Plan 22; preserved as option research
+**Status:** Fio selected and shipping; further direct bank adapters deferred
 
-**Researched:** 2026-08-13
+**Researched:** 2026-08-13 (initial) · **Refreshed:** 2026-08-15 (Czech bank API matrix)
 
 **Selected:** 2026-08-15
 
 ## Outcome
 
 The first pilot user will move future invoice settlement from Komerční banka to
-an existing Fio account. Invoicey will therefore build the provider-neutral
-payment ledger first and use Fio as the first live read-only adapter.
+an existing Fio account. Invoicey therefore builds a provider-neutral payment
+ledger and uses **Fio as the only live read-only adapter**.
+
+**2026-08-15 diligence:** other common Czech banks (and Revolut) were reviewed
+for workspace-configurable statement/history APIs comparable to Fio. Except for
+Fio, every option is either paid, certificate/OAuth-heavy, PSD2-TPP-only, or
+CSV/email-only. **No additional bank adapters will be built for now.** Keep the
+provider-neutral ledger so a later adapter (or Finbricks-class aggregator) can
+plug in without rewriting matching.
 
 The selected implementation is specified in
 [`specs/payment-ledger-fio.md`](../specs/payment-ledger-fio.md), decided in
 [ADR 0029](../decisions/0029-payment-ledger-fio-first.md), and sequenced in
-[Plan 22](../../.cursor/plans/plan-22-payment-ledger-fio.md). Other integration
-options below remain useful future diligence; they are not part of Plan 22.
+[Plan 22](../../.cursor/plans/plan-22-payment-ledger-fio.md).
 
 ## Why this is foundational
 
@@ -97,14 +103,65 @@ Automatic confirmation should be workspace opt-in, narrowly scoped, audited,
 and reversible. AI may help explain ambiguous text but should not override
 deterministic financial constraints.
 
-## Integration options
+---
+
+## Czech bank / fintech API matrix (2026-08-15)
+
+Criteria for Invoicey: **read payment/statement history**, **per-workspace
+credentials**, preferably **free for the account holder** like Fio, without
+Invoicey holding a ČNB AISP licence.
+
+Two access models matter:
+
+| Model                          | Who issues credentials                     | Invoicey needs AISP? | Workspace config                   |
+| ------------------------------ | ------------------------------------------ | -------------------- | ---------------------------------- |
+| Account-holder / “Premium” API | Client creates token or cert in their IB   | No                   | Good if token/simple secret        |
+| PSD2 AISP                      | Invoicey is TPP; client consents via OAuth | Yes                  | Poor unless licensed or aggregator |
+
+### Summary matrix
+
+| Provider                       | Account-holder API?                     | History / statements                    | Cost (typical, account holder)                                        | Auth / setup                                 | Workspace-pasteable? | Priority for Invoicey                                       |
+| ------------------------------ | --------------------------------------- | --------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------- | -------------------- | ----------------------------------------------------------- |
+| **Fio**                        | Yes                                     | Transactions + statements, many formats | **Free**                                                              | Monitoring token in IB                       | **Yes**              | **Shipped (only)**                                          |
+| MONETA                         | Yes                                     | Balances, tx history, statements        | **Free**                                                              | API token + service contract in IB           | Yes                  | Deferred — closest Fio-like, but still product/ops overhead |
+| ČSOB Business Connector        | Yes                                     | Statements / avíza (file API)           | **Free** (business CEB)                                               | mTLS cert via CEB                            | Cert + passphrase    | Deferred — free but cert-heavy                              |
+| CREDITAS                       | Historically token; moving to ČOBS PSD2 | Tx / export                             | Historically free                                                     | Token or PSD2 depending on era               | Unclear post-2025    | Deferred — re-check before any build                        |
+| Komerční banka (ADAA / STATDA) | Yes (Business API)                      | Live tx (ADAA) + statements (STATDA)    | **0 / 100 / 500 Kč/mo** by frequency (from 2025-11); ≤50 uses/mo free | App registration + OAuth2                    | No (OAuth refresh)   | Deferred — freemium + heavy setup                           |
+| Raiffeisenbank Premium API     | Yes                                     | Tx (often ≤90 days) + statements        | **~500 Kč/mo** + possible annual rights fee                           | ClientID + mTLS PKCS#12; yearly cert unblock | Cert-heavy           | Deferred — paid + ops pain                                  |
+| Česká spořitelna Premium API   | Yes                                     | Statements / history                    | **300 Kč / account / mo**                                             | Developer portal + bank onboarding           | Medium               | Deferred — paid                                             |
+| Revolut Business               | Yes (Grow+)                             | Accounts, tx, webhooks                  | Grow plan **~850–1 000 Kč/mo** (no API on Basic)                      | X.509 + JWT OAuth                            | Medium–heavy         | Deferred — good API, not free                               |
+| Partners Banka                 | No (PSD2 only)                          | AIS after TPP consent                   | Free for licensed TPP                                                 | QSeal + OAuth                                | No                   | Skip                                                        |
+| mBank CZ                       | No (PSD2 only)                          | AIS after TPP consent                   | Free for licensed TPP                                                 | QSealC + mTLS                                | No                   | Skip                                                        |
+| Air Bank                       | No (PSD2 only)                          | AIS after TPP consent                   | Free for licensed TPP                                                 | eIDAS + OAuth (refresh ~180d)                | No                   | Skip — CSV/email workaround only                            |
+| UniCredit / Trinity            | PSD2 / weak                             | Limited                                 | TPP path                                                              | TPP                                          | No                   | Skip                                                        |
+
+**Product stance:** keep Fio only. Revisit this matrix when (a) user bank mix
+shows clear demand, or (b) a licensed multibank intermediary (e.g. Finbricks)
+has acceptable small-OSVČ economics.
+
+### What “shitty setup” means in practice
+
+| Pain                                     | Banks                                                     |
+| ---------------------------------------- | --------------------------------------------------------- |
+| Paid API or paid plan required           | KB (above free tier), RB, ČS, Revolut Grow+               |
+| Cert / mTLS / yearly unblock UX          | RB, ČSOB, Revolut                                         |
+| OAuth app registration + consent renewal | KB, Revolut, all PSD2                                     |
+| Needs Invoicey AISP licence              | Partners, mBank, Air Bank, UniCredit, Trinity, plain PSD2 |
+| No live API — CSV / email only           | Air Bank / mBank / Partners in accounting practice        |
+
+Fio remains the only widely used Czech option that is **free + single pasteable
+token + no TPP licence + good enough fields for VS matching**.
+
+---
+
+## Integration options (detail)
 
 ### 1. Direct proprietary bank APIs
 
 Best data quality and sometimes real-time notifications, but each bank needs a
 separate commercial, security, and technical adapter.
 
-#### Fio API Bankovnictví
+#### Fio API Bankovnictví — selected
 
 - Self-service read token created by the account owner or authorized person.
 - Free according to Fio.
@@ -124,31 +181,58 @@ separate commercial, security, and technical adapter.
   transfer and its fee, or by a movement and its opposite-sign reversal.
 - Fio does not provide a sandbox for this proprietary API; its documentation
   says real testing requires a real account.
-- Strong first direct adapter for Fio users; not a multi-bank solution.
 
-#### Komerční banka Business API
+#### MONETA (deferred)
 
-- Account Direct Access exposes accounts, balances, transactions, statements,
-  and asynchronous transaction subscriptions.
-- Intended for entrepreneurs and legal entities.
-- Charged under KB's price list and requires customer onboarding/contracts.
-- Attractive for near-real-time matching if commercial terms fit Invoicey's
-  small-OSVČ audience.
+- Free account-holder API; token from Internet Banka after activating
+  “Přístup na platební účet prostřednictvím aplikačního rozhraní”.
+- Balances, transaction history (incl. cards), statements; developer sandbox.
+- Closest Fio-like candidate if a second bank is ever needed.
+- Confirm token lifetime / IB-login refresh behaviour before committing.
 
-#### Česká spořitelna Premium API / Final API Consumer
+#### Komerční banka Business API (deferred)
 
-- Premium API advertises statements, transaction history, payments, and
-  immediate notifications for connected business accounts.
-- Česká spořitelna also documents a Final API Consumer route for access to one's
-  own accounts, subject to registration and bank approval.
-- Requires commercial and onboarding validation before treating it as a
-  scalable end-user integration.
+- **ADAA:** accounts, balances, transaction history, optional movement
+  notifications.
+- **STATDA:** statement download (KM/BEST; XML planned 2026).
+- From 2025-11: freemium by frequency (≤50 uses/mo free; then 100 or 500 Kč/mo).
+- OAuth2 + registered third-party app — not a pasteable monitoring token.
+- Attractive only if many users stay on KB and accept fees/setup.
 
-#### ČSOB Business Connector / CEB
+#### Raiffeisenbank Premium API (deferred)
 
-- Supports automated statements and intraday advices for business customers.
-- Data formats include MT940, CAMT.053, CAMT.052, GPC, and bank-specific XML.
-- More enterprise/file-channel shaped than a simple OAuth-style SaaS connect.
+- Transactions, statements, batch payments; developer portal ClientID + mTLS.
+- Typical ~500 Kč/mo connection fee; certs need yearly client unblock.
+- Transaction list docs often limit history (e.g. 90 days) — verify if revisited.
+
+#### Česká spořitelna Premium API (deferred)
+
+- Statements / history for connected business accounts.
+- ~300 Kč per connected account per month.
+- Requires commercial and onboarding validation.
+
+#### ČSOB Business Connector (deferred)
+
+- Free for business CEB clients; automated statements and advices.
+- Certificate-based file/API channel — more enterprise-shaped than Fio.
+
+#### CREDITAS (deferred)
+
+- Accounting tools historically used AccountId + security key from IB.
+- Late 2025 movement toward ČOBS PSD2 — re-validate auth model before any work.
+
+#### Revolut Business (deferred)
+
+- Solid Business API (accounts, transactions, webhooks) for Grow+ plans.
+- No personal API; CZ Grow roughly 850–1 000 Kč/mo.
+- Cert + JWT OAuth setup; good product quality, wrong price for “free like Fio”.
+
+#### Partners Banka / mBank CZ / Air Bank (skip for direct adapters)
+
+- PSD2 AIS/PIS only for live data; TPP licence + eIDAS required.
+- Market workarounds: manual CSV (Partners, mBank) or email CSV (Air Bank).
+- Do not schedule direct adapters; statement-import or email signal could cover
+  edge users later without pretending they have a Fio-class API.
 
 ### 2. Licensed multibank/open-banking intermediary
 
@@ -244,21 +328,20 @@ idempotency rules as online connectors, not a separate feature path.
 
 ## Selected validation order
 
-1. Run a read-only Fio contract probe with the pilot user's real monitoring
-   token and save only redacted field coverage and fixtures.
-2. Implement the provider-neutral ledger, allocation service, deterministic
-   matcher, and migration of existing manual `paid_at` facts.
-3. Ship encrypted Fio connection and explicit-range synchronization.
-4. Pilot human-confirmed matching on a real future invoice paid to Fio.
-5. Add statement import as the next adapter/fallback after the live pilot.
-6. Request commercial/technical proposals from Finbricks and direct-bank APIs
-   when user bank distribution justifies broader coverage.
-7. Consider bank-notification signals and pay-by-bank links only as later
+1. ~~Run a read-only Fio contract probe~~ / ship Fio connector (Plan 22).
+2. Pilot human-confirmed matching on real Fio payments.
+3. Add statement import as the next adapter/fallback after the live pilot
+   (covers non-Fio users without pretending other banks have clean APIs).
+4. Do **not** schedule MONETA / KB / RB / Revolut / PSD2 adapters until user
+   bank distribution or commercial intermediary pricing justifies it.
+5. Optionally request Finbricks (or similar) commercial terms when multibank
+   coverage becomes a product priority.
+6. Consider bank-notification signals and pay-by-bank links only as later
    complementary inputs.
 
 ## Open diligence questions
 
-- Which banks do target Invoicey users actually use?
+- Which banks do target Invoicey users actually use? (blocks revisit of matrix)
 - Does the account belong to the OSVČ as a consumer or business customer, and
   which APIs permit that account type?
 - Transaction-history depth and pagination per bank/provider?
@@ -266,20 +349,33 @@ idempotency rules as online connectors, not a separate feature path.
 - Pending versus booked transactions and reversal semantics?
 - Consent lifetime and renewal UX?
 - Per-connection, per-account, and per-call pricing?
-- Does the provider contractually cover Invoicey without Invoicey holding an
-  AISP/PISP licence?
+- Does a multibank provider contractually cover Invoicey without Invoicey
+  holding an AISP/PISP licence?
 - Webhook availability, SLA, incident reporting, and data residency?
 - Can account connections be moved safely between workspaces/issuers?
+- CREDITAS: confirm whether the IB token model still works after 2025 ČOBS move.
 
 ## Sources consulted
 
+### Fio and ledger
+
 - [Fio API Bankovnictví](https://www.fio.cz/bankovni-sluzby/api-bankovnictvi)
 - [Fio API technical documentation](https://www2.fio.cz/docs/cz/API_Bankovnictvi.pdf)
-- [KB Business API](https://www.kb.cz/en/kbapi/kb-api-services/kb-business-api)
-- [KB Account Direct Access API](https://developers.kb.cz/service/AccountDirectAccessAPI-v2/swagger)
+
+### Direct bank / fintech APIs (2026-08-15 refresh)
+
+- [MONETA API](https://www.moneta.cz/zivnostnici-a-firmy/api) · [MONETA developers](https://www.moneta.cz/zivnostnici-a-firmy/api-pro-vyvojare)
+- [KB STATDA](https://www.kb.cz/cs/kbapi/sluzby-kb-api/vypisy-z-uctu-pres-api-statda) · [KB ADAA](https://www.kb.cz/en/kbapi/kb-api-services/account-direct-access)
+- [RB Premium API](https://www.rb.cz/firmy/transakcni-bankovnictvi/elektronicke-bankovnictvi/premium-api) · [developers.rb.cz](https://developers.rb.cz/)
+- [ČSOB Business Connector](https://www.csob.cz/firmy/prehled-on-line-kanalu-a-aplikaci/business-connector)
 - [Česká spořitelna Premium API](https://www.csas.cz/cs/otevrene-bankovnictvi/premium-api)
-- [Česká spořitelna API connection/FAC documentation](https://www.csas.cz/content/dam/cz/csas/www_csas_cz/dokumenty/obecne/jak-se-pripojit-do-api-cs.pdf)
-- [ČSOB CEB guide](https://www.csob.cz/portal/documents/10710/36574/ceb-uzivatelska-prirucka-cz.pdf)
+- [Revolut Business API (CZ)](https://www.revolut.com/en-CZ/business/business-api/) · [developer.revolut.com](https://developer.revolut.com/docs/api/business)
+- [Partners Banka PSD2](https://psd2.partnersbanka.cz/)
+- [mBank CZ developer portal](https://developer.api.mbank.cz/)
+- [Air Bank API](https://www.airbank.cz/api/)
+
+### Aggregators and competitors
+
 - [Finbricks MULTIBANK](https://www.finbricks.com/)
 - [ABRA/Finbricks supported-bank example](https://abra.finbricks.com/)
 - [Enable Banking Czech-market specifics](https://enablebanking.com/docs/markets/cz)

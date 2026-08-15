@@ -1,6 +1,7 @@
 "use client";
 
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
+import { PageHeader } from "@/components/layout/page-header";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import demoSampleInvoice from "@/lib/demo-sample-invoice.json";
@@ -9,6 +10,7 @@ import { InvoiceSchema, type Invoice } from "@invoicey/invoice-core/schema";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
+import { BracesIcon } from "lucide-react";
 
 function formatSampleJson(sample: Invoice): string {
   return JSON.stringify(sample, null, 2);
@@ -109,25 +111,8 @@ export default function InvoiceFromJsonDemoPage() {
 
   return (
     <div className="space-y-8">
-      <div className="border-border bg-card text-card-foreground rounded-xl border px-6 py-5 shadow-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="max-w-2xl space-y-1">
-            <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
-              {t("eyebrow")}
-            </p>
-            <h1 className="text-balance text-2xl font-semibold tracking-tight md:text-[1.75rem]">
-              {t("title")}
-            </h1>
-            <p className="text-muted-foreground leading-relaxed">
-              {t.rich("subtitle", {
-                code: (chunks) => (
-                  <code className="bg-muted text-foreground rounded-md px-1.5 py-0.5 font-mono text-xs">
-                    {chunks}
-                  </code>
-                ),
-              })}
-            </p>
-          </div>
+      <PageHeader
+        actions={
           <Link
             href="/invoices"
             className={cn(
@@ -137,8 +122,18 @@ export default function InvoiceFromJsonDemoPage() {
           >
             {t("backToInvoices")}
           </Link>
-        </div>
-      </div>
+        }
+        description={t.rich("subtitle", {
+          code: (chunks) => (
+            <code className="bg-muted text-foreground rounded-md px-1.5 py-0.5 font-mono text-xs">
+              {chunks}
+            </code>
+          ),
+        })}
+        eyebrow={t("eyebrow")}
+        icon={<BracesIcon />}
+        title={t("title")}
+      />
 
       <div className="flex flex-col gap-6 xl:flex-row xl:items-stretch">
         <div className="border-border bg-card text-card-foreground flex w-full shrink-0 flex-col gap-4 rounded-xl border p-5 shadow-sm xl:max-w-md xl:p-6">

@@ -1,5 +1,6 @@
 import { deleteClient } from "@/actions/clients";
 import { ClientEditorForm } from "@/components/clients/client-editor-form";
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { requireWorkspace } from "@/lib/auth/session";
@@ -10,6 +11,7 @@ import { and, eq } from "drizzle-orm";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { ContactRoundIcon } from "lucide-react";
 
 type Search = Promise<{ invalid?: string }>;
 
@@ -46,21 +48,20 @@ export default async function ClientEditPage({
 
   return (
     <div className="space-y-6 px-4 py-6 lg:px-6">
-      <div className="flex flex-wrap items-center gap-4">
-        <Button
-          render={<Link href="/clients" prefetch />}
-          variant="outline"
-          size="sm"
-        >
-          ← {tCommon("back")}
-        </Button>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t("editTitle")}
-          </h1>
-          <p className="text-muted-foreground">{snap.data.name}</p>
-        </div>
-      </div>
+      <PageHeader
+        actions={
+          <Button
+            render={<Link href="/clients" prefetch />}
+            size="sm"
+            variant="outline"
+          >
+            ← {tCommon("back")}
+          </Button>
+        }
+        description={snap.data.name}
+        icon={<ContactRoundIcon />}
+        title={t("editTitle")}
+      />
       <ClientEditorForm
         invalidQuery={sp.invalid ?? null}
         mode="edit"

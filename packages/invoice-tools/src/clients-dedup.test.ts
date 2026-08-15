@@ -1,4 +1,5 @@
 import {
+  clientAddressIdentity,
   clientMergeGroupKey,
   groupClientsForMerge,
   normalizeClientName,
@@ -36,6 +37,22 @@ describe("normalizeClientName", () => {
 
   it("returns undefined for blank", () => {
     expect(normalizeClientName("  ")).toBeUndefined();
+  });
+});
+
+describe("clientAddressIdentity", () => {
+  it("normalizes legal name and the full address", () => {
+    expect(
+      clientAddressIdentity({
+        name: "  NFCtron   a.s. ",
+        address: {
+          street: "Masarykova  10",
+          city: "Brno",
+          zip: "602 00",
+          country: "CZ",
+        },
+      }),
+    ).toBe("nfctron a.s.|masarykova 10|brno|60200|cz");
   });
 });
 
@@ -81,6 +98,39 @@ describe("groupClientsForMerge / pickMergeKeepId", () => {
       row("mid", { name: "X", ico: "1" }, t1),
     ]);
     expect(keep).toBe("older");
+  });
+
+  it("bridges an IČO-less draft to the identified client at the same address", () => {
+    const address = {
+      street: "Masarykova 10",
+      city: "Brno",
+      zip: "602 00",
+      country: "CZ",
+    };
+    const groups = groupClientsForMerge([
+      row("draft", { name: "NFCtron a.s.", address }, t0),
+      row("ares", { name: "NFCtron a.s.", ico: "07283539", address }, t1),
+    ]);
+    expect(groups.get("ico:07283539")?.map((r) => r.id)).toEqual([
+      "draft",
+      "ares",
+    ]);
+    expect(pickMergeKeepId(groups.get("ico:07283539") ?? [])).toBe("ares");
+  });
+
+  it("does not merge different IČOs that share a name and address", () => {
+    const address = {
+      street: "Shared 1",
+      city: "Praha",
+      zip: "110 00",
+      country: "CZ",
+    };
+    const groups = groupClientsForMerge([
+      row("one", { name: "Branch", ico: "12345678", address }, t0),
+      row("two", { name: "Branch", ico: "87654321", address }, t1),
+    ]);
+    expect(groups.get("ico:12345678")?.map((r) => r.id)).toEqual(["one"]);
+    expect(groups.get("ico:87654321")?.map((r) => r.id)).toEqual(["two"]);
   });
 
   it("clientMergeGroupKey prefers ico over name", () => {

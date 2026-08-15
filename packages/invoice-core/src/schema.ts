@@ -132,6 +132,13 @@ export const InvoiceMetaSchema = z
     }
   });
 
+export const PaymentQrSettingsSchema = z.object({
+  beneficiaryMessageTemplate: z.string().trim().min(1).max(200).optional(),
+  payerNoteTemplate: z.string().trim().min(1).max(200).optional(),
+});
+
+export type PaymentQrSettings = z.infer<typeof PaymentQrSettingsSchema>;
+
 export const IssuerSnapshotSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1).max(200),
@@ -145,6 +152,7 @@ export const IssuerSnapshotSchema = z.object({
   signatureUrl: z.string().url().optional(),
   registryNote: z.string().max(500).optional(),
   contactEmail: z.string().trim().email(),
+  paymentQr: PaymentQrSettingsSchema.optional(),
 });
 
 export type IssuerSnapshot = z.infer<typeof IssuerSnapshotSchema>;

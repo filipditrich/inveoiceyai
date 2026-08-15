@@ -329,6 +329,22 @@ function parseBankFromForm(
   return { ok: true, bank: bankParsed.data };
 }
 
+function parsePaymentQrFromForm(
+  formData: FormData,
+): IssuerSnapshot["paymentQr"] {
+  const beneficiaryMessageTemplate = optionalTrim(
+    formData.get("qrBeneficiaryMessageTemplate"),
+  );
+  const payerNoteTemplate = optionalTrim(formData.get("qrPayerNoteTemplate"));
+  if (!beneficiaryMessageTemplate && !payerNoteTemplate) {
+    return undefined;
+  }
+  return {
+    ...(beneficiaryMessageTemplate ? { beneficiaryMessageTemplate } : {}),
+    ...(payerNoteTemplate ? { payerNoteTemplate } : {}),
+  };
+}
+
 /**
  * Create issuer with identity + bank; numbering and email get defaults.
  * Redirects to edit identity (or welcome done when `next=welcome`).
@@ -458,6 +474,9 @@ export async function saveIssuerIdentity(formData: FormData): Promise<void> {
   if (existing.snapshot.signatureUrl) {
     candidate.signatureUrl = existing.snapshot.signatureUrl;
   }
+  if (existing.snapshot.paymentQr) {
+    candidate.paymentQr = existing.snapshot.paymentQr;
+  }
 
   const finalSnap = IssuerSnapshotSchema.safeParse(candidate);
   if (!finalSnap.success) {
@@ -507,10 +526,18 @@ export async function saveIssuerBank(formData: FormData): Promise<void> {
     sectionErr(issuerId, "bank", bank.code);
   }
 
-  const nextSnapshot = IssuerSnapshotSchema.safeParse({
+  const paymentQr = parsePaymentQrFromForm(formData);
+  const candidate: IssuerSnapshot = {
     ...existing.snapshot,
     bank: bank.bank,
-  });
+  };
+  if (paymentQr) {
+    candidate.paymentQr = paymentQr;
+  } else {
+    delete candidate.paymentQr;
+  }
+
+  const nextSnapshot = IssuerSnapshotSchema.safeParse(candidate);
   if (!nextSnapshot.success) {
     sectionErr(issuerId, "bank", "snapshot_validation");
   }

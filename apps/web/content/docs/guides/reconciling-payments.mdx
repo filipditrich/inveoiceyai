@@ -13,16 +13,17 @@ invoice status, outstanding totals and the dashboard all derive from them.
 flowchart LR
   Fio[Fio movements] --> Proposals[Match proposals]
   Manual[Manual entry] --> Allocation[Allocation]
-  Proposals --> Confirm[You confirm]
+  Proposals --> Confirm[Manual or exact auto-confirm]
   Confirm --> Allocation
   Allocation --> State[Invoice paid / partial / overpaid]
 "
 />
 
-<Callout title="Confirm-first by design">
-  Bank sync only *suggests* matches. Nothing marks an invoice paid until a
-  workspace member confirms a proposal or adds a manual payment. Automatic
-  confirmation stays off on purpose.
+<Callout title="Review-first by default">
+  Automatic matching is off when you connect a bank. You can opt in per
+  connection; Invoicey then confirms only blocker-free 100% matches with the
+  exact receiving account, CZK currency, variable symbol, and full amount due.
+  Everything else still waits for a person.
 </Callout>
 
 ## Before you connect a bank
@@ -41,8 +42,9 @@ them.
 
 ## Connect Fio banka
 
-The first supported bank is **Fio banka**, via a **read-only monitoring token** from Fio
-Internetbanking. That token can pull account movements; it cannot submit payment orders.
+The only supported bank feed today is **Fio banka**, via a **read-only monitoring token** from Fio
+Internetbanking. That token can pull account movements; it cannot submit payment orders. Why Fio and
+what we researched for other banks: [Bank connections](/docs/integrations/bank-connections).
 
 Owners and admins configure this under **Settings → Bank connections**. Connections belong to the
 **active workspace** — they are never shared with your other workspaces.
@@ -77,14 +79,22 @@ Owners and admins configure this under **Settings → Bank connections**. Connec
 Disconnect stops further sync but **keeps** imported transactions and allocations — history is not
 wiped when you rotate or revoke a token.
 
+### Optional automatic matching
+
+Turn on **Automatic exact matching** on the Fio connection to confirm only new, exact proposals.
+An automatic confirmation marks the invoice paid and sends the user who connected the account a
+summary email. Partial, overpaid, ambiguous, heuristic, and previously waiting proposals remain
+manual. Turning the option on does not bulk-confirm the existing review queue.
+
 ## The Payments page
 
 Open **Payments** in the sidebar. It is the reconciliation desk for the workspace.
 
 ### Match proposals
 
-Each proposal links a bank credit to an issued invoice, with a score, confidence, and reason /
-blocker codes (variable symbol, amount, IBAN, currency, and so on).
+Each proposal links a bank credit to an issued invoice. The interface explains it as an exact,
+strong, likely, or review-needed match and shows the supporting facts in readable labels rather
+than exposing matcher internals.
 
 | Action      | Effect                                                                      |
 | ----------- | --------------------------------------------------------------------------- |
@@ -111,6 +121,9 @@ outstanding totals recompute immediately.
 Invoice detail shows a **Payment ledger** summary: received, outstanding, and the allocation
 timeline. From there you can still **Mark paid** / **Unmark paid** (or reverse a specific
 allocation). Those actions are ledger operations too — not a separate shadow field.
+
+Unmarking or reversing a bank-confirmed payment reopens its original match proposal on
+**Payments**, so an accidental correction can be reviewed and confirmed again.
 
 When an invoice becomes fully paid, optional **payment-received** email can fire once (configured
 per issuer).
@@ -143,9 +156,9 @@ Issued documents are never rewritten when money moves — only payment projectio
 ## What this does not include yet
 
 - Payment initiation or any write-capable bank token
-- Automatic confirmation without a human
+- Automatic confirmation of partial, ambiguous, overpaid, or heuristic matches
 - Foreign-exchange / cross-currency allocation
-- Banks other than Fio (the ledger is ready for more adapters later)
+- Banks other than Fio ([researched and deferred](/docs/integrations/bank-connections); the ledger is ready for more adapters later)
 - Full rematch / multi-invoice split UI polish beyond confirm, reject, reverse and manual add
 
 ## Tips
@@ -157,9 +170,10 @@ Issued documents are never rewritten when money moves — only payment projectio
     the credit. Drafts are never candidates.
   </Accordion>
   <Accordion title="I use another bank">
-    Keep using **Mark paid** or **Add a manual payment**. Fio is the first feed;
-    other banks are not connected yet, but the ledger already accepts manual
-    entries the same way.
+    Keep using **Mark paid** or **Add a manual payment**. Other Czech banks were
+    reviewed and deferred — see [Bank
+    connections](/docs/integrations/bank-connections). The ledger already
+    accepts manual entries the same way as Fio matches.
   </Accordion>
   <Accordion title="Token or sync errors">
     Use a monitoring-only token for a CZK account. Fio rate-limits roughly every
@@ -171,6 +185,11 @@ Issued documents are never rewritten when money moves — only payment projectio
 ## Related
 
 <Cards>
+  <Card
+    title="Bank connections"
+    href="/docs/integrations/bank-connections"
+    description="Fio only for now — research matrix for other banks."
+  />
   <Card
     title="Issue & get paid"
     href="/docs/guides/issuing-and-payment"

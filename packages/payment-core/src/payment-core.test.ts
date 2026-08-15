@@ -6,7 +6,11 @@ import {
   isValidFioTokenShape,
   parseFioResponse,
 } from "./fio";
-import { derivePaymentState, proposeInvoiceMatches } from "./matcher";
+import {
+  derivePaymentState,
+  isExactAutoMatchProposal,
+  proposeInvoiceMatches,
+} from "./matcher";
 import type { NormalizedBankTransaction } from "./types";
 
 const transaction: NormalizedBankTransaction = {
@@ -169,6 +173,7 @@ describe("proposeInvoiceMatches", () => {
       proposedAmount: "1210.00",
       confidence: "high",
     });
+    expect(result[0] && isExactAutoMatchProposal(result[0])).toBe(true);
   });
 
   it("blocks an ambiguous variable symbol", () => {
@@ -220,6 +225,7 @@ describe("proposeInvoiceMatches", () => {
       confidence: "high",
       reasons: expect.arrayContaining(["partial_amount"]),
     });
+    expect(result[0] && isExactAutoMatchProposal(result[0])).toBe(false);
   });
 
   it("rejects currency and receiving-account mismatches", () => {

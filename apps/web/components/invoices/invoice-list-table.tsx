@@ -378,6 +378,14 @@ export function InvoiceListTable({
   const selectedDeletable = selectedRows.filter(
     (r) => r.displayStatus === "draft" || r.displayStatus === "cancelled",
   ).length;
+  const selectedCancellable = selectedRows.filter(
+    (r) =>
+      (r.displayStatus === "unpaid" ||
+        r.displayStatus === "overdue" ||
+        r.displayStatus === "future") &&
+      r.paymentState === "unpaid",
+  ).length;
+  const hasProtectedIssuedSelection = selectedDeletable < selectedIds.length;
 
   const runBulk = (
     key: Exclude<BulkKey, null>,
@@ -478,10 +486,15 @@ export function InvoiceListTable({
                   ? ` · ${t("selectedDrafts", { count: selectedDrafts })}`
                   : null}
               </span>
+              {hasProtectedIssuedSelection ? (
+                <p className="text-muted-foreground mt-0.5 text-xs">
+                  {t("deleteIssuedHint")}
+                </p>
+              ) : null}
             </div>
             <div className="flex flex-wrap gap-2">
               <Button
-                disabled={pending || selectedDeletable === 0}
+                disabled={pending || selectedDrafts === 0}
                 loading={pending && bulkKey === "issue"}
                 onClick={() => runBulk("issue", bulkIssueInvoice)}
                 size="sm"
@@ -512,7 +525,7 @@ export function InvoiceListTable({
                   : t("bulkUnpaid")}
               </Button>
               <Button
-                disabled={pending}
+                disabled={pending || selectedCancellable === 0}
                 loading={pending && bulkKey === "cancel"}
                 onClick={() => runBulk("cancel", bulkCancelInvoice)}
                 size="sm"
@@ -524,7 +537,7 @@ export function InvoiceListTable({
                   : t("bulkCancel")}
               </Button>
               <Button
-                disabled={pending}
+                disabled={pending || selectedDeletable === 0}
                 loading={pending && bulkKey === "delete"}
                 onClick={() => runBulk("delete", bulkDeleteInvoice)}
                 size="sm"

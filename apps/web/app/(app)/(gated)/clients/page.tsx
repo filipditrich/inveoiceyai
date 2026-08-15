@@ -1,5 +1,6 @@
 import { mergeClientsAction } from "@/actions/clients";
 import { ClientsDataGrid } from "@/components/clients/clients-data-grid";
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
 import { invalidMessage } from "@/lib/invalid-message";
@@ -12,6 +13,7 @@ import { db } from "@invoicey/db/client";
 import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { ContactRoundIcon } from "lucide-react";
 
 type Search = Promise<{ invalid?: string }>;
 
@@ -55,24 +57,23 @@ export default async function ClientsPage({
 
   return (
     <div className="space-y-4 px-4 py-6 lg:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t("title")}
-          </h1>
-          <p className="text-muted-foreground">{t("subtitle")}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <form action={mergeClientsAction}>
-            <Button size="sm" type="submit" variant="outline">
-              {t("mergeDuplicates")}
+      <PageHeader
+        actions={
+          <>
+            <form action={mergeClientsAction}>
+              <Button size="sm" type="submit" variant="outline">
+                {t("mergeDuplicates")}
+              </Button>
+            </form>
+            <Button render={<Link href="/clients/new" prefetch />} size="sm">
+              {t("newButton")}
             </Button>
-          </form>
-          <Button render={<Link href="/clients/new" prefetch />} size="sm">
-            {t("newButton")}
-          </Button>
-        </div>
-      </div>
+          </>
+        }
+        description={t("subtitle")}
+        icon={<ContactRoundIcon />}
+        title={t("title")}
+      />
       {err ? <p className="text-destructive text-sm">{err}</p> : null}
 
       {items.length === 0 ? (

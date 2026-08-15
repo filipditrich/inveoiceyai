@@ -1,9 +1,11 @@
 import { InvoiceAiDraftClient } from "@/components/invoices/invoice-ai-draft-client";
+import { PageHeader } from "@/components/layout/page-header";
 import { requireWorkspace } from "@/lib/auth/session";
 import { getWorkspaceTokenSummary } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { SparklesIcon } from "lucide-react";
 
 export default async function InvoiceAiPage() {
   const { workspaceId } = await requireWorkspace();
@@ -12,23 +14,20 @@ export default async function InvoiceAiPage() {
 
   return (
     <div className="space-y-6 px-4 py-6 lg:px-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-muted-foreground text-sm">{t("eyebrow")}</p>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t("title")}
-          </h1>
-          <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
-            {t("subtitle")}
-          </p>
-        </div>
-        <Link
-          href="/invoices"
-          className="text-muted-foreground hover:text-foreground text-sm underline-offset-4 hover:underline"
-        >
-          {t("backToInvoices")}
-        </Link>
-      </div>
+      <PageHeader
+        actions={
+          <Link
+            href="/invoices"
+            className="text-muted-foreground hover:text-foreground text-sm underline-offset-4 hover:underline"
+          >
+            {t("backToInvoices")}
+          </Link>
+        }
+        description={t("subtitle")}
+        eyebrow={t("eyebrow")}
+        icon={<SparklesIcon />}
+        title={t("title")}
+      />
       <InvoiceAiDraftClient
         initialBalance={{
           giftedRemaining: summary.giftedRemaining,

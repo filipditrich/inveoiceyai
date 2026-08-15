@@ -1,10 +1,12 @@
 import "server-only";
 
 import {
+  confirmPaymentMatchProposal,
   bankAccountIssuers,
   bankAccounts,
   bankConnections,
   bankTransactions,
+  invoicePaymentAllocations,
   invoices,
   issuerBusinesses,
   paymentAuditEvents,
@@ -12,14 +14,17 @@ import {
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { withDbTransaction } from "@invoicey/db/transaction";
+import { sendPaymentReceivedEmailIfEnabled } from "@invoicey/invoice-tools/email";
 import {
   fetchFioTransactions,
+  isExactAutoMatchProposal,
   proposeInvoiceMatches,
   type NormalizedTransactionBatch,
 } from "@invoicey/payment-core";
 import { and, eq, inArray, isNull, lt, or, sql } from "drizzle-orm";
 
 import { decryptBankToken, encryptBankToken } from "./token-crypto";
+import { sendAutoMatchOwnerEmail } from "./send-auto-match-email";
 
 const MATCHER_VERSION = "fio-v1";
 const MIN_REQUEST_INTERVAL_MS = 31_000;
@@ -48,6 +53,7 @@ export type FioConnectionSummary = {
   iban: string;
   accountNumber: string;
   currency: string;
+  autoConfirmExactMatches: boolean;
   lastSyncSucceededAt: Date | null;
   lastSyncErrorCode: string | null;
   nextSyncAt: Date | null;
@@ -63,6 +69,7 @@ export async function listFioConnections(
       iban: bankAccounts.iban,
       accountNumber: bankAccounts.accountNumber,
       currency: bankAccounts.currency,
+      autoConfirmExactMatches: bankConnections.autoConfirmExactMatches,
       lastSyncSucceededAt: bankConnections.lastSyncSucceededAt,
       lastSyncErrorCode: bankConnections.lastSyncErrorCode,
       nextSyncAt: bankConnections.nextSyncAt,
@@ -225,6 +232,7 @@ export type FioSyncResult = {
   ok: boolean;
   imported: number;
   proposed: number;
+  autoMatched: number;
   error?: string;
 };
 
@@ -253,7 +261,13 @@ export async function syncFioConnection(input: {
     )
     .returning();
   if (!leased)
-    return { ok: false, imported: 0, proposed: 0, error: "sync_busy" };
+    return {
+      ok: false,
+      imported: 0,
+      proposed: 0,
+      autoMatched: 0,
+      error: "sync_busy",
+    };
 
   try {
     const [account] = await db
@@ -355,12 +369,42 @@ export async function syncFioConnection(input: {
             ),
           )
       : [];
-    const insertedByProviderId = new Map(
-      inserted.map((row) => [row.providerTransactionId, row.id]),
+    // Retry matching fetched transactions that are still unallocated, not only
+    // rows inserted by this sync. This repairs transient misses and lets newly
+    // issued invoices match payments imported by an earlier sync.
+    const storedMatchableTransactions = credits.length
+      ? await db
+          .select({
+            id: bankTransactions.id,
+            providerTransactionId: bankTransactions.providerTransactionId,
+          })
+          .from(bankTransactions)
+          .where(
+            and(
+              eq(bankTransactions.bankAccountId, account.id),
+              inArray(
+                bankTransactions.providerTransactionId,
+                credits.map((transaction) => transaction.providerTransactionId),
+              ),
+              sql`not exists (
+                select 1
+                from ${invoicePaymentAllocations}
+                where ${invoicePaymentAllocations.bankTransactionId} = ${bankTransactions.id}
+                  and ${invoicePaymentAllocations.reversedAt} is null
+              )`,
+            ),
+          )
+      : [];
+    const matchableByProviderId = new Map(
+      storedMatchableTransactions.map((row) => [
+        row.providerTransactionId,
+        row.id,
+      ]),
     );
     let proposed = 0;
+    let autoMatched = 0;
     for (const transaction of credits) {
-      const bankTransactionId = insertedByProviderId.get(
+      const bankTransactionId = matchableByProviderId.get(
         transaction.providerTransactionId,
       );
       if (!bankTransactionId) continue;
@@ -370,20 +414,66 @@ export async function syncFioConnection(input: {
         invoices: invoiceRows,
       });
       if (proposals.length > 0) {
-        await db.insert(paymentMatchProposals).values(
-          proposals.map((proposal) => ({
-            workspaceId: input.workspaceId,
-            bankTransactionId,
-            invoiceId: proposal.invoiceId,
-            proposedAmount: proposal.proposedAmount,
-            score: proposal.score,
-            confidence: proposal.confidence,
-            reasonCodes: proposal.reasons,
-            blockerCodes: proposal.blockers,
-            matcherVersion: MATCHER_VERSION,
-          })),
-        );
-        proposed += proposals.length;
+        const insertedProposals = await db
+          .insert(paymentMatchProposals)
+          .values(
+            proposals.map((proposal) => ({
+              workspaceId: input.workspaceId,
+              bankTransactionId,
+              invoiceId: proposal.invoiceId,
+              proposedAmount: proposal.proposedAmount,
+              score: proposal.score,
+              confidence: proposal.confidence,
+              reasonCodes: proposal.reasons,
+              blockerCodes: proposal.blockers,
+              matcherVersion: MATCHER_VERSION,
+            })),
+          )
+          .onConflictDoNothing()
+          .returning({
+            id: paymentMatchProposals.id,
+            invoiceId: paymentMatchProposals.invoiceId,
+          });
+        proposed += insertedProposals.length;
+        if (leased.autoConfirmExactMatches) {
+          const proposalByInvoiceId = new Map(
+            proposals.map((proposal) => [proposal.invoiceId, proposal]),
+          );
+          for (const insertedProposal of insertedProposals) {
+            const proposal = proposalByInvoiceId.get(
+              insertedProposal.invoiceId,
+            );
+            if (!proposal || !isExactAutoMatchProposal(proposal)) continue;
+            const confirmation = await confirmPaymentMatchProposal({
+              workspaceId: input.workspaceId,
+              proposalId: insertedProposal.id,
+              actorType: "system",
+            });
+            if (!confirmation.ok) continue;
+            autoMatched += 1;
+            if (confirmation.becamePaid) {
+              try {
+                await Promise.all([
+                  sendAutoMatchOwnerEmail({
+                    workspaceId: input.workspaceId,
+                    userId: leased.createdByUserId,
+                    invoiceId: confirmation.invoiceId,
+                    amount: proposal.proposedAmount,
+                    bookedDate: transaction.bookingDate,
+                    variableSymbol: transaction.variableSymbol,
+                  }),
+                  sendPaymentReceivedEmailIfEnabled({
+                    db,
+                    workspaceId: input.workspaceId,
+                    invoiceId: confirmation.invoiceId,
+                  }),
+                ]);
+              } catch (error) {
+                console.error("[fio-sync] auto-match email failed", error);
+              }
+            }
+          }
+        }
       }
     }
 
@@ -407,7 +497,12 @@ export async function syncFioConnection(input: {
         updatedAt: now,
       })
       .where(eq(bankConnections.id, leased.id));
-    return { ok: true, imported: inserted.length, proposed };
+    return {
+      ok: true,
+      imported: inserted.length,
+      proposed,
+      autoMatched,
+    };
   } catch (error) {
     const code = error instanceof Error ? error.message : "fio_sync_failed";
     await db
@@ -420,8 +515,49 @@ export async function syncFioConnection(input: {
         updatedAt: new Date(),
       })
       .where(eq(bankConnections.id, input.connectionId));
-    return { ok: false, imported: 0, proposed: 0, error: code };
+    return {
+      ok: false,
+      imported: 0,
+      proposed: 0,
+      autoMatched: 0,
+      error: code,
+    };
   }
+}
+
+export async function setFioAutoMatch(input: {
+  workspaceId: string;
+  connectionId: string;
+  userId: string;
+  enabled: boolean;
+}): Promise<boolean> {
+  const [updated] = await db
+    .update(bankConnections)
+    .set({
+      autoConfirmExactMatches: input.enabled,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(bankConnections.id, input.connectionId),
+        eq(bankConnections.workspaceId, input.workspaceId),
+        eq(bankConnections.provider, "fio"),
+      ),
+    )
+    .returning({ id: bankConnections.id });
+  if (!updated) return false;
+  await db.insert(paymentAuditEvents).values({
+    workspaceId: input.workspaceId,
+    action: input.enabled
+      ? "bank_connection.auto_match_enabled"
+      : "bank_connection.auto_match_disabled",
+    actorType: "user",
+    actorUserId: input.userId,
+    entityType: "bank_connection",
+    entityId: updated.id,
+    payloadJson: { exactOnly: true },
+  });
+  return true;
 }
 
 export async function deleteFioConnection(input: {

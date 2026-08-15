@@ -68,6 +68,7 @@ export {
   type SlackLinkConfirmDecision,
 } from "./slack-identities";
 export {
+  clientAddressIdentity,
   clientMergeGroupKey,
   ensureClient,
   groupClientsForMerge,

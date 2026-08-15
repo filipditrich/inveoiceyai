@@ -9,6 +9,7 @@ import {
 import { requireWorkspace } from "@/lib/auth/session";
 import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
 import type { LastInvoiceSuggestions } from "@/lib/last-invoice-suggestions";
+import { invoicePaymentIdentifiers } from "@/lib/payments/invoice-payment-identifiers";
 import {
   ClientSnapshotSchema,
   InvoiceSchema,
@@ -238,6 +239,7 @@ function rowValuesFromInvoice(
     paidAt: opts.paidAt,
     cancelledAt: opts.cancelledAt,
     currency: invoice.meta.currency,
+    ...invoicePaymentIdentifiers(invoice.payment),
     total: String(invoice.totals.total),
     subtotal: String(invoice.totals.subtotal),
     vatTotal: String(invoice.totals.vatTotal),
@@ -577,11 +579,12 @@ export async function issueInvoice(formData: FormData): Promise<void> {
 
 /** Issue a saved draft by id (detail / list / bulk). */
 export async function issueSavedInvoice(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
   }
-  const result = await issueInvoiceById({ id });
+  const result = await issueInvoiceById({ id, workspaceId });
   if (!result.ok) {
     redirect(
       `/invoices/${id}?invalid=${encodeURIComponent(result.error || "cannot_issue")}`,
@@ -594,11 +597,12 @@ export async function issueSavedInvoice(formData: FormData): Promise<void> {
 }
 
 export async function bulkIssueInvoice(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
   const ids = collectIds(formData);
   if (ids.length === 0) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
   }
-  bulkRedirect(await bulkIssueInvoices({ ids }), "issue");
+  bulkRedirect(await bulkIssueInvoices({ ids, workspaceId }));
 }
 
 export async function markInvoicePaid(formData: FormData): Promise<void> {
@@ -618,12 +622,16 @@ export async function markInvoicePaid(formData: FormData): Promise<void> {
 }
 
 export async function unmarkInvoicePaid(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
   }
-  const result = await unmarkInvoicePaidById({ id, workspaceId });
+  const result = await unmarkInvoicePaidById({
+    id,
+    workspaceId,
+    actorUserId: userId,
+  });
   if (!result.ok) {
     redirect(`/invoices?invalid=${encodeURIComponent("cannot_unmark_paid")}`);
   }
@@ -640,14 +648,15 @@ function collectIds(formData: FormData): string[] {
     .map((v) => v.trim());
 }
 
-function bulkRedirect(
-  result: { ok: number; skipped: number; failed: number },
-  op: string,
-): never {
+function bulkRedirect(result: {
+  ok: number;
+  skipped: number;
+  failed: number;
+}): never {
   revalidatePath("/invoices");
   revalidatePath("/dashboard");
   const q = new URLSearchParams({
-    toast: `bulk_${op}`,
+    toast: "bulk_summary",
     ok: String(result.ok),
     skipped: String(result.skipped),
     failed: String(result.failed),
@@ -661,7 +670,7 @@ export async function bulkMarkInvoicePaid(formData: FormData): Promise<void> {
   if (ids.length === 0) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
   }
-  bulkRedirect(await bulkMarkInvoicesPaid({ ids, workspaceId }), "paid");
+  bulkRedirect(await bulkMarkInvoicesPaid({ ids, workspaceId }));
 }
 
 export async function bulkUnmarkInvoicePaid(formData: FormData): Promise<void> {
@@ -670,32 +679,35 @@ export async function bulkUnmarkInvoicePaid(formData: FormData): Promise<void> {
   if (ids.length === 0) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
   }
-  bulkRedirect(await bulkUnmarkInvoicesPaid({ ids, workspaceId }), "unpaid");
+  bulkRedirect(await bulkUnmarkInvoicesPaid({ ids, workspaceId }));
 }
 
 export async function bulkCancelInvoice(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
   const ids = collectIds(formData);
   if (ids.length === 0) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
   }
-  bulkRedirect(await bulkCancelInvoices({ ids }), "cancel");
+  bulkRedirect(await bulkCancelInvoices({ ids, workspaceId }));
 }
 
 export async function bulkDeleteInvoice(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
   const ids = collectIds(formData);
   if (ids.length === 0) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
   }
-  bulkRedirect(await bulkDeleteDraftInvoices({ ids }), "delete");
+  bulkRedirect(await bulkDeleteDraftInvoices({ ids, workspaceId }));
 }
 
 /** Cancel an issued (unpaid) invoice. */
 export async function cancelInvoice(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
   }
-  const result = await cancelInvoiceById({ id });
+  const result = await cancelInvoiceById({ id, workspaceId });
   if (!result.ok) {
     redirect(`/invoices?invalid=${encodeURIComponent("cannot_cancel")}`);
   }
@@ -722,7 +734,9 @@ export async function deleteInvoice(formData: FormData): Promise<void> {
   if (rows[0].issuedAt && !rows[0].cancelledAt) {
     redirect(`/invoices?invalid=${encodeURIComponent("not_draft")}`);
   }
-  await db.delete(invoices).where(eq(invoices.id, id));
+  await db
+    .delete(invoices)
+    .where(and(eq(invoices.id, id), eq(invoices.workspaceId, workspaceId)));
   revalidatePath("/invoices");
   revalidatePath("/dashboard");
   redirect("/invoices?toast=invoice_deleted");

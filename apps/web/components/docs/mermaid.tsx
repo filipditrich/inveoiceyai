@@ -1,17 +1,17 @@
 "use client";
 
-import { Suspense, use, useEffect, useId, useState } from "react";
+import { Suspense, use, useId, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 
 /**
  * Client-side Mermaid renderer for product docs. Theme follows next-themes.
  */
 export function Mermaid({ chart }: { chart: string }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  );
 
   if (!mounted) {
     return (

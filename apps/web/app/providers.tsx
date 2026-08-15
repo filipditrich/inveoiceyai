@@ -37,7 +37,13 @@ export default function Providers({ children }: PropsWithChildren) {
               <C15tDialog />
             </C15tProvider>
           </ModalsProvider>
-          <Toaster position="bottom-right" />
+          <Toaster
+            closeButton
+            expand
+            position="top-right"
+            richColors
+            visibleToasts={4}
+          />
         </TooltipProvider>
       </ThemeProvider>
     </NuqsAdapter>
