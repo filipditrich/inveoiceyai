@@ -243,7 +243,7 @@ export function normalizeMonetaTransaction(
   };
 }
 
-function authHeaders(token: string): HeadersInit {
+function authHeaders(token: string): Record<string, string> {
   return {
     accept: "application/json",
     authorization: `Bearer ${token.trim()}`,
