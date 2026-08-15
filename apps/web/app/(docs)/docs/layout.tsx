@@ -22,7 +22,12 @@ export default function DocsRootLayout({
       theme={{ enabled: false }}
     >
       <DocsLayout tree={source.getPageTree()} {...docsBaseOptions()}>
-        <main id="main-content" lang="en">
+        {/**
+         * `contents` keeps a main landmark for skip links while letting
+         * DocsPage's article + TOC participate in the layout CSS grid.
+         * A normal block wrapper pushes "On this page" under the article.
+         */}
+        <main className="contents" id="main-content" lang="en">
           {children}
         </main>
       </DocsLayout>
