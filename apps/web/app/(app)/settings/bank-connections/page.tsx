@@ -1,5 +1,6 @@
 import { issuerBusinesses } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
+import { asc, eq } from "drizzle-orm";
 import {
   Building2Icon,
   CircleDotDashedIcon,
@@ -11,6 +12,7 @@ import {
   Trash2Icon,
   ZapIcon,
 } from "lucide-react";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import Image from "next/image";
 
 import {
@@ -36,66 +38,41 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { AppLocale } from "@/i18n/config";
+import { isAppLocale } from "@/i18n/config";
 import { requireWorkspace } from "@/lib/auth/session";
+import { formatDateTime } from "@/lib/format";
+import { messageLookup } from "@/lib/i18n-lookup";
 import { listFioConnections } from "@/lib/payments/fio-service";
 import { listMonetaConnections } from "@/lib/payments/moneta-service";
 import { isBankTokenEncryptionConfigured } from "@/lib/payments/token-crypto";
-import { asc, eq } from "drizzle-orm";
-
-function issuerName(snapshot: Record<string, unknown>): string {
-  return typeof snapshot.name === "string" ? snapshot.name : "Unnamed issuer";
-}
 
 const PLANNED_BANKS = [
-  {
-    name: "Komerční banka",
-    logo: "/banks/kb.svg",
-    note: "Deferred",
-  },
-  {
-    name: "Raiffeisenbank",
-    logo: "/banks/rb.svg",
-    note: "Deferred",
-  },
-  {
-    name: "Česká spořitelna",
-    logo: "/banks/csas-modern.svg",
-    note: "Deferred",
-  },
-  {
-    name: "ČSOB",
-    logo: "/banks/csob.svg",
-    note: "Deferred",
-  },
-  {
-    name: "CREDITAS",
-    logo: "/banks/creditas.jpg",
-    note: "Deferred",
-  },
-  {
-    name: "Revolut",
-    logo: "/banks/revolut.svg",
-    note: "Deferred",
-  },
-  {
-    name: "Air Bank",
-    logo: "/banks/airbank.png",
-    note: "Not planned",
-  },
-  {
-    name: "mBank",
-    logo: "/banks/mbank.jpg",
-    note: "Not planned",
-  },
-  {
-    name: "Partners Banka",
-    logo: "/banks/partners.png",
-    note: "Not planned",
-  },
+  { id: "kb", logo: "/banks/kb.svg", note: "deferred" },
+  { id: "rb", logo: "/banks/rb.svg", note: "deferred" },
+  { id: "csas", logo: "/banks/csas-modern.svg", note: "deferred" },
+  { id: "csob", logo: "/banks/csob.svg", note: "deferred" },
+  { id: "creditas", logo: "/banks/creditas.jpg", note: "deferred" },
+  { id: "revolut", logo: "/banks/revolut.svg", note: "deferred" },
+  { id: "airbank", logo: "/banks/airbank.png", note: "notPlanned" },
+  { id: "mbank", logo: "/banks/mbank.jpg", note: "notPlanned" },
+  { id: "partners", logo: "/banks/partners.png", note: "notPlanned" },
 ] as const;
 
-function ConnectionStatusBadge({ status }: { status: string }) {
-  const active = status === "active";
+function issuerName(
+  snapshot: Record<string, unknown>,
+  fallback: string,
+): string {
+  return typeof snapshot.name === "string" ? snapshot.name : fallback;
+}
+
+function ConnectionStatusBadge({
+  label,
+  active,
+}: {
+  label: string;
+  active: boolean;
+}) {
   return (
     <Badge
       variant={active ? "default" : "secondary"}
@@ -107,7 +84,7 @@ function ConnectionStatusBadge({ status }: { status: string }) {
           active ? "bg-emerald-400" : "bg-muted-foreground/60"
         }`}
       />
-      {status}
+      {label}
     </Badge>
   );
 }
@@ -142,20 +119,29 @@ function BankLogoTile({
 
 export default async function BankConnectionsPage() {
   const { workspaceId, role } = await requireWorkspace();
-  const [fioConnections, monetaConnections, issuers] = await Promise.all([
-    listFioConnections(workspaceId),
-    listMonetaConnections(workspaceId),
-    db
-      .select({ id: issuerBusinesses.id, snapshot: issuerBusinesses.snapshot })
-      .from(issuerBusinesses)
-      .where(eq(issuerBusinesses.workspaceId, workspaceId))
-      .orderBy(asc(issuerBusinesses.createdAt)),
-  ]);
+  const [t, localeValue, messages, fioConnections, monetaConnections, issuers] =
+    await Promise.all([
+      getTranslations("Settings.bankConnections"),
+      getLocale(),
+      getMessages(),
+      listFioConnections(workspaceId),
+      listMonetaConnections(workspaceId),
+      db
+        .select({
+          id: issuerBusinesses.id,
+          snapshot: issuerBusinesses.snapshot,
+        })
+        .from(issuerBusinesses)
+        .where(eq(issuerBusinesses.workspaceId, workspaceId))
+        .orderBy(asc(issuerBusinesses.createdAt)),
+    ]);
+  const locale: AppLocale = isAppLocale(localeValue) ? localeValue : "cs";
+  const unnamedIssuer = t("unnamedIssuer");
   const canManage = role === "admin" || role === "owner";
   const encryptionReady = isBankTokenEncryptionConfigured();
   const issuerOptions = issuers.map((issuer) => ({
     id: issuer.id,
-    label: issuerName(issuer.snapshot),
+    label: issuerName(issuer.snapshot, unnamedIssuer),
   }));
   const hasActiveFio = fioConnections.some(
     (connection) => connection.status === "active",
@@ -164,17 +150,22 @@ export default async function BankConnectionsPage() {
     (connection) => connection.status === "active",
   );
   const connections = [...fioConnections, ...monetaConnections];
+  const statusLabels = messages.Settings.bankConnections.status;
+  const errorLabels = messages.Settings.bankConnections.errors;
 
   return (
     <div className="space-y-6">
       <SettingsPageHeader
-        description="Connect a read-only bank feed to this workspace. Tokens and accounts are never shared with your other workspaces."
+        description={t("pageDescription")}
         icon={<LandmarkIcon />}
-        title="Bank connections"
+        title={t("pageTitle")}
       />
 
       {connections.map((connection) => {
         const isMoneta = connection.provider === "moneta";
+        const providerName = isMoneta
+          ? t("providers.moneta")
+          : t("providers.fio");
         const syncAction = isMoneta ? syncMoneta : syncFio;
         const disconnectAction = isMoneta ? disconnectMoneta : disconnectFio;
         const toggleAction = isMoneta
@@ -186,16 +177,14 @@ export default async function BankConnectionsPage() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-4">
                   <BankLogoTile
-                    alt={isMoneta ? "MONETA Money Bank" : "Fio banka"}
+                    alt={providerName}
                     src={isMoneta ? "/banks/moneta.png" : "/banks/fio.png"}
                   />
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <CardTitle>
-                        {isMoneta ? "MONETA Money Bank" : "Fio banka"}
-                      </CardTitle>
+                      <CardTitle>{providerName}</CardTitle>
                       <Badge variant="outline" className="gap-1">
-                        <LockKeyholeIcon className="size-3" /> Read-only
+                        <LockKeyholeIcon className="size-3" /> {t("readOnly")}
                       </Badge>
                     </div>
                     <CardDescription className="mt-1 truncate font-mono">
@@ -203,31 +192,39 @@ export default async function BankConnectionsPage() {
                     </CardDescription>
                   </div>
                 </div>
-                <ConnectionStatusBadge status={connection.status} />
+                <ConnectionStatusBadge
+                  active={connection.status === "active"}
+                  label={messageLookup(statusLabels, connection.status)}
+                />
               </div>
             </CardHeader>
             <CardContent className="space-y-5 pt-5">
               <dl className="grid gap-3 text-sm sm:grid-cols-3">
                 <div className="bg-muted/35 rounded-xl p-3">
                   <dt className="text-muted-foreground text-xs">
-                    Imported currency
+                    {t("importedCurrency")}
                   </dt>
                   <dd className="mt-1 font-medium">{connection.currency}</dd>
                 </div>
                 <div className="bg-muted/35 rounded-xl p-3 sm:col-span-2">
                   <dt className="text-muted-foreground text-xs">
-                    Last successful sync
+                    {t("lastSuccessfulSync")}
                   </dt>
                   <dd className="mt-1 font-medium">
-                    {connection.lastSyncSucceededAt?.toLocaleString("cs-CZ") ??
-                      "Not synced yet"}
+                    {connection.lastSyncSucceededAt
+                      ? formatDateTime(connection.lastSyncSucceededAt, locale)
+                      : t("notSyncedYet")}
                   </dd>
                 </div>
               </dl>
               {connection.lastSyncErrorCode ? (
                 <p className="text-destructive text-sm">
-                  Last error:{" "}
-                  {connection.lastSyncErrorCode.replaceAll("_", " ")}
+                  {t("lastError", {
+                    code: messageLookup(
+                      errorLabels,
+                      connection.lastSyncErrorCode,
+                    ),
+                  })}
                 </p>
               ) : null}
               <div className="border-brand/15 bg-brand/[0.05] flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -236,12 +233,9 @@ export default async function BankConnectionsPage() {
                     <ZapIcon className="size-5" />
                   </span>
                   <div>
-                    <p className="font-medium">Automatic exact matching</p>
+                    <p className="font-medium">{t("autoMatchTitle")}</p>
                     <p className="text-muted-foreground mt-0.5 max-w-2xl text-sm leading-relaxed">
-                      When the receiving account, CZK currency, variable symbol,
-                      and full amount due all match exactly, mark the invoice
-                      paid and email you. Partial or ambiguous payments always
-                      wait for review.
+                      {t("autoMatchDescription")}
                     </p>
                   </div>
                 </div>
@@ -261,7 +255,7 @@ export default async function BankConnectionsPage() {
                       value={connection.id}
                     />
                     <Button type="submit" variant="outline">
-                      <RefreshCwIcon /> Sync now
+                      <RefreshCwIcon /> {t("syncNow")}
                     </Button>
                   </form>
                   <form action={disconnectAction}>
@@ -271,7 +265,7 @@ export default async function BankConnectionsPage() {
                       value={connection.id}
                     />
                     <Button type="submit" variant="destructive">
-                      <Trash2Icon /> Disconnect
+                      <Trash2Icon /> {t("disconnect")}
                     </Button>
                   </form>
                 </div>
@@ -284,31 +278,21 @@ export default async function BankConnectionsPage() {
       {hasActiveFio ? null : (
         <Card className="overflow-hidden">
           <CardHeader>
-            <BankLogoTile alt="Fio banka" src="/banks/fio.png" />
-            <CardTitle className="mt-2">Connect Fio read-only API</CardTitle>
-            <CardDescription>
-              Create a read-only API token in Fio Internetbanking and paste it
-              here. Invoicey validates it against today’s statement and stores
-              it encrypted. The selected issuer’s default receiving account is
-              updated to this verified Fio account for future invoices.
-            </CardDescription>
+            <BankLogoTile alt={t("providers.fio")} src="/banks/fio.png" />
+            <CardTitle className="mt-2">{t("fio.connectTitle")}</CardTitle>
+            <CardDescription>{t("fio.connectDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             {!encryptionReady ? (
               <p className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-3 text-sm">
-                Bank token encryption is not configured. Set
-                {" BANK_TOKEN_ENCRYPTION_KEY_V1 "}
-                before connecting an account.
+                {t("encryptionMissing")}
               </p>
             ) : issuers.length === 0 ? (
-              <p className="text-muted-foreground text-sm">
-                Create your issuer business before connecting its receiving
-                account.
-              </p>
+              <p className="text-muted-foreground text-sm">{t("needIssuer")}</p>
             ) : (
               <form action={connectFio} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="issuerId">Issuer receiving payments</Label>
+                  <Label htmlFor="issuerId">{t("issuerLabel")}</Label>
                   <select
                     id="issuerId"
                     name="issuerId"
@@ -318,13 +302,13 @@ export default async function BankConnectionsPage() {
                   >
                     {issuers.map((issuer) => (
                       <option key={issuer.id} value={issuer.id}>
-                        {issuerName(issuer.snapshot)}
+                        {issuerName(issuer.snapshot, unnamedIssuer)}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="token">Fio API token</Label>
+                  <Label htmlFor="token">{t("fio.tokenLabel")}</Label>
                   <Input
                     id="token"
                     name="token"
@@ -333,14 +317,10 @@ export default async function BankConnectionsPage() {
                     minLength={64}
                     autoComplete="off"
                     spellCheck={false}
-                    placeholder="64-character read-only token"
+                    placeholder={t("fio.tokenPlaceholder")}
                   />
                   <p className="text-muted-foreground text-xs">
-                    Create a monitoring token in Internetbanking → Nastavení →
-                    API bankovnictví, with Sledování účtu only. The 64-character
-                    token starts working after about five minutes and can last
-                    up to 180 days if you enable automatic extension. We never
-                    display it again and never request write access.
+                    {t("fio.tokenHelp")}
                   </p>
                   <a
                     className="text-brand inline-flex items-center gap-1 text-xs font-medium hover:underline"
@@ -348,16 +328,16 @@ export default async function BankConnectionsPage() {
                     rel="noreferrer"
                     target="_blank"
                   >
-                    How to create a Fio API token
+                    {t("fio.tokenGuide")}
                     <ExternalLinkIcon className="size-3" />
                   </a>
                 </div>
                 <Button type="submit" disabled={!canManage}>
-                  Connect and verify
+                  {t("connectAndVerify")}
                 </Button>
                 {!canManage ? (
                   <p className="text-muted-foreground text-xs">
-                    A workspace admin or owner must connect bank accounts.
+                    {t("adminOnly")}
                   </p>
                 ) : null}
               </form>
@@ -369,13 +349,9 @@ export default async function BankConnectionsPage() {
       {hasActiveMoneta ? null : (
         <Card className="overflow-hidden">
           <CardHeader>
-            <BankLogoTile alt="MONETA Money Bank" src="/banks/moneta.png" />
-            <CardTitle className="mt-2">Connect MONETA read-only API</CardTitle>
-            <CardDescription>
-              Create a passive API token in MONETA Internet Banka and paste it
-              here. Invoicey lists CZK accounts on the token, verifies today’s
-              movements, and stores the token encrypted for this workspace only.
-            </CardDescription>
+            <BankLogoTile alt={t("providers.moneta")} src="/banks/moneta.png" />
+            <CardTitle className="mt-2">{t("moneta.connectTitle")}</CardTitle>
+            <CardDescription>{t("moneta.connectDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <MonetaConnectForm
@@ -392,50 +368,44 @@ export default async function BankConnectionsPage() {
           <div>
             <h2 className="flex items-center gap-2 text-lg font-semibold">
               <CircleDotDashedIcon className="text-muted-foreground size-5" />
-              More bank integrations
+              {t("moreTitle")}
             </h2>
             <p className="text-muted-foreground mt-1 text-sm">
-              Fio and MONETA are live. Other banks we researched stay
-              unavailable for now.
+              {t("moreDescription")}
             </p>
           </div>
-          <Badge variant="secondary">Unavailable</Badge>
+          <Badge variant="secondary">{t("unavailable")}</Badge>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {PLANNED_BANKS.map((bank) => (
-            <Card
-              key={bank.name}
-              aria-disabled
-              className="border-dashed opacity-55"
-            >
-              <CardContent className="flex items-center gap-3 p-4">
-                <BankLogoTile
-                  alt={bank.name}
-                  src={bank.logo}
-                  size="sm"
-                  inactive
-                />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{bank.name}</p>
-                  <p className="text-muted-foreground flex items-center gap-1 text-xs">
-                    <Building2Icon className="size-3" /> {bank.note}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {PLANNED_BANKS.map((bank) => {
+            const name = t(`banks.${bank.id}`);
+            return (
+              <Card
+                key={bank.id}
+                aria-disabled
+                className="border-dashed opacity-55"
+              >
+                <CardContent className="flex items-center gap-3 p-4">
+                  <BankLogoTile alt={name} src={bank.logo} size="sm" inactive />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{name}</p>
+                    <p className="text-muted-foreground flex items-center gap-1 text-xs">
+                      <Building2Icon className="size-3" />{" "}
+                      {bank.note === "deferred"
+                        ? t("noteDeferred")
+                        : t("noteNotPlanned")}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
 
       <div className="border-border/70 bg-muted/25 flex gap-3 rounded-2xl border p-4 text-sm">
         <ShieldCheckIcon className="text-brand mt-0.5 size-5 shrink-0" />
-        <p className="text-muted-foreground leading-relaxed">
-          Connections belong to the current workspace, not your user account. A
-          user in multiple workspaces connects and configures each workspace
-          independently. Invoicey imports incoming transactions only; it cannot
-          send money. MONETA tokens typically expire within 90 days and should
-          be renewed in Internet Banka.
-        </p>
+        <p className="text-muted-foreground leading-relaxed">{t("footer")}</p>
       </div>
     </div>
   );

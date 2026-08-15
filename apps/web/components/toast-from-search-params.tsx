@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useMessages, useTranslations } from "next-intl";
 import { Suspense, useEffect } from "react";
 import { toast } from "sonner";
+
+import { messageLookup } from "@/lib/i18n-lookup";
 
 const TOAST_KEYS = [
   "issuer_saved",
@@ -50,6 +52,8 @@ function ToastFromSearchParamsInner() {
   const router = useRouter();
   const t = useTranslations("Toasts");
   const descriptions = useTranslations("ToastDescriptions");
+  const bankCopy = useTranslations("Settings.bankConnections");
+  const messages = useMessages();
   const toastKey = searchParams.get("toast");
   const error = searchParams.get("error");
   const mergeGroups = searchParams.get("groups");
@@ -68,7 +72,11 @@ function ToastFromSearchParamsInner() {
     }
     if (error && error !== "NEXT_REDIRECT") {
       toast.error(t("action_failed"), {
-        description: error.replaceAll("_", " "),
+        description: messageLookup(
+          messages.Settings.bankConnections.errors,
+          error,
+          bankCopy("errors.generic", { code: error.replaceAll("_", " ") }),
+        ),
         duration: 6500,
       });
     } else if (toastKey === "clients_merged") {
@@ -143,6 +151,8 @@ function ToastFromSearchParamsInner() {
     router,
     t,
     descriptions,
+    bankCopy,
+    messages,
   ]);
 
   return null;

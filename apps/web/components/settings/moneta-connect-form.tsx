@@ -1,6 +1,7 @@
 "use client";
 
 import { ExternalLinkIcon, Loader2Icon } from "lucide-react";
+import { useMessages, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
 import {
@@ -10,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { messageLookup } from "@/lib/i18n-lookup";
 
 type IssuerOption = {
   id: string;
@@ -35,6 +37,8 @@ export function MonetaConnectForm({
   canManage,
   encryptionReady,
 }: MonetaConnectFormProps) {
+  const t = useTranslations("Settings.bankConnections");
+  const messages = useMessages();
   const [token, setToken] = useState("");
   const [issuerId, setIssuerId] = useState(issuers[0]?.id ?? "");
   const [accounts, setAccounts] = useState<MonetaAccountOption[] | null>(null);
@@ -45,25 +49,19 @@ export function MonetaConnectForm({
   if (!encryptionReady) {
     return (
       <p className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-3 text-sm">
-        Bank token encryption is not configured. Set
-        {" BANK_TOKEN_ENCRYPTION_KEY_V1 "}
-        before connecting an account.
+        {t("encryptionMissing")}
       </p>
     );
   }
 
   if (issuers.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm">
-        Create your issuer business before connecting its receiving account.
-      </p>
-    );
+    return <p className="text-muted-foreground text-sm">{t("needIssuer")}</p>;
   }
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="moneta-issuerId">Issuer receiving payments</Label>
+        <Label htmlFor="moneta-issuerId">{t("issuerLabel")}</Label>
         <select
           id="moneta-issuerId"
           name="issuerId"
@@ -81,7 +79,7 @@ export function MonetaConnectForm({
         </select>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="moneta-token">MONETA API token</Label>
+        <Label htmlFor="moneta-token">{t("moneta.tokenLabel")}</Label>
         <Input
           id="moneta-token"
           name="token"
@@ -90,7 +88,7 @@ export function MonetaConnectForm({
           minLength={16}
           autoComplete="off"
           spellCheck={false}
-          placeholder="Read-only API token from Internet Banka"
+          placeholder={t("moneta.tokenPlaceholder")}
           value={token}
           onChange={(event) => {
             setToken(event.target.value);
@@ -100,25 +98,21 @@ export function MonetaConnectForm({
           }}
           disabled={!canManage || pending}
         />
-        <p className="text-muted-foreground text-xs">
-          Create a passive (read-only) token in Internet Banka → API tokeny.
-          Tokens expire after up to 90 days unless renewed. History is limited
-          to 90 days.
-        </p>
+        <p className="text-muted-foreground text-xs">{t("moneta.tokenHelp")}</p>
         <a
           className="text-brand inline-flex items-center gap-1 text-xs font-medium hover:underline"
           href="https://www.moneta.cz/zivnostnici-a-firmy/api"
           rel="noreferrer"
           target="_blank"
         >
-          How to create a MONETA API token
+          {t("moneta.tokenGuide")}
           <ExternalLinkIcon className="size-3" />
         </a>
       </div>
 
       {accounts && accounts.length > 1 ? (
         <div className="space-y-2">
-          <Label htmlFor="moneta-account">CZK account</Label>
+          <Label htmlFor="moneta-account">{t("moneta.accountLabel")}</Label>
           <select
             id="moneta-account"
             className="border-input bg-background h-9 w-full rounded-lg border px-3 text-sm"
@@ -127,7 +121,7 @@ export function MonetaConnectForm({
             disabled={!canManage || pending}
             required
           >
-            <option value="">Select account</option>
+            <option value="">{t("moneta.selectAccount")}</option>
             {accounts.map((account) => (
               <option
                 key={account.providerAccountId}
@@ -142,7 +136,13 @@ export function MonetaConnectForm({
       ) : null}
 
       {error ? (
-        <p className="text-destructive text-sm">{error.replaceAll("_", " ")}</p>
+        <p className="text-destructive text-sm">
+          {messageLookup(
+            messages.Settings.bankConnections.errors,
+            error,
+            t("errors.generic", { code: error.replaceAll("_", " ") }),
+          )}
+        </p>
       ) : null}
 
       <div className="flex flex-wrap gap-2">
@@ -171,7 +171,7 @@ export function MonetaConnectForm({
           }}
         >
           {pending ? <Loader2Icon className="animate-spin" /> : null}
-          Discover accounts
+          {t("moneta.discover")}
         </Button>
         <form action={connectMoneta}>
           <input type="hidden" name="issuerId" value={issuerId} />
@@ -190,18 +190,15 @@ export function MonetaConnectForm({
               (accounts !== null && accounts.length > 1 && !providerAccountId)
             }
           >
-            Connect and verify
+            {t("connectAndVerify")}
           </Button>
         </form>
       </div>
       {!canManage ? (
-        <p className="text-muted-foreground text-xs">
-          A workspace admin or owner must connect bank accounts.
-        </p>
+        <p className="text-muted-foreground text-xs">{t("adminOnly")}</p>
       ) : (
         <p className="text-muted-foreground text-xs">
-          Prefer Discover accounts when the token covers more than one CZK
-          account. A single CZK account connects without selection.
+          {t("moneta.discoverHint")}
         </p>
       )}
     </div>

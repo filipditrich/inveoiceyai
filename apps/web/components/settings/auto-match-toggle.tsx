@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 
 import { Switch } from "@/components/ui/switch";
@@ -22,6 +23,7 @@ export function AutoMatchToggle({
   disabled = false,
   action,
 }: AutoMatchToggleProps) {
+  const t = useTranslations("Settings.bankConnections");
   const [pending, startTransition] = useTransition();
 
   return (
@@ -34,7 +36,7 @@ export function AutoMatchToggle({
       <Switch
         checked={checked}
         disabled={disabled || pending}
-        aria-label="Automatic exact matching"
+        aria-label={t("autoMatchAria")}
         onCheckedChange={(next) => {
           const formData = new FormData();
           formData.set("connectionId", connectionId);
@@ -45,7 +47,7 @@ export function AutoMatchToggle({
         }}
       />
       <span className="text-muted-foreground w-7 text-sm font-medium tabular-nums">
-        {checked ? "On" : "Off"}
+        {checked ? t("on") : t("off")}
       </span>
     </label>
   );
