@@ -50,7 +50,7 @@
   "patchedDependencies": {
     "mcp-handler@1.1.0": "patches/mcp-handler@1.1.0.patch"
   },
-  "version": "1.25.0",
+  "version": "1.26.0",
   "engines": {
     "node": ">=24"
   },
