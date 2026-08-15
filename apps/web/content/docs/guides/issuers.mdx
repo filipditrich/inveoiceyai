@@ -88,8 +88,8 @@ Three optional images placed on the PDF:
 | Stamp (razítko) | PNG, JPEG      | 1 MB     |
 | Signature       | PNG, JPEG      | 1 MB     |
 
-Uploads go through UploadThing and need `UPLOADTHING_TOKEN` configured. Without it the fields still
-accept pasted URLs, so a self-hosted instance can use another public image host.
+Uploads go through Invoicey's file storage. Prefer PNG or JPEG — SVG is not rasterised reliably for
+the PDF. Without an uploaded file you can still paste a publicly reachable image URL.
 
 Replacing an asset preserves its old URL so issued-invoice [snapshots](/docs/concepts/snapshots)
 continue to render correctly.

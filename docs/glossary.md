@@ -102,6 +102,18 @@ Sorted by Czech name (or original abbreviation).
 
 > Example: `SPD*1.0*ACC:CZ6508000000192000145399*AM:12500.00*CC:CZK*X-VS:2026001*MSG:Faktura 2026001`
 
+### Fio (Fio banka)
+
+Czech bank with a self-service **monitoring token** and proprietary JSON periods API. Plan 22's first read-only bank adapter — see [`specs/payment-ledger-fio.md`](./specs/payment-ledger-fio.md) and [ADR 0029](./decisions/0029-payment-ledger-fio-first.md).
+
+### Payment ledger
+
+Workspace-scoped store of normalized bank transactions, match **proposals**, and confirmed **allocations**. Allocations are the payment source of truth; `invoices.paid_at` / `paid_amount` / `payment_state` are projections. Manual mark-paid and Fio confirms share the same path.
+
+### Allocation
+
+A confirmed payment fact linking money (manual or bank transaction) to an invoice for a positive amount. Reversals keep history; they do not delete rows.
+
 ## Document terminology
 
 ### Faktura

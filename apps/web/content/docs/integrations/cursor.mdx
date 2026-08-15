@@ -1,6 +1,6 @@
 ---
 title: Cursor
-description: Connect Cursor to local or hosted Invoicey tools.
+description: Connect Cursor to Invoicey’s hosted MCP tools.
 icon: MousePointer2
 ---
 
@@ -11,17 +11,11 @@ Cursor speaks MCP natively, so Invoicey's tools appear alongside its own once co
 MCP servers are configured in `mcp.json` — `~/.cursor/mcp.json` for every project, or
 `.cursor/mcp.json` inside one project.
 
-<Tabs items={['Hosted', 'Local']}>
-
-<Tab value="Hosted">
-
-The one you want. Reaches your real data.
-
 ```json
 {
   "mcpServers": {
     "invoicey": {
-      "url": "https://your-host/api/mcp",
+      "url": "https://invoicey.ditrich.me/api/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_API_KEY"
       }
@@ -30,45 +24,13 @@ The one you want. Reaches your real data.
 }
 ```
 
-Get the key from whoever operates the deployment — see [API keys](/docs/integrations/api-keys).
+Create the key under **Settings → API keys** — see [API keys](/docs/integrations/api-keys).
 
 <Callout type="warn" title="Do not commit this file">
   A project-level `.cursor/mcp.json` containing a bearer token is a credential
   in your repository. Add it to `.gitignore`, or configure Invoicey globally in
   `~/.cursor/mcp.json` instead.
 </Callout>
-
-</Tab>
-
-<Tab value="Local">
-
-For working against a checkout of the repository:
-
-```json
-{
-  "mcpServers": {
-    "invoicey-local": {
-      "command": "bun",
-      "args": [
-        "run",
-        "--cwd",
-        "/abs/path/to/inveoiceyai/apps/mcp",
-        "src/stdio.ts"
-      ],
-      "env": {
-        "INVOICEY_PRESETS_PATH": "/abs/path/to/inveoiceyai/.invoicey/presets.json"
-      }
-    }
-  }
-}
-```
-
-Absolute paths only — Cursor does not resolve `~` or relative paths here. Without a `DATABASE_URL`
-you get creation and rendering but no database-backed tools.
-
-</Tab>
-
-</Tabs>
 
 Then **Settings → MCP → Reload**, and confirm Invoicey is listed with its tools.
 
@@ -77,12 +39,6 @@ Then **Settings → MCP → Reload**, and confirm Invoicey is listed with its to
 Before your first invoice, save an issuer preset. Ask Cursor:
 
 > Save an issuer preset called "main" using these details: …
-
-or seed the file directly for the local server:
-
-```bash
-cp apps/mcp/presets.example.json ~/.invoicey/presets.json
-```
 
 The preset locks the "from" party. Without one, `create_invoice` falls back to a demo issuer — which
 renders fine and is completely wrong for real use.
@@ -96,7 +52,7 @@ Cursor decides when to call tools, so plain description works:
 
 Naming the preset explicitly avoids a round-trip where the assistant lists presets to find one.
 
-For follow-ups against the hosted endpoint:
+For follow-ups:
 
 > Show me everything unpaid, oldest first.
 >
@@ -107,16 +63,8 @@ For follow-ups against the hosted endpoint:
 <Accordions>
 
 <Accordion title="The server does not appear after reloading">
-For the local server, run the command by hand — a crash on startup shows the real error, which the
-MCP panel usually swallows:
-
-```bash
-bun run --cwd /abs/path/to/inveoiceyai/apps/mcp src/stdio.ts
-```
-
-You should see `[invoicey-mcp] stdio server ready`. For the hosted endpoint, check the URL includes
-`/api/mcp` and the JSON is valid.
-
+  Check the URL includes `/api/mcp`, the JSON is valid, and you reloaded MCP in
+  Cursor settings.
 </Accordion>
 
 <Accordion title="Every call returns unauthorized">
@@ -124,15 +72,12 @@ The key was revoked, mistyped, or truncated when copied. Personal keys are shown
 fresh one under **Settings → API keys** if you are unsure. Verify with:
 
 ```bash
-curl -X POST https://your-host/api/mcp -H "Authorization: Bearer YOUR_API_KEY" -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+curl -X POST https://invoicey.ditrich.me/api/mcp \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
-</Accordion>
-
-<Accordion title="Database-backed tools are missing">
-  `list_invoices`, `get_invoice`, `mark_invoice_paid` and `send_invoice_email`
-  need a database. The local stdio server without `DATABASE_URL` does not
-  register them. Use the hosted endpoint.
 </Accordion>
 
 <Accordion title="create_invoice keeps failing validation">

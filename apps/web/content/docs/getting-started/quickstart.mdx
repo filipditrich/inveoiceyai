@@ -115,10 +115,13 @@ events appear on the invoice timeline.
 
 ### Mark it paid
 
-When the money lands, **Mark paid**. Invoicey records the payment date; the status derives to
+When the money lands, **Mark paid** on the invoice (or add a manual payment under **Payments**).
+Invoicey records an allocation in the payment ledger; when the total is covered, status derives to
 `paid` and it drops out of your overdue list.
 
-Nothing marks invoices paid automatically — there is no bank integration.
+If you bank with **Fio**, connect a read-only monitoring token under **Settings → Bank connections**
+and confirm match proposals on **Payments** instead of typing everything by hand — see
+[Reconcile payments](/docs/guides/reconciling-payments).
 
 </Step>
 
@@ -141,6 +144,11 @@ Nothing marks invoices paid automatically — there is no bank integration.
     title="Import your old invoices"
     href="/docs/guides/importing-history"
     description="Bulk-load PDFs from your previous tool."
+  />
+  <Card
+    title="Reconcile payments"
+    href="/docs/guides/reconciling-payments"
+    description="Fio bank feed and the payment ledger."
   />
   <Card
     title="Something went wrong"

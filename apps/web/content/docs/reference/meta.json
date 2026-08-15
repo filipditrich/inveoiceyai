@@ -1,10 +1,5 @@
 {
   "title": "Technical reference",
   "icon": "Library",
-  "pages": [
-    "invoice-schema",
-    "mcp-tools",
-    "environment-variables",
-    "troubleshooting"
-  ]
+  "pages": ["invoice-schema", "mcp-tools", "troubleshooting"]
 }

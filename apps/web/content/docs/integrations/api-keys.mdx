@@ -4,18 +4,9 @@ description: Authenticate personal automation without exposing your sign-in sess
 icon: KeyRound
 ---
 
-Automation surfaces — [MCP](/docs/integrations/mcp), the [Slack agent](/docs/integrations/slack) —
-authenticate with a bearer token. There are **two kinds**, and the difference matters.
-
-|            | Personal key                          | Ops key                                       |
-| ---------- | ------------------------------------- | --------------------------------------------- |
-| Created in | **Settings → API keys**               | A deployment environment variable             |
-| Identifies | You                                   | The deployment                                |
-| Workspace  | Your default workspace                | The configured default workspace              |
-| Revocable  | Yes, individually, from the UI        | Only by changing the variable and redeploying |
-| Use for    | Your own Cursor, Claude Code, scripts | Shared infrastructure, the Slack bot          |
-
-Prefer a personal key. It is attributable and you can revoke it on its own.
+Automation surfaces — [MCP](/docs/integrations/mcp) and assistants that speak it — authenticate with
+a **personal API key**. Create and revoke keys under **Settings → API keys** without sharing your
+sign-in session.
 
 ## Creating a personal key
 
@@ -30,7 +21,7 @@ need to revoke one, the name is the only thing telling you which is which.
 Requests carry it as an ordinary bearer token:
 
 ```bash
-curl -X POST https://your-host/api/mcp \
+curl -X POST https://invoicey.ditrich.me/api/mcp \
   -H "Authorization: Bearer YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
@@ -71,29 +62,6 @@ Revoke whenever a key has been in a shared config file, a screenshot, or a chat 
 Key creation and revocation are both written to your security audit log under
 **Settings → Security**.
 
-## The ops key
-
-`MCP_API_KEY` is an environment variable on the deployment. It authenticates as the deployment
-itself, against the configured default workspace, with no user attached.
-
-Use it only for shared infrastructure such as the Slack bot or CI. It is not attributable, and
-rotation requires a redeploy of every client that uses it.
-
-| Variable                | Gates                                                       | When unset                      |
-| ----------------------- | ----------------------------------------------------------- | ------------------------------- |
-| `MCP_API_KEY`           | `/api/mcp`, and `/eve/v1/*` as a fallback                   | Only personal keys are accepted |
-| `EVE_API_KEY`           | `/eve/v1/*` over HTTP                                       | Falls back to `MCP_API_KEY`     |
-| `CRON_SECRET`           | `/api/cron/overdue-reminders`, `/api/cron/recurring-drafts` | Cron jobs never fire            |
-| `RESEND_WEBHOOK_SECRET` | `/api/webhooks/resend`                                      | The webhook rejects all events  |
-
-Generate one with:
-
-```bash
-openssl rand -base64 48
-```
-
-Everything fails closed. An unset key never means "open" — it means that path is refused.
-
 ## Related
 
 <Cards>
@@ -108,8 +76,8 @@ Everything fails closed. An unset key never means "open" — it means that path 
     description="Where to put the key."
   />
   <Card
-    title="Environment variables"
-    href="/docs/reference/environment-variables"
-    description="Every variable and what breaks without it."
+    title="Claude Code"
+    href="/docs/integrations/claude-code"
+    description="CLI setup for the same tools."
   />
 </Cards>

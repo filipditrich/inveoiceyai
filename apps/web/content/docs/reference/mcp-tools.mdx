@@ -7,10 +7,6 @@ icon: Wrench
 Setup: [MCP](/docs/integrations/mcp) · [Cursor](/docs/integrations/cursor) ·
 [Claude Code](/docs/integrations/claude-code).
 
-Tools marked **DB** need `DATABASE_URL` and are only registered when it is set. The
-[hosted endpoint](/docs/integrations/mcp) always has them; a local stdio server without a database
-does not.
-
 Every tool returns a JSON result with an `ok` boolean. Failures carry a message rather than throwing.
 
 ---
@@ -75,7 +71,7 @@ Nothing is silently defaulted. Omitting `duzp` is an error, not an invoice dated
 
 ---
 
-## list_invoices <span data-badge>DB</span>
+## list_invoices
 
 Workspace invoices as summaries, each with both the domain `status` and the UI `displayStatus`.
 
@@ -89,7 +85,7 @@ Workspace invoices as summaries, each with both the domain `status` and the UI `
   }}
 />
 
-## get_invoice <span data-badge>DB</span>
+## get_invoice
 
 One invoice: summary with status, plus the validated payload when present.
 
@@ -99,7 +95,7 @@ One invoice: summary with status, plus the validated payload when present.
   }}
 />
 
-## issue_invoice <span data-badge>DB</span>
+## issue_invoice
 
 Issues a draft with atomic numbering. Idempotent if the invoice is already issued.
 
@@ -109,7 +105,7 @@ Issues a draft with atomic numbering. Idempotent if the invoice is already issue
   }}
 />
 
-## mark_invoice_paid <span data-badge>DB</span>
+## mark_invoice_paid
 
 Sets `paidAt` on an issued, unpaid invoice.
 
@@ -121,7 +117,7 @@ Sets `paidAt` on an issued, unpaid invoice.
 
 There is no `unmark_invoice_paid` over MCP — that one is web-only.
 
-## send_invoice_email <span data-badge>DB</span>
+## send_invoice_email
 
 Emails an issued invoice with the PDF and, by default, the ISDOC. Needs `RESEND_API_KEY` as well as a
 database.
@@ -200,12 +196,8 @@ VAT flag, contact email. For `kind: "invoice_template"`, any partial draft: `met
 
 ## Storage
 
-Presets live in Postgres when `DATABASE_URL` is set, otherwise in a JSON file at
-`INVOICEY_PRESETS_PATH` or `~/.invoicey/presets.json`. Force the file backend with
-`INVOICEY_PRESETS_BACKEND=file`.
-
-File-backed presets on a serverless deployment land in `/tmp` and do not survive between
-invocations. Use the database in production.
+Presets are stored in your Invoicey workspace database and available to every MCP session that uses
+your personal API key.
 
 ## Not available over MCP
 

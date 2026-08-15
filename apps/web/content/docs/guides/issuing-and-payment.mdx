@@ -53,27 +53,43 @@ number.
 
 ## Recording payment
 
-**Mark paid** stamps the payment date; the [status](/docs/concepts/statuses) derives to `paid` and
-the invoice leaves your overdue list.
+Payment is authoritative in the **payment ledger** (confirmed allocations). The invoice keeps
+compatibility fields (`paid_at`, `paid_amount`, `payment_state`) updated transactionally from those
+allocations.
+
+### Manual payment
+
+**Mark paid** on the invoice (or **Add a manual payment** on [Payments](/docs/guides/reconciling-payments))
+creates a ledger allocation for the amount you enter. When active allocations cover the absolute
+invoice total, the [status](/docs/concepts/statuses) derives to `paid` and the invoice leaves your
+overdue list.
 
 You can supply the actual date the money arrived rather than accepting today — worth doing, since the
 overdue reminder cron and your dashboard both read it.
 
-**Unmark paid** clears it if you mark the wrong invoice. The status re-derives from the remaining
-facts, which may land on `overdue` if the due date has since passed.
+**Unmark paid** / **Reverse** clears active allocations for that payment rather than deleting history.
+The status re-derives from the remaining facts, which may land on `overdue` if the due date has since
+passed.
 
-<Callout>
-  Nothing marks invoices paid automatically. There is no bank connection and no
-  payment matching — you tell Invoicey when money arrives.
-</Callout>
+Partial payments are first-class: an invoice can sit in `partial` payment state with outstanding
+balance until the rest arrives (or you reverse).
+
+### Bank feed (Fio)
+
+Connect a **Fio monitoring token** under **Settings → Bank connections**. Sync imports credits;
+Invoicey opens **match proposals**. You confirm or reject them on the Payments page — nothing
+auto-marks invoices paid.
+
+Full walkthrough: [Reconcile payments](/docs/guides/reconciling-payments).
 
 ## Overdue
 
-An invoice goes overdue at the **end of its due date, Europe/Prague time** — not midnight UTC.
+An invoice goes overdue at the **end of its due date, Europe/Prague time** — not midnight UTC —
+when it is still not fully paid.
 
 Optional automated reminders exist per issuer, off by default, sending every 7 days by default to the
-client's contact email. Turn them on in the issuer's email settings. They require the deployment's
-reminder cron to be scheduled — see [sending email](/docs/guides/sending-email#deployment-setup).
+client's contact email. Turn them on in the issuer's email settings — see
+[sending email](/docs/guides/sending-email#overdue-reminders).
 
 ## Cancelling
 

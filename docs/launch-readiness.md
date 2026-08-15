@@ -25,6 +25,9 @@ them before the legal-page copy is finalized.
 - [x] Back up the target database and record pre-migration row counts.
 - [x] Apply `packages/db/sql/2026-08-13-default-issuer.sql`.
 - [x] Apply `packages/db/sql/2026-08-13-issued-artifact-hashes.sql`.
+- [ ] Apply Plan 22 payment SQL before enabling Fio in production:
+      `2026-08-15-plan22-payments-fio.sql` (+ optional identifier backfill /
+      auto-match follow-ups in `packages/db/sql/README.md`).
 - [x] Run `bun run --cwd apps/web check:runtime-schema` against the target.
 - [ ] Deploy the matching application commit only after the schema check passes.
 - [ ] Repeat the authenticated smoke walkthrough and verify issued artifact

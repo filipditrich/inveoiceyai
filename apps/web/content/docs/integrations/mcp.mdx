@@ -11,20 +11,16 @@ up companies, build invoices, issue them, mark them paid and email them.
 MCP tools call the same handlers and validate against the same
 [schema](/docs/concepts/invoice-as-data) as the web app. The supported fields and rules stay aligned.
 
-## Two ways to connect
+## Connect
 
-<Tabs items={['Hosted endpoint', 'Local stdio']}>
-
-<Tab value="Hosted endpoint">
-
-Streamable HTTP at `/api/mcp` on your deployment. Create a personal key under
+Streamable HTTP at `https://invoicey.ditrich.me/api/mcp`. Create a personal key under
 **Settings → API keys** — see [API keys](/docs/integrations/api-keys).
 
 ```json
 {
   "mcpServers": {
     "invoicey": {
-      "url": "https://your-host/api/mcp",
+      "url": "https://invoicey.ditrich.me/api/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_API_KEY"
       }
@@ -33,60 +29,24 @@ Streamable HTTP at `/api/mcp` on your deployment. Create a personal key under
 }
 ```
 
-This is the useful one: it reaches your real database, so `list_invoices`, `get_invoice`,
-`mark_invoice_paid` and `send_invoice_email` all work, and invoices you create are actually saved.
+Your key resolves to your user and binds every tool call to **your default workspace** (updated when
+you switch workspaces or change it under **Settings → API keys**).
 
-Your key resolves to your user and binds every tool call to **your default workspace**
-(updated when you switch workspaces or change it under **Settings → API keys**). The
-deployment-wide `MCP_API_KEY` is also accepted, operating against the configured default workspace
-instead.
-
-</Tab>
-
-<Tab value="Local stdio">
-
-A local server process, for development against a checkout of the repository.
-
-```json
-{
-  "mcpServers": {
-    "invoicey-local": {
-      "command": "bun",
-      "args": [
-        "run",
-        "--cwd",
-        "/abs/path/to/inveoiceyai/apps/mcp",
-        "src/stdio.ts"
-      ],
-      "env": {
-        "INVOICEY_PRESETS_PATH": "/abs/path/to/inveoiceyai/.invoicey/presets.json"
-      }
-    }
-  }
-}
-```
-
-Paths must be absolute. Without a `DATABASE_URL` in the environment this runs in file-backed mode:
-you get ARES lookup, invoice creation, rendering and presets, but none of the database-backed tools.
-
-</Tab>
-
-</Tabs>
-
-Client-specific setup: [Cursor](/docs/integrations/cursor) · [Claude Code](/docs/integrations/claude-code).
+Client-specific setup: [Cursor](/docs/integrations/cursor) ·
+[Claude Code](/docs/integrations/claude-code).
 
 ## The tools
 
-| Tool                                                            | Needs a database | Purpose                                      |
-| --------------------------------------------------------------- | ---------------- | -------------------------------------------- |
-| `lookup_business`                                               | no               | ARES lookup by IČO                           |
-| `search_business`                                               | no               | ARES search by company name                  |
-| `create_invoice`                                                | no               | Build, validate and render an invoice        |
-| `list_invoices`                                                 | yes              | Summaries, with `status` and `displayStatus` |
-| `get_invoice`                                                   | yes              | One invoice with its full payload            |
-| `mark_invoice_paid`                                             | yes              | Record payment                               |
-| `send_invoice_email`                                            | yes              | Email the PDF and ISDOC                      |
-| `list_presets` · `get_preset` · `save_preset` · `delete_preset` | no               | Manage presets                               |
+| Tool                                                            | Purpose                                      |
+| --------------------------------------------------------------- | -------------------------------------------- |
+| `lookup_business`                                               | ARES lookup by IČO                           |
+| `search_business`                                               | ARES search by company name                  |
+| `create_invoice`                                                | Build, validate and render an invoice        |
+| `list_invoices`                                                 | Summaries, with `status` and `displayStatus` |
+| `get_invoice`                                                   | One invoice with its full payload            |
+| `mark_invoice_paid`                                             | Record payment                               |
+| `send_invoice_email`                                            | Email the PDF and ISDOC                      |
+| `list_presets` · `get_preset` · `save_preset` · `delete_preset` | Manage presets                               |
 
 Full input and output shapes: [MCP tool reference](/docs/reference/mcp-tools).
 
@@ -102,13 +62,7 @@ Presets are what make this safe enough to use.
 defaults — merged underneath whatever the assistant specifies. Useful for a monthly retainer where
 only the period changes.
 
-Storage follows the environment: Postgres when `DATABASE_URL` is set, otherwise a JSON file at
-`INVOICEY_PRESETS_PATH` or `~/.invoicey/presets.json`.
-
-<Callout type="warn" title="File presets do not survive on serverless">
-  On a Vercel deployment without a database, presets land in `/tmp` and vanish
-  between invocations. Use the database-backed path in production.
-</Callout>
+Save presets from the assistant once, then refer to them by name or ID.
 
 <Callout type="warn" title="Validation is not verification">
   The schema guarantees an invoice is well-formed, not that it is right. It
@@ -128,5 +82,5 @@ Storage follows the environment: Postgres when `DATABASE_URL` is set, otherwise 
 - **No scopes.** A key is full access to that workspace, including sending email.
 - **No import tool.** [Historical import](/docs/guides/importing-history) is web-only by design.
 - **No `unmark_invoice_paid`.** Web only.
-- **The remote endpoint does not create issuers or clients.** Those are managed in the web UI; MCP
-  consumes them through presets.
+- **MCP does not create issuers or clients.** Those are managed in the web UI; MCP consumes them
+  through presets.

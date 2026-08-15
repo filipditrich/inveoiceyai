@@ -4,24 +4,25 @@ How the pieces fit together. Cross-references the ADRs that justify each choice.
 
 ## Stack at a glance
 
-| Layer               | Choice                                                      | ADR                                                                          |
-| ------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Monorepo            | Turborepo + bun workspaces                                  | [0001](./decisions/0001-monorepo-turborepo-bun.md)                           |
-| Web framework       | Next.js 16 (App Router, RSC, Server Actions)                | [0002](./decisions/0002-nextjs15-app-router.md)                              |
-| UI primitives       | shadcn/ui base + ReUI registry (`@reui`, `base-nova` style) | [0003](./decisions/0003-shadcn-plus-reui-registry.md)                        |
-| Styling             | Tailwind v4                                                 | inherited from shadcn/ReUI                                                   |
-| PDF rendering       | `@react-pdf/renderer`                                       | [0004](./decisions/0004-pdf-react-pdf-renderer.md)                           |
-| Schema / validation | Zod (single source of truth)                                | [0005](./decisions/0005-zod-as-source-of-truth.md)                           |
-| Form runtime        | React Hook Form + `@hookform/resolvers/zod`                 | [0015](./decisions/0015-rhf-plus-zod-resolver-builder.md)                    |
-| Database            | Neon Postgres (Vercel Marketplace)                          | [0009](./decisions/0009-drizzle-neon-postgres.md)                            |
-| ORM                 | Drizzle                                                     | [0009](./decisions/0009-drizzle-neon-postgres.md)                            |
-| File uploads        | UploadThing                                                 | [0010](./decisions/0010-uploadthing-for-files.md)                            |
-| QR generation       | `qrcode`                                                    | inherited from [0004](./decisions/0004-pdf-react-pdf-renderer.md) (PDF-side) |
-| ISDOC XML           | `xmlbuilder2`                                               | (lazy, finalized in `specs/isdoc.md`)                                        |
-| Auth                | _none in MVP_                                               | [0006](./decisions/0006-no-auth-mvp-multi-tenant-ready.md)                   |
-| Hosting             | Vercel                                                      | inherited from Next.js choice                                                |
-| Tests               | Vitest (unit) + golden-file fixtures (PDF/ISDOC)            | (decided in Plan 2/3)                                                        |
-| Lint / format       | ESLint + Prettier + `commitlint`                            | (decided in Plan 1)                                                          |
+| Layer               | Choice                                                      | ADR                                                                                                                      |
+| ------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Monorepo            | Turborepo + bun workspaces                                  | [0001](./decisions/0001-monorepo-turborepo-bun.md)                                                                       |
+| Web framework       | Next.js 16 (App Router, RSC, Server Actions)                | [0002](./decisions/0002-nextjs15-app-router.md)                                                                          |
+| UI primitives       | shadcn/ui base + ReUI registry (`@reui`, `base-nova` style) | [0003](./decisions/0003-shadcn-plus-reui-registry.md)                                                                    |
+| Styling             | Tailwind v4                                                 | inherited from shadcn/ReUI                                                                                               |
+| PDF rendering       | `@react-pdf/renderer`                                       | [0004](./decisions/0004-pdf-react-pdf-renderer.md)                                                                       |
+| Schema / validation | Zod (single source of truth)                                | [0005](./decisions/0005-zod-as-source-of-truth.md)                                                                       |
+| Form runtime        | React Hook Form + `@hookform/resolvers/zod`                 | [0015](./decisions/0015-rhf-plus-zod-resolver-builder.md)                                                                |
+| Database            | Neon Postgres (Vercel Marketplace)                          | [0009](./decisions/0009-drizzle-neon-postgres.md)                                                                        |
+| ORM                 | Drizzle                                                     | [0009](./decisions/0009-drizzle-neon-postgres.md)                                                                        |
+| File uploads        | UploadThing                                                 | [0010](./decisions/0010-uploadthing-for-files.md)                                                                        |
+| QR generation       | `qrcode`                                                    | inherited from [0004](./decisions/0004-pdf-react-pdf-renderer.md) (PDF-side)                                             |
+| ISDOC XML           | `xmlbuilder2`                                               | (lazy, finalized in `specs/isdoc.md`)                                                                                    |
+| Auth                | Better Auth (OAuth Google/GitHub; orgs = workspaces)        | [0018](./decisions/0018-better-auth-oauth-only.md), [0019](./decisions/0019-workspaces-are-better-auth-organizations.md) |
+| Payments            | `@invoicey/payment-core` + Fio read-only adapter            | [0029](./decisions/0029-payment-ledger-fio-first.md)                                                                     |
+| Hosting             | Vercel                                                      | inherited from Next.js choice                                                                                            |
+| Tests               | Vitest (unit) + golden-file fixtures (PDF/ISDOC)            | (decided in Plan 2/3)                                                                                                    |
+| Lint / format       | ESLint + Prettier + `commitlint`                            | (decided in Plan 1)                                                                                                      |
 
 ## Monorepo layout
 
@@ -30,23 +31,20 @@ inveoiceyai/
 ├── apps/
 │   ├── web/                    Next.js 16 App Router (@invoicey/web)
 │   │   ├── app/
-│   │   │   ├── (app)/          sidebar shell
-│   │   │   │   ├── dashboard/
-│   │   │   │   ├── invoices/   # incl. /from-json demo
-│   │   │   │   ├── clients/
-│   │   │   │   ├── issuers/
-│   │   │   │   └── settings/
-│   │   │   └── api/
-│   │   │       ├── ares/[ico]/
-│   │   │       ├── demo/invoice-pdf/
-│   │   │       └── [transport]/   # MCP Streamable HTTP (/api/mcp)
+│   │   │   ├── (app)/          sidebar shell (dashboard, invoices, clients, issuers, payments, settings)
+│   │   │   ├── (docs)/         Fumadocs product docs (/docs)
+│   │   │   └── api/            ARES, MCP, webhooks, cron (incl. bank-sync), auth
 │   │   ├── agent/              Eve Slack + HTTP channels (/eve/v1/*)
+│   │   ├── content/docs/       Public MDX docs
+│   │   ├── lib/payments/       Fio sync + allocation services
 │   │   └── actions/            server actions (mutations)
 │   └── mcp/                    local stdio MCP (@invoicey/mcp)
 ├── packages/
 │   ├── invoice-core/           Zod schema, totals, numbering, status, PDF, QR, ISDOC
 │   ├── invoice-tools/          normalize, presets, create/render, MCP registration
-│   ├── db/                     Drizzle schema + Neon client
+│   ├── payment-core/           Fio adapter, matcher, money helpers
+│   ├── emails/                 Resend + react-email templates
+│   ├── db/                     Drizzle schema + Neon client + SQL migrations
 │   ├── ares/                   ARES REST v3 client
 │   ├── env/                    env schema helpers
 │   ├── config-eslint/
@@ -60,7 +58,7 @@ inveoiceyai/
 └── bun.lock
 ```
 
-Shared domain: `invoice-core` + `invoice-tools` + `ares` + `db`. Slack Eve agent lives under `apps/web/agent/` (Plan 13b); see [`specs/slack-eve.md`](./specs/slack-eve.md).
+Shared domain: `invoice-core` + `invoice-tools` + `payment-core` + `ares` + `db`. Slack Eve agent lives under `apps/web/agent/` (Plan 13b); see [`specs/slack-eve.md`](./specs/slack-eve.md). Payments: [`specs/payment-ledger-fio.md`](./specs/payment-ledger-fio.md).
 
 ## Runtime boundaries (Next.js 16 + MCP)
 
@@ -162,13 +160,19 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 | `RESEND_WEBHOOK_SECRET`                        | Svix signing secret for `/api/webhooks/resend`                                                          | Vercel + `.env.local`          | Plan 11                |
 | `EMAIL_FROM`                                   | Invoice From header (`Invoicey <invoices@invoicey.ditrich.me>`)                                         | Vercel + `.env.local`          | Plan 11                |
 | `EMAIL_SYSTEM_FROM`                            | System From header (`Invoicey <noreply@invoicey.ditrich.me>`)                                           | Vercel + `.env.local`          | Plan 11                |
-| `CRON_SECRET`                                  | Bearer for `/api/cron/overdue-reminders` and `/api/cron/recurring-drafts`                               | Vercel + `.env.local`          | Plan 11d / 10          |
+| `CRON_SECRET`                                  | Bearer for `/api/cron/overdue-reminders`, `/api/cron/recurring-drafts`, `/api/cron/bank-sync`           | Vercel + `.env.local`          | Plan 11d / 10 / 22     |
+| `BANK_TOKEN_ENCRYPTION_KEY_V1`                 | AES key material for Fio monitoring tokens at rest                                                      | Vercel + `.env.local`          | Plan 22                |
+| `BANK_TOKEN_ACTIVE_KEY_VERSION`                | Active bank-token key version (default `1`)                                                             | Vercel + `.env.local`          | Plan 22                |
 | `AI_GATEWAY_API_KEY`                           | Vercel AI Gateway API key (Eve + MCP AI)                                                                | Vercel + `.env.local`          | Plan 13a / 13b         |
 | `INVOICEY_AI_MODEL`                            | Gateway model id for Eve (`agent/agent.ts`)                                                             | Vercel + `.env.local`          | Plan 13b               |
 | `INVOICEY_DEMO_ISSUER_JSON`                    | Optional JSON override for demo `IssuerSnapshot`                                                        | Vercel + `.env.local`          | Plan 12a / 13b         |
 | `INVOICEY_PRESETS_PATH`                        | Absolute path to local MCP presets JSON                                                                 | local MCP / optional           | Plan 12a               |
 | `MCP_API_KEY`                                  | Bearer token for `/api/mcp` (optional in schema; route fails closed when unset); also Eve HTTP fallback | Vercel + `.env` / `.env.local` | Plan 12a               |
 | `EVE_API_KEY`                                  | Optional Bearer for `/eve/v1/*` HTTP (else `MCP_API_KEY`)                                               | Vercel + `.env.local`          | Plan 13b               |
+| `BETTER_AUTH_SECRET`                           | Auth signing secret (required at build + runtime)                                                       | Vercel + `.env.local`          | Plan 14                |
+| `BETTER_AUTH_URL`                              | Auth base URL (defaults to `NEXT_PUBLIC_APP_URL`)                                                       | Vercel + `.env.local`          | Plan 14                |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`    | Google OAuth                                                                                            | Vercel + `.env.local`          | Plan 14                |
+| `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET`    | GitHub OAuth                                                                                            | Vercel + `.env.local`          | Plan 14                |
 | ~~`SLACK_BOT_TOKEN` / `SLACK_SIGNING_SECRET`~~ | Hand-managed Slack secrets — **deprecated** for Eve; use Vercel Connect                                 | —                              | Plan 13a only          |
 
 `.env.example` lives at repo root with every var commented; `.env.local` is git-ignored.
@@ -180,6 +184,8 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 - **UploadThing** for files — configured per-app
 - **Plan 13b (Eve Slack):** `apps/web/agent/` mounted with `withEve()`; Connect trigger → `/eve/v1/slack`; Node 24+. Spec: [`specs/slack-eve.md`](./specs/slack-eve.md). Plan 13a `/api/slack/*` retired.
 - **Plan 12a (MCP):** local stdio via `apps/mcp`; remote Streamable HTTP via `apps/web` `/api/mcp` (`mcp-handler`, Node runtime, `MCP_API_KEY` bearer, fail-closed when unset). Shared tool logic in `@invoicey/invoice-tools` (+ `/ops` for issue/paid).
+- **Plan 14 (auth):** Better Auth OAuth-only; workspaces are organizations.
+- **Plan 22 (payments):** Fio monitoring-token sync via `@invoicey/payment-core`; allocations are the payment source of truth; cron `/api/cron/bank-sync`. Spec: [`specs/payment-ledger-fio.md`](./specs/payment-ledger-fio.md).
 
 ## Tooling
 
@@ -195,14 +201,15 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 flowchart LR
     Core["@invoicey/invoice-core"] --> Tools["@invoicey/invoice-tools"]
     Ares["@invoicey/ares"] --> Tools
+    Pay["@invoicey/payment-core"] --> Web["apps/web<br/>/api/mcp + Eve + Fio + demo"]
     Tools --> MCP["apps/mcp stdio"]
-    Tools --> Web["apps/web<br/>/api/mcp + Eve + demo"]
+    Tools --> Web
     DB[("@invoicey/db")] --> Web
     Core --> Web
     Ares --> Web
 ```
 
-Post-MVP still designed-in: Vercel Cron (Plan 10 / 11d), Resend (Plan 11), MCP+DB tools (Plan 12b), Better Auth (Plan 14). Slack Eve (Plan 13b) shares the same Zod contract in-process — no HTTP shim between MCP and Slack. Email: [`specs/email.md`](./specs/email.md).
+Shipped post-MVP foundations: Vercel Cron (Plan 10 / 11d / 22), Resend (Plan 11), MCP+DB tools (Plan 12b), Better Auth (Plan 14), payment ledger + Fio (Plan 22). Slack Eve (Plan 13b) shares the same Zod contract in-process — no HTTP shim between MCP and Slack. Email: [`specs/email.md`](./specs/email.md). Payments: [`specs/payment-ledger-fio.md`](./specs/payment-ledger-fio.md).
 
 ## Open architectural questions
 

@@ -4,7 +4,7 @@
 
 A modern, Czech-first invoicing tool that treats invoices as **structured data first** and **rendered documents second**. Built so that the same invoice can be created via a UI, a JSON document, an MCP tool, or a Slack command — all going through one schema, one validator, one renderer.
 
-Inspired by [Midday.ai](https://midday.ai) (UX polish, finance-grade feel) and [fakturaonline.cz](https://fakturaonline.cz) (Czech tax compliance, ARES integration). Differentiated by: schema-first architecture, MCP/Slack automation as first-class create surfaces (local MCP + Slack demo already ship), multi-issuer-business support without a "company switcher" footgun.
+Inspired by [Midday.ai](https://midday.ai) (UX polish, finance-grade feel) and [fakturaonline.cz](https://fakturaonline.cz) (Czech tax compliance, ARES integration). Differentiated by: schema-first architecture, MCP/Slack automation as first-class create surfaces, multi-issuer-business support, and a provider-neutral payment ledger (Fio first).
 
 ## Use cases
 
@@ -31,10 +31,9 @@ The product targets three concrete scenarios. Every feature must serve at least 
 
 > "I want to type `@Invoicey invoice NFCtron monthly…` in Slack, or prompt Cursor via MCP, and get a validated Czech invoice PDF — without fighting a 40-control form."
 
-- Schema is the contract: Slack and MCP assemble the same `InvoiceSchema` the UI will use
-- **Shipped:** local MCP create/render + presets ([Plan 12a](./roadmap.md#plan-12a--mcp-server-local--vercel-http-prep-appsmcp)); Eve Slack agent + Neon drafts/HITL ([Plan 13b](./roadmap.md#plan-13b--eve-slack-agent-db-backed-in-appsweb), [`specs/slack-eve.md`](./specs/slack-eve.md)); Plan 13a slash demo is historical
-- **Later:** MCP+DB tool expansion (Plan 12b); workspace membership via Clerk (Plan 14)
-- MVP UI remains single-user no-auth; `workspace_id` is the seam for multi-user later
+- Schema is the contract: Slack and MCP assemble the same `InvoiceSchema` the UI uses
+- **Shipped:** local + hosted MCP ([Plan 12](./roadmap.md)); Better Auth workspaces ([Plan 14](./roadmap.md), [ADR 0018](./decisions/0018-better-auth-oauth-only.md) / [ADR 0019](./decisions/0019-workspaces-are-better-auth-organizations.md)); payment ledger + Fio ([Plan 22](./roadmap.md#plan-22--payment-ledger-and-fio-bank-integration), [ADR 0029](./decisions/0029-payment-ledger-fio-first.md))
+- **In progress:** Eve Slack agent + Neon drafts/HITL ([Plan 13b](./roadmap.md), [`specs/slack-eve.md`](./specs/slack-eve.md)); real Fio pilot hardening
 
 ## In-scope (MVP)
 
@@ -65,7 +64,8 @@ The MVP cut, ordered roughly by user-facing importance:
 - Data grid (ReUI Data Grid) — sortable, filterable, paginated invoice list
 - Filters: status, issuer, client, date range, free-text
 - Row actions: open, download PDF, download ISDOC, duplicate (as draft), mark paid, delete (drafts only)
-- Status engine: draft / issued / paid / overdue / cancelled (derived, not stored)
+- Status engine: draft / issued / paid / overdue / cancelled (derived, not stored); payment state unpaid / partial / paid / overpaid from ledger allocations
+- Payment ledger: manual allocations and Fio bank match proposals (human confirm) — see [`specs/payment-ledger-fio.md`](./specs/payment-ledger-fio.md)
 
 ### Dashboard
 
@@ -83,17 +83,18 @@ The MVP cut, ordered roughly by user-facing importance:
 
 These are explicitly deferred. They are _not_ prohibited future work — they're just not part of the MVP cut. Each has a placeholder in the roadmap.
 
-| Capability                                           | Why deferred                                                                                           | Where it lands        |
+| Capability                                           | Why deferred / note                                                                                    | Where it lands        |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------- |
-| Recurring invoices / scheduled issuance              | Needs cron + tracking + lifecycle UI                                                                   | Plan 10               |
-| Email delivery to clients                            | Needs Resend wiring + bounce handling + audit trail                                                    | Plan 11               |
-| MCP + DB (list/mark paid, durable presets)           | Local MCP already ships; persistence next                                                              | Plan 12b              |
+| Recurring invoices / scheduled issuance              | **Shipped** as draft-only cron (HITL issue/send)                                                       | Plan 10               |
+| Email delivery to clients                            | **Shipped** (Resend + lifecycle)                                                                       | Plan 11               |
+| MCP + DB (list/mark paid, durable presets)           | **Shipped**                                                                                            | Plan 12b              |
 | Slack bot (DB-persisted drafts)                      | Eve agent in `apps/web/agent` ([slack-eve.md](./specs/slack-eve.md))                                   | Plan 13b              |
-| Authentication / multi-user                          | Single user is enough for personal use; Clerk integrates cleanly later                                 | Plan 14               |
+| Authentication / multi-user                          | **Shipped** via Better Auth (not Clerk)                                                                | Plan 14               |
+| Payment ledger + bank matching                       | **Shipped** for Fio (read-only, confirm-first); other banks / statement import later                   | Plan 22               |
 | Multi-currency (EUR, USD)                            | CZK-only is sufficient for the personal use case; ARES is CZ-only anyway                               | Post-MVP              |
 | Dual-label bilingual invoice PDF (CS+EN on one page) | Per-invoice `cs` \| `en` covers foreign clients ([ADR 0028](./decisions/0028-per-invoice-language.md)) | Post-MVP              |
 | Accounting export (Pohoda, Money S3, iDoklad)        | ISDOC already covers most importers — see [TODO below](#todoplan-3-isdoc-compatibility)                | Validate after Plan 3 |
-| Bank-statement import / payment matching             | Out of scope for an invoice-issuance tool                                                              | Possibly never        |
+| Multibank consent / payment initiation               | Fio monitoring token only in Plan 22; initiation is a separate capability                              | Later                 |
 | Client-side payment portal (pay-by-link)             | Out of scope for this product                                                                          | Possibly never        |
 | Advanced templates (custom PDF layouts)              | One good template is better than ten mediocre ones                                                     | Post-MVP              |
 | Tax reporting / kontrolní hlášení / DPH přiznání     | Adjacent product; ISDOC export covers the upstream piece                                               | Possibly never        |

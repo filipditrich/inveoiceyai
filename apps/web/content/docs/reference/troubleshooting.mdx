@@ -1,6 +1,6 @@
 ---
 title: Troubleshooting
-description: Fast answers for common setup, invoice and integration failures.
+description: Fast answers for common invoice, email, payment and automation issues.
 icon: CircleHelp
 ---
 
@@ -69,18 +69,15 @@ See [payment QR](/docs/outputs/payment-qr).
 
 </Accordion>
 
-<Accordion title="Czech characters render as boxes">
-  Should not happen — fonts are vendored into the repository precisely to avoid
-  this. If you see it on a self-hosted instance, the font assets are missing
-  from the deployment bundle. Check that `outputFileTracingIncludes` in
-  `next.config.ts` still covers the invoice-core assets for the route doing the
-  rendering.
+<Accordion title="Czech characters look wrong in the PDF">
+  Should not happen — fonts are vendored into Invoicey for Czech diacritics. If
+  a PDF looks broken, re-download from the invoice detail; issued files are
+  stored copies from issue time.
 </Accordion>
 
 <Accordion title="My logo does not appear">
-  SVG is not rasterised reliably — upload PNG or JPEG. Also confirm
-  `UPLOADTHING_TOKEN` is set, or that the URL you pasted is publicly reachable
-  from the server.
+  SVG is not rasterised reliably — upload PNG or JPEG. If you pasted a URL,
+  confirm it is publicly reachable.
 </Accordion>
 
 <Accordion title="No ISDOC download on an imported invoice">
@@ -96,40 +93,63 @@ See [payment QR](/docs/outputs/payment-qr).
 <Accordions>
 
 <Accordion title="Sending fails immediately">
-  `RESEND_API_KEY` is not set on the deployment. Sending fails closed rather
-  than pretending to work.
+  Check the recipient address and that the invoice is issued. If it still fails,
+  retry later or contact support — delivery is handled by Invoicey's mail
+  pipeline.
 </Accordion>
 
 <Accordion title="Delivery status never leaves 'sent'">
-  The webhook is not reaching you. Check it points at `/api/webhooks/resend`,
-  that `RESEND_WEBHOOK_SECRET` matches, and that the events are subscribed.
-  Signature verification fails closed. See [deployment
-  setup](/docs/guides/sending-email#deployment-setup).
+  Delivery events update asynchronously. Give it a minute, then refresh the
+  invoice timeline. Terminal outcomes (bounced, failed, complained) win over
+  delivered. See [sending email](/docs/guides/sending-email#tracking).
 </Accordion>
 
 <Accordion title="Overdue reminders never fire">
-  Three things must all be true: enabled on the issuer, `CRON_SECRET` set, and a
-  daily request actually scheduled against `/api/cron/overdue-reminders`. The UI
-  toggle alone does nothing.
+  Reminders must be enabled on the issuer, with a contact email on the client.
+  They run on Invoicey's schedule once enabled — the toggle alone is enough in
+  the product UI.
 </Accordion>
 
 <Accordion title="Recurring drafts never appear">
-  Apply the Plan 10 SQL (`packages/db/sql/2026-08-12-plan10-recurring.sql`), set
-  `CRON_SECRET`, and confirm Vercel Cron hits `/api/cron/recurring-drafts` at
-  06:00. Paused schedules and schedules that already have an unissued draft are
-  skipped on purpose.
+  Confirm the schedule is not paused and that a previous draft from that
+  schedule is not still unissued (the cron skips rather than piling drafts). See
+  [creating invoices](/docs/guides/creating-invoices#recurring-drafts).
 </Accordion>
 
 <Accordion title="Emails land in spam">
-  Verify your sending domain in Resend and set its DNS records. The From address
-  is always the deployment's verified domain — sending as an arbitrary address
-  would fail SPF and DKIM, which is why it is not offered. See
-  [addressing](/docs/guides/sending-email#addressing).
+  From is always Invoicey's verified sending domain with `{Issuer} via Invoicey`
+  as the display name and your contact as Reply-To. Ask the recipient to allow
+  the domain; sending as an arbitrary From is not offered because it would fail
+  SPF/DKIM. See [addressing](/docs/guides/sending-email#addressing).
 </Accordion>
 
 <Accordion title="A recipient is suppressed">
   They hard-bounced or filed a complaint. Automated sends skip them; manual
   sends warn and proceed. Confirm the address is right before overriding.
+</Accordion>
+
+</Accordions>
+
+## Payments
+
+<Accordions>
+
+<Accordion title="Fio connect fails or sync errors">
+  Use a **monitoring-only** 64-character token for a CZK account. Check the
+  error badge on **Settings → Bank connections** (throttling, account currency,
+  token shape). Wait ~30 seconds between **Sync now** attempts.
+</Accordion>
+
+<Accordion title="Proposals appear but invoices stay unpaid">
+  Expected. Fio only creates match proposals. Open **Payments**, review the
+  suggestion, and **Confirm**. Nothing auto-marks invoices paid. Guide:
+  [Reconcile payments](/docs/guides/reconciling-payments).
+</Accordion>
+
+<Accordion title="Automatic sync seems stuck">
+  Use **Sync now** on the bank connection. If that works, leave scheduled sync
+  to Invoicey; if Sync now fails, rotate the monitoring token in Fio and
+  reconnect.
 </Accordion>
 
 </Accordions>
@@ -140,19 +160,15 @@ See [payment QR](/docs/outputs/payment-qr).
 
 <Accordion title="MCP returns unauthorized on everything">
 The key was revoked, mistyped, or truncated when copied. Personal keys are shown once, so create a
-fresh one under **Settings → API keys** if you are unsure. Test the endpoint directly before
-debugging the client:
+fresh one under **Settings → API keys** if you are unsure. Test with:
 
 ```bash
-curl -X POST https://your-host/api/mcp -H "Authorization: Bearer YOUR_API_KEY" -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+curl -X POST https://invoicey.ditrich.me/api/mcp \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
-</Accordion>
-
-<Accordion title="Only some MCP tools appear">
-  `list_invoices`, `get_invoice`, `mark_invoice_paid` and `send_invoice_email`
-  need `DATABASE_URL` and are not registered without it. Use the hosted
-  endpoint. See [MCP tools](/docs/reference/mcp-tools).
 </Accordion>
 
 <Accordion title="An assistant invented issuer details">
@@ -161,29 +177,17 @@ curl -X POST https://your-host/api/mcp -H "Authorization: Bearer YOUR_API_KEY" -
   [presets](/docs/integrations/mcp#presets).
 </Accordion>
 
-<Accordion title="Presets vanish between calls">
-  File-backed presets on serverless land in `/tmp` and do not persist. Set
-  `DATABASE_URL` so presets go to Postgres.
-</Accordion>
-
 <Accordion title="The Slack bot never responds">
-  Check `https://your-host/eve/v1/health`. No answer usually means the
-  deployment was built without `VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1`, so the
-  agent routes were never generated. A healthy response points instead at the
-  Connect trigger not being attached to `/eve/v1/slack`. See
+  Confirm the bot is invited, your Slack account is linked, and you are in the
+  right Invoicey workspace. See
   [Slack](/docs/integrations/slack#troubleshooting).
 </Accordion>
 
 </Accordions>
 
-## Deployment
+## Lookups & sign-in
 
 <Accordions>
-
-<Accordion title="Build fails on the auth secret">
-  `BETTER_AUTH_SECRET` must be present at **build** time, minimum 32 characters.
-  See [environment variables](/docs/reference/environment-variables#required).
-</Accordion>
 
 <Accordion title="ARES lookup returns nothing">
   Distinguish the cases: an invalid IČO is rejected before any request;
@@ -193,9 +197,8 @@ curl -X POST https://your-host/api/mcp -H "Authorization: Bearer YOUR_API_KEY" -
 </Accordion>
 
 <Accordion title="Only one sign-in provider appears">
-  A provider is registered only when both its ID and secret are set, so a
-  half-configured provider is hidden rather than shown as a button that fails
-  after redirect.
+  Invoicey shows only providers that are enabled for the product. Use Google or
+  GitHub when offered — there is no password sign-in.
 </Accordion>
 
 </Accordions>

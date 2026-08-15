@@ -66,16 +66,18 @@ Each plan in `.cursor/plans/` cites the docs it implements. Each ADR cites the p
 4. [`architecture.md`](./architecture.md) — how the system fits together
 5. [`domain/invoice-schema.md`](./domain/invoice-schema.md) — the central contract
 6. [`specs/mcp.md`](./specs/mcp.md) — AI create path (local Cursor)
-7. [`roadmap.md`](./roadmap.md) — what ships when
-8. [`decisions/`](./decisions) — why each foundational call was made
-9. [`research/`](./research) — possible future directions and unresolved options
+7. [`specs/payment-ledger-fio.md`](./specs/payment-ledger-fio.md) — payment ledger + Fio
+8. [`roadmap.md`](./roadmap.md) — what ships when
+9. [`decisions/`](./decisions) — why each foundational call was made
+10. [`research/`](./research) — possible future directions and unresolved options
 
 ## Status
 
 Implementation progress lives in [`roadmap.md`](./roadmap.md).
 
-- **Done:** Plans 0–7 (docs → list UI), Plan 12a (local MCP), Plan 13a (historical Slack demo).
-- **In progress:** Plan 13b — Eve Slack agent ([`specs/slack-eve.md`](./specs/slack-eve.md)).
+- **Done:** Plans 0–12, 14, 16–21 (MVP UI through AI usage), Plan 22 implementation (payment ledger + Fio connector).
+- **In progress:** Plan 13b — Eve Slack agent ([`specs/slack-eve.md`](./specs/slack-eve.md)); Plan 22 real Fio pilot + rematch/split UI polish.
+- **Public product docs:** [`apps/web/content/docs/`](../apps/web/content/docs/) (served at `/docs`).
 - **Automation:** Prefer MCP / Eve Slack over a heavy builder UI for day-to-day create ([`AGENTS.md`](../AGENTS.md)).
 
 Narrative plans: [`.cursor/plans/`](../.cursor/plans/).

@@ -70,45 +70,10 @@ problem, and that judgement is yours.
 Off by default, per issuer. When enabled, a daily cron finds overdue unpaid invoices for that issuer
 and emails the client every _N_ days (7 by default).
 
-Enable them in the issuer's email settings. They need the deployment cron to actually be scheduled.
+Enable them in the issuer's email settings. Reminders run on Invoicey's schedule once enabled —
+there is nothing else to configure in the product UI.
 
-## Deployment setup
+## Templates
 
-Self-hosting? Four steps, none automatable:
-
-<Steps>
-  <Step>
-    ### Verify a sending domain
-
-    Add a domain in Resend and publish its DNS records.
-
-  </Step>
-  <Step>
-    ### Set the environment
-
-    Configure `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET` and `EMAIL_FROM`. Missing values fail closed.
-
-  </Step>
-  <Step>
-    ### Point the webhook
-
-    Send Resend events to `https://your-host/api/webhooks/resend`. Subscribe to sent, delivered,
-    delayed, bounced, failed, complained, opened and clicked events.
-
-  </Step>
-  <Step>
-    ### Schedule reminders
-
-    Set `CRON_SECRET` and make a daily authenticated request to
-    `/api/cron/overdue-reminders`.
-
-  </Step>
-</Steps>
-
-Templates live in the `@invoicey/emails` package and can be previewed locally:
-
-```bash
-bun run email:dev
-```
-
-Copy is Czech, matching the app UI.
+Email copy is Czech, matching the app UI. Invoice, invite, sign-in alert, overdue reminder and
+payment-received templates all go through the same delivery pipeline and suppression rules above.

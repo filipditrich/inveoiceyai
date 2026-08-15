@@ -4,8 +4,9 @@ description: How drafts become issued, paid, overdue or cancelled.
 icon: CircleDot
 ---
 
-Invoicey stores facts—when an invoice was issued, paid or cancelled—and derives its status whenever
-it is read. Time can therefore make an unpaid invoice overdue without a nightly status job.
+Invoicey stores facts—when an invoice was issued, cancelled, and which payment allocations are
+active—and derives its status whenever it is read. Time can therefore make an unpaid invoice overdue
+without a nightly status job.
 
 ## Status at a glance
 
@@ -15,11 +16,15 @@ it is read. Time can therefore make an unpaid invoice overdue without a nightly 
 | `future`       | Budoucí       | Issued with a future issue date        |
 | `unpaid`       | Nezaplaceno   | Issued, unpaid and not past due        |
 | `overdue`      | Po splatnosti | Issued, unpaid and past due            |
-| `paid`         | Zaplaceno     | Payment date recorded                  |
+| `paid`         | Zaplaceno     | Fully covered by active allocations    |
 | `cancelled`    | Stornováno    | Cancelled; its number remains consumed |
 
 Priority is `cancelled → draft → paid → future → overdue → unpaid`. A future invoice never appears
 overdue, even when its due date was entered earlier than today.
+
+Payment coverage also exposes a finer **payment state** on the invoice: `unpaid`, `partial`, `paid`,
+or `overpaid`. Partial and overpaid never rewrite the issued document — they only change how much is
+still outstanding.
 
 <Callout title="Domain status vs. display status">
   Automation returns both `status` and `displayStatus`. The domain status keeps
@@ -33,7 +38,7 @@ overdue, even when its due date was entered earlier than today.
 function deriveStatus(invoice, now) {
   if (invoice.cancelledAt) return "cancelled";
   if (!invoice.issuedAt) return "draft";
-  if (invoice.paidAt) return "paid";
+  if (invoice.paidAt) return "paid"; // set when allocations fully cover the total
   if (invoice.issueDate > today(now)) return "future";
   return now > endOfDay(invoice.dueDate, "Europe/Prague")
     ? "overdue"
@@ -46,17 +51,19 @@ ends in **Europe/Prague**, not at midnight UTC.
 
 ## Actions and outcomes
 
-| Action      | Allowed from        | Result                   |
-| ----------- | ------------------- | ------------------------ |
-| Save        | new or `draft`      | `draft`                  |
-| Issue       | `draft`             | numbered and immutable   |
-| Mark paid   | open issued invoice | `paid`                   |
-| Unmark paid | `paid`              | derived again from dates |
-| Cancel      | issued invoice      | `cancelled`              |
-| Delete      | `draft` only        | permanently removed      |
-| Duplicate   | any status          | new `draft`              |
+| Action                         | Allowed from        | Result                                |
+| ------------------------------ | ------------------- | ------------------------------------- |
+| Save                           | new or `draft`      | `draft`                               |
+| Issue                          | `draft`             | numbered and immutable                |
+| Mark paid / confirm allocation | open issued invoice | allocation; `paid` when fully covered |
+| Unmark / reverse               | allocated invoice   | projections recomputed                |
+| Cancel                         | issued invoice      | `cancelled`                           |
+| Delete                         | `draft` only        | permanently removed                   |
+| Duplicate                      | any status          | new `draft`                           |
 
 `issued → overdue` is not a user action. Time passes and the result changes.
+
+Bank match proposals are suggestions only until you [confirm them](/docs/guides/reconciling-payments).
 
 ## Why issued invoices are frozen
 
@@ -76,6 +83,11 @@ The cancelled document keeps its number, so the sequence still explains itself d
     title="Issue & get paid"
     href="/docs/guides/issuing-and-payment"
     description="The complete lifecycle in the app."
+  />
+  <Card
+    title="Reconcile payments"
+    href="/docs/guides/reconciling-payments"
+    description="Fio feed, proposals, and the payment ledger."
   />
   <Card
     title="Snapshots"

@@ -1,41 +1,34 @@
-# Handover — MCP local + tools landed; Plan 5 issuers next
+# Handover — Plan 22 payment ledger + Fio shipped; pilot pending
 
 ## Phase status
 
-| Area | Status |
-| --- | --- |
-| Plans 0–4 (docs → ARES/clients) | Done |
-| Plan 12a (local MCP + `/api/mcp` prep) | Done |
-| Plan 13a (Slack stateless demo) | Done |
-| **Plan 5 (issuers)** | **Next** on MVP track |
-| Plans 6–9 | Planned (builder / list / dashboard / polish) |
+| Area                               | Status                                  |
+| ---------------------------------- | --------------------------------------- |
+| Plans 0–9 (MVP UI)                 | Done                                    |
+| Plans 10–12, 14, 16–21             | Done                                    |
+| Plan 13b (Eve Slack)               | In progress                             |
+| **Plan 22 (payment ledger + Fio)** | **Implemented; real Fio pilot pending** |
 
-Living ledger: [`docs/roadmap.md`](docs/roadmap.md). Repo overview: [`README.md`](README.md).
+Living ledger: [`docs/roadmap.md`](docs/roadmap.md). Repo overview: [`README.md`](README.md). Product docs: `apps/web/content/docs/` → `/docs`.
 
-## What shipped recently (automation)
+## What shipped recently (payments)
 
-- **`@invoicey/invoice-tools`** — normalize draft, ARES lookup, create/render PDF+ISDOC, file presets, MCP registration (`@invoicey/invoice-tools/mcp`).
-- **`apps/mcp`** — stdio MCP for Cursor (`bun run --cwd apps/mcp src/stdio.ts`).
-- **`apps/web` `/api/mcp`** — `mcp-handler` + required `MCP_API_KEY` (Node, `maxDuration` 120).
-- **Slack** — `/invoice` + `app_mention` use shared handlers via AI SDK wrappers.
-- **Docs** — [`docs/specs/mcp.md`](docs/specs/mcp.md), README + architecture updated for new layout.
-- **Cursor** — [`.cursor/mcp.json.example`](.cursor/mcp.json.example); local `.cursor/mcp.json` and `.invoicey/` are gitignored.
+- **`@invoicey/payment-core`** — Fio periods adapter, deterministic matcher, money helpers.
+- **Ledger tables** — bank connections/accounts, transactions, match proposals, allocations, audit.
+- **Settings → Bank connections** — encrypted Fio monitoring token, sync now, disconnect.
+- **Payments** (`/payments`) — confirm/reject proposals, manual payments, recent Fio credits.
+- **Invoice payment state** — allocations drive `paid_amount` / `payment_state` / `paid_at` projection.
+- **Cron** — `/api/cron/bank-sync` (needs `CRON_SECRET` + `BANK_TOKEN_ENCRYPTION_KEY_V1`).
 
-## Web demo (keep)
-
-| Piece | Purpose |
-| --- | --- |
-| `/invoices/from-json` | Paste/edit invoice JSON, preview PDF |
-| `POST /api/demo/invoice-pdf` | Server builds PDF from posted JSON |
-| `apps/web/lib/demo-sample-invoice.json` | Realistic sample |
+Spec: [`docs/specs/payment-ledger-fio.md`](docs/specs/payment-ledger-fio.md) · ADR: [`0029`](docs/decisions/0029-payment-ledger-fio-first.md).
 
 ## Gotchas
 
 1. PDF needs Node `Buffer` for images — never Edge for render routes.
 2. Fonts: `outputFileTracingIncludes` in `apps/web/next.config.ts` for `invoice-core` assets.
-3. Issuer on MCP/Slack is **locked** server-side (preset or `INVOICEY_DEMO_ISSUER_JSON`).
-4. `IssuerSnapshotSchema` requires `contactEmail`.
-5. Commit scopes include `invoice-tools` and `mcp` ([`commitlint.config.mjs`](commitlint.config.mjs)).
+3. Issuer on MCP/Eve is **locked** server-side (preset / workspace default issuer).
+4. Prod schema changes go through checked-in SQL under `packages/db/sql/` — do not unattended `db:push` against production.
+5. Fio tokens are never returned to the client; encryption key must be set before connect.
 
 ## Verification
 
@@ -46,14 +39,14 @@ bun run typecheck && bun run lint && bun run test && bun run build
 
 ## Next session — pick a track
 
-**A — Plan 5 (issuers)**  
-Follow [`docs/roadmap.md`](docs/roadmap.md) Plan 5 exit criteria (issuer CRUD, numbering editor, UploadThing when ready).
+**A — Plan 22 pilot**  
+Complete real monitoring-token probe, rematch/split UI, and idempotent sync validation.
 
-**B — MCP polish**  
-More presets / templates, remote Vercel go-live when asked ([`docs/specs/mcp.md`](docs/specs/mcp.md)).
+**B — Eve Slack (13b)**  
+Continue agent HITL / persistence polish ([`docs/specs/slack-eve.md`](docs/specs/slack-eve.md)).
 
-**C — PDF visuals**  
-Iterate via `/invoices/from-json` + [`docs/specs/pdf-rendering.md`](docs/specs/pdf-rendering.md).
+**C — Docs drift**  
+Keep root README, `docs/`, and `apps/web/content/docs/` aligned when behavior changes.
 
 ## Agent continuity
 

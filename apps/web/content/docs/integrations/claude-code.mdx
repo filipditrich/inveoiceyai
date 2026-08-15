@@ -1,6 +1,6 @@
 ---
 title: Claude Code
-description: Connect Claude Code to local or hosted Invoicey tools.
+description: Connect Claude Code to Invoicey’s hosted MCP tools.
 icon: SquareTerminal
 ---
 
@@ -9,16 +9,10 @@ Claude Code connects to MCP servers from the CLI, so the same tools available in
 
 ## Adding the server
 
-The hosted endpoint, added for your user rather than one project:
-
 ```bash
-claude mcp add --transport http --scope user invoicey https://your-host/api/mcp --header "Authorization: Bearer YOUR_API_KEY"
-```
-
-Or the local server against a repository checkout:
-
-```bash
-claude mcp add --scope user invoicey-local -- bun run --cwd /abs/path/to/inveoiceyai/apps/mcp src/stdio.ts
+claude mcp add --transport http --scope user invoicey \
+  https://invoicey.ditrich.me/api/mcp \
+  --header "Authorization: Bearer YOUR_API_KEY"
 ```
 
 Verify:
@@ -27,7 +21,7 @@ Verify:
 claude mcp list
 ```
 
-<Callout title="Prefer user scope for the hosted endpoint">
+<Callout title="Prefer user scope">
   `--scope project` writes to `.mcp.json` in the repository, which is checked in
   and shared. A bearer token does not belong there. User scope keeps it in your
   own config.
@@ -40,7 +34,7 @@ Tools appear as `invoicey` tools in any session:
 > Look up NFCtron in ARES, then draft an invoice from my "main" issuer preset for October
 > consulting — 32 hours at 1 800 CZK. Due in 14 days.
 
-And for follow-ups against the hosted endpoint:
+And for follow-ups:
 
 > List unpaid invoices and tell me which are overdue.
 >
@@ -54,16 +48,6 @@ Claude Code will ask before tools that send email or change payment state. Let i
 correctly and is entirely fictional. Save one before your first real invoice — see
 [presets](/docs/integrations/mcp#presets).
 
-## What works where
-
-|                              | Hosted `/api/mcp` | Local stdio                     |
-| ---------------------------- | ----------------- | ------------------------------- |
-| ARES lookup and search       | yes               | yes                             |
-| Create and render an invoice | yes               | yes                             |
-| Presets                      | yes               | file-backed                     |
-| List, get, mark paid         | yes               | only with `DATABASE_URL`        |
-| Send email                   | yes               | only with a database and Resend |
-
 ## Troubleshooting
 
 <Accordions>
@@ -71,19 +55,12 @@ correctly and is entirely fictional. Save one before your first real invoice —
 <Accordion title="Unauthorized on every call">
   The key was revoked, mistyped, or truncated when copied. Personal keys are
   shown once — if you are not certain you have it intact, create a new one under
-  **Settings → API keys**. Test the endpoint directly with `curl` before
-  debugging the client.
+  **Settings → API keys**.
 </Accordion>
 
 <Accordion title="The server shows as failed">
-  Run `claude mcp list` for status. For the local server, run its command by
-  hand to see the startup error; a successful boot prints `[invoicey-mcp] stdio
-  server ready`. Relative paths and `~` are not resolved — use absolute paths.
-</Accordion>
-
-<Accordion title="Only some tools are available">
-  The database-backed tools are not registered when there is no database. Use
-  the hosted endpoint, or set `DATABASE_URL` in the local server's environment.
+  Run `claude mcp list` for status, then confirm the URL and bearer header are
+  intact.
 </Accordion>
 
 </Accordions>

@@ -1,0 +1,184 @@
+---
+title: Reconcile payments
+description: Connect Fio, review match proposals, and confirm allocations in the payment ledger.
+icon: Landmark
+---
+
+Getting paid in Invoicey is more than stamping a date on an invoice. Every payment — cash, another
+bank, or a Fio credit — becomes a **ledger allocation**. Allocations are the source of truth;
+invoice status, outstanding totals and the dashboard all derive from them.
+
+```text
+  Fio movements  ─┐
+                  ├─▶  match proposals  ─▶  you confirm  ─▶  allocation  ─▶  invoice paid / partial / overpaid
+  Manual entry   ─┘
+```
+
+<Callout title="Confirm-first by design">
+  Bank sync only *suggests* matches. Nothing marks an invoice paid until a
+  workspace member confirms a proposal or adds a manual payment. Automatic
+  confirmation stays off on purpose.
+</Callout>
+
+## Before you connect a bank
+
+Matching works best when issued invoices already carry the payment facts Czech banks use:
+
+| Fact                     | Where it comes from                                      |
+| ------------------------ | -------------------------------------------------------- |
+| **IBAN**                 | Issuer bank account frozen onto the invoice at issue     |
+| **Variable symbol (VS)** | Usually the invoice number; used heavily by Fio matching |
+| **Amount + currency**    | Invoice total (CZK in the current pilot)                 |
+
+Issue invoices with a clear VS and the correct issuer IBAN before you expect clean proposals. Older
+paid invoices already migrated into the ledger as manual allocations — you do not need to re-mark
+them.
+
+## Connect Fio banka
+
+The first supported bank is **Fio banka**, via a **read-only monitoring token** from Fio
+Internetbanking. That token can pull account movements; it cannot submit payment orders.
+
+Owners and admins configure this under **Settings → Bank connections**. Connections belong to the
+**active workspace** — they are never shared with your other workspaces.
+
+<Steps>
+  <Step>
+    ### Create a monitoring token in Fio
+
+    In Fio Internetbanking, create a token with statement / movement rights only. Copy the
+    64-character string once. Invoicey encrypts it at rest and never shows the plaintext again after
+    save.
+
+  </Step>
+  <Step>
+    ### Connect in Invoicey
+
+    Open **Settings → Bank connections**, paste the token, and connect. Invoicey probes Fio,
+    verifies the account (CZK pilot), and stores the IBAN on this workspace. One IBAN can be active
+    in only one workspace at a time.
+
+  </Step>
+  <Step>
+    ### Sync movements
+
+    Use **Sync now** on the connection, or wait for the scheduled bank sync. Sync pulls an explicit
+    overlapping date range, upserts movements without duplicates, and runs the matcher to open
+    proposals on **Payments**.
+
+  </Step>
+</Steps>
+
+Disconnect stops further sync but **keeps** imported transactions and allocations — history is not
+wiped when you rotate or revoke a token.
+
+## The Payments page
+
+Open **Payments** in the sidebar. It is the reconciliation desk for the workspace.
+
+### Match proposals
+
+Each proposal links a bank credit to an issued invoice, with a score, confidence, and reason /
+blocker codes (variable symbol, amount, IBAN, currency, and so on).
+
+| Action      | Effect                                                                      |
+| ----------- | --------------------------------------------------------------------------- |
+| **Confirm** | Creates an allocation for the proposed amount                               |
+| **Reject**  | Dismisses the suggestion; the bank credit stays available for another match |
+
+Confirming a full match marks the invoice paid when allocations cover the absolute total. Confirming
+a smaller amount leaves the invoice **partially** paid with an outstanding balance.
+
+### Manual payments
+
+Use **Add a manual payment** for cash, an unconnected bank, or a correction. Pick the outstanding
+invoice, amount and paid-on date. Manual entries write the **same ledger** as confirmed Fio matches,
+so dashboards stay consistent.
+
+### Recent transactions and allocations
+
+Imported Fio credits show whether they are already allocated. The allocations list is the audit
+trail of confirmed payments — reverse an allocation if the wrong invoice was matched; status and
+outstanding totals recompute immediately.
+
+## On the invoice itself
+
+Invoice detail shows a **Payment ledger** summary: received, outstanding, and the allocation
+timeline. From there you can still **Mark paid** / **Unmark paid** (or reverse a specific
+allocation). Those actions are ledger operations too — not a separate shadow field.
+
+When an invoice becomes fully paid, optional **payment-received** email can fire once (configured
+per issuer).
+
+## How matching decides
+
+The matcher is deterministic and versioned (`fio-v1` today). It never crosses workspace boundaries
+and never invents FX: transaction currency, allocation currency and invoice currency must agree.
+
+Typical strong signals:
+
+- Variable symbol matches the issued invoice
+- Amount equals (or cleanly covers) the outstanding balance
+- Credit lands on the invoice’s payment IBAN
+
+Ambiguous or blocked cases stay as proposals (or stay unmatched) until a human decides. That is
+preferable to silently marking the wrong invoice paid.
+
+## Partial, split and overpaid
+
+| Situation                            | What Invoicey does                                                   |
+| ------------------------------------ | -------------------------------------------------------------------- |
+| Client pays part of the total        | Allocation recorded; invoice stays open with outstanding             |
+| One transfer covers several invoices | Confirm each proposal (or add manual splits) as separate allocations |
+| Client overpays                      | Invoice can show **overpaid**; issued PDF/ISDOC totals stay frozen   |
+| You matched the wrong invoice        | **Reverse** the allocation; rematch from Payments                    |
+
+Issued documents are never rewritten when money moves — only payment projections change.
+
+## What this does not include yet
+
+- Payment initiation or any write-capable bank token
+- Automatic confirmation without a human
+- Foreign-exchange / cross-currency allocation
+- Banks other than Fio (the ledger is ready for more adapters later)
+- Full rematch / multi-invoice split UI polish beyond confirm, reject, reverse and manual add
+
+## Tips
+
+<Accordions>
+  <Accordion title="Proposals never appear after sync">
+    Confirm the connection status is active, the sync finished without an error
+    badge, and you have issued invoices whose VS / IBAN / CZK amount can match
+    the credit. Drafts are never candidates.
+  </Accordion>
+  <Accordion title="I use another bank">
+    Keep using **Mark paid** or **Add a manual payment**. Fio is the first feed;
+    other banks are not connected yet, but the ledger already accepts manual
+    entries the same way.
+  </Accordion>
+  <Accordion title="Token or sync errors">
+    Use a monitoring-only token for a CZK account. Fio rate-limits roughly every
+    30 seconds per token — wait briefly between **Sync now** attempts. Rotate
+    the token from Bank connections if Fio revoked the old one.
+  </Accordion>
+</Accordions>
+
+## Related
+
+<Cards>
+  <Card
+    title="Issue & get paid"
+    href="/docs/guides/issuing-and-payment"
+    description="Issue lifecycle, overdue and downloads."
+  />
+  <Card
+    title="Statuses"
+    href="/docs/concepts/statuses"
+    description="How paid, partial and overdue are derived."
+  />
+  <Card
+    title="Payment QR"
+    href="/docs/outputs/payment-qr"
+    description="SPAYD fields clients scan in banking apps."
+  />
+</Cards>

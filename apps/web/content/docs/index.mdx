@@ -25,6 +25,7 @@ same validated payload.
 | **ISDOC 6.0.2**      | XML your accountant's software imports without retyping            |
 | **SPAYD QR**         | Czech banking apps pre-fill amount, account, VS from a scan        |
 | **Multiple issuers** | Separate businesses, each with its own numbering and bank account  |
+| **Payment ledger**   | Manual payments + Fio bank feed with human-confirmed matches       |
 | **Automation**       | Create and issue invoices from Cursor, Claude Code or Slack        |
 
 ## How the pieces fit
@@ -56,6 +57,11 @@ Every surface must satisfy the same schema before Invoicey renders or stores an 
     description="API keys, MCP, Cursor, Claude Code and Slack."
   />
   <Card
+    title="Reconcile payments"
+    href="/docs/guides/reconciling-payments"
+    description="Fio bank feed, match proposals and the payment ledger."
+  />
+  <Card
     title="Troubleshooting"
     href="/docs/reference/troubleshooting"
     description="What to check when something does not work."
@@ -66,8 +72,9 @@ Every surface must satisfy the same schema before Invoicey renders or stores an 
 
 Invoicey is pre-1.0. Today that means:
 
-- **Czech koruna only.** Multi-currency is not implemented.
+- **Czech koruna only.** Multi-currency is not implemented. The Fio pilot is CZK-only.
 - **Czech and English UI.** Issued PDF and ISDOC labels remain Czech.
 - **API keys have no scopes.** A key is full access to one workspace — see [API keys](/docs/integrations/api-keys).
 - **No public REST API.** Automation goes through MCP or the Slack agent.
 - **Recurring invoices are drafts only.** A daily cron creates a reviewable draft; you issue and send it. Auto-issue and auto-email are not in v1.
+- **Bank matching is confirm-first.** Fio imports proposals; a person confirms allocations — see [Reconcile payments](/docs/guides/reconciling-payments).
