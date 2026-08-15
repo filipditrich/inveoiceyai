@@ -1,6 +1,7 @@
 "use client";
 
 import { updateWorkspaceAction } from "@/actions/workspace";
+import { WorkspaceLogoField } from "@/components/settings/workspace-logo-field";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,28 +23,38 @@ import { toast } from "sonner";
 export function WorkspaceSettingsPanel({
   name,
   slug,
+  logo,
   role,
+  uploadConfigured,
 }: {
   name: string;
   slug: string;
+  logo: string | null;
   role: WorkspaceRole;
+  uploadConfigured: boolean;
 }) {
   const t = useTranslations("App.settings.workspace");
   const tErrors = useTranslations("App.workspaceErrors");
   const router = useRouter();
   const canEdit = role === "owner" || role === "admin";
   const [value, setValue] = useState(name);
+  const [logoUrl, setLogoUrl] = useState(logo ?? "");
   const [pending, startTransition] = useTransition();
 
-  const save = () => {
+  const persist = (input: { name?: string; logo?: string | null }) => {
     if (!canEdit || pending) return;
     startTransition(async () => {
-      const result = await updateWorkspaceAction(value);
+      const result = await updateWorkspaceAction(input);
       if (!result.ok) {
         toast.error(tErrors(result.errorCode));
         return;
       }
-      toast.success(t("saved"));
+      if (input.logo !== undefined) {
+        setLogoUrl(input.logo ?? "");
+        toast.success(t("logoSaved"));
+      } else {
+        toast.success(t("saved"));
+      }
       router.refresh();
     });
   };
@@ -55,6 +66,13 @@ export function WorkspaceSettingsPanel({
         <CardDescription>{t("pageDescription")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        <WorkspaceLogoField
+          canEdit={canEdit}
+          onUrl={(next) => persist({ logo: next })}
+          pending={pending}
+          uploadConfigured={uploadConfigured}
+          url={logoUrl}
+        />
         <div className="space-y-2">
           <Label htmlFor="workspace-settings-name">{t("nameLabel")}</Label>
           <Input
@@ -65,7 +83,7 @@ export function WorkspaceSettingsPanel({
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
-                save();
+                persist({ name: value });
               }
             }}
           />
@@ -81,7 +99,7 @@ export function WorkspaceSettingsPanel({
           <div className="flex flex-wrap items-center gap-3">
             <Button
               disabled={pending || !value.trim() || value.trim() === name}
-              onClick={() => save()}
+              onClick={() => persist({ name: value })}
             >
               {pending ? (
                 <LoaderCircleIcon className="size-4 animate-spin" />

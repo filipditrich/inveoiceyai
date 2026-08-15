@@ -41,6 +41,15 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ file }) => {
       return { url: file.ufsUrl };
     }),
+  /** Workspace chrome logo (switcher / settings). Not used on invoice PDFs. */
+  workspaceLogo: f({
+    "image/png": { maxFileSize: "1MB", maxFileCount: 1 },
+    "image/jpeg": { maxFileSize: "1MB", maxFileCount: 1 },
+  })
+    .middleware(authedMiddleware)
+    .onUploadComplete(async ({ file }) => {
+      return { url: file.ufsUrl };
+    }),
   /** Bulk PDF import — stored as immutable invoice artifacts. */
   importedInvoicePdf: f({
     "application/pdf": { maxFileSize: "16MB", maxFileCount: 40 },

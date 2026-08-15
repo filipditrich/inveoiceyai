@@ -19,6 +19,7 @@ export type AppShellTokenBalance = {
   monthlyRemaining: number;
   purchasedRemaining: number;
   totalAvailable: number;
+  monthlyLimit: number;
 };
 
 export function AppShell({

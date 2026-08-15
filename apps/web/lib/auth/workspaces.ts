@@ -22,6 +22,7 @@ export const listUserWorkspaces = cache(
         id: workspaces.id,
         name: workspaces.name,
         slug: workspaces.slug,
+        logo: workspaces.logo,
         role: member.role,
       })
       .from(member)
@@ -33,6 +34,7 @@ export const listUserWorkspaces = cache(
       id: row.id,
       name: row.name,
       slug: row.slug,
+      logo: row.logo,
       role: row.role as WorkspaceRole,
     }));
   },

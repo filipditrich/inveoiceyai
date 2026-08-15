@@ -30,6 +30,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { WorkspaceMark } from "@/components/workspace-mark";
 import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 import {
   CheckIcon,
@@ -120,9 +121,7 @@ export function WorkspaceSwitcher({
                 />
               }
             >
-              <div className="bg-brand/15 text-brand flex size-8 shrink-0 items-center justify-center rounded-md text-xs font-semibold uppercase">
-                {active.name.slice(0, 2)}
-              </div>
+              <WorkspaceMark logo={active.logo} name={active.name} />
               <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{active.name}</span>
                 <span className="text-muted-foreground truncate text-xs">
@@ -165,6 +164,11 @@ export function WorkspaceSwitcher({
                     disabled={pending}
                     onClick={() => switchTo(workspace.id)}
                   >
+                    <WorkspaceMark
+                      className="size-7"
+                      logo={workspace.logo}
+                      name={workspace.name}
+                    />
                     <div className="grid min-w-0 flex-1 text-left leading-tight">
                       <span className="truncate font-medium">
                         {workspace.name}

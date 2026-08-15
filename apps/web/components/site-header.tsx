@@ -39,6 +39,7 @@ export function SiteHeader() {
     "api-keys": t("breadcrumb.api-keys"),
     integrations: t("breadcrumb.integrations"),
     usage: t("breadcrumb.usage"),
+    "bank-connections": t("breadcrumb.bank-connections"),
     "from-json": t("breadcrumb.fromJson"),
     import: t("breadcrumb.import"),
     recurring: t("breadcrumb.recurring"),

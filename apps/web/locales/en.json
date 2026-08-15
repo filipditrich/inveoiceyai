@@ -557,7 +557,11 @@
       "toolsGroup": "Import & developer tools",
       "manageGroup": "Manage workspace",
       "settings": "Workspace settings",
-      "integrations": "Integrations & API",
+      "workspace": "Workspace",
+      "members": "Members",
+      "bankConnections": "Bank connections",
+      "integrations": "Integrations",
+      "usage": "Usage",
       "resourcesGroup": "Resources",
       "docs": "Docs",
       "collapseToggle": "Expand or collapse {title}"
@@ -584,7 +588,8 @@
       "referrals": "Referrals",
       "api-keys": "API Keys",
       "integrations": "Integrations",
-      "usage": "Usage"
+      "usage": "Usage",
+      "bank-connections": "Bank connections"
     },
     "a11y": {
       "toggleSidebar": "Toggle sidebar",
@@ -597,8 +602,12 @@
       "eyebrow": "Account and workspace",
       "subtitle": "Customize the interface, secure your account, and manage access for people and connected tools.",
       "navigationLabel": "Settings sections",
+      "navGroups": {
+        "you": "You",
+        "workspace": "Workspace"
+      },
       "nav": {
-        "appearance": "Appearance",
+        "account": "Account",
         "workspace": "Workspace",
         "security": "Security",
         "members": "Members",
@@ -609,8 +618,8 @@
         "integrations": "Integrations"
       },
       "navDescriptions": {
-        "appearance": "Theme and interface language",
-        "workspace": "Name and identity of this workspace",
+        "account": "Profile, theme, and language",
+        "workspace": "Name and logo of this workspace",
         "security": "Sign-in, sessions, and devices",
         "members": "People and permissions",
         "usage": "AI tokens, charts, and history",
@@ -621,15 +630,30 @@
       },
       "workspace": {
         "pageTitle": "Workspace",
-        "pageDescription": "Rename this workspace. The slug stays fixed for links and integrations.",
+        "pageDescription": "Rename this workspace and set a logo for the sidebar. The slug stays fixed for links and integrations.",
         "nameLabel": "Name",
         "slugLabel": "Slug",
         "slugHint": "Slug cannot be changed after creation.",
+        "logoLabel": "Logo",
+        "logoHint": "Shown in the workspace switcher. Invoice PDFs still use each issuer’s logo.",
+        "logoSaved": "Workspace logo saved",
+        "removeLogo": "Remove logo",
+        "uploadUnavailable": "File uploads are not configured in this environment.",
         "save": "Save name",
         "saving": "Saving…",
         "saved": "Workspace name saved",
         "membersLink": "Manage members",
-        "readOnly": "Only owners and admins can rename this workspace."
+        "readOnly": "Only owners and admins can change the name or logo."
+      },
+      "account": {
+        "pageTitle": "Account",
+        "pageDescription": "Your sign-in identity plus the preferences you can change on this device.",
+        "profileTitle": "Profile",
+        "profileDescription": "Name, email, and photo come from Google or GitHub.",
+        "oauthNote": "These fields update when you sign in with your provider. Link or unlink accounts under Security.",
+        "nameLabel": "Name",
+        "emailLabel": "Email",
+        "securityLink": "Security settings"
       },
       "apiKeysDefault": {
         "title": "Default workspace for API keys",
@@ -701,6 +725,8 @@
         },
         "chip": {
           "title": "Token balance",
+          "remaining": "{count} left",
+          "monthlyUsed": "Monthly tokens",
           "gifted": "Gifted",
           "monthly": "Monthly",
           "purchased": "Purchased",
@@ -743,7 +769,8 @@
       "name_required": "Enter a workspace name",
       "switch_failed": "Could not switch workspace",
       "create_failed": "Could not create workspace",
-      "update_failed": "Could not save the name",
+      "update_failed": "Could not save workspace settings",
+      "logo_invalid": "That logo URL is not from a trusted upload host",
       "default_failed": "Could not set the default workspace",
       "invite_failed": "Could not accept the invitation",
       "invite_missing_workspace": "Invitation is missing a workspace",

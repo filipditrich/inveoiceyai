@@ -6,11 +6,12 @@ Issuer businesses upload three small image assets used on PDF renders: logo, sta
 
 ## Inputs / outputs
 
-| Endpoint          | MIME      | Max size | Snapshot field |
-| ----------------- | --------- | -------- | -------------- |
-| `issuerLogo`      | PNG, JPEG | 1 MB     | `logoUrl`      |
-| `issuerStamp`     | PNG, JPEG | 1 MB     | `stampUrl`     |
-| `issuerSignature` | PNG, JPEG | 1 MB     | `signatureUrl` |
+| Endpoint          | MIME      | Max size | Snapshot field                                               |
+| ----------------- | --------- | -------- | ------------------------------------------------------------ |
+| `issuerLogo`      | PNG, JPEG | 1 MB     | `logoUrl`                                                    |
+| `issuerStamp`     | PNG, JPEG | 1 MB     | `stampUrl`                                                   |
+| `issuerSignature` | PNG, JPEG | 1 MB     | `signatureUrl`                                               |
+| `workspaceLogo`   | PNG, JPEG | 1 MB     | `workspaces.logo` (sidebar chrome only; not on invoice PDFs) |
 
 Client receives `file.ufsUrl` (or `file.url`) from `onUploadComplete` and writes it into the issuer form before save.
 

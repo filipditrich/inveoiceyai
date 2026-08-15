@@ -4,5 +4,6 @@ export interface WorkspaceListItem {
   id: string;
   name: string;
   slug: string;
+  logo: string | null;
   role: WorkspaceRole;
 }

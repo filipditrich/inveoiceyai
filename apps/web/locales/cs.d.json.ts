@@ -560,7 +560,11 @@ declare const messages: {
       toolsGroup: "Import a vývojářské nástroje";
       manageGroup: "Správa workspace";
       settings: "Nastavení workspace";
-      integrations: "Integrace a API";
+      workspace: "Pracovní prostor";
+      members: "Členové";
+      bankConnections: "Bankovní spojení";
+      integrations: "Integrace";
+      usage: "Využití";
       resourcesGroup: "Zdroje";
       docs: "Dokumentace";
       collapseToggle: "Rozbalit nebo sbalit {title}";
@@ -588,6 +592,7 @@ declare const messages: {
       "api-keys": "API klíče";
       integrations: "Integrace";
       usage: "Využití";
+      "bank-connections": "Bankovní spojení";
     };
     a11y: {
       toggleSidebar: "Přepnout postranní panel";
@@ -600,8 +605,12 @@ declare const messages: {
       eyebrow: "Účet a pracovní prostor";
       subtitle: "Přizpůsobte rozhraní, zabezpečte účet a spravujte přístup lidí i připojených nástrojů.";
       navigationLabel: "Sekce nastavení";
+      navGroups: {
+        you: "Vy";
+        workspace: "Pracovní prostor";
+      };
       nav: {
-        appearance: "Vzhled";
+        account: "Účet";
         workspace: "Pracovní prostor";
         security: "Zabezpečení";
         members: "Členové";
@@ -612,8 +621,8 @@ declare const messages: {
         integrations: "Integrace";
       };
       navDescriptions: {
-        appearance: "Motiv a jazyk rozhraní";
-        workspace: "Název a identita tohoto prostoru";
+        account: "Profil, motiv a jazyk";
+        workspace: "Název a logo tohoto prostoru";
         security: "Přihlášení, relace a zařízení";
         members: "Lidé a oprávnění";
         usage: "AI tokeny, grafy a historie";
@@ -624,15 +633,30 @@ declare const messages: {
       };
       workspace: {
         pageTitle: "Pracovní prostor";
-        pageDescription: "Přejmenujte tento pracovní prostor. Slug zůstává pevný pro odkazy a integrace.";
+        pageDescription: "Přejmenujte tento pracovní prostor a nastavte logo pro postranní panel. Slug zůstává pevný pro odkazy a integrace.";
         nameLabel: "Název";
         slugLabel: "Slug";
         slugHint: "Slug nelze po vytvoření změnit.";
+        logoLabel: "Logo";
+        logoHint: "Zobrazuje se v přepínači workspace. Faktury dál používají logo jednotlivých dodavatelů.";
+        logoSaved: "Logo pracovního prostoru uloženo";
+        removeLogo: "Odebrat logo";
+        uploadUnavailable: "Nahrávání souborů v tomto prostředí není nastavené.";
         save: "Uložit název";
         saving: "Ukládám…";
         saved: "Název pracovního prostoru uložen";
         membersLink: "Spravovat členy";
-        readOnly: "Přejmenovat může jen vlastník nebo správce.";
+        readOnly: "Název nebo logo může změnit jen vlastník nebo správce.";
+      };
+      account: {
+        pageTitle: "Účet";
+        pageDescription: "Identita z přihlášení a preference, které můžete změnit na tomto zařízení.";
+        profileTitle: "Profil";
+        profileDescription: "Jméno, e-mail a fotka pocházejí z Google nebo GitHub účtu.";
+        oauthNote: "Tato pole se aktualizují při přihlášení přes poskytovatele. Účty propojíte nebo odpojíte v Zabezpečení.";
+        nameLabel: "Jméno";
+        emailLabel: "E-mail";
+        securityLink: "Nastavení zabezpečení";
       };
       apiKeysDefault: {
         title: "Výchozí pracovní prostor pro API klíče";
@@ -704,6 +728,8 @@ declare const messages: {
         };
         chip: {
           title: "Zůstatek tokenů";
+          remaining: "zbývá {count}";
+          monthlyUsed: "Měsíční tokeny";
           gifted: "Dárkové";
           monthly: "Měsíční";
           purchased: "Zakoupené";
@@ -746,7 +772,8 @@ declare const messages: {
       name_required: "Zadejte název pracovního prostoru";
       switch_failed: "Nepodařilo se přepnout pracovní prostor";
       create_failed: "Nepodařilo se vytvořit pracovní prostor";
-      update_failed: "Nepodařilo se uložit název";
+      update_failed: "Nepodařilo se uložit nastavení workspace";
+      logo_invalid: "Adresa loga nepochází z důvěryhodného úložiště";
       default_failed: "Nepodařilo se nastavit výchozí pracovní prostor";
       invite_failed: "Přijetí pozvánky selhalo";
       invite_missing_workspace: "Pozvánka neobsahuje pracovní prostor";

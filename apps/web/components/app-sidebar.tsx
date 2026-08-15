@@ -19,6 +19,7 @@ import {
 import { APP_GIT_SHA, APP_VERSION } from "@/lib/app-build-info";
 import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 import {
+  ActivityIcon,
   ArchiveRestoreIcon,
   BookOpenIcon,
   BracesIcon,
@@ -32,6 +33,7 @@ import {
   Settings2Icon,
   SparklesIcon,
   UsersIcon,
+  UsersRoundIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -57,6 +59,7 @@ export function AppSidebar({
     monthlyRemaining: number;
     purchasedRemaining: number;
     totalAvailable: number;
+    monthlyLimit: number;
   } | null;
 }) {
   const pathname = usePathname();
@@ -194,19 +197,44 @@ export function AppSidebar({
           groupLabel={t("nav.manageGroup")}
           items={[
             {
-              title: t("nav.settings"),
-              url: "/settings",
+              title: t("nav.workspace"),
+              url: "/settings/workspace",
               icon: <Settings2Icon />,
               isActive:
-                (pathname === "/settings" ||
-                  pathname.startsWith("/settings/")) &&
-                pathname !== "/settings/integrations",
+                pathname === "/settings/workspace" ||
+                pathname.startsWith("/settings/workspace/"),
+            },
+            {
+              title: t("nav.members"),
+              url: "/settings/members",
+              icon: <UsersRoundIcon />,
+              isActive:
+                pathname === "/settings/members" ||
+                pathname.startsWith("/settings/members/"),
+            },
+            {
+              title: t("nav.bankConnections"),
+              url: "/settings/bank-connections",
+              icon: <LandmarkIcon />,
+              isActive:
+                pathname === "/settings/bank-connections" ||
+                pathname.startsWith("/settings/bank-connections/"),
             },
             {
               title: t("nav.integrations"),
               url: "/settings/integrations",
               icon: <PlugZapIcon />,
-              isActive: pathname === "/settings/integrations",
+              isActive:
+                pathname === "/settings/integrations" ||
+                pathname.startsWith("/settings/integrations/"),
+            },
+            {
+              title: t("nav.usage"),
+              url: "/settings/usage",
+              icon: <ActivityIcon />,
+              isActive:
+                pathname === "/settings/usage" ||
+                pathname.startsWith("/settings/usage/"),
             },
           ]}
         />
@@ -224,7 +252,7 @@ export function AppSidebar({
       </SidebarContent>
       <SidebarFooter className="gap-3">
         {tokenBalance ? (
-          <div className="px-2 group-data-[collapsible=icon]:hidden">
+          <div className="px-2">
             <TokenBalanceChip {...tokenBalance} />
           </div>
         ) : null}

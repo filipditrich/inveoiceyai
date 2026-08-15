@@ -48,6 +48,7 @@ export default async function AppShellLayout({
               monthlyRemaining: tokenSummary.monthlyRemaining,
               purchasedRemaining: tokenSummary.purchasedRemaining,
               totalAvailable: tokenSummary.totalAvailable,
+              monthlyLimit: tokenSummary.monthlyLimit,
             }
           : null
       }

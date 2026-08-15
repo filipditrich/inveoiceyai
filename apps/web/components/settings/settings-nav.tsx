@@ -9,33 +9,42 @@ import {
   Building2Icon,
   GiftIcon,
   KeyRoundIcon,
-  PaletteIcon,
   PlugZapIcon,
   ShieldCheckIcon,
+  UserRoundIcon,
   UsersRoundIcon,
 } from "lucide-react";
 
 import { NavLinkPending } from "@/components/navigation/nav-link-pending";
 import { cn } from "@/lib/utils";
 
-const LINKS = [
+const YOU_LINKS = [
   {
     href: "/settings",
-    key: "appearance" as const,
+    key: "account" as const,
     exact: true,
-    icon: PaletteIcon,
-  },
-  {
-    href: "/settings/workspace",
-    key: "workspace" as const,
-    exact: false,
-    icon: Building2Icon,
+    icon: UserRoundIcon,
   },
   {
     href: "/settings/security",
     key: "security" as const,
     exact: false,
     icon: ShieldCheckIcon,
+  },
+  {
+    href: "/settings/referrals",
+    key: "referrals" as const,
+    exact: false,
+    icon: GiftIcon,
+  },
+];
+
+const WORKSPACE_LINKS = [
+  {
+    href: "/settings/workspace",
+    key: "workspace" as const,
+    exact: false,
+    icon: Building2Icon,
   },
   {
     href: "/settings/members",
@@ -48,12 +57,6 @@ const LINKS = [
     key: "usage" as const,
     exact: false,
     icon: ActivityIcon,
-  },
-  {
-    href: "/settings/referrals",
-    key: "referrals" as const,
-    exact: false,
-    icon: GiftIcon,
   },
   {
     href: "/settings/api-keys",
@@ -75,16 +78,17 @@ const LINKS = [
   },
 ];
 
-export function SettingsNav() {
+function SettingsNavLinks({
+  links,
+}: {
+  links: typeof YOU_LINKS | typeof WORKSPACE_LINKS;
+}) {
   const pathname = usePathname();
   const t = useTranslations("App.settings");
 
   return (
-    <nav
-      aria-label={t("navigationLabel")}
-      className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-2 md:sticky md:top-[calc(var(--header-height)+1.5rem)] md:mx-0 md:flex-col md:overflow-visible md:px-0 md:pb-0"
-    >
-      {LINKS.map((link) => {
+    <div className="flex gap-1 md:flex-col md:gap-0.5">
+      {links.map((link) => {
         const active = link.exact
           ? pathname === link.href
           : pathname === link.href || pathname.startsWith(`${link.href}/`);
@@ -120,6 +124,30 @@ export function SettingsNav() {
           </Link>
         );
       })}
+    </div>
+  );
+}
+
+export function SettingsNav() {
+  const t = useTranslations("App.settings");
+
+  return (
+    <nav
+      aria-label={t("navigationLabel")}
+      className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 md:sticky md:top-[calc(var(--header-height)+1.5rem)] md:mx-0 md:flex-col md:gap-6 md:overflow-visible md:px-0 md:pb-0"
+    >
+      <div className="min-w-0">
+        <p className="text-muted-foreground mb-1.5 px-3 text-[0.65rem] font-medium uppercase tracking-[0.14em]">
+          {t("navGroups.you")}
+        </p>
+        <SettingsNavLinks links={YOU_LINKS} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-muted-foreground mb-1.5 px-3 text-[0.65rem] font-medium uppercase tracking-[0.14em]">
+          {t("navGroups.workspace")}
+        </p>
+        <SettingsNavLinks links={WORKSPACE_LINKS} />
+      </div>
     </nav>
   );
 }

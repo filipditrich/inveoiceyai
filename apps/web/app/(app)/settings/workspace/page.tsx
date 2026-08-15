@@ -23,9 +23,11 @@ export default async function SettingsWorkspacePage() {
         title={t("pageTitle")}
       />
       <WorkspaceSettingsPanel
+        logo={active.logo}
         name={active.name}
         role={active.role}
         slug={active.slug}
+        uploadConfigured={Boolean(process.env.UPLOADTHING_TOKEN?.trim())}
       />
     </div>
   );

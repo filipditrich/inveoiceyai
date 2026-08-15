@@ -7,6 +7,8 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { isTrustedInvoiceImageUrl } from "@invoicey/invoice-core";
+
 import { auth } from "@/lib/auth/auth";
 import { ForbiddenError } from "@/lib/auth/errors";
 import { recordSecurityAuditEvent } from "@/lib/auth/security-audit";
@@ -27,6 +29,7 @@ export type WorkspaceActionErrorCode =
   | "switch_failed"
   | "create_failed"
   | "update_failed"
+  | "logo_invalid"
   | "default_failed"
   | "invite_failed"
   | "invite_missing_workspace"
@@ -117,20 +120,40 @@ export async function createWorkspaceAction(
   redirect("/dashboard");
 }
 
-/** Rename the active workspace (owner/admin). Slug stays immutable. */
-export async function updateWorkspaceAction(
-  name: string,
-): Promise<WorkspaceActionResult> {
-  const trimmed = name.trim();
-  if (!trimmed) {
-    return { ok: false, errorCode: "name_required" };
+/** Rename and/or set the chrome logo of the active workspace (owner/admin). */
+export async function updateWorkspaceAction(input: {
+  name?: string;
+  logo?: string | null;
+}): Promise<WorkspaceActionResult> {
+  const hasName = input.name !== undefined;
+  const hasLogo = input.logo !== undefined;
+  if (!hasName && !hasLogo) {
+    return { ok: false, errorCode: "update_failed" };
+  }
+
+  const data: { name?: string; logo?: string } = {};
+
+  if (hasName) {
+    const trimmed = (input.name ?? "").trim();
+    if (!trimmed) {
+      return { ok: false, errorCode: "name_required" };
+    }
+    data.name = trimmed;
+  }
+
+  if (hasLogo) {
+    const logo = input.logo?.trim() || "";
+    if (logo && !isTrustedInvoiceImageUrl(logo)) {
+      return { ok: false, errorCode: "logo_invalid" };
+    }
+    data.logo = logo;
   }
 
   try {
     await requireWorkspaceRole("admin");
     await auth.api.updateOrganization({
       headers: await headers(),
-      body: { data: { name: trimmed } },
+      body: { data },
     });
     revalidatePath("/", "layout");
     return { ok: true };
