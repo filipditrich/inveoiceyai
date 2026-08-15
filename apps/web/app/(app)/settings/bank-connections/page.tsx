@@ -50,17 +50,47 @@ const PLANNED_BANKS = [
   {
     name: "Komerční banka",
     logo: "/banks/kb.svg",
-    alt: "Komerční banka",
+    note: "Deferred",
+  },
+  {
+    name: "Raiffeisenbank",
+    logo: "/banks/rb.svg",
+    note: "Deferred",
   },
   {
     name: "Česká spořitelna",
     logo: "/banks/csas-modern.svg",
-    alt: "Česká spořitelna",
+    note: "Deferred",
   },
   {
     name: "ČSOB",
     logo: "/banks/csob.svg",
-    alt: "ČSOB",
+    note: "Deferred",
+  },
+  {
+    name: "CREDITAS",
+    logo: "/banks/creditas.jpg",
+    note: "Deferred",
+  },
+  {
+    name: "Revolut",
+    logo: "/banks/revolut.svg",
+    note: "Deferred",
+  },
+  {
+    name: "Air Bank",
+    logo: "/banks/airbank.png",
+    note: "Not planned",
+  },
+  {
+    name: "mBank",
+    logo: "/banks/mbank.jpg",
+    note: "Not planned",
+  },
+  {
+    name: "Partners Banka",
+    logo: "/banks/partners.png",
+    note: "Not planned",
   },
 ] as const;
 
@@ -82,15 +112,29 @@ function ConnectionStatusBadge({ status }: { status: string }) {
   );
 }
 
-function BankLogo({ src, alt }: { src: string; alt: string }) {
+function BankLogoTile({
+  src,
+  alt,
+  inactive = false,
+  size = "md",
+}: {
+  src: string;
+  alt: string;
+  inactive?: boolean;
+  size?: "sm" | "md";
+}) {
   return (
-    <div className="shadow-xs flex h-14 w-36 shrink-0 items-center rounded-xl border bg-white px-3">
+    <div
+      className={`shadow-xs flex shrink-0 items-center justify-center overflow-hidden rounded-xl border bg-white p-2 ${
+        size === "sm" ? "size-12" : "size-14"
+      } ${inactive ? "opacity-40 grayscale" : ""}`}
+    >
       <Image
         alt={alt}
         src={src}
-        width={180}
-        height={64}
-        className="h-auto w-full object-contain"
+        width={80}
+        height={80}
+        className="size-full object-contain"
       />
     </div>
   );
@@ -141,7 +185,7 @@ export default async function BankConnectionsPage() {
             <CardHeader className="bg-muted/20 border-b">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-4">
-                  <BankLogo
+                  <BankLogoTile
                     alt={isMoneta ? "MONETA Money Bank" : "Fio banka"}
                     src={isMoneta ? "/banks/moneta.png" : "/banks/fio.png"}
                   />
@@ -240,7 +284,7 @@ export default async function BankConnectionsPage() {
       {hasActiveFio ? null : (
         <Card className="overflow-hidden">
           <CardHeader>
-            <BankLogo alt="Fio banka" src="/banks/fio.png" />
+            <BankLogoTile alt="Fio banka" src="/banks/fio.png" />
             <CardTitle className="mt-2">Connect Fio read-only API</CardTitle>
             <CardDescription>
               Create a read-only API token in Fio Internetbanking and paste it
@@ -292,12 +336,15 @@ export default async function BankConnectionsPage() {
                     placeholder="64-character read-only token"
                   />
                   <p className="text-muted-foreground text-xs">
-                    The connection belongs to this workspace. We never display
-                    the token again and never request write access.
+                    Create a monitoring token in Internetbanking → Nastavení →
+                    API bankovnictví, with Sledování účtu only. The 64-character
+                    token starts working after about five minutes and can last
+                    up to 180 days if you enable automatic extension. We never
+                    display it again and never request write access.
                   </p>
                   <a
                     className="text-brand inline-flex items-center gap-1 text-xs font-medium hover:underline"
-                    href="https://www.fio.cz/bank-services/internetbanking-api"
+                    href="https://www.fio.cz/bankovni-sluzby/api-bankovnictvi"
                     rel="noreferrer"
                     target="_blank"
                   >
@@ -322,7 +369,7 @@ export default async function BankConnectionsPage() {
       {hasActiveMoneta ? null : (
         <Card className="overflow-hidden">
           <CardHeader>
-            <BankLogo alt="MONETA Money Bank" src="/banks/moneta.png" />
+            <BankLogoTile alt="MONETA Money Bank" src="/banks/moneta.png" />
             <CardTitle className="mt-2">Connect MONETA read-only API</CardTitle>
             <CardDescription>
               Create a passive API token in MONETA Internet Banka and paste it
@@ -348,29 +395,30 @@ export default async function BankConnectionsPage() {
               More bank integrations
             </h2>
             <p className="text-muted-foreground mt-1 text-sm">
-              Fio and MONETA are live. These connections are being evaluated
-              next.
+              Fio and MONETA are live. Other banks we researched stay
+              unavailable for now.
             </p>
           </div>
-          <Badge variant="secondary">Planned</Badge>
+          <Badge variant="secondary">Unavailable</Badge>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {PLANNED_BANKS.map((bank) => (
-            <Card key={bank.name} className="border-dashed">
+            <Card
+              key={bank.name}
+              aria-disabled
+              className="border-dashed opacity-55"
+            >
               <CardContent className="flex items-center gap-3 p-4">
-                <div className="shadow-xs flex size-12 shrink-0 items-center justify-center rounded-xl border bg-white p-2">
-                  <Image
-                    alt={bank.alt}
-                    src={bank.logo}
-                    width={40}
-                    height={40}
-                    className="h-auto w-full object-contain"
-                  />
-                </div>
+                <BankLogoTile
+                  alt={bank.name}
+                  src={bank.logo}
+                  size="sm"
+                  inactive
+                />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{bank.name}</p>
                   <p className="text-muted-foreground flex items-center gap-1 text-xs">
-                    <Building2Icon className="size-3" /> Coming later
+                    <Building2Icon className="size-3" /> {bank.note}
                   </p>
                 </div>
               </CardContent>
