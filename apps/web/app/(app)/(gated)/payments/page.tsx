@@ -188,7 +188,7 @@ export default async function PaymentsPage() {
     ]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6">
+    <div className="space-y-4 px-4 py-6 lg:px-6">
       <PageHeader
         actions={
           <Button

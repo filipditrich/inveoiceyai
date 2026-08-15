@@ -1,7 +1,6 @@
 import { issuerBusinesses } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import {
-  Building2Icon,
   CircleDotDashedIcon,
   ExternalLinkIcon,
   LandmarkIcon,
@@ -13,12 +12,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
-import {
-  connectFio,
-  disconnectFio,
-  syncFio,
-  toggleFioAutoMatch,
-} from "@/actions/payments";
+import { connectFio, disconnectFio, syncFio } from "@/actions/payments";
+import { AutoMatchToggle } from "@/components/settings/auto-match-toggle";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +26,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import { requireWorkspace } from "@/lib/auth/session";
 import { listFioConnections } from "@/lib/payments/fio-service";
 import { isBankTokenEncryptionConfigured } from "@/lib/payments/token-crypto";
@@ -40,12 +36,75 @@ function issuerName(snapshot: Record<string, unknown>): string {
   return typeof snapshot.name === "string" ? snapshot.name : "Unnamed issuer";
 }
 
+/** Square white tile — logos use object-contain so they never stretch. */
+function BankLogoTile({
+  src,
+  alt,
+  muted = false,
+  size = "md",
+}: {
+  src: string;
+  alt: string;
+  muted?: boolean;
+  size?: "md" | "lg";
+}) {
+  return (
+    <span
+      className={cn(
+        "shadow-xs flex shrink-0 items-center justify-center overflow-hidden rounded-xl border bg-white p-2",
+        size === "lg" ? "size-14" : "size-12",
+        muted && "opacity-55",
+      )}
+    >
+      <Image
+        alt={alt}
+        src={src}
+        width={96}
+        height={96}
+        className={cn(
+          "max-h-full max-w-full object-contain",
+          muted && "grayscale",
+        )}
+      />
+    </span>
+  );
+}
+
 const PLANNED_BANKS = [
-  { name: "Komerční banka", short: "KB", color: "bg-red-600 text-white" },
-  { name: "MONETA Money Bank", short: "M", color: "bg-teal-700 text-white" },
-  { name: "Česká spořitelna", short: "ČS", color: "bg-blue-700 text-white" },
-  { name: "ČSOB", short: "ČSOB", color: "bg-blue-900 text-white" },
+  { name: "MONETA Money Bank", logo: "/banks/moneta.png" },
+  { name: "Komerční banka", logo: "/banks/kb.svg" },
+  { name: "Raiffeisenbank", logo: "/banks/rb.svg" },
+  { name: "ČSOB", logo: "/banks/csob.svg" },
+  { name: "Česká spořitelna", logo: "/banks/csas-modern.svg" },
+  { name: "CREDITAS", logo: "/banks/creditas.jpg" },
+  { name: "Air Bank", logo: "/banks/airbank.png" },
+  { name: "mBank", logo: "/banks/mbank.jpg" },
+  { name: "Partners Banka", logo: "/banks/partners.png" },
+  { name: "Revolut", logo: "/banks/revolut.svg" },
 ] as const;
+
+function ConnectionStatusBadge({ status }: { status: string }) {
+  const active = status === "active";
+  return (
+    <span
+      className={
+        active
+          ? "inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400"
+          : "bg-muted text-muted-foreground inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1 text-xs font-medium"
+      }
+    >
+      <span
+        aria-hidden
+        className={
+          active
+            ? "size-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_3px] shadow-emerald-500/20"
+            : "bg-muted-foreground/50 size-1.5 rounded-full"
+        }
+      />
+      {active ? "Active" : status}
+    </span>
+  );
+}
 
 export default async function BankConnectionsPage() {
   const { workspaceId, role } = await requireWorkspace();
@@ -73,15 +132,7 @@ export default async function BankConnectionsPage() {
           <CardHeader className="bg-muted/20 border-b">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex min-w-0 items-center gap-4">
-                <div className="shadow-xs flex h-14 w-36 shrink-0 items-center rounded-xl border bg-white px-3">
-                  <Image
-                    alt="Fio banka"
-                    src="/banks/fio.svg"
-                    width={180}
-                    height={64}
-                    className="h-auto w-full"
-                  />
-                </div>
+                <BankLogoTile alt="Fio banka" size="lg" src="/banks/fio.png" />
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <CardTitle>Fio banka</CardTitle>
@@ -94,13 +145,7 @@ export default async function BankConnectionsPage() {
                   </CardDescription>
                 </div>
               </div>
-              <Badge
-                variant={
-                  connection.status === "active" ? "default" : "secondary"
-                }
-              >
-                {connection.status}
-              </Badge>
+              <ConnectionStatusBadge status={connection.status} />
             </div>
           </CardHeader>
           <CardContent className="space-y-5 pt-5">
@@ -126,10 +171,10 @@ export default async function BankConnectionsPage() {
                 Last error: {connection.lastSyncErrorCode.replaceAll("_", " ")}
               </p>
             ) : null}
-            <div className="border-brand/15 bg-brand/[0.05] flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="border-border/80 bg-muted/20 flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 gap-3">
-                <span className="bg-brand/10 text-brand flex size-10 shrink-0 items-center justify-center rounded-xl">
-                  <ZapIcon className="size-5" />
+                <span className="bg-background text-foreground shadow-xs flex size-10 shrink-0 items-center justify-center rounded-xl border">
+                  <ZapIcon className="size-4" />
                 </span>
                 <div>
                   <p className="font-medium">Automatic exact matching</p>
@@ -141,45 +186,11 @@ export default async function BankConnectionsPage() {
                   </p>
                 </div>
               </div>
-              <form action={toggleFioAutoMatch} className="shrink-0">
-                <input
-                  type="hidden"
-                  name="connectionId"
-                  value={connection.id}
-                />
-                <input
-                  type="hidden"
-                  name="enabled"
-                  value={connection.autoConfirmExactMatches ? "false" : "true"}
-                />
-                <Button
-                  type="submit"
-                  variant={
-                    connection.autoConfirmExactMatches ? "default" : "outline"
-                  }
-                  disabled={!canManage || connection.status !== "active"}
-                  role="switch"
-                  aria-checked={connection.autoConfirmExactMatches}
-                >
-                  <span
-                    aria-hidden
-                    className={`relative h-5 w-9 rounded-full transition-colors ${
-                      connection.autoConfirmExactMatches
-                        ? "bg-primary-foreground/25"
-                        : "bg-muted-foreground/25"
-                    }`}
-                  >
-                    <span
-                      className={`bg-background absolute top-0.5 size-4 rounded-full shadow-sm transition-transform ${
-                        connection.autoConfirmExactMatches
-                          ? "translate-x-[18px]"
-                          : "translate-x-0.5"
-                      }`}
-                    />
-                  </span>
-                  {connection.autoConfirmExactMatches ? "On" : "Off"}
-                </Button>
-              </form>
+              <AutoMatchToggle
+                connectionId={connection.id}
+                checked={connection.autoConfirmExactMatches}
+                disabled={!canManage || connection.status !== "active"}
+              />
             </div>
             {canManage && connection.status === "active" ? (
               <div className="flex flex-wrap gap-2">
@@ -214,16 +225,8 @@ export default async function BankConnectionsPage() {
       ) ? null : (
         <Card className="overflow-hidden">
           <CardHeader>
-            <div className="shadow-xs mb-2 flex h-14 w-36 items-center rounded-xl border bg-white px-3">
-              <Image
-                alt="Fio banka"
-                src="/banks/fio.svg"
-                width={180}
-                height={64}
-                className="h-auto w-full"
-              />
-            </div>
-            <CardTitle>Connect Fio read-only API</CardTitle>
+            <BankLogoTile alt="Fio banka" size="lg" src="/banks/fio.png" />
+            <CardTitle className="mt-3">Connect Fio read-only API</CardTitle>
             <CardDescription>
               Create a read-only API token in Fio Internetbanking and paste it
               here. Invoicey validates it against today’s statement and stores
@@ -309,25 +312,23 @@ export default async function BankConnectionsPage() {
               More bank integrations
             </h2>
             <p className="text-muted-foreground mt-1 text-sm">
-              Fio is the first provider. These connections are being evaluated
-              next.
+              Fio is the only live feed for now. Other Czech banks are deferred
+              until setup is as simple.
             </p>
           </div>
           <Badge variant="secondary">Planned</Badge>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {PLANNED_BANKS.map((bank) => (
-            <Card key={bank.name} className="border-dashed">
+            <Card key={bank.name} className="border-dashed opacity-80">
               <CardContent className="flex items-center gap-3 p-4">
-                <span
-                  className={`flex size-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold ${bank.color}`}
-                >
-                  {bank.short}
-                </span>
+                <BankLogoTile alt="" muted src={bank.logo} />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{bank.name}</p>
-                  <p className="text-muted-foreground flex items-center gap-1 text-xs">
-                    <Building2Icon className="size-3" /> Coming later
+                  <p className="text-muted-foreground truncate text-sm font-medium">
+                    {bank.name}
+                  </p>
+                  <p className="text-muted-foreground/80 text-xs">
+                    Coming later
                   </p>
                 </div>
               </CardContent>

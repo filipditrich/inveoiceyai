@@ -285,4 +285,33 @@
   .legal-copy > aside strong {
     color: var(--foreground);
   }
+
+  /** sonner: calm surfaces, close control top-right */
+  [data-sonner-toaster]
+    [data-sonner-toast][data-styled="true"]
+    [data-close-button] {
+    left: auto;
+    right: 0.35rem;
+    top: 0.35rem;
+    transform: none;
+    border-radius: calc(var(--radius) - 2px);
+    border: 1px solid var(--border);
+    background: var(--popover);
+    color: var(--muted-foreground);
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  [data-sonner-toaster]
+    [data-sonner-toast][data-styled="true"]
+    [data-close-button]:hover {
+    background: var(--muted);
+    color: var(--foreground);
+    border-color: var(--border);
+  }
+
+  [data-sonner-toaster]
+    [data-sonner-toast][data-styled="true"][data-close-button="true"] {
+    padding-inline-end: 2rem;
+  }
 }
