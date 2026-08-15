@@ -7,6 +7,7 @@ export function PageHeader({
   className,
   description,
   eyebrow,
+  filters,
   icon,
   title,
 }: {
@@ -14,6 +15,7 @@ export function PageHeader({
   className?: string;
   description?: ReactNode;
   eyebrow?: ReactNode;
+  filters?: ReactNode;
   icon?: ReactNode;
   title: ReactNode;
 }) {
@@ -49,8 +51,9 @@ export function PageHeader({
             ) : null}
           </div>
         </div>
-        {actions ? (
-          <div className="flex max-w-full flex-wrap items-center gap-2">
+        {filters || actions ? (
+          <div className="flex max-w-full flex-wrap items-center justify-end gap-2">
+            {filters}
             {actions}
           </div>
         ) : null}

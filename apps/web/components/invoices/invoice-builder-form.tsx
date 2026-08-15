@@ -787,7 +787,7 @@ export function InvoiceBuilderForm({
         <FormSection
           action={
             <Button
-              render={<Link href="/docs/domain/snapshots" prefetch />}
+              render={<Link href="/docs/concepts/snapshots" prefetch />}
               size="sm"
               variant="ghost"
             >
@@ -1143,7 +1143,7 @@ export function InvoiceBuilderForm({
         <FormSection
           action={
             <Button
-              render={<Link href="/docs/domain/vat-czech" prefetch />}
+              render={<Link href="/docs/concepts/czech-vat" prefetch />}
               size="sm"
               variant="ghost"
             >

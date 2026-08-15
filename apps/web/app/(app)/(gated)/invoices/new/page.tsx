@@ -40,7 +40,7 @@ export default async function InvoiceNewPage({
         actions={
           <>
             <Button
-              render={<Link href="/docs/ui/invoice-builder-flow" prefetch />}
+              render={<Link href="/docs/guides/creating-invoices" prefetch />}
               size="sm"
               variant="outline"
             >
@@ -48,7 +48,7 @@ export default async function InvoiceNewPage({
               {t("builderGuide")}
             </Button>
             <Button
-              render={<Link href="/docs/domain/vat-czech" prefetch />}
+              render={<Link href="/docs/concepts/czech-vat" prefetch />}
               size="sm"
               variant="outline"
             >

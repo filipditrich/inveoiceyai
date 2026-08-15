@@ -66,11 +66,13 @@ export default async function DashboardPage({
             </>
           }
           description={t("subtitle")}
+          filters={
+            <DashboardIssuerFilter issuers={issuers} selectedId={issuerId} />
+          }
           icon={<ChartNoAxesCombinedIcon />}
           title={t("title")}
         />
       </div>
-      <DashboardIssuerFilter issuers={issuers} selectedId={issuerId} />
       <DashboardStatusCards buckets={metrics.buckets} issuerId={issuerId} />
       <DashboardBalanceRow balance={metrics.balance} />
       <div className="px-4 lg:px-6">
