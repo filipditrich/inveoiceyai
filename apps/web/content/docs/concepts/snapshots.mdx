@@ -34,13 +34,15 @@ while you are still working on it. Fix a typo in a client's address and your ope
 Issuing changes that. The server loads the live records, projects them down to the invoice-relevant
 fields, validates them, and writes them onto the invoice row.
 
-```text
-draft  ──references──▶  live issuer / live client   (follows edits)
-  │
-  │ issue
-  ▼
-issued ──contains────▶  frozen copies               (immune to edits)
-```
+<Mermaid
+  chart="
+flowchart TD
+  Draft[Draft] -->|references| Live[Live issuer / client]
+  Live -.->|follows edits| Draft
+  Draft -->|issue| Issued[Issued invoice]
+  Issued -->|contains| Frozen[Frozen snapshots]
+"
+/>
 
 ## What is captured
 

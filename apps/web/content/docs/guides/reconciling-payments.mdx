@@ -8,11 +8,16 @@ Getting paid in Invoicey is more than stamping a date on an invoice. Every payme
 bank, or a Fio credit — becomes a **ledger allocation**. Allocations are the source of truth;
 invoice status, outstanding totals and the dashboard all derive from them.
 
-```text
-  Fio movements  ─┐
-                  ├─▶  match proposals  ─▶  you confirm  ─▶  allocation  ─▶  invoice paid / partial / overpaid
-  Manual entry   ─┘
-```
+<Mermaid
+  chart="
+flowchart LR
+  Fio[Fio movements] --> Proposals[Match proposals]
+  Manual[Manual entry] --> Allocation[Allocation]
+  Proposals --> Confirm[You confirm]
+  Confirm --> Allocation
+  Allocation --> State[Invoice paid / partial / overpaid]
+"
+/>
 
 <Callout title="Confirm-first by design">
   Bank sync only *suggests* matches. Nothing marks an invoice paid until a

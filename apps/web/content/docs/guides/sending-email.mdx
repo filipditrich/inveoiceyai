@@ -44,13 +44,21 @@ to the server.
 
 Every send is logged and its status updated by webhook:
 
-```text
-queued → sent → delivered
-                    ├→ delayed
-                    ├→ bounced
-                    ├→ failed
-                    └→ complained
-```
+<Mermaid
+  chart="
+stateDiagram-v2
+  [*] --> queued
+  queued --> sent
+  sent --> delivered
+  sent --> delayed
+  sent --> bounced
+  sent --> failed
+  sent --> complained
+  delayed --> delivered
+  delayed --> bounced
+  delayed --> failed
+"
+/>
 
 Opens and clicks are recorded as soft signals and never move the delivery status backwards. Terminal
 outcomes — bounced, failed, complained — win over `delivered`.

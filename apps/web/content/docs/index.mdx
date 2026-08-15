@@ -30,11 +30,17 @@ same validated payload.
 
 ## How the pieces fit
 
-```text
-  Web UI  ─┐
-  MCP     ─┼─▶  shared tool layer  ─▶  InvoiceSchema  ─┬─▶  PDF · ISDOC · SPAYD QR
-  Slack   ─┘                          (validated)     └─▶  your workspace
-```
+<Mermaid
+  chart="
+flowchart LR
+  WebUI[Web UI] --> Tools[Shared tool layer]
+  MCP[MCP] --> Tools
+  Slack[Slack] --> Tools
+  Tools --> Schema[InvoiceSchema]
+  Schema --> Outputs[PDF / ISDOC / SPAYD QR]
+  Schema --> Workspace[Your workspace]
+"
+/>
 
 Every surface must satisfy the same schema before Invoicey renders or stores an invoice.
 

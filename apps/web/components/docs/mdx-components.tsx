@@ -8,6 +8,8 @@ import { TypeTable } from "fumadocs-ui/components/type-table";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
 
+import { Mermaid } from "@/components/docs/mermaid";
+
 /**
  * Components available to every `.mdx` file under `content/docs` without an
  * import. Keep this list small — anything added here is in the bundle for all
@@ -24,6 +26,7 @@ export function getDocsMdxComponents(overrides?: MDXComponents): MDXComponents {
     File,
     Files,
     Folder,
+    Mermaid,
     Step,
     Steps,
     Tab,

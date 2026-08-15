@@ -12,14 +12,19 @@ the same source data.
 `InvoiceSchema` is the shared Zod schema used by the web form, [MCP tools](/docs/integrations/mcp),
 [Slack agent](/docs/integrations/slack) and output renderers.
 
-```text
-web form ─┐
-MCP       ─┼─▶ InvoiceSchema.parse() ─┬─▶ PDF
-Slack     ─┘         │                ├─▶ ISDOC XML
-                     │                ├─▶ SPAYD QR
-                     ▼                └─▶ database row
-              rejected if invalid
-```
+<Mermaid
+  chart="
+flowchart LR
+  Web[Web form] --> Parse[InvoiceSchema.parse]
+  MCP[MCP] --> Parse
+  Slack[Slack] --> Parse
+  Parse -->|invalid| Rejected[Rejected]
+  Parse -->|valid| PDF[PDF]
+  Parse -->|valid| ISDOC[ISDOC XML]
+  Parse -->|valid| QR[SPAYD QR]
+  Parse -->|valid| DB[Database row]
+"
+/>
 
 The result: **every surface creates the same kind of invoice.** A missing DUZP, malformed IČO or
 invalid due date is rejected with a specific error that a person or assistant can correct.
