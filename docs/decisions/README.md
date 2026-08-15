@@ -43,3 +43,4 @@ When a decision changes:
 | [0027](./0027-recurring-drafts-only.md)                    | Recurring schedules materialize drafts only                | Accepted                          |
 | [0028](./0028-per-invoice-language.md)                     | Per-invoice document language (`cs` \| `en`)               | Accepted                          |
 | [0029](./0029-payment-ledger-fio-first.md)                 | Provider-neutral payment ledger with Fio first             | Accepted                          |
+| [0030](./0030-moneta-second-adapter.md)                    | MONETA as second read-only bank adapter                    | Accepted                          |

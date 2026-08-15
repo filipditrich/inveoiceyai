@@ -68,9 +68,10 @@ Each plan in `.cursor/plans/` cites the docs it implements. Each ADR cites the p
 5. [`domain/invoice-schema.md`](./domain/invoice-schema.md) — the central contract
 6. [`specs/mcp.md`](./specs/mcp.md) — AI create path (local Cursor)
 7. [`specs/payment-ledger-fio.md`](./specs/payment-ledger-fio.md) — payment ledger + Fio
-8. [`roadmap.md`](./roadmap.md) — what ships when
-9. [`decisions/`](./decisions) — why each foundational call was made
-10. [`research/`](./research) — possible future directions and unresolved options
+8. [`specs/payment-ledger-moneta.md`](./specs/payment-ledger-moneta.md) — MONETA adapter
+9. [`roadmap.md`](./roadmap.md) — what ships when
+10. [`decisions/`](./decisions) — why each foundational call was made
+11. [`research/`](./research) — possible future directions and unresolved options
 
 ## Status
 

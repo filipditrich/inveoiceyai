@@ -1,29 +1,31 @@
 ---
 title: Bank connections
-description: Why Invoicey supports Fio first, and what we researched for other Czech banks.
+description: Connect Fio or MONETA read-only feeds, and what we researched for other Czech banks.
 icon: Building2
 ---
 
 Invoicey reconciles invoices through a **payment ledger**. Bank feeds are optional adapters on top
 of that ledger — the same place manual payments land.
 
-Today the only live bank adapter is **Fio banka**. Everything else stays on [manual
+Live bank adapters today: **Fio banka** and **MONETA Money Bank**. Everything else stays on [manual
 payments](/docs/guides/reconciling-payments#manual-payments) until a bank offers a setup as simple
-and free as Fio.
+and free as these account-holder tokens.
 
-## Why Fio
+## Why Fio and MONETA
 
-Fio’s API Bankovnictví is built for exactly this use case:
+Both expose a free, workspace-pasteable read token without requiring Invoicey to hold a ČNB AISP
+licence:
 
-| Need                        | Fio                                                               |
-| --------------------------- | ----------------------------------------------------------------- |
-| Read movements / statements | Yes                                                               |
-| Cost                        | Free                                                              |
-| Credentials                 | Monitoring token from Internetbanking (paste into Invoicey)       |
-| Licence for Invoicey        | None — the account holder issues the token                        |
-| Workspace configuration     | One encrypted token per connection, owned by the active workspace |
+| Need                        | Fio                                        | MONETA                                                          |
+| --------------------------- | ------------------------------------------ | --------------------------------------------------------------- |
+| Read movements / statements | Yes                                        | Yes (VIP AISP)                                                  |
+| Cost                        | Free                                       | Free (passive ops)                                              |
+| Credentials                 | Monitoring token from Internetbanking      | API token from Internet Banka                                   |
+| Licence for Invoicey        | None — the account holder issues the token | None — same model                                               |
+| Workspace configuration     | One encrypted token per connection         | One encrypted token per connection; pick CZK account if several |
+| Extra ops note              | ~30s per-token throttle                    | Token ≤90 days; history ≤90 days — renew in IB                  |
 
-Setup: [Reconcile payments → Connect Fio](/docs/guides/reconciling-payments#connect-fio-banka).
+Setup: [Reconcile payments](/docs/guides/reconciling-payments#connect-fio-banka).
 
 ## What we looked at (and deferred)
 
@@ -42,7 +44,7 @@ Two access models keep showing up:
 | Bank / provider              | Live history API for account holders? | Typical cost                         | Setup pain                   | Invoicey status |
 | ---------------------------- | ------------------------------------- | ------------------------------------ | ---------------------------- | --------------- |
 | **Fio**                      | Yes                                   | Free                                 | Paste monitoring token       | **Supported**   |
-| MONETA                       | Yes                                   | Free                                 | Token + service contract     | Deferred        |
+| **MONETA**                   | Yes                                   | Free                                 | Paste API token (+ account)  | **Supported**   |
 | ČSOB Business Connector      | Yes (business CEB)                    | Free                                 | Client certificate / mTLS    | Deferred        |
 | CREDITAS                     | Unclear after 2025 PSD2 move          | Historically free                    | Re-check before any work     | Deferred        |
 | Komerční banka (ADAA/STATDA) | Yes                                   | Free ≤50 uses/mo; then 100–500 Kč/mo | App registration + OAuth     | Deferred        |
@@ -55,14 +57,14 @@ Two access models keep showing up:
 
 **Deferred** means the ledger can grow another adapter later; we are not building those
 integrations now. Paid plans, certificates, OAuth app registration, and AISP licensing are a poor
-fit next to Fio’s free token.
+fit next to Fio/MONETA pasteable tokens.
 
 ## If you bank elsewhere
 
 Use **Mark paid** on the invoice or **Add a manual payment** on Payments. Those write the same
-ledger as Fio matches, so dashboards and outstanding balances stay consistent.
+ledger as bank matches, so dashboards and outstanding balances stay consistent.
 
-A future **statement import** (CSV / CAMT / etc.) may cover non-Fio accounts without pretending
+A future **statement import** (CSV / CAMT / etc.) may cover other accounts without pretending
 those banks have a Fio-class API.
 
 ## Related
@@ -71,7 +73,7 @@ those banks have a Fio-class API.
   <Card
     title="Reconcile payments"
     href="/docs/guides/reconciling-payments"
-    description="Connect Fio, review proposals, confirm allocations."
+    description="Connect Fio or MONETA, review proposals, confirm allocations."
   />
   <Card
     title="Issue & get paid"

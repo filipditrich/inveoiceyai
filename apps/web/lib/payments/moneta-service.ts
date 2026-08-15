@@ -10,7 +10,9 @@ import {
 import { db } from "@invoicey/db/client";
 import { withDbTransaction } from "@invoicey/db/transaction";
 import {
-  fetchFioTransactions,
+  fetchMonetaTransactions,
+  listMonetaAccounts,
+  type DiscoveredBankAccount,
   type NormalizedTransactionBatch,
 } from "@invoicey/payment-core";
 import { and, eq, isNull, lt, or } from "drizzle-orm";
@@ -22,9 +24,9 @@ import {
 } from "./import-bank-batch";
 import { decryptBankToken, encryptBankToken } from "./token-crypto";
 
-const MATCHER_VERSION = "fio-v1";
-const MIN_REQUEST_INTERVAL_MS = 31_000;
+const MATCHER_VERSION = "moneta-v1";
 const LEASE_MS = 60_000;
+const MIN_REQUEST_INTERVAL_MS = 5_000;
 
 function pragueDate(date = new Date()): string {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -43,9 +45,9 @@ function shiftDate(value: string, days: number): string {
   return date.toISOString().slice(0, 10);
 }
 
-export type FioConnectionSummary = {
+export type MonetaConnectionSummary = {
   id: string;
-  provider: "fio";
+  provider: "moneta";
   status: string;
   iban: string;
   accountNumber: string;
@@ -56,9 +58,14 @@ export type FioConnectionSummary = {
   nextSyncAt: Date | null;
 };
 
-export async function listFioConnections(
+export type MonetaDiscoveredAccount = Pick<
+  DiscoveredBankAccount,
+  "providerAccountId" | "accountNumber" | "iban" | "currency" | "name"
+>;
+
+export async function listMonetaConnections(
   workspaceId: string,
-): Promise<FioConnectionSummary[]> {
+): Promise<MonetaConnectionSummary[]> {
   const rows = await db
     .select({
       id: bankConnections.id,
@@ -76,20 +83,41 @@ export async function listFioConnections(
     .where(
       and(
         eq(bankConnections.workspaceId, workspaceId),
-        eq(bankConnections.provider, "fio"),
+        eq(bankConnections.provider, "moneta"),
       ),
     );
-  return rows.map((row) => ({ ...row, provider: "fio" as const }));
+  return rows.map((row) => ({ ...row, provider: "moneta" as const }));
 }
 
-export async function testFioToken(
+export async function discoverMonetaAccounts(
   token: string,
-): Promise<NormalizedTransactionBatch> {
-  const today = pragueDate();
-  return fetchFioTransactions({ token, from: today, to: today });
+): Promise<MonetaDiscoveredAccount[]> {
+  const accounts = await listMonetaAccounts({ token });
+  return accounts
+    .filter((account) => account.currency === "CZK")
+    .map((account) => ({
+      providerAccountId: account.providerAccountId,
+      accountNumber: account.accountNumber,
+      iban: account.iban,
+      currency: account.currency,
+      name: account.name ?? null,
+    }));
 }
 
-export async function createFioConnection(input: {
+export async function testMonetaToken(input: {
+  token: string;
+  providerAccountId: string;
+}): Promise<NormalizedTransactionBatch> {
+  const today = pragueDate();
+  return fetchMonetaTransactions({
+    token: input.token,
+    accountId: input.providerAccountId,
+    from: today,
+    to: today,
+  });
+}
+
+export async function createMonetaConnection(input: {
   workspaceId: string;
   userId: string;
   issuerId: string;
@@ -97,7 +125,7 @@ export async function createFioConnection(input: {
   batch: NormalizedTransactionBatch;
 }): Promise<string> {
   if (input.batch.account.currency !== "CZK") {
-    throw new Error("fio_account_must_be_czk");
+    throw new Error("moneta_account_must_be_czk");
   }
   const secret = encryptBankToken(input.token);
   return withDbTransaction(async (tx) => {
@@ -134,7 +162,7 @@ export async function createFioConnection(input: {
       )
       .where(
         and(
-          eq(bankAccounts.provider, "fio"),
+          eq(bankAccounts.provider, "moneta"),
           eq(bankAccounts.iban, input.batch.account.iban),
         ),
       )
@@ -174,7 +202,7 @@ export async function createFioConnection(input: {
       .insert(bankConnections)
       .values({
         workspaceId: input.workspaceId,
-        provider: "fio",
+        provider: "moneta",
         secretCiphertext: secret.ciphertext,
         secretFingerprint: secret.fingerprint,
         keyVersion: secret.keyVersion,
@@ -186,13 +214,13 @@ export async function createFioConnection(input: {
         nextSyncAt: new Date(Date.now() + 15 * 60_000),
       })
       .returning({ id: bankConnections.id });
-    if (!connection) throw new Error("fio_connection_insert_failed");
+    if (!connection) throw new Error("moneta_connection_insert_failed");
     const [account] = await tx
       .insert(bankAccounts)
       .values({
         workspaceId: input.workspaceId,
         connectionId: connection.id,
-        provider: "fio",
+        provider: "moneta",
         providerAccountId: input.batch.account.providerAccountId,
         accountNumber: input.batch.account.accountNumber,
         bankCode: input.batch.account.bankCode,
@@ -203,7 +231,7 @@ export async function createFioConnection(input: {
         balanceUpdatedAt: new Date(),
       })
       .returning({ id: bankAccounts.id });
-    if (!account) throw new Error("fio_account_insert_failed");
+    if (!account) throw new Error("moneta_account_insert_failed");
     await tx.insert(bankAccountIssuers).values({
       workspaceId: input.workspaceId,
       bankAccountId: account.id,
@@ -220,13 +248,13 @@ export async function createFioConnection(input: {
       actorUserId: input.userId,
       entityType: "bank_connection",
       entityId: connection.id,
-      payloadJson: { provider: "fio", iban: input.batch.account.iban },
+      payloadJson: { provider: "moneta", iban: input.batch.account.iban },
     });
     return connection.id;
   });
 }
 
-export type FioSyncResult = {
+export type MonetaSyncResult = {
   ok: boolean;
   imported: number;
   proposed: number;
@@ -234,10 +262,10 @@ export type FioSyncResult = {
   error?: string;
 };
 
-export async function syncFioConnection(input: {
+export async function syncMonetaConnection(input: {
   workspaceId: string;
   connectionId: string;
-}): Promise<FioSyncResult> {
+}): Promise<MonetaSyncResult> {
   const now = new Date();
   const [leased] = await db
     .update(bankConnections)
@@ -251,6 +279,7 @@ export async function syncFioConnection(input: {
         eq(bankConnections.id, input.connectionId),
         eq(bankConnections.workspaceId, input.workspaceId),
         eq(bankConnections.status, "active"),
+        eq(bankConnections.provider, "moneta"),
         or(
           isNull(bankConnections.leaseUntil),
           lt(bankConnections.leaseUntil, now),
@@ -278,7 +307,7 @@ export async function syncFioConnection(input: {
       leased.lastRequestAt &&
       now.getTime() - leased.lastRequestAt.getTime() < MIN_REQUEST_INTERVAL_MS
     ) {
-      throw new Error("fio_throttled_locally");
+      throw new Error("moneta_throttled_locally");
     }
     const today = pragueDate(now);
     const from = leased.syncCoverageThrough
@@ -288,24 +317,25 @@ export async function syncFioConnection(input: {
       .update(bankConnections)
       .set({ lastRequestAt: now })
       .where(eq(bankConnections.id, leased.id));
-    const batch = await fetchFioTransactions({
+    const batch = await fetchMonetaTransactions({
       token: decryptBankToken(leased.secretCiphertext, leased.keyVersion),
+      accountId: account.providerAccountId,
       from,
       to: today,
     });
     if (batch.account.iban !== account.iban)
-      throw new Error("fio_account_changed");
+      throw new Error("moneta_account_changed");
 
     const result = await importBankTransactionBatch({
       workspaceId: input.workspaceId,
       bankAccountId: account.id,
       receivingIban: account.iban,
-      provider: "fio",
+      provider: "moneta",
       matcherVersion: MATCHER_VERSION,
       batch,
       autoConfirmExactMatches: leased.autoConfirmExactMatches,
       createdByUserId: leased.createdByUserId,
-      logPrefix: "fio-sync",
+      logPrefix: "moneta-sync",
     });
     await markBankSyncSucceeded({
       connectionId: leased.id,
@@ -314,7 +344,7 @@ export async function syncFioConnection(input: {
     });
     return { ok: true, ...result };
   } catch (error) {
-    const code = error instanceof Error ? error.message : "fio_sync_failed";
+    const code = error instanceof Error ? error.message : "moneta_sync_failed";
     await markBankSyncFailed({
       connectionId: input.connectionId,
       errorCode: code,
@@ -330,7 +360,7 @@ export async function syncFioConnection(input: {
   }
 }
 
-export async function setFioAutoMatch(input: {
+export async function setMonetaAutoMatch(input: {
   workspaceId: string;
   connectionId: string;
   userId: string;
@@ -346,7 +376,7 @@ export async function setFioAutoMatch(input: {
       and(
         eq(bankConnections.id, input.connectionId),
         eq(bankConnections.workspaceId, input.workspaceId),
-        eq(bankConnections.provider, "fio"),
+        eq(bankConnections.provider, "moneta"),
       ),
     )
     .returning({ id: bankConnections.id });
@@ -360,12 +390,12 @@ export async function setFioAutoMatch(input: {
     actorUserId: input.userId,
     entityType: "bank_connection",
     entityId: updated.id,
-    payloadJson: { exactOnly: true },
+    payloadJson: { exactOnly: true, provider: "moneta" },
   });
   return true;
 }
 
-export async function deleteFioConnection(input: {
+export async function deleteMonetaConnection(input: {
   workspaceId: string;
   connectionId: string;
   userId: string;
@@ -383,7 +413,7 @@ export async function deleteFioConnection(input: {
       and(
         eq(bankConnections.id, input.connectionId),
         eq(bankConnections.workspaceId, input.workspaceId),
-        eq(bankConnections.provider, "fio"),
+        eq(bankConnections.provider, "moneta"),
       ),
     )
     .returning({ id: bankConnections.id });
@@ -395,6 +425,7 @@ export async function deleteFioConnection(input: {
     actorUserId: input.userId,
     entityType: "bank_connection",
     entityId: deleted.id,
+    payloadJson: { provider: "moneta" },
   });
   return true;
 }

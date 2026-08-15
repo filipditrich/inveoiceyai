@@ -106,9 +106,13 @@ Sorted by Czech name (or original abbreviation).
 
 Czech bank with a self-service **monitoring token** and proprietary JSON periods API. Plan 22's first read-only bank adapter — see [`specs/payment-ledger-fio.md`](./specs/payment-ledger-fio.md) and [ADR 0029](./decisions/0029-payment-ledger-fio-first.md).
 
+### MONETA Money Bank
+
+Czech bank with an account-holder **API token** (VIP AISP) for balances and transaction history. Plan 23's second read-only adapter — see [`specs/payment-ledger-moneta.md`](./specs/payment-ledger-moneta.md) and [ADR 0030](./decisions/0030-moneta-second-adapter.md). Tokens expire within ~90 days; history is capped at 90 days.
+
 ### Payment ledger
 
-Workspace-scoped store of normalized bank transactions, match **proposals**, and confirmed **allocations**. Allocations are the payment source of truth; `invoices.paid_at` / `paid_amount` / `payment_state` are projections. Manual mark-paid and Fio confirms share the same path.
+Workspace-scoped store of normalized bank transactions, match **proposals**, and confirmed **allocations**. Allocations are the payment source of truth; `invoices.paid_at` / `paid_amount` / `payment_state` are projections. Manual mark-paid and bank confirms (Fio / MONETA) share the same path.
 
 ### Allocation
 

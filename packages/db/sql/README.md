@@ -52,6 +52,7 @@ two steps (add nullable + backfill, then tighten), as
 | `2026-08-15-plan22-payments-fio.sql`                  | Payment ledger + Fio read-only integration     |
 | `2026-08-15-invoice-payment-identifiers-backfill.sql` | Repair web-issued invoice matching identifiers |
 | `2026-08-15-fio-auto-match.sql`                       | Opt-in exact Fio payment auto-matching         |
+| `2026-08-15-moneta-provider.sql`                      | Allow `moneta` on `bank_connections.provider`  |
 | `2026-08-15-client-identity-dedup.sql`                | Client cleanup + identity uniqueness indexes   |
 
 Apply Plan 19 before deploying referral routes (`/r/*`, `/settings/referrals`, admin users list).

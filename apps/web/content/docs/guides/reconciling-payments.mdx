@@ -1,17 +1,17 @@
 ---
 title: Reconcile payments
-description: Connect Fio, review match proposals, and confirm allocations in the payment ledger.
+description: Connect Fio or MONETA, review match proposals, and confirm allocations in the payment ledger.
 icon: Landmark
 ---
 
 Getting paid in Invoicey is more than stamping a date on an invoice. Every payment — cash, another
-bank, or a Fio credit — becomes a **ledger allocation**. Allocations are the source of truth;
+bank, or a bank credit — becomes a **ledger allocation**. Allocations are the source of truth;
 invoice status, outstanding totals and the dashboard all derive from them.
 
 <Mermaid
   chart="
 flowchart LR
-  Fio[Fio movements] --> Proposals[Match proposals]
+  Banks[Fio or MONETA credits] --> Proposals[Match proposals]
   Manual[Manual entry] --> Allocation[Allocation]
   Proposals --> Confirm[Manual or exact auto-confirm]
   Confirm --> Allocation
@@ -30,11 +30,11 @@ flowchart LR
 
 Matching works best when issued invoices already carry the payment facts Czech banks use:
 
-| Fact                     | Where it comes from                                      |
-| ------------------------ | -------------------------------------------------------- |
-| **IBAN**                 | Issuer bank account frozen onto the invoice at issue     |
-| **Variable symbol (VS)** | Usually the invoice number; used heavily by Fio matching |
-| **Amount + currency**    | Invoice total (CZK in the current pilot)                 |
+| Fact                     | Where it comes from                                       |
+| ------------------------ | --------------------------------------------------------- |
+| **IBAN**                 | Issuer bank account frozen onto the invoice at issue      |
+| **Variable symbol (VS)** | Usually the invoice number; used heavily by bank matching |
+| **Amount + currency**    | Invoice total (CZK in the current pilot)                  |
 
 Issue invoices with a clear VS and the correct issuer IBAN before you expect clean proposals. Older
 paid invoices already migrated into the ledger as manual allocations — you do not need to re-mark
@@ -42,9 +42,9 @@ them.
 
 ## Connect Fio banka
 
-The only supported bank feed today is **Fio banka**, via a **read-only monitoring token** from Fio
-Internetbanking. That token can pull account movements; it cannot submit payment orders. Why Fio and
-what we researched for other banks: [Bank connections](/docs/integrations/bank-connections).
+**Fio banka** connects via a **read-only monitoring token** from Fio Internetbanking. That token can
+pull account movements; it cannot submit payment orders. Other supported banks:
+[Bank connections](/docs/integrations/bank-connections).
 
 Owners and admins configure this under **Settings → Bank connections**. Connections belong to the
 **active workspace** — they are never shared with your other workspaces.
@@ -79,9 +79,40 @@ Owners and admins configure this under **Settings → Bank connections**. Connec
 Disconnect stops further sync but **keeps** imported transactions and allocations — history is not
 wiped when you rotate or revoke a token.
 
+## Connect MONETA Money Bank
+
+**MONETA** uses a passive API token from Internet Banka (VIP AISP). Setup is the same Settings page;
+a workspace may have both Fio and MONETA connected.
+
+<Steps>
+  <Step>
+    ### Create an API token in MONETA
+
+    In Internet Banka, activate API access and create a **passive** token under API tokeny. Copy it
+    once. Tokens typically expire within **90 days** unless you renew or auto-extend them in the
+    bank UI. History is limited to **90 days**.
+
+  </Step>
+  <Step>
+    ### Connect in Invoicey
+
+    Open **Settings → Bank connections**, paste the token for MONETA, and optionally **Discover
+    accounts**. If the token covers more than one CZK account, pick the receiving account. Invoicey
+    verifies today’s movements and encrypts the token for this workspace.
+
+  </Step>
+  <Step>
+    ### Sync movements
+
+    Use **Sync now** or wait for the scheduled bank sync — the same Payments queue and matcher as
+    Fio.
+
+  </Step>
+</Steps>
+
 ### Optional automatic matching
 
-Turn on **Automatic exact matching** on the Fio connection to confirm only new, exact proposals.
+Turn on **Automatic exact matching** on a bank connection to confirm only new, exact proposals.
 An automatic confirmation marks the invoice paid and sends the user who connected the account a
 summary email. Partial, overpaid, ambiguous, heuristic, and previously waiting proposals remain
 manual. Turning the option on does not bulk-confirm the existing review queue.
@@ -107,12 +138,12 @@ a smaller amount leaves the invoice **partially** paid with an outstanding balan
 ### Manual payments
 
 Use **Add a manual payment** for cash, an unconnected bank, or a correction. Pick the outstanding
-invoice, amount and paid-on date. Manual entries write the **same ledger** as confirmed Fio matches,
+invoice, amount and paid-on date. Manual entries write the **same ledger** as confirmed bank matches,
 so dashboards stay consistent.
 
 ### Recent transactions and allocations
 
-Imported Fio credits show whether they are already allocated. The allocations list is the audit
+Imported bank credits show whether they are already allocated. The allocations list is the audit
 trail of confirmed payments — reverse an allocation if the wrong invoice was matched; status and
 outstanding totals recompute immediately.
 
@@ -130,8 +161,9 @@ per issuer).
 
 ## How matching decides
 
-The matcher is deterministic and versioned (`fio-v1` today). It never crosses workspace boundaries
-and never invents FX: transaction currency, allocation currency and invoice currency must agree.
+The matcher is deterministic and versioned (`fio-v1` / `moneta-v1`). It never crosses workspace
+boundaries and never invents FX: transaction currency, allocation currency and invoice currency must
+agree.
 
 Typical strong signals:
 
@@ -158,7 +190,7 @@ Issued documents are never rewritten when money moves — only payment projectio
 - Payment initiation or any write-capable bank token
 - Automatic confirmation of partial, ambiguous, overpaid, or heuristic matches
 - Foreign-exchange / cross-currency allocation
-- Banks other than Fio ([researched and deferred](/docs/integrations/bank-connections); the ledger is ready for more adapters later)
+- Banks beyond Fio and MONETA ([researched and deferred](/docs/integrations/bank-connections))
 - Full rematch / multi-invoice split UI polish beyond confirm, reject, reverse and manual add
 
 ## Tips
@@ -173,12 +205,14 @@ Issued documents are never rewritten when money moves — only payment projectio
     Keep using **Mark paid** or **Add a manual payment**. Other Czech banks were
     reviewed and deferred — see [Bank
     connections](/docs/integrations/bank-connections). The ledger already
-    accepts manual entries the same way as Fio matches.
+    accepts manual entries the same way as bank matches.
   </Accordion>
   <Accordion title="Token or sync errors">
-    Use a monitoring-only token for a CZK account. Fio rate-limits roughly every
-    30 seconds per token — wait briefly between **Sync now** attempts. Rotate
-    the token from Bank connections if Fio revoked the old one.
+    Use a read-only token for a CZK account. Fio rate-limits roughly every 30
+    seconds per token — wait briefly between **Sync now** attempts. MONETA
+    tokens expire within ~90 days; renew them in Internet Banka and reconnect if
+    sync returns unauthorized. Rotate the token from Bank connections if the
+    bank revoked the old one.
   </Accordion>
 </Accordions>
 
@@ -188,7 +222,7 @@ Issued documents are never rewritten when money moves — only payment projectio
   <Card
     title="Bank connections"
     href="/docs/integrations/bank-connections"
-    description="Fio only for now — research matrix for other banks."
+    description="Fio and MONETA — research matrix for other banks."
   />
   <Card
     title="Issue & get paid"

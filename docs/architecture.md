@@ -19,7 +19,7 @@ How the pieces fit together. Cross-references the ADRs that justify each choice.
 | QR generation       | `qrcode`                                                    | inherited from [0004](./decisions/0004-pdf-react-pdf-renderer.md) (PDF-side)                                             |
 | ISDOC XML           | `xmlbuilder2`                                               | (lazy, finalized in `specs/isdoc.md`)                                                                                    |
 | Auth                | Better Auth (OAuth Google/GitHub; orgs = workspaces)        | [0018](./decisions/0018-better-auth-oauth-only.md), [0019](./decisions/0019-workspaces-are-better-auth-organizations.md) |
-| Payments            | `@invoicey/payment-core` + Fio read-only adapter            | [0029](./decisions/0029-payment-ledger-fio-first.md)                                                                     |
+| Payments            | `@invoicey/payment-core` + Fio / MONETA read-only adapters  | [0029](./decisions/0029-payment-ledger-fio-first.md), [0030](./decisions/0030-moneta-second-adapter.md)                  |
 | Hosting             | Vercel                                                      | inherited from Next.js choice                                                                                            |
 | Tests               | Vitest (unit) + golden-file fixtures (PDF/ISDOC)            | (decided in Plan 2/3)                                                                                                    |
 | Lint / format       | ESLint + Prettier + `commitlint`                            | (decided in Plan 1)                                                                                                      |

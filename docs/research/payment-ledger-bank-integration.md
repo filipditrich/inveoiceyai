@@ -120,24 +120,25 @@ Two access models matter:
 
 ### Summary matrix
 
-| Provider                       | Account-holder API?                     | History / statements                    | Cost (typical, account holder)                                        | Auth / setup                                 | Workspace-pasteable? | Priority for Invoicey                                       |
-| ------------------------------ | --------------------------------------- | --------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------- | -------------------- | ----------------------------------------------------------- |
-| **Fio**                        | Yes                                     | Transactions + statements, many formats | **Free**                                                              | Monitoring token in IB                       | **Yes**              | **Shipped (only)**                                          |
-| MONETA                         | Yes                                     | Balances, tx history, statements        | **Free**                                                              | API token + service contract in IB           | Yes                  | Deferred — closest Fio-like, but still product/ops overhead |
-| ČSOB Business Connector        | Yes                                     | Statements / avíza (file API)           | **Free** (business CEB)                                               | mTLS cert via CEB                            | Cert + passphrase    | Deferred — free but cert-heavy                              |
-| CREDITAS                       | Historically token; moving to ČOBS PSD2 | Tx / export                             | Historically free                                                     | Token or PSD2 depending on era               | Unclear post-2025    | Deferred — re-check before any build                        |
-| Komerční banka (ADAA / STATDA) | Yes (Business API)                      | Live tx (ADAA) + statements (STATDA)    | **0 / 100 / 500 Kč/mo** by frequency (from 2025-11); ≤50 uses/mo free | App registration + OAuth2                    | No (OAuth refresh)   | Deferred — freemium + heavy setup                           |
-| Raiffeisenbank Premium API     | Yes                                     | Tx (often ≤90 days) + statements        | **~500 Kč/mo** + possible annual rights fee                           | ClientID + mTLS PKCS#12; yearly cert unblock | Cert-heavy           | Deferred — paid + ops pain                                  |
-| Česká spořitelna Premium API   | Yes                                     | Statements / history                    | **300 Kč / account / mo**                                             | Developer portal + bank onboarding           | Medium               | Deferred — paid                                             |
-| Revolut Business               | Yes (Grow+)                             | Accounts, tx, webhooks                  | Grow plan **~850–1 000 Kč/mo** (no API on Basic)                      | X.509 + JWT OAuth                            | Medium–heavy         | Deferred — good API, not free                               |
-| Partners Banka                 | No (PSD2 only)                          | AIS after TPP consent                   | Free for licensed TPP                                                 | QSeal + OAuth                                | No                   | Skip                                                        |
-| mBank CZ                       | No (PSD2 only)                          | AIS after TPP consent                   | Free for licensed TPP                                                 | QSealC + mTLS                                | No                   | Skip                                                        |
-| Air Bank                       | No (PSD2 only)                          | AIS after TPP consent                   | Free for licensed TPP                                                 | eIDAS + OAuth (refresh ~180d)                | No                   | Skip — CSV/email workaround only                            |
-| UniCredit / Trinity            | PSD2 / weak                             | Limited                                 | TPP path                                                              | TPP                                          | No                   | Skip                                                        |
+| Provider                       | Account-holder API?                     | History / statements                    | Cost (typical, account holder)                                        | Auth / setup                                 | Workspace-pasteable? | Priority for Invoicey                              |
+| ------------------------------ | --------------------------------------- | --------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------- | -------------------- | -------------------------------------------------- |
+| **Fio**                        | Yes                                     | Transactions + statements, many formats | **Free**                                                              | Monitoring token in IB                       | **Yes**              | **Supported**                                      |
+| **MONETA**                     | Yes                                     | Balances, tx history, statements        | **Free**                                                              | API token + service contract in IB           | **Yes**              | **Supported** (VIP AISP; token ≤90d; history ≤90d) |
+| ČSOB Business Connector        | Yes                                     | Statements / avíza (file API)           | **Free** (business CEB)                                               | mTLS cert via CEB                            | Cert + passphrase    | Deferred — free but cert-heavy                     |
+| CREDITAS                       | Historically token; moving to ČOBS PSD2 | Tx / export                             | Historically free                                                     | Token or PSD2 depending on era               | Unclear post-2025    | Deferred — re-check before any build               |
+| Komerční banka (ADAA / STATDA) | Yes (Business API)                      | Live tx (ADAA) + statements (STATDA)    | **0 / 100 / 500 Kč/mo** by frequency (from 2025-11); ≤50 uses/mo free | App registration + OAuth2                    | No (OAuth refresh)   | Deferred — freemium + heavy setup                  |
+| Raiffeisenbank Premium API     | Yes                                     | Tx (often ≤90 days) + statements        | **~500 Kč/mo** + possible annual rights fee                           | ClientID + mTLS PKCS#12; yearly cert unblock | Cert-heavy           | Deferred — paid + ops pain                         |
+| Česká spořitelna Premium API   | Yes                                     | Statements / history                    | **300 Kč / account / mo**                                             | Developer portal + bank onboarding           | Medium               | Deferred — paid                                    |
+| Revolut Business               | Yes (Grow+)                             | Accounts, tx, webhooks                  | Grow plan **~850–1 000 Kč/mo** (no API on Basic)                      | X.509 + JWT OAuth                            | Medium–heavy         | Deferred — good API, not free                      |
+| Partners Banka                 | No (PSD2 only)                          | AIS after TPP consent                   | Free for licensed TPP                                                 | QSeal + OAuth                                | No                   | Skip                                               |
+| mBank CZ                       | No (PSD2 only)                          | AIS after TPP consent                   | Free for licensed TPP                                                 | QSealC + mTLS                                | No                   | Skip                                               |
+| Air Bank                       | No (PSD2 only)                          | AIS after TPP consent                   | Free for licensed TPP                                                 | eIDAS + OAuth (refresh ~180d)                | No                   | Skip — CSV/email workaround only                   |
+| UniCredit / Trinity            | PSD2 / weak                             | Limited                                 | TPP path                                                              | TPP                                          | No                   | Skip                                               |
 
-**Product stance:** keep Fio only. Revisit this matrix when (a) user bank mix
-shows clear demand, or (b) a licensed multibank intermediary (e.g. Finbricks)
-has acceptable small-OSVČ economics.
+**Product stance:** keep Fio and MONETA as the pasteable-token adapters. Revisit
+this matrix when (a) user bank mix shows clear demand for another bank, or (b) a
+licensed multibank intermediary (e.g. Finbricks) has acceptable small-OSVČ
+economics.
 
 ### What “shitty setup” means in practice
 
@@ -149,8 +150,9 @@ has acceptable small-OSVČ economics.
 | Needs Invoicey AISP licence              | Partners, mBank, Air Bank, UniCredit, Trinity, plain PSD2 |
 | No live API — CSV / email only           | Air Bank / mBank / Partners in accounting practice        |
 
-Fio remains the only widely used Czech option that is **free + single pasteable
-token + no TPP licence + good enough fields for VS matching**.
+Fio and MONETA remain the widely used Czech options that are **free + single
+pasteable token + no TPP licence + good enough fields for VS matching**. MONETA
+adds token renewal and a 90-day history cap as explicit product constraints.
 
 ---
 
@@ -182,12 +184,13 @@ separate commercial, security, and technical adapter.
 - Fio does not provide a sandbox for this proprietary API; its documentation
   says real testing requires a real account.
 
-#### MONETA (deferred)
+#### MONETA — supported (second adapter)
 
 - Free account-holder API; token from Internet Banka after activating
   “Přístup na platební účet prostřednictvím aplikačního rozhraní”.
 - Balances, transaction history (incl. cards), statements; developer sandbox.
-- Closest Fio-like candidate if a second bank is ever needed.
+- Implemented as VIP AISP read-only adapter ([ADR 0030](../decisions/0030-moneta-second-adapter.md),
+  [spec](../specs/payment-ledger-moneta.md)). Token ≤90 days; history ≤90 days.
 - Confirm token lifetime / IB-login refresh behaviour before committing.
 
 #### Komerční banka Business API (deferred)
@@ -332,8 +335,8 @@ idempotency rules as online connectors, not a separate feature path.
 2. Pilot human-confirmed matching on real Fio payments.
 3. Add statement import as the next adapter/fallback after the live pilot
    (covers non-Fio users without pretending other banks have clean APIs).
-4. Do **not** schedule MONETA / KB / RB / Revolut / PSD2 adapters until user
-   bank distribution or commercial intermediary pricing justifies it.
+4. Do **not** schedule KB / RB / Revolut / PSD2 adapters until user bank
+   distribution or commercial intermediary pricing justifies it.
 5. Optionally request Finbricks (or similar) commercial terms when multibank
    coverage becomes a product priority.
 6. Consider bank-notification signals and pay-by-bank links only as later

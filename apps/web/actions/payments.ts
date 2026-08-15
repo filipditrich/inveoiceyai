@@ -8,7 +8,11 @@ import {
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { sendPaymentReceivedEmailIfEnabled } from "@invoicey/invoice-tools/email";
-import { decimalToMinor, isValidFioTokenShape } from "@invoicey/payment-core";
+import {
+  decimalToMinor,
+  isValidFioTokenShape,
+  isValidMonetaTokenShape,
+} from "@invoicey/payment-core";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -20,6 +24,15 @@ import {
   syncFioConnection,
   testFioToken,
 } from "@/lib/payments/fio-service";
+import {
+  createMonetaConnection,
+  deleteMonetaConnection,
+  discoverMonetaAccounts,
+  setMonetaAutoMatch,
+  syncMonetaConnection,
+  testMonetaToken,
+  type MonetaDiscoveredAccount,
+} from "@/lib/payments/moneta-service";
 
 function field(formData: FormData, name: string): string {
   const value = formData.get(name);
@@ -115,6 +128,130 @@ export async function toggleFioAutoMatch(formData: FormData): Promise<void> {
   if (!connectionId) settingsRedirect({ error: "missing_connection" });
   const enabled = field(formData, "enabled") === "true";
   const updated = await setFioAutoMatch({
+    workspaceId,
+    connectionId,
+    userId,
+    enabled,
+  });
+  revalidatePath("/settings/bank-connections");
+  settingsRedirect(
+    updated
+      ? {
+          toast: enabled
+            ? "bank_auto_match_enabled"
+            : "bank_auto_match_disabled",
+        }
+      : { error: "not_found" },
+  );
+}
+
+export async function discoverMonetaAccountsAction(input: {
+  token: string;
+}): Promise<
+  | { ok: true; accounts: MonetaDiscoveredAccount[] }
+  | { ok: false; error: string }
+> {
+  await requireWorkspaceRole("admin");
+  const token = input.token.trim();
+  if (!token) return { ok: false, error: "missing_moneta_token" };
+  if (!isValidMonetaTokenShape(token)) {
+    return { ok: false, error: "moneta_invalid_token_shape" };
+  }
+  try {
+    const accounts = await discoverMonetaAccounts(token);
+    if (accounts.length === 0) {
+      return { ok: false, error: "moneta_no_czk_accounts" };
+    }
+    return { ok: true, accounts };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "moneta_discover_failed",
+    };
+  }
+}
+
+export async function connectMoneta(formData: FormData): Promise<void> {
+  const { workspaceId, userId } = await requireWorkspaceRole("admin");
+  const token = field(formData, "token");
+  const issuerId = field(formData, "issuerId");
+  let providerAccountId = field(formData, "providerAccountId");
+  if (!issuerId) settingsRedirect({ error: "missing_issuer" });
+  if (!token) settingsRedirect({ error: "missing_moneta_token" });
+  if (!isValidMonetaTokenShape(token)) {
+    settingsRedirect({ error: "moneta_invalid_token_shape" });
+  }
+  try {
+    if (!providerAccountId) {
+      const accounts = await discoverMonetaAccounts(token);
+      if (accounts.length === 0) {
+        settingsRedirect({ error: "moneta_no_czk_accounts" });
+      }
+      if (accounts.length > 1) {
+        settingsRedirect({ error: "moneta_select_account" });
+      }
+      providerAccountId = accounts[0]?.providerAccountId ?? "";
+    }
+    const batch = await testMonetaToken({ token, providerAccountId });
+    await createMonetaConnection({
+      workspaceId,
+      userId,
+      issuerId,
+      token,
+      batch,
+    });
+  } catch (error) {
+    settingsRedirect({
+      error:
+        error instanceof Error ? error.message : "moneta_connection_failed",
+    });
+  }
+  revalidatePath("/settings/bank-connections");
+  revalidatePath("/payments");
+  settingsRedirect({ toast: "bank_connected" });
+}
+
+export async function syncMoneta(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspaceRole("admin");
+  const connectionId = field(formData, "connectionId");
+  if (!connectionId) settingsRedirect({ error: "missing_connection" });
+  const result = await syncMonetaConnection({ workspaceId, connectionId });
+  revalidatePath("/settings/bank-connections");
+  revalidatePath("/payments");
+  settingsRedirect(
+    result.ok
+      ? {
+          synced: connectionId,
+          imported: String(result.imported),
+          proposed: String(result.proposed),
+          autoMatched: String(result.autoMatched),
+          toast: "bank_synced",
+        }
+      : { error: result.error ?? "moneta_sync_failed" },
+  );
+}
+
+export async function disconnectMoneta(formData: FormData): Promise<void> {
+  const { workspaceId, userId } = await requireWorkspaceRole("admin");
+  const connectionId = field(formData, "connectionId");
+  if (!connectionId) settingsRedirect({ error: "missing_connection" });
+  const disconnected = await deleteMonetaConnection({
+    workspaceId,
+    connectionId,
+    userId,
+  });
+  revalidatePath("/settings/bank-connections");
+  settingsRedirect(
+    disconnected ? { toast: "bank_disconnected" } : { error: "not_found" },
+  );
+}
+
+export async function toggleMonetaAutoMatch(formData: FormData): Promise<void> {
+  const { workspaceId, userId } = await requireWorkspaceRole("admin");
+  const connectionId = field(formData, "connectionId");
+  if (!connectionId) settingsRedirect({ error: "missing_connection" });
+  const enabled = field(formData, "enabled") === "true";
+  const updated = await setMonetaAutoMatch({
     workspaceId,
     connectionId,
     userId,

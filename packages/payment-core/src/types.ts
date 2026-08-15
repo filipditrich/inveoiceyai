@@ -1,7 +1,9 @@
 export type BankDirection = "credit" | "debit";
 
+export type BankProvider = "fio" | "moneta";
+
 export interface DiscoveredBankAccount {
-  provider: "fio";
+  provider: BankProvider;
   providerAccountId: string;
   accountNumber: string;
   bankCode: string;
@@ -10,10 +12,12 @@ export interface DiscoveredBankAccount {
   currency: string;
   openingBalance: string | null;
   closingBalance: string | null;
+  /** Display name from the provider when available. */
+  name?: string | null;
 }
 
 export interface NormalizedBankTransaction {
-  provider: "fio";
+  provider: BankProvider;
   providerTransactionId: string;
   providerInstructionId: string | null;
   bookingDate: string;

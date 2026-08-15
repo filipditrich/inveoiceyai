@@ -11,6 +11,14 @@ import {
   isExactAutoMatchProposal,
   proposeInvoiceMatches,
 } from "./matcher";
+import {
+  extractMonetaPaymentSymbols,
+  fetchMonetaTransactions,
+  isValidMonetaTokenShape,
+  listMonetaAccounts,
+  normalizeMonetaTransaction,
+  parseMonetaAccountsResponse,
+} from "./moneta";
 import type { NormalizedBankTransaction } from "./types";
 
 const transaction: NormalizedBankTransaction = {
@@ -142,6 +150,152 @@ describe("Fio token shape", () => {
   it("rejects the wrong length or embedded whitespace", () => {
     expect(isValidFioTokenShape("a".repeat(63))).toBe(false);
     expect(isValidFioTokenShape(`${"a".repeat(31)} ${"b".repeat(32)}`)).toBe(
+      false,
+    );
+  });
+});
+
+describe("Moneta VIP AISP adapter", () => {
+  it("parses accounts and builds CZ account numbers from IBAN", () => {
+    const accounts = parseMonetaAccountsResponse({
+      accounts: [
+        {
+          id: "acc-1",
+          nameI18N: "Běžný účet",
+          currency: "CZK",
+          identification: { iban: "CZ6508000000192000145399" },
+          servicer: {
+            bankCode: "0800",
+            bic: "GIBACZPX",
+            countryCode: "CZ",
+          },
+        },
+      ],
+      pageNumber: 0,
+      pageCount: 1,
+    });
+    expect(accounts).toHaveLength(1);
+    expect(accounts[0]).toMatchObject({
+      provider: "moneta",
+      providerAccountId: "acc-1",
+      iban: "CZ6508000000192000145399",
+      bankCode: "0800",
+      currency: "CZK",
+      accountNumber: "192000145399/0800",
+    });
+  });
+
+  it("extracts VS/KS/SS from creditor reference and normalizes CRDT", () => {
+    expect(extractMonetaPaymentSymbols("VS:123456 KS:0308 SS:0001")).toEqual({
+      variableSymbol: "123456",
+      constantSymbol: "0308",
+      specificSymbol: "0001",
+    });
+    const tx = normalizeMonetaTransaction({
+      entryReference: "trx-1",
+      status: "BOOK",
+      creditDebitIndicator: "CRDT",
+      amount: { currency: "CZK", value: 101.5 },
+      bookingDate: { date: "2026-08-01" },
+      entryDetails: {
+        transactionDetails: {
+          remittanceInformation: {
+            structured: {
+              creditorReferenceInformation: {
+                reference: "VS:123456 KS:0308 SS:0001",
+              },
+            },
+          },
+          references: {
+            transactionDescription: "Platba faktury",
+          },
+        },
+      },
+    });
+    expect(tx).toMatchObject({
+      provider: "moneta",
+      providerTransactionId: "trx-1",
+      amount: "101.50",
+      direction: "credit",
+      variableSymbol: "123456",
+      constantSymbol: "0308",
+      specificSymbol: "0001",
+      message: "Platba faktury",
+    });
+  });
+
+  it("pages through transactions and maps unauthorized without exposing the token", async () => {
+    let calls = 0;
+    const batch = await fetchMonetaTransactions({
+      token: "m".repeat(32),
+      accountId: "acc-1",
+      from: "2026-08-01",
+      to: "2026-08-15",
+      account: {
+        provider: "moneta",
+        providerAccountId: "acc-1",
+        accountNumber: "1/0600",
+        bankCode: "0600",
+        iban: "CZ0006000000000000000001",
+        bic: "AGBACZPP",
+        currency: "CZK",
+        openingBalance: null,
+        closingBalance: null,
+      },
+      fetchImpl: async (input) => {
+        calls += 1;
+        const url = String(input);
+        expect(url).toContain("fromDate=2026-08-01");
+        expect(url).toContain("toDate=2026-08-15");
+        if (url.includes("pageNumber=0")) {
+          return Response.json({
+            transactions: [
+              {
+                entryReference: "trx-a",
+                status: "BOOK",
+                creditDebitIndicator: "CRDT",
+                amount: { currency: "CZK", value: 10 },
+                bookingDate: { date: "2026-08-02" },
+              },
+            ],
+            pageNumber: 0,
+            pageCount: 2,
+          });
+        }
+        return Response.json({
+          transactions: [
+            {
+              entryReference: "trx-b",
+              status: "BOOK",
+              creditDebitIndicator: "DBIT",
+              amount: { currency: "CZK", value: 5 },
+              bookingDate: { date: "2026-08-03" },
+            },
+          ],
+          pageNumber: 1,
+          pageCount: 2,
+        });
+      },
+    });
+    expect(calls).toBe(2);
+    expect(batch.transactions.map((row) => row.providerTransactionId)).toEqual([
+      "trx-a",
+      "trx-b",
+    ]);
+    expect(batch.transactions[1]?.direction).toBe("debit");
+
+    await expect(
+      listMonetaAccounts({
+        token: "m".repeat(32),
+        fetchImpl: async () => new Response(null, { status: 401 }),
+      }),
+    ).rejects.toThrow("moneta_unauthorized");
+  });
+
+  it("validates token shape", () => {
+    expect(isValidMonetaTokenShape("m".repeat(32))).toBe(true);
+    expect(isValidMonetaTokenShape("short")).toBe(false);
+    expect(isValidMonetaTokenShape(`${"m".repeat(16)} ${"n".repeat(16)}`)).toBe(
       false,
     );
   });

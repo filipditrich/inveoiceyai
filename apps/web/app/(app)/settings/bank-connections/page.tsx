@@ -1,6 +1,7 @@
 import { issuerBusinesses } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import {
+  Building2Icon,
   CircleDotDashedIcon,
   ExternalLinkIcon,
   LandmarkIcon,
@@ -12,8 +13,17 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
-import { connectFio, disconnectFio, syncFio } from "@/actions/payments";
+import {
+  connectFio,
+  disconnectFio,
+  disconnectMoneta,
+  syncFio,
+  syncMoneta,
+  toggleFioAutoMatch,
+  toggleMonetaAutoMatch,
+} from "@/actions/payments";
 import { AutoMatchToggle } from "@/components/settings/auto-match-toggle";
+import { MonetaConnectForm } from "@/components/settings/moneta-connect-form";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,9 +36,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 import { requireWorkspace } from "@/lib/auth/session";
 import { listFioConnections } from "@/lib/payments/fio-service";
+import { listMonetaConnections } from "@/lib/payments/moneta-service";
 import { isBankTokenEncryptionConfigured } from "@/lib/payments/token-crypto";
 import { asc, eq } from "drizzle-orm";
 
@@ -36,80 +46,61 @@ function issuerName(snapshot: Record<string, unknown>): string {
   return typeof snapshot.name === "string" ? snapshot.name : "Unnamed issuer";
 }
 
-/** Square white tile — logos use object-contain so they never stretch. */
-function BankLogoTile({
-  src,
-  alt,
-  muted = false,
-  size = "md",
-}: {
-  src: string;
-  alt: string;
-  muted?: boolean;
-  size?: "md" | "lg";
-}) {
-  return (
-    <span
-      className={cn(
-        "shadow-xs flex shrink-0 items-center justify-center overflow-hidden rounded-xl border bg-white p-2",
-        size === "lg" ? "size-14" : "size-12",
-        muted && "opacity-55",
-      )}
-    >
-      <Image
-        alt={alt}
-        src={src}
-        width={96}
-        height={96}
-        className={cn(
-          "max-h-full max-w-full object-contain",
-          muted && "grayscale",
-        )}
-      />
-    </span>
-  );
-}
-
 const PLANNED_BANKS = [
-  { name: "MONETA Money Bank", logo: "/banks/moneta.png" },
-  { name: "Komerční banka", logo: "/banks/kb.svg" },
-  { name: "Raiffeisenbank", logo: "/banks/rb.svg" },
-  { name: "ČSOB", logo: "/banks/csob.svg" },
-  { name: "Česká spořitelna", logo: "/banks/csas-modern.svg" },
-  { name: "CREDITAS", logo: "/banks/creditas.jpg" },
-  { name: "Air Bank", logo: "/banks/airbank.png" },
-  { name: "mBank", logo: "/banks/mbank.jpg" },
-  { name: "Partners Banka", logo: "/banks/partners.png" },
-  { name: "Revolut", logo: "/banks/revolut.svg" },
+  {
+    name: "Komerční banka",
+    logo: "/banks/kb.svg",
+    alt: "Komerční banka",
+  },
+  {
+    name: "Česká spořitelna",
+    logo: "/banks/csas-modern.svg",
+    alt: "Česká spořitelna",
+  },
+  {
+    name: "ČSOB",
+    logo: "/banks/csob.svg",
+    alt: "ČSOB",
+  },
 ] as const;
 
 function ConnectionStatusBadge({ status }: { status: string }) {
   const active = status === "active";
   return (
-    <span
-      className={
-        active
-          ? "inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400"
-          : "bg-muted text-muted-foreground inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1 text-xs font-medium"
-      }
+    <Badge
+      variant={active ? "default" : "secondary"}
+      className="gap-1.5 capitalize"
     >
       <span
         aria-hidden
-        className={
-          active
-            ? "size-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_3px] shadow-emerald-500/20"
-            : "bg-muted-foreground/50 size-1.5 rounded-full"
-        }
+        className={`size-1.5 rounded-full ${
+          active ? "bg-emerald-400" : "bg-muted-foreground/60"
+        }`}
       />
-      {active ? "Active" : status}
-    </span>
+      {status}
+    </Badge>
+  );
+}
+
+function BankLogo({ src, alt }: { src: string; alt: string }) {
+  return (
+    <div className="shadow-xs flex h-14 w-36 shrink-0 items-center rounded-xl border bg-white px-3">
+      <Image
+        alt={alt}
+        src={src}
+        width={180}
+        height={64}
+        className="h-auto w-full object-contain"
+      />
+    </div>
   );
 }
 
 export default async function BankConnectionsPage() {
   const { workspaceId, role } = await requireWorkspace();
-  const [connections, issuers] = await Promise.all([
+  const [fioConnections, monetaConnections, issuers] = await Promise.all([
     listFioConnections(workspaceId),
+    listMonetaConnections(workspaceId),
     db
       .select({ id: issuerBusinesses.id, snapshot: issuerBusinesses.snapshot })
       .from(issuerBusinesses)
@@ -118,6 +109,17 @@ export default async function BankConnectionsPage() {
   ]);
   const canManage = role === "admin" || role === "owner";
   const encryptionReady = isBankTokenEncryptionConfigured();
+  const issuerOptions = issuers.map((issuer) => ({
+    id: issuer.id,
+    label: issuerName(issuer.snapshot),
+  }));
+  const hasActiveFio = fioConnections.some(
+    (connection) => connection.status === "active",
+  );
+  const hasActiveMoneta = monetaConnections.some(
+    (connection) => connection.status === "active",
+  );
+  const connections = [...fioConnections, ...monetaConnections];
 
   return (
     <div className="space-y-6">
@@ -127,106 +129,119 @@ export default async function BankConnectionsPage() {
         title="Bank connections"
       />
 
-      {connections.map((connection) => (
-        <Card key={connection.id} className="overflow-hidden">
-          <CardHeader className="bg-muted/20 border-b">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-4">
-                <BankLogoTile alt="Fio banka" size="lg" src="/banks/fio.png" />
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <CardTitle>Fio banka</CardTitle>
-                    <Badge variant="outline" className="gap-1">
-                      <LockKeyholeIcon className="size-3" /> Read-only
-                    </Badge>
+      {connections.map((connection) => {
+        const isMoneta = connection.provider === "moneta";
+        const syncAction = isMoneta ? syncMoneta : syncFio;
+        const disconnectAction = isMoneta ? disconnectMoneta : disconnectFio;
+        const toggleAction = isMoneta
+          ? toggleMonetaAutoMatch
+          : toggleFioAutoMatch;
+        return (
+          <Card key={connection.id} className="overflow-hidden">
+            <CardHeader className="bg-muted/20 border-b">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-4">
+                  <BankLogo
+                    alt={isMoneta ? "MONETA Money Bank" : "Fio banka"}
+                    src={isMoneta ? "/banks/moneta.png" : "/banks/fio.png"}
+                  />
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <CardTitle>
+                        {isMoneta ? "MONETA Money Bank" : "Fio banka"}
+                      </CardTitle>
+                      <Badge variant="outline" className="gap-1">
+                        <LockKeyholeIcon className="size-3" /> Read-only
+                      </Badge>
+                    </div>
+                    <CardDescription className="mt-1 truncate font-mono">
+                      {connection.accountNumber} · {connection.iban}
+                    </CardDescription>
                   </div>
-                  <CardDescription className="mt-1 truncate font-mono">
-                    {connection.accountNumber} · {connection.iban}
-                  </CardDescription>
                 </div>
+                <ConnectionStatusBadge status={connection.status} />
               </div>
-              <ConnectionStatusBadge status={connection.status} />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-5 pt-5">
-            <dl className="grid gap-3 text-sm sm:grid-cols-3">
-              <div className="bg-muted/35 rounded-xl p-3">
-                <dt className="text-muted-foreground text-xs">
-                  Imported currency
-                </dt>
-                <dd className="mt-1 font-medium">{connection.currency}</dd>
-              </div>
-              <div className="bg-muted/35 rounded-xl p-3 sm:col-span-2">
-                <dt className="text-muted-foreground text-xs">
-                  Last successful sync
-                </dt>
-                <dd className="mt-1 font-medium">
-                  {connection.lastSyncSucceededAt?.toLocaleString("cs-CZ") ??
-                    "Not synced yet"}
-                </dd>
-              </div>
-            </dl>
-            {connection.lastSyncErrorCode ? (
-              <p className="text-destructive text-sm">
-                Last error: {connection.lastSyncErrorCode.replaceAll("_", " ")}
-              </p>
-            ) : null}
-            <div className="border-border/80 bg-muted/20 flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex min-w-0 gap-3">
-                <span className="bg-background text-foreground shadow-xs flex size-10 shrink-0 items-center justify-center rounded-xl border">
-                  <ZapIcon className="size-4" />
-                </span>
-                <div>
-                  <p className="font-medium">Automatic exact matching</p>
-                  <p className="text-muted-foreground mt-0.5 max-w-2xl text-sm leading-relaxed">
-                    When the receiving account, CZK currency, variable symbol,
-                    and full amount due all match exactly, mark the invoice paid
-                    and email you. Partial or ambiguous payments always wait for
-                    review.
-                  </p>
+            </CardHeader>
+            <CardContent className="space-y-5 pt-5">
+              <dl className="grid gap-3 text-sm sm:grid-cols-3">
+                <div className="bg-muted/35 rounded-xl p-3">
+                  <dt className="text-muted-foreground text-xs">
+                    Imported currency
+                  </dt>
+                  <dd className="mt-1 font-medium">{connection.currency}</dd>
                 </div>
+                <div className="bg-muted/35 rounded-xl p-3 sm:col-span-2">
+                  <dt className="text-muted-foreground text-xs">
+                    Last successful sync
+                  </dt>
+                  <dd className="mt-1 font-medium">
+                    {connection.lastSyncSucceededAt?.toLocaleString("cs-CZ") ??
+                      "Not synced yet"}
+                  </dd>
+                </div>
+              </dl>
+              {connection.lastSyncErrorCode ? (
+                <p className="text-destructive text-sm">
+                  Last error:{" "}
+                  {connection.lastSyncErrorCode.replaceAll("_", " ")}
+                </p>
+              ) : null}
+              <div className="border-brand/15 bg-brand/[0.05] flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 gap-3">
+                  <span className="bg-brand/10 text-brand flex size-10 shrink-0 items-center justify-center rounded-xl">
+                    <ZapIcon className="size-5" />
+                  </span>
+                  <div>
+                    <p className="font-medium">Automatic exact matching</p>
+                    <p className="text-muted-foreground mt-0.5 max-w-2xl text-sm leading-relaxed">
+                      When the receiving account, CZK currency, variable symbol,
+                      and full amount due all match exactly, mark the invoice
+                      paid and email you. Partial or ambiguous payments always
+                      wait for review.
+                    </p>
+                  </div>
+                </div>
+                <AutoMatchToggle
+                  connectionId={connection.id}
+                  checked={connection.autoConfirmExactMatches}
+                  disabled={!canManage || connection.status !== "active"}
+                  action={toggleAction}
+                />
               </div>
-              <AutoMatchToggle
-                connectionId={connection.id}
-                checked={connection.autoConfirmExactMatches}
-                disabled={!canManage || connection.status !== "active"}
-              />
-            </div>
-            {canManage && connection.status === "active" ? (
-              <div className="flex flex-wrap gap-2">
-                <form action={syncFio}>
-                  <input
-                    type="hidden"
-                    name="connectionId"
-                    value={connection.id}
-                  />
-                  <Button type="submit" variant="outline">
-                    <RefreshCwIcon /> Sync now
-                  </Button>
-                </form>
-                <form action={disconnectFio}>
-                  <input
-                    type="hidden"
-                    name="connectionId"
-                    value={connection.id}
-                  />
-                  <Button type="submit" variant="destructive">
-                    <Trash2Icon /> Disconnect
-                  </Button>
-                </form>
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
-      ))}
+              {canManage && connection.status === "active" ? (
+                <div className="flex flex-wrap gap-2">
+                  <form action={syncAction}>
+                    <input
+                      type="hidden"
+                      name="connectionId"
+                      value={connection.id}
+                    />
+                    <Button type="submit" variant="outline">
+                      <RefreshCwIcon /> Sync now
+                    </Button>
+                  </form>
+                  <form action={disconnectAction}>
+                    <input
+                      type="hidden"
+                      name="connectionId"
+                      value={connection.id}
+                    />
+                    <Button type="submit" variant="destructive">
+                      <Trash2Icon /> Disconnect
+                    </Button>
+                  </form>
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
+        );
+      })}
 
-      {connections.some(
-        (connection) => connection.status === "active",
-      ) ? null : (
+      {hasActiveFio ? null : (
         <Card className="overflow-hidden">
           <CardHeader>
-            <BankLogoTile alt="Fio banka" size="lg" src="/banks/fio.png" />
-            <CardTitle className="mt-3">Connect Fio read-only API</CardTitle>
+            <BankLogo alt="Fio banka" src="/banks/fio.png" />
+            <CardTitle className="mt-2">Connect Fio read-only API</CardTitle>
             <CardDescription>
               Create a read-only API token in Fio Internetbanking and paste it
               here. Invoicey validates it against today’s statement and stores
@@ -304,6 +319,27 @@ export default async function BankConnectionsPage() {
         </Card>
       )}
 
+      {hasActiveMoneta ? null : (
+        <Card className="overflow-hidden">
+          <CardHeader>
+            <BankLogo alt="MONETA Money Bank" src="/banks/moneta.png" />
+            <CardTitle className="mt-2">Connect MONETA read-only API</CardTitle>
+            <CardDescription>
+              Create a passive API token in MONETA Internet Banka and paste it
+              here. Invoicey lists CZK accounts on the token, verifies today’s
+              movements, and stores the token encrypted for this workspace only.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MonetaConnectForm
+              issuers={issuerOptions}
+              canManage={canManage}
+              encryptionReady={encryptionReady}
+            />
+          </CardContent>
+        </Card>
+      )}
+
       <section className="space-y-3">
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -312,23 +348,29 @@ export default async function BankConnectionsPage() {
               More bank integrations
             </h2>
             <p className="text-muted-foreground mt-1 text-sm">
-              Fio is the only live feed for now. Other Czech banks are deferred
-              until setup is as simple.
+              Fio and MONETA are live. These connections are being evaluated
+              next.
             </p>
           </div>
           <Badge variant="secondary">Planned</Badge>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {PLANNED_BANKS.map((bank) => (
-            <Card key={bank.name} className="border-dashed opacity-80">
+            <Card key={bank.name} className="border-dashed">
               <CardContent className="flex items-center gap-3 p-4">
-                <BankLogoTile alt="" muted src={bank.logo} />
+                <div className="shadow-xs flex size-12 shrink-0 items-center justify-center rounded-xl border bg-white p-2">
+                  <Image
+                    alt={bank.alt}
+                    src={bank.logo}
+                    width={40}
+                    height={40}
+                    className="h-auto w-full object-contain"
+                  />
+                </div>
                 <div className="min-w-0">
-                  <p className="text-muted-foreground truncate text-sm font-medium">
-                    {bank.name}
-                  </p>
-                  <p className="text-muted-foreground/80 text-xs">
-                    Coming later
+                  <p className="truncate text-sm font-medium">{bank.name}</p>
+                  <p className="text-muted-foreground flex items-center gap-1 text-xs">
+                    <Building2Icon className="size-3" /> Coming later
                   </p>
                 </div>
               </CardContent>
@@ -343,7 +385,8 @@ export default async function BankConnectionsPage() {
           Connections belong to the current workspace, not your user account. A
           user in multiple workspaces connects and configures each workspace
           independently. Invoicey imports incoming transactions only; it cannot
-          send money.
+          send money. MONETA tokens typically expire within 90 days and should
+          be renewed in Internet Banka.
         </p>
       </div>
     </div>
