@@ -1,8 +1,10 @@
 import {
+  createManualPaymentAllocation,
   invoiceItems,
   invoices,
   issuerBusinesses,
   issuerNumberingSchemes,
+  reverseAllInvoicePaymentAllocations,
   tryCreateDbFromEnv,
   type InvoiceyDb,
 } from "@invoicey/db";
@@ -216,27 +218,41 @@ export async function markInvoicePaidById(options: {
   if (!row.issuedAt || row.cancelledAt) {
     return { ok: false, error: "cannot_mark_paid" };
   }
-  if (row.paidAt) {
+  if (row.paymentState === "paid" || row.paymentState === "overpaid") {
     return { ok: true, summary: rowToSummary(row) };
   }
-  const now = new Date();
-  await database
-    .update(invoices)
-    .set({ paidAt: now, updatedAt: now })
-    .where(eq(invoices.id, options.id));
+  const outstanding = Math.max(
+    0,
+    Math.abs(Number(row.total)) - Number(row.paidAmount),
+  ).toFixed(2);
+  if (outstanding === "0.00") {
+    return { ok: false, error: "cannot_mark_paid" };
+  }
+  const allocation = await createManualPaymentAllocation({
+    workspaceId,
+    invoiceId: options.id,
+    amount: outstanding,
+    effectiveDate: pragueTodayIso(),
+  });
+  if (!allocation.ok) return allocation;
   try {
-    await sendPaymentReceivedEmailIfEnabled({
-      db: database,
-      workspaceId,
-      invoiceId: options.id,
-    });
+    if (allocation.becamePaid) {
+      await sendPaymentReceivedEmailIfEnabled({
+        db: database,
+        workspaceId,
+        invoiceId: options.id,
+      });
+    }
   } catch (err) {
     console.error("[markInvoicePaidById] payment-received email failed", err);
   }
-  return {
-    ok: true,
-    summary: rowToSummary({ ...row, paidAt: now, updatedAt: now }),
-  };
+  const [updated] = await database
+    .select()
+    .from(invoices)
+    .where(eq(invoices.id, options.id))
+    .limit(1);
+  if (!updated) return { ok: false, error: "invoice_not_found" };
+  return { ok: true, summary: rowToSummary(updated) };
 }
 
 export async function cancelInvoiceById(options: {
@@ -258,7 +274,12 @@ export async function cancelInvoiceById(options: {
   if (!row) {
     return { ok: false, error: `invoice not found: ${options.id}` };
   }
-  if (!row.issuedAt || row.paidAt || row.cancelledAt) {
+  if (
+    !row.issuedAt ||
+    Number(row.paidAmount) > 0 ||
+    row.paidAt ||
+    row.cancelledAt
+  ) {
     return { ok: false, error: "cannot_cancel" };
   }
   const now = new Date();
@@ -292,18 +313,24 @@ export async function unmarkInvoicePaidById(options: {
   if (!row) {
     return { ok: false, error: `invoice not found: ${options.id}` };
   }
-  if (!row.paidAt || row.cancelledAt) {
+  if (row.paymentState === "unpaid" || row.cancelledAt) {
     return { ok: false, error: "cannot_unmark_paid" };
   }
-  const now = new Date();
-  await database
-    .update(invoices)
-    .set({ paidAt: null, updatedAt: now })
-    .where(eq(invoices.id, options.id));
-  return {
-    ok: true,
-    summary: rowToSummary({ ...row, paidAt: null, updatedAt: now }),
-  };
+  const reversal = await reverseAllInvoicePaymentAllocations({
+    workspaceId,
+    invoiceId: options.id,
+    reason: "Marked unpaid",
+  });
+  if (!reversal.ok) {
+    return { ok: false, error: reversal.error ?? "cannot_unmark_paid" };
+  }
+  const [updated] = await database
+    .select()
+    .from(invoices)
+    .where(eq(invoices.id, options.id))
+    .limit(1);
+  if (!updated) return { ok: false, error: "invoice_not_found" };
+  return { ok: true, summary: rowToSummary(updated) };
 }
 
 export type BulkOpResult = {
@@ -332,49 +359,19 @@ export async function bulkMarkInvoicesPaid(options: {
   ids: string[];
   workspaceId?: string;
 }): Promise<BulkOpResult> {
-  const database = requireDb();
   const workspaceId = resolveWorkspaceId(options.workspaceId);
-  const rows = await loadWorkspaceInvoicesByIds(
-    database,
-    workspaceId,
-    options.ids,
-  );
-  const byId = new Map(rows.map((r) => [r.id, r]));
   let ok = 0;
   let skipped = 0;
   let failed = 0;
-  const now = new Date();
   for (const id of options.ids) {
-    const row = byId.get(id);
-    if (!row) {
+    const result = await markInvoicePaidById({ id, workspaceId });
+    if (result.ok) {
+      ok += 1;
+    } else if (result.error === "cannot_mark_paid") {
+      skipped += 1;
+    } else {
       failed += 1;
-      continue;
     }
-    if (!row.issuedAt || row.cancelledAt) {
-      skipped += 1;
-      continue;
-    }
-    if (row.paidAt) {
-      skipped += 1;
-      continue;
-    }
-    await database
-      .update(invoices)
-      .set({ paidAt: now, updatedAt: now })
-      .where(eq(invoices.id, id));
-    try {
-      await sendPaymentReceivedEmailIfEnabled({
-        db: database,
-        workspaceId,
-        invoiceId: id,
-      });
-    } catch (err) {
-      console.error(
-        "[bulkMarkInvoicesPaid] payment-received email failed",
-        err,
-      );
-    }
-    ok += 1;
   }
   return { ok, skipped, failed };
 }
@@ -383,33 +380,19 @@ export async function bulkUnmarkInvoicesPaid(options: {
   ids: string[];
   workspaceId?: string;
 }): Promise<BulkOpResult> {
-  const database = requireDb();
   const workspaceId = resolveWorkspaceId(options.workspaceId);
-  const rows = await loadWorkspaceInvoicesByIds(
-    database,
-    workspaceId,
-    options.ids,
-  );
-  const byId = new Map(rows.map((r) => [r.id, r]));
   let ok = 0;
   let skipped = 0;
   let failed = 0;
-  const now = new Date();
   for (const id of options.ids) {
-    const row = byId.get(id);
-    if (!row) {
-      failed += 1;
-      continue;
-    }
-    if (!row.paidAt || row.cancelledAt) {
+    const result = await unmarkInvoicePaidById({ id, workspaceId });
+    if (result.ok) {
+      ok += 1;
+    } else if (result.error === "cannot_unmark_paid") {
       skipped += 1;
-      continue;
+    } else {
+      failed += 1;
     }
-    await database
-      .update(invoices)
-      .set({ paidAt: null, updatedAt: now })
-      .where(eq(invoices.id, id));
-    ok += 1;
   }
   return { ok, skipped, failed };
 }
@@ -436,7 +419,12 @@ export async function bulkCancelInvoices(options: {
       failed += 1;
       continue;
     }
-    if (!row.issuedAt || row.paidAt || row.cancelledAt) {
+    if (
+      !row.issuedAt ||
+      Number(row.paidAmount) > 0 ||
+      row.paidAt ||
+      row.cancelledAt
+    ) {
       skipped += 1;
       continue;
     }
@@ -633,6 +621,11 @@ export async function issueInvoiceById(options: {
           subtotal: String(parsed.data.totals.subtotal),
           vatTotal: String(parsed.data.totals.vatTotal),
           clientName: parsed.data.client.name,
+          paymentAccountIban:
+            parsed.data.payment.bankAccount?.iban
+              .replace(/\s+/gu, "")
+              .toUpperCase() ?? null,
+          paymentVariableSymbol: parsed.data.payment.variableSymbol ?? null,
           updatedAt: now,
         })
         .where(eq(invoices.id, options.id));

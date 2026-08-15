@@ -112,7 +112,11 @@ export default async function InvoicesPage({
     );
     tally[display].count += 1;
     const currency = row.currency || "CZK";
-    const amount = Number(row.total) || 0;
+    const total = Math.abs(Number(row.total) || 0);
+    const amount =
+      display === "unpaid" || display === "overdue" || display === "future"
+        ? Math.max(0, total - Number(row.paidAmount))
+        : total;
     tally[display].totalsByCurrency[currency] =
       (tally[display].totalsByCurrency[currency] ?? 0) + amount;
   }
@@ -130,6 +134,7 @@ export default async function InvoicesPage({
     clientName: row.clientName,
     total: String(row.total),
     currency: row.currency,
+    paymentState: row.paymentState,
     displayStatus: resolveDisplayStatus(
       {
         issuedAt: row.issuedAt,

@@ -31,6 +31,13 @@ erDiagram
   invoices ||--o{ email_messages : optional
   email_messages ||--o{ email_events : has
   workspaces ||--o{ email_suppressions : has
+  workspaces ||--o{ bank_connections : owns
+  bank_connections ||--o{ bank_accounts : exposes
+  bank_accounts ||--o{ bank_transactions : imports
+  bank_transactions ||--o{ payment_match_proposals : suggests
+  invoices ||--o{ payment_match_proposals : candidate
+  invoices ||--o{ invoice_payment_allocations : receives
+  bank_transactions ||--o{ invoice_payment_allocations : funds
 
   workspaces {
     text id PK
@@ -83,6 +90,10 @@ erDiagram
     timestamptz paid_at
     timestamptz cancelled_at
     numeric total
+    numeric paid_amount
+    text payment_state
+    text payment_account_iban
+    text payment_variable_symbol
     numeric subtotal
     numeric vat_total
     text client_name
@@ -154,23 +165,71 @@ erDiagram
     text email
     text reason
   }
+
+  bank_connections {
+    uuid id PK
+    text workspace_id FK
+    text provider
+    text secret_ciphertext
+    text status
+    timestamptz lease_until
+  }
+
+  bank_accounts {
+    uuid id PK
+    uuid connection_id FK
+    text iban
+    text currency
+  }
+
+  bank_transactions {
+    uuid id PK
+    uuid bank_account_id FK
+    text provider_transaction_id
+    numeric amount
+    text variable_symbol
+  }
+
+  payment_match_proposals {
+    uuid id PK
+    uuid bank_transaction_id FK
+    uuid invoice_id FK
+    text confidence
+    text status
+  }
+
+  invoice_payment_allocations {
+    uuid id PK
+    uuid invoice_id FK
+    uuid bank_transaction_id FK
+    numeric amount
+    text source
+    timestamptz reversed_at
+  }
 ```
 
 ## Tables
 
-| Table                      | Notes                                                                                                                                                                                                                                                          |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `workspaces`               | Seeded default UUID workspace                                                                                                                                                                                                                                  |
-| `issuer_businesses`        | Live issuer; snapshot is IssuerSnapshot JSON (ADR 0008); `email_settings` jsonb (Plan 11)                                                                                                                                                                      |
-| `issuer_numbering_schemes` | Per `(issuer, docType)`; `counter` / `reset_period` / `padding` (numbering.md)                                                                                                                                                                                 |
-| `clients`                  | Plan 4                                                                                                                                                                                                                                                         |
-| `invoices`                 | Drafts: `number` + `issued_at` null; unique `(issuer_id, number)`. Issued artifacts: `pdf_url`, `isdoc_url`, `pdf_generated_at`. Import provenance: `origin_*`, `import_completeness`, `import_batch_id`, `imported_at`, `external_key`, `artifacts_immutable` |
-| `invoice_items`            | Denormalized lines; canonical lines also in `payload_json`                                                                                                                                                                                                     |
-| `invoice_import_batches`   | Bulk import run counters / defaults                                                                                                                                                                                                                            |
-| `presets`                  | MCP/Slack `issuer` \| `invoice_template`; unique `(workspace_id, kind, name)`                                                                                                                                                                                  |
-| `email_messages`           | One row per send; Resend id + latest delivery status (Plan 11)                                                                                                                                                                                                 |
-| `email_events`             | Append-only webhook events; unique `provider_event_id`                                                                                                                                                                                                         |
-| `email_suppressions`       | Bounce/complaint suppressions for automated sends (Plan 11d)                                                                                                                                                                                                   |
+| Table                         | Notes                                                                                                                                                                                                                                                          |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `workspaces`                  | Seeded default UUID workspace                                                                                                                                                                                                                                  |
+| `issuer_businesses`           | Live issuer; snapshot is IssuerSnapshot JSON (ADR 0008); `email_settings` jsonb (Plan 11)                                                                                                                                                                      |
+| `issuer_numbering_schemes`    | Per `(issuer, docType)`; `counter` / `reset_period` / `padding` (numbering.md)                                                                                                                                                                                 |
+| `clients`                     | Plan 4                                                                                                                                                                                                                                                         |
+| `invoices`                    | Drafts: `number` + `issued_at` null; unique `(issuer_id, number)`. Issued artifacts: `pdf_url`, `isdoc_url`, `pdf_generated_at`. Import provenance: `origin_*`, `import_completeness`, `import_batch_id`, `imported_at`, `external_key`, `artifacts_immutable` |
+| `invoice_items`               | Denormalized lines; canonical lines also in `payload_json`                                                                                                                                                                                                     |
+| `invoice_import_batches`      | Bulk import run counters / defaults                                                                                                                                                                                                                            |
+| `presets`                     | MCP/Slack `issuer` \| `invoice_template`; unique `(workspace_id, kind, name)`                                                                                                                                                                                  |
+| `email_messages`              | One row per send; Resend id + latest delivery status (Plan 11)                                                                                                                                                                                                 |
+| `email_events`                | Append-only webhook events; unique `provider_event_id`                                                                                                                                                                                                         |
+| `email_suppressions`          | Bounce/complaint suppressions for automated sends (Plan 11d)                                                                                                                                                                                                   |
+| `bank_connections`            | Workspace-owned encrypted read-only provider credential, sync lease, health, and coverage (Plan 22)                                                                                                                                                            |
+| `bank_accounts`               | Verified provider account; a Fio IBAN belongs to one workspace in Plan 22                                                                                                                                                                                      |
+| `bank_account_issuers`        | Issuers whose immutable invoice payment identifiers may reconcile against an account                                                                                                                                                                           |
+| `bank_transactions`           | Normalized, idempotent provider movements; raw provider payloads are not retained                                                                                                                                                                              |
+| `payment_match_proposals`     | Versioned deterministic suggestions with reason and blocker codes; never settlement by themselves                                                                                                                                                              |
+| `invoice_payment_allocations` | Authoritative confirmed/manual money ledger. Active allocations derive `paid_amount`, `payment_state`, and compatibility `paid_at`                                                                                                                             |
+| `payment_audit_events`        | Append-only trail for connection, proposal, allocation, and reversal actions                                                                                                                                                                                   |
 
 ## Backend selection (presets)
 

@@ -216,6 +216,20 @@ export async function persistDraftInvoice(
     issuer: issuerSnapshot,
     client: clientSnapshot,
   };
+  const payment = (payloadJson as Record<string, unknown>).payment as
+    | {
+        variableSymbol?: unknown;
+        bankAccount?: { iban?: unknown };
+      }
+    | undefined;
+  const paymentAccountIban =
+    typeof payment?.bankAccount?.iban === "string"
+      ? payment.bankAccount.iban.replace(/\s+/gu, "").toUpperCase() || null
+      : null;
+  const paymentVariableSymbol =
+    typeof payment?.variableSymbol === "string"
+      ? payment.variableSymbol.replace(/\D/gu, "") || null
+      : null;
 
   const values = {
     workspaceId,
@@ -233,6 +247,8 @@ export async function persistDraftInvoice(
     subtotal: (invoice.totals.subtotal ?? invoice.totals.total).toFixed(2),
     vatTotal: (invoice.totals.vatTotal ?? 0).toFixed(2),
     currency: invoice.meta.currency,
+    paymentAccountIban,
+    paymentVariableSymbol,
     clientName: invoice.client.name,
     notes: invoice.notes ?? null,
     issuerSnapshot,

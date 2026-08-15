@@ -42,3 +42,4 @@ When a decision changes:
 | [0026](./0026-multi-currency-without-fx.md)                | Multi-currency invoices without FX                         | Accepted                          |
 | [0027](./0027-recurring-drafts-only.md)                    | Recurring schedules materialize drafts only                | Accepted                          |
 | [0028](./0028-per-invoice-language.md)                     | Per-invoice document language (`cs` \| `en`)               | Accepted                          |
+| [0029](./0029-payment-ledger-fio-first.md)                 | Provider-neutral payment ledger with Fio first             | Accepted                          |

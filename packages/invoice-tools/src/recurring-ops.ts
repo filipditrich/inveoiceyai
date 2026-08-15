@@ -83,6 +83,10 @@ function rowValuesFromInvoice(
     paidAt: null,
     cancelledAt: null,
     currency: invoice.meta.currency,
+    paymentAccountIban:
+      invoice.payment.bankAccount?.iban.replace(/\s+/gu, "").toUpperCase() ??
+      null,
+    paymentVariableSymbol: invoice.payment.variableSymbol ?? null,
     total: String(invoice.totals.total),
     subtotal: String(invoice.totals.subtotal),
     vatTotal: String(invoice.totals.vatTotal),

@@ -497,6 +497,7 @@
       "invoicesImport": "Import issued",
       "invoicesFromJson": "From JSON",
       "invoicesRecurring": "Recurring",
+      "payments": "Payments",
       "clients": "Clients",
       "issuers": "Issuers",
       "newInvoice": "New invoice",
@@ -550,6 +551,7 @@
         "usage": "Usage",
         "referrals": "Referrals",
         "apiKeys": "API Keys",
+        "bankConnections": "Bank connections",
         "integrations": "Integrations"
       },
       "navDescriptions": {
@@ -560,6 +562,7 @@
         "usage": "AI tokens, charts, and history",
         "referrals": "Invite friends to Invoicey",
         "apiKeys": "Access for automation",
+        "bankConnections": "Read-only payment feeds",
         "integrations": "Slack, MCP, and other tools"
       },
       "workspace": {

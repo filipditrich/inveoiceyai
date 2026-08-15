@@ -28,6 +28,8 @@ flowchart LR
     P16 --> P18["Plan 18<br/>platform admin<br/>done"]
     P16 --> P19["Plan 19<br/>invites + referrals<br/>done"]
     P16 --> P20["Plan 20<br/>multi-workspace UX<br/>done"]
+    P20 --> P21["Plan 21<br/>AI usage<br/>done"]
+    P21 --> P22["Plan 22<br/>payments + Fio<br/>pilot pending"]
     P12a -.feeds.-> P13b
     P13a -.upgrades to.-> P13b
 ```
@@ -539,12 +541,61 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 
 **Out of v1:** Payments / top-up, billing MCP client LLM tokens.
 
+### Plan 22 — Payment ledger and Fio bank integration
+
+**Status:** Implemented; real Fio pilot pending
+
+**Selected:** 2026-08-15
+
+**ADR:** [0029](./decisions/0029-payment-ledger-fio-first.md) · [spec](./specs/payment-ledger-fio.md) · [plan](../.cursor/plans/plan-22-payment-ledger-fio.md)
+
+**Goal:** Reconcile future invoice payments received into a Fio account through
+a provider-neutral, auditable ledger with deterministic suggestions and human
+confirmation.
+
+**22a — live contract probe:**
+
+- [x] Confirm pilot account scope/currency, linked issuer, and history start
+- [x] Resolve Filip Ditrich / IČO 09870113 in the workspace for
+      `filip.ditrich@gmx.us`; create only if absent
+- [x] Add minimal encrypted workspace connection and in-app token form
+- [ ] Validate the current Fio JSON contract with a real monitoring-only token
+- [ ] Capture only redacted field coverage and test fixtures
+
+**22b — ledger and matcher:**
+
+- [x] Provider-neutral transaction, proposal, allocation, and audit schema
+- [x] Existing `paid_at` migration and allocation-derived payment state
+- [x] Manual payments use the same allocation service
+- [x] Versioned deterministic matcher with partial, split, overpayment, and
+      reversal coverage
+
+**22c — Fio connection and sync:**
+
+- [x] Encrypted, rotatable, read-only token storage and account verification
+- [x] Explicit overlapping date-range sync with leases and idempotency
+- [x] Connection-date start, scheduled/manual sync, backoff, and degraded UX
+
+**22d — reconciliation and pilot:**
+
+- [x] Bank connection settings and payments review queue
+- [x] Confirm/reject/reverse workflows; rematch/split UI remains
+- [ ] Rematch and split-allocation UI
+- [x] Invoice timeline plus allocation-derived outstanding dashboard values
+- [ ] One controlled real-invoice pilot and repeated-sync idempotency validation
+
+**Out of Plan 22:** payment initiation, FX allocation, auto-confirmation,
+multibank provider, notification-email ingestion, and general expense
+categorization.
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:
 
 - Dual-label bilingual invoices (CS + EN on one PDF)
 - Custom PDF templates / template editor
-- Bank-statement reconciliation
+- Czech OSVČ lifecycle companion (start, obligations, insights, year-end close,
+  and guided portal filings) — see
+  [`research/osvc-companion.md`](./research/osvc-companion.md)
 - Tax-period reporting (kontrolní hlášení / DPH přiznání) — adjacent product
 - AI token top-up via payment

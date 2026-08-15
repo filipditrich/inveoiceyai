@@ -29,6 +29,7 @@ import {
   DataGridTableRowSelectAll,
 } from "@/components/reui/data-grid/data-grid-table";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -89,6 +90,7 @@ export type InvoiceListRow = {
   total: string;
   currency: string;
   displayStatus: InvoiceDisplayStatus;
+  paymentState: string;
   importCompleteness?: string | null;
   originProvider?: string | null;
 };
@@ -298,7 +300,13 @@ export function InvoiceListTable({
           <DataGridColumnHeader column={column} title={t("status")} />
         ),
         cell: ({ row }) => (
-          <InvoiceStatusBadge status={row.original.displayStatus} />
+          <div className="flex flex-wrap items-center gap-1">
+            <InvoiceStatusBadge status={row.original.displayStatus} />
+            {row.original.paymentState === "partial" ||
+            row.original.paymentState === "overpaid" ? (
+              <Badge variant="outline">{row.original.paymentState}</Badge>
+            ) : null}
+          </div>
         ),
         meta: { headerTitle: t("status") },
         size: 64,
@@ -566,7 +574,12 @@ function InvoiceMobileCard({ row }: { row: InvoiceListRow }) {
             {row.clientName}
           </p>
         </div>
-        <InvoiceStatusBadge status={row.displayStatus} />
+        <div className="flex flex-col items-end gap-1">
+          <InvoiceStatusBadge status={row.displayStatus} />
+          {row.paymentState === "partial" || row.paymentState === "overpaid" ? (
+            <Badge variant="outline">{row.paymentState}</Badge>
+          ) : null}
+        </div>
       </div>
       <dl className="grid grid-cols-2 gap-3 text-sm">
         <div>

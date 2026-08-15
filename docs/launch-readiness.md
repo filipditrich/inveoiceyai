@@ -22,13 +22,18 @@ them before the legal-page copy is finalized.
 
 ## Deployment order
 
-- [ ] Back up the target database and record pre-migration row counts.
-- [ ] Apply `packages/db/sql/2026-08-13-default-issuer.sql`.
-- [ ] Apply `packages/db/sql/2026-08-13-issued-artifact-hashes.sql`.
-- [ ] Run `bun run --cwd apps/web check:runtime-schema` against the target.
+- [x] Back up the target database and record pre-migration row counts.
+- [x] Apply `packages/db/sql/2026-08-13-default-issuer.sql`.
+- [x] Apply `packages/db/sql/2026-08-13-issued-artifact-hashes.sql`.
+- [x] Run `bun run --cwd apps/web check:runtime-schema` against the target.
 - [ ] Deploy the matching application commit only after the schema check passes.
 - [ ] Repeat the authenticated smoke walkthrough and verify issued artifact
       hashes after deployment.
+
+Completed against the configured Neon target on 2026-08-13. A custom-format
+pre-migration backup was retained outside the repository; all recorded business
+table row counts were unchanged after the idempotent migration run, and the
+runtime schema compatibility check passed.
 
 ## Production controls
 

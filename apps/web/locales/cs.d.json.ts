@@ -500,6 +500,7 @@ declare const messages: {
       invoicesImport: "Import vystavených";
       invoicesFromJson: "Z JSON";
       invoicesRecurring: "Opakované";
+      payments: "Platby";
       clients: "Klienti";
       issuers: "Dodavatelé";
       newInvoice: "Nová faktura";
@@ -553,6 +554,7 @@ declare const messages: {
         usage: "Využití";
         referrals: "Doporučení";
         apiKeys: "API klíče";
+        bankConnections: "Bankovní spojení";
         integrations: "Integrace";
       };
       navDescriptions: {
@@ -563,6 +565,7 @@ declare const messages: {
         usage: "AI tokeny, grafy a historie";
         referrals: "Pozvěte přátele do Invoicey";
         apiKeys: "Přístup pro automatizaci";
+        bankConnections: "Bankovní přehledy jen pro čtení";
         integrations: "Slack, MCP a další nástroje";
       };
       workspace: {

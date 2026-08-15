@@ -2,6 +2,7 @@ import {
   ensureClient,
   invoiceImportBatches,
   invoiceItems,
+  invoicePaymentAllocations,
   invoices,
   issuerBusinesses,
   issuerNumberingSchemes,
@@ -196,6 +197,8 @@ export async function insertIssuedImport(
   let payloadJson: Record<string, unknown>;
   let clientSnapshot: Record<string, unknown>;
   let items: Invoice["items"];
+  let paymentAccountIban: string | null = null;
+  let paymentVariableSymbol: string | null = null;
 
   if (input.completeness === "full") {
     const parsed = InvoiceSchema.safeParse(input.invoice);
@@ -217,6 +220,10 @@ export async function insertIssuedImport(
     payloadJson = invoice as unknown as Record<string, unknown>;
     clientSnapshot = invoice.client as unknown as Record<string, unknown>;
     items = invoice.items;
+    paymentAccountIban =
+      invoice.payment.bankAccount?.iban.replace(/\s+/gu, "").toUpperCase() ??
+      null;
+    paymentVariableSymbol = invoice.payment.variableSymbol ?? null;
   } else {
     const parsed = ArchiveInvoicePayloadSchema.safeParse(input.archive);
     if (!parsed.success) {
@@ -292,6 +299,10 @@ export async function insertIssuedImport(
     duzp,
     issuedAt,
     paidAt: input.paidAt ?? null,
+    paidAmount: input.paidAt ? String(Math.abs(Number(total))) : "0.00",
+    paymentState: input.paidAt ? "paid" : "unpaid",
+    paymentAccountIban,
+    paymentVariableSymbol,
     cancelledAt: null,
     currency,
     total,
@@ -318,6 +329,22 @@ export async function insertIssuedImport(
   });
 
   await replaceItems(database, invoiceId, items);
+  if (input.paidAt && Math.abs(Number(total)) > 0) {
+    const effectiveDate = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Prague",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(input.paidAt);
+    await database.insert(invoicePaymentAllocations).values({
+      workspaceId: input.workspaceId,
+      invoiceId,
+      source: "legacy_manual",
+      amount: String(Math.abs(Number(total))),
+      currency,
+      effectiveDate,
+    });
+  }
 
   return { ok: true, invoiceId, created: true };
 }

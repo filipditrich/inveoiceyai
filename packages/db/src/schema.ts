@@ -215,6 +215,15 @@ export const invoices = pgTable(
     cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
     currency: text("currency").notNull().default("CZK"),
     total: numeric("total", { precision: 14, scale: 2 }).notNull(),
+    /** Denormalized allocation projection; the ledger remains authoritative. */
+    paidAmount: numeric("paid_amount", { precision: 14, scale: 2 })
+      .notNull()
+      .default("0"),
+    /** unpaid | partial | paid | overpaid */
+    paymentState: text("payment_state").notNull().default("unpaid"),
+    /** Immutable payment identifiers copied from the invoice payload. */
+    paymentAccountIban: text("payment_account_iban"),
+    paymentVariableSymbol: text("payment_variable_symbol"),
     subtotal: numeric("subtotal", { precision: 14, scale: 2 }).notNull(),
     vatTotal: numeric("vat_total", { precision: 14, scale: 2 }).notNull(),
     clientName: text("client_name").notNull(),
@@ -332,6 +341,315 @@ export const invoiceItems = pgTable(
     lineTotal: numeric("line_total", { precision: 14, scale: 2 }).notNull(),
   },
   (t) => [index("invoice_items_invoice_idx").on(t.invoiceId)],
+);
+
+/** Workspace-owned, encrypted read-only bank integration. */
+export const bankConnections = pgTable(
+  "bank_connections",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull(),
+    status: text("status").notNull().default("active"),
+    accessMode: text("access_mode").notNull().default("read"),
+    secretCiphertext: text("secret_ciphertext").notNull(),
+    secretFingerprint: text("secret_fingerprint").notNull(),
+    keyVersion: integer("key_version").notNull(),
+    createdByUserId: text("created_by_user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    lastRotatedByUserId: text("last_rotated_by_user_id").references(
+      () => user.id,
+      { onDelete: "set null" },
+    ),
+    tokenExpiresAt: timestamp("token_expires_at", { withTimezone: true }),
+    syncCoverageThrough: text("sync_coverage_through"),
+    lastRequestAt: timestamp("last_request_at", { withTimezone: true }),
+    leaseUntil: timestamp("lease_until", { withTimezone: true }),
+    lastSyncStartedAt: timestamp("last_sync_started_at", {
+      withTimezone: true,
+    }),
+    lastSyncSucceededAt: timestamp("last_sync_succeeded_at", {
+      withTimezone: true,
+    }),
+    lastSyncErrorCode: text("last_sync_error_code"),
+    nextSyncAt: timestamp("next_sync_at", { withTimezone: true }),
+    consecutiveFailureCount: integer("consecutive_failure_count")
+      .notNull()
+      .default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("bank_connections_workspace_idx").on(t.workspaceId, t.createdAt),
+    index("bank_connections_sync_idx").on(t.status, t.nextSyncAt),
+    uniqueIndex("bank_connections_workspace_secret_uidx").on(
+      t.workspaceId,
+      t.provider,
+      t.secretFingerprint,
+    ),
+  ],
+);
+
+/** Bank account discovered through a connection. */
+export const bankAccounts = pgTable(
+  "bank_accounts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    connectionId: uuid("connection_id")
+      .notNull()
+      .references(() => bankConnections.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull(),
+    providerAccountId: text("provider_account_id").notNull(),
+    accountNumber: text("account_number").notNull(),
+    bankCode: text("bank_code").notNull(),
+    iban: text("iban").notNull(),
+    bic: text("bic"),
+    currency: text("currency").notNull(),
+    displayName: text("display_name"),
+    importScope: text("import_scope").notNull().default("incoming"),
+    balance: numeric("balance", { precision: 18, scale: 2 }),
+    balanceAvailable: numeric("balance_available", {
+      precision: 18,
+      scale: 2,
+    }),
+    balanceUpdatedAt: timestamp("balance_updated_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("bank_accounts_provider_iban_uidx").on(t.provider, t.iban),
+    uniqueIndex("bank_accounts_connection_provider_id_uidx").on(
+      t.connectionId,
+      t.providerAccountId,
+    ),
+    index("bank_accounts_workspace_idx").on(t.workspaceId),
+  ],
+);
+
+/** Issuers whose invoices may be reconciled against a bank account. */
+export const bankAccountIssuers = pgTable(
+  "bank_account_issuers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    bankAccountId: uuid("bank_account_id")
+      .notNull()
+      .references(() => bankAccounts.id, { onDelete: "cascade" }),
+    issuerId: uuid("issuer_id")
+      .notNull()
+      .references(() => issuerBusinesses.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("bank_account_issuers_account_issuer_uidx").on(
+      t.bankAccountId,
+      t.issuerId,
+    ),
+    index("bank_account_issuers_workspace_idx").on(t.workspaceId),
+  ],
+);
+
+/** Provider-normalized bank statement row. Provider payloads are not retained. */
+export const bankTransactions = pgTable(
+  "bank_transactions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    bankAccountId: uuid("bank_account_id")
+      .notNull()
+      .references(() => bankAccounts.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull(),
+    providerTransactionId: text("provider_transaction_id").notNull(),
+    bookedDate: text("booked_date").notNull(),
+    valueDate: text("value_date"),
+    amount: numeric("amount", { precision: 18, scale: 2 }).notNull(),
+    currency: text("currency").notNull(),
+    direction: text("direction").notNull(),
+    counterpartyAccount: text("counterparty_account"),
+    counterpartyBankCode: text("counterparty_bank_code"),
+    counterpartyIban: text("counterparty_iban"),
+    counterpartyName: text("counterparty_name"),
+    variableSymbol: text("variable_symbol"),
+    constantSymbol: text("constant_symbol"),
+    specificSymbol: text("specific_symbol"),
+    message: text("message"),
+    transactionType: text("transaction_type"),
+    providerReference: text("provider_reference"),
+    payloadHash: text("payload_hash").notNull(),
+    possibleReversalOfId: uuid("possible_reversal_of_id"),
+    importedAt: timestamp("imported_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("bank_transactions_account_provider_id_uidx").on(
+      t.bankAccountId,
+      t.providerTransactionId,
+    ),
+    index("bank_transactions_workspace_booked_idx").on(
+      t.workspaceId,
+      t.bookedDate,
+    ),
+    index("bank_transactions_match_idx").on(
+      t.bankAccountId,
+      t.variableSymbol,
+      t.amount,
+    ),
+  ],
+);
+
+/** Explainable, versioned suggestion; it never mutates invoice state by itself. */
+export const paymentMatchProposals = pgTable(
+  "payment_match_proposals",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    bankTransactionId: uuid("bank_transaction_id")
+      .notNull()
+      .references(() => bankTransactions.id, { onDelete: "cascade" }),
+    invoiceId: uuid("invoice_id")
+      .notNull()
+      .references(() => invoices.id, { onDelete: "cascade" }),
+    proposedAmount: numeric("proposed_amount", {
+      precision: 18,
+      scale: 2,
+    }).notNull(),
+    score: integer("score").notNull(),
+    confidence: text("confidence").notNull(),
+    reasonCodes: jsonb("reason_codes").$type<string[]>().notNull(),
+    blockerCodes: jsonb("blocker_codes").$type<string[]>().notNull(),
+    matcherVersion: text("matcher_version").notNull(),
+    status: text("status").notNull().default("pending"),
+    reviewedByUserId: text("reviewed_by_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("payment_match_proposals_version_uidx").on(
+      t.bankTransactionId,
+      t.invoiceId,
+      t.matcherVersion,
+    ),
+    index("payment_match_proposals_workspace_status_idx").on(
+      t.workspaceId,
+      t.status,
+    ),
+  ],
+);
+
+/** Authoritative, append-oriented money allocation ledger. */
+export const invoicePaymentAllocations = pgTable(
+  "invoice_payment_allocations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    invoiceId: uuid("invoice_id")
+      .notNull()
+      .references(() => invoices.id, { onDelete: "cascade" }),
+    bankTransactionId: uuid("bank_transaction_id").references(
+      () => bankTransactions.id,
+      { onDelete: "restrict" },
+    ),
+    proposalId: uuid("proposal_id").references(() => paymentMatchProposals.id, {
+      onDelete: "set null",
+    }),
+    source: text("source").notNull(),
+    amount: numeric("amount", { precision: 18, scale: 2 }).notNull(),
+    currency: text("currency").notNull(),
+    effectiveDate: text("effective_date").notNull(),
+    confirmedByUserId: text("confirmed_by_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    reversedAt: timestamp("reversed_at", { withTimezone: true }),
+    reversedByUserId: text("reversed_by_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    reversalReason: text("reversal_reason"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("invoice_payment_allocations_invoice_idx").on(
+      t.workspaceId,
+      t.invoiceId,
+    ),
+    index("invoice_payment_allocations_transaction_idx").on(
+      t.bankTransactionId,
+    ),
+    uniqueIndex("invoice_payment_allocations_transaction_invoice_uidx")
+      .on(t.bankTransactionId, t.invoiceId)
+      .where(sql`${t.reversedAt} IS NULL`),
+    uniqueIndex("invoice_payment_allocations_legacy_invoice_uidx")
+      .on(t.invoiceId)
+      .where(sql`${t.source} = 'legacy_manual' AND ${t.reversedAt} IS NULL`),
+  ],
+);
+
+/** Append-only human/system trail for sensitive reconciliation operations. */
+export const paymentAuditEvents = pgTable(
+  "payment_audit_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    action: text("action").notNull(),
+    actorType: text("actor_type").notNull(),
+    actorUserId: text("actor_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    entityType: text("entity_type").notNull(),
+    entityId: text("entity_id").notNull(),
+    payloadJson: jsonb("payload_json")
+      .$type<Record<string, unknown>>()
+      .default({})
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("payment_audit_events_workspace_created_idx").on(
+      t.workspaceId,
+      t.createdAt,
+    ),
+    index("payment_audit_events_entity_idx").on(t.entityType, t.entityId),
+  ],
 );
 
 /**

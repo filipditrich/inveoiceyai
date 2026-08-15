@@ -602,11 +602,12 @@ export async function bulkIssueInvoice(formData: FormData): Promise<void> {
 }
 
 export async function markInvoicePaid(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
   }
-  const result = await markInvoicePaidById({ id });
+  const result = await markInvoicePaidById({ id, workspaceId });
   if (!result.ok) {
     redirect(`/invoices?invalid=${encodeURIComponent("cannot_mark_paid")}`);
   }
@@ -617,11 +618,12 @@ export async function markInvoicePaid(formData: FormData): Promise<void> {
 }
 
 export async function unmarkInvoicePaid(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
   }
-  const result = await unmarkInvoicePaidById({ id });
+  const result = await unmarkInvoicePaidById({ id, workspaceId });
   if (!result.ok) {
     redirect(`/invoices?invalid=${encodeURIComponent("cannot_unmark_paid")}`);
   }
@@ -654,19 +656,21 @@ function bulkRedirect(
 }
 
 export async function bulkMarkInvoicePaid(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
   const ids = collectIds(formData);
   if (ids.length === 0) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
   }
-  bulkRedirect(await bulkMarkInvoicesPaid({ ids }), "paid");
+  bulkRedirect(await bulkMarkInvoicesPaid({ ids, workspaceId }), "paid");
 }
 
 export async function bulkUnmarkInvoicePaid(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireWorkspace();
   const ids = collectIds(formData);
   if (ids.length === 0) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
   }
-  bulkRedirect(await bulkUnmarkInvoicesPaid({ ids }), "unpaid");
+  bulkRedirect(await bulkUnmarkInvoicesPaid({ ids, workspaceId }), "unpaid");
 }
 
 export async function bulkCancelInvoice(formData: FormData): Promise<void> {

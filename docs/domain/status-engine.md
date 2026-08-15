@@ -2,17 +2,17 @@
 
 How Invoicey decides whether an invoice is `draft`, `issued`, `paid`, `overdue`, or `cancelled`.
 
-The core principle: **status is derived, not stored** (per [ADR 0014](../decisions/0014-status-derived-not-stored.md)). Only the *facts* (issuance, payment, cancellation) are persisted. The state name is computed from those facts at read time.
+The core principle: **status is derived, not stored** (per [ADR 0014](../decisions/0014-status-derived-not-stored.md)). Issuance and cancellation are invoice facts; payment is authoritative in active `invoice_payment_allocations`. `paid_amount`, `payment_state`, and `paid_at` are transactionally maintained projections.
 
 ## States
 
-| State | Czech | Description |
-| --- | --- | --- |
-| `draft` | rozpracováno | The invoice has been saved but not finalized. No number assigned. Editable. |
-| `issued` | vystaveno | Finalized — number assigned, snapshots frozen, due in the future, not yet paid. Read-only. |
-| `overdue` | po splatnosti | Issued, due date has passed, still unpaid. |
-| `paid` | uhrazeno | Payment received and recorded. |
-| `cancelled` | stornováno | Issued and then explicitly cancelled by the issuer. Number stays consumed. |
+| State       | Czech         | Description                                                                                |
+| ----------- | ------------- | ------------------------------------------------------------------------------------------ |
+| `draft`     | rozpracováno  | The invoice has been saved but not finalized. No number assigned. Editable.                |
+| `issued`    | vystaveno     | Finalized — number assigned, snapshots frozen, due in the future, not yet paid. Read-only. |
+| `overdue`   | po splatnosti | Issued, due date has passed, still unpaid.                                                 |
+| `paid`      | uhrazeno      | Payment received and recorded.                                                             |
+| `cancelled` | stornováno    | Issued and then explicitly cancelled by the issuer. Number stays consumed.                 |
 
 ## Persisted facts
 
@@ -20,10 +20,12 @@ Only these fields drive status. They live on the `invoices` row:
 
 ```ts
 interface InvoiceFacts {
-	issuedAt: Date | null;       // null = draft
-	dueDate: Date;               // always present (default = issuedAt + payment terms)
-	paidAt: Date | null;         // null = unpaid
-	cancelledAt: Date | null;    // null = not cancelled
+  issuedAt: Date | null; // null = draft
+  dueDate: Date; // always present (default = issuedAt + payment terms)
+  paidAt: Date | null; // compatibility projection: null until fully paid
+  paidAmount: Decimal; // sum of active allocations
+  paymentState: "unpaid" | "partial" | "paid" | "overpaid";
+  cancelledAt: Date | null; // null = not cancelled
 }
 ```
 
@@ -34,17 +36,17 @@ The number (`meta.number`) is also assigned at issue time — but the status log
 Implemented in `packages/invoice-core/src/status.ts` (Plan 2). Pure, takes facts + a "now" timestamp:
 
 ```ts
-type InvoiceStatus = 'draft' | 'issued' | 'overdue' | 'paid' | 'cancelled';
+type InvoiceStatus = "draft" | "issued" | "overdue" | "paid" | "cancelled";
 
 function deriveStatus(facts: InvoiceFacts, now: Date): InvoiceStatus {
-	if (facts.cancelledAt !== null) return 'cancelled';
-	if (facts.issuedAt === null) return 'draft';
-	if (facts.paidAt !== null) return 'paid';
+  if (facts.cancelledAt !== null) return "cancelled";
+  if (facts.issuedAt === null) return "draft";
+  if (facts.paidAt !== null) return "paid";
 
-	// issued, not paid, not cancelled → check due date
-	const dueEndOfDay = endOfDayUTC(facts.dueDate);
-	if (now > dueEndOfDay) return 'overdue';
-	return 'issued';
+  // issued, not paid, not cancelled → check due date
+  const dueEndOfDay = endOfDayUTC(facts.dueDate);
+  if (now > dueEndOfDay) return "overdue";
+  return "issued";
 }
 ```
 
@@ -75,20 +77,20 @@ stateDiagram-v2
     end note
 ```
 
-Note: `paid → unpaid/overdue/future` is via the separate `unmarkPaid` verb (clears `paidAt`; no grace window).
+Note: reversing an allocation recomputes the projections. The compatibility `unmarkPaid` verb reverses all active allocations instead of deleting history.
 
 ## Allowed transitions per UI action
 
-| Action | Pre-state(s) | Post-state | What changes |
-| --- | --- | --- | --- |
-| `saveDraft` | (none, new) / `draft` | `draft` | persists payload |
-| `issueInvoice` | `draft` | `issued` | sets `issuedAt`, allocates number, freezes snapshots |
-| `markPaid(date?)` | `issued`, `overdue` | `paid` | sets `paidAt` |
-| `unmarkPaid` | `paid` | `issued` or `overdue` (re-derived) | clears `paidAt` |
-| `cancelInvoice` | `issued`, `overdue` | `cancelled` | sets `cancelledAt` |
-| `deleteDraft` | `draft` | (deleted) | removes row entirely |
-| `editInvoice` | `draft` only | `draft` | updates payload, does not touch facts |
-| `duplicateInvoice` | any | new `draft` | copies payload, drops snapshots/facts |
+| Action             | Pre-state(s)          | Post-state                         | What changes                                           |
+| ------------------ | --------------------- | ---------------------------------- | ------------------------------------------------------ |
+| `saveDraft`        | (none, new) / `draft` | `draft`                            | persists payload                                       |
+| `issueInvoice`     | `draft`               | `issued`                           | sets `issuedAt`, allocates number, freezes snapshots   |
+| `markPaid(date?)`  | `issued`, `overdue`   | `paid`                             | creates a manual allocation for the outstanding amount |
+| `unmarkPaid`       | `paid`                | `issued` or `overdue` (re-derived) | reverses active allocations and recomputes `paidAt`    |
+| `cancelInvoice`    | `issued`, `overdue`   | `cancelled`                        | sets `cancelledAt`                                     |
+| `deleteDraft`      | `draft`               | (deleted)                          | removes row entirely                                   |
+| `editInvoice`      | `draft` only          | `draft`                            | updates payload, does not touch facts                  |
+| `duplicateInvoice` | any                   | new `draft`                        | copies payload, drops snapshots/facts                  |
 
 `issued` and `overdue` are not separate persisted states; they're derivations of the same persisted fact set. So "Mark paid" works identically against `issued` and `overdue`.
 
@@ -125,12 +127,12 @@ When you cancel, do we automatically open a fresh `duplicateInvoice` so the user
 
 ## Overdue: timezone & "due date" semantics
 
-The due date is stored as a calendar date (not a timestamp). An invoice with `dueDate = 2026-05-17` becomes overdue at the *end* of that day in **Europe/Prague** time:
+The due date is stored as a calendar date (not a timestamp). An invoice with `dueDate = 2026-05-17` becomes overdue at the _end_ of that day in **Europe/Prague** time:
 
 ```ts
 function endOfDayUTC(d: Date): Date {
-	// Treat d as a Europe/Prague calendar date; return its UTC end (next-day 00:00 Prague - 1ms)
-	// (uses date-fns-tz or equivalent — final lib pick during Plan 2)
+  // Treat d as a Europe/Prague calendar date; return its UTC end (next-day 00:00 Prague - 1ms)
+  // (uses date-fns-tz or equivalent — final lib pick during Plan 2)
 }
 ```
 
@@ -140,14 +142,14 @@ This avoids "your invoice became overdue at 2:00 a.m. while you slept" on shaky 
 
 Domain `deriveStatus` stays as above. The web UI and MCP summaries also expose a **display** bucket via `resolveDisplayStatus` in `@invoicey/invoice-core/status-display`:
 
-| Display | Czech | Rule |
-| --- | --- | --- |
-| `draft` | Návrh | `issuedAt == null` |
-| `paid` | Zaplaceno | `paidAt != null` |
-| `future` | Budoucí | unpaid ∧ `issueDate > today` (Prague calendar) |
-| `overdue` | Po splatnosti | unpaid ∧ `issueDate <= today` ∧ `dueDate < today` |
-| `unpaid` | Nezaplaceno | unpaid ∧ `issueDate <= today` ∧ `dueDate >= today` |
-| `cancelled` | Stornováno | `cancelledAt != null` |
+| Display     | Czech         | Rule                                               |
+| ----------- | ------------- | -------------------------------------------------- |
+| `draft`     | Návrh         | `issuedAt == null`                                 |
+| `paid`      | Zaplaceno     | `paidAt != null`                                   |
+| `future`    | Budoucí       | unpaid ∧ `issueDate > today` (Prague calendar)     |
+| `overdue`   | Po splatnosti | unpaid ∧ `issueDate <= today` ∧ `dueDate < today`  |
+| `unpaid`    | Nezaplaceno   | unpaid ∧ `issueDate <= today` ∧ `dueDate >= today` |
+| `cancelled` | Stornováno    | `cancelledAt != null`                              |
 
 Priority: cancelled → draft → paid → **future** → overdue → unpaid. Domain still returns `issued` for both `future` and `unpaid`. List/dashboard filters use `displayStatusWhere`; URL keys are display names (`unpaid`, not `issued`). Legacy `?status=issued` maps to `unpaid`.
 
@@ -157,7 +159,7 @@ The former dashboard-only “upcoming ≤ 14 days” overlay was removed in favo
 
 If status were a stored column:
 
-- Every dawn, *every* invoice would need a job to check "did this become overdue overnight?"
+- Every dawn, _every_ invoice would need a job to check "did this become overdue overnight?"
 - A clock-skew bug between the cron and the request handler would create inconsistencies users could see
 - Queries that filter by status would still need to recompute it for correctness
 
@@ -204,9 +206,12 @@ Tuned during Plan 7 if real query plans demand more.
 
 ## Open status questions
 
-### TODO(plan-7): partial payments
+### Allocation-derived payment state (Plan 22)
 
-Czech practice allows partial payment (the client pays half, you mark the partial amount, the rest stays outstanding). Not modeled in MVP — `paidAt` is binary. Plan 7 reconsiders if the dashboard "outstanding" total feels misleading without it.
+Czech practice allows partial payment (the client pays half and the rest stays outstanding). Plan 22 replaces the binary source with confirmed payment allocations and adds
+`unpaid`, `partial`, `paid`, and `overpaid` payment state while maintaining
+`paidAt` as a compatibility projection. The combined presentation is specified in
+[`payment-ledger-fio.md`](../specs/payment-ledger-fio.md).
 
 ### TODO(plan-9): grace period for "due"
 
@@ -214,4 +219,4 @@ Some businesses give a grace period (e.g. 3 days after `dueDate`) before somethi
 
 ### Unmark paid
 
-`unmarkPaid` clears `paidAt` with **no grace window** (solo demo). Implemented in `@invoicey/invoice-tools/ops` (`unmarkInvoicePaidById`) and web actions (single + bulk). Not exposed on MCP/Eve in this pass.
+`unmarkPaid` reverses active allocations with **no grace window**. Implemented in `@invoicey/invoice-tools/ops` (`unmarkInvoicePaidById`) and web actions (single + bulk). Not exposed on MCP/Eve in this pass.

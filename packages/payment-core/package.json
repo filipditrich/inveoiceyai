@@ -1,0 +1,25 @@
+{
+  "name": "@invoicey/payment-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fio": "./src/fio.ts",
+    "./matcher": "./src/matcher.ts",
+    "./money": "./src/money.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@invoicey/eslint-config": "workspace:*",
+    "@types/node": "25.6.0",
+    "eslint": "^9",
+    "typescript": "6.0.3",
+    "vitest": "^3.2.4"
+  }
+}

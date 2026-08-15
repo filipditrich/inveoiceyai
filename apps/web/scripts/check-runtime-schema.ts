@@ -6,7 +6,23 @@ import { sql } from "drizzle-orm";
 
 const required = new Map([
   ["issuer_businesses", new Set(["is_default"])],
-  ["invoices", new Set(["pdf_sha256", "isdoc_sha256"])],
+  [
+    "invoices",
+    new Set([
+      "pdf_sha256",
+      "isdoc_sha256",
+      "paid_amount",
+      "payment_state",
+      "payment_account_iban",
+      "payment_variable_symbol",
+    ]),
+  ],
+  ["bank_connections", new Set(["secret_ciphertext", "lease_until"])],
+  ["bank_accounts", new Set(["iban", "currency"])],
+  ["bank_transactions", new Set(["provider_transaction_id", "amount"])],
+  ["payment_match_proposals", new Set(["matcher_version", "status"])],
+  ["invoice_payment_allocations", new Set(["amount", "reversed_at"])],
+  ["payment_audit_events", new Set(["action", "payload_json"])],
 ]);
 
 const result = await db.execute<{
@@ -16,7 +32,16 @@ const result = await db.execute<{
   select table_name, column_name
   from information_schema.columns
   where table_schema = 'public'
-    and table_name in ('issuer_businesses', 'invoices')
+    and table_name in (
+      'issuer_businesses',
+      'invoices',
+      'bank_connections',
+      'bank_accounts',
+      'bank_transactions',
+      'payment_match_proposals',
+      'invoice_payment_allocations',
+      'payment_audit_events'
+    )
 `);
 
 for (const row of result.rows) {

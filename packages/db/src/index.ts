@@ -36,6 +36,16 @@ export {
   type PersistDraftInvoiceResult,
 } from "./invoices-repo";
 export {
+  confirmPaymentMatchProposal,
+  createManualPaymentAllocation,
+  listInvoicePaymentAllocations,
+  rejectPaymentMatchProposal,
+  reverseAllInvoicePaymentAllocations,
+  reversePaymentAllocation,
+  type AllocationMutationResult,
+  type PaymentState,
+} from "./payments-repo";
+export {
   SLACK_LINK_CODE_TTL_MS,
   consumeSlackLinkCode,
   createOrReuseSlackLinkCode,

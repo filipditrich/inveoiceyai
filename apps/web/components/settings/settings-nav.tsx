@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   ActivityIcon,
+  LandmarkIcon,
   Building2Icon,
   GiftIcon,
   KeyRoundIcon,
@@ -59,6 +60,12 @@ const LINKS = [
     key: "apiKeys" as const,
     exact: false,
     icon: KeyRoundIcon,
+  },
+  {
+    href: "/settings/bank-connections",
+    key: "bankConnections" as const,
+    exact: false,
+    icon: LandmarkIcon,
   },
   {
     href: "/settings/integrations",

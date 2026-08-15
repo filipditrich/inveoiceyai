@@ -49,5 +49,6 @@ two steps (add nullable + backfill, then tighten), as
 | `2026-08-12-plan10-recurring.sql`         | Plan 10 templates + recurring schedules      |
 | `2026-08-13-default-issuer.sql`           | `issuer_businesses.is_default`               |
 | `2026-08-13-issued-artifact-hashes.sql`   | Immutable issued artifact SHA-256 metadata   |
+| `2026-08-15-plan22-payments-fio.sql`      | Payment ledger + Fio read-only integration   |
 
 Apply Plan 19 before deploying referral routes (`/r/*`, `/settings/referrals`, admin users list).

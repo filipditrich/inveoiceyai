@@ -6,26 +6,37 @@ If a doc disagrees with the code, the doc is right and the code is a bug — or 
 
 ## Layout
 
-| Path | Purpose | Lifecycle |
-| --- | --- | --- |
-| [`PRD.md`](./PRD.md) | Product requirements — use cases, MVP scope, non-goals, success criteria | Living |
-| [`roadmap.md`](./roadmap.md) | Plan 0..N with goal + exit criteria for each | Living |
-| [`architecture.md`](./architecture.md) | Stack, monorepo layout, dataflow, runtime boundaries, env vars | Living |
-| [`glossary.md`](./glossary.md) | Czech tax/invoicing terms with English equivalents | Living |
-| [`domain/`](./domain) | Domain contracts (invoice schema, VAT rules, numbering, status, snapshots) | Living |
-| [`decisions/`](./decisions) | ADRs in Michael Nygard format, numbered, append-only | Append-only |
-| [`specs/`](./specs) | Per-feature implementation specs (PDF, ARES, MCP, Slack, …) | Just-in-time, written before each plan |
-| [`ui/`](./ui) | UI/UX specs — information architecture, flows, page intents | Just-in-time, written before each plan |
+| Path                                   | Purpose                                                                    | Lifecycle                              |
+| -------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------- |
+| [`PRD.md`](./PRD.md)                   | Product requirements — use cases, MVP scope, non-goals, success criteria   | Living                                 |
+| [`roadmap.md`](./roadmap.md)           | Plan 0..N with goal + exit criteria for each                               | Living                                 |
+| [`architecture.md`](./architecture.md) | Stack, monorepo layout, dataflow, runtime boundaries, env vars             | Living                                 |
+| [`glossary.md`](./glossary.md)         | Czech tax/invoicing terms with English equivalents                         | Living                                 |
+| [`domain/`](./domain)                  | Domain contracts (invoice schema, VAT rules, numbering, status, snapshots) | Living                                 |
+| [`decisions/`](./decisions)            | ADRs in Michael Nygard format, numbered, append-only                       | Append-only                            |
+| [`specs/`](./specs)                    | Per-feature implementation specs (PDF, ARES, MCP, Slack, …)                | Just-in-time, written before each plan |
+| [`ui/`](./ui)                          | UI/UX specs — information architecture, flows, page intents                | Just-in-time, written before each plan |
+| [`research/`](./research)              | Evidence, options, and direction selection                                 | Exploratory → promoted                 |
 
 ## Lifecycle conventions
 
-- **Living docs** (PRD, roadmap, architecture, domain, glossary) — edit any time. Commit message body should explain *why* it changed, not just *what*.
+- **Living docs** (PRD, roadmap, architecture, domain, glossary) — edit any time. Commit message body should explain _why_ it changed, not just _what_.
 - **ADRs** — append-only. If a decision changes:
   1. Write a new ADR with the next number (e.g. `0018-…`)
   2. Set the new ADR's `Status` to `Accepted (supersedes 0004)`
   3. Edit the old ADR's `Status` to `Superseded by 0018`
   4. Never rewrite the body of a superseded ADR
 - **Specs and UI docs** — written just-in-time before the plan that consumes them. If a feature is dropped, archive its spec under `specs/_archived/` with a one-line explanation at the top.
+- **Research docs** — preserve useful evidence and alternatives without creating
+  roadmap commitment. Promote selected research into a spec, plan, and ADRs
+  before implementation.
+
+## Current product research
+
+- [Payment ledger and bank integration](./research/payment-ledger-bank-integration.md)
+  — selected for the provider-neutral Plan 22 with Fio first.
+- [Czech OSVČ companion](./research/osvc-companion.md) — exploratory and not
+  scheduled.
 
 ## Conventions
 
@@ -57,6 +68,7 @@ Each plan in `.cursor/plans/` cites the docs it implements. Each ADR cites the p
 6. [`specs/mcp.md`](./specs/mcp.md) — AI create path (local Cursor)
 7. [`roadmap.md`](./roadmap.md) — what ships when
 8. [`decisions/`](./decisions) — why each foundational call was made
+9. [`research/`](./research) — possible future directions and unresolved options
 
 ## Status
 

@@ -24,6 +24,13 @@ const tables = [
   "invoice_templates",
   "recurring_schedules",
   "presets",
+  "bank_connections",
+  "bank_accounts",
+  "bank_account_issuers",
+  "bank_transactions",
+  "payment_match_proposals",
+  "invoice_payment_allocations",
+  "payment_audit_events",
 ];
 
 for (const table of tables) {

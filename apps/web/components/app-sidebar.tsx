@@ -27,6 +27,7 @@ import {
   FileTextIcon,
   ListIcon,
   LayoutDashboardIcon,
+  LandmarkIcon,
   PlugZapIcon,
   PlusIcon,
   RepeatIcon,
@@ -124,6 +125,12 @@ export function AppSidebar({
           isActive: pathname === "/invoices/from-json",
         },
       ],
+    },
+    {
+      title: t("nav.payments"),
+      url: "/payments",
+      icon: <LandmarkIcon />,
+      isActive: pathname === "/payments" || pathname.startsWith("/payments/"),
     },
     {
       title: t("nav.clients"),

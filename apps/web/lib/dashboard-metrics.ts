@@ -3,9 +3,13 @@ import {
   resolveDisplayStatus,
   type InvoiceDisplayStatus,
 } from "@invoicey/invoice-core/status-display";
-import { issuerBusinesses, invoices } from "@invoicey/db";
+import {
+  invoicePaymentAllocations,
+  issuerBusinesses,
+  invoices,
+} from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { and, desc, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 
 export type StatusBucket = {
   status: InvoiceDisplayStatus;
@@ -78,10 +82,32 @@ export async function loadDashboardMetrics(
     base.push(eq(invoices.issuerId, opts.issuerId));
   }
 
-  const rows = await db
-    .select()
-    .from(invoices)
-    .where(and(...base));
+  const [rows, allocationRows, issuerRows] = await Promise.all([
+    db
+      .select()
+      .from(invoices)
+      .where(and(...base)),
+    db
+      .select({
+        amount: invoicePaymentAllocations.amount,
+        currency: invoicePaymentAllocations.currency,
+        effectiveDate: invoicePaymentAllocations.effectiveDate,
+        issuerId: invoices.issuerId,
+      })
+      .from(invoicePaymentAllocations)
+      .innerJoin(invoices, eq(invoices.id, invoicePaymentAllocations.invoiceId))
+      .where(
+        and(
+          eq(invoicePaymentAllocations.workspaceId, workspaceId),
+          isNull(invoicePaymentAllocations.reversedAt),
+          ...(opts?.issuerId ? [eq(invoices.issuerId, opts.issuerId)] : []),
+        ),
+      ),
+    db
+      .select({ id: issuerBusinesses.id })
+      .from(issuerBusinesses)
+      .where(eq(issuerBusinesses.workspaceId, workspaceId)),
+  ]);
 
   const now = new Date();
   const tally: Record<
@@ -107,7 +133,11 @@ export async function loadDashboardMetrics(
       },
       todayIso,
     );
-    const amount = Number(row.total) || 0;
+    const total = Math.abs(Number(row.total) || 0);
+    const amount =
+      status === "unpaid" || status === "overdue" || status === "future"
+        ? Math.max(0, total - Number(row.paidAmount))
+        : total;
     tally[status].count += 1;
     addAmount(tally[status].totalsByCurrency, row.currency, amount);
   }
@@ -164,13 +194,12 @@ export async function loadDashboardMetrics(
         issuedCount12m += 1;
       }
     }
-    if (row.paidAt && isCzk) {
-      const key = monthKey(new Date(row.paidAt));
-      const point = monthlyMap.get(key);
-      if (point) {
-        point.paid += amount;
-      }
-    }
+  }
+
+  for (const allocation of allocationRows) {
+    if (allocation.currency !== "CZK") continue;
+    const point = monthlyMap.get(allocation.effectiveDate.slice(0, 7));
+    if (point) point.paid += Number(allocation.amount) || 0;
   }
 
   for (const status of ["unpaid", "overdue", "future"] as const) {
@@ -199,12 +228,9 @@ export async function loadDashboardMetrics(
       outstanding: outstandingByCurrency[currency] ?? 0,
     }));
 
-  const recentRows = await db
-    .select()
-    .from(invoices)
-    .where(and(...base))
-    .orderBy(desc(invoices.updatedAt))
-    .limit(10);
+  const recentRows = [...rows]
+    .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+    .slice(0, 10);
 
   const recent: RecentInvoice[] = recentRows.map((row) => ({
     id: row.id,
@@ -225,11 +251,6 @@ export async function loadDashboardMetrics(
       todayIso,
     ),
   }));
-
-  const issuerRows = await db
-    .select({ id: issuerBusinesses.id })
-    .from(issuerBusinesses)
-    .where(eq(issuerBusinesses.workspaceId, workspaceId));
 
   return {
     buckets,

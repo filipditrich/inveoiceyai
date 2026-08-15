@@ -126,6 +126,18 @@ export const privateEnvSchema = z.object({
   ),
   /** Bearer for `/api/cron/overdue-reminders` and `/api/cron/recurring-drafts`. */
   CRON_SECRET: z.preprocess(emptyEnvToUndefined, z.string().min(1).optional()),
+  /**
+   * Base64-encoded 32-byte AES key used only for bank access tokens. Keep old
+   * versions available during rotation; Plan 22 starts with version 1.
+   */
+  BANK_TOKEN_ENCRYPTION_KEY_V1: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
+  BANK_TOKEN_ACTIVE_KEY_VERSION: z.preprocess(
+    emptyEnvToUndefined,
+    z.coerce.number().int().positive().default(1),
+  ),
 });
 
 /** Vercel-only system vars (subset). @see https://vercel.com/docs/environment-variables/system-environment-variables */
