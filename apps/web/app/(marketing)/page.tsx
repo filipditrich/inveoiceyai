@@ -23,8 +23,10 @@ import {
 import { ProductPreview } from "@/components/marketing/product-preview";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import motionStyles from "@/components/marketing/marketing-motion.module.css";
+import { MarketingSignedInChip } from "@/components/marketing/marketing-signed-in";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getOptionalSession } from "@/lib/auth/session";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Marketing.meta");
@@ -42,6 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const t = await getTranslations("Marketing");
+  const user = await getOptionalSession();
   const trustItems = [
     { icon: FileCheck2Icon, label: t("trust.pdfIsdoc") },
     { icon: QrCodeIcon, label: t("trust.spaydQr") },
@@ -122,7 +125,7 @@ export default async function HomePage() {
                 className="shadow-primary/15 h-11 px-5 text-[0.95rem] shadow-lg"
                 render={<Link href="/dashboard" prefetch={false} />}
               >
-                {t("hero.ctaPrimary")}
+                {user ? t("hero.ctaPrimarySignedIn") : t("hero.ctaPrimary")}
                 <ArrowRightIcon data-icon="inline-end" />
               </Button>
               <Button
@@ -134,6 +137,14 @@ export default async function HomePage() {
                 {t("hero.ctaSecondary")}
               </Button>
             </div>
+            {user ? (
+              <p className="mt-5">
+                <MarketingSignedInChip
+                  user={user}
+                  caption={t("nav.signedIn")}
+                />
+              </p>
+            ) : null}
             <div className="text-muted-foreground mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2Icon className="text-primary size-3.5" />
@@ -377,14 +388,22 @@ export default async function HomePage() {
               {t("cta.title")}
             </h2>
             <p className="text-muted-foreground mt-5 text-base leading-relaxed sm:text-lg">
-              {t("cta.description")}
+              {user ? t("cta.descriptionSignedIn") : t("cta.description")}
             </p>
+            {user ? (
+              <div className="mt-6">
+                <MarketingSignedInChip
+                  user={user}
+                  caption={t("nav.signedIn")}
+                />
+              </div>
+            ) : null}
             <Button
               size="lg"
               className="mt-8 h-11 px-5 text-[0.95rem]"
               render={<Link href="/dashboard" prefetch={false} />}
             >
-              {t("cta.button")}
+              {user ? t("cta.buttonSignedIn") : t("cta.button")}
               <ArrowRightIcon data-icon="inline-end" />
             </Button>
           </div>

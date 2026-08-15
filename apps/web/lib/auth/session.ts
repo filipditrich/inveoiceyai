@@ -48,19 +48,36 @@ const getSession = cache(async () => {
   return auth.api.getSession({ headers: await headers() });
 });
 
-/** Signed-in user, or a redirect to sign-in. Never returns null. */
-export async function requireSession(): Promise<SessionUser> {
-  const session = await getSession();
-  if (!session) {
-    redirect("/sign-in");
-  }
-  const { user } = session;
+function toSessionUser(user: {
+  id: string;
+  name: string;
+  email: string;
+  image?: string | null;
+}): SessionUser {
   return {
     id: user.id,
     name: user.name,
     email: user.email,
     image: user.image ?? null,
   };
+}
+
+/** Signed-in user when present, else null. For public surfaces. */
+export async function getOptionalSession(): Promise<SessionUser | null> {
+  const session = await getSession();
+  if (!session) {
+    return null;
+  }
+  return toSessionUser(session.user);
+}
+
+/** Signed-in user, or a redirect to sign-in. Never returns null. */
+export async function requireSession(): Promise<SessionUser> {
+  const user = await getOptionalSession();
+  if (!user) {
+    redirect("/sign-in");
+  }
+  return user;
 }
 
 /** Session and workspace when present, else null. For optional-auth surfaces. */

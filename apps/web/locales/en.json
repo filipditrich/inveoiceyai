@@ -184,6 +184,10 @@
       "docs": "Docs",
       "signIn": "Sign in",
       "openApp": "Open app",
+      "continueToApp": "Continue to app",
+      "signedIn": "Signed in",
+      "signedInAs": "Signed in as {name}",
+      "openMenu": "Open menu",
       "skipToContent": "Skip to content",
       "ariaLabel": "Main navigation"
     },
@@ -203,7 +207,9 @@
       "titleLine2": "Not a form.",
       "subtitle": "Issue documents from the web, JSON, or AI. Invoicey validates every time and produces the same PDF, ISDOC, and payment QR — including ARES, VAT, and Czech document rules.",
       "ctaPrimary": "Open Invoicey",
+      "ctaPrimarySignedIn": "Continue to app",
       "ctaSecondary": "How it works",
+      "signedInAs": "Signed in as {name}",
       "noPassword": "No password",
       "czechUi": "Czech-first",
       "betaAccess": "Beta access"
@@ -327,7 +333,9 @@
       "eyebrow": "Ready to issue",
       "title": "Give your invoices one place and one source of truth.",
       "description": "Sign in with Google or GitHub. You don't need to create a password.",
-      "button": "Open Invoicey"
+      "descriptionSignedIn": "You're already signed in. Continue to your invoices.",
+      "button": "Open Invoicey",
+      "buttonSignedIn": "Open dashboard"
     },
     "legal": {
       "terms": {

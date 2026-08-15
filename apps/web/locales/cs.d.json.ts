@@ -187,6 +187,10 @@ declare const messages: {
       docs: "Dokumentace";
       signIn: "Přihlásit se";
       openApp: "Otevřít aplikaci";
+      continueToApp: "Pokračovat do aplikace";
+      signedIn: "Přihlášeni";
+      signedInAs: "Přihlášeni jako {name}";
+      openMenu: "Otevřít nabídku";
       skipToContent: "Přeskočit na obsah";
       ariaLabel: "Hlavní navigace";
     };
@@ -206,7 +210,9 @@ declare const messages: {
       titleLine2: "Ne formulářem.";
       subtitle: "Vystavujte doklady ve webu, z JSONu nebo přes AI. Invoicey je pokaždé ověří a vytvoří stejné PDF, ISDOC i platební QR — včetně ARES, DPH a českých reálií.";
       ctaPrimary: "Otevřít Invoicey";
+      ctaPrimarySignedIn: "Pokračovat do aplikace";
       ctaSecondary: "Jak to funguje";
+      signedInAs: "Přihlášeni jako {name}";
       noPassword: "Bez hesla";
       czechUi: "Czech-first";
       betaAccess: "Beta přístup";
@@ -330,7 +336,9 @@ declare const messages: {
       eyebrow: "Připraveno k vystavení";
       title: "Dejte fakturám jedno místo a jeden zdroj pravdy.";
       description: "Přihlaste se přes Google nebo GitHub. Heslo u Invoicey vytvářet nemusíte.";
+      descriptionSignedIn: "Jste přihlášeni. Pokračujte ke svým fakturám.";
       button: "Otevřít Invoicey";
+      buttonSignedIn: "Otevřít přehled";
     };
     legal: {
       terms: {

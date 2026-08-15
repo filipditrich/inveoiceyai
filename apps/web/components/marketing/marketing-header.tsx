@@ -5,10 +5,17 @@ import { getTranslations } from "next-intl/server";
 import { BrandLogo } from "@/components/brand-logo";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Button } from "@/components/ui/button";
+import { getOptionalSession } from "@/lib/auth/session";
+
+import {
+  MarketingSignedInChip,
+  sessionDisplayName,
+} from "./marketing-signed-in";
 
 export async function MarketingHeader() {
   const t = await getTranslations("Marketing.nav");
   const tBrand = await getTranslations("App.brand");
+  const user = await getOptionalSession();
 
   const navItems = [
     { href: "/#jak-to-funguje", label: t("howItWorks") },
@@ -57,21 +64,36 @@ export async function MarketingHeader() {
 
         <div className="ml-auto flex items-center gap-2 lg:ml-2">
           <LocaleSwitcher compact className="hidden sm:inline-flex" />
-          <Button
-            variant="ghost"
-            className="hidden sm:inline-flex"
-            render={<Link href="/sign-in" />}
-          >
-            {t("signIn")}
-          </Button>
+          {user ? (
+            <Link
+              href="/dashboard"
+              prefetch={false}
+              aria-label={t("signedInAs", { name: sessionDisplayName(user) })}
+              className="hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 hidden min-w-0 items-center rounded-lg px-2 py-1 outline-none sm:flex"
+            >
+              <MarketingSignedInChip
+                user={user}
+                caption={t("signedIn")}
+                className="inline-flex min-w-0 max-w-44 items-center gap-2"
+              />
+            </Link>
+          ) : (
+            <Button
+              variant="ghost"
+              className="hidden sm:inline-flex"
+              render={<Link href="/sign-in" />}
+            >
+              {t("signIn")}
+            </Button>
+          )}
           <Button render={<Link href="/dashboard" prefetch={false} />}>
-            {t("openApp")}
+            {user ? t("continueToApp") : t("openApp")}
             <ArrowRightIcon data-icon="inline-end" />
           </Button>
           <details className="group relative sm:hidden">
             <summary className="border-input hover:bg-muted focus-visible:ring-ring flex size-9 cursor-pointer list-none items-center justify-center rounded-md border outline-none focus-visible:ring-2 [&::-webkit-details-marker]:hidden">
               <MenuIcon className="size-4" aria-hidden="true" />
-              <span className="sr-only">Otevřít nabídku</span>
+              <span className="sr-only">{t("openMenu")}</span>
             </summary>
             <nav
               aria-label={t("ariaLabel")}
@@ -87,12 +109,25 @@ export async function MarketingHeader() {
                 </Link>
               ))}
               <div className="my-2 border-t" />
-              <Link
-                href="/sign-in"
-                className="hover:bg-muted block rounded-lg px-3 py-2 text-sm font-medium"
-              >
-                {t("signIn")}
-              </Link>
+              {user ? (
+                <Link
+                  href="/dashboard"
+                  prefetch={false}
+                  aria-label={t("signedInAs", {
+                    name: sessionDisplayName(user),
+                  })}
+                  className="hover:bg-muted flex items-center rounded-lg px-3 py-2"
+                >
+                  <MarketingSignedInChip user={user} caption={t("signedIn")} />
+                </Link>
+              ) : (
+                <Link
+                  href="/sign-in"
+                  className="hover:bg-muted block rounded-lg px-3 py-2 text-sm font-medium"
+                >
+                  {t("signIn")}
+                </Link>
+              )}
               <LocaleSwitcher
                 align="start"
                 size="sm"
