@@ -1778,7 +1778,25 @@
       "rulesHint": "First match by priority wins. With no rules, accepting auto-approves.",
       "ruleName": "Rule name",
       "saveRule": "Save rule",
-      "deleteRule": "Delete"
+      "deleteRule": "Delete",
+      "currentAddress": "Current address",
+      "previousAddresses": "Previous addresses",
+      "copied": "Address copied",
+      "priority": "Priority",
+      "priorityHint": "Lower number is evaluated first.",
+      "priorityValue": "Priority {value}",
+      "whenCurrency": "When currency is",
+      "pathType": "Then",
+      "pathAutoApprove": "Auto-approve under a cap",
+      "pathRequireAdmin": "Require an admin",
+      "maxTotal": "Auto-approve up to",
+      "pathCurrency": "Cap currency",
+      "ruleSummaryAuto": "Auto-approve up to {max} {currency}",
+      "ruleSummaryAdmin": "Requires an admin approval",
+      "ruleSummaryCustom": "Custom approval path",
+      "ruleWhenCurrency": "When currency is {currency}",
+      "showAllPrevious": "Show all {count}",
+      "hidePrevious": "Show fewer"
     },
     "bankConnections": {
       "pageTitle": "Bank connections",
@@ -2128,9 +2146,12 @@
   },
   "IncomingInvoices": {
     "title": "Incoming invoices",
-    "subtitle": "Review, approve, and pay — three separate gates.",
+    "subtitle": "Accept on To review, approve on To approve, then create a payment run on To pay.",
     "upload": "Upload",
     "empty": "Nothing here yet.",
+    "emptyReview": "Nothing to review. Upload a document or wait for the inbox.",
+    "emptyApproval": "Nothing waiting for approval.",
+    "emptyPay": "Nothing ready to pay. Approve an invoice first.",
     "myTask": "Mine",
     "tabs": {
       "review": "To review",
@@ -2145,7 +2166,44 @@
       "supplier": "Supplier",
       "due": "Due",
       "total": "Total",
-      "status": "Status"
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "gate": {
+      "reviewTitle": "Review this invoice",
+      "reviewHint": "Check the document and fields, then accept it into the approval queue or reject it.",
+      "approvalTitle": "Approve this invoice",
+      "approvalHint": "Approving releases it to To pay. A comment is required to reject or send it back.",
+      "payTitle": "Ready to pay",
+      "payHint": "Select it on To pay and create a Fio run. Invoicey never authorizes the payment.",
+      "payCta": "Go to To pay",
+      "rejectedTitle": "Rejected",
+      "acceptedTitle": "Accepted",
+      "acceptedHint": "Approval rules are evaluating this invoice.",
+      "open": "Open",
+      "commentHint": "Required to reject or request changes"
+    },
+    "payment": {
+      "unpaid": "Unpaid",
+      "partial": "Partial",
+      "paid": "Paid",
+      "overpaid": "Overpaid"
+    },
+    "exceptions": {
+      "duplicate_invoice": "Duplicate invoice",
+      "entity_unresolved": "Receiving entity not resolved",
+      "supplier_unknown": "Unknown supplier",
+      "new_beneficiary_account": "New beneficiary account",
+      "vat_mismatch": "VAT does not add up",
+      "line_total_mismatch": "Line totals do not match",
+      "missing_required_field": "Required field missing",
+      "due_before_issue": "Due date is before issue date",
+      "invalid_iban": "Invalid IBAN",
+      "invalid_ico": "Invalid IČO",
+      "low_confidence": "Low extraction confidence",
+      "currency_unsupported": "Unsupported currency",
+      "unverified_sender": "Unverified sender",
+      "unknown": "{code}"
     },
     "status": {
       "needs_review": "Needs review",
@@ -2160,7 +2218,11 @@
     "run": {
       "issuer": "Paying entity",
       "account": "Account",
-      "create": "Create run ({count})"
+      "create": "Create run ({count})",
+      "selectHint": "Tick the invoices to include, then create the run.",
+      "selectAll": "Select all",
+      "noAccount": "Connect a paying account before you can create a run.",
+      "connectBank": "Bank connections"
     },
     "detail": {
       "untitled": "No number",
@@ -2187,7 +2249,10 @@
       "requestChanges": "Request changes",
       "line": "Line",
       "lineTotal": "Total",
-      "delete": "Delete"
+      "delete": "Delete",
+      "fields": "Invoice fields",
+      "activity": "Activity",
+      "acceptNext": "Accept & next"
     },
     "uploadPage": {
       "title": "Upload incoming invoices",
@@ -2204,7 +2269,16 @@
       "subject": "Subject",
       "status": "Status",
       "documents": "Documents",
-      "empty": "Inbox is empty."
+      "empty": "Inbox is empty.",
+      "emptyHint": "New mail and uploads land here first. Use Upload to add a file now.",
+      "itemStatus": {
+        "received": "Received",
+        "processing": "Processing",
+        "processed": "Processed",
+        "no_invoice": "Not an invoice",
+        "rejected": "Rejected",
+        "failed": "Failed"
+      }
     },
     "runs": {
       "title": "Payment runs",
@@ -2215,6 +2289,16 @@
       "status": "Status",
       "batch": "Batch id",
       "empty": "No runs yet.",
+      "goToPay": "Go to To pay",
+      "runStatus": {
+        "draft": "Draft",
+        "ready": "Ready",
+        "submitting": "Submitting",
+        "submitted": "Submitted",
+        "failed": "Failed",
+        "cancelled": "Cancelled",
+        "closed": "Closed"
+      },
       "awaitingAuthorization": "This batch is in Fio's orders-to-sign queue. Authorize it in internet banking. Nothing has been paid yet.",
       "confirm": "Confirm and freeze accounts",
       "beneficiary": "Beneficiary",

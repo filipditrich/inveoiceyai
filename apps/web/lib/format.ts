@@ -30,6 +30,19 @@ export function formatMoney(
   }).format(amount);
 }
 
+/** Amount + ISO code once — never `CZK 12,100.00 CZK`. */
+export function formatMoneyCode(
+  amount: number,
+  currency: string = "CZK",
+  locale: AppLocale = "cs",
+): string {
+  const formatted = new Intl.NumberFormat(toIntlLocale(locale), {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+  return `${formatted} ${currency}`;
+}
+
 /**
  * Format YYYY-MM-DD as a calendar date in the active locale
  * (e.g. cs → `10. 8. 2026`, en → `10/08/2026`).

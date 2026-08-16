@@ -1,32 +1,42 @@
-import {
-  deleteApprovalRuleAction,
-  saveApprovalRuleAction,
-} from "@/actions/incoming-approvals";
+import { deleteApprovalRuleAction } from "@/actions/incoming-approvals";
 import {
   ensurePrimaryInboxAlias,
   rotateInboxAliasAction,
 } from "@/actions/inbox-aliases";
+import { AliasHistoryList } from "@/components/incoming-invoices/alias-history-list";
+import { ApprovalRuleForm } from "@/components/incoming-invoices/approval-rule-form";
+import { CopyInboxAddress } from "@/components/incoming-invoices/copy-inbox-address";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { InboxIcon } from "lucide-react";
 import { requireWorkspace } from "@/lib/auth/session";
-import { env } from "@invoicey/env/server";
+import { describeApprovalRule } from "@/lib/incoming-invoices/rule-summary";
+import { invalidMessage } from "@/lib/invalid-message";
 import { approvalRules, inboxAliases } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { asc, eq } from "drizzle-orm";
+import { env } from "@invoicey/env/server";
+import { InboxIcon } from "lucide-react";
+import { asc, desc, eq } from "drizzle-orm";
 import { getTranslations } from "next-intl/server";
 
-export default async function IncomingInvoiceSettingsPage() {
-  const [t, { workspaceId, role }] = await Promise.all([
+export default async function IncomingInvoiceSettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ invalid?: string }>;
+}) {
+  const [t, tErrors, { workspaceId, role }, sp] = await Promise.all([
     getTranslations("Settings.incomingInvoices"),
+    getTranslations("Errors.invalid"),
     requireWorkspace(),
+    searchParams,
   ]);
+  const err = sp.invalid ? invalidMessage(tErrors, sp.invalid) : null;
   await ensurePrimaryInboxAlias();
   const aliases = await db
     .select()
     .from(inboxAliases)
-    .where(eq(inboxAliases.workspaceId, workspaceId));
+    .where(eq(inboxAliases.workspaceId, workspaceId))
+    .orderBy(desc(inboxAliases.createdAt));
   const rules = await db
     .select()
     .from(approvalRules)
@@ -35,6 +45,9 @@ export default async function IncomingInvoiceSettingsPage() {
   const domain =
     env.INVOICEY_INBOUND_EMAIL_DOMAIN ?? "inbox.invoicey.ditrich.me";
   const canAdmin = role === "admin" || role === "owner";
+  const current = aliases.find((alias) => alias.isActive) ?? null;
+  const history = aliases.filter((alias) => !alias.isActive);
+  const currentAddress = current ? `${current.localPart}@${domain}` : null;
 
   return (
     <div className="space-y-8">
@@ -43,114 +56,83 @@ export default async function IncomingInvoiceSettingsPage() {
         title={t("title")}
         description={t("subtitle")}
       />
+      {err ? (
+        <p className="text-destructive text-sm" role="alert">
+          {err}
+        </p>
+      ) : null}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold">{t("aliasTitle")}</h2>
         <p className="text-muted-foreground text-sm">{t("aliasWarning")}</p>
-        <ul className="space-y-2">
-          {aliases.map((alias) => (
-            <li
-              key={alias.id}
-              className="bg-card flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4"
-            >
-              <div>
-                <code className="text-sm">
-                  {alias.localPart}@{domain}
-                </code>
-                <div className="mt-1 flex gap-2">
-                  <Badge variant={alias.isActive ? "default" : "outline"}>
-                    {alias.isActive ? t("active") : t("rotated")}
-                  </Badge>
-                  {alias.label ? (
-                    <Badge variant="secondary">{alias.label}</Badge>
-                  ) : null}
-                </div>
-              </div>
-              {alias.isActive && canAdmin ? (
+        {current && currentAddress ? (
+          <div className="bg-card space-y-3 rounded-xl border p-4">
+            <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+              {t("currentAddress")}
+            </p>
+            <code className="block break-all text-base">{currentAddress}</code>
+            <div className="flex flex-wrap gap-2">
+              <Badge>{t("active")}</Badge>
+              <CopyInboxAddress address={currentAddress} />
+              {canAdmin ? (
                 <form action={rotateInboxAliasAction}>
-                  <input type="hidden" name="id" value={alias.id} />
+                  <input type="hidden" name="id" value={current.id} />
                   <Button type="submit" variant="outline">
                     {t("rotate")}
                   </Button>
                 </form>
               ) : null}
-            </li>
-          ))}
-        </ul>
+            </div>
+          </div>
+        ) : null}
+        {history.length > 0 ? (
+          <AliasHistoryList
+            addresses={history.map((alias) => `${alias.localPart}@${domain}`)}
+          />
+        ) : null}
       </section>
       <section className="space-y-3">
         <h2 className="text-sm font-semibold">{t("rulesTitle")}</h2>
         <p className="text-muted-foreground text-sm">{t("rulesHint")}</p>
-        {rules.map((rule) => (
-          <div
-            key={rule.id}
-            className="bg-card space-y-2 rounded-xl border p-4"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <strong>{rule.name}</strong>
-              <Badge variant="outline">{rule.priority}</Badge>
+        {rules.map((rule) => {
+          const summary = describeApprovalRule(rule.conditions, rule.path);
+          const thenLabel =
+            summary.pathType === "auto_approve"
+              ? t("ruleSummaryAuto", {
+                  max: summary.maxTotal ?? "—",
+                  currency: summary.pathCurrency ?? "CZK",
+                })
+              : summary.pathType === "require_admin"
+                ? t("ruleSummaryAdmin")
+                : t("ruleSummaryCustom");
+          return (
+            <div
+              key={rule.id}
+              className="bg-card space-y-2 rounded-xl border p-4"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <strong>{rule.name}</strong>
+                <Badge variant="outline">
+                  {t("priorityValue", { value: String(rule.priority) })}
+                </Badge>
+              </div>
+              <p className="text-sm">{thenLabel}</p>
+              {summary.currency ? (
+                <p className="text-muted-foreground text-sm">
+                  {t("ruleWhenCurrency", { currency: summary.currency })}
+                </p>
+              ) : null}
+              {canAdmin ? (
+                <form action={deleteApprovalRuleAction}>
+                  <input type="hidden" name="id" value={rule.id} />
+                  <Button size="sm" type="submit" variant="ghost">
+                    {t("deleteRule")}
+                  </Button>
+                </form>
+              ) : null}
             </div>
-            <pre className="text-muted-foreground overflow-auto text-xs">
-              {JSON.stringify(
-                { conditions: rule.conditions, path: rule.path },
-                null,
-                2,
-              )}
-            </pre>
-            {canAdmin ? (
-              <form action={deleteApprovalRuleAction}>
-                <input type="hidden" name="id" value={rule.id} />
-                <Button size="sm" type="submit" variant="ghost">
-                  {t("deleteRule")}
-                </Button>
-              </form>
-            ) : null}
-          </div>
-        ))}
-        {canAdmin ? (
-          <form
-            action={saveApprovalRuleAction}
-            className="bg-card grid gap-3 rounded-xl border p-4"
-          >
-            <input
-              name="name"
-              required
-              placeholder={t("ruleName")}
-              className="border-input rounded-md border px-2 py-1.5"
-            />
-            <input
-              name="priority"
-              type="number"
-              defaultValue={100}
-              className="border-input rounded-md border px-2 py-1.5"
-            />
-            <textarea
-              name="conditions"
-              required
-              rows={6}
-              defaultValue={JSON.stringify(
-                {
-                  version: 1,
-                  all: [{ fact: "currency", op: "eq", value: "CZK" }],
-                },
-                null,
-                2,
-              )}
-              className="border-input rounded-md border px-2 py-1.5 font-mono text-xs"
-            />
-            <textarea
-              name="path"
-              required
-              rows={4}
-              defaultValue={JSON.stringify(
-                { type: "auto_approve", maxTotal: "5000", currency: "CZK" },
-                null,
-                2,
-              )}
-              className="border-input rounded-md border px-2 py-1.5 font-mono text-xs"
-            />
-            <Button type="submit">{t("saveRule")}</Button>
-          </form>
-        ) : null}
+          );
+        })}
+        {canAdmin ? <ApprovalRuleForm /> : null}
       </section>
     </div>
   );

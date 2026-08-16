@@ -1,24 +1,36 @@
+import { IncomingInvoiceTabs } from "@/components/incoming-invoices/incoming-invoice-tabs";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
+import { formatDateTime } from "@/lib/format";
+import type { AppLocale } from "@/i18n/config";
+import { inboxStatusMessageKey } from "@/lib/incoming-invoices/inbox-status-message";
+import { loadIncomingQueueCounts } from "@/lib/incoming-invoices/queue-counts";
 import { inboxItems, incomingDocuments } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { desc, eq } from "drizzle-orm";
-import { MailIcon } from "lucide-react";
+import { MailIcon, UploadIcon } from "lucide-react";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function IncomingInboxPage() {
-  const [t, { workspaceId }] = await Promise.all([
+  const [t, tQueue, { workspaceId }, locale] = await Promise.all([
     getTranslations("IncomingInvoices.inbox"),
+    getTranslations("IncomingInvoices"),
     requireWorkspace(),
+    getLocale(),
   ]);
-  const items = await db
-    .select()
-    .from(inboxItems)
-    .where(eq(inboxItems.workspaceId, workspaceId))
-    .orderBy(desc(inboxItems.receivedAt))
-    .limit(100);
+  const appLocale = locale as AppLocale;
+  const [items, counts] = await Promise.all([
+    db
+      .select()
+      .from(inboxItems)
+      .where(eq(inboxItems.workspaceId, workspaceId))
+      .orderBy(desc(inboxItems.receivedAt))
+      .limit(100),
+    loadIncomingQueueCounts(workspaceId),
+  ]);
   const documents = await db
     .select()
     .from(incomingDocuments)
@@ -37,8 +49,15 @@ export default async function IncomingInboxPage() {
         icon={<MailIcon />}
         title={t("title")}
         description={t("subtitle")}
+        actions={
+          <Button render={<Link href="/incoming-invoices/upload" prefetch />}>
+            <UploadIcon />
+            {tQueue("upload")}
+          </Button>
+        }
       />
-      <div className="overflow-hidden rounded-xl border">
+      <IncomingInvoiceTabs active="inbox" counts={counts} />
+      <div className="overflow-x-auto rounded-xl border">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>
@@ -56,21 +75,24 @@ export default async function IncomingInboxPage() {
                   className="text-muted-foreground px-3 py-8 text-center"
                   colSpan={5}
                 >
-                  {t("empty")}
+                  <p>{t("empty")}</p>
+                  <p className="mt-1">{t("emptyHint")}</p>
                 </td>
               </tr>
             ) : (
               items.map((item) => (
                 <tr key={item.id} className="border-t">
-                  <td className="px-3 py-2">
-                    {item.receivedAt.toISOString().slice(0, 16)}
+                  <td className="whitespace-nowrap px-3 py-2">
+                    {formatDateTime(item.receivedAt, appLocale)}
                   </td>
                   <td className="px-3 py-2">
                     {item.parsedOriginalFrom ?? item.fromAddress ?? "—"}
                   </td>
                   <td className="px-3 py-2">{item.subject ?? "—"}</td>
                   <td className="px-3 py-2">
-                    <Badge variant="outline">{item.status}</Badge>
+                    <Badge variant="outline">
+                      {t(inboxStatusMessageKey(item.status))}
+                    </Badge>
                     {item.errorCode ? (
                       <Badge variant="secondary">{item.errorCode}</Badge>
                     ) : null}
@@ -84,10 +106,6 @@ export default async function IncomingInboxPage() {
                         >
                           {document.fileName}
                         </Link>
-                        <span className="text-muted-foreground">
-                          {" "}
-                          · {document.classification}
-                        </span>
                       </div>
                     ))}
                   </td>

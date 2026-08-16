@@ -1782,6 +1782,24 @@ declare const messages: {
       ruleName: "Název pravidla";
       saveRule: "Uložit pravidlo";
       deleteRule: "Smazat";
+      currentAddress: "Aktuální adresa";
+      previousAddresses: "Předchozí adresy";
+      copied: "Adresa zkopírována";
+      priority: "Priorita";
+      priorityHint: "Nižší číslo se vyhodnotí dřív.";
+      priorityValue: "Priorita {value}";
+      whenCurrency: "Když je měna";
+      pathType: "Pak";
+      pathAutoApprove: "Schválit automaticky do limitu";
+      pathRequireAdmin: "Vyžadovat admina";
+      maxTotal: "Automaticky schválit do";
+      pathCurrency: "Měna limitu";
+      ruleSummaryAuto: "Automaticky schválit do {max} {currency}";
+      ruleSummaryAdmin: "Vyžaduje schválení adminem";
+      ruleSummaryCustom: "Vlastní cesta schválení";
+      ruleWhenCurrency: "Když je měna {currency}";
+      showAllPrevious: "Zobrazit všech {count}";
+      hidePrevious: "Zobrazit méně";
     };
     bankConnections: {
       pageTitle: "Bankovní spojení";
@@ -2131,9 +2149,12 @@ declare const messages: {
   };
   IncomingInvoices: {
     title: "Přijaté faktury";
-    subtitle: "Ke zpracování, schválení a zaplacení — tři samostatné brány.";
+    subtitle: "Na Ke zpracování přijměte, na Ke schválení schvalte, na K zaplacení vytvořte dávku.";
     upload: "Nahrát";
     empty: "Tady zatím nic není.";
+    emptyReview: "Nic ke kontrole. Nahrajte dokument, nebo počkejte na inbox.";
+    emptyApproval: "Nic nečeká na schválení.";
+    emptyPay: "Nic není připravené k platbě. Nejdřív fakturu schvalte.";
     myTask: "Moje";
     tabs: {
       review: "Ke zpracování";
@@ -2149,6 +2170,43 @@ declare const messages: {
       due: "Splatnost";
       total: "Celkem";
       status: "Stav";
+      actions: "Akce";
+    };
+    gate: {
+      reviewTitle: "Zkontrolujte tuto fakturu";
+      reviewHint: "Ověřte dokument a pole, pak ji přijměte do schvalování, nebo ji zamítněte.";
+      approvalTitle: "Schvalte tuto fakturu";
+      approvalHint: "Schválením ji uvolníte na K zaplacení. K zamítnutí nebo vrácení je potřeba komentář.";
+      payTitle: "Připraveno k platbě";
+      payHint: "Vyberte ji na K zaplacení a vytvořte dávku pro Fio. Invoicey platbu nikdy neautorizuje.";
+      payCta: "Přejít na K zaplacení";
+      rejectedTitle: "Zamítnuto";
+      acceptedTitle: "Přijato";
+      acceptedHint: "Pravidla schválení tuto fakturu právě vyhodnocují.";
+      open: "Otevřít";
+      commentHint: "Povinné při zamítnutí nebo vrácení";
+    };
+    payment: {
+      unpaid: "Nezaplaceno";
+      partial: "Částečně";
+      paid: "Zaplaceno";
+      overpaid: "Přeplatek";
+    };
+    exceptions: {
+      duplicate_invoice: "Duplicitní faktura";
+      entity_unresolved: "Přijímající subjekt neurčen";
+      supplier_unknown: "Neznámý dodavatel";
+      new_beneficiary_account: "Nový účet příjemce";
+      vat_mismatch: "DPH nesedí";
+      line_total_mismatch: "Součty položek nesedí";
+      missing_required_field: "Chybí povinné pole";
+      due_before_issue: "Splatnost je před datem vystavení";
+      invalid_iban: "Neplatný IBAN";
+      invalid_ico: "Neplatné IČO";
+      low_confidence: "Nízká jistota extrakce";
+      currency_unsupported: "Nepodporovaná měna";
+      unverified_sender: "Neověřený odesílatel";
+      unknown: "{code}";
     };
     status: {
       needs_review: "Ke kontrole";
@@ -2164,6 +2222,10 @@ declare const messages: {
       issuer: "Platící subjekt";
       account: "Účet";
       create: "Vytvořit dávku ({count})";
+      selectHint: "Zaškrtněte faktury do dávky a dávku vytvořte.";
+      selectAll: "Vybrat vše";
+      noAccount: "Než vytvoříte dávku, připojte platící účet.";
+      connectBank: "Bankovní spojení";
     };
     detail: {
       untitled: "Bez čísla";
@@ -2191,6 +2253,9 @@ declare const messages: {
       line: "Položka";
       lineTotal: "Celkem";
       delete: "Smazat";
+      fields: "Pole faktury";
+      activity: "Aktivita";
+      acceptNext: "Přijmout a další";
     };
     uploadPage: {
       title: "Nahrát přijaté faktury";
@@ -2208,6 +2273,15 @@ declare const messages: {
       status: "Stav";
       documents: "Dokumenty";
       empty: "Inbox je prázdný.";
+      emptyHint: "Nová pošta a nahrávky sem přijdou jako první. Soubor můžete přidat přes Nahrát.";
+      itemStatus: {
+        received: "Přijato";
+        processing: "Zpracovává se";
+        processed: "Zpracováno";
+        no_invoice: "Není faktura";
+        rejected: "Zamítnuto";
+        failed: "Selhalo";
+      };
     };
     runs: {
       title: "Platební dávky";
@@ -2218,6 +2292,16 @@ declare const messages: {
       status: "Stav";
       batch: "ID dávky";
       empty: "Zatím žádné dávky.";
+      goToPay: "Přejít na K zaplacení";
+      runStatus: {
+        draft: "Návrh";
+        ready: "Připraveno";
+        submitting: "Odesílá se";
+        submitted: "Odesláno";
+        failed: "Selhalo";
+        cancelled: "Zrušeno";
+        closed: "Uzavřeno";
+      };
       awaitingAuthorization: "Dávka je ve Fio ve frontě příkazů k podpisu. Autorizujte ji v internetovém bankovnictví. Nic ještě nebylo zaplaceno.";
       confirm: "Potvrdit a zmrazit účty";
       beneficiary: "Příjemce";

@@ -16,6 +16,10 @@ import { redirect } from "next/navigation";
 
 import { requireWorkspace } from "@/lib/auth/session";
 import { processIncomingDocument } from "@/lib/incoming-invoices/process-document";
+import {
+  incomingActionPath,
+  safeIncomingReturnTo,
+} from "@/lib/incoming-invoices/safe-return-to";
 
 function optionalTrim(value: FormDataEntryValue | null): string | null {
   if (typeof value !== "string") return null;
@@ -112,6 +116,7 @@ export async function acceptIncomingInvoiceAction(
 ): Promise<void> {
   const { workspaceId, userId } = await requireWorkspace();
   const id = optionalTrim(formData.get("id"));
+  const returnTo = safeIncomingReturnTo(formData.get("returnTo"));
   if (!id) {
     redirect("/incoming-invoices?invalid=missing_id");
   }
@@ -122,7 +127,11 @@ export async function acceptIncomingInvoiceAction(
   });
   if (!result.ok) {
     redirect(
-      `/incoming-invoices/${id}?invalid=${encodeURIComponent(result.error)}`,
+      incomingActionPath({
+        returnTo,
+        fallback: `/incoming-invoices/${id}`,
+        invalid: result.error,
+      }),
     );
   }
   const [invoice] = await db
@@ -158,8 +167,19 @@ export async function acceptIncomingInvoiceAction(
       lowConfidence: (invoice?.exceptionCodes ?? []).includes("low_confidence"),
     },
   });
+  const nextId = optionalTrim(formData.get("nextId"));
+  const nextPath =
+    nextId && /^[0-9a-f-]{36}$/iu.test(nextId)
+      ? `/incoming-invoices/${nextId}`
+      : `/incoming-invoices/${id}`;
   revalidatePath("/incoming-invoices");
-  redirect(`/incoming-invoices/${id}?toast=incoming_accepted`);
+  redirect(
+    incomingActionPath({
+      returnTo,
+      fallback: nextPath,
+      toast: "incoming_accepted",
+    }),
+  );
 }
 
 export async function rejectIncomingInvoiceAction(
@@ -168,11 +188,18 @@ export async function rejectIncomingInvoiceAction(
   const { workspaceId, userId } = await requireWorkspace();
   const id = optionalTrim(formData.get("id"));
   const reason = optionalTrim(formData.get("reason"));
+  const returnTo = safeIncomingReturnTo(formData.get("returnTo"));
   if (!id) {
     redirect("/incoming-invoices?invalid=missing_id");
   }
   if (!reason) {
-    redirect(`/incoming-invoices/${id}?invalid=reason_required`);
+    redirect(
+      incomingActionPath({
+        returnTo,
+        fallback: `/incoming-invoices/${id}`,
+        invalid: "reason_required",
+      }),
+    );
   }
   const result = await rejectIncomingInvoice({
     workspaceId,
@@ -182,11 +209,21 @@ export async function rejectIncomingInvoiceAction(
   });
   if (!result.ok) {
     redirect(
-      `/incoming-invoices/${id}?invalid=${encodeURIComponent(result.error)}`,
+      incomingActionPath({
+        returnTo,
+        fallback: `/incoming-invoices/${id}`,
+        invalid: result.error,
+      }),
     );
   }
   revalidatePath("/incoming-invoices");
-  redirect(`/incoming-invoices/${id}?toast=incoming_rejected`);
+  redirect(
+    incomingActionPath({
+      returnTo,
+      fallback: `/incoming-invoices/${id}`,
+      toast: "incoming_rejected",
+    }),
+  );
 }
 
 export async function deleteIncomingInvoiceAction(

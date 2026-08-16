@@ -2,7 +2,10 @@ import { createPaymentRunAction } from "@/actions/payment-runs";
 import { IncomingInvoiceQueue } from "@/components/incoming-invoices/incoming-invoice-queue";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
+import type { AppLocale } from "@/i18n/config";
 import { requireWorkspace } from "@/lib/auth/session";
+import { formatInvoiceDate, formatMoneyCode } from "@/lib/format";
+import { incomingQueueCountsFromRows } from "@/lib/incoming-invoices/queue-counts";
 import { invalidMessage } from "@/lib/invalid-message";
 import {
   approvalTasks,
@@ -15,7 +18,7 @@ import { db } from "@invoicey/db/client";
 import { and, desc, eq } from "drizzle-orm";
 import { InboxIcon, UploadIcon } from "lucide-react";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 type Search = Promise<{
   invalid?: string;
@@ -28,12 +31,15 @@ export default async function IncomingInvoicesPage({
 }: {
   searchParams: Search;
 }) {
-  const [t, tErrors, sp, { workspaceId, userId, role }] = await Promise.all([
-    getTranslations("IncomingInvoices"),
-    getTranslations("Errors.invalid"),
-    searchParams,
-    requireWorkspace(),
-  ]);
+  const [t, tErrors, sp, { workspaceId, userId, role }, locale] =
+    await Promise.all([
+      getTranslations("IncomingInvoices"),
+      getTranslations("Errors.invalid"),
+      searchParams,
+      requireWorkspace(),
+      getLocale(),
+    ]);
+  const appLocale = locale as AppLocale;
   const tab = sp.tab ?? "review";
   const rows = await db
     .select({
@@ -46,20 +52,31 @@ export default async function IncomingInvoicesPage({
     .orderBy(desc(incomingInvoices.createdAt))
     .limit(200);
 
-  const myTasks = await db
-    .select({ incomingInvoiceId: approvalTasks.incomingInvoiceId })
+  const pendingTasks = await db
+    .select({
+      id: approvalTasks.id,
+      incomingInvoiceId: approvalTasks.incomingInvoiceId,
+      assigneeUserId: approvalTasks.assigneeUserId,
+    })
     .from(approvalTasks)
     .where(
       and(
         eq(approvalTasks.workspaceId, workspaceId),
         eq(approvalTasks.status, "pending"),
-        eq(approvalTasks.assigneeUserId, userId),
       ),
     );
-  const myTaskIds = new Set(myTasks.map((task) => task.incomingInvoiceId));
+  const pendingTaskByInvoice = new Map(
+    pendingTasks.map((task) => [task.incomingInvoiceId, task]),
+  );
+  const myTaskIds = new Set(
+    pendingTasks
+      .filter((task) => task.assigneeUserId === userId)
+      .map((task) => task.incomingInvoiceId),
+  );
 
+  const counts = incomingQueueCountsFromRows(rows.map((row) => row.invoice));
   const review = rows.filter((row) =>
-    ["needs_review", "extract_failed"].includes(row.invoice.status),
+    ["needs_review", "extract_failed", "on_hold"].includes(row.invoice.status),
   );
   const approval = rows.filter(
     (row) => row.invoice.status === "pending_approval",
@@ -115,23 +132,24 @@ export default async function IncomingInvoicesPage({
       ) : null}
       <IncomingInvoiceQueue
         tab={tab}
-        counts={{
-          review: review.length,
-          approval: approval.length,
-          pay: payables.length,
-          all: rows.length,
-        }}
+        counts={counts}
         rows={visible.map((row) => ({
           id: row.invoice.id,
           number: row.invoice.number,
           supplierName: row.supplierName ?? row.invoice.supplierNameRaw,
           status: row.invoice.status,
           paymentState: row.invoice.paymentState,
-          total: row.invoice.total,
-          currency: row.invoice.currency,
-          dueDate: row.invoice.dueDate,
+          total: row.invoice.total
+            ? formatMoneyCode(
+                Number(row.invoice.total),
+                row.invoice.currency,
+                appLocale,
+              )
+            : null,
+          dueDate: formatInvoiceDate(row.invoice.dueDate, appLocale),
           exceptions: row.invoice.exceptionCodes,
           mine: myTaskIds.has(row.invoice.id),
+          pendingTaskId: pendingTaskByInvoice.get(row.invoice.id)?.id ?? null,
         }))}
         canCreateRun={canCreateRun}
         issuers={issuers.map((issuer) => ({

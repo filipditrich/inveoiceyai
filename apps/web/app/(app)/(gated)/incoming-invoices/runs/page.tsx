@@ -1,23 +1,34 @@
+import { IncomingInvoiceTabs } from "@/components/incoming-invoices/incoming-invoice-tabs";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import type { AppLocale } from "@/i18n/config";
 import { requireWorkspace } from "@/lib/auth/session";
+import { formatInvoiceDate, formatMoneyCode } from "@/lib/format";
+import { loadIncomingQueueCounts } from "@/lib/incoming-invoices/queue-counts";
+import { runStatusMessageKey } from "@/lib/incoming-invoices/run-status-message";
 import { paymentRuns } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { desc, eq } from "drizzle-orm";
 import { LandmarkIcon } from "lucide-react";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function PaymentRunsPage() {
-  const [t, { workspaceId }] = await Promise.all([
+  const [t, { workspaceId }, locale] = await Promise.all([
     getTranslations("IncomingInvoices.runs"),
     requireWorkspace(),
+    getLocale(),
   ]);
-  const rows = await db
-    .select()
-    .from(paymentRuns)
-    .where(eq(paymentRuns.workspaceId, workspaceId))
-    .orderBy(desc(paymentRuns.createdAt));
+  const appLocale = locale as AppLocale;
+  const [rows, counts] = await Promise.all([
+    db
+      .select()
+      .from(paymentRuns)
+      .where(eq(paymentRuns.workspaceId, workspaceId))
+      .orderBy(desc(paymentRuns.createdAt)),
+    loadIncomingQueueCounts(workspaceId),
+  ]);
 
   return (
     <div className="space-y-4 px-4 py-6 lg:px-6">
@@ -26,7 +37,8 @@ export default async function PaymentRunsPage() {
         title={t("title")}
         description={t("subtitle")}
       />
-      <div className="overflow-hidden rounded-xl border">
+      <IncomingInvoiceTabs active="runs" counts={counts} />
+      <div className="overflow-x-auto rounded-xl border">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>
@@ -44,7 +56,17 @@ export default async function PaymentRunsPage() {
                   className="text-muted-foreground px-3 py-8 text-center"
                   colSpan={5}
                 >
-                  {t("empty")}
+                  <p>{t("empty")}</p>
+                  <p className="mt-2">
+                    <Button
+                      size="sm"
+                      render={
+                        <Link href="/incoming-invoices?tab=pay" prefetch />
+                      }
+                    >
+                      {t("goToPay")}
+                    </Button>
+                  </p>
                 </td>
               </tr>
             ) : (
@@ -58,12 +80,20 @@ export default async function PaymentRunsPage() {
                       {row.name}
                     </Link>
                   </td>
-                  <td className="px-3 py-2">{row.executionDate}</td>
+                  <td className="px-3 py-2">
+                    {formatInvoiceDate(row.executionDate, appLocale)}
+                  </td>
                   <td className="px-3 py-2 tabular-nums">
-                    {row.totalAmount} {row.currency}
+                    {formatMoneyCode(
+                      Number(row.totalAmount),
+                      row.currency,
+                      appLocale,
+                    )}
                   </td>
                   <td className="px-3 py-2">
-                    <Badge variant="outline">{row.status}</Badge>
+                    <Badge variant="outline">
+                      {t(runStatusMessageKey(row.status))}
+                    </Badge>
                   </td>
                   <td className="px-3 py-2">{row.providerBatchId ?? "—"}</td>
                 </tr>

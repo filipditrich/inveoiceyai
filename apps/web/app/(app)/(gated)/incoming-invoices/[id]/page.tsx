@@ -1,14 +1,18 @@
 import {
-  acceptIncomingInvoiceAction,
   deleteIncomingInvoiceAction,
-  rejectIncomingInvoiceAction,
   updateIncomingInvoiceFields,
 } from "@/actions/incoming-invoices";
-import { decideIncomingApprovalAction } from "@/actions/incoming-approvals";
+import { IncomingDecisionBar } from "@/components/incoming-invoices/incoming-decision-bar";
+import { IncomingExceptionBadge } from "@/components/incoming-invoices/incoming-exception-badge";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import type { AppLocale } from "@/i18n/config";
 import { requireWorkspace } from "@/lib/auth/session";
+import { formatDateTime, formatMoneyCode } from "@/lib/format";
+import { incomingPaymentStateMessageKey } from "@/lib/incoming-invoices/payment-state-message";
 import { incomingStatusMessageKey } from "@/lib/incoming-invoices/status-message";
 import { invalidMessage } from "@/lib/invalid-message";
 import {
@@ -23,7 +27,7 @@ import { db } from "@invoicey/db/client";
 import { and, desc, eq } from "drizzle-orm";
 import { FileTextIcon } from "lucide-react";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 type Search = Promise<{ invalid?: string }>;
 
@@ -35,13 +39,15 @@ export default async function IncomingInvoiceDetailPage({
   searchParams: Search;
 }) {
   const { id } = await params;
-  const [t, tStatus, tErrors, sp, { workspaceId, userId }] = await Promise.all([
+  const [t, tStatus, tErrors, sp, { workspaceId }, locale] = await Promise.all([
     getTranslations("IncomingInvoices.detail"),
     getTranslations("IncomingInvoices"),
     getTranslations("Errors.invalid"),
     searchParams,
     requireWorkspace(),
+    getLocale(),
   ]);
+  const appLocale = locale as AppLocale;
   const [invoice] = await db
     .select()
     .from(incomingInvoices)
@@ -93,8 +99,23 @@ export default async function IncomingInvoiceDetailPage({
   const err = sp.invalid ? invalidMessage(tErrors, sp.invalid) : null;
   const editable =
     invoice.status === "needs_review" || invoice.status === "on_hold";
+  const pendingTask = tasks.find((task) => task.status === "pending");
   const viewerUrl = document
     ? `/api/incoming-documents/${document.id}?disposition=inline`
+    : null;
+  const nextReview = await db
+    .select({ id: incomingInvoices.id })
+    .from(incomingInvoices)
+    .where(
+      and(
+        eq(incomingInvoices.workspaceId, workspaceId),
+        eq(incomingInvoices.status, "needs_review"),
+      ),
+    )
+    .orderBy(desc(incomingInvoices.createdAt));
+  const nextId = nextReview.find((row) => row.id !== invoice.id)?.id ?? null;
+  const amount = invoice.total
+    ? formatMoneyCode(Number(invoice.total), invoice.currency, appLocale)
     : null;
 
   return (
@@ -105,10 +126,13 @@ export default async function IncomingInvoiceDetailPage({
         description={
           <span className="flex flex-wrap items-center gap-2">
             <span>{supplier?.name ?? invoice.supplierNameRaw ?? "—"}</span>
+            {amount ? <span className="tabular-nums">{amount}</span> : null}
             <Badge variant="outline">
               {tStatus(incomingStatusMessageKey(invoice.status))}
             </Badge>
-            <Badge variant="secondary">{invoice.paymentState}</Badge>
+            <Badge variant="secondary">
+              {tStatus(incomingPaymentStateMessageKey(invoice.paymentState))}
+            </Badge>
           </span>
         }
       />
@@ -116,6 +140,24 @@ export default async function IncomingInvoiceDetailPage({
         <p className="text-destructive text-sm" role="alert">
           {err}
         </p>
+      ) : null}
+      <IncomingDecisionBar
+        invoiceId={invoice.id}
+        status={invoice.status}
+        pendingTaskId={pendingTask?.id}
+        nextId={nextId}
+      />
+      {invoice.exceptionCodes.length > 0 ? (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+          <h2 className="mb-2 text-sm font-semibold">{t("exceptions")}</h2>
+          <ul className="flex flex-wrap gap-1">
+            {invoice.exceptionCodes.map((code) => (
+              <li key={code}>
+                <IncomingExceptionBadge code={code} />
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
       <div className="grid gap-4 lg:grid-cols-2">
         <section className="bg-card min-h-[32rem] overflow-hidden rounded-xl border">
@@ -132,22 +174,11 @@ export default async function IncomingInvoiceDetailPage({
           )}
         </section>
         <section className="space-y-4">
-          {invoice.exceptionCodes.length > 0 ? (
-            <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-              <h2 className="mb-2 text-sm font-semibold">{t("exceptions")}</h2>
-              <ul className="flex flex-wrap gap-1">
-                {invoice.exceptionCodes.map((code) => (
-                  <li key={code}>
-                    <Badge variant="secondary">{code}</Badge>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
           <form
             action={updateIncomingInvoiceFields}
             className="bg-card space-y-3 rounded-xl border p-4"
           >
+            <h2 className="text-sm font-semibold">{t("fields")}</h2>
             <input type="hidden" name="id" value={invoice.id} />
             <Field
               name="number"
@@ -160,12 +191,14 @@ export default async function IncomingInvoiceDetailPage({
               label={t("issueDate")}
               defaultValue={invoice.issueDate}
               disabled={!editable}
+              type="date"
             />
             <Field
               name="dueDate"
               label={t("dueDate")}
               defaultValue={invoice.dueDate}
               disabled={!editable}
+              type="date"
             />
             <Field
               name="currency"
@@ -211,68 +244,6 @@ export default async function IncomingInvoiceDetailPage({
             />
             {editable ? <Button type="submit">{t("save")}</Button> : null}
           </form>
-          {editable ? (
-            <div className="flex flex-wrap gap-2">
-              <form action={acceptIncomingInvoiceAction}>
-                <input type="hidden" name="id" value={invoice.id} />
-                <Button type="submit">{t("accept")}</Button>
-              </form>
-              <form action={rejectIncomingInvoiceAction} className="flex gap-2">
-                <input type="hidden" name="id" value={invoice.id} />
-                <input
-                  name="reason"
-                  required
-                  placeholder={t("rejectReason")}
-                  className="border-input rounded-md border px-2 py-1.5 text-sm"
-                />
-                <Button type="submit" variant="outline">
-                  {t("reject")}
-                </Button>
-              </form>
-            </div>
-          ) : null}
-          {tasks
-            .filter((task) => task.status === "pending")
-            .map((task) => (
-              <form
-                key={task.id}
-                action={decideIncomingApprovalAction}
-                className="bg-card space-y-2 rounded-xl border p-4"
-              >
-                <input type="hidden" name="taskId" value={task.id} />
-                <input type="hidden" name="invoiceId" value={invoice.id} />
-                <p className="text-sm">
-                  {t("approvalTask")} ·{" "}
-                  {task.assigneeRole ?? task.assigneeUserId}
-                </p>
-                <input
-                  name="comment"
-                  placeholder={t("comment")}
-                  className="border-input w-full rounded-md border px-2 py-1.5 text-sm"
-                />
-                <div className="flex flex-wrap gap-2">
-                  <Button name="decision" value="approved" type="submit">
-                    {t("approve")}
-                  </Button>
-                  <Button
-                    name="decision"
-                    value="rejected"
-                    type="submit"
-                    variant="outline"
-                  >
-                    {t("reject")}
-                  </Button>
-                  <Button
-                    name="decision"
-                    value="changes_requested"
-                    type="submit"
-                    variant="ghost"
-                  >
-                    {t("requestChanges")}
-                  </Button>
-                </div>
-              </form>
-            ))}
           {lines.length > 0 ? (
             <div className="overflow-hidden rounded-xl border">
               <table className="w-full text-sm">
@@ -287,7 +258,13 @@ export default async function IncomingInvoiceDetailPage({
                     <tr key={line.id} className="border-t">
                       <td className="px-3 py-2">{line.description}</td>
                       <td className="px-3 py-2 tabular-nums">
-                        {line.lineTotal}
+                        {line.lineTotal
+                          ? formatMoneyCode(
+                              Number(line.lineTotal),
+                              invoice.currency,
+                              appLocale,
+                            )
+                          : "—"}
                       </td>
                     </tr>
                   ))}
@@ -301,13 +278,18 @@ export default async function IncomingInvoiceDetailPage({
               {t("delete")}
             </Button>
           </form>
-          <ol className="text-muted-foreground space-y-1 text-xs">
-            {audit.map((event) => (
-              <li key={event.id}>
-                {event.createdAt.toISOString()} · {event.action}
+          {audit.length > 0 ? (
+            <ol className="text-muted-foreground space-y-1 text-xs">
+              <li className="text-foreground text-sm font-semibold">
+                {t("activity")}
               </li>
-            ))}
-          </ol>
+              {audit.map((event) => (
+                <li key={event.id}>
+                  {formatDateTime(event.createdAt, appLocale)} · {event.action}
+                </li>
+              ))}
+            </ol>
+          ) : null}
         </section>
       </div>
     </div>
@@ -319,21 +301,24 @@ function Field({
   label,
   defaultValue,
   disabled,
+  type = "text",
 }: {
   name: string;
   label: string;
   defaultValue?: string | null;
   disabled?: boolean;
+  type?: string;
 }) {
   return (
-    <label className="grid gap-1 text-sm">
-      <span>{label}</span>
-      <input
+    <div className="grid gap-1.5">
+      <Label htmlFor={name}>{label}</Label>
+      <Input
+        id={name}
         name={name}
+        type={type}
         defaultValue={defaultValue ?? ""}
         disabled={disabled}
-        className="border-input rounded-md border px-2 py-1.5 disabled:opacity-60"
       />
-    </label>
+    </div>
   );
 }

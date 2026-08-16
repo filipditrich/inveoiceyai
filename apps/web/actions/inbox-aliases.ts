@@ -2,7 +2,7 @@
 
 import { inboxAliases, paymentAuditEvents } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -21,7 +21,7 @@ function localPart(): string {
 
 export async function ensurePrimaryInboxAlias(): Promise<void> {
   const { workspaceId } = await requireWorkspace();
-  const [existing] = await db
+  const active = await db
     .select({ id: inboxAliases.id })
     .from(inboxAliases)
     .where(
@@ -30,13 +30,21 @@ export async function ensurePrimaryInboxAlias(): Promise<void> {
         eq(inboxAliases.isActive, true),
       ),
     )
-    .limit(1);
-  if (existing) return;
-  await db.insert(inboxAliases).values({
-    workspaceId,
-    localPart: localPart(),
-    label: "primary",
-  });
+    .orderBy(desc(inboxAliases.createdAt));
+  if (active.length === 0) {
+    await db.insert(inboxAliases).values({
+      workspaceId,
+      localPart: localPart(),
+      label: "primary",
+    });
+    return;
+  }
+  const extras = active.slice(1).map((row) => row.id);
+  if (extras.length === 0) return;
+  await db
+    .update(inboxAliases)
+    .set({ isActive: false, deactivatedAt: new Date(), label: "rotated" })
+    .where(inArray(inboxAliases.id, extras));
 }
 
 export async function rotateInboxAliasAction(
