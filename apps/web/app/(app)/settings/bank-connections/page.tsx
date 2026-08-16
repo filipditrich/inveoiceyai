@@ -17,8 +17,10 @@ import Image from "next/image";
 
 import {
   connectFio,
+  disableFioPayments,
   disconnectFio,
   disconnectMoneta,
+  enableFioPayments,
   syncFio,
   syncMoneta,
   toggleFioAutoMatch,
@@ -246,6 +248,80 @@ export default async function BankConnectionsPage() {
                   action={toggleAction}
                 />
               </div>
+              {canManage && connection.status === "active" && !isMoneta ? (
+                <div className="space-y-3 rounded-2xl border p-4">
+                  <p className="font-medium">{t("paymentsTitle")}</p>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {t("paymentsCannotAuthorize")}
+                  </p>
+                  {"paymentEnabledAt" in connection &&
+                  connection.paymentEnabledAt ? (
+                    <p className="text-sm">
+                      {t("paymentsEnabled")}
+                      {connection.paymentTokenExpiresAt
+                        ? ` · ${t("paymentsExpires", {
+                            date: formatDateTime(
+                              connection.paymentTokenExpiresAt,
+                              locale,
+                            ),
+                          })}`
+                        : ""}
+                    </p>
+                  ) : null}
+                  <form
+                    action={enableFioPayments}
+                    className="grid gap-3 sm:grid-cols-2"
+                  >
+                    <input
+                      type="hidden"
+                      name="connectionId"
+                      value={connection.id}
+                    />
+                    <div className="space-y-1 sm:col-span-2">
+                      <Label htmlFor={`paymentToken-${connection.id}`}>
+                        {t("paymentsTokenLabel")}
+                      </Label>
+                      <Input
+                        id={`paymentToken-${connection.id}`}
+                        name="paymentToken"
+                        type="password"
+                        required
+                        minLength={64}
+                        autoComplete="off"
+                        spellCheck={false}
+                        placeholder={t("paymentsTokenPlaceholder")}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor={`paymentTokenExpiresAt-${connection.id}`}>
+                        {t("paymentsExpiresLabel")}
+                      </Label>
+                      <Input
+                        id={`paymentTokenExpiresAt-${connection.id}`}
+                        name="paymentTokenExpiresAt"
+                        type="date"
+                        required
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <Button type="submit">{t("paymentsEnable")}</Button>
+                    </div>
+                  </form>
+                  {"paymentEnabledAt" in connection &&
+                  connection.paymentEnabledAt ? (
+                    <form action={disableFioPayments}>
+                      <input
+                        type="hidden"
+                        name="connectionId"
+                        value={connection.id}
+                      />
+                      <Button type="submit" variant="outline">
+                        {t("paymentsDisable")}
+                      </Button>
+                    </form>
+                  ) : null}
+                </div>
+              ) : null}
               {canManage && connection.status === "active" ? (
                 <div className="flex flex-wrap gap-2">
                   <form action={syncAction}>

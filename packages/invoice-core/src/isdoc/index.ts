@@ -16,8 +16,12 @@ export {
 } from "./extract-isdoc-from-pdf";
 export {
   parseIsdoc,
+  parseIsdocAsIncoming,
   parseIssuerFromIsdoc,
+  type IncomingDocType,
+  type IncomingInvoiceLine,
   type ParseIsdocOptions,
   type ParseIsdocResult,
+  type ParsedIncomingIsdoc,
   type ParsedIssuerFromIsdoc,
 } from "./parse-isdoc";

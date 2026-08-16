@@ -77,6 +77,20 @@ declare const messages: {
       missing_row: "Záznam nenalezen.";
       save_failed: "Uložení se nezdařilo.";
       generic: "Chyba: {code}";
+      not_reviewable: "Tato faktura už není ke kontrole.";
+      missing_required_field: "Chybí povinné pole.";
+      duplicate_invoice: "Faktura se stejným dodavatelem a číslem už existuje.";
+      retention_window: "Přijatou fakturu nelze smazat v archivační lhůtě.";
+      reason_required: "Důvod je povinný.";
+      four_eyes: "Kdo fakturu přijal, nemůže být jediný schvalovatel.";
+      forbidden: "Na tuto akci nemáte oprávnění.";
+      not_ready: "Dávka ještě není připravená k odeslání.";
+      empty_run: "Dávka nemá žádné způsobilé položky.";
+      payment_token_missing: "Nejdřív uložte Fio token pro odesílání v nastavení banky.";
+      payment_token_expired: "Fio token pro odesílání vypršel.";
+      fio_throttled_locally: "Fio je dočasně omezené. Zkuste to za 30 sekund.";
+      sum_mismatch: "Fio přijalo jinou částku, než je v dávce.";
+      run_create_failed: "Platební dávku se nepodařilo vytvořit.";
     };
   };
   Toasts: {
@@ -114,6 +128,23 @@ declare const messages: {
     platform_admin_revoked: "Platformní admin odebrán";
     platform_admin_last: "Nelze odebrat posledního platformního admina";
     platform_admin_failed: "Platformní roli se nepodařilo změnit";
+    incoming_saved: "Přijatá faktura uložena";
+    incoming_accepted: "Faktura přijata";
+    incoming_rejected: "Faktura zamítnuta";
+    incoming_deleted: "Přijatá faktura smazána";
+    incoming_uploaded: "Dokumenty zpracovány";
+    incoming_approval_decided: "Schválení zaznamenáno";
+    supplier_saved: "Dodavatel uložen";
+    supplier_account_confirmed: "Účet dodavatele potvrzen";
+    approval_rule_saved: "Pravidlo schválení uloženo";
+    approval_rule_deleted: "Pravidlo smazáno";
+    inbox_alias_rotated: "Adresa inboxu otočena";
+    payment_run_created: "Platební dávka vytvořena";
+    payment_run_ready: "Dávka potvrzena — čeká na odeslání do banky";
+    payment_run_line_dropped: "Položka vrácena do kalendáře";
+    payment_run_submitted: "Dávka odeslána do Fio — čeká na vaši autorizaci";
+    fio_payments_enabled: "Fio token pro odesílání uložen";
+    fio_payments_disabled: "Práva k odesílání plateb odebrána";
   };
   ToastDescriptions: {
     issuer_saved: "Údaje podnikatele jsou připravené pro další faktury.";
@@ -147,6 +178,23 @@ declare const messages: {
     platform_admin_revoked: "Přístup ke správě platformy byl odebrán.";
     platform_admin_last: "Musí zůstat alespoň jeden platformní administrátor.";
     platform_admin_failed: "Přístup se nezměnil.";
+    incoming_saved: "Pole přijaté faktury byla uložena.";
+    incoming_accepted: "Záznam je důvěryhodný a pokračuje ke schválení.";
+    incoming_rejected: "Faktura byla zamítnuta.";
+    incoming_deleted: "Záznam byl odstraněn nebo zrušen v rámci retence.";
+    incoming_uploaded: "Soubory prošly stejnou cestou jako e-mailový inbox.";
+    incoming_approval_decided: "Rozhodnutí je v auditní stopě.";
+    supplier_saved: "Dodavatel je připravený pro další faktury.";
+    supplier_account_confirmed: "Účet lze použít v platební dávce.";
+    approval_rule_saved: "Pravidlo se použije při dalším přijetí.";
+    approval_rule_deleted: "Pravidlo už se nebude vyhodnocovat.";
+    inbox_alias_rotated: "Stará adresa už nic neuloží.";
+    payment_run_created: "Vybrané splatné faktury jsou v dávce.";
+    payment_run_ready: "Účty příjemců jsou zmrazené. Odeslání do Fio je další krok.";
+    payment_run_line_dropped: "Faktura se vrátila do kalendáře k zaplacení.";
+    payment_run_submitted: "Dávka je ve Fio ve frontě příkazů k podpisu. Nic ještě nebylo zaplaceno.";
+    fio_payments_enabled: "Invoicey teď může navrhnout dávku. Platbu pořád autorizujete ve Fio.";
+    fio_payments_disabled: "Synchronizace výpisů zůstává. Nové dávky nelze odeslat.";
   };
   Status: {
     invoice: {
@@ -552,6 +600,8 @@ declare const messages: {
       invoicesImport: "Importovat staré faktury";
       invoicesFromJson: "Faktura z JSON";
       invoicesRecurring: "Opakované faktury";
+      incomingInvoices: "Přijaté faktury";
+      suppliers: "Dodavatelé";
       payments: "Platby";
       clients: "Klienti";
       issuers: "Moje podnikání";
@@ -572,6 +622,11 @@ declare const messages: {
     breadcrumb: {
       dashboard: "Přehled";
       invoices: "Faktury";
+      "incoming-invoices": "Přijaté faktury";
+      suppliers: "Dodavatelé";
+      inbox: "Inbox";
+      runs: "Platební dávky";
+      upload: "Nahrát";
       clients: "Klienti";
       issuers: "Dodavatelé";
       settings: "Nastavení";
@@ -618,6 +673,7 @@ declare const messages: {
         referrals: "Doporučení";
         apiKeys: "API klíče";
         bankConnections: "Bankovní spojení";
+        incomingInvoices: "Přijaté faktury";
         integrations: "Integrace";
       };
       navDescriptions: {
@@ -629,6 +685,7 @@ declare const messages: {
         referrals: "Pozvěte přátele do Invoicey";
         apiKeys: "Přístup pro automatizaci";
         bankConnections: "Bankovní přehledy jen pro čtení";
+        incomingInvoices: "Inbox alias a pravidla schválení";
         integrations: "Slack, MCP a další nástroje";
       };
       workspace: {
@@ -1712,6 +1769,20 @@ declare const messages: {
         rebindSuccess: "Slack teď používá aktuální workspace";
       };
     };
+    incomingInvoices: {
+      title: "Přijaté faktury";
+      subtitle: "Adresa inboxu je nositel oprávnění. Pravidla schválení jsou volitelná — bez nich se faktura po přijetí schválí sama.";
+      aliasTitle: "Adresa inboxu";
+      aliasWarning: "Kdo zná tuto adresu, může sem posílat dokumenty. Otáčením starou adresu ihned vypnete.";
+      active: "Aktivní";
+      rotated: "Vypnuto";
+      rotate: "Otočit adresu";
+      rulesTitle: "Pravidla schválení";
+      rulesHint: "První shoda podle priority vyhrává. Bez pravidel se po přijetí faktura schválí automaticky.";
+      ruleName: "Název pravidla";
+      saveRule: "Uložit pravidlo";
+      deleteRule: "Smazat";
+    };
     bankConnections: {
       pageTitle: "Bankovní spojení";
       pageDescription: "Připojte k tomuto workspace bankovní přehled jen pro čtení. Tokeny a účty se s ostatními workspace nesdílejí.";
@@ -1738,7 +1809,16 @@ declare const messages: {
       unavailable: "Nedostupné";
       noteDeferred: "Odloženo";
       noteNotPlanned: "Neplánováno";
-      footer: "Připojení patří aktuálnímu workspace, ne vašemu uživatelskému účtu. V každém workspace se banka nastavuje zvlášť. Invoicey importuje jen příchozí transakce — peníze odesílat neumí. Tokeny MONETA obvykle vyprší do 90 dnů a obnovují se v Internet Bance.";
+      footer: "Připojení patří aktuálnímu workspace, ne vašemu uživatelskému účtu. V každém workspace se banka nastavuje zvlášť. Synchronizace výpisů je jen pro čtení. Samostatný Fio token pro odesílání může vložit dávku do fronty příkazů k podpisu; Invoicey platbu nikdy neautorizuje. Tokeny MONETA obvykle vyprší do 90 dnů a obnovují se v Internet Bance.";
+      paymentsTitle: "Zahájení plateb (Fio)";
+      paymentsCannotAuthorize: "Invoicey platby autorizovat neumí. Token s právem odesílat jen vloží dávku do fronty příkazů k podpisu ve Fio. Podpisník ji musí uvolnit v internetovém bankovnictví.";
+      paymentsEnabled: "Token pro odesílání je uložený šifrovaně.";
+      paymentsExpires: "Vyprší {date}";
+      paymentsTokenLabel: "Fio token pro odesílání";
+      paymentsTokenPlaceholder: "64znakový token s právem odesílat";
+      paymentsExpiresLabel: "Platnost tokenu";
+      paymentsEnable: "Uložit token";
+      paymentsDisable: "Odebrat práva k odesílání";
       providers: {
         fio: "Fio banka";
         moneta: "MONETA Money Bank";
@@ -1802,6 +1882,11 @@ declare const messages: {
         moneta_account_changed: "MONETA účet už tomuto připojení neodpovídá.";
         moneta_unauthorized: "MONETA token byl odmítnut. V Internet Bance vytvořte nový.";
         not_found: "Připojení nebylo nalezeno.";
+        missing_connection: "Vyberte bankovní připojení.";
+        missing_issuer: "Vyberte dodavatele, který platby přijímá.";
+        missing_fio_payment_token: "Vložte Fio token s právem odesílat.";
+        missing_payment_token_expiry: "Zadejte datum vypršení tokenu z Fio.";
+        payment_token_expired: "Token pro odesílání vypršel. Zadejte nový.";
       };
     };
   };
@@ -2043,6 +2128,123 @@ declare const messages: {
       noAds: "Invoicey aktuálně nepoužívá reklamní cookies. Více informací najdete v zásadách používání cookies a ochrany soukromí.";
       footerHint: "Vyberte, co může Invoicey používat. Volbu můžete kdykoliv změnit v patičce webu.";
     };
+  };
+  IncomingInvoices: {
+    title: "Přijaté faktury";
+    subtitle: "Ke zpracování, schválení a zaplacení — tři samostatné brány.";
+    upload: "Nahrát";
+    empty: "Tady zatím nic není.";
+    myTask: "Moje";
+    tabs: {
+      review: "Ke zpracování";
+      approval: "Ke schválení";
+      pay: "K zaplacení";
+      all: "Vše";
+      inbox: "Inbox";
+      runs: "Dávky";
+    };
+    table: {
+      number: "Číslo";
+      supplier: "Dodavatel";
+      due: "Splatnost";
+      total: "Celkem";
+      status: "Stav";
+    };
+    status: {
+      needs_review: "Ke kontrole";
+      extract_failed: "Extrakce selhala";
+      accepted: "Přijato";
+      pending_approval: "Čeká na schválení";
+      approved: "Schváleno";
+      on_hold: "Pozastaveno";
+      rejected: "Zamítnuto";
+      cancelled: "Zrušeno";
+    };
+    run: {
+      issuer: "Platící subjekt";
+      account: "Účet";
+      create: "Vytvořit dávku ({count})";
+    };
+    detail: {
+      untitled: "Bez čísla";
+      document: "Dokument";
+      noDocument: "Dokument není k dispozici";
+      exceptions: "Výjimky";
+      number: "Číslo";
+      issueDate: "Datum vystavení";
+      dueDate: "Splatnost";
+      currency: "Měna";
+      total: "Celkem";
+      subtotal: "Základ";
+      vatTotal: "DPH";
+      variableSymbol: "VS";
+      iban: "IBAN";
+      notes: "Poznámka";
+      save: "Uložit";
+      accept: "Přijmout";
+      reject: "Zamítnout";
+      rejectReason: "Důvod zamítnutí";
+      approvalTask: "Úkol schválení";
+      comment: "Komentář";
+      approve: "Schválit";
+      requestChanges: "Vrátit k úpravě";
+      line: "Položka";
+      lineTotal: "Celkem";
+      delete: "Smazat";
+    };
+    uploadPage: {
+      title: "Nahrát přijaté faktury";
+      subtitle: "PDF nebo ISDOC. Stejná cesta jako e-mailový inbox.";
+      issuer: "Přijímající subjekt";
+      process: "Zpracovat";
+      processing: "Zpracovávám…";
+    };
+    inbox: {
+      title: "Inbox";
+      subtitle: "Surové e-maily a nahrávky, včetně zaparkovaných ne-faktur.";
+      received: "Přijato";
+      from: "Od";
+      subject: "Předmět";
+      status: "Stav";
+      documents: "Dokumenty";
+      empty: "Inbox je prázdný.";
+    };
+    runs: {
+      title: "Platební dávky";
+      subtitle: "Dávka v bance čeká na vaši autorizaci. Nic není zaplaceno, dokud nedorazí debet.";
+      name: "Název";
+      date: "Datum splatnosti";
+      total: "Celkem";
+      status: "Stav";
+      batch: "ID dávky";
+      empty: "Zatím žádné dávky.";
+      awaitingAuthorization: "Dávka je ve Fio ve frontě příkazů k podpisu. Autorizujte ji v internetovém bankovnictví. Nic ještě nebylo zaplaceno.";
+      confirm: "Potvrdit a zmrazit účty";
+      beneficiary: "Příjemce";
+      amount: "Částka";
+      rail: "Kanál";
+      drop: "Vyřadit";
+      submit: "Odeslat do Fio";
+      submitHint: "Invoicey platbu autorizovat neumí. Po odeslání dávku podepište v internetovém bankovnictví Fio.";
+    };
+  };
+  Suppliers: {
+    title: "Dodavatelé";
+    subtitle: "Protistrany, od kterých přijímáte faktury.";
+    name: "Název";
+    ico: "IČO";
+    dic: "DIČ";
+    trusted: "Důvěryhodný";
+    yes: "Ano";
+    no: "Ne";
+    create: "Přidat";
+    save: "Uložit";
+    empty: "Zatím žádní dodavatelé.";
+    accounts: "Známé účty";
+    account: "Účet";
+    confirmed: "Potvrzeno";
+    confirm: "Potvrdit";
+    invoices: "Faktury";
   };
   Pwa: {
     name: "Invoicey";

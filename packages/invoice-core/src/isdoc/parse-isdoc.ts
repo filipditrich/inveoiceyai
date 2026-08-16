@@ -578,3 +578,259 @@ export function parseIssuerFromIsdoc(xml: string): ParsedIssuerFromIsdoc {
     bic,
   };
 }
+
+export type IncomingDocType =
+  "invoice" | "credit_note" | "proforma" | "advance";
+
+export type IncomingInvoiceLine = {
+  position: number;
+  description: string;
+  quantity: string;
+  unit?: string;
+  unitPriceWithoutVat?: string;
+  vatRate?: string;
+  lineSubtotal?: string;
+  lineVat?: string;
+  lineTotal?: string;
+};
+
+export type ParsedIncomingIsdoc = {
+  supplier: {
+    ico?: string;
+    dic?: string;
+    name: string;
+    address: { street: string; city: string; zip: string; country: string };
+  };
+  customer: { ico?: string; dic?: string; name: string };
+  header: {
+    number: string;
+    docType: IncomingDocType;
+    issueDate: string;
+    taxDate?: string;
+    dueDate: string;
+    currency: string;
+    subtotal: string;
+    vatTotal: string;
+    total: string;
+    variableSymbol?: string;
+    constantSymbol?: string;
+    specificSymbol?: string;
+    paymentMethod: "transfer" | "card" | "cash" | "direct_debit" | "other";
+    messageForRecipient?: string;
+  };
+  payment: {
+    iban?: string;
+    accountNumber?: string;
+    bankCode?: string;
+    bic?: string;
+  };
+  vatBreakdown: Array<{ rate: string; base: string; vat: string }>;
+  lines: IncomingInvoiceLine[];
+  isdocUuid?: string;
+};
+
+function money2(n: number): string {
+  return n.toFixed(2);
+}
+
+function money4(n: number): string {
+  return n.toFixed(4);
+}
+
+/**
+ * Parse ISDOC as a supplier invoice addressed to us (inverted party mapping).
+ */
+export function parseIsdocAsIncoming(xml: string): ParsedIncomingIsdoc {
+  const converted = convert(xml, { format: "object" });
+  const root = findInvoiceRoot(converted);
+  if (!root) {
+    throw new Error("isdoc_missing_invoice_root");
+  }
+
+  const number = textOf(child(root, "ID"));
+  if (!number) {
+    throw new Error("isdoc_missing_number");
+  }
+
+  const docType = docTypeFromIsdoc(textOf(child(root, "DocumentType")));
+  const issueDate = textOf(child(root, "IssueDate"));
+  const taxDate = textOf(child(root, "TaxPointDate")) || undefined;
+  const isdocUuid = textOf(child(root, "UUID")) || undefined;
+
+  const supplierParty = child(child(root, "AccountingSupplierParty"), "Party");
+  const customerParty = child(child(root, "AccountingCustomerParty"), "Party");
+  const supplierName = partyName(supplierParty);
+  if (!supplierName) {
+    throw new Error("isdoc_missing_supplier_name");
+  }
+
+  const lineNodes = children(child(root, "InvoiceLines"), "InvoiceLine");
+  const lines: IncomingInvoiceLine[] = lineNodes.map((line, index) => {
+    const qty = numOf(child(line, "InvoicedQuantity"), 1);
+    const unitCode =
+      asRecord(child(line, "InvoicedQuantity"))?.["@unitCode"] != null
+        ? String(asRecord(child(line, "InvoicedQuantity"))!["@unitCode"])
+        : "C62";
+    const vatRate = Math.round(
+      numOf(child(child(line, "ClassifiedTaxCategory"), "Percent"), 0),
+    );
+    const lineSubtotal = numOf(child(line, "LineExtensionAmount"));
+    const lineVat = numOf(child(line, "LineExtensionTaxAmount"));
+    const lineTotal = numOf(
+      child(line, "LineExtensionAmountTaxInclusive"),
+      lineSubtotal + lineVat,
+    );
+    const unitPrice = numOf(
+      child(line, "UnitPrice"),
+      qty !== 0 ? lineSubtotal / qty : 0,
+    );
+    return {
+      position: Number(textOf(child(line, "ID"))) || index + 1,
+      description:
+        textOf(child(child(line, "Item"), "Description")) ||
+        `Položka ${index + 1}`,
+      quantity: money4(qty || 1),
+      unit: unitFromCode(unitCode),
+      unitPriceWithoutVat: money4(unitPrice),
+      vatRate: String(vatRate),
+      lineSubtotal: money2(lineSubtotal),
+      lineVat: money2(lineVat),
+      lineTotal: money2(lineTotal),
+    };
+  });
+
+  const vatBreakdownMap = new Map<number, { base: number; vat: number }>();
+  for (const st of children(child(root, "TaxTotal"), "TaxSubTotal")) {
+    const rate = Math.round(
+      numOf(child(child(st, "TaxCategory"), "Percent"), 0),
+    );
+    const base = numOf(child(st, "TaxableAmount"));
+    const vat = numOf(child(st, "TaxAmount"));
+    const prev = vatBreakdownMap.get(rate) ?? { base: 0, vat: 0 };
+    vatBreakdownMap.set(rate, { base: prev.base + base, vat: prev.vat + vat });
+  }
+  let vatBreakdown = [...vatBreakdownMap.entries()].map(([rate, v]) => ({
+    rate: String(rate),
+    base: money2(v.base),
+    vat: money2(v.vat),
+  }));
+  if (vatBreakdown.length === 0 && lines.length > 0) {
+    const byRate = new Map<number, { base: number; vat: number }>();
+    for (const line of lines) {
+      const rate = Number(line.vatRate ?? 0);
+      const prev = byRate.get(rate) ?? { base: 0, vat: 0 };
+      byRate.set(rate, {
+        base: prev.base + Number(line.lineSubtotal ?? 0),
+        vat: prev.vat + Number(line.lineVat ?? 0),
+      });
+    }
+    vatBreakdown = [...byRate.entries()].map(([rate, v]) => ({
+      rate: String(rate),
+      base: money2(v.base),
+      vat: money2(v.vat),
+    }));
+  }
+
+  const subtotal = numOf(
+    child(child(root, "LegalMonetaryTotal"), "TaxExclusiveAmount"),
+    lines.reduce((s, l) => s + Number(l.lineSubtotal ?? 0), 0),
+  );
+  let total = numOf(
+    child(child(root, "LegalMonetaryTotal"), "PayableAmount"),
+    lines.reduce((s, l) => s + Number(l.lineTotal ?? 0), 0),
+  );
+  const vatTotal = numOf(
+    child(child(root, "TaxTotal"), "TaxAmount"),
+    lines.reduce((s, l) => s + Number(l.lineVat ?? 0), 0),
+  );
+  if (docType === "credit_note" && total > 0) {
+    total = -total;
+  }
+
+  const paymentNode = children(child(root, "PaymentMeans"), "Payment")[0];
+  const meansCode = textOf(child(paymentNode, "PaymentMeansCode")) || "42";
+  const details = child(paymentNode, "Details");
+  const dueDate =
+    textOf(child(details, "PaymentDueDate")) ||
+    textOf(child(root, "PaymentDueDate")) ||
+    issueDate;
+  const accountNumber = textOf(child(details, "ID")) || undefined;
+  const bankCode = textOf(child(details, "BankCode")) || undefined;
+  const ibanRaw = textOf(child(details, "IBAN"))
+    .replace(/\s+/gu, "")
+    .toUpperCase();
+  const iban = ibanRaw || undefined;
+  const bic = textOf(child(details, "BIC")) || undefined;
+  const method = paymentMethodFromCode(meansCode);
+  const incomingMethod =
+    method === "cash" || method === "card" || method === "transfer"
+      ? method
+      : "other";
+
+  const currencyRaw = textOf(child(root, "LocalCurrencyCode")) || "CZK";
+
+  return {
+    supplier: {
+      ico: partyIco(supplierParty),
+      dic: partyDic(supplierParty),
+      name: supplierName,
+      address: partyAddress(supplierParty),
+    },
+    customer: {
+      ico: partyIco(customerParty),
+      dic: partyDic(customerParty),
+      name: partyName(customerParty),
+    },
+    header: {
+      number,
+      docType,
+      issueDate,
+      taxDate,
+      dueDate: dueDate || issueDate,
+      currency: currencyRaw.toUpperCase() || "CZK",
+      subtotal: money2(
+        docType === "credit_note" && subtotal > 0 ? -subtotal : subtotal,
+      ),
+      vatTotal: money2(
+        docType === "credit_note" && vatTotal > 0 ? -vatTotal : vatTotal,
+      ),
+      total: money2(total),
+      variableSymbol: textOf(child(details, "VariableSymbol")) || undefined,
+      constantSymbol: textOf(child(details, "ConstantSymbol")) || undefined,
+      specificSymbol: textOf(child(details, "SpecificSymbol")) || undefined,
+      paymentMethod: incomingMethod,
+      messageForRecipient: textOf(child(root, "Note")) || undefined,
+    },
+    payment: {
+      iban,
+      accountNumber,
+      bankCode,
+      bic,
+    },
+    vatBreakdown: vatBreakdown.map((row) =>
+      docType === "credit_note"
+        ? {
+            rate: row.rate,
+            base: money2(-Math.abs(Number(row.base))),
+            vat: money2(-Math.abs(Number(row.vat))),
+          }
+        : row,
+    ),
+    lines:
+      docType === "credit_note"
+        ? lines.map((line) => ({
+            ...line,
+            lineSubtotal: line.lineSubtotal
+              ? money2(-Math.abs(Number(line.lineSubtotal)))
+              : line.lineSubtotal,
+            lineVat: line.lineVat
+              ? money2(-Math.abs(Number(line.lineVat)))
+              : line.lineVat,
+            lineTotal: line.lineTotal
+              ? money2(-Math.abs(Number(line.lineTotal)))
+              : line.lineTotal,
+          }))
+        : lines,
+    isdocUuid,
+  };
+}

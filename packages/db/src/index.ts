@@ -80,3 +80,25 @@ export {
   type EnsureClientOptions,
   type MergeDuplicateClientsResult,
 } from "./clients-repo";
+export {
+  acceptIncomingInvoice,
+  createUploadInboxItem,
+  deleteIncomingInvoice,
+  ensureSupplier,
+  persistIncomingInvoice,
+  recordSupplierBankAccount,
+  rejectIncomingInvoice,
+  resolveIssuerByIco,
+  upsertIncomingDocument,
+  type PersistIncomingInvoiceInput,
+} from "./incoming-repo";
+export {
+  decideApprovalTask,
+  spawnApprovalForAcceptedInvoice,
+} from "./approvals-repo";
+export {
+  confirmPayableMatchProposal,
+  createManualPayableAllocation,
+  reversePayableAllocation,
+  type PayableAllocationResult,
+} from "./payables-repo";

@@ -12,7 +12,12 @@ import { user } from "./auth-schema";
 import { workspaces } from "./workspaces";
 
 /** Surfaces that can emit AI usage events. */
-export const AI_USAGE_PRODUCTS = ["web", "slack", "mcp"] as const;
+export const AI_USAGE_PRODUCTS = [
+  "web",
+  "slack",
+  "mcp",
+  "incoming_invoice_extract",
+] as const;
 export type AiUsageProduct = (typeof AI_USAGE_PRODUCTS)[number];
 
 /** LLM burns tokens; MCP tool calls are activity-only. */

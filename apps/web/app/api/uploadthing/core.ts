@@ -66,6 +66,17 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ file }) => {
       return { url: file.ufsUrl, name: file.name };
     }),
+  incomingInvoiceDocument: f({
+    "application/pdf": { maxFileSize: "16MB", maxFileCount: 20 },
+    "application/xml": { maxFileSize: "2MB", maxFileCount: 20 },
+    "text/xml": { maxFileSize: "2MB", maxFileCount: 20 },
+    "image/png": { maxFileSize: "8MB", maxFileCount: 20 },
+    "image/jpeg": { maxFileSize: "8MB", maxFileCount: 20 },
+  })
+    .middleware(authedMiddleware)
+    .onUploadComplete(async ({ file }) => {
+      return { url: file.ufsUrl, name: file.name, type: file.type };
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

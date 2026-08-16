@@ -336,6 +336,7 @@ export async function syncMonetaConnection(input: {
       autoConfirmExactMatches: leased.autoConfirmExactMatches,
       createdByUserId: leased.createdByUserId,
       logPrefix: "moneta-sync",
+      importScope: account.importScope,
     });
     await markBankSyncSucceeded({
       connectionId: leased.id,

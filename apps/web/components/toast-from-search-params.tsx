@@ -39,6 +39,23 @@ const TOAST_KEYS = [
   "platform_admin_revoked",
   "platform_admin_last",
   "platform_admin_failed",
+  "incoming_saved",
+  "incoming_accepted",
+  "incoming_rejected",
+  "incoming_deleted",
+  "incoming_uploaded",
+  "incoming_approval_decided",
+  "supplier_saved",
+  "supplier_account_confirmed",
+  "approval_rule_saved",
+  "approval_rule_deleted",
+  "inbox_alias_rotated",
+  "payment_run_created",
+  "payment_run_ready",
+  "payment_run_line_dropped",
+  "payment_run_submitted",
+  "fio_payments_enabled",
+  "fio_payments_disabled",
 ] as const;
 
 type ToastKey = (typeof TOAST_KEYS)[number];

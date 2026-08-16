@@ -7,6 +7,7 @@ import {
   ActivityIcon,
   LandmarkIcon,
   Building2Icon,
+  InboxIcon,
   GiftIcon,
   KeyRoundIcon,
   PlugZapIcon,
@@ -63,6 +64,12 @@ const WORKSPACE_LINKS = [
     key: "apiKeys" as const,
     exact: false,
     icon: KeyRoundIcon,
+  },
+  {
+    href: "/settings/incoming-invoices",
+    key: "incomingInvoices" as const,
+    exact: false,
+    icon: InboxIcon,
   },
   {
     href: "/settings/bank-connections",

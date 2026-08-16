@@ -18,6 +18,20 @@ const KNOWN_INVALID_CODES = [
   "invalid_cadence",
   "open_draft",
   "invalid_payload",
+  "not_reviewable",
+  "missing_required_field",
+  "duplicate_invoice",
+  "retention_window",
+  "reason_required",
+  "four_eyes",
+  "forbidden",
+  "not_ready",
+  "empty_run",
+  "payment_token_missing",
+  "payment_token_expired",
+  "fio_throttled_locally",
+  "sum_mismatch",
+  "run_create_failed",
 ] as const;
 
 type KnownInvalidCode = (typeof KNOWN_INVALID_CODES)[number];

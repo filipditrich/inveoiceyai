@@ -73,7 +73,21 @@
       "snapshot_validation": "Data does not match the schema.",
       "missing_row": "Record not found.",
       "save_failed": "Save failed.",
-      "generic": "Error: {code}"
+      "generic": "Error: {code}",
+      "not_reviewable": "This invoice is no longer in review.",
+      "missing_required_field": "A required field is empty.",
+      "duplicate_invoice": "An invoice with this supplier and number already exists.",
+      "retention_window": "An accepted invoice cannot be deleted inside its retention window.",
+      "reason_required": "A reason is required.",
+      "four_eyes": "The person who accepted cannot be the sole approver.",
+      "forbidden": "You do not have permission for this action.",
+      "not_ready": "This run is not ready to submit.",
+      "empty_run": "The run has no eligible lines.",
+      "payment_token_missing": "Save a Fio submit token in bank settings first.",
+      "payment_token_expired": "The Fio submit token has expired.",
+      "fio_throttled_locally": "Fio is rate-limited. Try again in 30 seconds.",
+      "sum_mismatch": "Fio accepted a different total than this run.",
+      "run_create_failed": "Could not create the payment run."
     }
   },
   "Toasts": {
@@ -110,7 +124,24 @@
     "platform_admin_granted": "Platform admin granted",
     "platform_admin_revoked": "Platform admin revoked",
     "platform_admin_last": "Cannot revoke the last platform admin",
-    "platform_admin_failed": "Could not update platform role"
+    "platform_admin_failed": "Could not update platform role",
+    "incoming_saved": "Incoming invoice saved",
+    "incoming_accepted": "Invoice accepted",
+    "incoming_rejected": "Invoice rejected",
+    "incoming_deleted": "Incoming invoice deleted",
+    "incoming_uploaded": "Documents processed",
+    "incoming_approval_decided": "Approval recorded",
+    "supplier_saved": "Supplier saved",
+    "supplier_account_confirmed": "Supplier account confirmed",
+    "approval_rule_saved": "Approval rule saved",
+    "approval_rule_deleted": "Rule deleted",
+    "inbox_alias_rotated": "Inbox address rotated",
+    "payment_run_created": "Payment run created",
+    "payment_run_ready": "Run confirmed — waiting to submit to the bank",
+    "payment_run_line_dropped": "Line returned to the calendar",
+    "payment_run_submitted": "Batch sent to Fio — waiting for your authorization",
+    "fio_payments_enabled": "Fio payment token saved",
+    "fio_payments_disabled": "Fio payment rights removed"
   },
   "ToastDescriptions": {
     "issuer_saved": "Your business details are ready for future invoices.",
@@ -143,7 +174,24 @@
     "platform_admin_granted": "This user can now access platform administration.",
     "platform_admin_revoked": "Platform administration access was removed.",
     "platform_admin_last": "At least one platform administrator must remain.",
-    "platform_admin_failed": "No access change was made."
+    "platform_admin_failed": "No access change was made.",
+    "incoming_saved": "Incoming invoice fields were saved.",
+    "incoming_accepted": "The record is trusted and continues to approval.",
+    "incoming_rejected": "The invoice was rejected.",
+    "incoming_deleted": "The record was removed or cancelled within retention.",
+    "incoming_uploaded": "Files went through the same path as the email inbox.",
+    "incoming_approval_decided": "The decision is in the audit trail.",
+    "supplier_saved": "The supplier is ready for later invoices.",
+    "supplier_account_confirmed": "The account can enter a payment run.",
+    "approval_rule_saved": "The rule will apply on the next accept.",
+    "approval_rule_deleted": "The rule will no longer be evaluated.",
+    "inbox_alias_rotated": "The old address will no longer store anything.",
+    "payment_run_created": "Selected payables are in the run.",
+    "payment_run_ready": "Beneficiary accounts are frozen. Submitting to Fio is the next step.",
+    "payment_run_line_dropped": "The invoice returned to the payable calendar.",
+    "payment_run_submitted": "The batch is in Fio's orders-to-sign queue. Nothing has been paid yet.",
+    "fio_payments_enabled": "Invoicey can now propose batches. You still authorize every payment in Fio.",
+    "fio_payments_disabled": "Statement sync is unchanged. New payment runs cannot be submitted."
   },
   "Status": {
     "invoice": {
@@ -549,6 +597,8 @@
       "invoicesImport": "Import past invoices",
       "invoicesFromJson": "JSON invoice",
       "invoicesRecurring": "Recurring invoices",
+      "incomingInvoices": "Incoming invoices",
+      "suppliers": "Suppliers",
       "payments": "Payments",
       "clients": "Clients",
       "issuers": "My businesses",
@@ -569,6 +619,11 @@
     "breadcrumb": {
       "dashboard": "Dashboard",
       "invoices": "Invoices",
+      "incoming-invoices": "Incoming invoices",
+      "suppliers": "Suppliers",
+      "inbox": "Inbox",
+      "runs": "Payment runs",
+      "upload": "Upload",
       "clients": "Clients",
       "issuers": "Issuers",
       "settings": "Settings",
@@ -615,6 +670,7 @@
         "referrals": "Referrals",
         "apiKeys": "API Keys",
         "bankConnections": "Bank connections",
+        "incomingInvoices": "Incoming invoices",
         "integrations": "Integrations"
       },
       "navDescriptions": {
@@ -626,6 +682,7 @@
         "referrals": "Invite friends to Invoicey",
         "apiKeys": "Access for automation",
         "bankConnections": "Read-only payment feeds",
+        "incomingInvoices": "Inbox alias and approval rules",
         "integrations": "Slack, MCP, and other tools"
       },
       "workspace": {
@@ -1709,6 +1766,20 @@
         "rebindSuccess": "Slack now uses the current workspace"
       }
     },
+    "incomingInvoices": {
+      "title": "Incoming invoices",
+      "subtitle": "The inbox address is a bearer capability. Approval rules are optional — without them, accepting auto-approves.",
+      "aliasTitle": "Inbox address",
+      "aliasWarning": "Anyone who knows this address can send documents here. Rotating deactivates the old address immediately.",
+      "active": "Active",
+      "rotated": "Off",
+      "rotate": "Rotate address",
+      "rulesTitle": "Approval rules",
+      "rulesHint": "First match by priority wins. With no rules, accepting auto-approves.",
+      "ruleName": "Rule name",
+      "saveRule": "Save rule",
+      "deleteRule": "Delete"
+    },
     "bankConnections": {
       "pageTitle": "Bank connections",
       "pageDescription": "Connect a read-only bank feed to this workspace. Tokens and accounts are never shared with your other workspaces.",
@@ -1735,7 +1806,16 @@
       "unavailable": "Unavailable",
       "noteDeferred": "Deferred",
       "noteNotPlanned": "Not planned",
-      "footer": "Connections belong to the current workspace, not your user account. A user in multiple workspaces connects and configures each workspace independently. Invoicey imports incoming transactions only; it cannot send money. MONETA tokens typically expire within 90 days and should be renewed in Internet Banka.",
+      "footer": "Connections belong to the current workspace, not your user account. A user in multiple workspaces connects and configures each workspace independently. Statement sync is read-only. A separate Fio submit token can place a batch in the bank's orders-to-sign queue; Invoicey never authorizes a payment. MONETA tokens typically expire within 90 days and should be renewed in Internet Banka.",
+      "paymentsTitle": "Payment initiation (Fio)",
+      "paymentsCannotAuthorize": "Invoicey cannot authorize payments. A submit-rights token only places a batch in Fio's orders-to-sign queue. A signatory must release it in internet banking.",
+      "paymentsEnabled": "Submit token is stored encrypted.",
+      "paymentsExpires": "Expires {date}",
+      "paymentsTokenLabel": "Fio submit token",
+      "paymentsTokenPlaceholder": "64-character token with payment rights",
+      "paymentsExpiresLabel": "Token expiry",
+      "paymentsEnable": "Save submit token",
+      "paymentsDisable": "Remove payment rights",
       "providers": {
         "fio": "Fio banka",
         "moneta": "MONETA Money Bank"
@@ -1798,7 +1878,12 @@
         "moneta_throttled_locally": "MONETA is rate-limited. Try again in a moment.",
         "moneta_account_changed": "The MONETA account no longer matches this connection.",
         "moneta_unauthorized": "The MONETA token was rejected. Create a new one in Internet Banka.",
-        "not_found": "Connection not found."
+        "not_found": "Connection not found.",
+        "missing_connection": "Choose a bank connection.",
+        "missing_issuer": "Choose the issuer receiving payments.",
+        "missing_fio_payment_token": "Paste a Fio submit-rights token.",
+        "missing_payment_token_expiry": "Set the token expiry date from Fio.",
+        "payment_token_expired": "The submit token has expired. Enter a new one."
       }
     }
   },
@@ -2040,6 +2125,123 @@
       "noAds": "Invoicey currently does not use advertising cookies. See the cookie and privacy policies for details.",
       "footerHint": "Choose what Invoicey may use. You can change this anytime in the site footer."
     }
+  },
+  "IncomingInvoices": {
+    "title": "Incoming invoices",
+    "subtitle": "Review, approve, and pay — three separate gates.",
+    "upload": "Upload",
+    "empty": "Nothing here yet.",
+    "myTask": "Mine",
+    "tabs": {
+      "review": "To review",
+      "approval": "To approve",
+      "pay": "To pay",
+      "all": "All",
+      "inbox": "Inbox",
+      "runs": "Runs"
+    },
+    "table": {
+      "number": "Number",
+      "supplier": "Supplier",
+      "due": "Due",
+      "total": "Total",
+      "status": "Status"
+    },
+    "status": {
+      "needs_review": "Needs review",
+      "extract_failed": "Extraction failed",
+      "accepted": "Accepted",
+      "pending_approval": "Pending approval",
+      "approved": "Approved",
+      "on_hold": "On hold",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    },
+    "run": {
+      "issuer": "Paying entity",
+      "account": "Account",
+      "create": "Create run ({count})"
+    },
+    "detail": {
+      "untitled": "No number",
+      "document": "Document",
+      "noDocument": "No document available",
+      "exceptions": "Exceptions",
+      "number": "Number",
+      "issueDate": "Issue date",
+      "dueDate": "Due date",
+      "currency": "Currency",
+      "total": "Total",
+      "subtotal": "Subtotal",
+      "vatTotal": "VAT",
+      "variableSymbol": "VS",
+      "iban": "IBAN",
+      "notes": "Notes",
+      "save": "Save",
+      "accept": "Accept",
+      "reject": "Reject",
+      "rejectReason": "Rejection reason",
+      "approvalTask": "Approval task",
+      "comment": "Comment",
+      "approve": "Approve",
+      "requestChanges": "Request changes",
+      "line": "Line",
+      "lineTotal": "Total",
+      "delete": "Delete"
+    },
+    "uploadPage": {
+      "title": "Upload incoming invoices",
+      "subtitle": "PDF or ISDOC. Same path as the email inbox.",
+      "issuer": "Receiving entity",
+      "process": "Process",
+      "processing": "Processing…"
+    },
+    "inbox": {
+      "title": "Inbox",
+      "subtitle": "Raw emails and uploads, including parked non-invoices.",
+      "received": "Received",
+      "from": "From",
+      "subject": "Subject",
+      "status": "Status",
+      "documents": "Documents",
+      "empty": "Inbox is empty."
+    },
+    "runs": {
+      "title": "Payment runs",
+      "subtitle": "A submitted batch waits for your authorization in the bank. Nothing is paid until the debit arrives.",
+      "name": "Name",
+      "date": "Execution date",
+      "total": "Total",
+      "status": "Status",
+      "batch": "Batch id",
+      "empty": "No runs yet.",
+      "awaitingAuthorization": "This batch is in Fio's orders-to-sign queue. Authorize it in internet banking. Nothing has been paid yet.",
+      "confirm": "Confirm and freeze accounts",
+      "beneficiary": "Beneficiary",
+      "amount": "Amount",
+      "rail": "Rail",
+      "drop": "Drop",
+      "submit": "Submit to Fio",
+      "submitHint": "Invoicey cannot authorize the payment. After submit, sign the batch in Fio internet banking."
+    }
+  },
+  "Suppliers": {
+    "title": "Suppliers",
+    "subtitle": "Counterparties you receive invoices from.",
+    "name": "Name",
+    "ico": "IČO",
+    "dic": "DIČ",
+    "trusted": "Trusted",
+    "yes": "Yes",
+    "no": "No",
+    "create": "Add",
+    "save": "Save",
+    "empty": "No suppliers yet.",
+    "accounts": "Known accounts",
+    "account": "Account",
+    "confirmed": "Confirmed",
+    "confirm": "Confirm",
+    "invoices": "Invoices"
   },
   "Pwa": {
     "name": "Invoicey",

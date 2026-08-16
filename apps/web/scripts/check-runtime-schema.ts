@@ -19,13 +19,21 @@ const required = new Map([
   ],
   [
     "bank_connections",
-    new Set(["secret_ciphertext", "lease_until", "auto_confirm_exact_matches"]),
+    new Set([
+      "secret_ciphertext",
+      "lease_until",
+      "auto_confirm_exact_matches",
+      "payment_secret_ciphertext",
+    ]),
   ],
   ["bank_accounts", new Set(["iban", "currency"])],
   ["bank_transactions", new Set(["provider_transaction_id", "amount"])],
   ["payment_match_proposals", new Set(["matcher_version", "status"])],
   ["invoice_payment_allocations", new Set(["amount", "reversed_at"])],
   ["payment_audit_events", new Set(["action", "payload_json"])],
+  ["incoming_invoices", new Set(["status", "payment_state", "retain_until"])],
+  ["suppliers", new Set(["name", "ico"])],
+  ["payment_runs", new Set(["status", "provider_batch_id"])],
 ]);
 
 const result = await db.execute<{
@@ -43,7 +51,10 @@ const result = await db.execute<{
       'bank_transactions',
       'payment_match_proposals',
       'invoice_payment_allocations',
-      'payment_audit_events'
+      'payment_audit_events',
+      'incoming_invoices',
+      'suppliers',
+      'payment_runs'
     )
 `);
 
