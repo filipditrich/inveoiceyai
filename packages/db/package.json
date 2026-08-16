@@ -14,6 +14,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@invoicey/invoice-core": "workspace:*",
+    "@invoicey/payment-core": "workspace:*",
     "@invoicey/env": "workspace:*",
     "@neondatabase/serverless": "^1.0.1",
     "drizzle-orm": "^0.44.3",

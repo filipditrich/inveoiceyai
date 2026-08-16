@@ -31,6 +31,20 @@ const tables = [
   "payment_match_proposals",
   "invoice_payment_allocations",
   "payment_audit_events",
+  "inbox_aliases",
+  "inbox_items",
+  "incoming_documents",
+  "suppliers",
+  "supplier_bank_accounts",
+  "incoming_invoices",
+  "incoming_invoice_lines",
+  "incoming_invoice_documents",
+  "approval_rules",
+  "approval_tasks",
+  "payment_runs",
+  "payment_run_lines",
+  "payable_payment_allocations",
+  "payable_match_proposals",
 ];
 
 for (const table of tables) {

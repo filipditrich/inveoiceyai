@@ -18,8 +18,10 @@ import { redirect } from "next/navigation";
 
 import { requireWorkspace, requireWorkspaceRole } from "@/lib/auth/session";
 import {
+  clearFioPaymentToken,
   createFioConnection,
   deleteFioConnection,
+  saveFioPaymentToken,
   setFioAutoMatch,
   syncFioConnection,
   testFioToken,
@@ -119,6 +121,50 @@ export async function disconnectFio(formData: FormData): Promise<void> {
   revalidatePath("/settings/bank-connections");
   settingsRedirect(
     disconnected ? { toast: "bank_disconnected" } : { error: "not_found" },
+  );
+}
+
+export async function enableFioPayments(formData: FormData): Promise<void> {
+  const { workspaceId, userId } = await requireWorkspaceRole("admin");
+  const connectionId = field(formData, "connectionId");
+  const token = field(formData, "paymentToken");
+  const expiresAtRaw = field(formData, "paymentTokenExpiresAt");
+  if (!connectionId) settingsRedirect({ error: "missing_connection" });
+  if (!token) settingsRedirect({ error: "missing_fio_payment_token" });
+  if (token.length !== 64 || !isValidFioTokenShape(token)) {
+    settingsRedirect({ error: "fio_token_must_have_64_characters" });
+  }
+  if (!expiresAtRaw)
+    settingsRedirect({ error: "missing_payment_token_expiry" });
+  const expiresAt = new Date(`${expiresAtRaw}T23:59:59.000Z`);
+  if (Number.isNaN(expiresAt.getTime()) || expiresAt.getTime() <= Date.now()) {
+    settingsRedirect({ error: "payment_token_expired" });
+  }
+  const saved = await saveFioPaymentToken({
+    workspaceId,
+    connectionId,
+    userId,
+    token,
+    expiresAt,
+  });
+  revalidatePath("/settings/bank-connections");
+  settingsRedirect(
+    saved ? { toast: "fio_payments_enabled" } : { error: "not_found" },
+  );
+}
+
+export async function disableFioPayments(formData: FormData): Promise<void> {
+  const { workspaceId, userId } = await requireWorkspaceRole("admin");
+  const connectionId = field(formData, "connectionId");
+  if (!connectionId) settingsRedirect({ error: "missing_connection" });
+  const cleared = await clearFioPaymentToken({
+    workspaceId,
+    connectionId,
+    userId,
+  });
+  revalidatePath("/settings/bank-connections");
+  settingsRedirect(
+    cleared ? { toast: "fio_payments_disabled" } : { error: "not_found" },
   );
 }
 

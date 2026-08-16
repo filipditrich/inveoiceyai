@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./fio": "./src/fio.ts",
     "./matcher": "./src/matcher.ts",
-    "./money": "./src/money.ts"
+    "./money": "./src/money.ts",
+    "./fio-import": "./src/fio-import.ts"
   },
   "scripts": {
     "lint": "eslint .",

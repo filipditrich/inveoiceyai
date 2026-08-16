@@ -32,6 +32,8 @@ import {
   RepeatIcon,
   Settings2Icon,
   SparklesIcon,
+  InboxIcon,
+  TruckIcon,
   UsersIcon,
   UsersRoundIcon,
 } from "lucide-react";
@@ -86,6 +88,20 @@ export function AppSidebar({
       url: "/invoices",
       icon: <FileTextIcon />,
       isActive: invoicesOpen,
+    },
+    {
+      title: t("nav.incomingInvoices"),
+      url: "/incoming-invoices",
+      icon: <InboxIcon />,
+      isActive:
+        pathname === "/incoming-invoices" ||
+        pathname.startsWith("/incoming-invoices/"),
+    },
+    {
+      title: t("nav.suppliers"),
+      url: "/suppliers",
+      icon: <TruckIcon />,
+      isActive: pathname === "/suppliers" || pathname.startsWith("/suppliers/"),
     },
     {
       title: t("nav.payments"),

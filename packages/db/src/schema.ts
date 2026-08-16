@@ -390,6 +390,21 @@ export const bankConnections = pgTable(
       { onDelete: "set null" },
     ),
     tokenExpiresAt: timestamp("token_expires_at", { withTimezone: true }),
+    /** Optional Fio submit token (ADR 0033). Never returned after write. */
+    paymentSecretCiphertext: text("payment_secret_ciphertext"),
+    paymentSecretFingerprint: text("payment_secret_fingerprint"),
+    paymentKeyVersion: integer("payment_key_version"),
+    paymentTokenExpiresAt: timestamp("payment_token_expires_at", {
+      withTimezone: true,
+    }),
+    paymentLastRequestAt: timestamp("payment_last_request_at", {
+      withTimezone: true,
+    }),
+    paymentEnabledAt: timestamp("payment_enabled_at", { withTimezone: true }),
+    paymentEnabledByUserId: text("payment_enabled_by_user_id").references(
+      () => user.id,
+      { onDelete: "set null" },
+    ),
     syncCoverageThrough: text("sync_coverage_through"),
     lastRequestAt: timestamp("last_request_at", { withTimezone: true }),
     leaseUntil: timestamp("lease_until", { withTimezone: true }),
@@ -861,3 +876,5 @@ export const emailSuppressions = pgTable(
     ),
   ],
 );
+
+export * from "./incoming-schema";

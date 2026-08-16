@@ -157,6 +157,8 @@
       "version": "0.0.0",
       "dependencies": {
         "@invoicey/env": "workspace:*",
+        "@invoicey/invoice-core": "workspace:*",
+        "@invoicey/payment-core": "workspace:*",
         "@neondatabase/serverless": "^1.0.1",
         "drizzle-orm": "^0.44.3",
         "ws": "8.21.3",
