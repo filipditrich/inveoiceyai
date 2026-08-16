@@ -144,6 +144,18 @@ A confirmed payment fact linking money (manual or bank transaction) to an invoic
 
 **Invoice number** — the issuer's sequential identifier for the invoice. We generate it via per-issuer numbering schemes — see [`domain/numbering.md`](./domain/numbering.md).
 
+### Přijatá faktura
+
+**Received (incoming) invoice** — a supplier's tax document addressed to one of our issuers. The number belongs to the supplier, the document is an opaque original we must never regenerate, and the lifecycle is review-and-authorize rather than issue-and-send. Modeled separately from `invoices` — see [`specs/incoming-invoices.md`](./specs/incoming-invoices.md) and [ADR 0031](./decisions/0031-incoming-invoice-payable-ledger.md).
+
+### Dodavatel
+
+**Supplier / vendor** — the counterparty on a _přijatá faktura_, keyed by IČO. Distinct from a _client_ (the counterparty on an invoice we issue), even when the same company fills both roles.
+
+### Příkazy k podpisu
+
+**Orders awaiting signature** — the queue in Fio internet banking where an uploaded payment batch waits until an authorized signatory approves it with SMS or Fio podpis. Invoicey can place a batch there; only the account's signatory can release it — see [ADR 0033](./decisions/0033-fio-payment-initiation-bank-signed.md).
+
 ## Standards & file formats
 
 ### ISDOC

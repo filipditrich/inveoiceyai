@@ -30,6 +30,7 @@ flowchart LR
     P16 --> P20["Plan 20<br/>multi-workspace UX<br/>done"]
     P20 --> P21["Plan 21<br/>AI usage<br/>done"]
     P21 --> P22["Plan 22<br/>payments + Fio<br/>pilot pending"]
+    P22 --> P24["Plan 24<br/>incoming invoices<br/>planned"]
     P12a -.feeds.-> P13b
     P13a -.upgrades to.-> P13b
 ```
@@ -587,6 +588,69 @@ confirmation.
 **Out of Plan 22:** payment initiation, FX allocation, auto-confirmation,
 multibank provider, notification-email ingestion, and general expense
 categorization.
+
+### Plan 24 — Incoming invoices (přijaté faktury)
+
+**Status:** Planned — ready for implementation
+
+**Selected:** 2026-08-16
+
+**ADRs:** [0031](./decisions/0031-incoming-invoice-payable-ledger.md) ·
+[0032](./decisions/0032-inbound-email-capture-resend.md) ·
+[0033](./decisions/0033-fio-payment-initiation-bank-signed.md) ·
+**Specs:** [incoming invoices](./specs/incoming-invoices.md) ·
+[inbound email capture](./specs/inbound-email-capture.md) ·
+[payables, runs, Fio](./specs/payables-payment-runs-fio.md) ·
+[research](./research/incoming-invoices.md) ·
+[plan](../.cursor/plans/plan-24-incoming-invoices.md)
+
+**Goal:** Close the other half of the money loop — collect supplier invoices
+from a mailbox or an upload, extract them, pass three explicit gates (accept,
+approve, pay), submit a payment batch that the customer authorizes in their own
+bank, and reconcile the resulting debit through the Plan 22 ledger.
+
+**24a — domain foundation, upload, ISDOC, accept:**
+
+- [ ] Inbox, document, supplier, and incoming-invoice schema with duplicate and
+      identity indexes
+- [ ] Inverted ISDOC mapper plus the PDF/A-3 embedded rung
+- [ ] Supplier master with every beneficiary account ever seen
+- [ ] Upload, review queue, two-pane detail, accept invariants, 10-year
+      retention
+
+**24b — inbound email capture:**
+
+- [ ] Per-workspace unguessable Resend Inbound alias, rotatable, optionally
+      pinned to an issuer
+- [ ] Svix-verified webhook, idempotent ingest job, attachment storage and
+      hashing
+- [ ] Deterministic classification with non-invoices parked, not queued
+
+**24c — AI extraction and exceptions:**
+
+- [ ] Gateway extraction with per-field confidence, metered on workspace AI
+      tokens
+- [ ] Full validation pass and an exception bucket
+- [ ] Confidence-aware accept screen with re-extract and diff
+
+**24d — approval rules:**
+
+- [ ] Data-driven rule table with versioned conditions and paths
+- [ ] Task lifecycle, four-eyes enforcement, new-account override
+- [ ] Assignment emails; off by default so a solo workspace sees no gate
+
+**24e — payables, payment runs, Fio submission, reconciliation:**
+
+- [ ] Payable calendar against connected-account balances
+- [ ] Payment runs with frozen beneficiaries and eligibility blockers
+- [ ] Fio import XML, submit token in its own encrypted columns, batch
+      submitted for the customer to authorize in internet banking
+- [ ] Debit ingestion, payables matcher, allocation ledger, run closure
+
+**Out of Plan 24:** MCP/Eve tooling for payables, cost centres and budgets, DPH
+return or kontrolní hlášení generation, purchase orders and three-way match,
+datová schránka / Peppol / EDI intake, foreign (non-SEPA) payment rails, and FX
+allocation.
 
 ## Plans not yet promised
 

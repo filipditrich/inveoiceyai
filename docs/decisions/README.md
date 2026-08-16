@@ -44,3 +44,6 @@ When a decision changes:
 | [0028](./0028-per-invoice-language.md)                     | Per-invoice document language (`cs` \| `en`)               | Accepted                          |
 | [0029](./0029-payment-ledger-fio-first.md)                 | Provider-neutral payment ledger with Fio first             | Accepted                          |
 | [0030](./0030-moneta-second-adapter.md)                    | MONETA as second read-only bank adapter                    | Accepted                          |
+| [0031](./0031-incoming-invoice-payable-ledger.md)          | Incoming invoices as a first-class payable domain          | Accepted                          |
+| [0032](./0032-inbound-email-capture-resend.md)             | Inbound email capture through Resend Inbound aliases       | Accepted                          |
+| [0033](./0033-fio-payment-initiation-bank-signed.md)       | Payment initiation is a bank-signed batch                  | Accepted                          |
