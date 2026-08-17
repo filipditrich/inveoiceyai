@@ -1,9 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { ImageUploadField } from "@/components/upload/image-upload-field";
 import { Label } from "@/components/ui/label";
-import { UploadDropzone } from "@/lib/uploadthing";
-import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export function WorkspaceLogoField({
@@ -28,54 +26,29 @@ export function WorkspaceLogoField({
         <Label>{t("logoLabel")}</Label>
         <p className="text-muted-foreground text-xs">{t("logoHint")}</p>
       </div>
-      {hasUrl ? (
-        <div className="bg-muted/40 flex items-center gap-3 rounded-lg border p-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            alt={t("logoLabel")}
-            className="bg-background size-16 rounded-md object-cover"
-            src={url}
-          />
-          {canEdit ? (
-            <Button
-              disabled={pending}
-              onClick={() => {
-                onUrl(null);
-              }}
-              size="sm"
-              type="button"
-              variant="outline"
-            >
-              {pending ? (
-                <LoaderCircleIcon className="size-4 animate-spin" />
-              ) : null}
-              {t("removeLogo")}
-            </Button>
-          ) : null}
-        </div>
-      ) : null}
       {canEdit && uploadConfigured ? (
-        <UploadDropzone
+        <ImageUploadField
+          alt={t("logoLabel")}
+          disabled={pending}
           endpoint="workspaceLogo"
-          onClientUploadComplete={(res) => {
-            const first = res[0];
-            const nextUrl =
-              (first?.serverData as { url?: string } | undefined)?.url ??
-              first?.ufsUrl ??
-              first?.url;
-            if (typeof nextUrl === "string" && nextUrl.length > 0) {
-              onUrl(nextUrl);
-            }
-          }}
-          onUploadError={(err) => {
-            console.error(err);
-          }}
+          onUrl={onUrl}
+          url={url}
         />
       ) : null}
       {canEdit && !uploadConfigured ? (
         <p className="text-muted-foreground text-xs">
           {t("uploadUnavailable")}
         </p>
+      ) : null}
+      {!canEdit && hasUrl ? (
+        <div className="bg-muted/40 overflow-hidden rounded-xl border">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            alt={t("logoLabel")}
+            className="mx-auto h-40 w-full object-contain p-4"
+            src={url}
+          />
+        </div>
       ) : null}
     </div>
   );

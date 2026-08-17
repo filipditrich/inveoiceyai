@@ -25,6 +25,20 @@
       "en": "English"
     }
   },
+  "Upload": {
+    "dropTitle": "Choose a file or drag & drop here",
+    "browse": "Browse file",
+    "browseFiles": "Browse files",
+    "change": "Change",
+    "remove": "Remove",
+    "uploading": "Uploading…",
+    "hintImage": "PNG or JPG, up to {maxSize}",
+    "hintPdf": "PDF",
+    "hintIncoming": "PDF, ISDOC, PNG or JPG",
+    "hintMax": "up to {maxSize} each",
+    "failed": "Upload failed",
+    "replaceHint": "Click or drop to replace"
+  },
   "Filters": {
     "addFilter": "Add filter",
     "searchFields": "Search fields…",

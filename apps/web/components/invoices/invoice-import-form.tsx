@@ -18,8 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { FileUploadZone } from "@/components/upload/file-upload-zone";
 import { cn } from "@/lib/utils";
-import { UploadDropzone } from "@/lib/uploadthing";
 import {
   InvoiceOriginProviderSchema,
   buildExternalKey,
@@ -113,6 +113,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
   const t = useTranslations("Invoices.import");
   const tOrigin = useTranslations("Invoices.origin");
   const tCommon = useTranslations("Common");
+  const tUpload = useTranslations("Upload");
   const router = useRouter();
   const [step, setStep] = useState<ImportStep>("settings");
   const [issuerId, setIssuerId] = useState(issuers[0]?.id ?? "");
@@ -418,20 +419,22 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
         <div className="space-y-4">
           <div className="rounded-md border p-4">
             <p className="mb-3 text-sm font-medium">{t("uploadTitle")}</p>
-            <UploadDropzone
+            <FileUploadZone
+              accept="application/pdf,.pdf"
               endpoint="importedInvoicePdf"
-              onClientUploadComplete={(res) => {
-                if (!res?.length) {
+              hint={tUpload("hintPdf")}
+              maxSize={16 * 1024 * 1024}
+              onUploaded={(uploaded) => {
+                if (uploaded.length === 0) {
                   return;
                 }
                 onUploaded(
-                  res.map((f) => ({
-                    name: f.name,
-                    ufsUrl: f.ufsUrl,
+                  uploaded.map((file) => ({
+                    name: file.name,
+                    ufsUrl: file.url,
                   })),
                 );
               }}
-              onUploadError={(err) => setMessage(err.message)}
             />
           </div>
           <div className="flex flex-wrap justify-between gap-2">

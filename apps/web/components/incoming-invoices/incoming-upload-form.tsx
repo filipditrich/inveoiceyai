@@ -2,7 +2,7 @@
 
 import { processIncomingUploads } from "@/actions/incoming-invoices";
 import { Button } from "@/components/ui/button";
-import { UploadDropzone } from "@/lib/uploadthing";
+import { FileUploadZone } from "@/components/upload/file-upload-zone";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -13,6 +13,7 @@ export function IncomingUploadForm({
   issuers: Array<{ id: string; name: string }>;
 }) {
   const t = useTranslations("IncomingInvoices.uploadPage");
+  const tUpload = useTranslations("Upload");
   const router = useRouter();
   const [issuerId, setIssuerId] = useState(issuers[0]?.id ?? "");
   const [files, setFiles] = useState<
@@ -37,26 +38,20 @@ export function IncomingUploadForm({
           ))}
         </select>
       </label>
-      <UploadDropzone
+      <FileUploadZone
+        accept="application/pdf,application/xml,text/xml,image/png,image/jpeg,.pdf,.xml,.png,.jpg,.jpeg"
         endpoint="incomingInvoiceDocument"
-        onClientUploadComplete={(uploaded) => {
-          setFiles(
-            uploaded.map((file) => ({
-              url: file.ufsUrl,
-              name: file.name,
-              type: file.type,
-            })),
-          );
+        files={files}
+        hint={tUpload("hintIncoming")}
+        maxSize={16 * 1024 * 1024}
+        onRemove={(url) => {
+          setFiles((prev) => prev.filter((file) => file.url !== url));
         }}
-        onUploadError={(err) => setError(err.message)}
+        onUploaded={(uploaded) => {
+          setError(null);
+          setFiles((prev) => [...prev, ...uploaded]);
+        }}
       />
-      {files.length > 0 ? (
-        <ul className="text-muted-foreground text-sm">
-          {files.map((file) => (
-            <li key={file.url}>{file.name}</li>
-          ))}
-        </ul>
-      ) : null}
       {error ? (
         <p className="text-destructive text-sm" role="alert">
           {error}

@@ -28,6 +28,20 @@ declare const messages: {
       en: "English";
     };
   };
+  Upload: {
+    dropTitle: "Vyberte soubor nebo ho sem přetáhněte";
+    browse: "Vybrat soubor";
+    browseFiles: "Vybrat soubory";
+    change: "Změnit";
+    remove: "Odebrat";
+    uploading: "Nahrávám…";
+    hintImage: "PNG nebo JPG, max. {maxSize}";
+    hintPdf: "PDF";
+    hintIncoming: "PDF, ISDOC, PNG nebo JPG";
+    hintMax: "max. {maxSize} na soubor";
+    failed: "Nahrání se nezdařilo";
+    replaceHint: "Klikněte nebo přetáhněte pro výměnu";
+  };
   Filters: {
     addFilter: "Přidat filtr";
     searchFields: "Hledat pole…";

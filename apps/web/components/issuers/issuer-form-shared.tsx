@@ -3,12 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ImageUploadField } from "@/components/upload/image-upload-field";
 import {
   DEFAULT_TEMPLATES,
   DOC_TYPES,
   type NumberingSchemeDraft,
 } from "@/lib/issuer-types";
-import { UploadDropzone } from "@/lib/uploadthing";
 import type { ClientDraft } from "@invoicey/ares";
 import {
   IcoSchema,
@@ -153,52 +153,18 @@ export function AssetField(props: {
   uploadConfigured: boolean;
 }) {
   const t = useTranslations("Issuers.form");
-  const hasUrl = props.url.trim().length > 0;
 
   return (
     <div className="space-y-3">
       <Label>{props.label}</Label>
-      {hasUrl ? (
-        <div className="bg-muted/40 flex items-start gap-3 rounded-lg border p-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            alt={props.label}
-            className="bg-background h-16 w-16 rounded object-contain"
-            src={props.url}
-          />
-          <div className="min-w-0 flex-1 space-y-2">
-            <p className="text-muted-foreground truncate text-xs">
-              {props.url}
-            </p>
-            <Button
-              onClick={() => {
-                props.onUrl("");
-              }}
-              size="sm"
-              type="button"
-              variant="outline"
-            >
-              {t("removeAsset")}
-            </Button>
-          </div>
-        </div>
-      ) : null}
       {props.uploadConfigured ? (
-        <UploadDropzone
+        <ImageUploadField
+          alt={props.label}
           endpoint={props.endpoint}
-          onClientUploadComplete={(res) => {
-            const first = res[0];
-            const url =
-              (first?.serverData as { url?: string } | undefined)?.url ??
-              first?.ufsUrl ??
-              first?.url;
-            if (typeof url === "string" && url.length > 0) {
-              props.onUrl(url);
-            }
+          onUrl={(next) => {
+            props.onUrl(next ?? "");
           }}
-          onUploadError={(err) => {
-            console.error(err);
-          }}
+          url={props.url}
         />
       ) : (
         <p className="text-muted-foreground text-xs">
