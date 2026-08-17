@@ -51,7 +51,7 @@ Skip (count as skipped, not error) when:
 
 ### Cron
 
-Copy overdue-reminders: `Authorization: Bearer ${CRON_SECRET}` (503 if unset, 401 if wrong). Loop all `workspaces`, pass **explicit** `workspaceId` into ops. Schedule `0 6 * * *` in `apps/web/vercel.json` (before 07:00 overdue job).
+Copy overdue-reminders: `Authorization: Bearer ${CRON_SECRET}` (503 if unset, 401 if wrong). Loop all `workspaces`, pass **explicit** `workspaceId` into ops. Schedule `20 5 * * *` in `apps/web/vercel.json` (same Hobby hour as the other crons, before overdue reminders).
 
 ### UI
 

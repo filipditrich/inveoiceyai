@@ -362,8 +362,10 @@ backfill flow, not part of unattended sync.
 
 ### Polling cadence
 
-- scheduled target: daily on Hobby (`0 5 * * *`); every 15 minutes when the
-  plan allows sub-daily Vercel Cron;
+- scheduled target: daily on Hobby (`0 5 * * *`, same UTC hour as every
+  other cron — Hobby silently rejects deploys when jobs span hours or run
+  more than once a day); every 15 minutes when the plan allows sub-daily
+  Vercel Cron;
 - manual **Sync now**: available when the connection is not leased or throttled;
 - exponential backoff for provider/network failures;
 - `409`: respect Fio's per-token interval and retry later;
