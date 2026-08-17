@@ -176,7 +176,9 @@ export default async function BankConnectionsPage() {
         return (
           <Card key={connection.id} className="overflow-hidden">
             <CardHeader className="bg-muted/20 border-b">
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              {/* Grid items default to min-width:auto, which lets the
+                  unbreakable IBAN push past the card instead of truncating. */}
+              <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-4">
                   <BankLogoTile
                     alt={providerName}

@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import * as React from "react";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
-import { useIsMobile } from "@/hooks/use-mobile"
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Card,
   CardAction,
@@ -11,26 +11,23 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/components/ui/chart"
+} from "@/components/ui/chart";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group"
+} from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
-export const description = "An interactive area chart"
+export const description = "An interactive area chart";
 
 const chartData = [
   { date: "2024-04-01", desktop: 222, mobile: 150 },
@@ -124,7 +121,7 @@ const chartData = [
   { date: "2024-06-28", desktop: 149, mobile: 200 },
   { date: "2024-06-29", desktop: 103, mobile: 160 },
   { date: "2024-06-30", desktop: 446, mobile: 400 },
-]
+];
 
 const chartConfig = {
   desktop: {
@@ -135,35 +132,35 @@ const chartConfig = {
     label: "Exported",
     color: "var(--primary)",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function ChartAreaInteractive() {
-  const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = React.useState("90d")
+  const isMobile = useIsMobile();
+  const [timeRange, setTimeRange] = React.useState("90d");
 
   /** 90d unavailable on mobile — clamp for display and filtering */
-  const activeRange = isMobile && timeRange === "90d" ? "7d" : timeRange
+  const activeRange = isMobile && timeRange === "90d" ? "7d" : timeRange;
 
   const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date)
-    const referenceDate = new Date("2024-06-30")
-    let daysToSubtract = 90
+    const date = new Date(item.date);
+    const referenceDate = new Date("2024-06-30");
+    let daysToSubtract = 90;
     if (activeRange === "30d") {
-      daysToSubtract = 30
+      daysToSubtract = 30;
     } else if (activeRange === "7d") {
-      daysToSubtract = 7
+      daysToSubtract = 7;
     }
-    const startDate = new Date(referenceDate)
-    startDate.setDate(startDate.getDate() - daysToSubtract)
-    return date >= startDate
-  })
+    const startDate = new Date(referenceDate);
+    startDate.setDate(startDate.getDate() - daysToSubtract);
+    return date >= startDate;
+  });
 
   return (
     <Card className="@container/card">
       <CardHeader>
         <CardTitle>Billing activity</CardTitle>
         <CardDescription>
-          <span className="hidden @[540px]/card:block">
+          <span className="@[540px]/card:block hidden">
             Demo counts — invoices issued vs exported
           </span>
           <span className="@[540px]/card:hidden">Issued vs exported</span>
@@ -173,10 +170,10 @@ export function ChartAreaInteractive() {
             multiple={false}
             value={activeRange ? [activeRange] : []}
             onValueChange={(value) => {
-              setTimeRange(value[0] ?? "90d")
+              setTimeRange(value[0] ?? "90d");
             }}
             variant="outline"
-            className="hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex"
+            className="*:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex hidden"
           >
             <ToggleGroupItem value="90d">Last 3 months</ToggleGroupItem>
             <ToggleGroupItem value="30d">Last 30 days</ToggleGroupItem>
@@ -186,12 +183,12 @@ export function ChartAreaInteractive() {
             value={activeRange}
             onValueChange={(value) => {
               if (value !== null) {
-                setTimeRange(value)
+                setTimeRange(value);
               }
             }}
           >
             <SelectTrigger
-              className="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
+              className="**:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden flex w-40"
               size="sm"
               aria-label="Select a value"
             >
@@ -253,11 +250,11 @@ export function ChartAreaInteractive() {
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value)
+                const date = new Date(value);
                 return date.toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
-                })
+                });
               }}
             />
             <ChartTooltip
@@ -268,7 +265,7 @@ export function ChartAreaInteractive() {
                     return new Date(value).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
-                    })
+                    });
                   }}
                   indicator="dot"
                 />
@@ -292,5 +289,5 @@ export function ChartAreaInteractive() {
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

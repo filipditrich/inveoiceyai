@@ -16,7 +16,7 @@ export default async function IssuersNewPage({
   const t = await getTranslations("Issuers");
 
   return (
-    <div className="space-y-6 px-4 py-6 lg:px-6">
+    <div className="space-y-6">
       <PageHeader
         description={t("newSubtitle")}
         icon={<BriefcaseBusinessIcon />}

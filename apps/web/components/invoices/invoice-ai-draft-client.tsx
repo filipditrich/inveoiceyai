@@ -158,6 +158,7 @@ export function InvoiceAiDraftClient({
         </div>
 
         <Textarea
+          aria-label={t("promptLabel")}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder={t("placeholder")}

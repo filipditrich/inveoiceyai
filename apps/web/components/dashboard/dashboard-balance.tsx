@@ -13,7 +13,7 @@ export async function DashboardBalanceRow({
   const locale = (await getLocale()) as AppLocale;
 
   return (
-    <div className="grid gap-4 px-4 sm:grid-cols-2 lg:px-6">
+    <div className="grid gap-4 sm:grid-cols-2">
       <div className="rounded-md border px-4 py-3">
         <div className="text-muted-foreground text-sm">{t("issued12m")}</div>
         <div className="mt-1 space-y-0.5 text-2xl font-semibold tabular-nums">

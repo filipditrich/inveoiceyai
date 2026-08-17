@@ -11,6 +11,7 @@ import { DataGridScrollArea } from "@/components/reui/data-grid/data-grid-scroll
 import { DataGridTable } from "@/components/reui/data-grid/data-grid-table";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { flexRender } from "@tanstack/react-table";
 import { Columns3Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
@@ -31,6 +32,81 @@ type AppDataGridProps<TData extends object> = {
     rowsPerPageLabel?: string;
   };
 };
+
+/**
+ * Phone rendering of the same rows. A fixed-width multi-column table only
+ * scrolls sideways at 390px and clips its first column, so each row becomes a
+ * card: the leading column is the heading, the rest are labelled fields.
+ */
+function DataGridMobileCards<TData extends object>({
+  table,
+  emptyMessage,
+}: {
+  table: DataGridTableInstance<TData>;
+  emptyMessage: ReactNode;
+}) {
+  const rows = table.getRowModel().rows;
+
+  if (rows.length === 0) {
+    return (
+      <p className="text-muted-foreground rounded-md border px-4 py-8 text-center text-sm md:hidden">
+        {emptyMessage}
+      </p>
+    );
+  }
+
+  return (
+    <ul className="space-y-2 md:hidden">
+      {rows.map((row) => {
+        const cells = row
+          .getVisibleCells()
+          .filter((cell) => cell.column.id !== "select");
+        const [lead, ...rest] = cells;
+        return (
+          <li className="bg-card space-y-2 rounded-md border p-3" key={row.id}>
+            {lead ? (
+              <div className="min-w-0 font-medium">
+                {flexRender(lead.column.columnDef.cell, lead.getContext())}
+              </div>
+            ) : null}
+            <dl className="grid gap-x-3 gap-y-1.5 text-sm">
+              {rest.map((cell) => {
+                const label = cell.column.columnDef.meta?.headerTitle;
+                const isActions = cell.column.id === "actions";
+                return (
+                  <div
+                    className={cn(
+                      "flex items-center justify-between gap-3",
+                      isActions && "pt-1",
+                    )}
+                    key={cell.id}
+                  >
+                    {label && !isActions ? (
+                      <dt className="text-muted-foreground shrink-0">
+                        {label}
+                      </dt>
+                    ) : null}
+                    <dd
+                      className={cn(
+                        "min-w-0 truncate text-right",
+                        isActions && "ml-auto",
+                      )}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </dd>
+                  </div>
+                );
+              })}
+            </dl>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 /**
  * Shared ReUI Data Grid shell: sticky dense header, optional toolbar,
@@ -70,7 +146,12 @@ export function AppDataGrid<TData extends object>({
               <DataGridColumnVisibility
                 table={table}
                 trigger={
-                  <Button size="sm" variant="outline">
+                  /* Column visibility only affects the md+ table. */
+                  <Button
+                    className="hidden md:inline-flex"
+                    size="sm"
+                    variant="outline"
+                  >
                     <Columns3Icon className="size-4" />
                     {columnsLabel ?? t("columns")}
                   </Button>
@@ -80,7 +161,12 @@ export function AppDataGrid<TData extends object>({
           </div>
         ) : null}
 
-        <DataGridContainer className="min-w-0 max-w-full overflow-hidden rounded-md border">
+        <DataGridMobileCards
+          emptyMessage={emptyMessage ?? t("empty")}
+          table={table}
+        />
+
+        <DataGridContainer className="hidden min-w-0 max-w-full overflow-hidden rounded-md border md:block">
           <DataGridScrollArea className="max-h-[min(70vh,720px)] max-w-full overflow-x-auto">
             <DataGridTable />
           </DataGridScrollArea>

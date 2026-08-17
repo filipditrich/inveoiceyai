@@ -22,7 +22,7 @@ export function IncomingInvoiceTabs({
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 max-sm:[&_[data-slot=button]]:h-9">
       {(
         [
           ["review", counts.review],

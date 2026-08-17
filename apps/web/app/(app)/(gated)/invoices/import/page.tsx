@@ -12,7 +12,7 @@ export default async function InvoiceImportPage() {
   const issuers = await loadIssuerOptions(workspaceId);
 
   return (
-    <div className="@container/main space-y-4 px-4 py-6 lg:px-6">
+    <div className="@container/main space-y-4">
       <PageHeader
         description={t("subtitle")}
         eyebrow={

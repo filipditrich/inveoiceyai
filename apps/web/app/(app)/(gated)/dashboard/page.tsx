@@ -32,7 +32,7 @@ export default async function DashboardPage({
 
   if (metrics.issuerCount === 0) {
     return (
-      <div className="flex flex-1 flex-col px-4 py-10 lg:px-6">
+      <div className="flex flex-1 flex-col py-6">
         <PageHeader
           actions={
             <Button render={<Link href="/welcome" prefetch />} size="sm">
@@ -48,8 +48,8 @@ export default async function DashboardPage({
   }
 
   return (
-    <div className="@container/main flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
-      <div className="px-4 lg:px-6">
+    <div className="@container/main flex flex-1 flex-col gap-4 md:gap-6">
+      <div>
         <PageHeader
           actions={
             <>
@@ -75,9 +75,7 @@ export default async function DashboardPage({
       </div>
       <DashboardStatusCards buckets={metrics.buckets} issuerId={issuerId} />
       <DashboardBalanceRow balance={metrics.balance} />
-      <div className="px-4 lg:px-6">
-        <DashboardMonthlyChart data={metrics.monthly} />
-      </div>
+      <DashboardMonthlyChart data={metrics.monthly} />
       <DashboardRecentInvoices rows={metrics.recent} />
     </div>
   );

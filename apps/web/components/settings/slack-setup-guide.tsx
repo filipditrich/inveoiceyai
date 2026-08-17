@@ -157,9 +157,7 @@ export function SlackSetupGuide() {
             <p className="font-medium text-amber-900 dark:text-amber-200">
               {t("accessTitle")}
             </p>
-            <p className="text-muted-foreground text-xs">
-              {t("accessBody")}
-            </p>
+            <p className="text-muted-foreground text-xs">{t("accessBody")}</p>
           </div>
         </div>
 

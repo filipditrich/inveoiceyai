@@ -1,6 +1,8 @@
 import { saveSupplier } from "@/actions/suppliers";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { requireWorkspace } from "@/lib/auth/session";
 import { suppliers } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
@@ -21,7 +23,7 @@ export default async function SuppliersPage() {
     .orderBy(desc(suppliers.updatedAt));
 
   return (
-    <div className="space-y-4 px-4 py-6 lg:px-6">
+    <div className="space-y-4">
       <PageHeader
         icon={<TruckIcon />}
         title={t("title")}
@@ -29,27 +31,48 @@ export default async function SuppliersPage() {
       />
       <form
         action={saveSupplier}
-        className="bg-card grid gap-3 rounded-xl border p-4 sm:grid-cols-4"
+        className="bg-card grid items-end gap-3 rounded-xl border p-4 sm:grid-cols-4"
       >
-        <input
-          name="name"
-          required
-          placeholder={t("name")}
-          className="border-input rounded-md border px-2 py-1.5"
-        />
-        <input
-          name="ico"
-          placeholder={t("ico")}
-          className="border-input rounded-md border px-2 py-1.5"
-        />
-        <input
-          name="dic"
-          placeholder={t("dic")}
-          className="border-input rounded-md border px-2 py-1.5"
-        />
-        <Button type="submit">{t("create")}</Button>
+        <div className="grid gap-1.5">
+          <Label htmlFor="supplier-name">{t("name")}</Label>
+          <Input id="supplier-name" name="name" required />
+        </div>
+        <div className="grid gap-1.5">
+          <Label htmlFor="supplier-ico">{t("ico")}</Label>
+          <Input id="supplier-ico" inputMode="numeric" name="ico" />
+        </div>
+        <div className="grid gap-1.5">
+          <Label htmlFor="supplier-dic">{t("dic")}</Label>
+          <Input id="supplier-dic" name="dic" />
+        </div>
+        <Button className="max-sm:h-10" size="lg" type="submit">
+          {t("create")}
+        </Button>
       </form>
-      <div className="overflow-hidden rounded-xl border">
+      <ul className="space-y-2 md:hidden">
+        {rows.length === 0 ? (
+          <li className="text-muted-foreground rounded-xl border px-4 py-8 text-center text-sm">
+            {t("empty")}
+          </li>
+        ) : (
+          rows.map((row) => (
+            <li className="bg-card rounded-xl border p-3" key={row.id}>
+              <Link
+                className="block font-medium underline-offset-2 hover:underline"
+                href={`/suppliers/${row.id}`}
+              >
+                {row.name}
+              </Link>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {t("ico")}: {row.ico ?? "—"} · {t("trusted")}:{" "}
+                {row.isTrusted ? t("yes") : t("no")}
+              </p>
+            </li>
+          ))
+        )}
+      </ul>
+
+      <div className="hidden overflow-hidden rounded-xl border md:block">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>

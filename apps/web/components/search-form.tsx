@@ -20,7 +20,7 @@ export function SearchForm({
           id={inputId}
           name="q"
           placeholder={t("placeholder")}
-          className="h-8 pl-7"
+          className="h-10 pl-7 md:h-8"
         />
         <SearchIcon className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-50" />
       </div>

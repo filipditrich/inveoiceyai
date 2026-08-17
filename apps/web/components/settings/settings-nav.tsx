@@ -106,7 +106,7 @@ function SettingsNavLinks({
             href={link.href}
             prefetch
             className={cn(
-              "group flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors md:items-start md:gap-3 md:px-3 md:py-2.5",
+              "group flex shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-colors md:items-start md:gap-3 md:px-3",
               active
                 ? "bg-brand/10 text-foreground ring-brand/15 font-medium ring-1"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -141,15 +141,18 @@ export function SettingsNav() {
   return (
     <nav
       aria-label={t("navigationLabel")}
-      className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 md:sticky md:top-[calc(var(--header-height)+1.5rem)] md:mx-0 md:flex-col md:gap-6 md:overflow-visible md:px-0 md:pb-0"
+      className="scroll-fade-x -mx-4 flex gap-4 overflow-x-auto px-4 pb-2 md:sticky md:top-[calc(var(--header-height)+1.5rem)] md:mx-0 md:flex-col md:gap-6 md:overflow-visible md:px-0 md:pb-0"
     >
-      <div className="min-w-0">
+      {/* `shrink-0` keeps each group at its content width so the nav scrolls
+          horizontally on mobile — without it the groups collapse and the
+          `shrink-0` links inside overlap each other. */}
+      <div className="shrink-0 md:min-w-0 md:shrink">
         <p className="text-muted-foreground mb-1.5 px-3 text-[0.65rem] font-medium uppercase tracking-[0.14em]">
           {t("navGroups.you")}
         </p>
         <SettingsNavLinks links={YOU_LINKS} />
       </div>
-      <div className="min-w-0">
+      <div className="shrink-0 md:min-w-0 md:shrink">
         <p className="text-muted-foreground mb-1.5 px-3 text-[0.65rem] font-medium uppercase tracking-[0.14em]">
           {t("navGroups.workspace")}
         </p>

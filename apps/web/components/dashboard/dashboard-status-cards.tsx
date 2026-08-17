@@ -33,7 +33,7 @@ export async function DashboardStatusCards({
   const locale = (await getLocale()) as AppLocale;
 
   return (
-    <div className="@xl/main:grid-cols-2 @5xl/main:grid-cols-5 grid grid-cols-1 gap-4 px-4 lg:px-6">
+    <div className="@5xl/main:grid-cols-5 grid grid-cols-2 gap-3 sm:gap-4">
       {buckets.map((b) => (
         <Link
           className="block transition-opacity hover:opacity-90"
@@ -47,7 +47,7 @@ export async function DashboardStatusCards({
               >
                 {tStatus(b.status)}
               </CardDescription>
-              <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+              <CardTitle className="@[180px]/card:text-2xl @[250px]/card:text-3xl text-xl font-semibold tabular-nums">
                 {formatMoneyByCurrency(b.totalsByCurrency, locale)}
               </CardTitle>
             </CardHeader>

@@ -172,7 +172,7 @@ export default async function InvoicesPage({
   }));
 
   return (
-    <div className="@container/main space-y-4 px-4 py-6 lg:px-6">
+    <div className="@container/main space-y-4">
       <PageHeader
         actions={
           <>

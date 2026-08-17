@@ -34,7 +34,7 @@ export default async function RecurringInvoicesPage({
   const err = sp.invalid ? invalidMessage(tErrors, sp.invalid) : null;
 
   return (
-    <div className="space-y-4 px-4 py-6 lg:px-6">
+    <div className="space-y-4">
       <PageHeader
         description={t("list.subtitle")}
         icon={<Repeat2Icon />}

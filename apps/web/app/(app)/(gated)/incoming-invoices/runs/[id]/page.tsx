@@ -40,7 +40,7 @@ export default async function PaymentRunDetailPage({
   const canManage = role === "admin" || role === "owner";
 
   return (
-    <div className="space-y-4 px-4 py-6 lg:px-6">
+    <div className="space-y-4">
       <PageHeader
         icon={<LandmarkIcon />}
         title={run.name}

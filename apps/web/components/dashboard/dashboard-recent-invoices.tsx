@@ -25,7 +25,7 @@ export async function DashboardRecentInvoices({
 
   if (rows.length === 0) {
     return (
-      <p className="text-muted-foreground px-4 text-sm lg:px-6">
+      <p className="text-muted-foreground text-sm">
         {t("empty")}{" "}
         <Link
           className="text-primary underline-offset-4 hover:underline"
@@ -38,7 +38,7 @@ export async function DashboardRecentInvoices({
   }
 
   return (
-    <div className="px-4 lg:px-6">
+    <div>
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-lg font-medium">{t("title")}</h2>
         <Link
@@ -48,7 +48,48 @@ export async function DashboardRecentInvoices({
           {t("viewAll")}
         </Link>
       </div>
-      <div className="rounded-md border">
+
+      {/* Six columns cannot fit a phone; the table would scroll sideways and
+          clip the invoice number. Stack the same fields instead. */}
+      <ul className="space-y-2 md:hidden">
+        {rows.map((row) => (
+          <li
+            className={cn(
+              "rounded-md border p-3",
+              DISPLAY_STATUS_ROW_ACCENT[row.displayStatus],
+            )}
+            key={row.id}
+          >
+            <Link className="block" href={`/invoices/${row.id}`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-medium tabular-nums">
+                    {row.number ?? t("draft")}
+                  </p>
+                  <p className="text-muted-foreground truncate text-sm">
+                    {row.clientName}
+                  </p>
+                </div>
+                <InvoiceStatusBadge status={row.displayStatus} />
+              </div>
+              <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm tabular-nums">
+                <span className="text-foreground font-medium">
+                  {formatMoney(
+                    Number(row.total) || 0,
+                    row.currency || "CZK",
+                    locale,
+                  )}
+                </span>
+                <span>
+                  {t("due")} {formatInvoiceDate(row.dueDate, locale)}
+                </span>
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      <div className="hidden rounded-md border md:block">
         <Table>
           <TableHeader>
             <TableRow>

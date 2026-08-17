@@ -119,7 +119,77 @@ export function IncomingInvoiceQueue({
         </form>
       ) : null}
 
-      <div className="overflow-x-auto rounded-xl border">
+      {/* The table needs 52rem; on a phone that is two screens of sideways
+          scrolling for the queue people actually work from. */}
+      <ul className="space-y-2 md:hidden">
+        {rows.length === 0 ? (
+          <li className="text-muted-foreground rounded-xl border px-4 py-8 text-center text-sm">
+            {emptyLabel}
+          </li>
+        ) : (
+          rows.map((row) => (
+            <li
+              className="bg-card space-y-3 rounded-xl border p-3"
+              key={row.id}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <Link
+                    className="block truncate font-medium underline-offset-2 hover:underline"
+                    href={`/incoming-invoices/${row.id}`}
+                  >
+                    {row.number ?? "—"}
+                  </Link>
+                  <p className="text-muted-foreground truncate text-sm">
+                    {row.supplierName ?? "—"}
+                  </p>
+                </div>
+                {tab === "pay" ? (
+                  <input
+                    aria-label={row.number ?? t("table.number")}
+                    checked={selected.includes(row.id)}
+                    className="mt-1 size-5 shrink-0"
+                    onChange={(event) => {
+                      setSelected((current) =>
+                        event.target.checked
+                          ? [...current, row.id]
+                          : current.filter((id) => id !== row.id),
+                      );
+                    }}
+                    type="checkbox"
+                  />
+                ) : null}
+              </div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                <span className="font-medium tabular-nums">
+                  {row.total ?? "—"}
+                </span>
+                <span className="text-muted-foreground tabular-nums">
+                  {t("table.due")} {row.dueDate}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                <Badge variant="outline">
+                  {t(incomingStatusMessageKey(row.status))}
+                </Badge>
+                {row.mine ? <Badge>{t("myTask")}</Badge> : null}
+                {row.exceptions.slice(0, 2).map((code) => (
+                  <IncomingExceptionBadge code={code} key={code} />
+                ))}
+              </div>
+              <IncomingDecisionBar
+                invoiceId={row.id}
+                pendingTaskId={row.pendingTaskId}
+                returnTo={`/incoming-invoices?tab=${tab}`}
+                status={row.status}
+                variant="row"
+              />
+            </li>
+          ))
+        )}
+      </ul>
+
+      <div className="hidden overflow-x-auto rounded-xl border md:block">
         <table className="w-full min-w-[52rem] text-sm">
           <thead className="bg-muted/50 text-muted-foreground text-left">
             <tr>

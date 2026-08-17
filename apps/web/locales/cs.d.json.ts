@@ -624,6 +624,8 @@ declare const messages: {
       invoices: "Faktury";
       "incoming-invoices": "Přijaté faktury";
       suppliers: "Dodavatelé";
+      payments: "Platby";
+      welcome: "Začínáme";
       inbox: "Inbox";
       runs: "Platební dávky";
       upload: "Nahrát";
@@ -1239,6 +1241,7 @@ declare const messages: {
       subtitle: "Popište klienta, položky a částky běžným jazykem. Vytvoříme validovaný koncept a náhled PDF. Spotřebovává AI tokeny pracovního prostoru.";
       backToInvoices: "← Zpět na faktury";
       placeholder: "např. Faktura pro NFCtron a.s. za konzultace 12 500 Kč, splatnost 14 dní, DPH 21 %";
+      promptLabel: "Popis faktury";
       generate: "Vygenerovat koncept";
       generating: "Generuji…";
       tokensAvailable: "Dostupných tokenů: {available}";

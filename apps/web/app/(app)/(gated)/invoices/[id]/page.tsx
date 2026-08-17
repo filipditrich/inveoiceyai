@@ -214,7 +214,14 @@ export default async function InvoiceDetailPage({
   );
 
   return (
-    <div className="space-y-6 px-4 py-6 lg:px-6">
+    <div className="space-y-6">
+      <Link
+        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
+        href="/invoices"
+        prefetch
+      >
+        {t("backToList")}
+      </Link>
       <PageHeader
         actions={
           <>
@@ -531,53 +538,89 @@ export default async function InvoiceDetailPage({
       ) : null}
 
       {payload?.success ? (
-        <div className="max-w-full overflow-x-auto rounded-md border">
-          <table className="w-full min-w-[42rem] text-sm">
-            <thead>
-              <tr className="border-b text-left">
-                <th className="p-2">{t("itemsHeader.position")}</th>
-                <th className="p-2">{t("itemsHeader.description")}</th>
-                <th className="p-2">{t("itemsHeader.quantity")}</th>
-                <th className="p-2">{t("itemsHeader.price")}</th>
-                <th className="p-2">{t("itemsHeader.vat")}</th>
-                <th className="p-2">{t("itemsHeader.total")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payload.data.items.map((it) => (
-                <tr className="border-b" key={it.position}>
-                  <td className="p-2">{it.position}</td>
-                  <td className="p-2">{it.description}</td>
-                  <td className="p-2 tabular-nums">
+        <>
+          {/* Six numeric columns need 42rem; on a phone each line becomes a
+              small stacked block instead of a sideways scroll. */}
+          <ul className="space-y-2 md:hidden">
+            {payload.data.items.map((it) => (
+              <li className="rounded-md border p-3 text-sm" key={it.position}>
+                <p className="font-medium">
+                  <span className="text-muted-foreground mr-2 tabular-nums">
+                    {it.position}.
+                  </span>
+                  {it.description}
+                </p>
+                <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
+                  <dt className="text-muted-foreground">
+                    {t("itemsHeader.quantity")}
+                  </dt>
+                  <dd className="text-right tabular-nums">
                     {it.quantity} {it.unit}
-                  </td>
-                  <td className="p-2 tabular-nums">
+                  </dd>
+                  <dt className="text-muted-foreground">
+                    {t("itemsHeader.price")}
+                  </dt>
+                  <dd className="text-right tabular-nums">
                     {formatMoney(
                       it.unitPriceWithoutVat,
                       row.currency || "CZK",
                       locale,
                     )}
-                  </td>
-                  <td className="p-2 tabular-nums">{it.vatRate} %</td>
-                  <td className="p-2 tabular-nums">
+                  </dd>
+                  <dt className="text-muted-foreground">
+                    {t("itemsHeader.vat")}
+                  </dt>
+                  <dd className="text-right tabular-nums">{it.vatRate} %</dd>
+                  <dt className="font-medium">{t("itemsHeader.total")}</dt>
+                  <dd className="text-right font-medium tabular-nums">
                     {formatMoney(it.lineTotal, row.currency || "CZK", locale)}
-                  </td>
+                  </dd>
+                </dl>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden max-w-full overflow-x-auto rounded-md border md:block">
+            <table className="w-full min-w-[42rem] text-sm">
+              <thead>
+                <tr className="border-b text-left">
+                  <th className="p-2">{t("itemsHeader.position")}</th>
+                  <th className="p-2">{t("itemsHeader.description")}</th>
+                  <th className="p-2">{t("itemsHeader.quantity")}</th>
+                  <th className="p-2">{t("itemsHeader.price")}</th>
+                  <th className="p-2">{t("itemsHeader.vat")}</th>
+                  <th className="p-2">{t("itemsHeader.total")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {payload.data.items.map((it) => (
+                  <tr className="border-b" key={it.position}>
+                    <td className="p-2">{it.position}</td>
+                    <td className="p-2">{it.description}</td>
+                    <td className="p-2 tabular-nums">
+                      {it.quantity} {it.unit}
+                    </td>
+                    <td className="p-2 tabular-nums">
+                      {formatMoney(
+                        it.unitPriceWithoutVat,
+                        row.currency || "CZK",
+                        locale,
+                      )}
+                    </td>
+                    <td className="p-2 tabular-nums">{it.vatRate} %</td>
+                    <td className="p-2 tabular-nums">
+                      {formatMoney(it.lineTotal, row.currency || "CZK", locale)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       ) : null}
 
       {!archive && payload && !payload.success ? (
         <p className="text-destructive text-sm">{t("invalidPayload")}</p>
       ) : null}
-
-      <p>
-        <Link className="text-sm underline" href="/invoices">
-          {t("backToList")}
-        </Link>
-      </p>
 
       {showPdfPreview ? (
         <InvoicePdfPreview

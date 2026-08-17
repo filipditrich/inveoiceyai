@@ -315,3 +315,42 @@
     padding-inline-end: 2rem;
   }
 }
+
+/**
+ * Phone form controls, deliberately unlayered so it wins over the Tailwind
+ * utilities that set the dense desktop scale.
+ *
+ * iOS Safari zooms the whole page whenever a focused control renders below
+ * 16px, and the app's 28-32px control height is under the comfortable touch
+ * target. Both only apply below the `md` breakpoint, where the dense tables
+ * that motivate the small scale are already swapped for card layouts.
+ */
+@media (width < 48rem) {
+  select,
+  textarea,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not(
+      [type="range"]
+    ):not([type="color"]) {
+    font-size: max(1rem, 1em);
+    min-height: 2.5rem;
+  }
+
+  /**
+   * Right-edge fade on a horizontal strip. Unlayered for the same reason:
+   * a `@media` nested inside `@layer components` never made it into the
+   * computed style.
+   */
+  .scroll-fade-x {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      black calc(100% - 2rem),
+      transparent
+    );
+    mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent);
+    scrollbar-width: none;
+  }
+
+  .scroll-fade-x::-webkit-scrollbar {
+    display: none;
+  }
+}

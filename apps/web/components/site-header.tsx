@@ -30,6 +30,8 @@ export function SiteHeader() {
     invoices: t("breadcrumb.invoices"),
     "incoming-invoices": t("breadcrumb.incoming-invoices"),
     suppliers: t("breadcrumb.suppliers"),
+    payments: t("breadcrumb.payments"),
+    welcome: t("breadcrumb.welcome"),
     inbox: t("breadcrumb.inbox"),
     runs: t("breadcrumb.runs"),
     upload: t("breadcrumb.upload"),
@@ -93,13 +95,18 @@ export function SiteHeader() {
       <div className="h-(--header-height) group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex w-full items-center gap-2 px-4 transition-[height] duration-200 ease-linear">
         <SidebarTrigger
           aria-label={t("a11y.toggleSidebar")}
-          className="-ml-1"
+          className="-ml-1 size-10 sm:size-7"
           title="⌘ / Ctrl+B"
         />
         <Separator
           className="data-vertical:h-4 data-vertical:self-center mr-2"
           orientation="vertical"
         />
+        {/* Breadcrumbs do not fit a phone; the current page label keeps the
+            header from being an anonymous strip of icons. */}
+        <span className="mr-auto min-w-0 flex-1 truncate text-sm font-medium sm:hidden">
+          {crumbs[lastIndex]?.label}
+        </span>
         <Breadcrumb className="mr-auto hidden min-w-0 flex-1 sm:flex">
           <BreadcrumbList className="min-w-0">
             {crumbs.map((crumb, index) => (
@@ -125,7 +132,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-1.5">
           <SearchForm className="hidden w-full sm:block sm:max-w-xs" />
           <details className="group relative sm:hidden">
-            <summary className="hover:bg-muted focus-visible:ring-ring flex size-8 cursor-pointer list-none items-center justify-center rounded-md outline-none focus-visible:ring-2 [&::-webkit-details-marker]:hidden">
+            <summary className="hover:bg-muted focus-visible:ring-ring flex size-10 cursor-pointer list-none items-center justify-center rounded-md outline-none focus-visible:ring-2 [&::-webkit-details-marker]:hidden">
               <SearchIcon className="size-4" aria-hidden="true" />
               <span className="sr-only">{t("search.label")}</span>
             </summary>
@@ -133,7 +140,7 @@ export function SiteHeader() {
               <SearchForm inputId="mobile-search" />
             </div>
           </details>
-          <ThemeToggle />
+          <ThemeToggle className="size-10 sm:size-7" />
         </div>
       </div>
     </header>
