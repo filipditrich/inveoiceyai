@@ -1,6 +1,11 @@
 import { inboxItems, incomingDocuments } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
+import {
+  getInboundCaptureAdapter,
+  type InboundCaptureAdapter,
+  type InboundReceivedEmail,
+} from "@invoicey/invoice-tools/email";
 import { eq } from "drizzle-orm";
 
 import { parseForwardedFrom } from "./classify";
@@ -18,43 +23,12 @@ const ALLOWED_MIME = new Set([
   "image/webp",
 ]);
 
-export type ResendReceivedEmail = {
-  html?: string | null;
-  text?: string | null;
-  headers?: Record<string, string>;
-  attachments?: Array<{
-    id?: string;
-    filename?: string;
-    content_type?: string;
-    download_url?: string;
-    size?: number;
-  }>;
-};
-
-export async function fetchResendReceivedEmail(
-  emailId: string,
-  fetchImpl: typeof fetch = fetch,
-): Promise<ResendReceivedEmail> {
-  const key = env.RESEND_API_KEY;
-  if (!key) {
-    throw new Error("RESEND_API_KEY is not configured");
-  }
-  const res = await fetchImpl(
-    `https://api.resend.com/emails/receiving/${emailId}`,
-    {
-      headers: { Authorization: `Bearer ${key}` },
-    },
-  );
-  if (!res.ok) {
-    throw new Error(`resend_fetch_${res.status}`);
-  }
-  return (await res.json()) as ResendReceivedEmail;
-}
+export type { InboundReceivedEmail };
 
 export async function ingestInboxItem(
   inboxItemId: string,
   deps: {
-    fetchEmail?: typeof fetchResendReceivedEmail;
+    capture?: InboundCaptureAdapter;
     fetchImpl?: typeof fetch;
   } = {},
 ): Promise<void> {
@@ -72,9 +46,10 @@ export async function ingestInboxItem(
     .where(eq(inboxItems.id, item.id));
 
   try {
-    const fetchEmail = deps.fetchEmail ?? fetchResendReceivedEmail;
+    const capture =
+      deps.capture ?? getInboundCaptureAdapter({ fetchImpl: deps.fetchImpl });
     const email = item.providerMessageId
-      ? await fetchEmail(item.providerMessageId, deps.fetchImpl)
+      ? await capture.fetchReceivedEmail(item.providerMessageId, deps.fetchImpl)
       : {};
     const bodyText = (email.text ?? email.html ?? "").slice(0, 4000);
     const headers = email.headers ?? {};
@@ -96,15 +71,15 @@ export async function ingestInboxItem(
     const maxBytes = env.INVOICEY_INBOUND_MAX_ATTACHMENT_BYTES ?? 20_971_520;
     let invoiceCount = 0;
     for (const attachment of attachments) {
-      const mime = attachment.content_type ?? "application/octet-stream";
+      const mime = attachment.contentType ?? "application/octet-stream";
       if (!ALLOWED_MIME.has(mime)) continue;
       if ((attachment.size ?? 0) > maxBytes) continue;
-      if (!attachment.download_url) continue;
+      if (!attachment.downloadUrl) continue;
       const stored = await processIncomingDocument({
         workspaceId: item.workspaceId,
         inboxItemId: item.id,
         issuerId: item.issuerId,
-        fileUrl: attachment.download_url,
+        fileUrl: attachment.downloadUrl,
         fileName: attachment.filename ?? "attachment",
         mimeType: mime,
         subject: item.subject,

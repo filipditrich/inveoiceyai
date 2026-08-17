@@ -107,6 +107,14 @@ export const privateEnvSchema = z.object({
   ),
 
   /**
+   * Active email transport (ADR 0034). Resend is the only implementation
+   * today; SES plugs in behind the same adapters later.
+   */
+  EMAIL_PROVIDER: z.preprocess(
+    emptyEnvToUndefined,
+    z.enum(["resend"]).default("resend"),
+  ),
+  /**
    * Resend (Plan 11). Optional so the app boots without mail configured;
    * send / webhook fail closed when unset.
    */

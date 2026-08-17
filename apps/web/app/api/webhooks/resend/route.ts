@@ -1,8 +1,9 @@
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
+import { parseResendDeliveryEvent } from "@invoicey/invoice-tools/email";
 import { Webhook } from "svix";
 
-import { applyResendWebhookEvent } from "@/lib/email/webhook";
+import { applyEmailDeliveryEvent } from "@/lib/email/webhook";
 
 export const runtime = "nodejs";
 
@@ -36,10 +37,17 @@ export async function POST(request: Request): Promise<Response> {
       "svix-signature": svixSignature,
     }) as { type: string; created_at?: string; data?: Record<string, unknown> };
 
-    const result = await applyResendWebhookEvent({
-      db,
+    const normalized = parseResendDeliveryEvent({
       providerEventId: svixId,
       payload: event,
+    });
+    if (!normalized) {
+      return Response.json({ ok: true, kind: "ignored" });
+    }
+
+    const result = await applyEmailDeliveryEvent({
+      db,
+      event: normalized,
     });
 
     if (!result.ok) {

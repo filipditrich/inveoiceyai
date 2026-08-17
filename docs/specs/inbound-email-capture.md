@@ -6,7 +6,9 @@
 
 How a supplier's email becomes an `inbox_items` row with stored, hashed
 documents. Everything downstream of `inbox_items` is capture-agnostic by
-construction.
+construction. Resend Inbound is the first `InboundCaptureAdapter` (ADR 0032,
+ADR 0034); ingest fetches body and attachments through that adapter, not the
+Resend API directly.
 
 ## Address model
 
@@ -184,4 +186,5 @@ enters the repository.
 
 - [Resend — receiving emails](https://resend.com/docs/dashboard/receiving/introduction)
 - [Email spec](./email.md) — outbound side and the existing webhook route
+- [ADR 0034](../decisions/0034-email-transport-adapters.md) — `InboundCaptureAdapter` seam
 - [Uploads spec](./uploads.md)

@@ -1,21 +1,13 @@
 import { inboxAliases, inboxItems } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
+import { parseResendInboundEvent } from "@invoicey/invoice-tools/email";
 import { and, eq, gte, sql } from "drizzle-orm";
 import { Webhook } from "svix";
 
 import { ingestInboxItem } from "@/lib/incoming-invoices/ingest";
 
 export const runtime = "nodejs";
-
-function firstRecipient(data: Record<string, unknown>): string | null {
-  const receivedFor = data.received_for ?? data.to;
-  if (typeof receivedFor === "string") return receivedFor;
-  if (Array.isArray(receivedFor) && typeof receivedFor[0] === "string") {
-    return receivedFor[0];
-  }
-  return null;
-}
 
 export async function POST(request: Request): Promise<Response> {
   const secret = env.RESEND_INBOUND_WEBHOOK_SECRET;
@@ -48,13 +40,17 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
-  if (event.type !== "email.received") {
-    return Response.json({ ok: true, ignored: "unhandled_type" });
+  const parsed = parseResendInboundEvent({
+    type: event.type,
+    data: event.data,
+    emailIdFallback: svixId,
+  });
+  if ("ignored" in parsed) {
+    return Response.json({ ok: true, ignored: parsed.ignored });
   }
 
-  const data = event.data ?? {};
-  const recipient = firstRecipient(data);
-  const localPart = recipient?.split("@")[0]?.toLowerCase();
+  const { notification } = parsed;
+  const localPart = notification.recipient?.split("@")[0]?.toLowerCase();
   if (!localPart) {
     return Response.json({ ok: true, ignored: "unknown_alias" });
   }
@@ -85,7 +81,6 @@ export async function POST(request: Request): Promise<Response> {
       ),
     );
   const cap = env.INVOICEY_INBOUND_MAX_MESSAGES_PER_DAY ?? 200;
-  const emailId = typeof data.email_id === "string" ? data.email_id : svixId;
   const overCap = Number(todayCount ?? 0) >= cap;
 
   const [inserted] = await db
@@ -95,10 +90,10 @@ export async function POST(request: Request): Promise<Response> {
       source: "email",
       aliasId: alias.id,
       issuerId: alias.issuerId,
-      providerMessageId: emailId,
-      fromAddress: typeof data.from === "string" ? data.from : null,
-      subject: typeof data.subject === "string" ? data.subject : null,
-      toAddresses: recipient ? [recipient] : [],
+      providerMessageId: notification.providerMessageId,
+      fromAddress: notification.fromAddress,
+      subject: notification.subject,
+      toAddresses: notification.recipient ? [notification.recipient] : [],
       status: overCap ? "rejected" : "received",
       errorCode: overCap ? "rate_limited" : null,
     })

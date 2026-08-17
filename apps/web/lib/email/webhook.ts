@@ -11,79 +11,43 @@ import {
   type EmailMessageStatus,
   type InvoiceyDb,
 } from "@invoicey/db";
+import type {
+  EmailDeliveryEventKind,
+  NormalizedEmailDeliveryEvent,
+} from "@invoicey/invoice-tools/email";
 
-import {
-  eventKindToStatus,
-  mergeEmailStatus,
-  stripResendEventType,
-  type ResendEventKind,
-} from "./status";
-
-type ResendWebhookPayload = {
-  type: string;
-  created_at?: string;
-  data?: {
-    email_id?: string;
-    tags?: Record<string, string> | { name: string; value: string }[];
-    [key: string]: unknown;
-  };
-};
-
-function tagsToRecord(
-  tags:
-    | Record<string, string>
-    | { name: string; value: string }[]
-    | undefined
-    | null,
-): Record<string, string> {
-  if (!tags) return {};
-  if (Array.isArray(tags)) {
-    const out: Record<string, string> = {};
-    for (const t of tags) {
-      if (t?.name) out[t.name] = t.value;
-    }
-    return out;
-  }
-  return tags;
-}
+import { eventKindToStatus, mergeEmailStatus } from "./status";
 
 /**
- * Apply a signed Resend event. Duplicate `provider_event_id`s still re-apply
- * the message status patch so a failed update can recover on retry.
+ * Apply a normalized delivery event. Duplicate `provider_event_id`s still
+ * re-apply the message status patch so a failed update can recover on retry.
  */
-export async function applyResendWebhookEvent(opts: {
+export async function applyEmailDeliveryEvent(opts: {
   db: InvoiceyDb;
-  providerEventId: string;
-  payload: ResendWebhookPayload;
+  event: NormalizedEmailDeliveryEvent;
 }): Promise<
-  { ok: true; kind: ResendEventKind | "ignored" } | { ok: false; error: string }
+  | { ok: true; kind: EmailDeliveryEventKind | "ignored" }
+  | { ok: false; error: string }
 > {
-  const kind = stripResendEventType(opts.payload.type);
-  if (!kind) {
-    return { ok: true, kind: "ignored" };
-  }
-
-  const tags = tagsToRecord(opts.payload.data?.tags);
-  const messageId = tags.message_id;
-  const providerMessageId = opts.payload.data?.email_id;
+  const { event } = opts;
 
   let message =
-    messageId != null
+    event.messageId != null
       ? (
           await opts.db
             .select()
             .from(emailMessages)
-            .where(eq(emailMessages.id, messageId))
+            .where(eq(emailMessages.id, event.messageId))
             .limit(1)
         )[0]
       : undefined;
 
-  if (!message && providerMessageId) {
+  if (!message && event.providerMessageId) {
     message = (
       await opts.db
         .select()
         .from(emailMessages)
-        .where(eq(emailMessages.providerMessageId, providerMessageId))
+        .where(eq(emailMessages.providerMessageId, event.providerMessageId))
         .limit(1)
     )[0];
   }
@@ -92,11 +56,7 @@ export async function applyResendWebhookEvent(opts: {
     return { ok: false, error: "email message not found" };
   }
 
-  const occurredAt = opts.payload.created_at
-    ? new Date(opts.payload.created_at)
-    : new Date();
-
-  const statusPatch = eventKindToStatus(kind);
+  const statusPatch = eventKindToStatus(event.kind);
   const nextStatus = mergeEmailStatus(message.status, statusPatch);
 
   const patch: {
@@ -106,13 +66,13 @@ export async function applyResendWebhookEvent(opts: {
     clickedAt?: Date;
   } = {
     status: nextStatus,
-    lastEventAt: occurredAt,
+    lastEventAt: event.occurredAt,
   };
-  if (kind === "opened" && !message.openedAt) {
-    patch.openedAt = occurredAt;
+  if (event.kind === "opened" && !message.openedAt) {
+    patch.openedAt = event.occurredAt;
   }
-  if (kind === "clicked" && !message.clickedAt) {
-    patch.clickedAt = occurredAt;
+  if (event.kind === "clicked" && !message.clickedAt) {
+    patch.clickedAt = event.occurredAt;
   }
 
   await opts.db
@@ -121,10 +81,10 @@ export async function applyResendWebhookEvent(opts: {
       id: randomUUID(),
       workspaceId: message.workspaceId,
       messageId: message.id,
-      type: kind,
-      providerEventId: opts.providerEventId,
-      payloadJson: opts.payload as unknown as Record<string, unknown>,
-      occurredAt,
+      type: event.kind,
+      providerEventId: event.providerEventId,
+      payloadJson: event.payload,
+      occurredAt: event.occurredAt,
     })
     .onConflictDoNothing({ target: emailEvents.providerEventId });
 
@@ -134,8 +94,8 @@ export async function applyResendWebhookEvent(opts: {
     .set(patch)
     .where(eq(emailMessages.id, message.id));
 
-  if (kind === "bounced" || kind === "complained") {
-    const reason = kind === "bounced" ? "bounce" : "complaint";
+  if (event.kind === "bounced" || event.kind === "complained") {
+    const reason = event.kind === "bounced" ? "bounce" : "complaint";
     const email = message.toEmail.toLowerCase();
     const [already] = await opts.db
       .select({ id: emailSuppressions.id })
@@ -157,5 +117,5 @@ export async function applyResendWebhookEvent(opts: {
     }
   }
 
-  return { ok: true, kind };
+  return { ok: true, kind: event.kind };
 }

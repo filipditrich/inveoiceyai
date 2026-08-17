@@ -43,7 +43,7 @@ inveoiceyai/
 │   ├── invoice-core/           Zod schema, totals, numbering, status, PDF, QR, ISDOC
 │   ├── invoice-tools/          normalize, presets, create/render, MCP registration
 │   ├── payment-core/           Fio adapter, matcher, money helpers
-│   ├── emails/                 Resend + react-email templates
+│   ├── emails/                 react-email templates (transport adapters live in invoice-tools)
 │   ├── db/                     Drizzle schema + Neon client + SQL migrations
 │   ├── ares/                   ARES REST v3 client
 │   ├── env/                    env schema helpers
@@ -156,6 +156,7 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 | `UPLOADTHING_APP_ID`                           | UploadThing app ID                                                                                      | Vercel + `.env.local`          | Plan 5                 |
 | `NEXT_PUBLIC_APP_URL`                          | Public origin (used by SPAYD message templates, future emails)                                          | Vercel + `.env.local`          | Plan 1                 |
 | `INVOICEY_DEFAULT_WORKSPACE_ID`                | UUID of the seeded default workspace; until auth, every server action loads this                        | Vercel + `.env.local`          | Plan 1                 |
+| `EMAIL_PROVIDER`                               | Email transport selector (`resend` today; ADR 0034)                                                     | Vercel + `.env.local`          | Plan 11 / ADR 0034     |
 | `RESEND_API_KEY`                               | Resend API key (optional in schema; send fails closed when unset)                                       | Vercel + `.env.local`          | Plan 11                |
 | `RESEND_WEBHOOK_SECRET`                        | Svix signing secret for `/api/webhooks/resend`                                                          | Vercel + `.env.local`          | Plan 11                |
 | `EMAIL_FROM`                                   | Invoice From header (`Invoicey <invoices@invoicey.ditrich.me>`)                                         | Vercel + `.env.local`          | Plan 11                |
@@ -209,7 +210,7 @@ flowchart LR
     Ares --> Web
 ```
 
-Shipped post-MVP foundations: Vercel Cron (Plan 10 / 11d / 22), Resend (Plan 11), MCP+DB tools (Plan 12b), Better Auth (Plan 14), payment ledger + Fio (Plan 22). Slack Eve (Plan 13b) shares the same Zod contract in-process — no HTTP shim between MCP and Slack. Email: [`specs/email.md`](./specs/email.md). Payments: [`specs/payment-ledger-fio.md`](./specs/payment-ledger-fio.md).
+Shipped post-MVP foundations: Vercel Cron (Plan 10 / 11d / 22), Resend via `EmailTransport` (Plan 11 / ADR 0034), MCP+DB tools (Plan 12b), Better Auth (Plan 14), payment ledger + Fio (Plan 22). Slack Eve (Plan 13b) shares the same Zod contract in-process — no HTTP shim between MCP and Slack. Email: [`specs/email.md`](./specs/email.md). Payments: [`specs/payment-ledger-fio.md`](./specs/payment-ledger-fio.md).
 
 ## Open architectural questions
 

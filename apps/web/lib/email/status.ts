@@ -1,14 +1,11 @@
 import type { EmailMessageStatus } from "@invoicey/db";
+import type { EmailDeliveryEventKind } from "@invoicey/invoice-tools/email";
 
-export type ResendEventKind =
-  | "sent"
-  | "delivered"
-  | "delivery_delayed"
-  | "bounced"
-  | "failed"
-  | "complained"
-  | "opened"
-  | "clicked";
+export type { EmailDeliveryEventKind };
+/** @deprecated Use `EmailDeliveryEventKind`. */
+export type ResendEventKind = EmailDeliveryEventKind;
+
+export { parseResendDeliveryEventType as stripResendEventType } from "@invoicey/invoice-tools/email";
 
 const DELIVERY_RANK: Record<EmailMessageStatus, number> = {
   queued: 0,
@@ -20,25 +17,8 @@ const DELIVERY_RANK: Record<EmailMessageStatus, number> = {
   failed: 5,
 };
 
-export function stripResendEventType(type: string): ResendEventKind | null {
-  const bare = type.startsWith("email.") ? type.slice("email.".length) : type;
-  switch (bare) {
-    case "sent":
-    case "delivered":
-    case "delivery_delayed":
-    case "bounced":
-    case "failed":
-    case "complained":
-    case "opened":
-    case "clicked":
-      return bare;
-    default:
-      return null;
-  }
-}
-
 export function eventKindToStatus(
-  kind: ResendEventKind,
+  kind: EmailDeliveryEventKind,
 ): EmailMessageStatus | null {
   switch (kind) {
     case "sent":

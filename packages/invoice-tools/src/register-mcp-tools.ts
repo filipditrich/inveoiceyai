@@ -222,7 +222,7 @@ export function registerInvoiceyMcpTools(
 
   s.tool(
     "send_invoice_email",
-    "Email an issued invoice (PDF + optional ISDOC) via Resend. Requires DATABASE_URL + RESEND_API_KEY. Pass `to` when the client has no contactEmail — do not invent an address.",
+    "Email an issued invoice (PDF + optional ISDOC) via the configured email transport. Requires DATABASE_URL and a configured transport (Resend today). Pass `to` when the client has no contactEmail — do not invent an address.",
     {
       id: z.string().uuid().describe("Invoice row id"),
       to: z

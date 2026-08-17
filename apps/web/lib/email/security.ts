@@ -5,7 +5,7 @@ import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
 import { getLocale } from "next-intl/server";
 
-import { getResendClient } from "./client";
+import { isEmailConfigured } from "./client";
 import { sendTransactionalEmail } from "./send";
 
 export async function sendNewSignInEmail(opts: {
@@ -18,7 +18,7 @@ export async function sendNewSignInEmail(opts: {
   trustUrl: string;
   securitySettingsUrl: string;
 }): Promise<void> {
-  if (!getResendClient()) {
+  if (!isEmailConfigured()) {
     throw new Error("RESEND_API_KEY is not configured");
   }
 

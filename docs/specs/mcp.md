@@ -17,17 +17,17 @@ Slack Eve reuses the same handlers in-process (`apps/web/agent/tools`) — see [
 
 ## Tools
 
-| Tool                                                            | Input                                                  | Output                                                                                          |
-| --------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| `lookup_business`                                               | `{ ico }`                                              | ARES draft client fields or error                                                               |
-| `search_business`                                               | `{ query, limit? }`                                    | ARES name search → matches with IČO + address                                                   |
-| `create_invoice`                                                | `{ draft? }`                                           | Validated invoice + PDF base64 + ISDOC XML, or issues. Issuer is the workspace default.         |
-| `list_invoices`                                                 | `{ limit?, unpaidOnly? }`                              | Summaries with `status` + `displayStatus` (needs `DATABASE_URL`)                                |
-| `get_invoice`                                                   | `{ id }`                                               | Summary + validated payload when present (needs DB)                                             |
-| `issue_invoice`                                                 | `{ id }`                                               | Issues a draft (atomic numbering; idempotent if already issued). Needs DB                       |
-| `mark_invoice_paid`                                             | `{ id }`                                               | Sets `paidAt` (needs DB)                                                                        |
-| `send_invoice_email`                                            | `{ id, to?, cc?, coverText?, attachIsdoc?, subject? }` | Emails PDF (+ ISDOC); needs DB + `RESEND_API_KEY`. Pass `to` when client has no `contactEmail`. |
-| `list_presets` / `get_preset` / `save_preset` / `delete_preset` | preset ids / kind / data                               | Preset records on disk                                                                          |
+| Tool                                                            | Input                                                  | Output                                                                                                                             |
+| --------------------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `lookup_business`                                               | `{ ico }`                                              | ARES draft client fields or error                                                                                                  |
+| `search_business`                                               | `{ query, limit? }`                                    | ARES name search → matches with IČO + address                                                                                      |
+| `create_invoice`                                                | `{ draft? }`                                           | Validated invoice + PDF base64 + ISDOC XML, or issues. Issuer is the workspace default.                                            |
+| `list_invoices`                                                 | `{ limit?, unpaidOnly? }`                              | Summaries with `status` + `displayStatus` (needs `DATABASE_URL`)                                                                   |
+| `get_invoice`                                                   | `{ id }`                                               | Summary + validated payload when present (needs DB)                                                                                |
+| `issue_invoice`                                                 | `{ id }`                                               | Issues a draft (atomic numbering; idempotent if already issued). Needs DB                                                          |
+| `mark_invoice_paid`                                             | `{ id }`                                               | Sets `paidAt` (needs DB)                                                                                                           |
+| `send_invoice_email`                                            | `{ id, to?, cc?, coverText?, attachIsdoc?, subject? }` | Emails PDF (+ ISDOC); needs DB + configured email transport (`RESEND_API_KEY` today). Pass `to` when client has no `contactEmail`. |
+| `list_presets` / `get_preset` / `save_preset` / `delete_preset` | preset ids / kind / data                               | Preset records on disk                                                                                                             |
 
 ### Preset kinds
 

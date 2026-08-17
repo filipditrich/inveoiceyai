@@ -2,10 +2,9 @@ import "server-only";
 
 import { emailLocale, renderWorkspaceInviteEmail } from "@invoicey/emails";
 import { db } from "@invoicey/db/client";
-import { env } from "@invoicey/env/server";
 import { getLocale } from "next-intl/server";
 
-import { getResendClient } from "./client";
+import { isEmailConfigured } from "./client";
 import { buildViaInvoiceyDisplayName } from "./from";
 import { sendTransactionalEmail } from "./send";
 
@@ -19,7 +18,7 @@ export async function sendWorkspaceInviteEmail(opts: {
   inviteUrl: string;
   expiresAt?: Date | string | null;
 }): Promise<void> {
-  if (!getResendClient()) {
+  if (!isEmailConfigured()) {
     throw new Error("RESEND_API_KEY is not configured");
   }
 
@@ -50,9 +49,7 @@ export async function sendWorkspaceInviteEmail(opts: {
   });
 }
 
-export function isEmailConfigured(): boolean {
-  return Boolean(env.RESEND_API_KEY);
-}
+export { isEmailConfigured } from "./client";
 
 /** prague-local label for czech invite mail */
 export function formatInviteExpiry(

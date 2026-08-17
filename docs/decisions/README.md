@@ -47,3 +47,4 @@ When a decision changes:
 | [0031](./0031-incoming-invoice-payable-ledger.md)          | Incoming invoices as a first-class payable domain          | Accepted                          |
 | [0032](./0032-inbound-email-capture-resend.md)             | Inbound email capture through Resend Inbound aliases       | Accepted                          |
 | [0033](./0033-fio-payment-initiation-bank-signed.md)       | Payment initiation is a bank-signed batch                  | Accepted                          |
+| [0034](./0034-email-transport-adapters.md)                 | Provider-neutral email transport with Resend first         | Accepted                          |

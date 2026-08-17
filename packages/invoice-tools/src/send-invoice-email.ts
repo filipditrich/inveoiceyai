@@ -397,12 +397,28 @@ export async function sendPaymentReceivedEmailIfEnabled(opts: {
 }
 
 export {
+  createResendEmailTransport,
+  createResendInboundCaptureAdapter,
   emailFromFamily,
+  getEmailTransport,
+  getInboundCaptureAdapter,
+  isEmailTransportConfigured,
+  parseResendDeliveryEvent,
+  parseResendDeliveryEventType,
+  parseResendInboundEvent,
+  resolveEmailProviderId,
   resolveTransactionalFrom,
   sendTransactionalEmail,
   type EmailAttachment,
+  type EmailDeliveryEventKind,
   type EmailFromFamily,
+  type EmailProviderId,
+  type EmailTransport,
+  type InboundCaptureAdapter,
+  type InboundReceivedEmail,
+  type NormalizedEmailDeliveryEvent,
+  type NormalizedInboundNotification,
   type ResolvedEmailFrom,
   type SendTransactionalEmailInput,
   type SendTransactionalEmailResult,
-} from "./email-transport";
+} from "./email";

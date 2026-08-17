@@ -24,7 +24,7 @@ Just-in-time convention: write the remaining specs before the plan that consumes
 | `db-schema.md`                 | DB foundation        | Neon tables: workspaces, issuer_businesses, clients, invoices, presets                                                               |
 | `uploads.md`                   | Plan 5               | UploadThing endpoints (issuer logo / stamp / signature, workspace logo), allowed MIME types and sizes, replace-without-delete policy |
 | `data-grid.md`                 | Plan 7               | ReUI Data Grid columns, filter/sort/search wiring, virtualization, row actions                                                       |
-| `email.md`                     | Plan 11              | Resend + react-email templates, From/Reply-To, webhooks, invoice send, lifecycle                                                     |
+| `email.md`                     | Plan 11              | react-email templates, EmailTransport adapters (Resend first), From/Reply-To, webhooks, invoice send                                 |
 | `public-shell.md`              | Plan 17              | Public homepage, auth entry shell, essential legal routes, consent UX, and launch metadata                                           |
 | `recurring.md`                 | Plan 10              | Invoice templates, monthly/quarterly schedules, cron drafts (HITL)                                                                   |
 | `payment-ledger-fio.md`        | Plan 22              | Provider-neutral allocations, deterministic matching, encrypted Fio connection, sync, reconciliation UI                              |

@@ -2,17 +2,17 @@
 
 ## Goal
 
-Transactional email for Invoicey: invoice delivery to clients (PDF + optional ISDOC), workspace invitations, overdue reminders, and payment-received notices. Shared Resend transport in `@invoicey/invoice-tools/email` (`sendTransactionalEmail`) used by web, MCP, and Eve; templates from `@invoicey/emails`; durable delivery log and webhook-driven status tracking.
+Transactional email for Invoicey: invoice delivery to clients (PDF + optional ISDOC), workspace invitations, overdue reminders, and payment-received notices. Shared `EmailTransport` in `@invoicey/invoice-tools` (`sendTransactionalEmail`) used by web, MCP, and Eve; templates from `@invoicey/emails`; durable delivery log and webhook-driven status tracking. Resend is the first transport (ADR 0034).
 
 ## Inputs / outputs
 
 | Surface                        | Input                                               | Output                                  |
 | ------------------------------ | --------------------------------------------------- | --------------------------------------- |
-| Web send dialog                | Issued invoice id + to/cc/subject/cover/attachIsdoc | `email_messages` row + Resend id        |
+| Web send dialog                | Issued invoice id + to/cc/subject/cover/attachIsdoc | `email_messages` row + provider id      |
 | MCP / Eve `send_invoice_email` | Same as ops                                         | JSON `{ messageId, status, to }`        |
 | Better Auth invite             | Invitee email + org                                 | `workspace_invite` template send        |
 | Cron (11d)                     | Overdue invoices + issuer settings                  | `overdue_reminder` sends                |
-| Resend webhook                 | Svix-signed events                                  | `email_events` + updated message status |
+| Delivery webhook               | Provider-signed events (Resend/Svix today)          | `email_events` + updated message status |
 
 ## Templates (`@invoicey/emails`)
 
@@ -56,6 +56,17 @@ Primary delivery statuses: `queued` → `sent` → `delivered` | `delayed` | `bo
 
 `opened` / `clicked` are soft signals (`opened_at` / `clicked_at`); they never regress delivery status. Terminal delivery outcomes (`bounced`, `failed`, `complained`) win over `delivered`.
 
+## Transport adapters (ADR 0034)
+
+`@invoicey/invoice-tools/src/email/` owns the seam:
+
+| Contract                | Role                                  | First impl                          |
+| ----------------------- | ------------------------------------- | ----------------------------------- |
+| `EmailTransport`        | Outbound send                         | `createResendEmailTransport`        |
+| `InboundCaptureAdapter` | Fetch received body + attachment URLs | `createResendInboundCaptureAdapter` |
+
+`EMAIL_PROVIDER` selects the impl (`resend` today). Templates, From/Reply-To, and `email_messages` stay provider-neutral. A later SES adapter implements the same two interfaces; webhook _routes_ stay provider-specific because signing schemes differ.
+
 ## Webhooks
 
 - Route: `POST /api/webhooks/resend`
@@ -86,13 +97,14 @@ Table `email_suppressions`: `(workspace_id, email)` + `reason` (`bounce` | `comp
 
 ## Env
 
-| Var                     | Purpose                                                         |
-| ----------------------- | --------------------------------------------------------------- |
-| `RESEND_API_KEY`        | Send API (optional in schema; send fails closed when unset)     |
-| `RESEND_WEBHOOK_SECRET` | Svix webhook secret (optional; webhook fails closed when unset) |
-| `EMAIL_FROM`            | Invoice From (`Invoicey <invoices@invoicey.ditrich.me>`)        |
-| `EMAIL_SYSTEM_FROM`     | System From (`Invoicey <noreply@invoicey.ditrich.me>`)          |
-| `CRON_SECRET`           | Bearer for `/api/cron/overdue-reminders` (11d)                  |
+| Var                     | Purpose                                                            |
+| ----------------------- | ------------------------------------------------------------------ |
+| `EMAIL_PROVIDER`        | Transport selector (`resend` today; fail closed on unknown)        |
+| `RESEND_API_KEY`        | Resend send API (optional in schema; send fails closed when unset) |
+| `RESEND_WEBHOOK_SECRET` | Svix webhook secret (optional; webhook fails closed when unset)    |
+| `EMAIL_FROM`            | Invoice From (`Invoicey <invoices@invoicey.ditrich.me>`)           |
+| `EMAIL_SYSTEM_FROM`     | System From (`Invoicey <noreply@invoicey.ditrich.me>`)             |
+| `CRON_SECRET`           | Bearer for `/api/cron/overdue-reminders` (11d)                     |
 
 ## Go-live checklist (operator)
 
@@ -104,5 +116,6 @@ Table `email_suppressions`: `(workspace_id, email)` + `reason` (`bounce` | `comp
 ## References
 
 - [ADR 0022](../decisions/0022-resend-and-react-email.md)
+- [ADR 0034](../decisions/0034-email-transport-adapters.md)
 - Roadmap Plan 11a–11d
 - Resend webhooks: https://resend.com/docs/webhooks/event-types
