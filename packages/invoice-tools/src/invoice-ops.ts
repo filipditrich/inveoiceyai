@@ -8,7 +8,10 @@ import {
   tryCreateDbFromEnv,
   type InvoiceyDb,
 } from "@invoicey/db";
-import { withDbTransaction } from "@invoicey/db/transaction";
+import {
+  withDbTransaction,
+  type DbTransaction,
+} from "@invoicey/db/transaction";
 import { nextInvoiceNumber } from "@invoicey/invoice-core";
 import {
   ClientSnapshotSchema,
@@ -255,20 +258,26 @@ export async function markInvoicePaidById(options: {
   return { ok: true, summary: rowToSummary(updated) };
 }
 
-export async function cancelInvoiceById(options: {
-  id: string;
-  workspaceId?: string;
-}): Promise<
-  { ok: true; summary: InvoiceSummary } | { ok: false; error: string }
-> {
-  const database = requireDb();
-  const workspaceId = resolveWorkspaceId(options.workspaceId);
-  const rows = await database
+type CancelInvoiceResult =
+  { ok: true; summary: InvoiceSummary } | { ok: false; error: string };
+
+async function cancelLockedInvoice(
+  tx: DbTransaction,
+  options: {
+    id: string;
+    workspaceId: string;
+  },
+): Promise<CancelInvoiceResult> {
+  const rows = await tx
     .select()
     .from(invoices)
     .where(
-      and(eq(invoices.id, options.id), eq(invoices.workspaceId, workspaceId)),
+      and(
+        eq(invoices.id, options.id),
+        eq(invoices.workspaceId, options.workspaceId),
+      ),
     )
+    .for("update")
     .limit(1);
   const row = rows[0];
   if (!row) {
@@ -282,17 +291,31 @@ export async function cancelInvoiceById(options: {
   ) {
     return { ok: false, error: "cannot_cancel" };
   }
+
   const now = new Date();
-  await database
+  await tx
     .update(invoices)
     .set({ cancelledAt: now, updatedAt: now })
     .where(
-      and(eq(invoices.id, options.id), eq(invoices.workspaceId, workspaceId)),
+      and(
+        eq(invoices.id, options.id),
+        eq(invoices.workspaceId, options.workspaceId),
+      ),
     );
   return {
     ok: true,
     summary: rowToSummary({ ...row, cancelledAt: now, updatedAt: now }),
   };
+}
+
+export async function cancelInvoiceById(options: {
+  id: string;
+  workspaceId?: string;
+}): Promise<CancelInvoiceResult> {
+  const workspaceId = resolveWorkspaceId(options.workspaceId);
+  return withDbTransaction((tx) =>
+    cancelLockedInvoice(tx, { id: options.id, workspaceId }),
+  );
 }
 
 /** Clear `paidAt` (no grace window). */
@@ -405,38 +428,21 @@ export async function bulkCancelInvoices(options: {
   ids: string[];
   workspaceId?: string;
 }): Promise<BulkOpResult> {
-  const database = requireDb();
   const workspaceId = resolveWorkspaceId(options.workspaceId);
-  const rows = await loadWorkspaceInvoicesByIds(
-    database,
-    workspaceId,
-    options.ids,
-  );
-  const byId = new Map(rows.map((r) => [r.id, r]));
   let ok = 0;
   let skipped = 0;
   let failed = 0;
-  const now = new Date();
   for (const id of options.ids) {
-    const row = byId.get(id);
-    if (!row) {
-      failed += 1;
+    const result = await cancelInvoiceById({ id, workspaceId });
+    if (result.ok) {
+      ok += 1;
       continue;
     }
-    if (
-      !row.issuedAt ||
-      Number(row.paidAmount) > 0 ||
-      row.paidAt ||
-      row.cancelledAt
-    ) {
+    if (result.error === "cannot_cancel") {
       skipped += 1;
       continue;
     }
-    await database
-      .update(invoices)
-      .set({ cancelledAt: now, updatedAt: now })
-      .where(and(eq(invoices.id, id), eq(invoices.workspaceId, workspaceId)));
-    ok += 1;
+    failed += 1;
   }
   return { ok, skipped, failed };
 }
