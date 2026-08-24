@@ -40,12 +40,22 @@ export function InvoicePdfPreview({
         </p>
       ) : null}
       {src ? (
-        <iframe
-          className="absolute inset-0 h-full w-full border-0 bg-white"
-          data-slot="pdf-frame"
-          src={src}
-          title={t("title")}
-        />
+        <>
+          <iframe
+            className="absolute inset-0 h-full w-full border-0 bg-white"
+            data-slot="pdf-frame"
+            src={src}
+            title={t("title")}
+          />
+          <a
+            className="bg-background/80 text-muted-foreground absolute bottom-2 right-2 rounded px-2 py-1 text-xs underline backdrop-blur"
+            href={url ?? undefined}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t("open")}
+          </a>
+        </>
       ) : (
         <div
           className="text-muted-foreground absolute inset-0 flex items-center justify-center text-sm"

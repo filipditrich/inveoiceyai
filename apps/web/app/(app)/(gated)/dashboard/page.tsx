@@ -1,5 +1,6 @@
 import { DashboardBalanceRow } from "@/components/dashboard/dashboard-balance";
 import { DashboardIssuerFilter } from "@/components/dashboard/dashboard-issuer-filter";
+import { DashboardGettingStarted } from "@/components/dashboard/dashboard-getting-started";
 import { DashboardMonthlyChart } from "@/components/dashboard/dashboard-monthly-chart";
 import { DashboardRecentInvoices } from "@/components/dashboard/dashboard-recent-invoices";
 import { DashboardStatusCards } from "@/components/dashboard/dashboard-status-cards";
@@ -43,6 +44,15 @@ export default async function DashboardPage({
           icon={<ChartNoAxesCombinedIcon />}
           title={t("empty.title")}
         />
+      </div>
+    );
+  }
+
+  const hasInvoices = metrics.buckets.some((bucket) => bucket.count > 0);
+  if (!issuerId && !hasInvoices) {
+    return (
+      <div className="flex flex-1 flex-col py-6">
+        <DashboardGettingStarted />
       </div>
     );
   }

@@ -58,7 +58,8 @@
   "PdfPreview": {
     "updating": "Updating…",
     "empty": "Fill in line items for a preview…",
-    "title": "Invoice PDF preview"
+    "title": "Invoice PDF preview",
+    "open": "Open PDF"
   },
   "Errors": {
     "invalid": {
@@ -69,7 +70,7 @@
       "already_issued": "Invoice has already been issued.",
       "not_draft": "Only drafts can be edited.",
       "cannot_issue": "This draft cannot be issued.",
-      "has_invoices": "Cannot delete an issuer that has invoices.",
+      "has_invoices": "Cannot delete a business that has invoices.",
       "missing_id": "Missing identifier.",
       "missing_name": "Name is required.",
       "duplicate_name": "A recurring template with this name already exists.",
@@ -105,8 +106,8 @@
     }
   },
   "Toasts": {
-    "issuer_saved": "Issuer saved",
-    "issuer_deleted": "Issuer deleted",
+    "issuer_saved": "Business saved",
+    "issuer_deleted": "Business deleted",
     "client_saved": "Client saved",
     "client_deleted": "Client deleted",
     "invoice_saved": "Draft saved",
@@ -310,7 +311,7 @@
       "pdfIsdoc": "PDF + ISDOC",
       "spaydQr": "SPAYD QR payment",
       "aresLookup": "ARES by ICO",
-      "multiIssuer": "Multiple issuers",
+      "multiIssuer": "Multiple businesses",
       "ariaLabel": "Key formats"
     },
     "workflow": {
@@ -318,7 +319,7 @@
       "title": "Less manual work. You stay in control.",
       "description": "Invoicey keeps the full document lifecycle together and leaves sensitive steps in your hands.",
       "step1Title": "Prepare the data",
-      "step1Description": "Pick an issuer, look up a client by ICO, and add line items. Or send the same data as JSON or an agent instruction.",
+      "step1Description": "Pick a business, look up a client by ICO, and add line items. Or send the same data as JSON or an agent instruction.",
       "step2Title": "Validate & issue",
       "step2Description": "One schema checks required fields, VAT, and totals. Only then is an immutable document created — PDF, ISDOC, and QR.",
       "step3Title": "Send & track",
@@ -331,7 +332,7 @@
       "docsTitle": "Documents without blind spots",
       "docsDescription": "Invoices, advances, proformas, and credit notes. VAT, tax point date, symbols, QR payment, and ISDOC are part of the same output.",
       "issuersTitle": "Every business has its own rules",
-      "issuersDescription": "Bank account, numbering series, VAT registration, and visual assets stay with the correct issuer.",
+      "issuersDescription": "Bank account, numbering series, VAT registration, and visual assets stay with the correct business.",
       "emailTitle": "From issuance to payment",
       "emailDescription": "Send PDF and ISDOC, track delivery, due date, and payment without rewriting status across multiple tools.",
       "historyTitle": "History stays history",
@@ -363,9 +364,9 @@
       "chatDisclaimer": "Issuing an invoice always requires confirmation"
     },
     "featurePanels": {
-      "multiIssuerEyebrow": "Multiple issuers",
+      "multiIssuerEyebrow": "Multiple businesses",
       "multiIssuerTitle": "Sole trader and LLC without the switching chaos.",
-      "multiIssuerDescription": "Pick who issues the invoice and Invoicey uses their account, numbering series, VAT mode, and visual assets. Shared clients stay shared.",
+      "multiIssuerDescription": "Pick the business that issues the invoice and Invoicey uses its account, numbering series, VAT mode, and visual assets. Shared clients stay shared.",
       "multiIssuerItem1": "Own numbering series",
       "multiIssuerItem2": "Bank details & QR",
       "multiIssuerItem3": "Logo, signature & stamp",
@@ -383,7 +384,7 @@
       "q1": "Is Invoicey only for VAT payers?",
       "a1": "No. It supports both VAT and non-VAT payers, the standard VAT regime, domestic reverse charge, and other Czech document requirements.",
       "q2": "Can I invoice from multiple businesses?",
-      "a2": "Yes. Each issuer has its own bank, numbering series, VAT settings, logo, and contact details. Clients remain shared within a single workspace.",
+      "a2": "Yes. Each business has its own bank, numbering series, VAT settings, logo, and contact details. Clients remain shared within a single workspace.",
       "q3": "What does AI invoicing mean?",
       "a3": "The agent doesn't assemble a PDF by guesswork. It prepares a structured draft that passes the same validation as a web-created invoice. Issuing or sending a sensitive document remains a confirmed action.",
       "q4": "Can I import old invoices?",
@@ -641,7 +642,7 @@
       "runs": "Payment runs",
       "upload": "Upload",
       "clients": "Clients",
-      "issuers": "Issuers",
+      "issuers": "My businesses",
       "settings": "Settings",
       "fromJson": "From JSON",
       "ai": "AI draft",
@@ -650,7 +651,7 @@
       "new": "New",
       "edit": "Edit",
       "invoice": "Invoice",
-      "issuer": "Issuer",
+      "issuer": "Business",
       "client": "Client",
       "detail": "Detail",
       "security": "Security",
@@ -708,7 +709,7 @@
         "slugLabel": "Slug",
         "slugHint": "Slug cannot be changed after creation.",
         "logoLabel": "Logo",
-        "logoHint": "Shown in the workspace switcher. Invoice PDFs still use each issuer’s logo.",
+        "logoHint": "Shown in the workspace switcher. Invoice PDFs still use each business’s logo.",
         "logoSaved": "Workspace logo saved",
         "removeLogo": "Remove logo",
         "uploadUnavailable": "File uploads are not configured in this environment.",
@@ -824,7 +825,7 @@
       "label": "Workspaces",
       "create": "Create workspace…",
       "createTitle": "Create workspace",
-      "createDescription": "A new workspace keeps its own issuers, clients, and invoices. Switching also updates your API key default.",
+      "createDescription": "A new workspace keeps its own businesses, clients, and invoices. Switching also updates your API key default.",
       "nameLabel": "Name",
       "namePlaceholder": "e.g. Acme s.r.o.",
       "cancel": "Cancel",
@@ -861,12 +862,19 @@
     "newInvoice": "New invoice",
     "empty": {
       "title": "Welcome to Invoicey",
-      "description": "Create your first issuer (your business) to start drafting invoices with ARES lookup, numbering, and PDF / ISDOC export.",
-      "cta": "Create your first issuer"
+      "description": "Add your business before creating an invoice.",
+      "cta": "Add my business"
+    },
+    "gettingStarted": {
+      "businessReady": "Business setup complete",
+      "title": "Create your first invoice",
+      "description": "Choose a client or add one from ARES while creating the invoice.",
+      "create": "Create invoice",
+      "ai": "Describe with AI"
     },
     "issuerFilter": {
-      "label": "Issuer",
-      "all": "All issuers",
+      "label": "Business",
+      "all": "All businesses",
       "description": "Focus every dashboard figure and chart on one business."
     },
     "recent": {
@@ -898,9 +906,9 @@
   },
   "Invoices": {
     "list": {
-      "title": "Issued Invoices",
+      "title": "Invoices",
       "subtitle": "Statuses, filters, and actions for invoices.",
-      "newButton": "+ Issue invoice",
+      "newButton": "New invoice",
       "aiButton": "AI draft",
       "importButton": "Import",
       "fromJsonButton": "From JSON",
@@ -935,6 +943,11 @@
       "bulkPaid": "Paid",
       "bulkUnpaid": "Unmark paid",
       "bulkCancel": "Cancel",
+      "bulkCancelTitle": "Cancel selected invoices?",
+      "bulkCancelDescription": "Review this permanent accounting change before continuing.",
+      "bulkCancelPermanent": "Cancellation keeps every invoice number and leaves each document in history.",
+      "bulkCancelConfirm": "Cancel {count, plural, one {# invoice} other {# invoices}} permanently",
+      "bulkCancelPending": "Cancelling…",
       "bulkDelete": "Delete",
       "untitledDraft": "Untitled draft",
       "moreActions": "More actions for {number}",
@@ -943,6 +956,13 @@
       "downloadPdf": "Download PDF",
       "markPaidFull": "Mark as paid",
       "cancelInvoice": "Cancel invoice",
+      "reviewCancellation": "Review cancellation",
+      "paymentStates": {
+        "unpaid": "Unpaid",
+        "partial": "Partially paid",
+        "paid": "Paid",
+        "overpaid": "Overpaid"
+      },
       "deleteDraft": "Delete",
       "issuing": "Issuing…",
       "saving": "Saving…",
@@ -1019,6 +1039,42 @@
       "savingPending": "Saving…",
       "duplicatingPending": "Duplicating…",
       "cancellingPending": "Cancelling…",
+      "cannotCancelError": "This invoice could not be cancelled. Reverse every payment allocation first, then try again.",
+      "payments": {
+        "title": "Payment ledger",
+        "description": "Confirmed allocations are the source of truth for this invoice.",
+        "open": "Open payments",
+        "state": "State",
+        "allocated": "Allocated",
+        "outstanding": "Outstanding",
+        "empty": "No payment has been allocated yet.",
+        "reversed": "Reversed",
+        "reverse": "Reverse",
+        "states": {
+          "unpaid": "Unpaid",
+          "partial": "Partially paid",
+          "paid": "Paid",
+          "overpaid": "Overpaid"
+        },
+        "sources": {
+          "manual": "Manual payment",
+          "legacy_manual": "Imported payment",
+          "bank_confirmed": "Confirmed bank payment",
+          "bank_transaction": "Bank transaction",
+          "payment_run": "Payment run",
+          "other": "Other payment source"
+        }
+      },
+      "cancelSheet": {
+        "trigger": "Cancel",
+        "title": "Cancel this invoice?",
+        "description": "Review this before making a permanent accounting change.",
+        "permanent": "Cancellation keeps the invoice number and leaves the document in history.",
+        "blocked": "Payments are allocated to this invoice. Reverse them first before it can be cancelled.",
+        "reviewPayments": "Review payment ledger",
+        "confirm": "Cancel invoice permanently",
+        "pending": "Cancelling…"
+      },
       "deletingPending": "Deleting…",
       "itemsHeader": {
         "position": "#",
@@ -1191,7 +1247,7 @@
       "subtitle": "Upload PDFs. If they contain ISDOC (~80%), we'll parse them in full. Without ISDOC we store the original as an archive and you fill in the header manually.",
       "backLink": "← Invoices",
       "missingIssuer": "First create <issuer></issuer>.",
-      "issuerLink": "an issuer",
+      "issuerLink": "a business",
       "stepsAria": "Import steps",
       "stepSettings": "Settings",
       "stepUpload": "Upload",
@@ -1263,7 +1319,14 @@
       "invalidDraft": "The model returned an invalid draft. Try refining the prompt.",
       "openDraft": "Open draft",
       "editInBuilder": "Edit in builder",
-      "previewEmpty": "Generate a draft to preview the PDF…"
+      "previewEmpty": "Generate a draft to preview the PDF…",
+      "bestResults": "For the best result, include:",
+      "hintClient": "client name or IČO",
+      "hintLine": "line item or service",
+      "hintAmount": "amount and whether it includes VAT",
+      "hintDue": "due date",
+      "manageClients": "Add or manage clients",
+      "builderLink": "Use the structured builder"
     },
     "email": {
       "send": "Send by email",
@@ -1383,13 +1446,13 @@
     }
   },
   "Issuers": {
-    "title": "Issuers",
+    "title": "My businesses",
     "subtitle": "Your businesses — ARES, bank, VAT, numbering, logo.",
-    "newButton": "New issuer",
-    "empty": "No issuers yet. Add your business to start invoicing.",
-    "createFirst": "Create your first issuer",
+    "newButton": "New business",
+    "empty": "No businesses yet. Add your business to start invoicing.",
+    "createFirst": "Create my first business",
     "deleting": "Deleting…",
-    "editSectionsHint": "Edit each issuer section — saves are per section.",
+    "editSectionsHint": "Edit each business section — saves are per section.",
     "nav": {
       "identity": "Identity",
       "bank": "Bank",
@@ -1411,9 +1474,9 @@
       "defaultBadge": "Default",
       "setDefault": "Set as default"
     },
-    "newTitle": "New issuer",
+    "newTitle": "New business",
     "newSubtitle": "IČO via ARES, contact email, and bank. Other settings can be completed in sections after creation.",
-    "editTitle": "Edit issuer",
+    "editTitle": "Edit business",
     "editSubtitle": "Update business details, bank, and numbering.",
     "form": {
       "ico": "IČO",
@@ -1446,11 +1509,11 @@
       "ibanFilled": "IBAN filled from the account number.",
       "save": "Save",
       "saving": "Saving…",
-      "create": "Create issuer",
+      "create": "Create business",
       "creating": "Creating…",
       "identitySection": "Identity",
       "bankSection": "Bank",
-      "defaultsHint": "Numbering and email templates start with defaults — you can change them later in issuer settings.",
+      "defaultsHint": "Numbering and email templates start with defaults — you can change them later in business settings.",
       "source": "Source: {source}",
       "sourceAres": "ARES",
       "sourceManual": "Manual",
@@ -1471,43 +1534,57 @@
     },
     "welcome": {
       "step": "Step {current} / {total}",
-      "title": "Your first issuer",
-      "identityHint": "Load the company from ARES by IČO, or upload an issued invoice with ISDOC, and confirm the contact email.",
-      "bankHint": "Add a bank account — we need it for QR payments on invoices.",
+      "title": "Set up your business",
+      "identityHint": "Start with your company’s IČO and confirm its contact details.",
+      "bankHint": "Add the account shown on invoices and payment QR codes. Invoicey never moves money.",
       "skip": "Skip for now",
       "skipping": "Skipping…",
-      "uploadLabel": "Quick start — upload an issued invoice",
+      "skipHint": "You can resume setup later, but a business is required before you issue an invoice.",
+      "steps": {
+        "business": "Business",
+        "bank": "Bank account",
+        "ready": "Ready"
+      },
+      "progressLabel": "Setup progress",
+      "aresTitle": "Find your business in ARES",
+      "aresHint": "Enter IČO to prefill registered company details.",
+      "businessDetails": "Required business details",
+      "contactEmailHint": "We use this address as the contact on your invoices.",
+      "isdocAlternative": "Alternative: import an existing invoice",
+      "uploadLabel": "Upload a PDF with embedded ISDOC",
       "uploadPending": "Reading PDF…",
-      "uploadHint": "PDF with embedded ISDOC only (no OCR). Supplier and bank details will be prefilled.",
+      "uploadHint": "This is not OCR: it works only with an embedded ISDOC file and prefills business and bank details.",
       "continue": "Continue",
       "identityRequired": "Fill in the required identity fields.",
       "bankRequired": "Fill in the bank account and IBAN.",
-      "doneTitle": "Done",
-      "doneBody": "The issuer is created. Numbering and email templates have defaults — add a logo, stamp, and other details anytime in settings.",
+      "bankForBusiness": "You are completing the bank account for {business}. It appears on invoices and payment QR codes; Invoicey does not move money.",
+      "doneTitle": "Your business is ready",
+      "doneBody": "Numbering and email templates have sensible defaults. You can add a logo, stamp, and more details in business settings at any time.",
       "goDashboard": "Go to dashboard",
-      "editIssuer": "Edit issuer"
+      "createFirstInvoice": "Create first invoice",
+      "editBusiness": "Business settings"
     },
     "emailForm": {
       "subject": "Subject template",
       "body": "Message text",
-      "displayName": "From display template",
+      "displayName": "Sender name template",
       "attachIsdoc": "Attach ISDOC by default",
       "overdueReminders": "Send overdue reminders",
       "reminderInterval": "Reminder interval (days)",
       "paymentReceived": "Send payment received confirmation"
     },
     "numbering": {
-      "tokensHint": "Available tokens. Changing the counter by hand can create gaps in the sequence.",
+      "tokensHint": "Available placeholders. Changing the sequence number by hand can create gaps in the sequence.",
       "nextNumber": "Next number: {preview}",
       "invalidTemplate": "(invalid template)",
       "counterChanged": "The counter was changed — check that this will not create duplicates or gaps.",
       "template": "Template",
-      "padding": "Padding (#)",
+      "padding": "Minimum digits (#)",
       "reset": "Reset",
       "resetYearly": "Yearly",
       "resetNever": "Never",
-      "counter": "Counter",
-      "counterYear": "Counter year",
+      "counter": "Next sequence number",
+      "counterYear": "Sequence year",
       "docTypes": {
         "invoice": "Invoice (FV)",
         "proforma": "Proforma (PF)",
@@ -1818,7 +1895,7 @@
     "bankConnections": {
       "pageTitle": "Bank connections",
       "pageDescription": "Connect a read-only bank feed to this workspace. Tokens and accounts are never shared with your other workspaces.",
-      "unnamedIssuer": "Unnamed issuer",
+      "unnamedIssuer": "Unnamed business",
       "readOnly": "Read-only",
       "importedCurrency": "Imported currency",
       "lastSuccessfulSync": "Last successful sync",
@@ -1832,8 +1909,8 @@
       "syncNow": "Sync now",
       "disconnect": "Disconnect",
       "encryptionMissing": "Bank token encryption is not configured. Set BANK_TOKEN_ENCRYPTION_KEY_V1 before connecting an account.",
-      "needIssuer": "Create your issuer business before connecting its receiving account.",
-      "issuerLabel": "Issuer receiving payments",
+      "needIssuer": "Create a business before connecting its receiving account.",
+      "issuerLabel": "Business receiving payments",
       "adminOnly": "A workspace admin or owner must connect bank accounts.",
       "connectAndVerify": "Connect and verify",
       "moreTitle": "More bank integrations",
@@ -1864,7 +1941,7 @@
       },
       "fio": {
         "connectTitle": "Connect Fio read-only API",
-        "connectDescription": "Create a read-only API token in Fio Internetbanking and paste it here. Invoicey validates it against today’s statement and stores it encrypted. The selected issuer’s default receiving account is updated to this verified Fio account for future invoices.",
+        "connectDescription": "Create a read-only API token in Fio Internetbanking and paste it here. Invoicey validates it against today’s statement and stores it encrypted. The selected business’s default receiving account is updated to this verified Fio account for future invoices.",
         "tokenLabel": "Fio API token",
         "tokenPlaceholder": "64-character read-only token",
         "tokenHelp": "Create a monitoring token in Internetbanking → Nastavení → API bankovnictví, with Sledování účtu only. The 64-character token starts working after about five minutes and can last up to 180 days if you enable automatic extension. We never display it again and never request write access.",
@@ -1915,7 +1992,7 @@
         "moneta_unauthorized": "The MONETA token was rejected. Create a new one in Internet Banka.",
         "not_found": "Connection not found.",
         "missing_connection": "Choose a bank connection.",
-        "missing_issuer": "Choose the issuer receiving payments.",
+        "missing_issuer": "Choose the business receiving payments.",
         "missing_fio_payment_token": "Paste a Fio submit-rights token.",
         "missing_payment_token_expiry": "Set the token expiry date from Fio.",
         "payment_token_expired": "The submit token has expired. Enter a new one."

@@ -709,7 +709,7 @@ export async function cancelInvoice(formData: FormData): Promise<void> {
   }
   const result = await cancelInvoiceById({ id, workspaceId });
   if (!result.ok) {
-    redirect(`/invoices?invalid=${encodeURIComponent("cannot_cancel")}`);
+    redirect(`/invoices/${id}?invalid=${encodeURIComponent("cannot_cancel")}`);
   }
   revalidatePath("/invoices");
   revalidatePath("/dashboard");

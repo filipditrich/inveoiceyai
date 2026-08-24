@@ -53,6 +53,9 @@ export function IssuerWelcomeWizard(props: {
   const bank = useCzechIbanSuggest();
   const [bic, setBic] = React.useState("");
   const [msg, setMsg] = React.useState<string | null>(null);
+  const visibleMessage = invalidFromQuery ?? msg;
+  const currentStep = step === "identity" ? 1 : step === "bank" ? 2 : 3;
+  const steps = ["business", "bank", "ready"] as const;
 
   async function onUploadIssuedPdf(file: File | null) {
     if (!file) {
@@ -168,19 +171,21 @@ export function IssuerWelcomeWizard(props: {
   if (step === "done" || props.doneIssuerId) {
     const issuerId = props.doneIssuerId ?? doneId;
     return (
-      <div className="mx-auto max-w-lg space-y-6">
-        <div className="space-y-2">
-          <p className="text-muted-foreground text-sm">
-            {t("step", { current: "3", total: "3" })}
-          </p>
+      <div className="mx-auto max-w-2xl space-y-6">
+        <WelcomeProgress
+          ariaLabel={t("progressLabel")}
+          current={3}
+          labels={steps.map((key) => t(`steps.${key}`))}
+        />
+        <div className="bg-card space-y-2 rounded-xl border p-6 shadow-sm">
           <h1 className="text-2xl font-semibold tracking-tight">
             {t("doneTitle")}
           </h1>
           <p className="text-muted-foreground text-sm">{t("doneBody")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button render={<Link href="/dashboard" prefetch />} size="sm">
-            {t("goDashboard")}
+          <Button render={<Link href="/invoices/new" prefetch />} size="sm">
+            {t("createFirstInvoice")}
           </Button>
           {issuerId ? (
             <Button
@@ -190,7 +195,7 @@ export function IssuerWelcomeWizard(props: {
               size="sm"
               variant="outline"
             >
-              {t("editIssuer")}
+              {t("editBusiness")}
             </Button>
           ) : null}
         </div>
@@ -199,180 +204,234 @@ export function IssuerWelcomeWizard(props: {
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1">
-          <p className="text-muted-foreground text-sm">
-            {t("step", {
-              current: step === "identity" ? "1" : "2",
-              total: "3",
-            })}
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t("title")}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {step === "identity" ? t("identityHint") : t("bankHint")}
-          </p>
-        </div>
-        <Button
-          disabled={skipPending || pending}
-          onClick={() => {
-            startSkip(async () => {
-              await dismissIssuerWelcome();
-            });
-          }}
-          size="sm"
-          type="button"
-          variant="ghost"
-        >
-          {skipPending ? t("skipping") : t("skip")}
-        </Button>
-      </div>
-
-      {msg ? <p className="text-destructive text-sm">{msg}</p> : null}
-
-      {step === "identity" ? (
-        <form className="space-y-4" onSubmit={onIdentityNext}>
-          <FieldGroup label={t("uploadLabel")}>
-            <Input
-              accept="application/pdf,.pdf"
-              disabled={uploadPending}
-              onChange={(ev) => {
-                void onUploadIssuedPdf(ev.target.files?.[0] ?? null);
-                ev.target.value = "";
-              }}
-              type="file"
-            />
-            <p className="text-muted-foreground text-xs">
-              {uploadPending ? t("uploadPending") : t("uploadHint")}
+    <div className="mx-auto max-w-2xl space-y-6">
+      <WelcomeProgress
+        ariaLabel={t("progressLabel")}
+        current={currentStep}
+        labels={steps.map((key) => t(`steps.${key}`))}
+      />
+      <div className="bg-card space-y-6 rounded-xl border p-6 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {t("title")}
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              {step === "identity" ? t("identityHint") : t("bankHint")}
             </p>
-          </FieldGroup>
-          <FieldGroup label={tForm("ico")}>
+          </div>
+          <Button
+            disabled={skipPending || pending}
+            onClick={() => {
+              startSkip(async () => {
+                await dismissIssuerWelcome();
+              });
+            }}
+            size="sm"
+            type="button"
+            variant="ghost"
+          >
+            {skipPending ? t("skipping") : t("skip")}
+          </Button>
+        </div>
+
+        <p className="text-muted-foreground text-xs">{t("skipHint")}</p>
+        {visibleMessage ? (
+          <p className="text-destructive text-sm" role="alert">
+            {visibleMessage}
+          </p>
+        ) : null}
+
+        {step === "identity" ? (
+          <form className="space-y-6" onSubmit={onIdentityNext}>
+            <fieldset className="space-y-4">
+              <legend className="font-medium">{t("aresTitle")}</legend>
+              <p className="text-muted-foreground text-sm">{t("aresHint")}</p>
+              <FieldGroup label={tForm("ico")}>
+                <div className="flex flex-wrap gap-2">
+                  <Input
+                    className="max-w-xs"
+                    inputMode="numeric"
+                    maxLength={8}
+                    onChange={(ev) => {
+                      setIcoInput(ev.target.value);
+                    }}
+                    pattern="\d{0,8}"
+                    placeholder="12345678"
+                    required
+                    value={icoInput}
+                  />
+                  <Button
+                    disabled={lookupPending}
+                    onClick={() => void onLookupFromAres()}
+                    type="button"
+                    variant="secondary"
+                  >
+                    {lookupPending ? tForm("lookingUp") : tForm("lookup")}
+                  </Button>
+                </div>
+              </FieldGroup>
+            </fieldset>
+            <fieldset className="space-y-4">
+              <legend className="font-medium">{t("businessDetails")}</legend>
+              <p className="text-muted-foreground text-sm">
+                {t("contactEmailHint")}
+              </p>
+              <FieldGroup label={tForm("name")}>
+                <Input
+                  onChange={(ev) => {
+                    setName(ev.target.value);
+                  }}
+                  required
+                  value={name}
+                />
+              </FieldGroup>
+              <FieldGroup label={tForm("dic")}>
+                <Input
+                  onChange={(ev) => {
+                    setDic(ev.target.value);
+                  }}
+                  placeholder="CZ12345678"
+                  value={dic}
+                />
+              </FieldGroup>
+              <FieldGroup label={tForm("street")}>
+                <Input
+                  onChange={(ev) => {
+                    setStreet(ev.target.value);
+                  }}
+                  required
+                  value={street}
+                />
+              </FieldGroup>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FieldGroup label={tForm("city")}>
+                  <Input
+                    onChange={(ev) => setCity(ev.target.value)}
+                    required
+                    value={city}
+                  />
+                </FieldGroup>
+                <FieldGroup label={tForm("zip")}>
+                  <Input
+                    onChange={(ev) => setZip(ev.target.value)}
+                    required
+                    value={zip}
+                  />
+                </FieldGroup>
+              </div>
+              <FieldGroup label={tForm("contactEmail")}>
+                <Input
+                  onChange={(ev) => setContactEmail(ev.target.value)}
+                  required
+                  type="email"
+                  value={contactEmail}
+                />
+              </FieldGroup>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  checked={vatPayer}
+                  onChange={(ev) => setVatPayer(ev.target.checked)}
+                  type="checkbox"
+                />
+                {tForm("vatPayer")}
+              </label>
+            </fieldset>
+            <fieldset className="border-t pt-4">
+              <legend className="text-muted-foreground px-1 text-sm">
+                {t("isdocAlternative")}
+              </legend>
+              <FieldGroup label={t("uploadLabel")}>
+                <Input
+                  accept="application/pdf,.pdf"
+                  disabled={uploadPending}
+                  onChange={(ev) => {
+                    void onUploadIssuedPdf(ev.target.files?.[0] ?? null);
+                    ev.target.value = "";
+                  }}
+                  type="file"
+                />
+                <p className="text-muted-foreground text-xs">
+                  {uploadPending ? t("uploadPending") : t("uploadHint")}
+                </p>
+              </FieldGroup>
+            </fieldset>
+            <div className="flex gap-2">
+              <Button type="submit">{t("continue")}</Button>
+            </div>
+          </form>
+        ) : (
+          <form className="space-y-4" onSubmit={onCreate}>
+            <p className="text-muted-foreground text-sm">
+              {t("bankForBusiness", { business: name })}
+            </p>
+            <BankAccountFields
+              accountHint={bank.accountHint}
+              accountNumber={bank.accountNumber}
+              bic={bic}
+              iban={bank.iban}
+              ibanHint={bank.ibanHint}
+              onAccountNumber={bank.setAccountNumber}
+              onBic={setBic}
+              onIban={bank.setIban}
+              required
+            />
             <div className="flex flex-wrap gap-2">
-              <Input
-                className="max-w-xs"
-                inputMode="numeric"
-                maxLength={8}
-                onChange={(ev) => {
-                  setIcoInput(ev.target.value);
-                }}
-                pattern="\d{0,8}"
-                placeholder="12345678"
-                required
-                value={icoInput}
-              />
               <Button
-                disabled={lookupPending}
-                onClick={() => void onLookupFromAres()}
+                disabled={pending}
+                onClick={() => {
+                  setStep("identity");
+                }}
                 type="button"
-                variant="secondary"
+                variant="outline"
               >
-                {lookupPending ? tForm("lookingUp") : tForm("lookup")}
+                {tCommon("back")}
+              </Button>
+              <Button disabled={pending} type="submit">
+                {pending ? tForm("creating") : tForm("create")}
               </Button>
             </div>
-          </FieldGroup>
-          <FieldGroup label={tForm("name")}>
-            <Input
-              onChange={(ev) => {
-                setName(ev.target.value);
-              }}
-              required
-              value={name}
-            />
-          </FieldGroup>
-          <FieldGroup label={tForm("dic")}>
-            <Input
-              onChange={(ev) => {
-                setDic(ev.target.value);
-              }}
-              placeholder="CZ12345678"
-              value={dic}
-            />
-          </FieldGroup>
-          <FieldGroup label={tForm("street")}>
-            <Input
-              onChange={(ev) => {
-                setStreet(ev.target.value);
-              }}
-              required
-              value={street}
-            />
-          </FieldGroup>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FieldGroup label={tForm("city")}>
-              <Input
-                onChange={(ev) => {
-                  setCity(ev.target.value);
-                }}
-                required
-                value={city}
-              />
-            </FieldGroup>
-            <FieldGroup label={tForm("zip")}>
-              <Input
-                onChange={(ev) => {
-                  setZip(ev.target.value);
-                }}
-                required
-                value={zip}
-              />
-            </FieldGroup>
-          </div>
-          <FieldGroup label={tForm("contactEmail")}>
-            <Input
-              onChange={(ev) => {
-                setContactEmail(ev.target.value);
-              }}
-              required
-              type="email"
-              value={contactEmail}
-            />
-          </FieldGroup>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              checked={vatPayer}
-              onChange={(ev) => {
-                setVatPayer(ev.target.checked);
-              }}
-              type="checkbox"
-            />
-            {tForm("vatPayer")}
-          </label>
-          <div className="flex gap-2">
-            <Button type="submit">{t("continue")}</Button>
-          </div>
-        </form>
-      ) : (
-        <form className="space-y-4" onSubmit={onCreate}>
-          <BankAccountFields
-            accountHint={bank.accountHint}
-            accountNumber={bank.accountNumber}
-            bic={bic}
-            iban={bank.iban}
-            ibanHint={bank.ibanHint}
-            onAccountNumber={bank.setAccountNumber}
-            onBic={setBic}
-            onIban={bank.setIban}
-            required
-          />
-          <div className="flex flex-wrap gap-2">
-            <Button
-              disabled={pending}
-              onClick={() => {
-                setStep("identity");
-              }}
-              type="button"
-              variant="outline"
-            >
-              {tCommon("back")}
-            </Button>
-            <Button disabled={pending} type="submit">
-              {pending ? tForm("creating") : tForm("create")}
-            </Button>
-          </div>
-        </form>
-      )}
+          </form>
+        )}
+      </div>
     </div>
+  );
+}
+
+function WelcomeProgress({
+  current,
+  labels,
+  ariaLabel,
+}: {
+  current: number;
+  labels: string[];
+  ariaLabel: string;
+}) {
+  return (
+    <ol className="grid grid-cols-3 gap-2" aria-label={ariaLabel}>
+      {labels.map((label, index) => {
+        const position = index + 1;
+        return (
+          <li className="flex items-center gap-2 text-sm" key={label}>
+            <span
+              className={
+                position <= current
+                  ? "bg-primary text-primary-foreground flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium"
+                  : "bg-muted text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium"
+              }
+            >
+              {position}
+            </span>
+            <span
+              className={
+                position === current ? "font-medium" : "text-muted-foreground"
+              }
+            >
+              {label}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }

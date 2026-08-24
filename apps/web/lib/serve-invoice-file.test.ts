@@ -21,7 +21,28 @@ describe("serveInvoicePdf", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("application/pdf");
     expect(response.headers.get("content-disposition")).toContain("inline;");
+    expect(response.headers.get("x-frame-options")).toBe("SAMEORIGIN");
+    expect(response.headers.get("content-security-policy")).toContain(
+      "frame-ancestors 'self'",
+    );
     expect(new TextDecoder().decode(bytes.slice(0, 4))).toBe("%PDF");
+  });
+
+  it("keeps attachment downloads protected from framing", async () => {
+    const response = await serveInvoicePdf({
+      artifactsImmutable: 0,
+      importCompleteness: null,
+      issuedAt: new Date("2026-08-15T16:28:00.000Z"),
+      number: "20260117",
+      payloadJson: demoInvoice,
+      pdfUrl: null,
+    } as never);
+
+    expect(response.headers.get("content-disposition")).toContain(
+      "attachment;",
+    );
+    expect(response.headers.get("x-frame-options")).toBeNull();
+    expect(response.headers.get("content-security-policy")).toBeNull();
   });
 
   it("does not regenerate a missing immutable imported PDF", async () => {

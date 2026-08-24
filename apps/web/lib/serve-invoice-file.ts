@@ -13,6 +13,16 @@ const MAX_ARTIFACT_BYTES = 25 * 1024 * 1024;
 
 export type FileDisposition = "attachment" | "inline";
 
+function framingHeaders(disposition: FileDisposition): HeadersInit {
+  if (disposition !== "inline") {
+    return {};
+  }
+  return {
+    "Content-Security-Policy": "frame-ancestors 'self'",
+    "X-Frame-Options": "SAMEORIGIN",
+  };
+}
+
 function contentDisposition(
   disposition: FileDisposition,
   filename: string,
@@ -80,6 +90,7 @@ async function proxyStoredFile(
       "Content-Type": contentType,
       "Content-Disposition": contentDisposition(disposition, filename),
       "Cache-Control": "private, max-age=31536000, immutable",
+      ...framingHeaders(disposition),
     },
   });
 }
@@ -171,6 +182,7 @@ export async function serveInvoicePdf(
       "Content-Type": "application/pdf",
       "Content-Disposition": contentDisposition(disposition, filename),
       "Cache-Control": "no-store",
+      ...framingHeaders(disposition),
     },
   });
 }

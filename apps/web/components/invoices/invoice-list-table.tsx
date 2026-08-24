@@ -1,12 +1,10 @@
 "use client";
 
 import {
-  bulkCancelInvoice,
   bulkDeleteInvoice,
   bulkIssueInvoice,
   bulkMarkInvoicePaid,
   bulkUnmarkInvoicePaid,
-  cancelInvoice,
   deleteInvoice,
   duplicateInvoice,
   issueSavedInvoice,
@@ -14,6 +12,7 @@ import {
   unmarkInvoicePaid,
 } from "@/actions/invoices";
 import { AppDataGrid } from "@/components/data-grid/app-data-grid";
+import { BulkCancelSheet } from "@/components/invoices/bulk-cancel-sheet";
 import {
   InvoiceListFilters,
   type PartyOption,
@@ -113,7 +112,7 @@ function sortParamFromSorting(sorting: SortingState): string {
   });
 }
 
-type BulkKey = "issue" | "paid" | "unpaid" | "cancel" | "delete" | null;
+type BulkKey = "issue" | "paid" | "unpaid" | "delete" | null;
 
 type InvoiceListTableProps = {
   rows: InvoiceListRow[];
@@ -304,7 +303,11 @@ export function InvoiceListTable({
             <InvoiceStatusBadge status={row.original.displayStatus} />
             {row.original.paymentState === "partial" ||
             row.original.paymentState === "overpaid" ? (
-              <Badge variant="outline">{row.original.paymentState}</Badge>
+              <Badge variant="outline">
+                {row.original.paymentState === "partial"
+                  ? t("paymentStates.partial")
+                  : t("paymentStates.overpaid")}
+              </Badge>
             ) : null}
           </div>
         ),
@@ -378,13 +381,13 @@ export function InvoiceListTable({
   const selectedDeletable = selectedRows.filter(
     (r) => r.displayStatus === "draft" || r.displayStatus === "cancelled",
   ).length;
-  const selectedCancellable = selectedRows.filter(
+  const selectedCancellableRows = selectedRows.filter(
     (r) =>
       (r.displayStatus === "unpaid" ||
         r.displayStatus === "overdue" ||
         r.displayStatus === "future") &&
       r.paymentState === "unpaid",
-  ).length;
+  );
   const hasProtectedIssuedSelection = selectedDeletable < selectedIds.length;
 
   const runBulk = (
@@ -524,18 +527,10 @@ export function InvoiceListTable({
                   ? t("saving")
                   : t("bulkUnpaid")}
               </Button>
-              <Button
-                disabled={pending || selectedCancellable === 0}
-                loading={pending && bulkKey === "cancel"}
-                onClick={() => runBulk("cancel", bulkCancelInvoice)}
-                size="sm"
-                type="button"
-                variant="secondary"
-              >
-                {pending && bulkKey === "cancel"
-                  ? t("cancelling")
-                  : t("bulkCancel")}
-              </Button>
+              <BulkCancelSheet
+                disabled={pending || selectedCancellableRows.length === 0}
+                ids={selectedCancellableRows.map((row) => row.id)}
+              />
               <Button
                 disabled={pending || selectedDeletable === 0}
                 loading={pending && bulkKey === "delete"}
@@ -590,7 +585,11 @@ function InvoiceMobileCard({ row }: { row: InvoiceListRow }) {
         <div className="flex flex-col items-end gap-1">
           <InvoiceStatusBadge status={row.displayStatus} />
           {row.paymentState === "partial" || row.paymentState === "overpaid" ? (
-            <Badge variant="outline">{row.paymentState}</Badge>
+            <Badge variant="outline">
+              {row.paymentState === "partial"
+                ? t("paymentStates.partial")
+                : t("paymentStates.overpaid")}
+            </Badge>
           ) : null}
         </div>
       </div>
@@ -696,12 +695,12 @@ function InvoiceRowActions({ row }: { row: InvoiceListRow }) {
                 id={row.id}
                 label={t("markPaidFull")}
               />
-              <InvoiceActionMenuForm
-                action={cancelInvoice}
-                icon={<XCircleIcon />}
-                id={row.id}
-                label={t("cancelInvoice")}
-              />
+              <DropdownMenuItem
+                render={<Link href={`/invoices/${row.id}`} prefetch />}
+              >
+                <XCircleIcon />
+                {t("reviewCancellation")}
+              </DropdownMenuItem>
             </>
           ) : null}
           {row.displayStatus === "paid" ? (

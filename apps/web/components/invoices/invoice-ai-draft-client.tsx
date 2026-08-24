@@ -157,6 +157,24 @@ export function InvoiceAiDraftClient({
           </Link>
         </div>
 
+        <div className="bg-muted/40 space-y-2 rounded-lg border p-3 text-sm">
+          <p className="font-medium">{t("bestResults")}</p>
+          <ul className="text-muted-foreground list-disc space-y-1 pl-5">
+            <li>{t("hintClient")}</li>
+            <li>{t("hintLine")}</li>
+            <li>{t("hintAmount")}</li>
+            <li>{t("hintDue")}</li>
+          </ul>
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+            <Link className="underline underline-offset-4" href="/clients">
+              {t("manageClients")}
+            </Link>
+            <Link className="underline underline-offset-4" href="/invoices/new">
+              {t("builderLink")}
+            </Link>
+          </div>
+        </div>
+
         <Textarea
           aria-label={t("promptLabel")}
           value={prompt}

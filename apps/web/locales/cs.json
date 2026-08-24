@@ -58,7 +58,8 @@
   "PdfPreview": {
     "updating": "Aktualizuji…",
     "empty": "Vyplň položky pro náhled…",
-    "title": "Náhled faktury PDF"
+    "title": "Náhled faktury PDF",
+    "open": "Otevřít PDF"
   },
   "Errors": {
     "invalid": {
@@ -69,7 +70,7 @@
       "already_issued": "Faktura už je vystavená.",
       "not_draft": "Lze upravit jen návrh.",
       "cannot_issue": "Návrh nelze vystavit.",
-      "has_invoices": "Nelze smazat dodavatele s existujícími fakturami.",
+      "has_invoices": "Nelze smazat firmu s existujícími fakturami.",
       "missing_id": "Chybí identifikátor.",
       "missing_name": "Název je povinný.",
       "duplicate_name": "Šablona s tímto názvem už existuje.",
@@ -105,8 +106,8 @@
     }
   },
   "Toasts": {
-    "issuer_saved": "Dodavatel uložen",
-    "issuer_deleted": "Dodavatel smazán",
+    "issuer_saved": "Firma uložena",
+    "issuer_deleted": "Firma smazána",
     "client_saved": "Klient uložen",
     "client_deleted": "Klient smazán",
     "invoice_saved": "Návrh uložen",
@@ -158,8 +159,8 @@
     "fio_payments_disabled": "Práva k odesílání plateb odebrána"
   },
   "ToastDescriptions": {
-    "issuer_saved": "Údaje podnikatele jsou připravené pro další faktury.",
-    "issuer_deleted": "Podnikatel byl odebrán z tohoto workspace.",
+    "issuer_saved": "Údaje firmy jsou připravené pro další faktury.",
+    "issuer_deleted": "Firma byla odebrána z tohoto pracovního prostoru.",
     "client_saved": "Klient a jeho fakturační údaje byly uloženy.",
     "client_deleted": "Klient byl odebrán z tohoto workspace.",
     "invoice_saved": "K návrhu se můžete kdykoli vrátit.",
@@ -310,7 +311,7 @@
       "pdfIsdoc": "PDF + ISDOC",
       "spaydQr": "SPAYD QR platba",
       "aresLookup": "ARES podle IČO",
-      "multiIssuer": "Více dodavatelů",
+      "multiIssuer": "Více firem",
       "ariaLabel": "Klíčové formáty"
     },
     "workflow": {
@@ -318,7 +319,7 @@
       "title": "Méně ruční práce. Pořád máte kontrolu.",
       "description": "Invoicey drží celý životní cyklus dokladu pohromadě a citlivé kroky nechává ve vašich rukou.",
       "step1Title": "Připravte údaje",
-      "step1Description": "Vyberte dodavatele, dohledejte klienta podle IČO a doplňte položky. Nebo pošlete stejná data jako JSON či pokyn agentovi.",
+      "step1Description": "Vyberte firmu, dohledejte klienta podle IČO a doplňte položky. Nebo pošlete stejná data jako JSON či pokyn agentovi.",
       "step2Title": "Ověřte a vystavte",
       "step2Description": "Jedno schéma zkontroluje povinné údaje, DPH i součty. Teprve potom vznikne neměnný doklad, PDF, ISDOC a QR.",
       "step3Title": "Odešlete a sledujte",
@@ -331,7 +332,7 @@
       "docsTitle": "Doklady bez slepých míst",
       "docsDescription": "Faktury, zálohy, proformy i dobropisy. DPH, DUZP, symboly, QR platba a ISDOC jsou součást stejného výstupu.",
       "issuersTitle": "Každá firma má vlastní pravidla",
-      "issuersDescription": "Bankovní účet, číselná řada, plátcovství DPH i vizuální prvky zůstávají u správného dodavatele.",
+      "issuersDescription": "Bankovní účet, číselná řada, plátcovství DPH i vizuální prvky zůstávají u správné firmy.",
       "emailTitle": "Od vystavení po úhradu",
       "emailDescription": "Odešlete PDF a ISDOC, sledujte doručení, splatnost a úhradu bez přepisování stavu mezi několika nástroji.",
       "historyTitle": "Historie zůstává historií",
@@ -363,9 +364,9 @@
       "chatDisclaimer": "Vydání faktury vždy vyžaduje potvrzení"
     },
     "featurePanels": {
-      "multiIssuerEyebrow": "Více dodavatelů",
+      "multiIssuerEyebrow": "Více firem",
       "multiIssuerTitle": "Živnost a s.r.o. bez přepínacího chaosu.",
-      "multiIssuerDescription": "Vyberete, kdo fakturu vystavuje, a Invoicey použije jeho účet, číselnou řadu, DPH režim a vizuální prvky. Sdílený klient zůstává jeden.",
+      "multiIssuerDescription": "Vyberete firmu, která fakturu vystavuje, a Invoicey použije její účet, číselnou řadu, DPH režim a vizuální prvky. Sdílený klient zůstává jeden.",
       "multiIssuerItem1": "Vlastní číselné řady",
       "multiIssuerItem2": "Bankovní údaje a QR",
       "multiIssuerItem3": "Logo, podpis a razítko",
@@ -383,7 +384,7 @@
       "q1": "Je Invoicey určené jen pro plátce DPH?",
       "a1": "Ne. Podporuje plátce i neplátce, běžný režim DPH, přenesenou daňovou povinnost a další údaje českých dokladů.",
       "q2": "Můžu fakturovat z více firem nebo živností?",
-      "a2": "Ano. Každý dodavatel má vlastní banku, číselné řady, DPH nastavení, logo i kontaktní údaje. Klienti přitom zůstávají sdílení v jednom pracovním prostoru.",
+      "a2": "Ano. Každá firma má vlastní banku, číselné řady, DPH nastavení, logo i kontaktní údaje. Klienti přitom zůstávají sdílení v jednom pracovním prostoru.",
       "q3": "Co znamená AI fakturace?",
       "a3": "Agent neskládá PDF od oka. Připraví strukturovaný návrh, který projde stejnou validací jako faktura vytvořená ve webu. Vydání nebo odeslání citlivého dokladu zůstává potvrzovaná akce.",
       "q4": "Lze přenést staré faktury?",
@@ -502,7 +503,7 @@
     "subtitle": "Účet {email} je přihlášený, ale nemá pracovní prostor. Obvykle jej vytvoříme automaticky; tímto krokem dokončíte přerušené nastavení.",
     "benefit1": "Soukromý prostor pro vaše faktury",
     "benefit2": "Role vlastníka pracovního prostoru",
-    "benefit3": "Možnost přidat první dodavatelskou firmu",
+    "benefit3": "Možnost přidat první firmu",
     "submit": "Vytvořit můj pracovní prostor",
     "creating": "Vytvářím…"
   },
@@ -615,7 +616,7 @@
       "suppliers": "Dodavatelé",
       "payments": "Platby",
       "clients": "Klienti",
-      "issuers": "Moje podnikání",
+      "issuers": "Moje firmy",
       "newInvoice": "Nová faktura",
       "automationGroup": "Automatizace",
       "toolsGroup": "Import a vývojářské nástroje",
@@ -641,7 +642,7 @@
       "runs": "Platební dávky",
       "upload": "Nahrát",
       "clients": "Klienti",
-      "issuers": "Dodavatelé",
+      "issuers": "Moje firmy",
       "settings": "Nastavení",
       "fromJson": "Z JSON",
       "ai": "AI koncept",
@@ -650,7 +651,7 @@
       "new": "Nová",
       "edit": "Upravit",
       "invoice": "Faktura",
-      "issuer": "Dodavatel",
+      "issuer": "Firma",
       "client": "Klient",
       "detail": "Detail",
       "security": "Zabezpečení",
@@ -708,7 +709,7 @@
         "slugLabel": "Slug",
         "slugHint": "Slug nelze po vytvoření změnit.",
         "logoLabel": "Logo",
-        "logoHint": "Zobrazuje se v přepínači workspace. Faktury dál používají logo jednotlivých dodavatelů.",
+        "logoHint": "Zobrazuje se v přepínači pracovního prostoru. Faktury dál používají logo jednotlivých firem.",
         "logoSaved": "Logo pracovního prostoru uloženo",
         "removeLogo": "Odebrat logo",
         "uploadUnavailable": "Nahrávání souborů v tomto prostředí není nastavené.",
@@ -824,7 +825,7 @@
       "label": "Pracovní prostory",
       "create": "Vytvořit pracovní prostor…",
       "createTitle": "Nový pracovní prostor",
-      "createDescription": "Nový prostor má vlastní dodavatele, klienty a faktury. Přepnutí zároveň nastaví výchozí prostor pro API klíče.",
+      "createDescription": "Nový prostor má vlastní firmy, klienty a faktury. Přepnutí zároveň nastaví výchozí prostor pro API klíče.",
       "nameLabel": "Název",
       "namePlaceholder": "např. Acme s.r.o.",
       "cancel": "Zrušit",
@@ -861,13 +862,20 @@
     "newInvoice": "Nová faktura",
     "empty": {
       "title": "Vítejte v Invoicey",
-      "description": "Vytvořte prvního dodavatele (vaši firmu) a začněte vystavovat faktury s ARES ověřením, číslováním a PDF / ISDOC exportem.",
-      "cta": "Vytvořit prvního dodavatele"
+      "description": "Než vytvoříte první fakturu, přidejte svou firmu.",
+      "cta": "Přidat moji firmu"
+    },
+    "gettingStarted": {
+      "businessReady": "Nastavení firmy je hotové",
+      "title": "Vytvořte první fakturu",
+      "description": "Při vytváření faktury si vyberete klienta, nebo ho přidáte přes ARES.",
+      "create": "Vytvořit fakturu",
+      "ai": "Popsat s AI"
     },
     "issuerFilter": {
-      "label": "Dodavatel",
-      "all": "Všichni dodavatelé",
-      "description": "Zaměřte všechny přehledy a grafy na jedno podnikání."
+      "label": "Firma",
+      "all": "Všechny firmy",
+      "description": "Zaměřte všechny přehledy a grafy na jednu firmu."
     },
     "recent": {
       "title": "Nedávné faktury",
@@ -898,9 +906,9 @@
   },
   "Invoices": {
     "list": {
-      "title": "Vystavené faktury",
+      "title": "Faktury",
       "subtitle": "Stavy, filtry a akce nad fakturami.",
-      "newButton": "+ Vystavit fakturu",
+      "newButton": "Nová faktura",
       "aiButton": "AI koncept",
       "importButton": "Import",
       "fromJsonButton": "Z JSON",
@@ -935,6 +943,11 @@
       "bulkPaid": "Zaplaceno",
       "bulkUnpaid": "Zrušit zaplacení",
       "bulkCancel": "Storno",
+      "bulkCancelTitle": "Stornovat vybrané faktury?",
+      "bulkCancelDescription": "Před trvalou účetní změnou si vše zkontrolujte.",
+      "bulkCancelPermanent": "Storno ponechá čísla faktur a doklady zůstanou v historii.",
+      "bulkCancelConfirm": "Trvale stornovat {count, plural, one {# fakturu} few {# faktury} other {# faktur}}",
+      "bulkCancelPending": "Stornuji…",
       "bulkDelete": "Smazat",
       "untitledDraft": "Návrh bez čísla",
       "moreActions": "Další akce pro {number}",
@@ -943,6 +956,13 @@
       "downloadPdf": "Stáhnout PDF",
       "markPaidFull": "Označit jako zaplacenou",
       "cancelInvoice": "Stornovat fakturu",
+      "reviewCancellation": "Zkontrolovat storno",
+      "paymentStates": {
+        "unpaid": "Nezaplaceno",
+        "partial": "Částečně zaplaceno",
+        "paid": "Zaplaceno",
+        "overpaid": "Přeplatek"
+      },
       "deleteDraft": "Smazat",
       "issuing": "Vystavuji…",
       "saving": "Ukládám…",
@@ -1019,6 +1039,42 @@
       "savingPending": "Ukládám…",
       "duplicatingPending": "Duplikuji…",
       "cancellingPending": "Stornuji…",
+      "cannotCancelError": "Fakturu se nepodařilo stornovat. Nejdřív stornujte všechna přiřazení plateb a akci opakujte.",
+      "payments": {
+        "title": "Přehled plateb",
+        "description": "Potvrzená přiřazení jsou pro tuto fakturu rozhodující.",
+        "open": "Otevřít platby",
+        "state": "Stav",
+        "allocated": "Přiřazeno",
+        "outstanding": "Zbývá uhradit",
+        "empty": "K faktuře zatím není přiřazena žádná platba.",
+        "reversed": "Stornováno",
+        "reverse": "Stornovat platbu",
+        "states": {
+          "unpaid": "Nezaplaceno",
+          "partial": "Částečně zaplaceno",
+          "paid": "Zaplaceno",
+          "overpaid": "Přeplatek"
+        },
+        "sources": {
+          "manual": "Ruční platba",
+          "legacy_manual": "Importovaná platba",
+          "bank_confirmed": "Potvrzená bankovní platba",
+          "bank_transaction": "Bankovní transakce",
+          "payment_run": "Platební dávka",
+          "other": "Jiný zdroj platby"
+        }
+      },
+      "cancelSheet": {
+        "trigger": "Stornovat",
+        "title": "Stornovat tuto fakturu?",
+        "description": "Před trvalou účetní změnou si vše zkontrolujte.",
+        "permanent": "Storno ponechá číslo faktury a doklad zůstane v historii.",
+        "blocked": "K faktuře jsou přiřazené platby. Před stornem je nejdřív stornujte.",
+        "reviewPayments": "Zobrazit přehled plateb",
+        "confirm": "Trvale stornovat fakturu",
+        "pending": "Stornuji…"
+      },
       "deletingPending": "Mazání…",
       "itemsHeader": {
         "position": "#",
@@ -1191,7 +1247,7 @@
       "subtitle": "Nahrajte soubory PDF. Pokud obsahují vložený ISDOC, načteme i strukturovaná data. Ostatní uložíme jako archivní originály a základní údaje doplníte ručně.",
       "backLink": "← Faktury",
       "missingIssuer": "Nejprve vytvořte <issuer></issuer>.",
-      "issuerLink": "dodavatele",
+      "issuerLink": "firmu",
       "stepsAria": "Kroky importu",
       "stepSettings": "Nastavení",
       "stepUpload": "Nahrání",
@@ -1263,7 +1319,14 @@
       "invalidDraft": "Model vrátil neplatný koncept. Upravte popis a zkuste znovu.",
       "openDraft": "Otevřít koncept",
       "editInBuilder": "Upravit ve formuláři",
-      "previewEmpty": "Vygenerujte koncept pro náhled PDF…"
+      "previewEmpty": "Vygenerujte koncept pro náhled PDF…",
+      "bestResults": "Pro nejlepší výsledek uveďte:",
+      "hintClient": "jméno klienta nebo IČO",
+      "hintLine": "položku nebo službu",
+      "hintAmount": "částku s DPH nebo bez DPH",
+      "hintDue": "datum splatnosti",
+      "manageClients": "Přidat nebo spravovat klienty",
+      "builderLink": "Použít strukturovaný formulář"
     },
     "email": {
       "send": "Odeslat e-mailem",
@@ -1383,13 +1446,13 @@
     }
   },
   "Issuers": {
-    "title": "Dodavatelé",
+    "title": "Moje firmy",
     "subtitle": "Vaše firmy — ARES, banka, DPH, číslování, logo.",
-    "newButton": "Nový dodavatel",
-    "empty": "Zatím žádní dodavatelé. Přidejte firmu a začněte fakturovat.",
-    "createFirst": "Vytvořit prvního dodavatele",
+    "newButton": "Nová firma",
+    "empty": "Zatím nemáte žádnou firmu. Přidejte ji a začněte fakturovat.",
+    "createFirst": "Vytvořit první firmu",
     "deleting": "Mazání…",
-    "editSectionsHint": "Upravte jednotlivé části dodavatele — uložení je po sekcích.",
+    "editSectionsHint": "Upravte jednotlivé části firmy — uložení je po sekcích.",
     "nav": {
       "identity": "Identita",
       "bank": "Banka",
@@ -1411,9 +1474,9 @@
       "defaultBadge": "Výchozí",
       "setDefault": "Nastavit jako výchozí"
     },
-    "newTitle": "Nový dodavatel",
+    "newTitle": "Nová firma",
     "newSubtitle": "IČO přes ARES, kontaktní e-mail a banka. Ostatní nastavení doplníte v sekcích po vytvoření.",
-    "editTitle": "Upravit dodavatele",
+    "editTitle": "Upravit firmu",
     "editSubtitle": "Aktualizujte firemní údaje, banku a číslování.",
     "form": {
       "ico": "IČO",
@@ -1446,11 +1509,11 @@
       "ibanFilled": "IBAN doplněn z čísla účtu.",
       "save": "Uložit",
       "saving": "Ukládám…",
-      "create": "Vytvořit dodavatele",
+      "create": "Vytvořit firmu",
       "creating": "Vytvářím…",
       "identitySection": "Identita",
       "bankSection": "Banka",
-      "defaultsHint": "Číslování a e-mailové šablony nastavíme výchozími hodnotami — upravíte je později v nastavení dodavatele.",
+      "defaultsHint": "Číslování a e-mailové šablony nastavíme výchozími hodnotami — upravíte je později v nastavení firmy.",
       "source": "Zdroj: {source}",
       "sourceAres": "ARES",
       "sourceManual": "Ručně",
@@ -1471,43 +1534,57 @@
     },
     "welcome": {
       "step": "Krok {current} / {total}",
-      "title": "Váš první dodavatel",
-      "identityHint": "Načtěte firmu z ARES podle IČO, nebo nahrajte vystavenou fakturu s ISDOC, a potvrďte kontaktní e-mail.",
-      "bankHint": "Doplňte bankovní účet — potřebujeme ho pro QR platby na fakturách.",
+      "title": "Nastavte svou firmu",
+      "identityHint": "Začněte IČO své firmy a potvrďte její kontaktní údaje.",
+      "bankHint": "Přidejte účet, který bude na fakturách a platebních QR kódech. Invoicey peníze nepřevádí.",
       "skip": "Přeskočit pro teď",
       "skipping": "Přeskakuji…",
-      "uploadLabel": "Rychlý start — nahrát vystavenou fakturu",
+      "skipHint": "Nastavení můžete dokončit později, ale před vystavením faktury je firma potřeba.",
+      "steps": {
+        "business": "Firma",
+        "bank": "Bankovní účet",
+        "ready": "Připraveno"
+      },
+      "progressLabel": "Průběh nastavení",
+      "aresTitle": "Najděte firmu v ARES",
+      "aresHint": "Zadejte IČO a předvyplníme veřejně evidované údaje firmy.",
+      "businessDetails": "Povinné údaje firmy",
+      "contactEmailHint": "Tento e-mail uvedeme jako kontakt na vašich fakturách.",
+      "isdocAlternative": "Alternativa: načíst existující fakturu",
+      "uploadLabel": "Nahrát PDF s vloženým ISDOC",
       "uploadPending": "Načítám údaje z PDF…",
-      "uploadHint": "Pouze PDF s vloženým ISDOC (bez OCR). Údaje dodavatele a banky se předvyplní.",
+      "uploadHint": "Nejde o OCR: funguje jen s vloženým ISDOC a předvyplní údaje firmy a banky.",
       "continue": "Pokračovat",
       "identityRequired": "Vyplňte povinná pole identity.",
       "bankRequired": "Vyplňte bankovní účet a IBAN.",
-      "doneTitle": "Hotovo",
-      "doneBody": "Dodavatel je vytvořen. Číslování a e-mailové šablony mají výchozí hodnoty — logo, razítko a další detaily doplníte kdykoli v nastavení.",
+      "bankForBusiness": "Doplňujete účet firmy {business}. Bude na fakturách a platebních QR kódech; Invoicey peníze nepřevádí.",
+      "doneTitle": "Firma je připravená",
+      "doneBody": "Číslování a e-mailové šablony mají rozumné výchozí hodnoty. Logo, razítko a další údaje kdykoli doplníte v nastavení firmy.",
       "goDashboard": "Přejít na přehled",
-      "editIssuer": "Upravit dodavatele"
+      "createFirstInvoice": "Vytvořit první fakturu",
+      "editBusiness": "Nastavení firmy"
     },
     "emailForm": {
-      "subject": "Předmět šablona",
-      "body": "Text zprávy",
-      "displayName": "From display šablona",
+      "subject": "Šablona předmětu",
+      "body": "Text e-mailu",
+      "displayName": "Šablona jména odesílatele",
       "attachIsdoc": "Přikládat ISDOC ve výchozím stavu",
       "overdueReminders": "Posílat připomínky po splatnosti",
-      "reminderInterval": "Interval připomínek (dny)",
+      "reminderInterval": "Počet dní mezi připomínkami",
       "paymentReceived": "Posílat potvrzení o přijetí platby"
     },
     "numbering": {
-      "tokensHint": "Dostupné tokeny. Ruční změna counteru může vytvořit mezery v řadě.",
+      "tokensHint": "Dostupné zástupné proměnné. Ruční změna pořadového čísla může vytvořit mezery v řadě.",
       "nextNumber": "Další číslo: {preview}",
       "invalidTemplate": "(neplatná šablona)",
-      "counterChanged": "Counter byl změněn — zkontrolujte, že nevzniknou duplicity nebo mezery.",
+      "counterChanged": "Pořadové číslo bylo změněno — zkontrolujte, že nevzniknou duplicity nebo mezery.",
       "template": "Šablona",
-      "padding": "Padding (#)",
-      "reset": "Reset",
+      "padding": "Minimální počet číslic (#)",
+      "reset": "Obnova řady",
       "resetYearly": "Roční",
       "resetNever": "Nikdy",
-      "counter": "Counter",
-      "counterYear": "Counter year",
+      "counter": "Další pořadové číslo",
+      "counterYear": "Rok číselné řady",
       "docTypes": {
         "invoice": "Faktura (FV)",
         "proforma": "Proforma (PF)",
@@ -1818,7 +1895,7 @@
     "bankConnections": {
       "pageTitle": "Bankovní spojení",
       "pageDescription": "Připojte k tomuto workspace bankovní přehled jen pro čtení. Tokeny a účty se s ostatními workspace nesdílejí.",
-      "unnamedIssuer": "Dodavatel bez názvu",
+      "unnamedIssuer": "Firma bez názvu",
       "readOnly": "Jen pro čtení",
       "importedCurrency": "Importovaná měna",
       "lastSuccessfulSync": "Poslední úspěšná synchronizace",
@@ -1832,8 +1909,8 @@
       "syncNow": "Synchronizovat",
       "disconnect": "Odpojit",
       "encryptionMissing": "Šifrování bankovních tokenů není nastavené. Před připojením účtu nastavte BANK_TOKEN_ENCRYPTION_KEY_V1.",
-      "needIssuer": "Nejdřív vytvořte dodavatele, ke kterému účet patří.",
-      "issuerLabel": "Dodavatel, který platby přijímá",
+      "needIssuer": "Nejdřív vytvořte firmu, ke které účet patří.",
+      "issuerLabel": "Firma, která přijímá platby",
       "adminOnly": "Bankovní účty může připojit jen správce nebo vlastník workspace.",
       "connectAndVerify": "Připojit a ověřit",
       "moreTitle": "Další bankovní integrace",
@@ -1864,7 +1941,7 @@
       },
       "fio": {
         "connectTitle": "Připojit Fio API jen pro čtení",
-        "connectDescription": "V Fio Internetbankingu vytvořte token jen pro čtení a vložte ho sem. Invoicey ho ověří proti dnešnímu výpisu a uloží šifrovaně. Výchozí přijímací účet vybraného dodavatele se aktualizuje na ověřený Fio účet.",
+        "connectDescription": "V Fio Internetbankingu vytvořte token jen pro čtení a vložte ho sem. Invoicey ho ověří proti dnešnímu výpisu a uloží šifrovaně. Výchozí přijímací účet vybrané firmy se aktualizuje na ověřený Fio účet.",
         "tokenLabel": "Fio API token",
         "tokenPlaceholder": "64znakový token jen pro čtení",
         "tokenHelp": "V Internetbankingu → Nastavení → API bankovnictví vytvořte token se právem Sledování účtu. 64znakový token začne fungovat zhruba po pěti minutách a může platit až 180 dní, pokud zapnete automatické prodloužení. Znovu ho nezobrazíme a o zápisový přístup nežádáme.",
@@ -1915,7 +1992,7 @@
         "moneta_unauthorized": "MONETA token byl odmítnut. V Internet Bance vytvořte nový.",
         "not_found": "Připojení nebylo nalezeno.",
         "missing_connection": "Vyberte bankovní připojení.",
-        "missing_issuer": "Vyberte dodavatele, který platby přijímá.",
+        "missing_issuer": "Vyberte firmu, která přijímá platby.",
         "missing_fio_payment_token": "Vložte Fio token s právem odesílat.",
         "missing_payment_token_expiry": "Zadejte datum vypršení tokenu z Fio.",
         "payment_token_expired": "Token pro odesílání vypršel. Zadejte nový."

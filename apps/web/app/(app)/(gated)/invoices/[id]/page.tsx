@@ -1,5 +1,4 @@
 import {
-  cancelInvoice,
   deleteInvoice,
   duplicateInvoice,
   issueSavedInvoice,
@@ -7,6 +6,7 @@ import {
   unmarkInvoicePaid,
 } from "@/actions/invoices";
 import { reversePayment } from "@/actions/payments";
+import { InvoiceCancelSheet } from "@/components/invoices/invoice-cancel-sheet";
 import { SaveRecurringSheet } from "@/components/invoices/save-recurring-sheet";
 import { InvoiceEmailTimeline } from "@/components/invoices/invoice-email-timeline";
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
@@ -55,7 +55,6 @@ import {
 import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
 import {
-  BanIcon,
   CopyIcon,
   FileCodeIcon,
   FileDownIcon,
@@ -176,6 +175,26 @@ export default async function InvoiceDetailPage({
     workspaceId,
     id,
   );
+  const hasActivePayments = allocationRows.some(
+    (allocation) => !allocation.reversedAt,
+  );
+  const cancellationBlocked = hasActivePayments || Number(row.paidAmount) > 0;
+  const paymentSource = (source: string) => {
+    if (source === "legacy_manual") return t("payments.sources.legacy_manual");
+    if (source === "bank_confirmed")
+      return t("payments.sources.bank_confirmed");
+    if (source === "bank_transaction")
+      return t("payments.sources.bank_transaction");
+    if (source === "payment_run") return t("payments.sources.payment_run");
+    if (source === "manual") return t("payments.sources.manual");
+    return t("payments.sources.other");
+  };
+  const paymentState = (state: string) => {
+    if (state === "partial") return t("payments.states.partial");
+    if (state === "paid") return t("payments.states.paid");
+    if (state === "overpaid") return t("payments.states.overpaid");
+    return t("payments.states.unpaid");
+  };
 
   const canEmail =
     Boolean(row.issuedAt) && !row.cancelledAt && displayStatus !== "draft";
@@ -326,17 +345,10 @@ export default async function InvoiceDetailPage({
             {displayStatus === "unpaid" ||
             displayStatus === "overdue" ||
             displayStatus === "future" ? (
-              <form action={cancelInvoice}>
-                <input name="id" type="hidden" value={id} />
-                <SubmitButton
-                  pendingLabel={t("cancellingPending")}
-                  size="sm"
-                  variant="secondary"
-                >
-                  <BanIcon data-icon="inline-start" />
-                  {t("cancelButton")}
-                </SubmitButton>
-              </form>
+              <InvoiceCancelSheet
+                blockedByPayment={cancellationBlocked}
+                invoiceId={id}
+              />
             ) : null}
             {displayStatus === "paid" ? (
               <form action={unmarkInvoicePaid}>
@@ -373,7 +385,9 @@ export default async function InvoiceDetailPage({
 
       {sp.invalid ? (
         <p className="text-destructive text-sm">
-          {invalidMessage(tErrors, sp.invalid)}
+          {sp.invalid === "cannot_cancel"
+            ? t("cannotCancelError")
+            : invalidMessage(tErrors, sp.invalid)}
         </p>
       ) : null}
 
@@ -421,39 +435,40 @@ export default async function InvoiceDetailPage({
       </dl>
 
       {row.issuedAt ? (
-        <Card>
+        <Card id="payment-ledger">
           <CardHeader>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <CardTitle>Payment ledger</CardTitle>
-                <CardDescription>
-                  Confirmed allocations are the source of truth for this
-                  invoice.
-                </CardDescription>
+                <CardTitle>{t("payments.title")}</CardTitle>
+                <CardDescription>{t("payments.description")}</CardDescription>
               </div>
               <Button
                 render={<Link href="/payments" />}
                 size="sm"
                 variant="outline"
               >
-                Open payments
+                {t("payments.open")}
               </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <dl className="grid gap-3 text-sm sm:grid-cols-3">
               <div>
-                <dt className="text-muted-foreground">State</dt>
-                <dd className="capitalize">{row.paymentState}</dd>
+                <dt className="text-muted-foreground">{t("payments.state")}</dt>
+                <dd>{paymentState(row.paymentState)}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground">Allocated</dt>
+                <dt className="text-muted-foreground">
+                  {t("payments.allocated")}
+                </dt>
                 <dd className="tabular-nums">
                   {formatMoney(Number(row.paidAmount), row.currency, locale)}
                 </dd>
               </div>
               <div>
-                <dt className="text-muted-foreground">Outstanding</dt>
+                <dt className="text-muted-foreground">
+                  {t("payments.outstanding")}
+                </dt>
                 <dd className="tabular-nums">
                   {formatMoney(
                     Math.max(
@@ -468,7 +483,7 @@ export default async function InvoiceDetailPage({
             </dl>
             {allocationRows.length === 0 ? (
               <p className="text-muted-foreground text-sm">
-                No payment has been allocated yet.
+                {t("payments.empty")}
               </p>
             ) : (
               <div className="divide-y rounded-lg border px-3">
@@ -486,9 +501,11 @@ export default async function InvoiceDetailPage({
                         )}
                       </p>
                       <p className="text-muted-foreground text-xs">
-                        {allocation.effectiveDate} ·{" "}
-                        {allocation.source.replaceAll("_", " ")}
-                        {allocation.reversedAt ? " · reversed" : ""}
+                        {formatInvoiceDate(allocation.effectiveDate, locale)} ·{" "}
+                        {paymentSource(allocation.source)}
+                        {allocation.reversedAt
+                          ? ` · ${t("payments.reversed")}`
+                          : ""}
                       </p>
                     </div>
                     {!allocation.reversedAt ? (
@@ -504,7 +521,7 @@ export default async function InvoiceDetailPage({
                           value={`/invoices/${id}`}
                         />
                         <Button type="submit" size="sm" variant="ghost">
-                          Reverse
+                          {t("payments.reverse")}
                         </Button>
                       </form>
                     ) : null}
