@@ -1863,6 +1863,12 @@
     "incomingInvoices": {
       "title": "Přijaté faktury",
       "subtitle": "Adresa inboxu je nositel oprávnění. Pravidla schválení jsou volitelná — bez nich se faktura po přijetí schválí sama.",
+      "setupTitle": "Nastavení příjmu e-mailů",
+      "setupBadge": "Nastavení správce",
+      "setupHint": "Tato adresa začne přijímat poštu až po nastavení Resend Inbound a DNS. Pokud chybí MX záznam, odesílatel dostane chybu „Adresa nenalezena“ ještě předtím, než se e-mail dostane do Invoicey.",
+      "setupStepDomain": "Přidejte {domain} v Resendu jako receiving domain a zapněte Receiving.",
+      "setupStepMx": "Zkopírujte MX záznam, který Resend zobrazí pro {domain}, do DNS s prioritou 10 (nejnižší prioritou na tomto subdoméně).",
+      "setupStepWebhook": "Vytvořte webhook email.received na /api/webhooks/resend-inbound a jeho podpisový secret nastavte do RESEND_INBOUND_WEBHOOK_SECRET.",
       "aliasTitle": "Adresa inboxu",
       "aliasWarning": "Kdo zná tuto adresu, může sem posílat dokumenty. Otáčením starou adresu ihned vypnete.",
       "active": "Aktivní",

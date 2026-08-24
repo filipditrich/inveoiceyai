@@ -1863,6 +1863,12 @@
     "incomingInvoices": {
       "title": "Incoming invoices",
       "subtitle": "The inbox address is a bearer capability. Approval rules are optional — without them, accepting auto-approves.",
+      "setupTitle": "Email receiving setup",
+      "setupBadge": "Admin setup",
+      "setupHint": "This address only receives mail after Resend Inbound and DNS are configured. If the MX record is missing, senders see an “Address not found” bounce before Invoicey can receive anything.",
+      "setupStepDomain": "Add {domain} as a receiving domain in Resend and enable Receiving.",
+      "setupStepMx": "Copy Resend’s MX record for {domain} into DNS with priority 10 (the lowest priority on this subdomain).",
+      "setupStepWebhook": "Create an email.received webhook for /api/webhooks/resend-inbound and set its signing secret in RESEND_INBOUND_WEBHOOK_SECRET.",
       "aliasTitle": "Inbox address",
       "aliasWarning": "Anyone who knows this address can send documents here. Rotating deactivates the old address immediately.",
       "active": "Active",

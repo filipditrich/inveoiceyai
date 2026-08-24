@@ -41,7 +41,7 @@ Set these in addition to the existing Invoicey env (see `.env.example`):
 
 1. Confirm Resend Inbound is enabled on the account.
 2. Add receiving domain `inbox.invoicey.ditrich.me` (or the value of `INVOICEY_INBOUND_EMAIL_DOMAIN`).
-3. DNS — MX on that **subdomain** only, priority 10, lowest on the name. Leave the apex mail setup alone.
+3. DNS — MX on that **subdomain** only, priority 10, lowest on the name. Copy the mail-server value shown by Resend for this receiving domain (it can be region-specific); do not guess a target. Leave the apex mail setup alone.
 4. Create an `email.received` webhook pointing at `https://<app>/api/webhooks/resend-inbound`.
 5. Put the webhook signing secret in `RESEND_INBOUND_WEBHOOK_SECRET`.
 6. Privacy policy / processor list must mention inbound content.

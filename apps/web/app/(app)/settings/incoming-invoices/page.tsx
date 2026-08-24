@@ -61,6 +61,18 @@ export default async function IncomingInvoiceSettingsPage({
           {err}
         </p>
       ) : null}
+      <section className="bg-muted/40 space-y-2 rounded-xl border p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="text-sm font-semibold">{t("setupTitle")}</h2>
+          <Badge variant="outline">{t("setupBadge")}</Badge>
+        </div>
+        <p className="text-muted-foreground text-sm">{t("setupHint")}</p>
+        <ol className="text-muted-foreground list-inside list-decimal space-y-1 text-sm">
+          <li>{t("setupStepDomain", { domain })}</li>
+          <li>{t("setupStepMx", { domain })}</li>
+          <li>{t("setupStepWebhook")}</li>
+        </ol>
+      </section>
       <section className="space-y-3">
         <h2 className="text-sm font-semibold">{t("aliasTitle")}</h2>
         <p className="text-muted-foreground text-sm">{t("aliasWarning")}</p>
