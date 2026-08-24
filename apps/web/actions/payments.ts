@@ -35,6 +35,7 @@ import {
   testMonetaToken,
   type MonetaDiscoveredAccount,
 } from "@/lib/payments/moneta-service";
+import { normalizeFioError } from "@/lib/payments/fio-error";
 
 function field(formData: FormData, name: string): string {
   const value = formData.get(name);
@@ -80,9 +81,7 @@ export async function connectFio(formData: FormData): Promise<void> {
       batch,
     });
   } catch (error) {
-    settingsRedirect({
-      error: error instanceof Error ? error.message : "fio_connection_failed",
-    });
+    settingsRedirect({ error: normalizeFioError(error) });
   }
   revalidatePath("/settings/bank-connections");
   revalidatePath("/payments");

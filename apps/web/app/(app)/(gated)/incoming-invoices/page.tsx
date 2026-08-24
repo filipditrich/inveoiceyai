@@ -6,12 +6,14 @@ import type { AppLocale } from "@/i18n/config";
 import { requireWorkspace } from "@/lib/auth/session";
 import { formatInvoiceDate, formatMoneyCode } from "@/lib/format";
 import { incomingQueueCountsFromRows } from "@/lib/incoming-invoices/queue-counts";
+import { payableEligibility } from "@/lib/incoming-invoices/eligibility";
 import { invalidMessage } from "@/lib/invalid-message";
 import {
   approvalTasks,
   bankAccounts,
   incomingInvoices,
   issuerBusinesses,
+  supplierBankAccounts,
   suppliers,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
@@ -99,6 +101,13 @@ export default async function IncomingInvoicesPage({
     .select()
     .from(bankAccounts)
     .where(eq(bankAccounts.workspaceId, workspaceId));
+  const supplierAccounts = await db
+    .select()
+    .from(supplierBankAccounts)
+    .where(eq(supplierBankAccounts.workspaceId, workspaceId));
+  const supplierAccountById = new Map(
+    supplierAccounts.map((account) => [account.id, account]),
+  );
 
   const visible =
     tab === "approval"
@@ -148,6 +157,35 @@ export default async function IncomingInvoicesPage({
             : null,
           dueDate: formatInvoiceDate(row.invoice.dueDate, appLocale),
           exceptions: row.invoice.exceptionCodes,
+          paymentBlockers: payableEligibility({
+            status: row.invoice.status,
+            holdUntil: row.invoice.holdUntil,
+            paymentState: row.invoice.paymentState,
+            outstanding: String(
+              Math.max(
+                0,
+                Number(row.invoice.total ?? 0) -
+                  Number(row.invoice.paidAmount ?? 0),
+              ),
+            ),
+            currency: row.invoice.currency,
+            runCurrency: "CZK",
+            paymentMethod: row.invoice.paymentMethod,
+            beneficiaryConfirmed: Boolean(
+              supplierAccountById.get(row.invoice.supplierBankAccountId ?? "")
+                ?.confirmedAt,
+            ),
+            hasBeneficiary: Boolean(
+              row.invoice.beneficiaryIban ||
+              (row.invoice.beneficiaryAccountNumber &&
+                row.invoice.beneficiaryBankCode),
+            ),
+            iban: row.invoice.beneficiaryIban,
+            accountNumber: row.invoice.beneficiaryAccountNumber,
+            bankCode: row.invoice.beneficiaryBankCode,
+            activePaymentRunId: row.invoice.activePaymentRunId,
+            docType: row.invoice.docType,
+          }),
           mine: myTaskIds.has(row.invoice.id),
           pendingTaskId: pendingTaskByInvoice.get(row.invoice.id)?.id ?? null,
         }))}

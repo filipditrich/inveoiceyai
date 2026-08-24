@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 
 import {
   ensureSupplier,
+  incomingInvoices,
   persistIncomingInvoice,
   recordSupplierBankAccount,
   resolveIssuerByIco,
@@ -89,18 +90,24 @@ export async function processIncomingDocument(input: {
       fileName: input.fileName,
     });
     if (!extracted.ok) {
-      return {
+      return persistExtractionFailure({
+        workspaceId: input.workspaceId,
+        inboxItemId: input.inboxItemId,
+        issuerId: input.issuerId,
         documentId: document.id,
         reused: document.reused,
         classification: classified.classification,
-      };
+      });
     }
     if (!extracted.data.number && !extracted.data.total) {
-      return {
+      return persistExtractionFailure({
+        workspaceId: input.workspaceId,
+        inboxItemId: input.inboxItemId,
+        issuerId: input.issuerId,
         documentId: document.id,
         reused: document.reused,
         classification: classified.classification,
-      };
+      });
     }
     return persistFromAi({
       workspaceId: input.workspaceId,
@@ -118,6 +125,64 @@ export async function processIncomingDocument(input: {
     reused: document.reused,
     classification: classified.classification,
   };
+}
+
+async function persistExtractionFailure(input: {
+  workspaceId: string;
+  inboxItemId?: string | null;
+  issuerId?: string | null;
+  documentId: string;
+  reused: boolean;
+  classification: string;
+}) {
+  const issuerId = await resolveFallbackIssuer(
+    input.workspaceId,
+    input.issuerId,
+  );
+  if (!issuerId) {
+    return {
+      documentId: input.documentId,
+      reused: input.reused,
+      classification: input.classification,
+    };
+  }
+  const created = await persistIncomingInvoice(db, {
+    workspaceId: input.workspaceId,
+    issuerId,
+    inboxItemId: input.inboxItemId,
+    primaryDocumentId: input.documentId,
+    receivedDate: new Date().toISOString().slice(0, 10),
+    currency: "CZK",
+    extractionSource: "manual",
+    exceptionCodes: ["extraction_failed"],
+    notes:
+      "Automatic extraction was unavailable. Review the document fields manually.",
+    documentIds: [{ documentId: input.documentId, role: "original" }],
+  });
+  await db
+    .update(incomingInvoices)
+    .set({ status: "extract_failed", updatedAt: new Date() })
+    .where(eq(incomingInvoices.id, created.id));
+  return {
+    documentId: input.documentId,
+    invoiceId: created.id,
+    reused: input.reused,
+    classification: input.classification,
+  };
+}
+
+async function resolveFallbackIssuer(
+  workspaceId: string,
+  issuerId?: string | null,
+): Promise<string | null> {
+  if (issuerId) return issuerId;
+  const [fallback] = await db
+    .select({ id: issuerBusinesses.id })
+    .from(issuerBusinesses)
+    .where(eq(issuerBusinesses.workspaceId, workspaceId))
+    .orderBy(desc(issuerBusinesses.isDefault), desc(issuerBusinesses.updatedAt))
+    .limit(1);
+  return fallback?.id ?? null;
 }
 
 async function persistFromIsdoc(input: {

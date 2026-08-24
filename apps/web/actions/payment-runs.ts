@@ -26,6 +26,7 @@ import { decryptBankToken } from "@/lib/payments/token-crypto";
 
 import { requireWorkspace, requireWorkspaceRole } from "@/lib/auth/session";
 import { payableEligibility } from "@/lib/incoming-invoices/eligibility";
+import { selectEligiblePaymentRunIds } from "@/lib/incoming-invoices/payment-run-selection";
 
 function optionalTrim(value: FormDataEntryValue | null): string | null {
   if (typeof value !== "string") return null;
@@ -49,6 +50,9 @@ export async function createPaymentRunAction(
   if (!issuerId || !bankAccountId) {
     redirect("/incoming-invoices?invalid=required_fields");
   }
+  if (ids.length === 0) {
+    redirect("/incoming-invoices?invalid=empty_run");
+  }
   const now = new Date();
   const week = `${now.getUTCFullYear()}-W${String(getIsoWeek(now)).padStart(2, "0")}`;
   const [run] = await db
@@ -67,7 +71,16 @@ export async function createPaymentRunAction(
     redirect("/incoming-invoices?invalid=run_create_failed");
   }
   if (ids.length > 0) {
-    await addInvoicesToRun(workspaceId, run.id, ids, currency);
+    const includedCount = await addInvoicesToRun(
+      workspaceId,
+      run.id,
+      ids,
+      currency,
+    );
+    if (includedCount === 0) {
+      await db.delete(paymentRuns).where(eq(paymentRuns.id, run.id));
+      redirect(`/incoming-invoices?invalid=empty_run`);
+    }
   }
   revalidatePath("/incoming-invoices/runs");
   redirect(`/incoming-invoices/runs/${run.id}?toast=payment_run_created`);
@@ -78,7 +91,7 @@ async function addInvoicesToRun(
   runId: string,
   invoiceIds: string[],
   runCurrency: string,
-) {
+): Promise<number> {
   const invoices = await db
     .select()
     .from(incomingInvoices)
@@ -88,6 +101,10 @@ async function addInvoicesToRun(
         inArray(incomingInvoices.id, invoiceIds),
       ),
     );
+  const eligibility = new Map<
+    string,
+    { blockers: string[]; rail: string; outstanding: string }
+  >();
   for (const invoice of invoices) {
     const [account] = invoice.supplierBankAccountId
       ? await db
@@ -119,6 +136,7 @@ async function addInvoicesToRun(
       docType: invoice.docType,
     });
     if (blockers.length > 0) {
+      eligibility.set(invoice.id, { blockers, rail: "", outstanding });
       continue;
     }
     const rail = classifyFioRail({
@@ -126,7 +144,28 @@ async function addInvoicesToRun(
       accountNumber: invoice.beneficiaryAccountNumber,
       bankCode: invoice.beneficiaryBankCode,
     });
-    if (rail === "foreign") continue;
+    if (rail === "foreign") {
+      eligibility.set(invoice.id, {
+        blockers: ["foreign_rail"],
+        rail,
+        outstanding,
+      });
+      continue;
+    }
+    eligibility.set(invoice.id, { blockers: [], rail, outstanding });
+  }
+  const eligibleIds = new Set(
+    selectEligiblePaymentRunIds(
+      invoices.map((invoice) => ({
+        id: invoice.id,
+        blockers: eligibility.get(invoice.id)?.blockers ?? ["not_found"],
+      })),
+    ),
+  );
+  for (const invoice of invoices) {
+    if (!eligibleIds.has(invoice.id)) continue;
+    const eligible = eligibility.get(invoice.id);
+    if (!eligible?.rail) continue;
     const [supplier] = invoice.supplierId
       ? await db
           .select({ name: suppliers.name })
@@ -138,7 +177,7 @@ async function addInvoicesToRun(
       workspaceId,
       paymentRunId: runId,
       incomingInvoiceId: invoice.id,
-      amount: outstanding,
+      amount: eligible.outstanding,
       currency: invoice.currency,
       beneficiaryName: supplier?.name ?? invoice.supplierNameRaw,
       beneficiaryIban: invoice.beneficiaryIban,
@@ -150,7 +189,7 @@ async function addInvoicesToRun(
       specificSymbol: invoice.specificSymbol,
       messageForRecipient: invoice.messageForRecipient,
       comment: `inv/${invoice.id.slice(0, 8)}`,
-      rail,
+      rail: eligible.rail,
     });
     await db
       .update(incomingInvoices)
@@ -158,6 +197,7 @@ async function addInvoicesToRun(
       .where(eq(incomingInvoices.id, invoice.id));
   }
   await refreshRunTotals(runId);
+  return eligibleIds.size;
 }
 
 async function refreshRunTotals(runId: string) {

@@ -20,6 +20,7 @@ type QueueRow = {
   total: string | null;
   dueDate: string | null;
   exceptions: string[];
+  paymentBlockers: string[];
   mine: boolean;
   pendingTaskId: string | null;
 };
@@ -43,8 +44,10 @@ export function IncomingInvoiceQueue({
 }) {
   const t = useTranslations("IncomingInvoices");
   const [selected, setSelected] = useState<string[]>([]);
+  const selectableRows = rows.filter((row) => row.paymentBlockers.length === 0);
   const allSelected =
-    rows.length > 0 && rows.every((row) => selected.includes(row.id));
+    selectableRows.length > 0 &&
+    selectableRows.every((row) => selected.includes(row.id));
   const emptyLabel =
     tab === "approval"
       ? t("emptyApproval")
@@ -148,6 +151,7 @@ export function IncomingInvoiceQueue({
                   <input
                     aria-label={row.number ?? t("table.number")}
                     checked={selected.includes(row.id)}
+                    disabled={row.paymentBlockers.length > 0}
                     className="mt-1 size-5 shrink-0"
                     onChange={(event) => {
                       setSelected((current) =>
@@ -177,6 +181,11 @@ export function IncomingInvoiceQueue({
                   <IncomingExceptionBadge code={code} key={code} />
                 ))}
               </div>
+              {tab === "pay" && row.paymentBlockers.length > 0 ? (
+                <p className="text-muted-foreground text-xs">
+                  {t("run.blocked")}
+                </p>
+              ) : null}
               <IncomingDecisionBar
                 invoiceId={row.id}
                 pendingTaskId={row.pendingTaskId}
@@ -201,7 +210,9 @@ export function IncomingInvoiceQueue({
                     checked={allSelected}
                     onChange={(event) => {
                       setSelected(
-                        event.target.checked ? rows.map((row) => row.id) : [],
+                        event.target.checked
+                          ? selectableRows.map((row) => row.id)
+                          : [],
                       );
                     }}
                   />
@@ -235,6 +246,7 @@ export function IncomingInvoiceQueue({
                       <input
                         type="checkbox"
                         checked={selected.includes(row.id)}
+                        disabled={row.paymentBlockers.length > 0}
                         onChange={(event) => {
                           setSelected((current) =>
                             event.target.checked
@@ -268,6 +280,11 @@ export function IncomingInvoiceQueue({
                         <IncomingExceptionBadge key={code} code={code} />
                       ))}
                     </div>
+                    {tab === "pay" && row.paymentBlockers.length > 0 ? (
+                      <p className="text-muted-foreground mt-1 text-xs">
+                        {t("run.blocked")}
+                      </p>
+                    ) : null}
                   </td>
                   <td className="bg-card sticky right-0 px-3 py-2">
                     <IncomingDecisionBar

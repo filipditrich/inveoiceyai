@@ -1897,9 +1897,11 @@ declare const messages: {
     };
     bankConnections: {
       pageTitle: "Bankovní spojení";
-      pageDescription: "Připojte k tomuto workspace bankovní přehled jen pro čtení. Tokeny a účty se s ostatními workspace nesdílejí.";
+      pageDescription: "Připojte k tomuto workspace bankovní přehled jen pro čtení. Samostatný Fio token pro odesílání může vložit dávku do fronty k podpisu; Invoicey platbu nikdy neautorizuje.";
       unnamedIssuer: "Firma bez názvu";
       readOnly: "Jen pro čtení";
+      submitRights: "Odesílání povoleno";
+      submitExpired: "Token pro odesílání vypršel";
       importedCurrency: "Importovaná měna";
       lastSuccessfulSync: "Poslední úspěšná synchronizace";
       notSyncedYet: "Zatím nesynchronizováno";
@@ -1980,6 +1982,7 @@ declare const messages: {
         fio_token_contains_whitespace: "Fio token nesmí obsahovat mezery.";
         fio_connection_failed: "Fio se nepodařilo připojit.";
         fio_sync_failed: "Synchronizace Fio selhala.";
+        fio_token_inactive: "Fio tento token neověřilo. Zkontrolujte, že jde o monitorovací token (ne token pro odesílání) a že je ve Fio aktivní.";
         fio_throttled_locally: "Fio je dočasně omezené. Zkuste to za chvíli.";
         fio_account_changed: "Fio účet už tomuto připojení neodpovídá.";
         missing_moneta_token: "Vložte MONETA API token.";
@@ -2243,12 +2246,12 @@ declare const messages: {
   };
   IncomingInvoices: {
     title: "Přijaté faktury";
-    subtitle: "Na Ke zpracování přijměte, na Ke schválení schvalte, na K zaplacení vytvořte dávku.";
+    subtitle: "Zkontrolujte dokument, schvalte ho a potom vyberte připravené faktury na K zaplacení. Invoicey odešle dávku do Fio k podpisu, ale platbu nikdy neautorizuje.";
     upload: "Nahrát";
     empty: "Tady zatím nic není.";
     emptyReview: "Nic ke kontrole. Nahrajte dokument, nebo počkejte na inbox.";
     emptyApproval: "Nic nečeká na schválení.";
-    emptyPay: "Nic není připravené k platbě. Nejdřív fakturu schvalte.";
+    emptyPay: "Zatím není co zaplatit. Nejdřív schvalte fakturu a potvrďte účet příjemce.";
     myTask: "Moje";
     tabs: {
       review: "Ke zpracování";
@@ -2300,6 +2303,7 @@ declare const messages: {
       low_confidence: "Nízká jistota extrakce";
       currency_unsupported: "Nepodporovaná měna";
       unverified_sender: "Neověřený odesílatel";
+      extraction_failed: "Vyžaduje ruční kontrolu";
       unknown: "{code}";
     };
     status: {
@@ -2316,7 +2320,8 @@ declare const messages: {
       issuer: "Platící subjekt";
       account: "Účet";
       create: "Vytvořit dávku ({count})";
-      selectHint: "Zaškrtněte faktury do dávky a dávku vytvořte.";
+      selectHint: "Vybrat lze jen schválené faktury s potvrzeným účtem příjemce. Zvolte platící účet a vytvořte dávku.";
+      blocked: "Otevřete fakturu, dokončete kontrolu a potvrďte účet příjemce. Teprve pak ji lze přidat do dávky.";
       selectAll: "Vybrat vše";
       noAccount: "Než vytvoříte dávku, připojte platící účet.";
       connectBank: "Bankovní spojení";
@@ -2353,7 +2358,7 @@ declare const messages: {
     };
     uploadPage: {
       title: "Nahrát přijaté faktury";
-      subtitle: "PDF nebo ISDOC. Stejná cesta jako e-mailový inbox.";
+      subtitle: "Nahrajte PDF nebo ISDOC. Invoicey pole vytěží; pokud se extrakce nepovede, dokument otevře k ruční kontrole místo tichého zmizení.";
       issuer: "Přijímající subjekt";
       process: "Zpracovat";
       processing: "Zpracovávám…";

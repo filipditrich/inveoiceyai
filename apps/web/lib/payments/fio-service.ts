@@ -21,6 +21,7 @@ import {
   markBankSyncSucceeded,
 } from "./import-bank-batch";
 import { decryptBankToken, encryptBankToken } from "./token-crypto";
+import { normalizeFioError } from "./fio-error";
 
 const MATCHER_VERSION = "fio-v1";
 const MIN_REQUEST_INTERVAL_MS = 31_000;
@@ -321,7 +322,7 @@ export async function syncFioConnection(input: {
     });
     return { ok: true, ...result };
   } catch (error) {
-    const code = error instanceof Error ? error.message : "fio_sync_failed";
+    const code = normalizeFioError(error);
     await markBankSyncFailed({
       connectionId: input.connectionId,
       errorCode: code,

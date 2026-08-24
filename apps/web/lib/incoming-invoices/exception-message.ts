@@ -12,6 +12,7 @@ const INCOMING_EXCEPTION_CODES = [
   "low_confidence",
   "currency_unsupported",
   "unverified_sender",
+  "extraction_failed",
 ] as const;
 
 export type IncomingExceptionMessageKey =

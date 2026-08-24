@@ -1894,9 +1894,11 @@
     },
     "bankConnections": {
       "pageTitle": "Bank connections",
-      "pageDescription": "Connect a read-only bank feed to this workspace. Tokens and accounts are never shared with your other workspaces.",
+      "pageDescription": "Connect a read-only bank feed to this workspace. For Fio, a separate submit token can place payment batches in the signing queue; Invoicey never authorizes payments.",
       "unnamedIssuer": "Unnamed business",
       "readOnly": "Read-only",
+      "submitRights": "Submit rights enabled",
+      "submitExpired": "Submit token expired",
       "importedCurrency": "Imported currency",
       "lastSuccessfulSync": "Last successful sync",
       "notSyncedYet": "Not synced yet",
@@ -1977,6 +1979,7 @@
         "fio_token_contains_whitespace": "The Fio token must not contain spaces.",
         "fio_connection_failed": "Could not connect Fio.",
         "fio_sync_failed": "Fio sync failed.",
+        "fio_token_inactive": "Fio could not authenticate this token. Check that this is the monitoring token (not the submit token), and that it is active in Fio.",
         "fio_throttled_locally": "Fio is rate-limited. Try again in a moment.",
         "fio_account_changed": "The Fio account no longer matches this connection.",
         "missing_moneta_token": "Paste a MONETA API token.",
@@ -2240,12 +2243,12 @@
   },
   "IncomingInvoices": {
     "title": "Incoming invoices",
-    "subtitle": "Accept on To review, approve on To approve, then create a payment run on To pay.",
+    "subtitle": "Review the document, approve it, then select ready invoices on To pay. Invoicey sends a batch to Fio for signing; it never authorizes payments.",
     "upload": "Upload",
     "empty": "Nothing here yet.",
     "emptyReview": "Nothing to review. Upload a document or wait for the inbox.",
     "emptyApproval": "Nothing waiting for approval.",
-    "emptyPay": "Nothing ready to pay. Approve an invoice first.",
+    "emptyPay": "Nothing is ready to pay yet. Approve an invoice and confirm its beneficiary account first.",
     "myTask": "Mine",
     "tabs": {
       "review": "To review",
@@ -2297,6 +2300,7 @@
       "low_confidence": "Low extraction confidence",
       "currency_unsupported": "Unsupported currency",
       "unverified_sender": "Unverified sender",
+      "extraction_failed": "Manual review required",
       "unknown": "{code}"
     },
     "status": {
@@ -2313,7 +2317,8 @@
       "issuer": "Paying entity",
       "account": "Account",
       "create": "Create run ({count})",
-      "selectHint": "Tick the invoices to include, then create the run.",
+      "selectHint": "Only approved invoices with a confirmed beneficiary account can be selected. Choose the paying account, then create the run.",
+      "blocked": "Open the invoice to finish review and confirm the beneficiary account before adding it to a run.",
       "selectAll": "Select all",
       "noAccount": "Connect a paying account before you can create a run.",
       "connectBank": "Bank connections"
@@ -2350,7 +2355,7 @@
     },
     "uploadPage": {
       "title": "Upload incoming invoices",
-      "subtitle": "PDF or ISDOC. Same path as the email inbox.",
+      "subtitle": "Upload a PDF or ISDOC. Invoicey extracts the fields; if extraction is uncertain, it opens a manual review instead of silently dropping the document.",
       "issuer": "Receiving entity",
       "process": "Process",
       "processing": "Processing…"
