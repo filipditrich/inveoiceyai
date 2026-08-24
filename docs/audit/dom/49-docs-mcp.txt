@@ -1,0 +1,228 @@
+- complementary:
+  - link "Invoicey Invoicey docs":
+    - /url: /docs
+    - img "Invoicey"
+    - generic: Invoicey docs
+  - button "Collapse Sidebar":
+  - button "Search ⌘ K":
+    - text: Search
+    - generic: ⌘
+    - generic: K
+  - link "Open app":
+    - /url: /dashboard
+    - text: Open app
+  - link "What is Invoicey?":
+    - /url: /docs
+    - text: What is Invoicey?
+  - button "Start here":
+    - text: Start here
+  - button "How Invoicey works":
+    - text: How Invoicey works
+  - button "Everyday workflows":
+    - text: Everyday workflows
+  - button "Files & exports":
+    - text: Files & exports
+  - button "Connect & automate" [expanded]:
+    - text: Connect & automate
+  - link "API keys":
+    - /url: /docs/integrations/api-keys
+    - text: API keys
+  - link "MCP":
+    - /url: /docs/integrations/mcp
+    - text: MCP
+  - link "Cursor":
+    - /url: /docs/integrations/cursor
+    - text: Cursor
+  - link "Claude Code":
+    - /url: /docs/integrations/claude-code
+    - text: Claude Code
+  - link "Slack":
+    - /url: /docs/integrations/slack
+    - text: Slack
+  - link "Bank connections":
+    - /url: /docs/integrations/bank-connections
+    - text: Bank connections
+  - button "Technical reference":
+    - text: Technical reference
+  - link "GitHub":
+    - /url: https://github.com/filipditrich/inveoiceyai
+  - button "Toggle Theme":
+- button "Collapse Sidebar":
+- button "Open Search":
+- main:
+  - button "0.4 MCP Connect":
+    - progressbar
+    - generic: MCP
+    - generic: Connect
+  - article:
+    - generic: Connect & automate
+    - heading "MCP" [level=1]
+    - paragraph: Let compatible assistants use Invoicey through validated tools.
+    - paragraph:
+      - text: Invoicey exposes its invoicing tools over the
+      - link "Model Context Protocol":
+        - /url: https://modelcontextprotocol.io
+      - text: ", so an assistant that speaks MCP can look up companies, build invoices, issue them, mark them paid and email them."
+    - paragraph:
+      - text: MCP tools call the same handlers and validate against the same
+      - link "schema":
+        - /url: /docs/concepts/invoice-as-data
+      - text: as the web app. The supported fields and rules stay aligned.
+    - heading "Connect Copy Anchor Link" [level=2]:
+      - link "Connect":
+        - /url: "#connect"
+      - button "Copy Anchor Link":
+    - paragraph:
+      - text: Streamable HTTP at
+      - code: https://invoicey.ditrich.me/api/mcp
+      - text: . Create a personal key under
+      - strong: Settings → API keys
+      - text: — see
+      - link "API keys":
+        - /url: /docs/integrations/api-keys
+      - text: .
+    - figure:
+      - button "Copy Text":
+      - region:
+        - code:
+          - generic: "{"
+          - generic: "\"mcpServers\": {"
+          - generic: "\"invoicey\": {"
+          - generic: "\"url\": \"https://invoicey.ditrich.me/api/mcp\","
+          - generic: "\"headers\": {"
+          - generic: "\"Authorization\": \"Bearer YOUR_API_KEY\""
+          - generic: "}"
+          - generic: "}"
+          - generic: "}"
+          - generic: "}"
+    - paragraph:
+      - text: Your key resolves to your user and binds every tool call to
+      - strong: your default workspace
+      - text: (updated when you switch workspaces or change it under
+      - strong: Settings → API keys
+      - text: ).
+    - paragraph:
+      - text: "Client-specific setup:"
+      - link "Cursor":
+        - /url: /docs/integrations/cursor
+      - text: ·
+      - link "Claude Code":
+        - /url: /docs/integrations/claude-code
+      - text: .
+    - heading "The tools Copy Anchor Link" [level=2]:
+      - link "The tools":
+        - /url: "#the-tools"
+      - button "Copy Anchor Link":
+    - table:
+      - rowgroup:
+        - row "Tool Purpose":
+          - columnheader "Tool"
+          - columnheader "Purpose"
+      - rowgroup:
+        - row "lookup_business ARES lookup by IČO":
+          - cell "lookup_business":
+            - code: lookup_business
+          - cell "ARES lookup by IČO"
+        - row "search_business ARES search by company name":
+          - cell "search_business":
+            - code: search_business
+          - cell "ARES search by company name"
+        - row "create_invoice Build, validate and render an invoice":
+          - cell "create_invoice":
+            - code: create_invoice
+          - cell "Build, validate and render an invoice"
+        - row "list_invoices Summaries, with status and displayStatus":
+          - cell "list_invoices":
+            - code: list_invoices
+          - cell "Summaries, with status and displayStatus":
+            - text: Summaries, with
+            - code: status
+            - text: and
+            - code: displayStatus
+        - row "get_invoice One invoice with its full payload":
+          - cell "get_invoice":
+            - code: get_invoice
+          - cell "One invoice with its full payload"
+        - row "mark_invoice_paid Record payment":
+          - cell "mark_invoice_paid":
+            - code: mark_invoice_paid
+          - cell "Record payment"
+        - row "send_invoice_email Email the PDF and ISDOC":
+          - cell "send_invoice_email":
+            - code: send_invoice_email
+          - cell "Email the PDF and ISDOC"
+        - row "list_presets · get_preset · save_preset · delete_preset Manage presets":
+          - cell "list_presets · get_preset · save_preset · delete_preset":
+            - code: list_presets
+            - text: ·
+            - code: get_preset
+            - text: ·
+            - code: save_preset
+            - text: ·
+            - code: delete_preset
+          - cell "Manage presets"
+    - paragraph:
+      - text: "Full input and output shapes:"
+      - link "MCP tool reference":
+        - /url: /docs/reference/mcp-tools
+      - text: .
+    - heading "Presets Copy Anchor Link" [level=2]:
+      - link "Presets":
+        - /url: "#presets"
+      - button "Copy Anchor Link":
+    - paragraph: Presets are what make this safe enough to use.
+    - paragraph:
+      - strong: Issuer presets
+      - text: hold a complete issuer — name, IČO, DIČ, address, bank account, VAT status.
+      - code: create_invoice
+      - text: takes a preset
+      - emphasis: ID
+      - text: and injects the issuer server-side. The model never supplies the "from" party, so it cannot hallucinate your bank account onto an invoice.
+    - paragraph:
+      - strong: Invoice template presets
+      - text: hold a partial draft — standard line items, VAT settings, payment defaults — merged underneath whatever the assistant specifies. Useful for a monthly retainer where only the period changes.
+    - paragraph: Save presets from the assistant once, then refer to them by name or ID.
+    - paragraph: Validation is not verification
+    - paragraph: The schema guarantees an invoice is well-formed, not that it is right. It cannot tell that the model billed 40 hours when you worked 4. Read what it produced — issuing and sending are the irreversible steps.
+    - heading "Try a complete request Copy Anchor Link" [level=2]:
+      - link "Try a complete request":
+        - /url: "#try-a-complete-request"
+      - button "Copy Anchor Link":
+    - blockquote:
+      - paragraph: Look up NFCtron by IČO. Using my "s.r.o." issuer preset, invoice them 40 hours of consulting at 1 800 CZK, due in 14 days. Return the draft for review; do not issue it yet.
+    - heading "Limitations Copy Anchor Link" [level=2]:
+      - link "Limitations":
+        - /url: "#limitations"
+      - button "Copy Anchor Link":
+    - list:
+      - strong: One workspace per key.
+      - text: A personal key binds to your
+      - strong: default
+      - text: workspace; there is no per-call override. Change the default via the sidebar switcher or
+      - strong: Settings → API keys
+      - text: .
+      - strong: No scopes.
+      - text: A key is full access to that workspace, including sending email.
+      - strong: No import tool.
+      - link "Historical import":
+        - /url: /docs/guides/importing-history
+      - text: is web-only by design.
+      - strong:
+        - text: "No"
+        - code: unmark_invoice_paid
+        - text: .
+      - text: Web only.
+      - strong: MCP does not create issuers or clients.
+      - text: Those are managed in the web UI; MCP consumes them through presets.
+    - link "API keys Authenticate personal automation without exposing your sign-in session.":
+      - /url: /docs/integrations/api-keys
+      - paragraph: API keys
+      - paragraph: Authenticate personal automation without exposing your sign-in session.
+    - link "Cursor Connect Cursor to Invoicey’s hosted MCP tools.":
+      - /url: /docs/integrations/cursor
+      - paragraph: Cursor
+      - paragraph: Connect Cursor to Invoicey’s hosted MCP tools.
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

@@ -1,0 +1,163 @@
+- complementary:
+  - link "Invoicey Invoicey docs":
+    - /url: /docs
+    - img "Invoicey"
+    - generic: Invoicey docs
+  - button "Collapse Sidebar":
+  - button "Search ⌘ K":
+    - text: Search
+    - generic: ⌘
+    - generic: K
+  - link "Open app":
+    - /url: /dashboard
+    - text: Open app
+  - link "What is Invoicey?":
+    - /url: /docs
+    - text: What is Invoicey?
+  - button "Start here":
+    - text: Start here
+  - button "How Invoicey works":
+    - text: How Invoicey works
+  - button "Everyday workflows":
+    - text: Everyday workflows
+  - button "Files & exports":
+    - text: Files & exports
+  - button "Connect & automate" [expanded]:
+    - text: Connect & automate
+  - link "API keys":
+    - /url: /docs/integrations/api-keys
+    - text: API keys
+  - link "MCP":
+    - /url: /docs/integrations/mcp
+    - text: MCP
+  - link "Cursor":
+    - /url: /docs/integrations/cursor
+    - text: Cursor
+  - link "Claude Code":
+    - /url: /docs/integrations/claude-code
+    - text: Claude Code
+  - link "Slack":
+    - /url: /docs/integrations/slack
+    - text: Slack
+  - link "Bank connections":
+    - /url: /docs/integrations/bank-connections
+    - text: Bank connections
+  - button "Technical reference":
+    - text: Technical reference
+  - link "GitHub":
+    - /url: https://github.com/filipditrich/inveoiceyai
+  - button "Toggle Theme":
+- button "Collapse Sidebar":
+- button "Open Search":
+- main:
+  - button "0.5 API keys Creating a personal key":
+    - progressbar
+    - generic: API keys
+    - generic: Creating a personal key
+  - article:
+    - generic: Connect & automate
+    - heading "API keys" [level=1]
+    - paragraph: Authenticate personal automation without exposing your sign-in session.
+    - paragraph:
+      - text: Automation surfaces —
+      - link "MCP":
+        - /url: /docs/integrations/mcp
+      - text: and assistants that speak it — authenticate with a
+      - strong: personal API key
+      - text: . Create and revoke keys under
+      - strong: Settings → API keys
+      - text: without sharing your sign-in session.
+    - heading "Creating a personal key Copy Anchor Link" [level=2]:
+      - link "Creating a personal key":
+        - /url: "#creating-a-personal-key"
+      - button "Copy Anchor Link":
+    - paragraph:
+      - strong: Settings → API keys → give it a name → Create.
+    - paragraph:
+      - text: The key is displayed
+      - strong: once
+      - text: . Copy it immediately — it is not recoverable afterwards, and losing it means creating a new one and revoking the old.
+    - paragraph:
+      - text: "Name keys after where they live:"
+      - code: cursor-laptop
+      - text: ","
+      - code: claude-code
+      - text: ","
+      - code: billing-script
+      - text: . When you later need to revoke one, the name is the only thing telling you which is which.
+    - paragraph: "Requests carry it as an ordinary bearer token:"
+    - figure:
+      - button "Copy Text":
+      - region:
+        - code:
+          - generic: curl -X POST https://invoicey.ditrich.me/api/mcp \
+          - generic: "-H \"Authorization: Bearer YOUR_KEY\" \\"
+          - generic: "-H \"Content-Type: application/json\" \\"
+          - generic: "-d '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}'"
+    - heading "What a key grants Copy Anchor Link" [level=2]:
+      - link "What a key grants":
+        - /url: "#what-a-key-grants"
+      - button "Copy Anchor Link":
+    - paragraph:
+      - text: A personal key resolves to
+      - strong: your user
+      - text: ", and operates against"
+      - strong: your default workspace
+      - text: .
+    - paragraph:
+      - text: Switching workspaces in the sidebar updates that default so automation follows where you work.
+      - strong: Settings → API keys
+      - text: also lets you set the default without changing the browser session — useful when you want MCP pointed at one workspace while you browse another.
+    - paragraph: "Within that workspace it is full access. There are no scopes and no read-only variant: a holder can list invoices, create them, issue them, mark them paid, and email them to your clients."
+    - paragraph: "Treat the key like a password: it can change financial records and send email to clients."
+    - paragraph: A key is not limited to the workspace you are looking at
+    - paragraph:
+      - text: It binds to your
+      - strong: default
+      - text: workspace, not whichever one your browser session currently has active. If those differ, the API keys settings page shows both. Switching in the sidebar keeps them aligned.
+    - paragraph:
+      - text: "The one real containment:"
+      - code: create_invoice
+      - text: injects the issuer from a server-side
+      - link "preset":
+        - /url: /docs/guides/issuers#presets-for-automation
+      - text: . A model cannot invent a bank account or IČO onto your invoice, regardless of what it is asked to do.
+    - heading "Revoking Copy Anchor Link" [level=2]:
+      - link "Revoking":
+        - /url: "#revoking"
+      - button "Copy Anchor Link":
+    - paragraph:
+      - strong: Settings → API keys → Revoke.
+      - text: Immediate, and scoped to that one key — everything else keeps working.
+    - paragraph:
+      - text: Revoke whenever a key has been in a shared config file, a screenshot, or a chat you no longer trust. Key creation and revocation are both written to your security audit log under
+      - strong: Settings → Security
+      - text: .
+    - heading "Related Copy Anchor Link" [level=2]:
+      - link "Related":
+        - /url: "#related"
+      - button "Copy Anchor Link":
+    - link "Remote MCP The endpoint these keys protect.":
+      - /url: /docs/integrations/mcp
+      - heading "Remote MCP" [level=3]
+      - paragraph: The endpoint these keys protect.
+    - link "Cursor Where to put the key.":
+      - /url: /docs/integrations/cursor
+      - heading "Cursor" [level=3]
+      - paragraph: Where to put the key.
+    - link "Claude Code CLI setup for the same tools.":
+      - /url: /docs/integrations/claude-code
+      - heading "Claude Code" [level=3]
+      - paragraph: CLI setup for the same tools.
+    - link "Payment QR SPAYD data that pre-fills a Czech bank payment.":
+      - /url: /docs/outputs/payment-qr
+      - paragraph: Payment QR
+      - paragraph: SPAYD data that pre-fills a Czech bank payment.
+    - link "MCP Let compatible assistants use Invoicey through validated tools.":
+      - /url: /docs/integrations/mcp
+      - paragraph: MCP
+      - paragraph: Let compatible assistants use Invoicey through validated tools.
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

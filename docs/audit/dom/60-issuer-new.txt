@@ -1,0 +1,137 @@
+- list:
+  - link "Invoicey Invoicey Invoice automation":
+    - /url: /dashboard
+    - img "Invoicey"
+    - generic: Invoicey
+    - generic: Invoice automation
+- list:
+  - button "In Invoicey Agent Audit Owner":
+    - generic: In
+    - generic: Invoicey Agent Audit
+    - generic: Owner
+- list:
+  - link "New invoice":
+    - /url: /invoices/new
+    - generic: New invoice
+- generic: Workspace
+- list:
+  - link "Overview":
+    - /url: /dashboard
+    - generic: Overview
+  - link "Invoices":
+    - /url: /invoices
+    - generic: Invoices
+  - link "Incoming invoices":
+    - /url: /incoming-invoices
+    - generic: Incoming invoices
+  - link "Suppliers":
+    - /url: /suppliers
+    - generic: Suppliers
+  - link "Payments":
+    - /url: /payments
+    - generic: Payments
+  - link "Clients":
+    - /url: /clients
+    - generic: Clients
+  - link "My businesses":
+    - /url: /issuers
+    - generic: My businesses
+- generic: Automation
+- list:
+  - link "Create with AI":
+    - /url: /invoices/ai
+    - generic: Create with AI
+  - link "Recurring invoices":
+    - /url: /invoices/recurring
+    - generic: Recurring invoices
+- generic: Import & developer tools
+- list:
+  - link "Import past invoices":
+    - /url: /invoices/import
+    - generic: Import past invoices
+  - link "JSON invoice":
+    - /url: /invoices/from-json
+    - generic: JSON invoice
+- generic: Manage workspace
+- list:
+  - link "Workspace":
+    - /url: /settings/workspace
+    - generic: Workspace
+  - link "Members":
+    - /url: /settings/members
+    - generic: Members
+  - link "Bank connections":
+    - /url: /settings/bank-connections
+    - generic: Bank connections
+  - link "Integrations":
+    - /url: /settings/integrations
+    - generic: Integrations
+  - link "Usage":
+    - /url: /settings/usage
+    - generic: Usage
+- generic: Resources
+- list:
+  - link "Docs":
+    - /url: /docs
+    - generic: Docs
+- button "Token balance":
+  - generic: Token balance
+  - generic: 1.5M left
+  - generic "Monthly tokens"
+- list:
+  - button "IA Invoicey Agent agent@invoicey.local":
+    - generic: IA
+    - generic: Invoicey Agent
+    - generic: agent@invoicey.local
+- paragraph: v1.30.1·0524270
+- button "Toggle sidebar"
+- main:
+  - button "Toggle sidebar":
+    - generic: Toggle sidebar
+  - separator
+  - navigation "breadcrumb":
+    - list:
+      - link "Invoicey":
+        - /url: /dashboard
+      - link "Issuers":
+        - /url: /issuers
+      - link "New" [disabled]
+  - search:
+    - generic: Search
+    - textbox "Search":
+      - /placeholder: Type to search…
+  - button "Appearance":
+  - heading "New issuer" [level=1]
+  - generic: IČO via ARES, contact email, and bank. Other settings can be completed in sections after creation.
+  - heading "Identity" [level=2]
+  - generic: IČO (ARES)
+  - textbox "12345678"
+  - button "Load from ARES"
+  - generic: Name
+  - textbox
+  - generic: DIČ
+  - textbox "CZ12345678"
+  - generic: Street and number
+  - textbox
+  - generic: City
+  - textbox
+  - generic: ZIP
+  - textbox
+  - generic: Contact email
+  - textbox
+  - checkbox "VAT payer" [checked]
+  - text: VAT payer
+  - heading "Bank" [level=2]
+  - generic: Account number (e.g. 123456789/0100)
+  - textbox
+  - generic: IBAN
+  - textbox
+  - generic: BIC (optional)
+  - textbox
+  - paragraph: Numbering and email templates start with defaults — you can change them later in issuer settings.
+  - button "Create issuer"
+  - generic: "Source: Manual"
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

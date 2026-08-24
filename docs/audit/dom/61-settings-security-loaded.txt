@@ -1,0 +1,176 @@
+- list:
+  - link "Invoicey Invoicey Invoice automation":
+    - /url: /dashboard
+    - img "Invoicey"
+    - generic: Invoicey
+    - generic: Invoice automation
+- list:
+  - button "In Invoicey Agent Audit Owner":
+    - generic: In
+    - generic: Invoicey Agent Audit
+    - generic: Owner
+- list:
+  - link "New invoice":
+    - /url: /invoices/new
+    - generic: New invoice
+- generic: Workspace
+- list:
+  - link "Overview":
+    - /url: /dashboard
+    - generic: Overview
+  - link "Invoices":
+    - /url: /invoices
+    - generic: Invoices
+  - link "Incoming invoices":
+    - /url: /incoming-invoices
+    - generic: Incoming invoices
+  - link "Suppliers":
+    - /url: /suppliers
+    - generic: Suppliers
+  - link "Payments":
+    - /url: /payments
+    - generic: Payments
+  - link "Clients":
+    - /url: /clients
+    - generic: Clients
+  - link "My businesses":
+    - /url: /issuers
+    - generic: My businesses
+- generic: Automation
+- list:
+  - link "Create with AI":
+    - /url: /invoices/ai
+    - generic: Create with AI
+  - link "Recurring invoices":
+    - /url: /invoices/recurring
+    - generic: Recurring invoices
+- generic: Import & developer tools
+- list:
+  - link "Import past invoices":
+    - /url: /invoices/import
+    - generic: Import past invoices
+  - link "JSON invoice":
+    - /url: /invoices/from-json
+    - generic: JSON invoice
+- generic: Manage workspace
+- list:
+  - link "Workspace":
+    - /url: /settings/workspace
+    - generic: Workspace
+  - link "Members":
+    - /url: /settings/members
+    - generic: Members
+  - link "Bank connections":
+    - /url: /settings/bank-connections
+    - generic: Bank connections
+  - link "Integrations":
+    - /url: /settings/integrations
+    - generic: Integrations
+  - link "Usage":
+    - /url: /settings/usage
+    - generic: Usage
+- generic: Resources
+- list:
+  - link "Docs":
+    - /url: /docs
+    - generic: Docs
+- button "Token balance":
+  - generic: Token balance
+  - generic: 1.5M left
+  - generic "Monthly tokens"
+- list:
+  - button "IA Invoicey Agent agent@invoicey.local":
+    - generic: IA
+    - generic: Invoicey Agent
+    - generic: agent@invoicey.local
+- paragraph: v1.30.1·0524270
+- button "Toggle sidebar"
+- main:
+  - button "Toggle sidebar":
+    - generic: Toggle sidebar
+  - separator
+  - navigation "breadcrumb":
+    - list:
+      - link "Invoicey":
+        - /url: /dashboard
+      - link "Settings":
+        - /url: /settings
+      - link "Security" [disabled]
+  - search:
+    - generic: Search
+    - textbox "Search":
+      - /placeholder: Type to search…
+  - button "Appearance":
+  - paragraph: Account and workspace
+  - heading "Settings" [level=1]
+  - generic: Customize the interface, secure your account, and manage access for people and connected tools.
+  - navigation "Settings sections":
+    - paragraph: You
+    - link "Account Profile, theme, and language":
+      - /url: /settings
+      - generic: Account
+      - generic: Profile, theme, and language
+    - link "Security Sign-in, sessions, and devices":
+      - /url: /settings/security
+      - generic: Security
+      - generic: Sign-in, sessions, and devices
+    - link "Referrals Invite friends to Invoicey":
+      - /url: /settings/referrals
+      - generic: Referrals
+      - generic: Invite friends to Invoicey
+    - paragraph: Workspace
+    - link "Workspace Name and logo of this workspace":
+      - /url: /settings/workspace
+      - generic: Workspace
+      - generic: Name and logo of this workspace
+    - link "Members People and permissions":
+      - /url: /settings/members
+      - generic: Members
+      - generic: People and permissions
+    - link "Usage AI tokens, charts, and history":
+      - /url: /settings/usage
+      - generic: Usage
+      - generic: AI tokens, charts, and history
+    - link "API Keys Access for automation":
+      - /url: /settings/api-keys
+      - generic: API Keys
+      - generic: Access for automation
+    - link "Incoming invoices Inbox alias and approval rules":
+      - /url: /settings/incoming-invoices
+      - generic: Incoming invoices
+      - generic: Inbox alias and approval rules
+    - link "Bank connections Read-only payment feeds":
+      - /url: /settings/bank-connections
+      - generic: Bank connections
+      - generic: Read-only payment feeds
+    - link "Integrations Slack, MCP, and other tools":
+      - /url: /settings/integrations
+      - generic: Integrations
+      - generic: Slack, MCP, and other tools
+  - heading "Account security" [level=2]
+  - paragraph: Manage sign-in methods, active sessions, and trusted devices. Invoicey uses OAuth only — no extra password.
+  - text: Sign-in methods
+  - generic: Google and GitHub. The last provider cannot be unlinked.
+  - generic: Google
+  - generic: Not linked
+  - button "Link"
+  - generic: GitHub
+  - generic: Not linked
+  - button "Link"
+  - text: Active sessions
+  - generic: IP, browser, and ability to revoke access.
+  - button "Revoke others" [disabled]
+  - generic: Browser
+  - generic: this session
+  - generic: IP unknown · since 24 Aug 2026, 15:11
+  - text: Trusted devices
+  - generic: Soft trust — a new device receives an email; sign-in always succeeds.
+  - paragraph: No trusted devices yet. After signing in from a new place, use the “Trust” link in the email.
+  - text: Recent activity
+  - generic: Sign-in and security action audit.
+  - generic: Sign-in
+  - generic: 24 Aug 2026, 15:11
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

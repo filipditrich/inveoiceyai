@@ -1,0 +1,184 @@
+- list:
+  - link "Invoicey Invoicey Invoice automation":
+    - /url: /dashboard
+    - img "Invoicey"
+    - generic: Invoicey
+    - generic: Invoice automation
+- list:
+  - button "In Invoicey Agent Audit Owner":
+    - generic: In
+    - generic: Invoicey Agent Audit
+    - generic: Owner
+- list:
+  - link "New invoice":
+    - /url: /invoices/new
+    - generic: New invoice
+- generic: Workspace
+- list:
+  - link "Overview":
+    - /url: /dashboard
+    - generic: Overview
+  - link "Invoices":
+    - /url: /invoices
+    - generic: Invoices
+  - link "Incoming invoices":
+    - /url: /incoming-invoices
+    - generic: Incoming invoices
+  - link "Suppliers":
+    - /url: /suppliers
+    - generic: Suppliers
+  - link "Payments":
+    - /url: /payments
+    - generic: Payments
+  - link "Clients":
+    - /url: /clients
+    - generic: Clients
+  - link "My businesses":
+    - /url: /issuers
+    - generic: My businesses
+- generic: Automation
+- list:
+  - link "Create with AI":
+    - /url: /invoices/ai
+    - generic: Create with AI
+  - link "Recurring invoices":
+    - /url: /invoices/recurring
+    - generic: Recurring invoices
+- generic: Import & developer tools
+- list:
+  - link "Import past invoices":
+    - /url: /invoices/import
+    - generic: Import past invoices
+  - link "JSON invoice":
+    - /url: /invoices/from-json
+    - generic: JSON invoice
+- generic: Manage workspace
+- list:
+  - link "Workspace":
+    - /url: /settings/workspace
+    - generic: Workspace
+  - link "Members":
+    - /url: /settings/members
+    - generic: Members
+  - link "Bank connections":
+    - /url: /settings/bank-connections
+    - generic: Bank connections
+  - link "Integrations":
+    - /url: /settings/integrations
+    - generic: Integrations
+  - link "Usage":
+    - /url: /settings/usage
+    - generic: Usage
+- generic: Resources
+- list:
+  - link "Docs":
+    - /url: /docs
+    - generic: Docs
+- button "Token balance":
+  - generic: Token balance
+  - generic: 1.5M left
+  - generic "Monthly tokens"
+- list:
+  - button "IA Invoicey Agent agent@invoicey.local":
+    - generic: IA
+    - generic: Invoicey Agent
+    - generic: agent@invoicey.local
+- paragraph: v1.30.1·0524270
+- button "Toggle sidebar"
+- main:
+  - button "Toggle sidebar":
+    - generic: Toggle sidebar
+  - separator
+  - navigation "breadcrumb":
+    - list:
+      - link "Invoicey":
+        - /url: /dashboard
+      - link "Dashboard" [disabled]
+  - search:
+    - generic: Search
+    - textbox "Search":
+      - /placeholder: Type to search…
+  - button "Appearance":
+  - heading "Dashboard" [level=1]
+  - generic: Invoice statuses and revenue over the last 12 months.
+  - button "Go to invoices"
+  - button "New invoice"
+  - link "Paid CZK 0.00 0 invoices":
+    - /url: /invoices?status=paid
+    - generic: Paid
+    - generic: CZK 0.00
+    - generic: 0 invoices
+  - link "Draft CZK 0.00 0 invoices":
+    - /url: /invoices?status=draft
+    - generic: Draft
+    - generic: CZK 0.00
+    - generic: 0 invoices
+  - link "Unpaid CZK 41,350.00 1 invoice":
+    - /url: /invoices?status=unpaid
+    - generic: Unpaid
+    - generic: CZK 41,350.00
+    - generic: 1 invoice
+  - link "Overdue CZK 0.00 0 invoices":
+    - /url: /invoices?status=overdue
+    - generic: Overdue
+    - generic: CZK 0.00
+    - generic: 0 invoices
+  - link "Future CZK 0.00 0 invoices":
+    - /url: /invoices?status=future
+    - generic: Future
+    - generic: CZK 0.00
+    - generic: 0 invoices
+  - generic: Issued invoices (12 months)
+  - generic: CZK 42,350.00
+  - generic: 1 invoice
+  - generic: Outstanding (incl. overdue and future)
+  - generic: CZK 41,350.00
+  - generic: 1 invoice
+  - generic: Issued vs paid
+  - generic: Last 12 months (amount, CZK)
+  - application:
+    - generic: 25-09
+    - generic: 25-10
+    - generic: 25-11
+    - generic: 25-12
+    - generic: 26-01
+    - generic: 26-02
+    - generic: 26-03
+    - generic: 26-04
+    - generic: 26-05
+    - generic: 26-06
+    - generic: 26-07
+    - generic: 26-08
+    - generic: "0"
+    - generic: 15K
+    - generic: 30K
+    - generic: 45K
+    - generic: 60K
+  - heading "Recent invoices" [level=2]
+  - link "View all":
+    - /url: /invoices
+  - table:
+    - rowgroup:
+      - row "Number Client Issued Due Total Status":
+        - columnheader "Number"
+        - columnheader "Client"
+        - columnheader "Issued"
+        - columnheader "Due"
+        - columnheader "Total"
+        - columnheader "Status"
+    - rowgroup:
+      - row "20260001 Studio Sever s.r.o. 24/08/2026 07/09/2026 CZK 42,350.00 Unpaid":
+        - cell "20260001":
+          - link "20260001":
+            - /url: /invoices/dace2c6f-0142-462e-a971-7b3967860ac8
+        - cell "Studio Sever s.r.o."
+        - cell "24/08/2026"
+        - cell "07/09/2026"
+        - cell "CZK 42,350.00"
+        - cell "Unpaid":
+          - generic: Unpaid
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert
+- generic: "0"

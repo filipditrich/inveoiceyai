@@ -1,0 +1,212 @@
+- list:
+  - link "Invoicey Invoicey Automatizace faktur":
+    - /url: /dashboard
+    - img "Invoicey"
+    - generic: Invoicey
+    - generic: Automatizace faktur
+- list:
+  - button "In Invoicey Agent Audit Vlastník":
+    - generic: In
+    - generic: Invoicey Agent Audit
+    - generic: Vlastník
+- list:
+  - link "Nová faktura":
+    - /url: /invoices/new
+    - generic: Nová faktura
+- generic: Pracovní prostor
+- list:
+  - link "Přehled":
+    - /url: /dashboard
+    - generic: Přehled
+  - link "Faktury":
+    - /url: /invoices
+    - generic: Faktury
+  - link "Přijaté faktury":
+    - /url: /incoming-invoices
+    - generic: Přijaté faktury
+  - link "Dodavatelé":
+    - /url: /suppliers
+    - generic: Dodavatelé
+  - link "Platby":
+    - /url: /payments
+    - generic: Platby
+  - link "Klienti":
+    - /url: /clients
+    - generic: Klienti
+  - link "Moje podnikání":
+    - /url: /issuers
+    - generic: Moje podnikání
+- generic: Automatizace
+- list:
+  - link "Vytvořit s AI":
+    - /url: /invoices/ai
+    - generic: Vytvořit s AI
+  - link "Opakované faktury":
+    - /url: /invoices/recurring
+    - generic: Opakované faktury
+- generic: Import a vývojářské nástroje
+- list:
+  - link "Importovat staré faktury":
+    - /url: /invoices/import
+    - generic: Importovat staré faktury
+  - link "Faktura z JSON":
+    - /url: /invoices/from-json
+    - generic: Faktura z JSON
+- generic: Správa workspace
+- list:
+  - link "Pracovní prostor":
+    - /url: /settings/workspace
+    - generic: Pracovní prostor
+  - link "Členové":
+    - /url: /settings/members
+    - generic: Členové
+  - link "Bankovní spojení":
+    - /url: /settings/bank-connections
+    - generic: Bankovní spojení
+  - link "Integrace":
+    - /url: /settings/integrations
+    - generic: Integrace
+  - link "Využití":
+    - /url: /settings/usage
+    - generic: Využití
+- generic: Zdroje
+- list:
+  - link "Dokumentace":
+    - /url: /docs
+    - generic: Dokumentace
+- button "Zůstatek tokenů":
+  - generic: Zůstatek tokenů
+  - generic: zbývá 1.5M
+  - generic "Měsíční tokeny"
+- list:
+  - button "IA Invoicey Agent agent@invoicey.local":
+    - generic: IA
+    - generic: Invoicey Agent
+    - generic: agent@invoicey.local
+- paragraph: v1.30.1·0524270
+- button "Přepnout postranní panel"
+- main:
+  - button "Přepnout postranní panel":
+    - generic: Přepnout postranní panel
+  - separator
+  - navigation "breadcrumb":
+    - list:
+      - link "Invoicey":
+        - /url: /dashboard
+      - link "Nastavení":
+        - /url: /settings
+      - link "Využití" [disabled]
+  - search:
+    - generic: Hledat
+    - textbox "Hledat":
+      - /placeholder: Zadejte hledaný výraz…
+  - button "Vzhled":
+  - paragraph: Účet a pracovní prostor
+  - heading "Nastavení" [level=1]
+  - generic: Přizpůsobte rozhraní, zabezpečte účet a spravujte přístup lidí i připojených nástrojů.
+  - navigation "Sekce nastavení":
+    - paragraph: Vy
+    - link "Účet Profil, motiv a jazyk":
+      - /url: /settings
+      - generic: Účet
+      - generic: Profil, motiv a jazyk
+    - link "Zabezpečení Přihlášení, relace a zařízení":
+      - /url: /settings/security
+      - generic: Zabezpečení
+      - generic: Přihlášení, relace a zařízení
+    - link "Doporučení Pozvěte přátele do Invoicey":
+      - /url: /settings/referrals
+      - generic: Doporučení
+      - generic: Pozvěte přátele do Invoicey
+    - paragraph: Pracovní prostor
+    - link "Pracovní prostor Název a logo tohoto prostoru":
+      - /url: /settings/workspace
+      - generic: Pracovní prostor
+      - generic: Název a logo tohoto prostoru
+    - link "Členové Lidé a oprávnění":
+      - /url: /settings/members
+      - generic: Členové
+      - generic: Lidé a oprávnění
+    - link "Využití AI tokeny, grafy a historie":
+      - /url: /settings/usage
+      - generic: Využití
+      - generic: AI tokeny, grafy a historie
+    - link "API klíče Přístup pro automatizaci":
+      - /url: /settings/api-keys
+      - generic: API klíče
+      - generic: Přístup pro automatizaci
+    - link "Přijaté faktury Inbox alias a pravidla schválení":
+      - /url: /settings/incoming-invoices
+      - generic: Přijaté faktury
+      - generic: Inbox alias a pravidla schválení
+    - link "Bankovní spojení Bankovní přehledy jen pro čtení":
+      - /url: /settings/bank-connections
+      - generic: Bankovní spojení
+      - generic: Bankovní přehledy jen pro čtení
+    - link "Integrace Slack, MCP a další nástroje":
+      - /url: /settings/integrations
+      - generic: Integrace
+      - generic: Slack, MCP a další nástroje
+  - heading "Využití AI" [level=2]
+  - paragraph: Přehledný zůstatek tokenů a aktivita pro tento pracovní prostor. Sdílené všemi členy.
+  - generic: Aktuální plán
+  - generic: Free plán zahrnuje měsíční AI tokeny pro modely hostované Invoicey.
+  - button "Zobrazit plány" [disabled]
+  - button "Upgrade" [disabled]
+  - paragraph: Free
+  - paragraph: Každý měsíc 1M tokenů plus jednorázový dárek při založení prostoru.
+  - generic: Zůstatek tokenů
+  - generic: Měsíční tokeny se obnoví za 30 dní. Nevyužité měsíční tokeny se nepřenášejí.
+  - button "Upgrade" [disabled]
+  - paragraph: Prostor
+  - paragraph: 1.5M
+  - paragraph: Celkem dostupných
+  - term: Dárkové tokeny
+  - definition: 500k
+  - term: Měsíční tokeny
+  - definition: 999.1k / 1M
+  - term: Zakoupené tokeny
+  - definition: "0"
+  - term: Celkem dostupných
+  - definition: 1.5M
+  - paragraph: Nevyužité měsíční tokeny na konci období propadají. Dárkové a zakoupené zůstávají, dokud je nevyčerpáte.
+  - paragraph: Aktuální měsíční období končí 23. 9. 2026.
+  - generic: Využití (30 dní)
+  - generic: Web a Slack ukazují tokeny. MCP ukazuje volání nástrojů (klientský LLM účtuje klient).
+  - application:
+    - generic: 07-29
+    - generic: 08-03
+    - generic: 08-08
+    - generic: 08-13
+    - generic: 08-18
+    - generic: 08-24
+    - generic: "0"
+    - generic: "250"
+    - generic: "500"
+    - generic: "750"
+    - generic: "1000"
+  - paragraph: MCP neodečítá tokeny Invoicey — jazykový model běží v Cursoru nebo vašem MCP klientovi.
+  - generic: Historie aktivity
+  - generic: Nedávné LLM využití a MCP volání nástrojů v tomto prostoru.
+  - table:
+    - rowgroup:
+      - row "Kdy Produkt Detail Tokeny":
+        - columnheader "Kdy"
+        - columnheader "Produkt"
+        - columnheader "Detail"
+        - columnheader "Tokeny"
+    - rowgroup:
+      - row "24. 8. 2026 15:14 Web AI openai/gpt-4o-mini 925":
+        - cell "24. 8. 2026 15:14"
+        - cell "Web AI"
+        - cell "openai/gpt-4o-mini"
+        - cell "925"
+  - generic: Dobití
+  - generic: Nákup tokenů a kódy přijdou později. Tlačítka jsou zatím jen zástupné.
+  - button "Uplatnit kód" [disabled]
+  - button "Koupit tokeny" [disabled]
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert
+- generic: "0"

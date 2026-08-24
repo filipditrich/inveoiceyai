@@ -1,0 +1,171 @@
+- list:
+  - link "Invoicey Invoicey Automatizace faktur":
+    - /url: /dashboard
+    - img "Invoicey"
+    - generic: Invoicey
+    - generic: Automatizace faktur
+- list:
+  - button "In Invoicey Agent Audit Vlastník":
+    - generic: In
+    - generic: Invoicey Agent Audit
+    - generic: Vlastník
+- list:
+  - link "Nová faktura":
+    - /url: /invoices/new
+    - generic: Nová faktura
+- generic: Pracovní prostor
+- list:
+  - link "Přehled":
+    - /url: /dashboard
+    - generic: Přehled
+  - link "Faktury":
+    - /url: /invoices
+    - generic: Faktury
+  - link "Přijaté faktury":
+    - /url: /incoming-invoices
+    - generic: Přijaté faktury
+  - link "Dodavatelé":
+    - /url: /suppliers
+    - generic: Dodavatelé
+  - link "Platby":
+    - /url: /payments
+    - generic: Platby
+  - link "Klienti":
+    - /url: /clients
+    - generic: Klienti
+  - link "Moje podnikání":
+    - /url: /issuers
+    - generic: Moje podnikání
+- generic: Automatizace
+- list:
+  - link "Vytvořit s AI":
+    - /url: /invoices/ai
+    - generic: Vytvořit s AI
+  - link "Opakované faktury":
+    - /url: /invoices/recurring
+    - generic: Opakované faktury
+- generic: Import a vývojářské nástroje
+- list:
+  - link "Importovat staré faktury":
+    - /url: /invoices/import
+    - generic: Importovat staré faktury
+  - link "Faktura z JSON":
+    - /url: /invoices/from-json
+    - generic: Faktura z JSON
+- generic: Správa workspace
+- list:
+  - link "Pracovní prostor":
+    - /url: /settings/workspace
+    - generic: Pracovní prostor
+  - link "Členové":
+    - /url: /settings/members
+    - generic: Členové
+  - link "Bankovní spojení":
+    - /url: /settings/bank-connections
+    - generic: Bankovní spojení
+  - link "Integrace":
+    - /url: /settings/integrations
+    - generic: Integrace
+  - link "Využití":
+    - /url: /settings/usage
+    - generic: Využití
+- generic: Zdroje
+- list:
+  - link "Dokumentace":
+    - /url: /docs
+    - generic: Dokumentace
+- button "Zůstatek tokenů":
+  - generic: Zůstatek tokenů
+  - generic: zbývá 1.5M
+  - generic "Měsíční tokeny"
+- list:
+  - button "IA Invoicey Agent agent@invoicey.local":
+    - generic: IA
+    - generic: Invoicey Agent
+    - generic: agent@invoicey.local
+- paragraph: v1.30.1·0524270
+- button "Přepnout postranní panel"
+- main:
+  - button "Přepnout postranní panel":
+    - generic: Přepnout postranní panel
+  - separator
+  - navigation "breadcrumb":
+    - list:
+      - link "Invoicey":
+        - /url: /dashboard
+      - link "Nastavení":
+        - /url: /settings
+      - link "Pracovní prostor" [disabled]
+  - search:
+    - generic: Hledat
+    - textbox "Hledat":
+      - /placeholder: Zadejte hledaný výraz…
+  - button "Vzhled":
+  - paragraph: Účet a pracovní prostor
+  - heading "Nastavení" [level=1]
+  - generic: Přizpůsobte rozhraní, zabezpečte účet a spravujte přístup lidí i připojených nástrojů.
+  - navigation "Sekce nastavení":
+    - paragraph: Vy
+    - link "Účet Profil, motiv a jazyk":
+      - /url: /settings
+      - generic: Účet
+      - generic: Profil, motiv a jazyk
+    - link "Zabezpečení Přihlášení, relace a zařízení":
+      - /url: /settings/security
+      - generic: Zabezpečení
+      - generic: Přihlášení, relace a zařízení
+    - link "Doporučení Pozvěte přátele do Invoicey":
+      - /url: /settings/referrals
+      - generic: Doporučení
+      - generic: Pozvěte přátele do Invoicey
+    - paragraph: Pracovní prostor
+    - link "Pracovní prostor Název a logo tohoto prostoru":
+      - /url: /settings/workspace
+      - generic: Pracovní prostor
+      - generic: Název a logo tohoto prostoru
+    - link "Členové Lidé a oprávnění":
+      - /url: /settings/members
+      - generic: Členové
+      - generic: Lidé a oprávnění
+    - link "Využití AI tokeny, grafy a historie":
+      - /url: /settings/usage
+      - generic: Využití
+      - generic: AI tokeny, grafy a historie
+    - link "API klíče Přístup pro automatizaci":
+      - /url: /settings/api-keys
+      - generic: API klíče
+      - generic: Přístup pro automatizaci
+    - link "Přijaté faktury Inbox alias a pravidla schválení":
+      - /url: /settings/incoming-invoices
+      - generic: Přijaté faktury
+      - generic: Inbox alias a pravidla schválení
+    - link "Bankovní spojení Bankovní přehledy jen pro čtení":
+      - /url: /settings/bank-connections
+      - generic: Bankovní spojení
+      - generic: Bankovní přehledy jen pro čtení
+    - link "Integrace Slack, MCP a další nástroje":
+      - /url: /settings/integrations
+      - generic: Integrace
+      - generic: Slack, MCP a další nástroje
+  - heading "Pracovní prostor" [level=2]
+  - paragraph: Přejmenujte tento pracovní prostor a nastavte logo pro postranní panel. Slug zůstává pevný pro odkazy a integrace.
+  - generic: Pracovní prostor
+  - generic: Přejmenujte tento pracovní prostor a nastavte logo pro postranní panel. Slug zůstává pevný pro odkazy a integrace.
+  - generic: Logo
+  - paragraph: Zobrazuje se v přepínači workspace. Faktury dál používají logo jednotlivých dodavatelů.
+  - button "Choose File Vyberte soubor nebo ho sem přetáhněte PNG nebo JPG, max. 1.0 MB Vybrat soubor":
+    - button "Choose File"
+    - paragraph: Vyberte soubor nebo ho sem přetáhněte
+    - paragraph: PNG nebo JPG, max. 1.0 MB
+    - button "Vybrat soubor"
+  - generic: Název
+  - textbox "Název": Invoicey Agent Audit
+  - generic: Slug
+  - textbox "Slug" [disabled]: invoicey-agent-audit-20260824
+  - paragraph: Slug nelze po vytvoření změnit.
+  - button "Uložit název" [disabled]
+  - button "Spravovat členy"
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

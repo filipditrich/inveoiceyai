@@ -1,0 +1,56 @@
+- link "Přeskočit na obsah":
+  - /url: "#main-content"
+- banner:
+  - link "Invoicey Invoicey Automatizace faktur":
+    - /url: /
+    - img "Invoicey"
+    - generic: Invoicey
+    - generic: Automatizace faktur
+  - 'button "Jazyk: Čeština"':
+  - link "Přihlášeni jako Invoicey Agent":
+    - /url: /dashboard
+    - generic: IA
+    - generic: Přihlášeni
+    - generic: Invoicey Agent
+  - button "Pokračovat do aplikace":
+    - text: Pokračovat do aplikace
+- main:
+  - article:
+    - paragraph: Právní informace
+    - heading "Používání cookies" [level=1]
+    - paragraph: Dvě srozumitelné kategorie. Nezbytné technologie pro provoz a volitelné anonymní měření. Žádné reklamní cookies.
+    - paragraph: "Poslední aktualizace: 11. srpna 2026"
+    - paragraph: Chcete změnit svou volbu?
+    - paragraph: Nastavení otevřete kdykoliv. Odvolání analytického souhlasu se projeví bez dalšího sledování.
+    - button "Otevřít nastavení cookies"
+    - heading "1. Nezbytné technologie" [level=2]
+    - paragraph: Tyto technologie nelze vypnout, protože zajišťují přihlášení, zabezpečení relace, oddělení pracovního prostoru a zapamatování vaší volby soukromí. Patří sem zejména bezpečné cookies Better Auth a záznam c15t-consent, který uchovává vaši volbu nejdéle jeden rok. Rozhraní může v lokálním úložišti ukládat také čistě funkční preference, například motiv vzhledu.
+    - heading "2. Anonymní měření" [level=2]
+    - paragraph: Po vašem souhlasu načteme Vercel Analytics. Poskytuje souhrnné informace o návštěvnosti a výkonu veřejných stránek. Nepoužíváme je k reklamnímu profilování ani je nekombinujeme s fakturačním obsahem. Bez souhlasu se analytická komponenta nenačte.
+    - heading "3. Co nepoužíváme" [level=2]
+    - paragraph: Invoicey v současnosti nepoužívá reklamní sítě, remarketingové pixely ani cookies pro sledování napříč weby. Pokud by se to změnilo, tato stránka i volby souhlasu budou aktualizovány před jejich zapnutím.
+    - heading "4. Změna nebo odvolání souhlasu" [level=2]
+    - paragraph: Nastavení můžete otevřít tlačítkem výše nebo odkazem „Nastavení cookies“ v patičce. Volba „Pouze nezbytné“ odmítne nebo odvolá měření. Vymazání dat webu v prohlížeči odstraní i uloženou volbu a při příští návštěvě se zeptáme znovu.
+- contentinfo:
+  - link "Invoicey Invoicey":
+    - /url: /
+    - img "Invoicey"
+    - generic: Invoicey
+  - paragraph: Faktury jako strukturovaná data. Vytvořte je ve webu, přes JSON nebo s pomocí AI a pokaždé získejte stejný validovaný výstup.
+  - navigation "Právní informace":
+    - link "Dokumentace":
+      - /url: /docs
+    - link "Soukromí":
+      - /url: /privacy
+    - link "Podmínky":
+      - /url: /terms
+    - link "Cookies":
+      - /url: /cookies
+    - button "Nastavení cookies"
+  - 'button "Jazyk: Čeština"':
+    - generic: Čeština
+  - paragraph: © 2026 Invoicey · Neveřejná beta
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

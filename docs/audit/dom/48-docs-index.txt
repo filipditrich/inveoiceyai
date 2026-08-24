@@ -1,0 +1,173 @@
+- complementary:
+  - link "Invoicey Invoicey docs":
+    - /url: /docs
+    - img "Invoicey"
+    - generic: Invoicey docs
+  - button "Collapse Sidebar":
+  - button "Search ⌘ K":
+    - text: Search
+    - generic: ⌘
+    - generic: K
+  - link "Open app":
+    - /url: /dashboard
+    - text: Open app
+  - link "What is Invoicey?":
+    - /url: /docs
+    - text: What is Invoicey?
+  - button "Start here":
+    - text: Start here
+  - button "How Invoicey works":
+    - text: How Invoicey works
+  - button "Everyday workflows":
+    - text: Everyday workflows
+  - button "Files & exports":
+    - text: Files & exports
+  - button "Connect & automate":
+    - text: Connect & automate
+  - button "Technical reference":
+    - text: Technical reference
+  - link "GitHub":
+    - /url: https://github.com/filipditrich/inveoiceyai
+  - button "Toggle Theme":
+- button "Collapse Sidebar":
+- button "Open Search":
+- main:
+  - button "0.5 What is Invoicey? What you get":
+    - progressbar
+    - generic: What is Invoicey?
+    - generic: What you get
+  - article:
+    - heading "What is Invoicey?" [level=1]
+    - paragraph: Invoice automation built on validated data, from draft to PDF, ISDOC and payment QR.
+    - paragraph: Invoicey is invoice automation for freelancers and small teams — Czech-first by design (ARES, VAT, ISDOC, SPAYD), schema-validated from draft to delivery.
+    - paragraph: An invoice is data, not a document
+    - paragraph:
+      - text: Every invoice is a validated JSON payload first. The PDF, the ISDOC XML and the payment QR code are all
+      - emphasis: renders
+      - text: of that payload — never the source of truth.
+    - paragraph:
+      - text: The web app,
+      - link "MCP":
+        - /url: /docs/integrations/mcp
+      - text: and
+      - link "Slack agent":
+        - /url: /docs/integrations/slack
+      - text: all use that same validated payload.
+    - heading "What you get Copy Anchor Link" [level=2]:
+      - link "What you get":
+        - /url: "#what-you-get"
+      - button "Copy Anchor Link":
+    - table:
+      - rowgroup:
+        - row "Capability Detail":
+          - columnheader "Capability"
+          - columnheader "Detail"
+      - rowgroup:
+        - row "Czech VAT Standard/reduced rates, reverse charge, OSS, exempt supplies, DUZP":
+          - cell "Czech VAT":
+            - strong: Czech VAT
+          - cell "Standard/reduced rates, reverse charge, OSS, exempt supplies, DUZP"
+        - row "ARES lookup Type an IČO, get the legal name, address and DIČ filled in":
+          - cell "ARES lookup":
+            - strong: ARES lookup
+          - cell "Type an IČO, get the legal name, address and DIČ filled in"
+        - row "PDF Branded invoice PDF with the payment QR embedded":
+          - cell "PDF":
+            - strong: PDF
+          - cell "Branded invoice PDF with the payment QR embedded"
+        - row "ISDOC 6.0.2 XML your accountant's software imports without retyping":
+          - cell "ISDOC 6.0.2":
+            - strong: ISDOC 6.0.2
+          - cell "XML your accountant's software imports without retyping"
+        - row "SPAYD QR Czech banking apps pre-fill amount, account, VS from a scan":
+          - cell "SPAYD QR":
+            - strong: SPAYD QR
+          - cell "Czech banking apps pre-fill amount, account, VS from a scan"
+        - row "Multiple issuers Separate businesses, each with its own numbering and bank account":
+          - cell "Multiple issuers":
+            - strong: Multiple issuers
+          - cell "Separate businesses, each with its own numbering and bank account"
+        - row "Payment ledger Manual payments + Fio bank feed; other banks deferred for now":
+          - cell "Payment ledger":
+            - strong: Payment ledger
+          - cell "Manual payments + Fio bank feed; other banks deferred for now"
+        - row "Automation Create and issue invoices from Cursor, Claude Code or Slack":
+          - cell "Automation":
+            - strong: Automation
+          - cell "Create and issue invoices from Cursor, Claude Code or Slack"
+    - heading "How the pieces fit Copy Anchor Link" [level=2]:
+      - link "How the pieces fit":
+        - /url: "#how-the-pieces-fit"
+      - button "Copy Anchor Link":
+    - document:
+      - paragraph: Web UI
+      - paragraph: Shared tool layer
+      - paragraph: MCP
+      - paragraph: Slack
+      - paragraph: InvoiceSchema
+      - paragraph: PDF / ISDOC / SPAYD QR
+      - paragraph: Your workspace
+    - paragraph: Every surface must satisfy the same schema before Invoicey renders or stores an invoice.
+    - heading "Start here Copy Anchor Link" [level=2]:
+      - link "Start here":
+        - /url: "#start-here"
+      - button "Copy Anchor Link":
+    - link "Quickstart Sign in, create an issuer, send your first invoice.":
+      - /url: /docs/getting-started/quickstart
+      - heading "Quickstart" [level=3]
+      - paragraph: Sign in, create an issuer, send your first invoice.
+    - link "Core concepts The schema, VAT, numbering, statuses and snapshots.":
+      - /url: /docs/concepts/invoice-as-data
+      - heading "Core concepts" [level=3]
+      - paragraph: The schema, VAT, numbering, statuses and snapshots.
+    - link "Integrations API keys, MCP, Cursor, Claude Code and Slack.":
+      - /url: /docs/integrations/api-keys
+      - heading "Integrations" [level=3]
+      - paragraph: API keys, MCP, Cursor, Claude Code and Slack.
+    - link "Reconcile payments Fio bank feed, match proposals and the payment ledger.":
+      - /url: /docs/guides/reconciling-payments
+      - heading "Reconcile payments" [level=3]
+      - paragraph: Fio bank feed, match proposals and the payment ledger.
+    - link "Bank connections Supported banks and why other Czech APIs are deferred.":
+      - /url: /docs/integrations/bank-connections
+      - heading "Bank connections" [level=3]
+      - paragraph: Supported banks and why other Czech APIs are deferred.
+    - link "Troubleshooting What to check when something does not work.":
+      - /url: /docs/reference/troubleshooting
+      - heading "Troubleshooting" [level=3]
+      - paragraph: What to check when something does not work.
+    - heading "Current scope Copy Anchor Link" [level=2]:
+      - link "Current scope":
+        - /url: "#current-scope"
+      - button "Copy Anchor Link":
+    - paragraph: "Invoicey is pre-1.0. Today that means:"
+    - list:
+      - strong: Czech koruna only.
+      - text: Multi-currency is not implemented. The Fio pilot is CZK-only.
+      - strong: Czech and English UI.
+      - text: Issued PDF and ISDOC labels remain Czech.
+      - strong: API keys have no scopes.
+      - text: A key is full access to one workspace — see
+      - link "API keys":
+        - /url: /docs/integrations/api-keys
+      - text: .
+      - strong: No public REST API.
+      - text: Automation goes through MCP or the Slack agent.
+      - strong: Recurring invoices are drafts only.
+      - text: A daily cron creates a reviewable draft; you issue and send it. Auto-issue and auto-email are not in v1.
+      - strong: Bank matching is confirm-first.
+      - text: Fio imports proposals; a person confirms allocations — see
+      - link "Reconcile payments":
+        - /url: /docs/guides/reconciling-payments
+      - text: ". Why only Fio:"
+      - link "Bank connections":
+        - /url: /docs/integrations/bank-connections
+      - text: .
+    - link "Quickstart Create and send your first invoice in about ten minutes.":
+      - /url: /docs/getting-started/quickstart
+      - paragraph: Quickstart
+      - paragraph: Create and send your first invoice in about ten minutes.
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

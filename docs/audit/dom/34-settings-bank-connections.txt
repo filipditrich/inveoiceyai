@@ -1,0 +1,223 @@
+- list:
+  - link "Invoicey Invoicey Automatizace faktur":
+    - /url: /dashboard
+    - img "Invoicey"
+    - generic: Invoicey
+    - generic: Automatizace faktur
+- list:
+  - button "In Invoicey Agent Audit Vlastník":
+    - generic: In
+    - generic: Invoicey Agent Audit
+    - generic: Vlastník
+- list:
+  - link "Nová faktura":
+    - /url: /invoices/new
+    - generic: Nová faktura
+- generic: Pracovní prostor
+- list:
+  - link "Přehled":
+    - /url: /dashboard
+    - generic: Přehled
+  - link "Faktury":
+    - /url: /invoices
+    - generic: Faktury
+  - link "Přijaté faktury":
+    - /url: /incoming-invoices
+    - generic: Přijaté faktury
+  - link "Dodavatelé":
+    - /url: /suppliers
+    - generic: Dodavatelé
+  - link "Platby":
+    - /url: /payments
+    - generic: Platby
+  - link "Klienti":
+    - /url: /clients
+    - generic: Klienti
+  - link "Moje podnikání":
+    - /url: /issuers
+    - generic: Moje podnikání
+- generic: Automatizace
+- list:
+  - link "Vytvořit s AI":
+    - /url: /invoices/ai
+    - generic: Vytvořit s AI
+  - link "Opakované faktury":
+    - /url: /invoices/recurring
+    - generic: Opakované faktury
+- generic: Import a vývojářské nástroje
+- list:
+  - link "Importovat staré faktury":
+    - /url: /invoices/import
+    - generic: Importovat staré faktury
+  - link "Faktura z JSON":
+    - /url: /invoices/from-json
+    - generic: Faktura z JSON
+- generic: Správa workspace
+- list:
+  - link "Pracovní prostor":
+    - /url: /settings/workspace
+    - generic: Pracovní prostor
+  - link "Členové":
+    - /url: /settings/members
+    - generic: Členové
+  - link "Bankovní spojení":
+    - /url: /settings/bank-connections
+    - generic: Bankovní spojení
+  - link "Integrace":
+    - /url: /settings/integrations
+    - generic: Integrace
+  - link "Využití":
+    - /url: /settings/usage
+    - generic: Využití
+- generic: Zdroje
+- list:
+  - link "Dokumentace":
+    - /url: /docs
+    - generic: Dokumentace
+- button "Zůstatek tokenů":
+  - generic: Zůstatek tokenů
+  - generic: zbývá 1.5M
+  - generic "Měsíční tokeny"
+- list:
+  - button "IA Invoicey Agent agent@invoicey.local":
+    - generic: IA
+    - generic: Invoicey Agent
+    - generic: agent@invoicey.local
+- paragraph: v1.30.1·0524270
+- button "Přepnout postranní panel"
+- main:
+  - button "Přepnout postranní panel":
+    - generic: Přepnout postranní panel
+  - separator
+  - navigation "breadcrumb":
+    - list:
+      - link "Invoicey":
+        - /url: /dashboard
+      - link "Nastavení":
+        - /url: /settings
+      - link "Bankovní spojení" [disabled]
+  - search:
+    - generic: Hledat
+    - textbox "Hledat":
+      - /placeholder: Zadejte hledaný výraz…
+  - button "Vzhled":
+  - paragraph: Účet a pracovní prostor
+  - heading "Nastavení" [level=1]
+  - generic: Přizpůsobte rozhraní, zabezpečte účet a spravujte přístup lidí i připojených nástrojů.
+  - navigation "Sekce nastavení":
+    - paragraph: Vy
+    - link "Účet Profil, motiv a jazyk":
+      - /url: /settings
+      - generic: Účet
+      - generic: Profil, motiv a jazyk
+    - link "Zabezpečení Přihlášení, relace a zařízení":
+      - /url: /settings/security
+      - generic: Zabezpečení
+      - generic: Přihlášení, relace a zařízení
+    - link "Doporučení Pozvěte přátele do Invoicey":
+      - /url: /settings/referrals
+      - generic: Doporučení
+      - generic: Pozvěte přátele do Invoicey
+    - paragraph: Pracovní prostor
+    - link "Pracovní prostor Název a logo tohoto prostoru":
+      - /url: /settings/workspace
+      - generic: Pracovní prostor
+      - generic: Název a logo tohoto prostoru
+    - link "Členové Lidé a oprávnění":
+      - /url: /settings/members
+      - generic: Členové
+      - generic: Lidé a oprávnění
+    - link "Využití AI tokeny, grafy a historie":
+      - /url: /settings/usage
+      - generic: Využití
+      - generic: AI tokeny, grafy a historie
+    - link "API klíče Přístup pro automatizaci":
+      - /url: /settings/api-keys
+      - generic: API klíče
+      - generic: Přístup pro automatizaci
+    - link "Přijaté faktury Inbox alias a pravidla schválení":
+      - /url: /settings/incoming-invoices
+      - generic: Přijaté faktury
+      - generic: Inbox alias a pravidla schválení
+    - link "Bankovní spojení Bankovní přehledy jen pro čtení":
+      - /url: /settings/bank-connections
+      - generic: Bankovní spojení
+      - generic: Bankovní přehledy jen pro čtení
+    - link "Integrace Slack, MCP a další nástroje":
+      - /url: /settings/integrations
+      - generic: Integrace
+      - generic: Slack, MCP a další nástroje
+  - heading "Bankovní spojení" [level=2]
+  - paragraph: Připojte k tomuto workspace bankovní přehled jen pro čtení. Tokeny a účty se s ostatními workspace nesdílejí.
+  - img "Fio banka"
+  - generic: Připojit Fio API jen pro čtení
+  - generic: V Fio Internetbankingu vytvořte token jen pro čtení a vložte ho sem. Invoicey ho ověří proti dnešnímu výpisu a uloží šifrovaně. Výchozí přijímací účet vybraného dodavatele se aktualizuje na ověřený Fio účet.
+  - generic: Dodavatel, který platby přijímá
+  - combobox "Dodavatel, který platby přijímá":
+    - option "Alza.cz a.s." [selected]
+  - generic: Fio API token
+  - textbox "Fio API token":
+    - /placeholder: 64znakový token jen pro čtení
+  - paragraph: V Internetbankingu → Nastavení → API bankovnictví vytvořte token se právem Sledování účtu. 64znakový token začne fungovat zhruba po pěti minutách a může platit až 180 dní, pokud zapnete automatické prodloužení. Znovu ho nezobrazíme a o zápisový přístup nežádáme.
+  - link "Jak vytvořit Fio API token":
+    - /url: https://www.fio.cz/bankovni-sluzby/api-bankovnictvi
+    - text: Jak vytvořit Fio API token
+  - button "Připojit a ověřit"
+  - img "MONETA Money Bank"
+  - generic: Připojit MONETA API jen pro čtení
+  - generic: V MONETA Internet Bance vytvořte pasivní API token a vložte ho sem. Invoicey vypíše CZK účty na tokenu, ověří dnešní pohyby a token uloží šifrovaně jen pro tento workspace.
+  - generic: Dodavatel, který platby přijímá
+  - combobox "Dodavatel, který platby přijímá":
+    - option "Alza.cz a.s." [selected]
+  - generic: MONETA API token
+  - textbox "MONETA API token":
+    - /placeholder: Token jen pro čtení z Internet Banky
+  - paragraph: V Internet Bance → API tokeny vytvořte pasivní (jen pro čtení) token. Tokeny vyprší do 90 dnů, pokud je neobnovíte. Historie je omezená na 90 dnů.
+  - link "Jak vytvořit MONETA API token":
+    - /url: https://www.moneta.cz/zivnostnici-a-firmy/api
+    - text: Jak vytvořit MONETA API token
+  - button "Načíst účty" [disabled]
+  - button "Připojit a ověřit" [disabled]
+  - paragraph: Načtěte účty, pokud token pokrývá víc CZK účtů. Jeden CZK účet se připojí bez výběru.
+  - heading "Další bankovní integrace" [level=2]:
+    - text: Další bankovní integrace
+  - paragraph: Fio a MONETA jsou živé. Ostatní banky z výzkumu zatím nejsou k dispozici.
+  - generic: Nedostupné
+  - img "Komerční banka"
+  - paragraph: Komerční banka
+  - paragraph:
+    - text: Odloženo
+  - img "Raiffeisenbank"
+  - paragraph: Raiffeisenbank
+  - paragraph:
+    - text: Odloženo
+  - img "Česká spořitelna"
+  - paragraph: Česká spořitelna
+  - paragraph:
+    - text: Odloženo
+  - img "ČSOB"
+  - paragraph: ČSOB
+  - paragraph:
+    - text: Odloženo
+  - img "CREDITAS"
+  - paragraph: CREDITAS
+  - paragraph:
+    - text: Odloženo
+  - img "Revolut"
+  - paragraph: Revolut
+  - paragraph:
+    - text: Odloženo
+  - img "Air Bank"
+  - paragraph: Air Bank
+  - paragraph: Neplánováno
+  - img "mBank"
+  - paragraph: mBank
+  - paragraph: Neplánováno
+  - img "Partners Banka"
+  - paragraph: Partners Banka
+  - paragraph: Neplánováno
+  - paragraph: Připojení patří aktuálnímu workspace, ne vašemu uživatelskému účtu. V každém workspace se banka nastavuje zvlášť. Synchronizace výpisů je jen pro čtení. Samostatný Fio token pro odesílání může vložit dávku do fronty příkazů k podpisu; Invoicey platbu nikdy neautorizuje. Tokeny MONETA obvykle vyprší do 90 dnů a obnovují se v Internet Bance.
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

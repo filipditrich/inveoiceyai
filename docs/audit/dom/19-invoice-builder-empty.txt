@@ -1,0 +1,243 @@
+- list:
+  - link "Invoicey Invoicey Automatizace faktur":
+    - /url: /dashboard
+    - img "Invoicey"
+    - generic: Invoicey
+    - generic: Automatizace faktur
+- list:
+  - button "In Invoicey Agent Audit Vlastník":
+    - generic: In
+    - generic: Invoicey Agent Audit
+    - generic: Vlastník
+- list:
+  - link "Nová faktura":
+    - /url: /invoices/new
+    - generic: Nová faktura
+- generic: Pracovní prostor
+- list:
+  - link "Přehled":
+    - /url: /dashboard
+    - generic: Přehled
+  - link "Faktury":
+    - /url: /invoices
+    - generic: Faktury
+  - link "Přijaté faktury":
+    - /url: /incoming-invoices
+    - generic: Přijaté faktury
+  - link "Dodavatelé":
+    - /url: /suppliers
+    - generic: Dodavatelé
+  - link "Platby":
+    - /url: /payments
+    - generic: Platby
+  - link "Klienti":
+    - /url: /clients
+    - generic: Klienti
+  - link "Moje podnikání":
+    - /url: /issuers
+    - generic: Moje podnikání
+- generic: Automatizace
+- list:
+  - link "Vytvořit s AI":
+    - /url: /invoices/ai
+    - generic: Vytvořit s AI
+  - link "Opakované faktury":
+    - /url: /invoices/recurring
+    - generic: Opakované faktury
+- generic: Import a vývojářské nástroje
+- list:
+  - link "Importovat staré faktury":
+    - /url: /invoices/import
+    - generic: Importovat staré faktury
+  - link "Faktura z JSON":
+    - /url: /invoices/from-json
+    - generic: Faktura z JSON
+- generic: Správa workspace
+- list:
+  - link "Pracovní prostor":
+    - /url: /settings/workspace
+    - generic: Pracovní prostor
+  - link "Členové":
+    - /url: /settings/members
+    - generic: Členové
+  - link "Bankovní spojení":
+    - /url: /settings/bank-connections
+    - generic: Bankovní spojení
+  - link "Integrace":
+    - /url: /settings/integrations
+    - generic: Integrace
+  - link "Využití":
+    - /url: /settings/usage
+    - generic: Využití
+- generic: Zdroje
+- list:
+  - link "Dokumentace":
+    - /url: /docs
+    - generic: Dokumentace
+- button "Zůstatek tokenů":
+  - generic: Zůstatek tokenů
+  - generic: zbývá 1.5M
+  - generic "Měsíční tokeny"
+- list:
+  - button "IA Invoicey Agent agent@invoicey.local":
+    - generic: IA
+    - generic: Invoicey Agent
+    - generic: agent@invoicey.local
+- paragraph: v1.30.1·0524270
+- button "Přepnout postranní panel"
+- main:
+  - button "Přepnout postranní panel":
+    - generic: Přepnout postranní panel
+  - separator
+  - navigation "breadcrumb":
+    - list:
+      - link "Invoicey":
+        - /url: /dashboard
+      - link "Faktury":
+        - /url: /invoices
+      - link "Nová" [disabled]
+  - search:
+    - generic: Hledat
+    - textbox "Hledat":
+      - /placeholder: Zadejte hledaný výraz…
+  - button "Vzhled":
+  - heading "Nová faktura" [level=1]
+  - generic: Nejprve vytvořte návrh, potom jej zkontrolujte a vystavte. Náhled PDF najdete vedle formuláře nebo pod ním.
+  - button "Průvodce formulářem":
+    - text: Průvodce formulářem
+  - button "Průvodce DPH":
+    - text: Průvodce DPH
+  - button "Oficiální ARES":
+    - text: Oficiální ARES
+  - paragraph: Začněte návrhem
+  - paragraph: Během práce můžete návrh libovolně ukládat. Nemá finální číslo a zůstává upravitelný.
+  - paragraph: Vystavením se doklad uzamkne
+  - paragraph: Invoicey přidělí číslo a uloží neměnnou podobu stran, dat a částek pro historii.
+  - paragraph: Všechny výstupy souhlasí
+  - paragraph: Ze stejných ověřených dat vznikne PDF, ISDOC i platební QR pro CZK.
+  - generic: Strany
+  - generic: Dodavatel a odběratel na dokladu.
+  - button "Proč se strany ukládají":
+    - text: Proč se strany ukládají
+  - generic: Dodavatel
+  - combobox "Dodavatel":
+    - option "Alza.cz a.s. · IČO 27082440" [selected]
+  - paragraph: Vaše firma uvedená na faktuře jako dodavatel.
+  - paragraph: Alza.cz a.s.
+  - paragraph: IČO 27082440 · DIČ CZ27082440
+  - button "Nastavit dodavatele":
+    - text: Nastavit dodavatele
+  - button "Přidat dodavatele":
+    - text: Přidat dodavatele
+  - generic: Odběratel
+  - combobox "Odběratel":
+    - option "Vyberte odběratele" [disabled]
+    - option "Studio Sever s.r.o." [selected]
+  - paragraph: Odběratel z registru klientů (ARES).
+  - paragraph: Studio Sever s.r.o.
+  - paragraph: IČO není uvedeno · DIČ není uvedeno
+  - button "Přidat ručně":
+    - text: Přidat ručně
+  - paragraph: Přidat českou firmu podle IČO
+  - paragraph: Invoicey ověří ARES a při již uloženém IČO použije existujícího klienta.
+  - button "Otevřít ARES":
+    - text: Otevřít ARES
+  - textbox "8místné IČO"
+  - button "Přidat z ARES":
+    - text: Přidat z ARES
+  - generic: Doklad
+  - generic: Typ dokladu, jazyk PDF a měna.
+  - generic: Typ dokladu
+  - combobox "Typ dokladu":
+    - option "Faktura" [selected]
+    - option "Proforma"
+    - option "Záloha"
+    - option "Dobropis"
+  - paragraph: Typ daňového / platebního dokladu.
+  - generic: Náhled čísla
+  - paragraph: "20260001"
+  - paragraph: Číslo se přiřadí až při vystavení.
+  - generic: Jazyk dokladu
+  - combobox "Jazyk dokladu":
+    - option "Čeština" [selected]
+    - option "English"
+  - paragraph: Jazyk popisků na PDF a ISDOC. Nezávislý na jazyku aplikace.
+  - generic: Měna
+  - combobox "Měna":
+    - option "CZK (Kč)" [selected]
+    - option "EUR"
+    - option "USD"
+  - paragraph: Měna faktury. QR platba (SPAYD) je dostupná jen pro CZK.
+  - generic: Data
+  - generic: Datum vystavení, splatnost a DUZP.
+  - generic: Datum vystavení
+  - textbox "Datum vystavení": 2026-08-24
+  - paragraph: Datum, kdy fakturu vystavujete.
+  - generic: Splatnost
+  - textbox "Splatnost": 2026-09-07
+  - paragraph: Poslední den pro včasnou úhradu.
+  - generic: DUZP
+  - textbox "DUZP": 2026-08-24
+  - paragraph: Datum uskutečnění zdanitelného plnění
+  - generic: DPH a měna
+  - generic: Jak se na dokladu počítá DPH.
+  - button "Průvodce DPH":
+    - text: Průvodce DPH
+  - generic: Režim DPH
+  - combobox "Režim DPH":
+    - option "Běžný (plátce)" [selected]
+    - option "Přenesení DPH"
+  - checkbox "Zobrazit rozšířený režim OSS"
+  - text: Zobrazit rozšířený režim OSS
+  - paragraph: Běžný režim, přenesení DPH nebo rozšířený režim OSS.
+  - generic: Dodání do zahraničí
+  - combobox "Dodání do zahraničí":
+    - option "Ne" [selected]
+    - option "EU"
+    - option "Mimo EU"
+  - paragraph: Pro B2B dodání zboží/služeb do zahraničí.
+  - generic: Položky
+  - generic: Ceny zadávej bez DPH; celkem se počítá automaticky.
+  - combobox "Zadávání cen s DPH nebo bez DPH":
+    - option "Ceny bez DPH" [selected]
+    - option "Ceny s DPH"
+  - button "Přidat řádek":
+    - text: Přidat řádek
+  - paragraph: Položka 1
+  - button "Odebrat položku 1" [disabled]:
+  - generic: Popis
+  - textbox "Popis":
+    - /placeholder: Popis služby / zboží
+  - generic: Množství
+  - spinbutton "Množství": "1"
+  - generic: Jednotka
+  - textbox "Jednotka":
+    - /placeholder: ks / hod
+    - text: ks
+  - generic: Cena bez DPH
+  - spinbutton "Cena bez DPH": "0"
+  - generic: DPH
+  - combobox "DPH":
+    - option "0 %"
+    - option "12 %"
+    - option "21 %" [selected]
+    - option "Jiná…"
+  - paragraph: "Řádek celkem: 0,00 Kč"
+  - paragraph: "Celkem: 0,00 Kč (DPH 0,00 Kč)"
+  - generic: Poznámka
+  - generic: Volitelný text na PDF pod položkami.
+  - generic: Poznámka
+  - textbox "Poznámka":
+    - /placeholder: Např. děkujeme za spolupráci
+  - button "Uložit návrh":
+    - text: Uložit návrh
+  - button "Vystavit":
+    - text: Vystavit
+  - generic: Nová faktura
+  - complementary:
+    - generic: Aktualizuji…
+    - generic: Vyplň položky pro náhled…
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

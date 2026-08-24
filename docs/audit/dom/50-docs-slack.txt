@@ -1,0 +1,160 @@
+- complementary:
+  - link "Invoicey Invoicey docs":
+    - /url: /docs
+    - img "Invoicey"
+    - generic: Invoicey docs
+  - button "Collapse Sidebar":
+  - button "Search ⌘ K":
+    - text: Search
+    - generic: ⌘
+    - generic: K
+  - link "Open app":
+    - /url: /dashboard
+    - text: Open app
+  - link "What is Invoicey?":
+    - /url: /docs
+    - text: What is Invoicey?
+  - button "Start here":
+    - text: Start here
+  - button "How Invoicey works":
+    - text: How Invoicey works
+  - button "Everyday workflows":
+    - text: Everyday workflows
+  - button "Files & exports":
+    - text: Files & exports
+  - button "Connect & automate" [expanded]:
+    - text: Connect & automate
+  - link "API keys":
+    - /url: /docs/integrations/api-keys
+    - text: API keys
+  - link "MCP":
+    - /url: /docs/integrations/mcp
+    - text: MCP
+  - link "Cursor":
+    - /url: /docs/integrations/cursor
+    - text: Cursor
+  - link "Claude Code":
+    - /url: /docs/integrations/claude-code
+    - text: Claude Code
+  - link "Slack":
+    - /url: /docs/integrations/slack
+    - text: Slack
+  - link "Bank connections":
+    - /url: /docs/integrations/bank-connections
+    - text: Bank connections
+  - button "Technical reference":
+    - text: Technical reference
+  - link "GitHub":
+    - /url: https://github.com/filipditrich/inveoiceyai
+  - button "Toggle Theme":
+- button "Collapse Sidebar":
+- button "Open Search":
+- main:
+  - button "0.4 Slack Using it":
+    - progressbar
+    - generic: Slack
+    - generic: Using it
+  - article:
+    - generic: Connect & automate
+    - heading "Slack" [level=1]
+    - paragraph: Draft and manage invoices from a Slack conversation.
+    - paragraph: Invoicey runs a durable agent in Slack. Mention it, or DM it, and describe the invoice you want — it looks the client up in ARES, builds the invoice, posts the PDF and ISDOC into the thread, and asks before doing anything irreversible.
+    - heading "Using it Copy Anchor Link" [level=2]:
+      - link "Using it":
+        - /url: "#using-it"
+      - button "Copy Anchor Link":
+    - paragraph: "Mention the bot in a channel it has been invited to, or send it a direct message:"
+    - blockquote:
+      - paragraph: "@Invoicey invoice NFCtron (IČO 27074358) for 40 hours of consulting at 1 800 CZK, due in 14 days, from my \"s.r.o.\" preset"
+    - paragraph: It replies in a thread with the draft, the invoice ID, a link into the web app, and the rendered PDF and ISDOC as file attachments. The first time you talk to the bot, it DMs a link to confirm your Slack account against the Invoicey workspace you are viewing in the browser.
+    - paragraph:
+      - strong: Follow-ups in the same thread do not need a mention.
+      - text: "The agent keeps session context, so you can just say:"
+    - blockquote:
+      - paragraph: issue it
+      - paragraph: actually make it 45 hours first
+    - heading "Human approval on the dangerous parts Copy Anchor Link" [level=2]:
+      - link "Human approval on the dangerous parts":
+        - /url: "#human-approval-on-the-dangerous-parts"
+      - button "Copy Anchor Link":
+    - paragraph: "Three actions always stop and ask, with an approve/reject prompt in the thread:"
+    - table:
+      - rowgroup:
+        - row "Tool Why it asks":
+          - columnheader "Tool"
+          - columnheader "Why it asks"
+      - rowgroup:
+        - row "issue_invoice Irreversible — allocates a number and freezes the invoice":
+          - cell "issue_invoice":
+            - code: issue_invoice
+          - cell "Irreversible — allocates a number and freezes the invoice"
+        - row "mark_invoice_paid Asserts money arrived":
+          - cell "mark_invoice_paid":
+            - code: mark_invoice_paid
+          - cell "Asserts money arrived"
+        - row "send_invoice_email Reaches a real client's inbox":
+          - cell "send_invoice_email":
+            - code: send_invoice_email
+          - cell "Reaches a real client's inbox"
+    - paragraph: Creating and revising drafts does not require approval.
+    - paragraph: Link Slack before the bot will work
+    - paragraph:
+      - text: Unlinked Slack users are refused — no drafts, no ARES. The bot DMs a one-shot confirm link (15 minutes). Confirm it while viewing the Invoicey workspace that should receive
+      - strong: new
+      - text: invoices. Anyone in the channel can still click Allow/Deny on an approval card; keep the bot in a private channel.
+    - paragraph:
+      - text: The agent uses the same validated handlers as
+      - link "MCP":
+        - /url: /docs/integrations/mcp
+      - text: ", plus Slack file upload."
+    - heading "Getting the bot in your workspace Copy Anchor Link" [level=2]:
+      - link "Getting the bot in your workspace":
+        - /url: "#getting-the-bot-in-your-workspace"
+      - button "Copy Anchor Link":
+    - paragraph:
+      - text: Ask an Invoicey workspace owner/admin to enable Slack under
+      - strong: Settings → Integrations
+      - text: ", invite the bot to the channel you will use, and complete the one-time Slack ↔ Invoicey link when the bot DMs you."
+    - heading "Limitations Copy Anchor Link" [level=2]:
+      - link "Limitations":
+        - /url: "#limitations"
+      - button "Copy Anchor Link":
+    - list:
+      - strong: Link required.
+      - text: Each Slack user must confirm
+      - code: /slack/link/[code]
+      - text: against an Invoicey workspace they belong to. There is no email matching.
+      - strong: One Slack account → one Invoicey user + one workspace.
+      - text: Rebind the workspace in
+      - strong: Settings → Integrations
+      - text: ", or unlink so someone else can confirm."
+      - strong: HITL is not identity.
+      - text: Allow/Deny in the thread can be clicked by anyone in the channel. Keep the bot private.
+      - strong: No slash commands.
+      - text: Mentions and DMs only.
+      - strong: No import.
+      - link "Historical import":
+        - /url: /docs/guides/importing-history
+      - text: stays web-only.
+    - heading "Troubleshooting Copy Anchor Link" [level=2]:
+      - link "Troubleshooting":
+        - /url: "#troubleshooting"
+      - button "Copy Anchor Link":
+    - heading "The bot never responds" [level=3]:
+      - button "The bot never responds":
+        - text: The bot never responds
+    - heading "It invents issuer details" [level=3]:
+      - button "It invents issuer details":
+        - text: It invents issuer details
+    - link "Claude Code Connect Claude Code to Invoicey’s hosted MCP tools.":
+      - /url: /docs/integrations/claude-code
+      - paragraph: Claude Code
+      - paragraph: Connect Claude Code to Invoicey’s hosted MCP tools.
+    - link "Bank connections Connect Fio or MONETA read-only feeds, and what we researched for other Czech banks.":
+      - /url: /docs/integrations/bank-connections
+      - paragraph: Bank connections
+      - paragraph: Connect Fio or MONETA read-only feeds, and what we researched for other Czech banks.
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

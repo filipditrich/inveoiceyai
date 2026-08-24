@@ -1,0 +1,134 @@
+- list:
+  - link "Invoicey Invoicey Automatizace faktur":
+    - /url: /dashboard
+    - img "Invoicey"
+    - generic: Invoicey
+    - generic: Automatizace faktur
+- list:
+  - button "In Invoicey Agent Audit Vlastník":
+    - generic: In
+    - generic: Invoicey Agent Audit
+    - generic: Vlastník
+- list:
+  - link "Nová faktura":
+    - /url: /invoices/new
+    - generic: Nová faktura
+- generic: Pracovní prostor
+- list:
+  - link "Přehled":
+    - /url: /dashboard
+    - generic: Přehled
+  - link "Faktury":
+    - /url: /invoices
+    - generic: Faktury
+  - link "Přijaté faktury":
+    - /url: /incoming-invoices
+    - generic: Přijaté faktury
+  - link "Dodavatelé":
+    - /url: /suppliers
+    - generic: Dodavatelé
+  - link "Platby":
+    - /url: /payments
+    - generic: Platby
+  - link "Klienti":
+    - /url: /clients
+    - generic: Klienti
+  - link "Moje podnikání":
+    - /url: /issuers
+    - generic: Moje podnikání
+- generic: Automatizace
+- list:
+  - link "Vytvořit s AI":
+    - /url: /invoices/ai
+    - generic: Vytvořit s AI
+  - link "Opakované faktury":
+    - /url: /invoices/recurring
+    - generic: Opakované faktury
+- generic: Import a vývojářské nástroje
+- list:
+  - link "Importovat staré faktury":
+    - /url: /invoices/import
+    - generic: Importovat staré faktury
+  - link "Faktura z JSON":
+    - /url: /invoices/from-json
+    - generic: Faktura z JSON
+- generic: Správa workspace
+- list:
+  - link "Pracovní prostor":
+    - /url: /settings/workspace
+    - generic: Pracovní prostor
+  - link "Členové":
+    - /url: /settings/members
+    - generic: Členové
+  - link "Bankovní spojení":
+    - /url: /settings/bank-connections
+    - generic: Bankovní spojení
+  - link "Integrace":
+    - /url: /settings/integrations
+    - generic: Integrace
+  - link "Využití":
+    - /url: /settings/usage
+    - generic: Využití
+- generic: Zdroje
+- list:
+  - link "Dokumentace":
+    - /url: /docs
+    - generic: Dokumentace
+- button "Zůstatek tokenů":
+  - generic: Zůstatek tokenů
+  - generic: zbývá 1.5M
+  - generic "Měsíční tokeny"
+- list:
+  - button "IA Invoicey Agent agent@invoicey.local":
+    - generic: IA
+    - generic: Invoicey Agent
+    - generic: agent@invoicey.local
+- paragraph: v1.30.1·0524270
+- button "Přepnout postranní panel"
+- main:
+  - button "Přepnout postranní panel":
+    - generic: Přepnout postranní panel
+  - separator
+  - navigation "breadcrumb":
+    - list:
+      - link "Invoicey":
+        - /url: /dashboard
+      - link "Faktury":
+        - /url: /invoices
+      - link "Z JSON" [disabled]
+  - search:
+    - generic: Hledat
+    - textbox "Hledat":
+      - /placeholder: Zadejte hledaný výraz…
+  - button "Vzhled":
+  - paragraph: Strukturované zadání
+  - heading "Faktura z JSON" [level=1]
+  - text: Vložte
+  - code: InvoiceSchema
+  - text: JSON, ověřte jeho strukturu a vytvořte náhled PDF.
+  - link "← Zpět na faktury":
+    - /url: /invoices
+  - generic: Invoice JSON
+  - textbox "Invoice JSON":
+    - /placeholder: "{}"
+    - text: "{ \"meta\": { \"docType\": \"invoice\", \"number\": \"20260001\", \"issueDate\": \"2026-05-03\", \"dueDate\": \"2026-05-17\", \"duzp\": \"2026-05-03\", \"language\": \"cs\", \"currency\": \"CZK\" }, \"issuer\": { \"id\": \"ca8b8d4e-2e7e-4f6a-9b7d-1f9c1234abcd\", \"name\": \"Filip Ditrich\", \"ico\": \"09870113\", \"address\": { \"street\": \"Hrabalová 1092, Liberec XIV-Ruprechtice\", \"city\": \"Liberec\", \"zip\": \"460 14\", \"country\": \"CZ\" }, \"bank\": { \"accountNumber\": \"115-3743440297/0100\", \"iban\": \"CZ2501000001153743440297\", \"bic\": \"KOMBCZPP\" }, \"vatPayer\": false, \"contactEmail\": \"faktura@invoicey.demo\" }, \"client\": { \"id\": \"5bc1d5a7-0c58-4cda-a1f6-4ad9876543ff\", \"name\": \"NFCtron a.s.\", \"ico\": \"07283539\", \"dic\": \"CZ07283539\", \"address\": { \"street\": \"Opletalova 1525/39, Nové Město\", \"city\": \"Praha\", \"zip\": \"110 00\", \"country\": \"CZ\" }, \"contactEmail\": \"billing@nfctron.com\" }, \"vat\": { \"mode\": \"regular\", \"suppliesAbroad\": \"none\" }, \"payment\": { \"method\": \"transfer\", \"bankAccount\": { \"accountNumber\": \"115-3743440297/0100\", \"iban\": \"CZ2501000001153743440297\", \"bic\": \"KOMBCZPP\" }, \"variableSymbol\": \"20260001\", \"instructionsBefore\": \"Děkuji za spolupráci.\\nÚhradu prosím proveďte **převodem** na účet níže.\", \"instructionsAfter\": \"Při platbě uveďte variabilní symbol.\\nDotazy: _faktura@invoicey.demo_.\" }, \"items\": [ { \"position\": 1, \"description\": \"Služba\", \"quantity\": 1, \"unit\": \"ks\", \"unitPriceWithoutVat\": 4000, \"vatRate\": 0, \"lineSubtotal\": 4000, \"lineVat\": 0, \"lineTotal\": 4000 } ], \"totals\": { \"subtotal\": 4000, \"vatBreakdown\": [ { \"rate\": 0, \"base\": 4000, \"vat\": 0 } ], \"vatTotal\": 0, \"total\": 4000 } }"
+  - combobox:
+    - option "Neplátce · transfer · 0% DPH" [selected]
+    - option "Platební texty · markdown before/after"
+    - option "Plátce DPH · 21% · 1 položka"
+    - option "Plátce DPH · mix 12% + 21%"
+    - option "Proforma · platba kartou"
+    - option "Zálohová · hotovost"
+    - option "Reverse charge · EU odběratel"
+    - option "OSS · EU odběratel"
+    - option "Dobropis · záporné částky"
+    - option "Bez IČO/DIČ/email odběratele"
+  - button "Načíst předvolbu"
+  - button "Vytvořit náhled PDF"
+  - button "Obnovit ukázku"
+  - paragraph: InvoiceSchema ověří strukturu a zvýrazní chyby před vytvořením PDF.
+  - generic: Náhled zobrazíte tlačítkem „Vytvořit náhled PDF“.
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

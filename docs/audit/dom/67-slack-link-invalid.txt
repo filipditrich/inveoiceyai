@@ -1,0 +1,20 @@
+- banner:
+  - link "Invoicey Invoicey":
+    - /url: /
+    - img "Invoicey"
+    - generic: Invoicey
+  - 'button "Language: English"':
+    - generic: English
+- generic: Link Slack to Invoicey
+- generic: This Slack account will be able to prepare invoices in the workspace below.
+- generic: IA
+- paragraph: Invoicey account
+- paragraph: Invoicey Agent
+- paragraph: agent@invoicey.local
+- alert:
+  - paragraph: This link does not exist. Message the bot again for a new DM.
+- button "Back to app"
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

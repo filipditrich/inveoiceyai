@@ -1,0 +1,32 @@
+- main:
+  - link "Invoicey Invoicey Invoice automation":
+    - /url: /
+    - img "Invoicey"
+    - generic: Invoicey
+    - generic: Invoice automation
+  - paragraph: One schema, every channel
+  - heading "From data to a finished document without detours." [level=2]
+  - paragraph: Web, PDF, ISDOC, SPAYD QR, and agent tools all use the same validated invoice.
+  - paragraph: ARES
+  - paragraph: PDF + ISDOC
+  - paragraph: QR
+  - text: OAuth sign-in · no extra password
+  - link "Back to Invoicey":
+    - /url: /
+    - generic: Back to Invoicey
+  - 'button "Language: English"':
+    - generic: English
+  - heading "Referral link not found" [level=1]
+  - paragraph: This invite link is invalid or no longer active. You can still create an Invoicey account.
+  - button "Sign in to Invoicey"
+  - navigation:
+    - link "Privacy":
+      - /url: /privacy
+    - link "Terms":
+      - /url: /terms
+    - link "Cookies":
+      - /url: /cookies
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

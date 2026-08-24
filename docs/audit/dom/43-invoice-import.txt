@@ -1,0 +1,147 @@
+- list:
+  - link "Invoicey Invoicey Automatizace faktur":
+    - /url: /dashboard
+    - img "Invoicey"
+    - generic: Invoicey
+    - generic: Automatizace faktur
+- list:
+  - button "In Invoicey Agent Audit Vlastník":
+    - generic: In
+    - generic: Invoicey Agent Audit
+    - generic: Vlastník
+- list:
+  - link "Nová faktura":
+    - /url: /invoices/new
+    - generic: Nová faktura
+- generic: Pracovní prostor
+- list:
+  - link "Přehled":
+    - /url: /dashboard
+    - generic: Přehled
+  - link "Faktury":
+    - /url: /invoices
+    - generic: Faktury
+  - link "Přijaté faktury":
+    - /url: /incoming-invoices
+    - generic: Přijaté faktury
+  - link "Dodavatelé":
+    - /url: /suppliers
+    - generic: Dodavatelé
+  - link "Platby":
+    - /url: /payments
+    - generic: Platby
+  - link "Klienti":
+    - /url: /clients
+    - generic: Klienti
+  - link "Moje podnikání":
+    - /url: /issuers
+    - generic: Moje podnikání
+- generic: Automatizace
+- list:
+  - link "Vytvořit s AI":
+    - /url: /invoices/ai
+    - generic: Vytvořit s AI
+  - link "Opakované faktury":
+    - /url: /invoices/recurring
+    - generic: Opakované faktury
+- generic: Import a vývojářské nástroje
+- list:
+  - link "Importovat staré faktury":
+    - /url: /invoices/import
+    - generic: Importovat staré faktury
+  - link "Faktura z JSON":
+    - /url: /invoices/from-json
+    - generic: Faktura z JSON
+- generic: Správa workspace
+- list:
+  - link "Pracovní prostor":
+    - /url: /settings/workspace
+    - generic: Pracovní prostor
+  - link "Členové":
+    - /url: /settings/members
+    - generic: Členové
+  - link "Bankovní spojení":
+    - /url: /settings/bank-connections
+    - generic: Bankovní spojení
+  - link "Integrace":
+    - /url: /settings/integrations
+    - generic: Integrace
+  - link "Využití":
+    - /url: /settings/usage
+    - generic: Využití
+- generic: Zdroje
+- list:
+  - link "Dokumentace":
+    - /url: /docs
+    - generic: Dokumentace
+- button "Zůstatek tokenů":
+  - generic: Zůstatek tokenů
+  - generic: zbývá 1.5M
+  - generic "Měsíční tokeny"
+- list:
+  - button "IA Invoicey Agent agent@invoicey.local":
+    - generic: IA
+    - generic: Invoicey Agent
+    - generic: agent@invoicey.local
+- paragraph: v1.30.1·0524270
+- button "Přepnout postranní panel"
+- main:
+  - button "Přepnout postranní panel":
+    - generic: Přepnout postranní panel
+  - separator
+  - navigation "breadcrumb":
+    - list:
+      - link "Invoicey":
+        - /url: /dashboard
+      - link "Faktury":
+        - /url: /invoices
+      - link "Import" [disabled]
+  - search:
+    - generic: Hledat
+    - textbox "Hledat":
+      - /placeholder: Zadejte hledaný výraz…
+  - button "Vzhled":
+  - paragraph:
+    - link "← Faktury":
+      - /url: /invoices
+  - heading "Import historických faktur" [level=1]
+  - generic: Nahrajte soubory PDF. Pokud obsahují vložený ISDOC, načteme i strukturovaná data. Ostatní uložíme jako archivní originály a základní údaje doplníte ručně.
+  - navigation "Kroky importu":
+    - button "1.Nastavení":
+      - generic: "1."
+      - text: Nastavení
+    - button "2.Nahrání":
+      - generic: "2."
+      - text: Nahrání
+    - button "3.Kontrola":
+      - generic: "3."
+      - text: Kontrola
+  - generic: Dodavatel
+  - combobox "Dodavatel":
+    - option "Alza.cz a.s." [selected]
+  - generic: Výchozí zdroj (pro nerozpoznané)
+  - combobox "Výchozí zdroj (pro nerozpoznané)":
+    - option "Invoicey"
+    - option "FakturaOnline.cz"
+    - option "iDoklad"
+    - option "Fakturoid"
+    - option "Pohoda"
+    - option "Money S3"
+    - option "VyFakturuj.cz"
+    - option "SuperFaktura"
+    - option "Jiné / vlastní" [selected]
+  - paragraph: Po nahrání se u každého PDF použije detekovaný zdroj; tento výběr je záloha a hromadná úprava.
+  - generic: Verze (volitelné)
+  - textbox "Verze (volitelné)":
+    - /placeholder: např. 0.4.0
+  - generic: Vlastní popisek (volitelné)
+  - textbox "Vlastní popisek (volitelné)":
+    - /placeholder: např. stará šablona ve Wordu
+  - 'checkbox "Výchozí: označit importované jako zaplacené"'
+  - checkbox
+  - text: "Výchozí: označit importované jako zaplacené"
+  - button "Pokračovat k nahrání"
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

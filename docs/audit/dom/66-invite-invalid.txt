@@ -1,0 +1,7 @@
+- generic: Workspace invitation
+- generic: Invitation not found.
+- button "Back to app"
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

@@ -1,0 +1,64 @@
+- link "Přeskočit na obsah":
+  - /url: "#main-content"
+- banner:
+  - link "Invoicey Invoicey Automatizace faktur":
+    - /url: /
+    - img "Invoicey"
+    - generic: Invoicey
+    - generic: Automatizace faktur
+  - 'button "Jazyk: Čeština"':
+  - link "Přihlášeni jako Invoicey Agent":
+    - /url: /dashboard
+    - generic: IA
+    - generic: Přihlášeni
+    - generic: Invoicey Agent
+  - button "Pokračovat do aplikace":
+    - text: Pokračovat do aplikace
+- main:
+  - article:
+    - paragraph: Právní informace
+    - heading "Podmínky používání" [level=1]
+    - paragraph: Pravidla pro používání aktuální beta verze Invoicey a rozdělení odpovědnosti mezi službu a uživatele.
+    - paragraph: "Poslední aktualizace: 11. srpna 2026"
+    - complementary: Neveřejná beta verze. Tyto podmínky jsou pracovní verzí pro omezený beta provoz. Identifikace provozovatele, placené tarify, úroveň podpory a komerční podmínky budou doplněny před veřejným spuštěním.
+    - heading "1. Služba" [level=2]
+    - paragraph: Invoicey je nástroj pro přípravu, správu, import, vykreslení a odesílání fakturačních dokladů. Některé funkce mohou být dostupné jako beta, experiment nebo pouze vybraným uživatelům. Aktuální rozsah služby se může během beta provozu měnit.
+    - heading "2. Účet a přístup" [level=2]
+    - paragraph: Přihlášení probíhá přes podporovaného OAuth poskytovatele, aktuálně Google nebo GitHub. Uživatel odpovídá za zabezpečení tohoto účtu a za činnost osob, které pozve do svého pracovního prostoru. Přístup není dovoleno sdílet způsobem, který obchází oprávnění nebo technická omezení služby.
+    - heading "3. Odpovědnost za doklady" [level=2]
+    - paragraph: Invoicey provádí technické a schématické kontroly, ale neposkytuje účetní, daňové ani právní poradenství. Uživatel odpovídá za pravdivost vstupních údajů, volbu daňového režimu, oprávnění doklad vystavit a jeho soulad s konkrétním obchodním případem. Před vydáním má uživatel doklad zkontrolovat.
+    - heading "4. Agentní a automatizované funkce" [level=2]
+    - paragraph: AI může připravit návrh nebo navrhnout další krok. Výstup může být neúplný nebo chybný a musí projít stejnou validací a lidskou kontrolou jako ručně zadané údaje. Uživatel nesmí automatizaci využít k podvodu, vydávání dokladů bez oprávnění nebo jinému protiprávnímu jednání.
+    - heading "5. Data a soubory" [level=2]
+    - paragraph: Uživatel si ponechává práva ke svým údajům a souborům a uděluje Invoicey oprávnění zpracovat je pouze pro poskytnutí služby. Uživatel musí mít právo zpracovávat osobní a obchodní údaje, které do služby vloží. Důležité doklady je vhodné uchovávat také ve vlastním archivu.
+    - heading "6. Dostupnost a změny" [level=2]
+    - paragraph: Beta verze je poskytována bez záruky nepřetržité dostupnosti. Služba může být změněna, dočasně omezena nebo ukončena, zejména kvůli údržbě, bezpečnosti nebo změnám dodavatelů. Pokud to okolnosti dovolí, významnou změnu oznámíme přiměřeným způsobem.
+    - heading "7. Zakázané použití" [level=2]
+    - paragraph: Službu nelze používat k porušování právních předpisů, zasílání spamu, neoprávněnému přístupu, obcházení zabezpečení, šíření škodlivého kódu nebo vytěžování služby způsobem, který ji nepřiměřeně zatěžuje.
+    - heading "8. Omezení odpovědnosti" [level=2]
+    - paragraph: V rozsahu dovoleném právem neodpovídá beta služba za nepřímou škodu, ušlý zisk ani důsledky rozhodnutí založených na nezkontrolovaném automatizovaném výstupu. Tím nejsou dotčena práva, která podle zákona nelze smluvně omezit.
+    - heading "9. Změny podmínek" [level=2]
+    - paragraph: Podmínky mohou být upraveny spolu s vývojem služby. Nová verze bude zveřejněna zde s datem aktualizace. Pokračování v používání po účinnosti změny znamená přijetí aktualizovaných podmínek, pokud právní předpis nevyžaduje jiný postup.
+- contentinfo:
+  - link "Invoicey Invoicey":
+    - /url: /
+    - img "Invoicey"
+    - generic: Invoicey
+  - paragraph: Faktury jako strukturovaná data. Vytvořte je ve webu, přes JSON nebo s pomocí AI a pokaždé získejte stejný validovaný výstup.
+  - navigation "Právní informace":
+    - link "Dokumentace":
+      - /url: /docs
+    - link "Soukromí":
+      - /url: /privacy
+    - link "Podmínky":
+      - /url: /terms
+    - link "Cookies":
+      - /url: /cookies
+    - button "Nastavení cookies"
+  - 'button "Jazyk: Čeština"':
+    - generic: Čeština
+  - paragraph: © 2026 Invoicey · Neveřejná beta
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

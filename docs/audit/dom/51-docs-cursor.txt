@@ -1,0 +1,155 @@
+- complementary:
+  - link "Invoicey Invoicey docs":
+    - /url: /docs
+    - img "Invoicey"
+    - generic: Invoicey docs
+  - button "Collapse Sidebar":
+  - button "Search ⌘ K":
+    - text: Search
+    - generic: ⌘
+    - generic: K
+  - link "Open app":
+    - /url: /dashboard
+    - text: Open app
+  - link "What is Invoicey?":
+    - /url: /docs
+    - text: What is Invoicey?
+  - button "Start here":
+    - text: Start here
+  - button "How Invoicey works":
+    - text: How Invoicey works
+  - button "Everyday workflows":
+    - text: Everyday workflows
+  - button "Files & exports":
+    - text: Files & exports
+  - button "Connect & automate" [expanded]:
+    - text: Connect & automate
+  - link "API keys":
+    - /url: /docs/integrations/api-keys
+    - text: API keys
+  - link "MCP":
+    - /url: /docs/integrations/mcp
+    - text: MCP
+  - link "Cursor":
+    - /url: /docs/integrations/cursor
+    - text: Cursor
+  - link "Claude Code":
+    - /url: /docs/integrations/claude-code
+    - text: Claude Code
+  - link "Slack":
+    - /url: /docs/integrations/slack
+    - text: Slack
+  - link "Bank connections":
+    - /url: /docs/integrations/bank-connections
+    - text: Bank connections
+  - button "Technical reference":
+    - text: Technical reference
+  - link "GitHub":
+    - /url: https://github.com/filipditrich/inveoiceyai
+  - button "Toggle Theme":
+- button "Collapse Sidebar":
+- button "Open Search":
+- main:
+  - button "0.5 Cursor Configuration":
+    - progressbar
+    - generic: Cursor
+    - generic: Configuration
+  - article:
+    - generic: Connect & automate
+    - heading "Cursor" [level=1]
+    - paragraph: Connect Cursor to Invoicey’s hosted MCP tools.
+    - paragraph: Cursor speaks MCP natively, so Invoicey's tools appear alongside its own once configured.
+    - heading "Configuration Copy Anchor Link" [level=2]:
+      - link "Configuration":
+        - /url: "#configuration"
+      - button "Copy Anchor Link":
+    - paragraph:
+      - text: MCP servers are configured in
+      - code: mcp.json
+      - text: —
+      - code: ~/.cursor/mcp.json
+      - text: for every project, or
+      - code: .cursor/mcp.json
+      - text: inside one project.
+    - figure:
+      - button "Copy Text":
+      - region:
+        - code:
+          - generic: "{"
+          - generic: "\"mcpServers\": {"
+          - generic: "\"invoicey\": {"
+          - generic: "\"url\": \"https://invoicey.ditrich.me/api/mcp\","
+          - generic: "\"headers\": {"
+          - generic: "\"Authorization\": \"Bearer YOUR_API_KEY\""
+          - generic: "}"
+          - generic: "}"
+          - generic: "}"
+          - generic: "}"
+    - paragraph:
+      - text: Create the key under
+      - strong: Settings → API keys
+      - text: — see
+      - link "API keys":
+        - /url: /docs/integrations/api-keys
+      - text: .
+    - paragraph: Do not commit this file
+    - paragraph:
+      - text: A project-level
+      - code: .cursor/mcp.json
+      - text: containing a bearer token is a credential in your repository. Add it to
+      - code: .gitignore
+      - text: ", or configure Invoicey globally in"
+      - code: ~/.cursor/mcp.json
+      - text: instead.
+    - paragraph:
+      - text: Then
+      - strong: Settings → MCP → Reload
+      - text: ", and confirm Invoicey is listed with its tools."
+    - heading "Set up a preset first Copy Anchor Link" [level=2]:
+      - link "Set up a preset first":
+        - /url: "#set-up-a-preset-first"
+      - button "Copy Anchor Link":
+    - paragraph: "Before your first invoice, save an issuer preset. Ask Cursor:"
+    - blockquote:
+      - paragraph: "Save an issuer preset called \"main\" using these details: …"
+    - paragraph:
+      - text: The preset locks the "from" party. Without one,
+      - code: create_invoice
+      - text: falls back to a demo issuer — which renders fine and is completely wrong for real use.
+    - heading "Working with it Copy Anchor Link" [level=2]:
+      - link "Working with it":
+        - /url: "#working-with-it"
+      - button "Copy Anchor Link":
+    - paragraph: "Cursor decides when to call tools, so plain description works:"
+    - blockquote:
+      - paragraph: Look up IČO 27074358 and create an invoice from my "main" preset for 25 hours of development at 1 500 CZK, due in 21 days.
+    - paragraph: Naming the preset explicitly avoids a round-trip where the assistant lists presets to find one.
+    - paragraph: "For follow-ups:"
+    - blockquote:
+      - paragraph: Show me everything unpaid, oldest first.
+      - paragraph: Mark invoice 20260007 paid as of yesterday.
+    - heading "Troubleshooting Copy Anchor Link" [level=2]:
+      - link "Troubleshooting":
+        - /url: "#troubleshooting"
+      - button "Copy Anchor Link":
+    - heading "The server does not appear after reloading" [level=3]:
+      - button "The server does not appear after reloading":
+        - text: The server does not appear after reloading
+    - heading "Every call returns unauthorized" [level=3]:
+      - button "Every call returns unauthorized":
+        - text: Every call returns unauthorized
+    - heading "create_invoice keeps failing validation" [level=3]:
+      - button "create_invoice keeps failing validation":
+        - text: create_invoice keeps failing validation
+    - link "MCP Let compatible assistants use Invoicey through validated tools.":
+      - /url: /docs/integrations/mcp
+      - paragraph: MCP
+      - paragraph: Let compatible assistants use Invoicey through validated tools.
+    - link "Claude Code Connect Claude Code to Invoicey’s hosted MCP tools.":
+      - /url: /docs/integrations/claude-code
+      - paragraph: Claude Code
+      - paragraph: Connect Claude Code to Invoicey’s hosted MCP tools.
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert

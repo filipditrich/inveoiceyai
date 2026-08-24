@@ -1,0 +1,73 @@
+- link "Přeskočit na obsah":
+  - /url: "#main-content"
+- banner:
+  - link "Invoicey Invoicey Automatizace faktur":
+    - /url: /
+    - img "Invoicey"
+    - generic: Invoicey
+    - generic: Automatizace faktur
+  - 'button "Jazyk: Čeština"':
+  - link "Přihlášeni jako Invoicey Agent":
+    - /url: /dashboard
+    - generic: IA
+    - generic: Přihlášeni
+    - generic: Invoicey Agent
+  - button "Pokračovat do aplikace":
+    - text: Pokračovat do aplikace
+- main:
+  - article:
+    - paragraph: Právní informace
+    - heading "Ochrana soukromí" [level=1]
+    - paragraph: Přehled údajů, které Invoicey potřebuje k provozu služby, proč je zpracovává a jaké máte možnosti.
+    - paragraph: "Poslední aktualizace: 11. srpna 2026"
+    - complementary: Neveřejná beta verze. Invoicey je nyní poskytováno omezenému okruhu uživatelů. Úplné identifikační a kontaktní údaje provozovatele budou doplněny před veřejným komerčním spuštěním. Do té doby použijte pro požadavky stejný kontaktní kanál, kterým jste získali přístup.
+    - heading "1. Jaké údaje zpracováváme" [level=2]
+    - paragraph: "Podle toho, jak Invoicey používáte, může služba zpracovávat:"
+    - list:
+      - listitem: jméno, e-mail a profilový obrázek z Google nebo GitHub účtu
+      - listitem: členství a roli v pracovním prostoru
+      - listitem: údaje dodavatelů, klientů a faktur, včetně kontaktních údajů, bankovních údajů, IČO, DIČ a položek dokladů
+      - listitem: nahrané logo, podpis, razítko a archivní fakturační soubory
+      - listitem: záznamy o odeslání, doručení a stavu fakturačních e-mailů
+      - listitem: technické bezpečnostní záznamy a, pokud s tím souhlasíte, anonymní souhrnné měření návštěvnosti.
+    - heading "2. Proč údaje používáme" [level=2]
+    - paragraph: "Údaje používáme pouze v rozsahu potřebném pro:"
+    - list:
+      - listitem: přihlášení, správu účtu a oddělení pracovních prostorů
+      - listitem: vytvoření, uložení, vykreslení, import a odeslání faktur
+      - listitem: ochranu služby, diagnostiku chyb a prevenci zneužití
+      - listitem: splnění zákonných povinností spojených s účetními doklady
+      - listitem: měření výkonu a používání veřejného webu, pouze pokud udělíte souhlas s kategorií „Anonymní měření“.
+    - heading "3. Právní základ" [level=2]
+    - paragraph: Provoz účtu a fakturačních funkcí je založen na plnění služby, o kterou uživatel požádal. Bezpečnostní a nezbytné provozní záznamy zpracováváme na základě oprávněného zájmu na bezpečném provozu. Volitelné měření je založeno na souhlasu, který lze kdykoliv změnit.
+    - heading "4. Dodavatelé služby" [level=2]
+    - paragraph: Invoicey používá specializované dodavatele infrastruktury. Podle zapnutých funkcí jde zejména o Vercel (hosting a volitelné měření), Neon (databáze), UploadThing (soubory), Resend (transakční e-mail), Google/GitHub (OAuth přihlášení) a Slack/Vercel Connect pro agentní integraci. Tito dodavatelé zpracovávají údaje jen pro zajištění dané funkce a podle svých smluvních a bezpečnostních podmínek.
+    - heading "5. Doba uchování" [level=2]
+    - paragraph: Účetní a vystavené doklady mohou podléhat zákonným archivačním povinnostem a nejsou automaticky přepisovány při změně živých údajů. Ostatní údaje uchováváme po dobu aktivního účtu a následně jen po dobu nezbytnou k ochraně služby, řešení nároků nebo splnění právní povinnosti. Konkrétní retenční lhůty budou před veřejným spuštěním doplněny do této stránky.
+    - heading "6. Vaše práva" [level=2]
+    - paragraph: V mezích GDPR můžete požádat o přístup, opravu, výmaz, omezení zpracování, přenositelnost nebo vznést námitku. Souhlas s měřením lze odvolat okamžitě přes nastavení cookies. Některé údaje z účetních dokladů nemusí být možné vymazat, pokud jejich uchování vyžaduje zákon.
+    - heading "7. Zabezpečení a změny" [level=2]
+    - paragraph: Přístup do aplikace používá OAuth bez vlastního hesla u Invoicey. Pracovní data jsou vždy dotazována v kontextu ověřeného členství v pracovním prostoru. Žádné internetové službě však nelze slíbit absolutní bezpečnost. Tuto stránku upravíme při změně významného způsobu zpracování a zveřejníme nové datum aktualizace.
+- contentinfo:
+  - link "Invoicey Invoicey":
+    - /url: /
+    - img "Invoicey"
+    - generic: Invoicey
+  - paragraph: Faktury jako strukturovaná data. Vytvořte je ve webu, přes JSON nebo s pomocí AI a pokaždé získejte stejný validovaný výstup.
+  - navigation "Právní informace":
+    - link "Dokumentace":
+      - /url: /docs
+    - link "Soukromí":
+      - /url: /privacy
+    - link "Podmínky":
+      - /url: /terms
+    - link "Cookies":
+      - /url: /cookies
+    - button "Nastavení cookies"
+  - 'button "Jazyk: Čeština"':
+    - generic: Čeština
+  - paragraph: © 2026 Invoicey · Neveřejná beta
+- progressbar
+- region "Notifications alt+T"
+- button "Open Next.js Dev Tools":
+- alert
