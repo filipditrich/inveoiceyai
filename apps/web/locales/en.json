@@ -2354,9 +2354,11 @@
       "unknown": "{code}"
     },
     "status": {
-      "needs_review": "Needs review",
-      "extract_failed": "Extraction failed",
-      "accepted": "Accepted",
+      "parsing": "Parsing",
+      "unsupported": "Unsupported format",
+      "needs_validation": "Needs review",
+      "in_validation": "In review",
+      "validated": "Validated",
       "pending_approval": "Pending approval",
       "approved": "Approved",
       "on_hold": "On hold",
@@ -2377,8 +2379,6 @@
       "noCompatibleAccount": "No connected paying account matches this entity and currency."
     },
     "detail": {
-      "untitled": "No number",
-      "document": "Document",
       "progress": "Processing progress",
       "nextAction": {
         "review": "Next: review the extracted fields.",
@@ -2398,6 +2398,8 @@
         "payment_run": "Payment run",
         "payment": "Paid"
       },
+      "untitled": "No number",
+      "document": "Document",
       "noDocument": "No document available",
       "exceptions": "Exceptions",
       "number": "Number",
@@ -2478,6 +2480,14 @@
       "drop": "Drop",
       "submit": "Submit to Fio",
       "submitHint": "Invoicey cannot authorize the payment. After submit, sign the batch in Fio internet banking."
+    },
+    "accountingStatus": {
+      "not_applicable": "No accounting",
+      "pending": "Awaiting export",
+      "queued": "Queued for export",
+      "exported": "Exported",
+      "failed": "Export failed",
+      "settled": "Settled"
     }
   },
   "Suppliers": {

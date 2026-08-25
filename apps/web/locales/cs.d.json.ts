@@ -2357,14 +2357,24 @@ declare const messages: {
       unknown: "{code}";
     };
     status: {
-      needs_review: "Ke kontrole";
-      extract_failed: "Extrakce selhala";
-      accepted: "Přijato";
+      parsing: "Zpracovává se";
+      unsupported: "Nepodporovaný formát";
+      needs_validation: "Ke kontrole";
+      in_validation: "V kontrole";
+      validated: "Ověřeno";
       pending_approval: "Čeká na schválení";
       approved: "Schváleno";
       on_hold: "Pozastaveno";
       rejected: "Zamítnuto";
       cancelled: "Zrušeno";
+    };
+    accountingStatus: {
+      not_applicable: "Bez účetnictví";
+      pending: "Čeká na zaúčtování";
+      queued: "Ve frontě k exportu";
+      exported: "Zaúčtováno";
+      failed: "Export selhal";
+      settled: "Zlikvidováno";
     };
     run: {
       issuer: "Platící subjekt";
@@ -2374,22 +2384,12 @@ declare const messages: {
       selectAll: "Vybrat vše";
       noAccount: "Než vytvoříte dávku, připojte platící účet.";
       connectBank: "Bankovní spojení";
-    };
-    detail: {
-      untitled: "Bez čísla";
-      document: "Dokument";
-      noDocument: "Dokument není k dispozici";
-      exceptions: "Výjimky";
-      number: "Číslo";
-      issueDate: "Datum vystavení";
-      dueDate: "Splatnost";
-      currency: "Měna";
       selectFirst: "Výběrem faktury určíte platící subjekt, měnu a kompatibilní účet.";
       selectionSummary: "{issuer} · {currency}";
       selectionIncompatible: "Vyberte faktury se stejným platícím subjektem a měnou.";
       noCompatibleAccount: "Pro tento subjekt a měnu není připojený kompatibilní platící účet.";
-      total: "Celkem";
-      subtotal: "Základ";
+    };
+    detail: {
       progress: "Průběh zpracování";
       nextAction: {
         review: "Další krok: zkontrolujte načtená pole.";
@@ -2409,6 +2409,16 @@ declare const messages: {
         payment_run: "Platební dávka";
         payment: "Zaplaceno";
       };
+      untitled: "Bez čísla";
+      document: "Dokument";
+      noDocument: "Dokument není k dispozici";
+      exceptions: "Výjimky";
+      number: "Číslo";
+      issueDate: "Datum vystavení";
+      dueDate: "Splatnost";
+      currency: "Měna";
+      total: "Celkem";
+      subtotal: "Základ";
       vatTotal: "DPH";
       variableSymbol: "VS";
       iban: "IBAN";

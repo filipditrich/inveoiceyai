@@ -112,7 +112,7 @@ export default async function IncomingInvoicesPage({
     payableEligibility(paymentEligibility(row));
   const counts = incomingQueueCountsFromRows(rows.map(paymentEligibility));
   const review = rows.filter((row) =>
-    ["needs_review", "extract_failed", "on_hold"].includes(row.invoice.status),
+    ["needs_validation", "unsupported", "on_hold"].includes(row.invoice.status),
   );
   const approval = rows.filter(
     (row) => row.invoice.status === "pending_approval",

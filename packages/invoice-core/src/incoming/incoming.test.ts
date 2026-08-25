@@ -6,6 +6,7 @@ import { InvoiceSchema, type Invoice } from "../schema";
 import domesticFixture from "../__fixtures__/invoices/domestic-transfer.json";
 import creditNoteFixture from "../__fixtures__/invoices/credit-note.json";
 import { evaluateApprovalRules, validateApprovalRulePayload } from "./approval";
+import { resolveIdentityLink } from "./correction";
 import { isValidCzIco } from "./ico";
 import {
   acceptBlockingReasons,
@@ -199,7 +200,7 @@ describe("approval evaluator", () => {
         },
       ],
       facts,
-      acceptedByUserId: "acceptor",
+      validatedByUserId: "acceptor",
     });
     expect(result.path.type).toBe("fallback");
     expect(result.unreachable).toBe(true);
@@ -236,5 +237,48 @@ describe("approval evaluator", () => {
     });
     expect(result.ruleId).toBe("first");
     expect(result.path.type).toBe("one_of");
+  });
+});
+
+describe("resolveIdentityLink", () => {
+  it("flags a duplicate when a live invoice holds the identity", () => {
+    expect(
+      resolveIdentityLink({
+        liveDuplicate: { id: "live-1" },
+        rejectedPredecessor: { id: "rejected-1", correctionRound: 0 },
+      }),
+    ).toEqual({
+      duplicateOfId: "live-1",
+      supersedesId: null,
+      correctionRound: 0,
+    });
+  });
+
+  it("links a correction when only a rejected invoice holds the identity", () => {
+    expect(
+      resolveIdentityLink({
+        rejectedPredecessor: { id: "rejected-1", correctionRound: 0 },
+      }),
+    ).toEqual({
+      duplicateOfId: null,
+      supersedesId: "rejected-1",
+      correctionRound: 1,
+    });
+  });
+
+  it("increments the round on a second correction", () => {
+    expect(
+      resolveIdentityLink({
+        rejectedPredecessor: { id: "rejected-2", correctionRound: 2 },
+      }).correctionRound,
+    ).toBe(3);
+  });
+
+  it("leaves an unseen identity unlinked", () => {
+    expect(resolveIdentityLink({})).toEqual({
+      duplicateOfId: null,
+      supersedesId: null,
+      correctionRound: 0,
+    });
   });
 });

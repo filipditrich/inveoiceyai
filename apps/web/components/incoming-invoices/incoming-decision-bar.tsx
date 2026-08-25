@@ -14,7 +14,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
-const REVIEWABLE = new Set(["needs_review", "extract_failed", "on_hold"]);
+const REVIEWABLE = new Set(["needs_validation", "unsupported", "on_hold"]);
 
 export function IncomingDecisionBar({
   invoiceId,
@@ -279,7 +279,7 @@ export function IncomingDecisionBar({
     );
   }
 
-  if (status === "accepted") {
+  if (status === "validated") {
     return (
       <section className="bg-card rounded-xl border p-4">
         <h2 className="text-sm font-semibold">{t("gate.acceptedTitle")}</h2>

@@ -70,7 +70,7 @@ function tasksForPath(
 export async function spawnApprovalForAcceptedInvoice(input: {
   workspaceId: string;
   invoiceId: string;
-  acceptedByUserId: string;
+  validatedByUserId: string;
   facts: ApprovalFacts;
 }): Promise<{ status: "approved" | "pending_approval" }> {
   return withDbTransaction(async (tx) => {
@@ -87,7 +87,7 @@ export async function spawnApprovalForAcceptedInvoice(input: {
         path: rule.path,
       })),
       facts: input.facts,
-      acceptedByUserId: input.acceptedByUserId,
+      validatedByUserId: input.validatedByUserId,
     });
 
     if (evaluated.unreachable) {
@@ -115,7 +115,7 @@ export async function spawnApprovalForAcceptedInvoice(input: {
       await addAuditEvent(tx, {
         workspaceId: input.workspaceId,
         action: "incoming_invoice.approved",
-        actorUserId: input.acceptedByUserId,
+        actorUserId: input.validatedByUserId,
         entityType: "incoming_invoice",
         entityId: input.invoiceId,
         payload: { automatic: true, ruleId: evaluated.ruleId },
@@ -186,7 +186,7 @@ export async function decideApprovalTask(input: {
     if (!invoice) return { ok: false, error: "not_found" };
     if (
       input.decision === "approved" &&
-      invoice.acceptedByUserId === input.actorUserId
+      invoice.validatedByUserId === input.actorUserId
     ) {
       const siblings = await tx
         .select()
@@ -223,7 +223,7 @@ export async function decideApprovalTask(input: {
       await tx
         .update(incomingInvoices)
         .set({
-          status: "needs_review",
+          status: "needs_validation",
           notes: input.comment,
           updatedAt: new Date(),
         })

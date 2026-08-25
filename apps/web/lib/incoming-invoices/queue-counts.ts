@@ -16,7 +16,7 @@ export function incomingQueueCountsFromRows(
 ): IncomingQueueCounts {
   return {
     review: rows.filter((row) =>
-      ["needs_review", "extract_failed", "on_hold"].includes(row.status),
+      ["needs_validation", "unsupported", "on_hold"].includes(row.status),
     ).length,
     approval: rows.filter((row) => row.status === "pending_approval").length,
     pay: rows.filter(isIncomingInvoicePaymentRunEligible).length,

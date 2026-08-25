@@ -231,23 +231,23 @@ export function conditionsMatch(
   );
 }
 
-function stripAcceptor(
+function stripValidator(
   approvers: ApprovalApprover[],
-  acceptedByUserId?: string | null,
+  validatedByUserId?: string | null,
 ): ApprovalApprover[] {
-  if (!acceptedByUserId) {
+  if (!validatedByUserId) {
     return approvers;
   }
   return approvers.filter(
     (approver) =>
-      !(approver.kind === "user" && approver.id === acceptedByUserId),
+      !(approver.kind === "user" && approver.id === validatedByUserId),
   );
 }
 
 export function evaluateApprovalRules(input: {
   rules: RuleCandidate[];
   facts: ApprovalFacts;
-  acceptedByUserId?: string | null;
+  validatedByUserId?: string | null;
 }): {
   ruleId: string | null;
   path: EvaluatedPath;
@@ -302,7 +302,7 @@ export function evaluateApprovalRules(input: {
   if (path.type === "sequence") {
     const steps = path.steps.map((step) => ({
       type: step.type,
-      approvers: stripAcceptor(step.approvers, input.acceptedByUserId),
+      approvers: stripValidator(step.approvers, input.validatedByUserId),
     }));
     if (steps.some((step) => step.approvers.length === 0)) {
       return {
@@ -318,7 +318,7 @@ export function evaluateApprovalRules(input: {
     };
   }
 
-  const approvers = stripAcceptor(path.approvers, input.acceptedByUserId);
+  const approvers = stripValidator(path.approvers, input.validatedByUserId);
   if (approvers.length === 0) {
     return {
       ruleId: matched.id,

@@ -131,7 +131,7 @@ export default async function IncomingInvoiceDetailPage({
 
   const err = sp.invalid ? invalidMessage(tErrors, sp.invalid) : null;
   const editable =
-    invoice.status === "needs_review" || invoice.status === "on_hold";
+    invoice.status === "needs_validation" || invoice.status === "on_hold";
   const pendingTask = tasks.find((task) => task.status === "pending");
   const viewerUrl = document
     ? `/api/incoming-documents/${document.id}?disposition=inline`
@@ -142,7 +142,7 @@ export default async function IncomingInvoiceDetailPage({
     .where(
       and(
         eq(incomingInvoices.workspaceId, workspaceId),
-        eq(incomingInvoices.status, "needs_review"),
+        eq(incomingInvoices.status, "needs_validation"),
       ),
     )
     .orderBy(desc(incomingInvoices.createdAt));

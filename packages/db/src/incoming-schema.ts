@@ -42,10 +42,16 @@ export type IncomingDocumentClassification =
 export type IncomingExtractionStatus =
   "pending" | "succeeded" | "failed" | "skipped";
 
+/**
+ * Review and authorization only. Money lives in {@link IncomingPaymentState},
+ * the accounting system in {@link IncomingAccountingState} (ADR 0038).
+ */
 export type IncomingInvoiceStatus =
-  | "needs_review"
-  | "extract_failed"
-  | "accepted"
+  | "parsing"
+  | "unsupported"
+  | "needs_validation"
+  | "in_validation"
+  | "validated"
   | "pending_approval"
   | "approved"
   | "on_hold"
@@ -55,6 +61,11 @@ export type IncomingInvoiceStatus =
 export type IncomingDocType =
   "invoice" | "credit_note" | "proforma" | "advance";
 export type IncomingPaymentState = "unpaid" | "partial" | "paid" | "overpaid";
+
+/** Sync state against an external accounting system. `not_applicable` when the
+ * workspace has no accounting connection. */
+export type IncomingAccountingState =
+  "not_applicable" | "pending" | "queued" | "exported" | "failed" | "settled";
 export type IncomingPaymentMethod =
   "transfer" | "card" | "cash" | "direct_debit" | "other";
 export type IncomingExtractionSource = "isdoc" | "isdoc_pdf" | "ai" | "manual";
@@ -301,7 +312,7 @@ export const incomingInvoices = pgTable(
     status: text("status")
       .notNull()
       .$type<IncomingInvoiceStatus>()
-      .default("needs_review"),
+      .default("needs_validation"),
     docType: text("doc_type")
       .notNull()
       .$type<IncomingDocType>()
@@ -315,6 +326,7 @@ export const incomingInvoices = pgTable(
     specificSymbol: text("specific_symbol"),
     issueDate: text("issue_date"),
     taxDate: text("tax_date"),
+    accountingDate: text("accounting_date"),
     dueDate: text("due_date"),
     receivedDate: text("received_date").notNull(),
     currency: text("currency").notNull().default("CZK"),
@@ -345,6 +357,10 @@ export const incomingInvoices = pgTable(
       .notNull()
       .$type<IncomingPaymentState>()
       .default("unpaid"),
+    accountingState: text("accounting_state")
+      .notNull()
+      .$type<IncomingAccountingState>()
+      .default("not_applicable"),
     extractionSource: text("extraction_source")
       .notNull()
       .$type<IncomingExtractionSource>(),
@@ -354,8 +370,8 @@ export const incomingInvoices = pgTable(
       .notNull(),
     extractionModel: text("extraction_model"),
     extractedAt: timestamp("extracted_at", { withTimezone: true }),
-    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
-    acceptedByUserId: text("accepted_by_user_id").references(() => user.id, {
+    validatedAt: timestamp("validated_at", { withTimezone: true }),
+    validatedByUserId: text("validated_by_user_id").references(() => user.id, {
       onDelete: "set null",
     }),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
@@ -368,6 +384,11 @@ export const incomingInvoices = pgTable(
     holdReason: text("hold_reason"),
     cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
     duplicateOfId: uuid("duplicate_of_id"),
+    /** The rejected invoice this one corrects. Set on ingest when an identity
+     * collision lands on a rejected predecessor. */
+    supersedesId: uuid("supersedes_id"),
+    supersededById: uuid("superseded_by_id"),
+    correctionRound: integer("correction_round").notNull().default(0),
     creditNoteOfId: uuid("credit_note_of_id"),
     activePaymentRunId: uuid("active_payment_run_id"),
     externalKey: text("external_key"),
@@ -404,6 +425,7 @@ export const incomingInvoices = pgTable(
       t.workspaceId,
       t.externalKey,
     ),
+    index("incoming_invoices_supersedes_idx").on(t.supersedesId),
   ],
 );
 

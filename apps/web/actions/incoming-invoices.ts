@@ -79,7 +79,7 @@ export async function updateIncomingInvoiceFields(
   if (!row) {
     redirect("/incoming-invoices?invalid=not_found");
   }
-  if (row.status !== "needs_review" && row.status !== "on_hold") {
+  if (row.status !== "needs_validation" && row.status !== "on_hold") {
     redirect(`/incoming-invoices/${id}?invalid=not_reviewable`);
   }
   await db
@@ -149,7 +149,7 @@ export async function acceptIncomingInvoiceAction(
   await spawnApprovalForAcceptedInvoice({
     workspaceId,
     invoiceId: id,
-    acceptedByUserId: userId,
+    validatedByUserId: userId,
     facts: {
       issuerId: invoice?.issuerId,
       supplierId: invoice?.supplierId,

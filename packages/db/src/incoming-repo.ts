@@ -1,7 +1,8 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import {
   computeRetainUntil,
   normalizeInvoiceNumber,
+  resolveIdentityLink,
   validateIncomingInvoice,
   type IncomingException,
 } from "@invoicey/invoice-core/incoming";
@@ -277,16 +278,21 @@ export async function persistIncomingInvoice(
 ): Promise<{ id: string; exceptions: IncomingException[] }> {
   const numberNormalized = normalizeInvoiceNumber(input.number);
   let duplicateOfId: string | null = null;
+  let supersedesId: string | null = null;
+  let correctionRound = 0;
   if (input.supplierId && numberNormalized) {
+    const identity = and(
+      eq(incomingInvoices.workspaceId, input.workspaceId),
+      eq(incomingInvoices.issuerId, input.issuerId),
+      eq(incomingInvoices.supplierId, input.supplierId),
+      eq(incomingInvoices.numberNormalized, numberNormalized),
+    );
     const [dup] = await database
       .select({ id: incomingInvoices.id })
       .from(incomingInvoices)
       .where(
         and(
-          eq(incomingInvoices.workspaceId, input.workspaceId),
-          eq(incomingInvoices.issuerId, input.issuerId),
-          eq(incomingInvoices.supplierId, input.supplierId),
-          eq(incomingInvoices.numberNormalized, numberNormalized),
+          identity,
           sql`${incomingInvoices.cancelledAt} is null`,
           sql`${incomingInvoices.status} <> 'rejected'`,
         ),
@@ -294,6 +300,29 @@ export async function persistIncomingInvoice(
       .limit(1);
     if (dup) {
       duplicateOfId = dup.id;
+    } else {
+      // No live invoice under this identity, but a rejected one may exist: the
+      // supplier re-sent a corrected invoice under the same number. Link the
+      // chain instead of raising a duplicate. The identity unique index already
+      // excludes rejected rows, so the insert below is safe.
+      const [predecessor] = await database
+        .select({
+          id: incomingInvoices.id,
+          correctionRound: incomingInvoices.correctionRound,
+        })
+        .from(incomingInvoices)
+        .where(
+          and(
+            identity,
+            eq(incomingInvoices.status, "rejected"),
+            sql`${incomingInvoices.supersededById} is null`,
+          ),
+        )
+        .orderBy(desc(incomingInvoices.correctionRound))
+        .limit(1);
+      const link = resolveIdentityLink({ rejectedPredecessor: predecessor });
+      supersedesId = link.supersedesId;
+      correctionRound = link.correctionRound;
     }
   }
 
@@ -333,7 +362,9 @@ export async function persistIncomingInvoice(
       supplierId: input.supplierId ?? null,
       inboxItemId: input.inboxItemId ?? null,
       primaryDocumentId: input.primaryDocumentId ?? null,
-      status: "needs_review",
+      status: "needs_validation",
+      supersedesId,
+      correctionRound,
       docType: input.docType ?? "invoice",
       number: input.number ?? null,
       numberNormalized,
@@ -405,6 +436,13 @@ export async function persistIncomingInvoice(
     );
   }
 
+  if (supersedesId) {
+    await database
+      .update(incomingInvoices)
+      .set({ supersededById: row.id, updatedAt: new Date() })
+      .where(eq(incomingInvoices.id, supersedesId));
+  }
+
   return { id: row.id, exceptions };
 }
 
@@ -428,7 +466,7 @@ export async function acceptIncomingInvoice(input: {
     if (!invoice) {
       return { ok: false, error: "not_found" };
     }
-    if (invoice.status !== "needs_review" && invoice.status !== "on_hold") {
+    if (invoice.status !== "needs_validation" && invoice.status !== "on_hold") {
       return { ok: false, error: "not_reviewable" };
     }
 
@@ -464,9 +502,9 @@ export async function acceptIncomingInvoice(input: {
     await tx
       .update(incomingInvoices)
       .set({
-        status: "accepted",
-        acceptedAt: new Date(),
-        acceptedByUserId: input.actorUserId,
+        status: "validated",
+        validatedAt: new Date(),
+        validatedByUserId: input.actorUserId,
         retainUntil: invoice.retainUntil,
         exceptionCodes: exceptions.map((item) => item.code),
         updatedAt: new Date(),
@@ -553,11 +591,11 @@ export async function deleteIncomingInvoice(input: {
       .limit(1);
     if (!invoice) return { ok: false, error: "not_found" };
     const today = new Date().toISOString().slice(0, 10);
-    if (invoice.acceptedAt && invoice.retainUntil >= today) {
+    if (invoice.validatedAt && invoice.retainUntil >= today) {
       return { ok: false, error: "retention_window" };
     }
     if (
-      invoice.status === "accepted" ||
+      invoice.status === "validated" ||
       invoice.status === "approved" ||
       invoice.status === "pending_approval"
     ) {

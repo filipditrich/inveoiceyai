@@ -1,7 +1,7 @@
 const INCOMING_STATUSES = [
-  "needs_review",
-  "extract_failed",
-  "accepted",
+  "needs_validation",
+  "unsupported",
+  "validated",
   "pending_approval",
   "approved",
   "on_hold",
@@ -18,6 +18,6 @@ export function incomingStatusMessageKey(
   return (
     INCOMING_STATUSES.includes(status as (typeof INCOMING_STATUSES)[number])
       ? `status.${status}`
-      : "status.needs_review"
+      : "status.needs_validation"
   ) as IncomingStatusMessageKey;
 }

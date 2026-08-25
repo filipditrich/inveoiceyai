@@ -11,6 +11,11 @@ export {
   type EvaluatedPath,
   type RuleCandidate,
 } from "./approval";
+export {
+  resolveIdentityLink,
+  type IdentityLink,
+  type IdentityPredecessor,
+} from "./correction";
 export { isValidIban, normalizeIban } from "./iban";
 export { isValidCzIco, normalizeIcoDigits } from "./ico";
 export {

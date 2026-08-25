@@ -75,7 +75,7 @@ const accountId =
 const samples = [
   {
     number: "FV-2026-1001",
-    status: "needs_review",
+    status: "needs_validation",
     total: "12100.00",
     due: "2026-08-28",
     exceptions: ["new_beneficiary_account"],
@@ -96,7 +96,7 @@ const samples = [
   },
   {
     number: "CN-2026-12",
-    status: "accepted",
+    status: "validated",
     total: "-1210.00",
     due: "2026-08-18",
     exceptions: [],
