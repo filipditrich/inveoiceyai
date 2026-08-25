@@ -44,3 +44,6 @@ npm-debug.log*
 # local MCP presets (Plan 12a)
 .invoicey/
 .env*
+
+# Local git worktrees
+.worktrees/
