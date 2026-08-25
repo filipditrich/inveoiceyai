@@ -30,7 +30,8 @@ flowchart LR
     P16 --> P20["Plan 20<br/>multi-workspace UX<br/>done"]
     P20 --> P21["Plan 21<br/>AI usage<br/>done"]
     P21 --> P22["Plan 22<br/>payments + Fio<br/>pilot pending"]
-    P22 --> P24["Plan 24<br/>incoming invoices<br/>planned"]
+    P22 --> P24["Plan 24<br/>incoming invoices<br/>implemented"]
+    P24 --> P25["Plan 25<br/>payables lifecycle<br/>planned"]
     P12a -.feeds.-> P13b
     P13a -.upgrades to.-> P13b
 ```
@@ -651,6 +652,97 @@ bank, and reconcile the resulting debit through the Plan 22 ledger.
 return or kontrolní hlášení generation, purchase orders and three-way match,
 datová schránka / Peppol / EDI intake, foreign (non-SEPA) payment rails, and FX
 allocation.
+
+### Plan 25 — Payables lifecycle
+
+**Status:** Planned — ready for implementation
+
+**Selected:** 2026-08-24
+
+**ADRs:** [0035](./decisions/0035-isdoc-first-parsing.md) ·
+[0036](./decisions/0036-accounting-dimension-layer.md) ·
+[0037](./decisions/0037-pohoda-xml-as-the-reference-rail.md) ·
+[0038](./decisions/0038-three-orthogonal-projections.md)
+
+**Specs:** [payables lifecycle](./specs/payables-lifecycle.md) ·
+[accounting layer](./specs/accounting-layer.md) ·
+[invoice checks](./specs/invoice-checks.md) ·
+[workflow paths and automations](./specs/incoming-approval-workflows.md) ·
+[Pohoda integration](./specs/pohoda-integration.md) ·
+[cash-out planning](./specs/cashout-planning.md) ·
+[plan](../.cursor/plans/plan-25-payables-lifecycle.md)
+
+**Goal:** Take the supplier invoice from a mailbox to a settled entry in POHODA.
+Plan 24 built the skeleton; plan 25 adds the accountant's gate with a real
+accounting layer, configurable checks, reusable multi-actor workflow paths, the
+accounting-system export, payment planning, and likvidace — and gives all of it
+a product surface a customer can configure.
+
+**25a — foundations:**
+
+- [x] `accounting_state`; `accepted_*` → `validated_*`; new status vocabulary
+- [x] DB reset migration (`2026-08-25-plan25a-payables-reset.sql`) — payables
+      tables dropped and recreated by `db:push`; no data migration
+- [x] Correction linking on ingest (`supersedes_id` / `superseded_by_id` /
+      `correction_round`), with `resolveIdentityLink` covered by unit tests
+- [ ] The correction diff view
+- [ ] Three projections rendered separately in every list
+
+**25b — ISDOC-first parsing (ADR 0035):**
+
+- [ ] `unsupported` as a first-class state with manual entry beside the document
+- [ ] "Požádat dodavatele o ISDOC" reply; `isdoc_ratio` on supplier profiles
+- [ ] AI parsing behind a workspace switch, default off
+
+**25c — workflow paths and teams:**
+
+- [ ] `teams`; `workflow_paths` with `stage` ∈ validation | approval
+- [ ] Step builder, SLA, escalation, four-eyes; manual path assignment
+- [ ] Return-to-previous-level, delegate, bulk approve
+- [ ] Fix the priority-uniqueness collision and the fabricated admin task
+
+**25d — automations, tags, views:**
+
+- [ ] Conditions v2 (OR-of-ANDs), four triggers, the action catalogue
+- [ ] Tags; system and custom views with count badges; ReUI Data Grid
+
+**25e — accounting layer (ADR 0036):**
+
+- [ ] Five dimensions as codelists; header default with rendered line inheritance
+- [ ] Six-level resolution; learned supplier defaults, unanimity-gated
+- [ ] Required-dimension gating at G1
+
+**25f — Pohoda export (ADR 0037):**
+
+- [ ] dataPack builder: Windows-1250, truncation recorded, `extId` identity
+- [ ] `xml_file` rail end to end with `<rsp:responsePack>` parsing
+- [ ] `xml_mserver` rail; codelist sync; export queue and failure surface
+
+**25g — checks and findings:**
+
+- [ ] Configurable checks with severities and `applies_when`
+- [ ] Supplier profiles and the deviation checks
+- [ ] VAT-register lookups; card stack with "Vyřešit"; merged fraud card
+
+**25h — cash-out planning:**
+
+- [ ] `planned_payment_date`, payment policy, pay days with holiday shifting
+- [ ] Postponement with reason and badge; `/payables` with projected balance
+- [ ] Proposed run window; `not_exported` blocker
+
+**25i — likvidace:**
+
+- [ ] `liquidation_mode` with the owner confirmation
+- [ ] Bank agenda dataPack keyed on `extId`; `settled`; reversal finding
+
+**25j — transparency and notifications:**
+
+- [ ] Automation trace, approval timeline, live match preview
+- [ ] Per-event notifications with digest option; SLA reminders
+
+**Out of Plan 25:** purchase orders and three-way match, budgets, DPH přiznání
+and kontrolní hlášení, Peppol and datová schránka intake, non-Pohoda accounting
+providers, FX allocation, line-item approval, supplier portal.
 
 ## Plans not yet promised
 

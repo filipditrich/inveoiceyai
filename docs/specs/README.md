@@ -14,24 +14,30 @@ Just-in-time convention: write the remaining specs before the plan that consumes
 
 ## Expected specs (with the plan that authors them)
 
-| Spec                           | Plan that creates it | Purpose                                                                                                                              |
-| ------------------------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `pdf-rendering.md`             | Plan 3               | `@react-pdf/renderer` template structure, font selection, layout grid, asset embedding                                               |
-| `spayd-qr.md`                  | Plan 3               | SPAYD payload builder, QR encoding, rendering as PDF image                                                                           |
-| `isdoc.md`                     | Plan 3               | ISDOC 6.0.2 element-by-element mapping from `InvoiceSchema`, validators, importer compat notes                                       |
-| `ares.md`                      | Plan 4               | ARES REST v3 endpoint URL, response shape, Zod parser, caching policy, error handling, identifikovaná osoba edge case                |
-| `mcp.md`                       | Plan 12a             | Local stdio MCP + Vercel `/api/mcp`, tools, presets, Cursor + go-live checklist                                                      |
-| `db-schema.md`                 | DB foundation        | Neon tables: workspaces, issuer_businesses, clients, invoices, presets                                                               |
-| `uploads.md`                   | Plan 5               | UploadThing endpoints (issuer logo / stamp / signature, workspace logo), allowed MIME types and sizes, replace-without-delete policy |
-| `data-grid.md`                 | Plan 7               | ReUI Data Grid columns, filter/sort/search wiring, virtualization, row actions                                                       |
-| `email.md`                     | Plan 11              | react-email templates, EmailTransport adapters (Resend first), From/Reply-To, webhooks, invoice send                                 |
-| `public-shell.md`              | Plan 17              | Public homepage, auth entry shell, essential legal routes, consent UX, and launch metadata                                           |
-| `recurring.md`                 | Plan 10              | Invoice templates, monthly/quarterly schedules, cron drafts (HITL)                                                                   |
-| `payment-ledger-fio.md`        | Plan 22              | Provider-neutral allocations, deterministic matching, encrypted Fio connection, sync, reconciliation UI                              |
-| `payment-ledger-moneta.md`     | Plan 23              | MONETA VIP AISP read-only adapter on the same ledger                                                                                 |
-| `incoming-invoices.md`         | Plan 24              | Received supplier invoices: records, lifecycle gates, extraction ladder, approval rules, permissions, retention                      |
-| `inbound-email-capture.md`     | Plan 24b             | Resend Inbound aliases, Svix webhook, ingest job, classification, limits                                                             |
-| `payables-payment-runs-fio.md` | Plan 24e             | Payable calendar, payment runs, Fio import XML and submission, debit reconciliation                                                  |
+| Spec                             | Plan that creates it | Purpose                                                                                                                              |
+| -------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `pdf-rendering.md`               | Plan 3               | `@react-pdf/renderer` template structure, font selection, layout grid, asset embedding                                               |
+| `spayd-qr.md`                    | Plan 3               | SPAYD payload builder, QR encoding, rendering as PDF image                                                                           |
+| `isdoc.md`                       | Plan 3               | ISDOC 6.0.2 element-by-element mapping from `InvoiceSchema`, validators, importer compat notes                                       |
+| `ares.md`                        | Plan 4               | ARES REST v3 endpoint URL, response shape, Zod parser, caching policy, error handling, identifikovaná osoba edge case                |
+| `mcp.md`                         | Plan 12a             | Local stdio MCP + Vercel `/api/mcp`, tools, presets, Cursor + go-live checklist                                                      |
+| `db-schema.md`                   | DB foundation        | Neon tables: workspaces, issuer_businesses, clients, invoices, presets                                                               |
+| `uploads.md`                     | Plan 5               | UploadThing endpoints (issuer logo / stamp / signature, workspace logo), allowed MIME types and sizes, replace-without-delete policy |
+| `data-grid.md`                   | Plan 7               | ReUI Data Grid columns, filter/sort/search wiring, virtualization, row actions                                                       |
+| `email.md`                       | Plan 11              | react-email templates, EmailTransport adapters (Resend first), From/Reply-To, webhooks, invoice send                                 |
+| `public-shell.md`                | Plan 17              | Public homepage, auth entry shell, essential legal routes, consent UX, and launch metadata                                           |
+| `recurring.md`                   | Plan 10              | Invoice templates, monthly/quarterly schedules, cron drafts (HITL)                                                                   |
+| `payment-ledger-fio.md`          | Plan 22              | Provider-neutral allocations, deterministic matching, encrypted Fio connection, sync, reconciliation UI                              |
+| `payment-ledger-moneta.md`       | Plan 23              | MONETA VIP AISP read-only adapter on the same ledger                                                                                 |
+| `incoming-invoices.md`           | Plan 24              | Received supplier invoices: records, lifecycle gates, extraction ladder, approval rules, permissions, retention                      |
+| `inbound-email-capture.md`       | Plan 24b             | Resend Inbound aliases, Svix webhook, ingest job, classification, limits                                                             |
+| `payables-payment-runs-fio.md`   | Plan 24e             | Payable calendar, payment runs, Fio import XML and submission, debit reconciliation                                                  |
+| `payables-lifecycle.md`          | Plan 25              | **Master.** Five gates, three projections, corrections, the full configuration surface                                               |
+| `accounting-layer.md`            | Plan 25e             | Předkontace, středisko, činnost, zakázka, členění DPH: codelists, header default with per-line override, learned supplier defaults   |
+| `invoice-checks.md`              | Plan 25g             | Configurable checks with severities and conditions, supplier profiles, deviation and fraud detection, the finding card stack         |
+| `incoming-approval-workflows.md` | Plan 25c/25d         | Workflow paths with stages, teams, automations with OR conditions, tags, views, transparency surfaces                                |
+| `pohoda-integration.md`          | Plan 25f/25i         | Pohoda XML dataPack over three transports, accounting export, codelist sync, likvidace through the Bank agenda                       |
+| `cashout-planning.md`            | Plan 25h             | Planned payment dates, pay days, postponement, the cash-out view                                                                     |
 
 ## Spec format conventions
 
