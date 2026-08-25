@@ -84,8 +84,11 @@ is chosen so that the pilot gets value early and so that nothing is built twice.
   not widen it.
 - Correction diff view: changed fields only, old beside new, and carry the
   predecessor's accounting layer forward as defaults.
-- Lists render three badges. `accounting_state` is hidden when
-  `not_applicable`.
+- Lists render the three projections separately, never conflated into one
+  badge; `accounting_state` is hidden while `not_applicable`. **Only the badge
+  in 25a** — columns, filters and sorting on all three land in 25d with the data
+  grid, because the hand-rolled table is replaced there and doing it twice is
+  waste.
 
 **Done when** a rejected invoice, re-sent under the same number, arrives linked
 to its predecessor and opens on the diff.
@@ -135,6 +138,8 @@ assignable by hand, and Ivan can send one invoice to an extra approver.
 - System and custom views on a real filter model, with sidebar count badges.
 - Replace the hand-rolled table in `incoming-invoice-queue.tsx` with the ReUI
   Data Grid used by invoices and clients.
+- The three projections as first-class grid columns — sortable, filterable,
+  each with its own severity styling (carried over from 25a's badges).
 
 **Done when** "invoices over 100k → Cesta A, under 20k → Cesta B, supplier X →
 Cesta X" is three automations a customer wrote themselves.

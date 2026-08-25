@@ -200,6 +200,7 @@ export default async function IncomingInvoicesPage({
             supplierName: row.supplierName ?? row.invoice.supplierNameRaw,
             status: row.invoice.status,
             paymentState: row.invoice.paymentState,
+            accountingState: row.invoice.accountingState,
             activePaymentRunId: row.invoice.activePaymentRunId,
             docType: row.invoice.docType,
             issuerId: row.invoice.issuerId,

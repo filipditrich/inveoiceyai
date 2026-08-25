@@ -4,6 +4,10 @@ import {
 } from "@/actions/incoming-invoices";
 import { IncomingDecisionBar } from "@/components/incoming-invoices/incoming-decision-bar";
 import { IncomingExceptionBadge } from "@/components/incoming-invoices/incoming-exception-badge";
+import {
+  CorrectionNotice,
+  SupersededNotice,
+} from "@/components/incoming-invoices/correction-notice";
 import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 import {
   incomingActivitySteps,
@@ -18,6 +22,8 @@ import type { AppLocale } from "@/i18n/config";
 import { requireWorkspace } from "@/lib/auth/session";
 import { formatDateTime, formatMoneyCode } from "@/lib/format";
 import { incomingPaymentStateMessageKey } from "@/lib/incoming-invoices/payment-state-message";
+import { incomingAccountingStateMessageKey } from "@/lib/incoming-invoices/accounting-state-message";
+import { diffCorrection } from "@/lib/incoming-invoices/correction-diff";
 import { incomingStatusMessageKey } from "@/lib/incoming-invoices/status-message";
 import { invalidMessage } from "@/lib/invalid-message";
 import { payableEligibility } from "@/lib/incoming-invoices/eligibility";
@@ -112,6 +118,32 @@ export default async function IncomingInvoiceDetailPage({
     .select()
     .from(incomingInvoiceLines)
     .where(eq(incomingInvoiceLines.incomingInvoiceId, invoice.id));
+  const [predecessor] = invoice.supersedesId
+    ? await db
+        .select()
+        .from(incomingInvoices)
+        .where(
+          and(
+            eq(incomingInvoices.id, invoice.supersedesId),
+            eq(incomingInvoices.workspaceId, workspaceId),
+          ),
+        )
+        .limit(1)
+    : [];
+  const predecessorLineCount = predecessor
+    ? (
+        await db
+          .select({ id: incomingInvoiceLines.id })
+          .from(incomingInvoiceLines)
+          .where(eq(incomingInvoiceLines.incomingInvoiceId, predecessor.id))
+      ).length
+    : 0;
+  const correctionDiff = predecessor
+    ? diffCorrection(
+        { ...correctionSnapshot(predecessor), lineCount: predecessorLineCount },
+        { ...correctionSnapshot(invoice), lineCount: lines.length },
+      )
+    : [];
   const tasks = await db
     .select()
     .from(approvalTasks)
@@ -203,6 +235,13 @@ export default async function IncomingInvoiceDetailPage({
             <Badge variant="secondary">
               {tStatus(incomingPaymentStateMessageKey(invoice.paymentState))}
             </Badge>
+            {invoice.accountingState === "not_applicable" ? null : (
+              <Badge variant="outline">
+                {tStatus(
+                  incomingAccountingStateMessageKey(invoice.accountingState),
+                )}
+              </Badge>
+            )}
           </span>
         }
       />
@@ -210,6 +249,22 @@ export default async function IncomingInvoiceDetailPage({
         <p className="text-destructive text-sm" role="alert">
           {err}
         </p>
+      ) : null}
+      {predecessor ? (
+        <CorrectionNotice
+          correctionRound={invoice.correctionRound}
+          diff={correctionDiff}
+          locale={appLocale}
+          predecessor={{
+            id: predecessor.id,
+            number: predecessor.number,
+            rejectedAt: predecessor.rejectedAt,
+            rejectionReason: predecessor.rejectionReason,
+          }}
+        />
+      ) : null}
+      {invoice.supersededById ? (
+        <SupersededNotice successorId={invoice.supersededById} />
       ) : null}
       <IncomingDecisionBar
         invoiceId={invoice.id}
@@ -435,4 +490,29 @@ function Field({
       />
     </div>
   );
+}
+
+/** Maps an incoming invoice row onto the fields the correction diff compares. */
+function correctionSnapshot(row: typeof incomingInvoices.$inferSelect) {
+  return {
+    number: row.number,
+    docType: row.docType,
+    supplierName: row.supplierNameRaw,
+    supplierIco: row.supplierIcoRaw,
+    issueDate: row.issueDate,
+    taxDate: row.taxDate,
+    dueDate: row.dueDate,
+    currency: row.currency,
+    subtotal: row.subtotal,
+    vatTotal: row.vatTotal,
+    total: row.total,
+    variableSymbol: row.variableSymbol,
+    constantSymbol: row.constantSymbol,
+    specificSymbol: row.specificSymbol,
+    paymentMethod: row.paymentMethod,
+    beneficiaryIban: row.beneficiaryIban,
+    beneficiaryAccountNumber: row.beneficiaryAccountNumber,
+    beneficiaryBankCode: row.beneficiaryBankCode,
+    messageForRecipient: row.messageForRecipient,
+  };
 }

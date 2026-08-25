@@ -2437,6 +2437,43 @@ declare const messages: {
       fields: "Pole faktury";
       activity: "Aktivita";
       acceptNext: "Přijmout a další";
+      correction: {
+        title: "Oprava zamítnuté faktury";
+        round: "{round}. kolo oprav";
+        description: "Dodavatel poslal opravenou verzi faktury {number}, kterou jsme zamítli {date}.";
+        reason: "Důvod zamítnutí";
+        changed: "Co dodavatel změnil";
+        unchanged: "Dodavatel poslal fakturu znovu beze změny údajů. Zkontrolujte, jestli opravdu opravil, co jsme mu vytkli.";
+        before: "Původně";
+        after: "Nyní";
+        empty: "—";
+        openPredecessor: "Zobrazit zamítnutou fakturu";
+        supersededTitle: "Tato faktura byla nahrazena opravou";
+        supersededDescription: "Dodavatel poslal opravenou verzi. Pracujte s ní, tahle zůstává jen jako doklad o zamítnutí.";
+        openSuccessor: "Zobrazit opravenou fakturu";
+        fields: {
+          number: "Číslo faktury";
+          docType: "Typ dokladu";
+          supplierName: "Dodavatel";
+          supplierIco: "IČO dodavatele";
+          issueDate: "Datum vystavení";
+          taxDate: "DUZP";
+          dueDate: "Splatnost";
+          currency: "Měna";
+          subtotal: "Základ daně";
+          vatTotal: "DPH";
+          total: "Celkem";
+          variableSymbol: "Variabilní symbol";
+          constantSymbol: "Konstantní symbol";
+          specificSymbol: "Specifický symbol";
+          paymentMethod: "Způsob úhrady";
+          beneficiaryIban: "IBAN příjemce";
+          beneficiaryAccountNumber: "Číslo účtu příjemce";
+          beneficiaryBankCode: "Kód banky";
+          messageForRecipient: "Zpráva pro příjemce";
+          lineCount: "Počet položek";
+        };
+      };
     };
     uploadPage: {
       title: "Nahrát přijaté faktury";

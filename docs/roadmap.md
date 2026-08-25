@@ -685,8 +685,9 @@ a product surface a customer can configure.
       tables dropped and recreated by `db:push`; no data migration
 - [x] Correction linking on ingest (`supersedes_id` / `superseded_by_id` /
       `correction_round`), with `resolveIdentityLink` covered by unit tests
-- [ ] The correction diff view
-- [ ] Three projections rendered separately in every list
+- [x] The correction diff view — banner, field-level diff, superseded notice
+- [x] Three projections rendered separately (badges); columns and filters move
+      to 25d with the data grid
 
 **25b — ISDOC-first parsing (ADR 0035):**
 

@@ -2,6 +2,7 @@
 
 import { IncomingDecisionBar } from "@/components/incoming-invoices/incoming-decision-bar";
 import { IncomingExceptionBadge } from "@/components/incoming-invoices/incoming-exception-badge";
+import { incomingAccountingStateMessageKey } from "@/lib/incoming-invoices/accounting-state-message";
 import { IncomingInvoiceTabs } from "@/components/incoming-invoices/incoming-invoice-tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ type QueueRow = {
   supplierName: string | null;
   status: string;
   paymentState: string;
+  accountingState: string;
   activePaymentRunId: string | null;
   docType: string;
   issuerId: string | null;
@@ -202,6 +204,11 @@ export function IncomingInvoiceQueue({
                   {t(incomingStatusMessageKey(row.status))}
                 </Badge>
                 {row.mine ? <Badge>{t("myTask")}</Badge> : null}
+                {row.accountingState === "not_applicable" ? null : (
+                  <Badge variant="secondary">
+                    {t(incomingAccountingStateMessageKey(row.accountingState))}
+                  </Badge>
+                )}
                 {row.exceptions.slice(0, 2).map((code) => (
                   <IncomingExceptionBadge code={code} key={code} />
                 ))}
@@ -310,6 +317,24 @@ export function IncomingInvoiceQueue({
                         {t(incomingStatusMessageKey(row.status))}
                       </Badge>
                       {row.mine ? <Badge>{t("myTask")}</Badge> : null}
+                      {row.accountingState === "not_applicable" ? null : (
+                        <Badge variant="secondary">
+                          {t(
+                            incomingAccountingStateMessageKey(
+                              row.accountingState,
+                            ),
+                          )}
+                        </Badge>
+                      )}
+                      {row.accountingState === "not_applicable" ? null : (
+                        <Badge variant="secondary">
+                          {t(
+                            incomingAccountingStateMessageKey(
+                              row.accountingState,
+                            ),
+                          )}
+                        </Badge>
+                      )}
                       {row.exceptions.slice(0, 2).map((code) => (
                         <IncomingExceptionBadge key={code} code={code} />
                       ))}
