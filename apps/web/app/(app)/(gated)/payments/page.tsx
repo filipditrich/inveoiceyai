@@ -43,6 +43,8 @@ import { isAppLocale } from "@/i18n/config";
 import { requireWorkspace } from "@/lib/auth/session";
 import { formatInvoiceDate, formatMoney } from "@/lib/format";
 import { messageLookup } from "@/lib/i18n-lookup";
+import { paymentMatchFactors } from "@/components/payments/payment-match-explanation";
+import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 
 function todayPrague(): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -80,7 +82,11 @@ function matchLabel(
   return t("match.low");
 }
 
-export default async function PaymentsPage() {
+export default async function PaymentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ toast?: string }>;
+}) {
   const { workspaceId } = await requireWorkspace();
   const [
     t,
@@ -181,10 +187,12 @@ export default async function PaymentsPage() {
       )
       .orderBy(desc(invoices.issueDate)),
   ]);
+  const sp = await searchParams;
   const locale: AppLocale = isAppLocale(localeValue) ? localeValue : "cs";
 
   return (
     <div className="space-y-4">
+      <ProductToastTracker toast={sp.toast ?? null} />
       <PageHeader
         actions={
           <Button
@@ -255,7 +263,7 @@ export default async function PaymentsPage() {
                           value: proposal.variableSymbol ?? t("vsMissing"),
                         })}
                       </span>
-                      {proposal.reasons.map((reason) => (
+                      {paymentMatchFactors(proposal.reasons).map((reason) => (
                         <span
                           key={reason}
                           className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-700 dark:text-emerald-400"

@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { reportRuntimeError } from "@/lib/observability";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
@@ -14,7 +15,7 @@ export default function AppError({
   const t = useTranslations("AppError");
 
   useEffect(() => {
-    console.error("[app error]", error);
+    reportRuntimeError(error);
   }, [error]);
 
   return (

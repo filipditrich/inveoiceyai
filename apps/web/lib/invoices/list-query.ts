@@ -11,53 +11,10 @@ import {
   type SQL,
 } from "drizzle-orm";
 
+import type { InvoiceSort } from "@/lib/invoices/list-sort";
+
 export const DEFAULT_PAGE_SIZE = 50;
 export const PAGE_SIZES = [25, 50, 100] as const;
-
-export const INVOICE_SORT_KEYS = [
-  "issueDate",
-  "dueDate",
-  "clientName",
-  "total",
-  "number",
-] as const;
-
-export type InvoiceSortKey = (typeof INVOICE_SORT_KEYS)[number];
-
-export type InvoiceSort = {
-  id: InvoiceSortKey;
-  desc: boolean;
-};
-
-const SORT_KEY_SET = new Set<string>(INVOICE_SORT_KEYS);
-
-/**
- * Parse list `sort` query param.
- * Supports `issueDate.desc`, legacy `date_desc` / `date_asc`.
- */
-export function parseInvoiceSort(sort?: string | null): InvoiceSort {
-  if (!sort) {
-    return { id: "issueDate", desc: true };
-  }
-  if (sort === "date_asc") {
-    return { id: "issueDate", desc: false };
-  }
-  if (sort === "date_desc") {
-    return { id: "issueDate", desc: true };
-  }
-  const [rawId, rawDir] = sort.split(".");
-  if (rawId && SORT_KEY_SET.has(rawId)) {
-    return {
-      id: rawId as InvoiceSortKey,
-      desc: rawDir !== "asc",
-    };
-  }
-  return { id: "issueDate", desc: true };
-}
-
-export function serializeInvoiceSort(sort: InvoiceSort): string {
-  return `${sort.id}.${sort.desc ? "desc" : "asc"}`;
-}
 
 export function invoiceOrderBy(sort: InvoiceSort): SQL[] {
   const dir = sort.desc ? desc : asc;

@@ -1,15 +1,17 @@
 import { createPaymentRunAction } from "@/actions/payment-runs";
 import { IncomingInvoiceQueue } from "@/components/incoming-invoices/incoming-invoice-queue";
+import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import type { AppLocale } from "@/i18n/config";
 import { requireWorkspace } from "@/lib/auth/session";
 import { formatInvoiceDate, formatMoneyCode } from "@/lib/format";
-import { incomingQueueCountsFromRows } from "@/lib/incoming-invoices/queue-counts";
 import { payableEligibility } from "@/lib/incoming-invoices/eligibility";
+import { incomingQueueCountsFromRows } from "@/lib/incoming-invoices/queue-counts";
 import { invalidMessage } from "@/lib/invalid-message";
 import {
   approvalTasks,
+  bankAccountIssuers,
   bankAccounts,
   incomingInvoices,
   issuerBusinesses,
@@ -24,6 +26,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 
 type Search = Promise<{
   invalid?: string;
+  toast?: string;
   tab?: string;
   q?: string;
 }>;
@@ -47,9 +50,14 @@ export default async function IncomingInvoicesPage({
     .select({
       invoice: incomingInvoices,
       supplierName: suppliers.name,
+      beneficiaryConfirmed: supplierBankAccounts.confirmedAt,
     })
     .from(incomingInvoices)
     .leftJoin(suppliers, eq(suppliers.id, incomingInvoices.supplierId))
+    .leftJoin(
+      supplierBankAccounts,
+      eq(incomingInvoices.supplierBankAccountId, supplierBankAccounts.id),
+    )
     .where(eq(incomingInvoices.workspaceId, workspaceId))
     .orderBy(desc(incomingInvoices.createdAt))
     .limit(200);
@@ -76,38 +84,76 @@ export default async function IncomingInvoicesPage({
       .map((task) => task.incomingInvoiceId),
   );
 
-  const counts = incomingQueueCountsFromRows(rows.map((row) => row.invoice));
+  const paymentEligibility = (row: (typeof rows)[number]) => ({
+    status: row.invoice.status,
+    holdUntil: row.invoice.holdUntil,
+    paymentState: row.invoice.paymentState,
+    outstanding: String(
+      Math.max(
+        0,
+        Number(row.invoice.total ?? 0) - Number(row.invoice.paidAmount ?? 0),
+      ),
+    ),
+    currency: row.invoice.currency,
+    runCurrency: row.invoice.currency,
+    paymentMethod: row.invoice.paymentMethod,
+    beneficiaryConfirmed: Boolean(row.beneficiaryConfirmed),
+    hasBeneficiary: Boolean(
+      row.invoice.beneficiaryIban ||
+      (row.invoice.beneficiaryAccountNumber && row.invoice.beneficiaryBankCode),
+    ),
+    iban: row.invoice.beneficiaryIban,
+    accountNumber: row.invoice.beneficiaryAccountNumber,
+    bankCode: row.invoice.beneficiaryBankCode,
+    activePaymentRunId: row.invoice.activePaymentRunId,
+    docType: row.invoice.docType,
+  });
+  const paymentBlockers = (row: (typeof rows)[number]) =>
+    payableEligibility(paymentEligibility(row));
+  const counts = incomingQueueCountsFromRows(rows.map(paymentEligibility));
   const review = rows.filter((row) =>
     ["needs_review", "extract_failed", "on_hold"].includes(row.invoice.status),
   );
   const approval = rows.filter(
     (row) => row.invoice.status === "pending_approval",
   );
-  const payables = rows.filter(
-    (row) =>
-      row.invoice.status === "approved" &&
-      row.invoice.paymentState !== "paid" &&
-      row.invoice.docType !== "credit_note",
-  );
+  const payables = rows.filter((row) => paymentBlockers(row).length === 0);
 
-  const issuers = await db
-    .select({
-      id: issuerBusinesses.id,
-      snapshot: issuerBusinesses.snapshot,
-    })
-    .from(issuerBusinesses)
-    .where(eq(issuerBusinesses.workspaceId, workspaceId));
-  const accounts = await db
-    .select()
-    .from(bankAccounts)
-    .where(eq(bankAccounts.workspaceId, workspaceId));
-  const supplierAccounts = await db
-    .select()
-    .from(supplierBankAccounts)
-    .where(eq(supplierBankAccounts.workspaceId, workspaceId));
-  const supplierAccountById = new Map(
-    supplierAccounts.map((account) => [account.id, account]),
+  const [issuers, accounts, accountIssuerRows] = await Promise.all([
+    db
+      .select({
+        id: issuerBusinesses.id,
+        snapshot: issuerBusinesses.snapshot,
+      })
+      .from(issuerBusinesses)
+      .where(eq(issuerBusinesses.workspaceId, workspaceId)),
+    db
+      .select()
+      .from(bankAccounts)
+      .where(eq(bankAccounts.workspaceId, workspaceId)),
+    db
+      .select({
+        bankAccountId: bankAccountIssuers.bankAccountId,
+        issuerId: bankAccountIssuers.issuerId,
+      })
+      .from(bankAccountIssuers)
+      .where(eq(bankAccountIssuers.workspaceId, workspaceId)),
+  ]);
+  const issuerNameById = new Map(
+    issuers.map((issuer) => [
+      issuer.id,
+      typeof issuer.snapshot.name === "string"
+        ? issuer.snapshot.name
+        : issuer.id.slice(0, 8),
+    ]),
   );
+  const issuerIdsByAccount = new Map<string, string[]>();
+  for (const mapping of accountIssuerRows) {
+    issuerIdsByAccount.set(mapping.bankAccountId, [
+      ...(issuerIdsByAccount.get(mapping.bankAccountId) ?? []),
+      mapping.issuerId,
+    ]);
+  }
 
   const visible =
     tab === "approval"
@@ -123,6 +169,10 @@ export default async function IncomingInvoicesPage({
 
   return (
     <div className="space-y-4">
+      <ProductToastTracker
+        properties={{ routeKind: "incoming" }}
+        toast={sp.toast ?? null}
+      />
       <PageHeader
         icon={<InboxIcon />}
         title={t("title")}
@@ -142,65 +192,43 @@ export default async function IncomingInvoicesPage({
       <IncomingInvoiceQueue
         tab={tab}
         counts={counts}
-        rows={visible.map((row) => ({
-          id: row.invoice.id,
-          number: row.invoice.number,
-          supplierName: row.supplierName ?? row.invoice.supplierNameRaw,
-          status: row.invoice.status,
-          paymentState: row.invoice.paymentState,
-          total: row.invoice.total
-            ? formatMoneyCode(
-                Number(row.invoice.total),
-                row.invoice.currency,
-                appLocale,
-              )
-            : null,
-          dueDate: formatInvoiceDate(row.invoice.dueDate, appLocale),
-          exceptions: row.invoice.exceptionCodes,
-          paymentBlockers: payableEligibility({
+        rows={visible.map((row) => {
+          const blockers = paymentBlockers(row);
+          return {
+            id: row.invoice.id,
+            number: row.invoice.number,
+            supplierName: row.supplierName ?? row.invoice.supplierNameRaw,
             status: row.invoice.status,
-            holdUntil: row.invoice.holdUntil,
             paymentState: row.invoice.paymentState,
-            outstanding: String(
-              Math.max(
-                0,
-                Number(row.invoice.total ?? 0) -
-                  Number(row.invoice.paidAmount ?? 0),
-              ),
-            ),
-            currency: row.invoice.currency,
-            runCurrency: "CZK",
-            paymentMethod: row.invoice.paymentMethod,
-            beneficiaryConfirmed: Boolean(
-              supplierAccountById.get(row.invoice.supplierBankAccountId ?? "")
-                ?.confirmedAt,
-            ),
-            hasBeneficiary: Boolean(
-              row.invoice.beneficiaryIban ||
-              (row.invoice.beneficiaryAccountNumber &&
-                row.invoice.beneficiaryBankCode),
-            ),
-            iban: row.invoice.beneficiaryIban,
-            accountNumber: row.invoice.beneficiaryAccountNumber,
-            bankCode: row.invoice.beneficiaryBankCode,
             activePaymentRunId: row.invoice.activePaymentRunId,
             docType: row.invoice.docType,
-          }),
-          mine: myTaskIds.has(row.invoice.id),
-          pendingTaskId: pendingTaskByInvoice.get(row.invoice.id)?.id ?? null,
-        }))}
+            issuerId: row.invoice.issuerId,
+            issuerName: row.invoice.issuerId
+              ? (issuerNameById.get(row.invoice.issuerId) ??
+                row.invoice.issuerId.slice(0, 8))
+              : null,
+            currency: row.invoice.currency,
+            paymentEligible: blockers.length === 0,
+            paymentBlocker: blockers[0] ?? null,
+            total: row.invoice.total
+              ? formatMoneyCode(
+                  Number(row.invoice.total),
+                  row.invoice.currency,
+                  appLocale,
+                )
+              : null,
+            dueDate: formatInvoiceDate(row.invoice.dueDate, appLocale),
+            exceptions: row.invoice.exceptionCodes,
+            mine: myTaskIds.has(row.invoice.id),
+            pendingTaskId: pendingTaskByInvoice.get(row.invoice.id)?.id ?? null,
+          };
+        })}
         canCreateRun={canCreateRun}
-        issuers={issuers.map((issuer) => ({
-          id: issuer.id,
-          name:
-            typeof issuer.snapshot.name === "string"
-              ? issuer.snapshot.name
-              : issuer.id.slice(0, 8),
-        }))}
         bankAccounts={accounts.map((account) => ({
           id: account.id,
           label: account.displayName ?? account.iban,
           currency: account.currency,
+          issuerIds: issuerIdsByAccount.get(account.id) ?? [],
         }))}
         createRunAction={createPaymentRunAction}
       />

@@ -6,7 +6,12 @@ import { IncomingInvoiceTabs } from "@/components/incoming-invoices/incoming-inv
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { IncomingQueueCounts } from "@/lib/incoming-invoices/queue-counts";
+import {
+  compatiblePaymentRunAccounts,
+  paymentRunSelection,
+} from "@/lib/incoming-invoices/payment-run-selection";
 import { incomingStatusMessageKey } from "@/lib/incoming-invoices/status-message";
+import { incomingNextAction } from "@/components/incoming-invoices/incoming-invoice-activity";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
@@ -17,10 +22,16 @@ type QueueRow = {
   supplierName: string | null;
   status: string;
   paymentState: string;
+  activePaymentRunId: string | null;
+  docType: string;
+  issuerId: string | null;
+  issuerName: string | null;
+  currency: string;
+  paymentEligible: boolean;
+  paymentBlocker: string | null;
   total: string | null;
   dueDate: string | null;
   exceptions: string[];
-  paymentBlockers: string[];
   mine: boolean;
   pendingTaskId: string | null;
 };
@@ -30,7 +41,6 @@ export function IncomingInvoiceQueue({
   counts,
   rows,
   canCreateRun,
-  issuers,
   bankAccounts,
   createRunAction,
 }: {
@@ -38,16 +48,26 @@ export function IncomingInvoiceQueue({
   counts: IncomingQueueCounts;
   rows: QueueRow[];
   canCreateRun: boolean;
-  issuers: Array<{ id: string; name: string }>;
-  bankAccounts: Array<{ id: string; label: string; currency: string }>;
+  bankAccounts: Array<{
+    id: string;
+    label: string;
+    currency: string;
+    issuerIds: string[];
+  }>;
   createRunAction: (formData: FormData) => Promise<void>;
 }) {
   const t = useTranslations("IncomingInvoices");
   const [selected, setSelected] = useState<string[]>([]);
-  const selectableRows = rows.filter((row) => row.paymentBlockers.length === 0);
+  const selection = paymentRunSelection(rows, selected);
+  const compatibleIds = new Set(selection.compatibleIds);
+  const compatibleAccounts = compatiblePaymentRunAccounts(
+    bankAccounts,
+    selection.issuerId,
+    selection.currency,
+  );
   const allSelected =
-    selectableRows.length > 0 &&
-    selectableRows.every((row) => selected.includes(row.id));
+    selection.compatibleIds.length > 0 &&
+    selection.compatibleIds.every((id) => selected.includes(id));
   const emptyLabel =
     tab === "approval"
       ? t("emptyApproval")
@@ -75,11 +95,15 @@ export function IncomingInvoiceQueue({
             <input key={id} type="hidden" name="ids" value={id} />
           ))}
           <p className="text-muted-foreground text-sm">{t("run.selectHint")}</p>
-          {bankAccounts.length === 0 ? (
+          {!selection.issuerId || !selection.currency ? (
+            <p className="text-muted-foreground text-sm">
+              {t("run.selectFirst")}
+            </p>
+          ) : compatibleAccounts.length === 0 ? (
             <p className="text-sm">
-              {t("run.noAccount")}{" "}
+              {t("run.noCompatibleAccount")}{" "}
               <Link
-                className="text-brand underline-offset-2 hover:underline"
+                className="text-foreground font-medium underline underline-offset-2 hover:no-underline"
                 href="/settings/bank-connections"
               >
                 {t("run.connectBank")}
@@ -87,33 +111,29 @@ export function IncomingInvoiceQueue({
             </p>
           ) : (
             <div className="flex flex-wrap items-end gap-3">
-              <label className="grid gap-1 text-sm">
-                <span>{t("run.issuer")}</span>
-                <select
-                  name="issuerId"
-                  className="border-input h-8 rounded-lg border bg-transparent px-2.5 text-sm"
-                >
-                  {issuers.map((issuer) => (
-                    <option key={issuer.id} value={issuer.id}>
-                      {issuer.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <input type="hidden" name="issuerId" value={selection.issuerId} />
+              <input type="hidden" name="currency" value={selection.currency} />
+              <p className="text-muted-foreground text-sm">
+                {t("run.selectionSummary", {
+                  issuer:
+                    rows.find((row) => row.issuerId === selection.issuerId)
+                      ?.issuerName ?? "—",
+                  currency: selection.currency,
+                })}
+              </p>
               <label className="grid gap-1 text-sm">
                 <span>{t("run.account")}</span>
                 <select
                   name="bankAccountId"
                   className="border-input h-8 rounded-lg border bg-transparent px-2.5 text-sm"
                 >
-                  {bankAccounts.map((account) => (
+                  {compatibleAccounts.map((account) => (
                     <option key={account.id} value={account.id}>
                       {account.label}
                     </option>
                   ))}
                 </select>
               </label>
-              <input type="hidden" name="currency" value="CZK" />
               <Button type="submit" disabled={selected.length === 0}>
                 {t("run.create", { count: String(selected.length) })}
               </Button>
@@ -149,10 +169,10 @@ export function IncomingInvoiceQueue({
                 </div>
                 {tab === "pay" ? (
                   <input
-                    aria-label={row.number ?? t("table.number")}
+                    aria-label={`${t("table.number")}: ${row.number ?? "—"}`}
                     checked={selected.includes(row.id)}
-                    disabled={row.paymentBlockers.length > 0}
                     className="mt-1 size-5 shrink-0"
+                    disabled={!compatibleIds.has(row.id)}
                     onChange={(event) => {
                       setSelected((current) =>
                         event.target.checked
@@ -160,6 +180,11 @@ export function IncomingInvoiceQueue({
                           : current.filter((id) => id !== row.id),
                       );
                     }}
+                    title={
+                      compatibleIds.has(row.id)
+                        ? undefined
+                        : t("run.selectionIncompatible")
+                    }
                     type="checkbox"
                   />
                 ) : null}
@@ -181,14 +206,19 @@ export function IncomingInvoiceQueue({
                   <IncomingExceptionBadge code={code} key={code} />
                 ))}
               </div>
-              {tab === "pay" && row.paymentBlockers.length > 0 ? (
-                <p className="text-muted-foreground text-xs">
-                  {t("run.blocked")}
-                </p>
-              ) : null}
+              <p className="text-muted-foreground text-xs">
+                {t(
+                  `nextAction.${incomingNextAction({ status: row.status, paymentState: row.paymentState, exceptions: row.exceptions, docType: row.docType, activePaymentRunId: row.activePaymentRunId, paymentEligible: row.paymentEligible, paymentBlocker: row.paymentBlocker })}` as never,
+                )}
+              </p>
               <IncomingDecisionBar
                 invoiceId={row.id}
+                activePaymentRunId={row.activePaymentRunId}
+                docType={row.docType}
+                paymentEligible={row.paymentEligible}
+                paymentBlocker={row.paymentBlocker}
                 pendingTaskId={row.pendingTaskId}
+                paymentState={row.paymentState}
                 returnTo={`/incoming-invoices?tab=${tab}`}
                 status={row.status}
                 variant="row"
@@ -210,9 +240,7 @@ export function IncomingInvoiceQueue({
                     checked={allSelected}
                     onChange={(event) => {
                       setSelected(
-                        event.target.checked
-                          ? selectableRows.map((row) => row.id)
-                          : [],
+                        event.target.checked ? selection.compatibleIds : [],
                       );
                     }}
                   />
@@ -244,9 +272,10 @@ export function IncomingInvoiceQueue({
                   {tab === "pay" ? (
                     <td className="px-3 py-2">
                       <input
+                        aria-label={`${t("table.number")}: ${row.number ?? "—"}`}
+                        disabled={!compatibleIds.has(row.id)}
                         type="checkbox"
                         checked={selected.includes(row.id)}
-                        disabled={row.paymentBlockers.length > 0}
                         onChange={(event) => {
                           setSelected((current) =>
                             event.target.checked
@@ -254,6 +283,11 @@ export function IncomingInvoiceQueue({
                               : current.filter((id) => id !== row.id),
                           );
                         }}
+                        title={
+                          compatibleIds.has(row.id)
+                            ? undefined
+                            : t("run.selectionIncompatible")
+                        }
                       />
                     </td>
                   ) : null}
@@ -280,17 +314,17 @@ export function IncomingInvoiceQueue({
                         <IncomingExceptionBadge key={code} code={code} />
                       ))}
                     </div>
-                    {tab === "pay" && row.paymentBlockers.length > 0 ? (
-                      <p className="text-muted-foreground mt-1 text-xs">
-                        {t("run.blocked")}
-                      </p>
-                    ) : null}
                   </td>
                   <td className="bg-card sticky right-0 px-3 py-2">
                     <IncomingDecisionBar
                       invoiceId={row.id}
+                      activePaymentRunId={row.activePaymentRunId}
+                      docType={row.docType}
+                      paymentEligible={row.paymentEligible}
+                      paymentBlocker={row.paymentBlocker}
                       status={row.status}
                       pendingTaskId={row.pendingTaskId}
+                      paymentState={row.paymentState}
                       variant="row"
                       returnTo={`/incoming-invoices?tab=${tab}`}
                     />

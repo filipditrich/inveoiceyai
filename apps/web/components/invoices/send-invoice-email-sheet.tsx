@@ -13,6 +13,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { validateEmailPreflight } from "@/components/invoices/email-preflight";
 import { MailIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import * as React from "react";
@@ -33,10 +34,13 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
   const t = useTranslations("Invoices.email");
   const [open, setOpen] = React.useState(false);
   const [to, setTo] = React.useState(props.defaultTo);
-  const suppressedSet = new Set(
-    (props.suppressedEmails ?? []).map((e) => e.toLowerCase()),
+  const [cc, setCc] = React.useState("");
+  const preflight = validateEmailPreflight(
+    to,
+    cc,
+    props.suppressedEmails ?? [],
   );
-  const toSuppressed = suppressedSet.has(to.trim().toLowerCase());
+  const blocked = preflight.suppressed || !preflight.valid;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -58,9 +62,14 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
           <p className="text-destructive px-4 text-sm">{t("notConfigured")}</p>
         ) : null}
 
-        {toSuppressed ? (
+        {preflight.suppressed ? (
           <p className="text-muted-foreground px-4 text-sm">
             {t("suppressed")}
+          </p>
+        ) : null}
+        {!preflight.suppressed && !preflight.valid ? (
+          <p className="text-destructive px-4 text-sm" role="alert">
+            {t("invalidRecipient" as never)}
           </p>
         ) : null}
 
@@ -84,6 +93,7 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
             <Input
               id="email-cc"
               name="cc"
+              onChange={(event) => setCc(event.target.value)}
               placeholder="email@example.com, …"
               type="text"
             />
@@ -125,7 +135,7 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
             </p>
           </div>
           <SubmitButton
-            disabled={!props.emailConfigured}
+            disabled={!props.emailConfigured || blocked}
             pendingLabel={t("sending")}
           >
             {t("submit")}

@@ -1,7 +1,15 @@
 "use client";
 
+import { track } from "@vercel/analytics";
 import { Analytics } from "@vercel/analytics/next";
 import { useConsentManager } from "@c15t/react";
+import {
+  productAnalyticsBrowserEventName,
+  trackProductEvent,
+  type ProductEventName,
+  type ProductAnalyticsProperties,
+} from "@/lib/product-analytics";
+import { useEffect } from "react";
 
 /** Do not request the analytics script until measurement consent is active. */
 export function ConsentAwareAnalytics() {
@@ -12,6 +20,34 @@ export function ConsentAwareAnalytics() {
   if (!consent.consents?.measurement) {
     return null;
   }
+
+  return <MeasuredAnalytics />;
+}
+
+function MeasuredAnalytics() {
+  useEffect(() => {
+    const onProductEvent = (event: Event) => {
+      const detail = (
+        event as CustomEvent<{
+          name: ProductEventName;
+          properties: ProductAnalyticsProperties;
+        }>
+      ).detail;
+      if (!detail) return;
+      trackProductEvent(
+        { track: (name, properties) => track(name, properties) },
+        true,
+        detail.name,
+        detail.properties,
+      );
+    };
+    window.addEventListener(productAnalyticsBrowserEventName(), onProductEvent);
+    return () =>
+      window.removeEventListener(
+        productAnalyticsBrowserEventName(),
+        onProductEvent,
+      );
+  }, []);
 
   return <Analytics />;
 }

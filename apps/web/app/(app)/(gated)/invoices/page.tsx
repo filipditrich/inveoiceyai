@@ -6,11 +6,13 @@ import { requireWorkspace } from "@/lib/auth/session";
 import {
   buildInvoiceBaseConditions,
   invoiceOrderBy,
-  parseInvoiceSort,
   parsePage,
   parsePageSize,
-  serializeInvoiceSort,
 } from "@/lib/invoices/list-query";
+import {
+  parseInvoiceSort,
+  serializeInvoiceSort,
+} from "@/lib/invoices/list-sort";
 import { displayStatusWhere, pragueTodayIso } from "@/lib/invoice-status-sql";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import {

@@ -1,24 +1,37 @@
 import { describe, expect, it } from "vitest";
 
-import { selectEligiblePaymentRunIds } from "./payment-run-selection";
+import {
+  compatiblePaymentRunAccounts,
+  paymentRunSelection,
+} from "./payment-run-selection";
 
-describe("selectEligiblePaymentRunIds", () => {
-  it("does not create a run from rows that all have blockers", () => {
-    expect(
-      selectEligiblePaymentRunIds([
-        { id: "invoice-1", blockers: ["unconfirmed_beneficiary"] },
-        { id: "invoice-2", blockers: ["not_transfer"] },
-      ]),
-    ).toEqual([]);
+const rows = [
+  { id: "one", issuerId: "issuer-a", currency: "CZK" },
+  { id: "two", issuerId: "issuer-a", currency: "CZK" },
+  { id: "three", issuerId: "issuer-b", currency: "CZK" },
+  { id: "four", issuerId: "issuer-a", currency: "EUR" },
+];
+
+const accounts = [
+  { id: "a-czk", currency: "CZK", issuerIds: ["issuer-a"] },
+  { id: "a-eur", currency: "EUR", issuerIds: ["issuer-a"] },
+  { id: "b-czk", currency: "CZK", issuerIds: ["issuer-b"] },
+];
+
+describe("payment-run selection", () => {
+  it("allows only invoices compatible with the selected issuer and currency", () => {
+    expect(paymentRunSelection(rows, ["one"])).toEqual({
+      issuerId: "issuer-a",
+      currency: "CZK",
+      compatibleIds: ["one", "two"],
+    });
   });
 
-  it("keeps only rows without eligibility blockers", () => {
+  it("shows only accounts mapped to the selected issuer and currency", () => {
     expect(
-      selectEligiblePaymentRunIds([
-        { id: "invoice-1", blockers: [] },
-        { id: "invoice-2", blockers: ["currency_mismatch"] },
-        { id: "invoice-3", blockers: [] },
-      ]),
-    ).toEqual(["invoice-1", "invoice-3"]);
+      compatiblePaymentRunAccounts(accounts, "issuer-a", "CZK").map(
+        (account) => account.id,
+      ),
+    ).toEqual(["a-czk"]);
   });
 });

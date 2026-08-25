@@ -3,6 +3,7 @@
 import type { EmailMessageStatus } from "@invoicey/db";
 
 import { Badge } from "@/components/ui/badge";
+import { canResendEmail } from "@/components/invoices/email-preflight";
 import { useTranslations } from "next-intl";
 
 export type EmailTimelineEvent = {
@@ -113,6 +114,11 @@ export function InvoiceEmailTimeline({
                   );
                 })}
               </ol>
+            ) : null}
+            {canResendEmail(item.status) ? (
+              <p className="text-muted-foreground border-t pt-2 text-xs">
+                {t("emailResendHint" as never)}
+              </p>
             ) : null}
           </li>
         ))}

@@ -147,6 +147,61 @@ export type SendInvoiceEmailByIdResult =
     }
   | { ok: false; error: string };
 
+export function validateIntendedEmailRecipients(
+  to: string,
+  cc: readonly string[] | undefined,
+):
+  | { ok: true; cc: string[] | undefined }
+  | { ok: false; error: "missing_recipient" | "invalid_cc" } {
+  if (!to || !isValidEmailAddress(to)) {
+    return { ok: false, error: "missing_recipient" };
+  }
+  const normalizedCc = cc
+    ?.map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+  if (normalizedCc?.some((email) => !isValidEmailAddress(email))) {
+    return { ok: false, error: "invalid_cc" };
+  }
+  return { ok: true, cc: normalizedCc };
+}
+
+export async function validateInvoiceEmailDelivery(opts: {
+  to: string;
+  cc: string[] | undefined;
+  isSuppressed: (email: string) => Promise<boolean>;
+}) {
+  const recipients = validateIntendedEmailRecipients(opts.to, opts.cc);
+  if (!recipients.ok) return recipients;
+  if (await opts.isSuppressed(opts.to)) {
+    return { ok: false as const, error: "suppressed" };
+  }
+  for (const email of recipients.cc ?? []) {
+    if (await opts.isSuppressed(email)) {
+      return { ok: false as const, error: "suppressed" };
+    }
+  }
+  return { ok: true as const, recipients };
+}
+
+export async function deliverValidatedInvoiceEmail(opts: {
+  to: string;
+  cc: string[] | undefined;
+  isSuppressed: (email: string) => Promise<boolean>;
+  transport: typeof sendTransactionalEmail;
+  message: Parameters<typeof sendTransactionalEmail>[0];
+}) {
+  const delivery = await validateInvoiceEmailDelivery(opts);
+  if (!delivery.ok) return delivery;
+  return {
+    ok: true as const,
+    result: await opts.transport({
+      ...opts.message,
+      to: opts.to,
+      cc: delivery.recipients.cc,
+    }),
+  };
+}
+
 /** Send an issued invoice by email (PDF + optional ISDOC). */
 export async function sendInvoiceEmailById(
   input: SendInvoiceEmailByIdInput,
@@ -194,9 +249,15 @@ export async function sendInvoiceEmailById(
       ? invoice.client.contactEmail
       : undefined;
   const to = (input.to ?? clientEmail ?? "").trim().toLowerCase();
-  if (!to || !isValidEmailAddress(to)) {
-    return { ok: false, error: "missing_recipient" };
-  }
+  const recipients = validateIntendedEmailRecipients(to, input.cc);
+  if (!recipients.ok) return recipients;
+  const deliveryGate = await validateInvoiceEmailDelivery({
+    to,
+    cc: recipients.cc,
+    isSuppressed: (email) =>
+      isEmailSuppressed({ db: database, workspaceId, email }),
+  });
+  if (!deliveryGate.ok) return deliveryGate;
 
   const vars = {
     number,
@@ -242,12 +303,12 @@ export async function sendInvoiceEmailById(
   });
 
   try {
-    const result = await sendTransactionalEmail({
+    const message: Parameters<typeof sendTransactionalEmail>[0] = {
       db: database,
       workspaceId,
       template: "invoice_sent",
       to,
-      cc: input.cc,
+      cc: recipients.cc,
       replyTo: invoice.issuer.contactEmail,
       displayName,
       subject: subject || rendered.subject,
@@ -259,7 +320,17 @@ export async function sendInvoiceEmailById(
       attachIsdoc,
       attachments,
       createdBy: input.createdBy ?? getInvoiceyRequestContext()?.userId ?? null,
+    };
+    const delivered = await deliverValidatedInvoiceEmail({
+      to,
+      cc: recipients.cc,
+      isSuppressed: (email) =>
+        isEmailSuppressed({ db: database, workspaceId, email }),
+      transport: sendTransactionalEmail,
+      message,
     });
+    if (!delivered.ok) return delivered;
+    const result = delivered.result;
     return {
       ok: true,
       messageId: result.messageId,
