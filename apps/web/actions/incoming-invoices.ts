@@ -6,7 +6,7 @@ import {
   deleteIncomingInvoice,
   incomingInvoices,
   rejectIncomingInvoice,
-  spawnApprovalForAcceptedInvoice,
+  spawnApprovalForValidatedInvoice,
   suppliers,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
@@ -146,7 +146,7 @@ export async function acceptIncomingInvoiceAction(
         .where(eq(suppliers.id, invoice.supplierId))
         .limit(1)
     : [];
-  await spawnApprovalForAcceptedInvoice({
+  await spawnApprovalForValidatedInvoice({
     workspaceId,
     invoiceId: id,
     validatedByUserId: userId,

@@ -697,10 +697,19 @@ a product surface a customer can configure.
 
 **25c — workflow paths and teams:**
 
-- [ ] `teams`; `workflow_paths` with `stage` ∈ validation | approval
-- [ ] Step builder, SLA, escalation, four-eyes; manual path assignment
-- [ ] Return-to-previous-level, delegate, bulk approve
-- [ ] Fix the priority-uniqueness collision and the fabricated admin task
+- [x] `teams`, `team_members`; `workflow_paths` with `stage` ∈ validation | approval,
+      steps and approvers (user / team / role / dynamic)
+- [x] `resolveWorkflowPath` — step modes, four-eyes, guardrails, unreachable
+      paths escalate to the fallback instead of auto-approving (26 tests)
+- [x] Settings: teams, paths, step builder with reorder and approver picker
+- [x] Rules assign a named path instead of inlining one
+- [x] Return-to-previous-level and delegate in the decide action
+- [x] Fixed: priority-uniqueness collision; fabricated admin task; a path that
+      could not be resolved silently auto-approving
+- [ ] Manual path assignment on a single invoice and in bulk
+- [ ] Return-to-previous-level / delegate buttons in the decision bar
+- [ ] Bulk approve
+- [ ] SLA reminders and escalation (columns exist; no job yet)
 
 **25d — automations, tags, views:**
 

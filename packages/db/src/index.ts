@@ -94,7 +94,7 @@ export {
 } from "./incoming-repo";
 export {
   decideApprovalTask,
-  spawnApprovalForAcceptedInvoice,
+  spawnApprovalForValidatedInvoice,
 } from "./approvals-repo";
 export {
   confirmPayableMatchProposal,

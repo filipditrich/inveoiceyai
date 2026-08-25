@@ -42,42 +42,7 @@ export const ApprovalConditionsSchema = z.object({
   all: z.array(ApprovalConditionSchema).min(1),
 });
 
-const ApproverSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("user"), id: z.string().min(1) }),
-  z.object({
-    kind: z.literal("role"),
-    role: z.enum(["owner", "admin", "member"]),
-  }),
-]);
-
-const OneOfPathSchema = z.object({
-  type: z.literal("one_of"),
-  approvers: z.array(ApproverSchema).min(1),
-});
-const AllOfPathSchema = z.object({
-  type: z.literal("all_of"),
-  approvers: z.array(ApproverSchema).min(1),
-});
-const AutoApprovePathSchema = z.object({
-  type: z.literal("auto_approve"),
-  maxTotal: z.string().min(1),
-  currency: z.string().min(1),
-});
-const SequencePathSchema = z.object({
-  type: z.literal("sequence"),
-  steps: z.array(OneOfPathSchema.or(AllOfPathSchema)).min(1),
-});
-
-export const ApprovalPathSchema = z.discriminatedUnion("type", [
-  AutoApprovePathSchema,
-  OneOfPathSchema,
-  AllOfPathSchema,
-  SequencePathSchema,
-]);
-
 export type ApprovalConditions = z.infer<typeof ApprovalConditionsSchema>;
-export type ApprovalPath = z.infer<typeof ApprovalPathSchema>;
-export type ApprovalApprover = z.infer<typeof ApproverSchema>;
 
 export type ApprovalFacts = {
   issuerId?: string | null;
@@ -96,50 +61,30 @@ export type ApprovalFacts = {
   lowConfidence: boolean;
 };
 
-export type EvaluatedPath =
-  | { type: "auto_approve" }
-  | { type: "one_of"; approvers: ApprovalApprover[] }
-  | { type: "all_of"; approvers: ApprovalApprover[] }
-  | {
-      type: "sequence";
-      steps: Array<
-        | { type: "one_of"; approvers: ApprovalApprover[] }
-        | { type: "all_of"; approvers: ApprovalApprover[] }
-      >;
-    }
-  | { type: "fallback" };
-
 export type RuleCandidate = {
   id: string;
   priority: number;
   isActive: boolean;
   conditions: unknown;
-  path: unknown;
+  /** The workflow path this rule assigns. */
+  pathId: string | null;
+  /** Tiebreak for two rules sharing a priority. */
+  createdAt?: Date | string | null;
 };
 
-export function validateApprovalRulePayload(input: {
-  conditions: unknown;
-  path: unknown;
-}): { ok: true } | { ok: false; error: string } {
-  const conditions = ApprovalConditionsSchema.safeParse(input.conditions);
-  if (!conditions.success) {
+export function validateApprovalRuleConditions(
+  conditions: unknown,
+): { ok: true } | { ok: false; error: string } {
+  const parsed = ApprovalConditionsSchema.safeParse(conditions);
+  if (!parsed.success) {
     return { ok: false, error: "invalid_conditions" };
   }
-  const comparesTotal = conditions.data.all.some((c) => c.fact === "total");
-  const pinsCurrency = conditions.data.all.some(
+  const comparesTotal = parsed.data.all.some((c) => c.fact === "total");
+  const pinsCurrency = parsed.data.all.some(
     (c) => c.fact === "currency" && (c.op === "eq" || c.op === "in"),
   );
   if (comparesTotal && !pinsCurrency) {
     return { ok: false, error: "currency_required_for_total" };
-  }
-  const path = ApprovalPathSchema.safeParse(input.path);
-  if (!path.success) {
-    return { ok: false, error: "invalid_path" };
-  }
-  if (path.data.type === "auto_approve") {
-    if (!path.data.maxTotal || !path.data.currency) {
-      return { ok: false, error: "auto_approve_requires_cap" };
-    }
   }
   return { ok: true };
 }
@@ -231,104 +176,30 @@ export function conditionsMatch(
   );
 }
 
-function stripValidator(
-  approvers: ApprovalApprover[],
-  validatedByUserId?: string | null,
-): ApprovalApprover[] {
-  if (!validatedByUserId) {
-    return approvers;
-  }
-  return approvers.filter(
-    (approver) =>
-      !(approver.kind === "user" && approver.id === validatedByUserId),
-  );
-}
-
+/**
+ * First active rule by ascending priority whose conditions all hold wins, with
+ * `createdAt` breaking a tie. Returns the path that rule assigns; a null
+ * `pathId` means the caller falls back to the workspace fallback path.
+ */
 export function evaluateApprovalRules(input: {
   rules: RuleCandidate[];
   facts: ApprovalFacts;
-  validatedByUserId?: string | null;
-}): {
-  ruleId: string | null;
-  path: EvaluatedPath;
-  unreachable: boolean;
-} {
+}): { ruleId: string | null; pathId: string | null } {
   const ordered = [...input.rules]
     .filter((rule) => rule.isActive)
-    .sort((a, b) => a.priority - b.priority);
+    .sort((a, b) => {
+      if (a.priority !== b.priority) return a.priority - b.priority;
+      const at = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bt = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return at - bt;
+    });
 
-  let matched: { id: string; path: ApprovalPath } | null = null;
   for (const rule of ordered) {
     const conditions = ApprovalConditionsSchema.safeParse(rule.conditions);
-    const path = ApprovalPathSchema.safeParse(rule.path);
-    if (!conditions.success || !path.success) {
-      continue;
-    }
+    if (!conditions.success) continue;
     if (conditionsMatch(conditions.data, input.facts)) {
-      matched = { id: rule.id, path: path.data };
-      break;
+      return { ruleId: rule.id, pathId: rule.pathId };
     }
   }
-
-  if (!matched) {
-    return { ruleId: null, path: { type: "fallback" }, unreachable: false };
-  }
-
-  const path = matched.path;
-  if (path.type === "auto_approve") {
-    const overCap =
-      input.facts.currency !== path.currency ||
-      decimalToMinor(input.facts.total) > decimalToMinor(path.maxTotal);
-    const blocked =
-      overCap ||
-      !input.facts.supplierIsTrusted ||
-      input.facts.hasExceptions ||
-      input.facts.newBeneficiaryAccount ||
-      (input.facts.extractionSource === "ai" && input.facts.lowConfidence);
-    if (blocked) {
-      return {
-        ruleId: matched.id,
-        path: { type: "fallback" },
-        unreachable: false,
-      };
-    }
-    return {
-      ruleId: matched.id,
-      path: { type: "auto_approve" },
-      unreachable: false,
-    };
-  }
-
-  if (path.type === "sequence") {
-    const steps = path.steps.map((step) => ({
-      type: step.type,
-      approvers: stripValidator(step.approvers, input.validatedByUserId),
-    }));
-    if (steps.some((step) => step.approvers.length === 0)) {
-      return {
-        ruleId: matched.id,
-        path: { type: "fallback" },
-        unreachable: true,
-      };
-    }
-    return {
-      ruleId: matched.id,
-      path: { type: "sequence", steps },
-      unreachable: false,
-    };
-  }
-
-  const approvers = stripValidator(path.approvers, input.validatedByUserId);
-  if (approvers.length === 0) {
-    return {
-      ruleId: matched.id,
-      path: { type: "fallback" },
-      unreachable: true,
-    };
-  }
-  return {
-    ruleId: matched.id,
-    path: { type: path.type, approvers },
-    unreachable: false,
-  };
+  return { ruleId: null, pathId: null };
 }

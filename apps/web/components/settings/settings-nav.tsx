@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   ActivityIcon,
+  GitBranchIcon,
   LandmarkIcon,
   Building2Icon,
   InboxIcon,
@@ -70,6 +71,18 @@ const WORKSPACE_LINKS = [
     key: "incomingInvoices" as const,
     exact: false,
     icon: InboxIcon,
+  },
+  {
+    href: "/settings/workflow-paths",
+    key: "workflowPaths" as const,
+    exact: false,
+    icon: GitBranchIcon,
+  },
+  {
+    href: "/settings/teams",
+    key: "teams" as const,
+    exact: false,
+    icon: UsersRoundIcon,
   },
   {
     href: "/settings/bank-connections",

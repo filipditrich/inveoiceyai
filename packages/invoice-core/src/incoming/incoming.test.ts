@@ -5,7 +5,10 @@ import { parseIsdocAsIncoming } from "../isdoc/parse-isdoc";
 import { InvoiceSchema, type Invoice } from "../schema";
 import domesticFixture from "../__fixtures__/invoices/domestic-transfer.json";
 import creditNoteFixture from "../__fixtures__/invoices/credit-note.json";
-import { evaluateApprovalRules, validateApprovalRulePayload } from "./approval";
+import {
+  evaluateApprovalRules,
+  validateApprovalRuleConditions,
+} from "./approval";
 import { resolveIdentityLink } from "./correction";
 import { isValidCzIco } from "./ico";
 import {
@@ -146,97 +149,104 @@ describe("approval evaluator", () => {
     lowConfidence: false,
   };
 
+  const rule = (over = {}) => ({
+    id: "r1",
+    priority: 1,
+    isActive: true,
+    conditions: {
+      version: 1,
+      all: [{ fact: "currency", op: "eq", value: "CZK" }],
+    },
+    pathId: "path-a",
+    ...over,
+  });
+
   it("rejects a total compare without a currency pin", () => {
-    const result = validateApprovalRulePayload({
-      conditions: {
+    expect(
+      validateApprovalRuleConditions({
         version: 1,
         all: [{ fact: "total", op: "gt", value: "100" }],
-      },
-      path: { type: "auto_approve", maxTotal: "5000", currency: "CZK" },
-    });
-    expect(result.ok).toBe(false);
+      }),
+    ).toEqual({ ok: false, error: "currency_required_for_total" });
   });
 
-  it("auto-approves a trusted small invoice and refuses a new beneficiary", () => {
-    const rules = [
-      {
-        id: "r1",
-        priority: 1,
-        isActive: true,
-        conditions: {
-          version: 1,
-          all: [
-            { fact: "currency", op: "eq", value: "CZK" },
-            { fact: "supplier_is_trusted", op: "is", value: true },
-          ],
-        },
-        path: { type: "auto_approve", maxTotal: "5000", currency: "CZK" },
-      },
-    ];
-    const ok = evaluateApprovalRules({ rules, facts });
-    expect(ok.path.type).toBe("auto_approve");
-    const blocked = evaluateApprovalRules({
-      rules,
-      facts: { ...facts, newBeneficiaryAccount: true },
-    });
-    expect(blocked.path.type).toBe("fallback");
+  it("accepts a total compare that pins the currency", () => {
+    expect(
+      validateApprovalRuleConditions({
+        version: 1,
+        all: [
+          { fact: "currency", op: "eq", value: "CZK" },
+          { fact: "total", op: "gt", value: "100" },
+        ],
+      }),
+    ).toEqual({ ok: true });
   });
 
-  it("removes the accepting user and falls back when the path is empty", () => {
+  it("returns the path of the matching rule", () => {
+    expect(evaluateApprovalRules({ rules: [rule()], facts })).toEqual({
+      ruleId: "r1",
+      pathId: "path-a",
+    });
+  });
+
+  it("returns no path when nothing matches", () => {
     const result = evaluateApprovalRules({
       rules: [
-        {
-          id: "r1",
-          priority: 1,
-          isActive: true,
+        rule({
           conditions: {
             version: 1,
-            all: [{ fact: "currency", op: "eq", value: "CZK" }],
+            all: [{ fact: "currency", op: "eq", value: "EUR" }],
           },
-          path: {
-            type: "one_of",
-            approvers: [{ kind: "user", id: "acceptor" }],
-          },
-        },
+        }),
       ],
       facts,
-      validatedByUserId: "acceptor",
     });
-    expect(result.path.type).toBe("fallback");
-    expect(result.unreachable).toBe(true);
+    expect(result).toEqual({ ruleId: null, pathId: null });
+  });
+
+  it("skips inactive rules", () => {
+    expect(
+      evaluateApprovalRules({ rules: [rule({ isActive: false })], facts }),
+    ).toEqual({ ruleId: null, pathId: null });
+  });
+
+  it("skips a rule whose conditions do not parse", () => {
+    expect(
+      evaluateApprovalRules({
+        rules: [rule({ conditions: { nope: true } })],
+        facts,
+      }),
+    ).toEqual({ ruleId: null, pathId: null });
   });
 
   it("first match wins by priority", () => {
     const result = evaluateApprovalRules({
       rules: [
-        {
-          id: "later",
-          priority: 20,
-          isActive: true,
-          conditions: {
-            version: 1,
-            all: [{ fact: "currency", op: "eq", value: "CZK" }],
-          },
-          path: { type: "auto_approve", maxTotal: "1", currency: "CZK" },
-        },
-        {
-          id: "first",
-          priority: 1,
-          isActive: true,
-          conditions: {
-            version: 1,
-            all: [{ fact: "currency", op: "eq", value: "CZK" }],
-          },
-          path: {
-            type: "one_of",
-            approvers: [{ kind: "role", role: "admin" }],
-          },
-        },
+        rule({ id: "later", priority: 20, pathId: "path-later" }),
+        rule({ id: "first", priority: 1, pathId: "path-first" }),
       ],
       facts,
     });
-    expect(result.ruleId).toBe("first");
-    expect(result.path.type).toBe("one_of");
+    expect(result).toEqual({ ruleId: "first", pathId: "path-first" });
+  });
+
+  it("breaks a priority tie by creation order", () => {
+    const result = evaluateApprovalRules({
+      rules: [
+        rule({
+          id: "newer",
+          createdAt: "2026-08-02T00:00:00Z",
+          pathId: "p-newer",
+        }),
+        rule({
+          id: "older",
+          createdAt: "2026-08-01T00:00:00Z",
+          pathId: "p-older",
+        }),
+      ],
+      facts,
+    });
+    expect(result).toEqual({ ruleId: "older", pathId: "p-older" });
   });
 });
 

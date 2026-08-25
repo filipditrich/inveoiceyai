@@ -4,7 +4,7 @@ import {
   approvalRules,
   approvalTasks,
   decideApprovalTask,
-  incomingInvoices,
+  workflowPaths,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
@@ -26,16 +26,24 @@ function optionalTrim(value: FormDataEntryValue | null): string | null {
 export async function decideIncomingApprovalAction(
   formData: FormData,
 ): Promise<void> {
-  const { workspaceId, userId, role } = await requireWorkspace();
-  let taskId = optionalTrim(formData.get("taskId"));
+  const { workspaceId, userId } = await requireWorkspace();
   const invoiceId = optionalTrim(formData.get("invoiceId"));
   const decision = optionalTrim(formData.get("decision")) as
-    "approved" | "rejected" | "changes_requested" | null;
+    | "approved"
+    | "rejected"
+    | "changes_requested"
+    | "return_previous"
+    | "delegate"
+    | null;
+  const delegateTo = optionalTrim(formData.get("delegateToUserId"));
   const comment = optionalTrim(formData.get("comment"));
   const returnTo = safeIncomingReturnTo(formData.get("returnTo"));
   if (!invoiceId || !decision) {
     redirect("/incoming-invoices?invalid=missing_id");
   }
+  // The task must already exist. Inventing one — as this action used to, with
+  // assigneeRole "admin" — routes around whatever path the rules produced.
+  let taskId = optionalTrim(formData.get("taskId"));
   if (!taskId) {
     const [existing] = await db
       .select({ id: approvalTasks.id })
@@ -45,35 +53,11 @@ export async function decideIncomingApprovalAction(
           eq(approvalTasks.incomingInvoiceId, invoiceId),
           eq(approvalTasks.workspaceId, workspaceId),
           eq(approvalTasks.status, "pending"),
+          eq(approvalTasks.assigneeUserId, userId),
         ),
       )
       .limit(1);
-    if (existing) {
-      taskId = existing.id;
-    } else {
-      const [invoice] = await db
-        .select({ status: incomingInvoices.status })
-        .from(incomingInvoices)
-        .where(
-          and(
-            eq(incomingInvoices.id, invoiceId),
-            eq(incomingInvoices.workspaceId, workspaceId),
-          ),
-        )
-        .limit(1);
-      if (invoice?.status === "pending_approval") {
-        const [created] = await db
-          .insert(approvalTasks)
-          .values({
-            workspaceId,
-            incomingInvoiceId: invoiceId,
-            step: 1,
-            assigneeRole: "admin",
-          })
-          .returning({ id: approvalTasks.id });
-        taskId = created?.id ?? null;
-      }
-    }
+    taskId = existing?.id ?? null;
   }
   if (!taskId) {
     redirect(
@@ -88,9 +72,9 @@ export async function decideIncomingApprovalAction(
     workspaceId,
     taskId,
     actorUserId: userId,
-    actorRole: role,
     decision,
     comment: comment ?? undefined,
+    delegateToUserId: delegateTo ?? undefined,
   });
   if (!result.ok) {
     redirect(
@@ -117,45 +101,55 @@ export async function saveApprovalRuleAction(
   const { workspaceId, userId } = await requireWorkspaceRole("admin");
   const name = optionalTrim(formData.get("name"));
   const priority = Number(optionalTrim(formData.get("priority")) ?? "100");
-  const pathType = optionalTrim(formData.get("pathType"));
-  const conditionsRaw = optionalTrim(formData.get("conditions"));
-  const pathRaw = optionalTrim(formData.get("path"));
-  if (!name) {
+  const pathId = optionalTrim(formData.get("pathId"));
+  const whenCurrency = optionalTrim(formData.get("whenCurrency"));
+  const minTotal = optionalTrim(formData.get("minTotal"));
+  if (!name || !pathId) {
     redirect("/settings/incoming-invoices?invalid=required_fields");
   }
-  let conditions: unknown;
-  let path: unknown;
-  if (pathType === "auto_approve" || pathType === "require_admin") {
-    const whenCurrency = optionalTrim(formData.get("whenCurrency")) ?? "CZK";
-    const pathCurrency =
-      optionalTrim(formData.get("pathCurrency")) ?? whenCurrency;
-    const maxTotal = optionalTrim(formData.get("maxTotal")) ?? "5000";
-    conditions = {
-      version: 1,
-      all: [{ fact: "currency", op: "eq", value: whenCurrency }],
-    };
-    path =
-      pathType === "require_admin"
-        ? { type: "one_of", approvers: [{ kind: "role", role: "admin" }] }
-        : { type: "auto_approve", maxTotal, currency: pathCurrency };
-  } else if (conditionsRaw && pathRaw) {
-    try {
-      conditions = JSON.parse(conditionsRaw);
-      path = JSON.parse(pathRaw);
-    } catch {
-      redirect("/settings/incoming-invoices?invalid=invalid_payload");
+
+  const all: Array<Record<string, unknown>> = [];
+  if (whenCurrency) {
+    all.push({ fact: "currency", op: "eq", value: whenCurrency });
+  }
+  if (minTotal) {
+    // The evaluator refuses an amount compare that does not pin a currency,
+    // so the form pins one whenever an amount is given.
+    if (!whenCurrency) {
+      redirect(
+        "/settings/incoming-invoices?invalid=currency_required_for_total",
+      );
     }
-  } else {
-    redirect("/settings/incoming-invoices?invalid=required_fields");
+    all.push({ fact: "total", op: "gte", value: minTotal });
   }
-  const { validateApprovalRulePayload: validate } =
+  if (all.length === 0) {
+    all.push({ fact: "doc_type", op: "eq", value: "invoice" });
+  }
+  const conditions = { version: 1, all };
+
+  const { validateApprovalRuleConditions } =
     await import("@invoicey/invoice-core");
-  const checked = validate({ conditions, path });
+  const checked = validateApprovalRuleConditions(conditions);
   if (!checked.ok) {
     redirect(
       `/settings/incoming-invoices?invalid=${encodeURIComponent(checked.error)}`,
     );
   }
+
+  const [path] = await db
+    .select({ id: workflowPaths.id })
+    .from(workflowPaths)
+    .where(
+      and(
+        eq(workflowPaths.id, pathId),
+        eq(workflowPaths.workspaceId, workspaceId),
+      ),
+    )
+    .limit(1);
+  if (!path) {
+    redirect("/settings/incoming-invoices?invalid=not_found");
+  }
+
   const id = optionalTrim(formData.get("id"));
   if (id) {
     await db
@@ -163,8 +157,8 @@ export async function saveApprovalRuleAction(
       .set({
         name,
         priority,
+        pathId,
         conditions: conditions as Record<string, unknown>,
-        path: path as Record<string, unknown>,
         isActive: formData.get("isActive") !== "off",
         updatedAt: new Date(),
       })
@@ -179,8 +173,8 @@ export async function saveApprovalRuleAction(
       workspaceId,
       name,
       priority,
+      pathId,
       conditions: conditions as Record<string, unknown>,
-      path: path as Record<string, unknown>,
       createdByUserId: userId,
     });
   }

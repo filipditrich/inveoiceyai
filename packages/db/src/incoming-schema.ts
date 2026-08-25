@@ -58,6 +58,18 @@ export type IncomingInvoiceStatus =
   | "rejected"
   | "cancelled";
 
+export type WorkflowStage = "validation" | "approval";
+export type WorkflowStepMode = "any_one" | "all_of" | "quorum";
+export type WorkflowApproverKind = "user" | "team" | "role" | "dynamic";
+export type ApprovalTaskStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "skipped"
+  | "cancelled"
+  | "delegated"
+  | "escalated";
+
 export type IncomingDocType =
   "invoice" | "credit_note" | "proforma" | "advance";
 export type IncomingPaymentState = "unpaid" | "partial" | "paid" | "overpaid";
@@ -475,6 +487,165 @@ export const incomingInvoiceDocuments = pgTable(
   ],
 );
 
+export const teams = pgTable(
+  "teams",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    description: text("description"),
+    isActive: boolean("is_active").notNull().default(true),
+    createdByUserId: text("created_by_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("teams_workspace_name_uidx").on(
+      t.workspaceId,
+      sql`lower(trim(${t.name}))`,
+    ),
+    index("teams_workspace_active_idx").on(t.workspaceId, t.isActive),
+  ],
+);
+
+export const teamMembers = pgTable(
+  "team_members",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("team_members_team_user_uidx").on(t.teamId, t.userId),
+    index("team_members_user_idx").on(t.userId),
+  ],
+);
+
+/**
+ * A named, reusable path. `stage` decides which gate it runs: `validation`
+ * for gate 1, `approval` for gate 2. An `autoApprove` path carries a cap and
+ * no steps.
+ */
+export const workflowPaths = pgTable(
+  "workflow_paths",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    stage: text("stage").notNull().$type<WorkflowStage>().default("approval"),
+    name: text("name").notNull(),
+    description: text("description"),
+    isActive: boolean("is_active").notNull().default(true),
+    /** The workspace default for its stage when no automation matched. */
+    isFallback: boolean("is_fallback").notNull().default(false),
+    fourEyes: boolean("four_eyes").notNull().default(true),
+    fourEyesOverrideReason: text("four_eyes_override_reason"),
+    autoApprove: boolean("auto_approve").notNull().default(false),
+    autoApproveMaxTotal: numeric("auto_approve_max_total", {
+      precision: 14,
+      scale: 2,
+    }),
+    autoApproveCurrency: text("auto_approve_currency"),
+    reminderAfterDays: integer("reminder_after_days"),
+    escalateAfterDays: integer("escalate_after_days"),
+    escalateToUserId: text("escalate_to_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    skipIfAlreadyApproved: boolean("skip_if_already_approved")
+      .notNull()
+      .default(true),
+    createdByUserId: text("created_by_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("workflow_paths_workspace_stage_name_uidx").on(
+      t.workspaceId,
+      t.stage,
+      sql`lower(trim(${t.name}))`,
+    ),
+    uniqueIndex("workflow_paths_workspace_stage_fallback_uidx")
+      .on(t.workspaceId, t.stage)
+      .where(sql`${t.isFallback}`),
+    index("workflow_paths_workspace_stage_idx").on(t.workspaceId, t.stage),
+  ],
+);
+
+export const workflowPathSteps = pgTable(
+  "workflow_path_steps",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    pathId: uuid("path_id")
+      .notNull()
+      .references(() => workflowPaths.id, { onDelete: "cascade" }),
+    position: integer("position").notNull(),
+    mode: text("mode").notNull().$type<WorkflowStepMode>().default("any_one"),
+    /** Required when `mode` is `quorum`. */
+    quorum: integer("quorum"),
+    label: text("label"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("workflow_path_steps_path_position_uidx").on(
+      t.pathId,
+      t.position,
+    ),
+  ],
+);
+
+export const workflowPathStepApprovers = pgTable(
+  "workflow_path_step_approvers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    stepId: uuid("step_id")
+      .notNull()
+      .references(() => workflowPathSteps.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull().$type<WorkflowApproverKind>(),
+    /** Exactly one of these is set, per `kind`. */
+    userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
+    teamId: uuid("team_id").references(() => teams.id, { onDelete: "cascade" }),
+    role: text("role"),
+    dynamic: text("dynamic"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [index("workflow_path_step_approvers_step_idx").on(t.stepId)],
+);
+
 export const approvalRules = pgTable(
   "approval_rules",
   {
@@ -487,7 +658,10 @@ export const approvalRules = pgTable(
     isActive: boolean("is_active").notNull().default(true),
     conditionsVersion: integer("conditions_version").notNull().default(1),
     conditions: jsonb("conditions").$type<Record<string, unknown>>().notNull(),
-    path: jsonb("path").$type<Record<string, unknown>>().notNull(),
+    /** The path this rule assigns. Replaces the inline `path` JSON. */
+    pathId: uuid("path_id").references(() => workflowPaths.id, {
+      onDelete: "restrict",
+    }),
     createdByUserId: text("created_by_user_id").references(() => user.id, {
       onDelete: "set null",
     }),
@@ -499,7 +673,10 @@ export const approvalRules = pgTable(
       .notNull(),
   },
   (t) => [
-    uniqueIndex("approval_rules_workspace_priority_uidx").on(
+    // Deliberately NOT unique: two rules may share a priority and are then
+    // ordered by `createdAt`. The unique index this replaces made creating a
+    // second rule at the default priority throw.
+    index("approval_rules_workspace_priority_idx").on(
       t.workspaceId,
       t.priority,
     ),
@@ -519,17 +696,36 @@ export const approvalTasks = pgTable(
     ruleId: uuid("rule_id").references(() => approvalRules.id, {
       onDelete: "set null",
     }),
+    stage: text("stage").notNull().$type<WorkflowStage>().default("approval"),
+    pathId: uuid("path_id").references(() => workflowPaths.id, {
+      onDelete: "set null",
+    }),
+    pathStepId: uuid("path_step_id").references(() => workflowPathSteps.id, {
+      onDelete: "set null",
+    }),
+    /** Reserved for line-item approval; no UI ships in plan 25. */
+    lineId: uuid("line_id").references(() => incomingInvoiceLines.id, {
+      onDelete: "cascade",
+    }),
     step: integer("step").notNull().default(1),
+    /** How many approvals this step needs; 1 for any_one, n for all_of/quorum. */
+    required: integer("required").notNull().default(1),
     assigneeUserId: text("assignee_user_id").references(() => user.id, {
       onDelete: "set null",
     }),
     assigneeRole: text("assignee_role"),
-    status: text("status").notNull().default("pending"),
+    status: text("status")
+      .notNull()
+      .$type<ApprovalTaskStatus>()
+      .default("pending"),
     decidedByUserId: text("decided_by_user_id").references(() => user.id, {
       onDelete: "set null",
     }),
     decidedAt: timestamp("decided_at", { withTimezone: true }),
     comment: text("comment"),
+    escalatedAt: timestamp("escalated_at", { withTimezone: true }),
+    remindedAt: timestamp("reminded_at", { withTimezone: true }),
+    delegatedFromTaskId: uuid("delegated_from_task_id"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

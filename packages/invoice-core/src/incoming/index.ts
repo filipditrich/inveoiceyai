@@ -1,14 +1,10 @@
 export {
   ApprovalConditionsSchema,
-  ApprovalPathSchema,
   conditionsMatch,
   evaluateApprovalRules,
-  validateApprovalRulePayload,
-  type ApprovalApprover,
+  validateApprovalRuleConditions,
   type ApprovalConditions,
   type ApprovalFacts,
-  type ApprovalPath,
-  type EvaluatedPath,
   type RuleCandidate,
 } from "./approval";
 export {
@@ -29,3 +25,26 @@ export {
   type IncomingExceptionCode,
   type IncomingValidationInput,
 } from "./validate";
+export {
+  resolveWorkflowPath,
+  validateWorkflowPath,
+  DYNAMIC_APPROVERS,
+  STEP_MODES,
+  WORKFLOW_STAGES,
+  WORKSPACE_ROLES,
+  WorkflowApproverSchema,
+  WorkflowPathSchema,
+  WorkflowStepSchema,
+  type DynamicApprover,
+  type FallbackReason,
+  type ResolvedPath,
+  type ResolvedStep,
+  type WorkflowApprover,
+  type WorkflowFacts,
+  type WorkflowPath,
+  type WorkflowResolutionContext,
+  type WorkflowStage,
+  type WorkflowStep,
+  type WorkflowStepMode,
+  type WorkspaceRole,
+} from "./workflow-path";

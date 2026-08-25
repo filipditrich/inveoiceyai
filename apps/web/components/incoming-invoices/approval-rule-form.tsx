@@ -4,7 +4,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getTranslations } from "next-intl/server";
 
-export async function ApprovalRuleForm() {
+const SELECT_CLASS =
+  "border-input h-8 rounded-lg border bg-transparent px-2.5 text-sm";
+
+/**
+ * A rule answers "which path", not "who approves" — the path answers that.
+ * Richer conditions (OR groups, the full fact list) arrive with the automation
+ * builder in 25d; this form covers the two facts a workspace reaches for first.
+ */
+export async function ApprovalRuleForm({
+  paths,
+}: {
+  paths: Array<{ id: string; name: string }>;
+}) {
   const t = await getTranslations("Settings.incomingInvoices");
 
   return (
@@ -19,58 +31,50 @@ export async function ApprovalRuleForm() {
       <div className="grid gap-1.5">
         <Label htmlFor="approval-rule-priority">{t("priority")}</Label>
         <Input
+          defaultValue={100}
           id="approval-rule-priority"
+          min={1}
           name="priority"
           type="number"
-          min={1}
-          defaultValue={100}
         />
         <p className="text-muted-foreground text-xs">{t("priorityHint")}</p>
       </div>
       <div className="grid gap-1.5">
+        <Label htmlFor="approval-rule-path">{t("rulePath")}</Label>
+        <select
+          className={SELECT_CLASS}
+          id="approval-rule-path"
+          name="pathId"
+          required
+        >
+          {paths.map((path) => (
+            <option key={path.id} value={path.id}>
+              {path.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="grid gap-1.5">
         <Label htmlFor="approval-rule-when">{t("whenCurrency")}</Label>
         <select
+          className={SELECT_CLASS}
+          defaultValue="CZK"
           id="approval-rule-when"
           name="whenCurrency"
-          defaultValue="CZK"
-          className="border-input h-8 rounded-lg border bg-transparent px-2.5 text-sm"
         >
           <option value="CZK">CZK</option>
           <option value="EUR">EUR</option>
         </select>
       </div>
       <div className="grid gap-1.5">
-        <Label htmlFor="approval-rule-path">{t("pathType")}</Label>
-        <select
-          id="approval-rule-path"
-          name="pathType"
-          defaultValue="auto_approve"
-          className="border-input h-8 rounded-lg border bg-transparent px-2.5 text-sm"
-        >
-          <option value="auto_approve">{t("pathAutoApprove")}</option>
-          <option value="require_admin">{t("pathRequireAdmin")}</option>
-        </select>
-      </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="approval-rule-max">{t("maxTotal")}</Label>
+        <Label htmlFor="approval-rule-min">{t("minTotal")}</Label>
         <Input
-          id="approval-rule-max"
-          name="maxTotal"
-          defaultValue="5000"
+          id="approval-rule-min"
           inputMode="decimal"
+          name="minTotal"
+          placeholder={t("minTotalPlaceholder")}
         />
-      </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="approval-rule-currency">{t("pathCurrency")}</Label>
-        <select
-          id="approval-rule-currency"
-          name="pathCurrency"
-          defaultValue="CZK"
-          className="border-input h-8 rounded-lg border bg-transparent px-2.5 text-sm"
-        >
-          <option value="CZK">CZK</option>
-          <option value="EUR">EUR</option>
-        </select>
+        <p className="text-muted-foreground text-xs">{t("minTotalHint")}</p>
       </div>
       <div className="sm:col-span-2">
         <Button type="submit">{t("saveRule")}</Button>
