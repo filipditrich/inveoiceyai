@@ -8,7 +8,7 @@ Per-feature implementation specs. Written **just-in-time** before the plan that 
 
 **Shipped specs:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md), [`ares.md`](./ares.md), [`uploads.md`](./uploads.md), [`data-grid.md`](./data-grid.md), [`slack-bot.md`](./slack-bot.md), [`mcp.md`](./mcp.md), [`db-schema.md`](./db-schema.md), [`invoice-import.md`](./invoice-import.md), [`email.md`](./email.md), [`public-shell.md`](./public-shell.md), [`recurring.md`](./recurring.md), [`payment-ledger-fio.md`](./payment-ledger-fio.md) (Plan 22 — pilot pending), [`payment-ledger-moneta.md`](./payment-ledger-moneta.md) (Plan 23).
 
-**Planned specs:** none currently queued ahead of implementation.
+**Planned specs:** [`production-ux-finish.md`](./production-ux-finish.md) is the active cross-feature production UX program.
 
 Just-in-time convention: write the remaining specs before the plan that consumes them ([lifecycle](../README.md#lifecycle-conventions)).
 

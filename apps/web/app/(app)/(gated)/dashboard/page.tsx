@@ -51,7 +51,12 @@ export default async function DashboardPage({
   const hasInvoices = metrics.buckets.some((bucket) => bucket.count > 0);
   if (!issuerId && !hasInvoices) {
     return (
-      <div className="flex flex-1 flex-col py-6">
+      <div className="flex flex-1 flex-col gap-6 py-6">
+        <PageHeader
+          description={t("subtitle")}
+          icon={<ChartNoAxesCombinedIcon />}
+          title={t("title")}
+        />
         <DashboardGettingStarted />
       </div>
     );

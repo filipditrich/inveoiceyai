@@ -1007,6 +1007,42 @@
       "languageCs": "Czech",
       "languageEn": "English",
       "emailHeading": "Emails",
+      "emailResendHint": "Correct the recipient if needed, then use Send by email to create a new delivery attempt. Earlier attempts remain in this history.",
+      "lifecycleTitle": "Invoice lifecycle",
+      "lifecycle": {
+        "draft": {
+          "body": "This draft is editable and has no assigned invoice number.",
+          "action": "Review it, then issue it when the details are final."
+        },
+        "unpaid": {
+          "body": "The issued invoice has no confirmed payment yet.",
+          "action": "Send it or confirm a payment when it arrives."
+        },
+        "partial": {
+          "body": "A confirmed payment covers only part of the invoice.",
+          "action": "Keep the remaining balance open until it is paid."
+        },
+        "overdue": {
+          "body": "The due date has passed and payment is still outstanding.",
+          "action": "Follow up with the customer or record the payment."
+        },
+        "paid": {
+          "body": "Confirmed payments cover the invoice in full.",
+          "action": "Keep the payment history as the accounting record."
+        },
+        "overpaid": {
+          "body": "Confirmed payments exceed the invoice total.",
+          "action": "Review the allocation before issuing a correction or refund."
+        },
+        "future": {
+          "body": "This invoice has a future issue date and is not yet current.",
+          "action": "Review the issue date before sending it or waiting for payment."
+        },
+        "cancelled": {
+          "body": "This invoice remains in the accounting history as cancelled.",
+          "action": "Create a replacement only when a new document is needed."
+        }
+      },
       "currencyNote": "(MVP: CZK only)",
       "total": "Total",
       "paidAt": "Paid",
@@ -1227,6 +1263,11 @@
       "itemVatAria": "Line {n} VAT rate",
       "itemVatCustomAria": "Line {n} custom VAT rate",
       "removeItem": "Remove line {n}",
+      "duplicate": "Duplicate",
+      "duplicateItem": "Duplicate line {n}",
+      "recoveredDraft": "Recovered an unsaved local draft.",
+      "savedLocally": "Unsaved draft saved in this browser session.",
+      "discardRecoveredDraft": "Discard recovered draft",
       "errors": {
         "invalidDate": "Enter a valid date",
         "selectIssuer": "Select an issuer",
@@ -1333,7 +1374,8 @@
       "title": "Send invoice",
       "description": "PDF is always attached. ISDOC can be turned off.",
       "notConfigured": "RESEND_API_KEY is not set — sending will not work.",
-      "suppressed": "This address is on the suppression list (bounce/complaint). Manual send is still possible.",
+      "suppressed": "This address is on the suppression list (bounce/complaint). Choose a different recipient address before sending.",
+      "invalidRecipient": "Enter a valid recipient address in To and every Cc field before sending.",
       "subject": "Subject",
       "to": "To",
       "cc": "Cc (optional)",
@@ -2239,6 +2281,16 @@
     }
   },
   "IncomingInvoices": {
+    "nextAction": {
+      "review": "Next: review the extracted fields.",
+      "resolve_exception": "Next: resolve the exception before continuing.",
+      "waiting": "Next: wait while approval rules prepare the task.",
+      "approve": "Next: complete the required approval.",
+      "schedule_payment": "Next: add it to a payment run.",
+      "configure_payment": "Next: complete the payment details or resolve the payment blocker.",
+      "view_payment_run": "Next: follow this invoice in its payment run.",
+      "none": "No further action is required."
+    },
     "title": "Incoming invoices",
     "subtitle": "Accept on To review, approve on To approve, then create a payment run on To pay.",
     "upload": "Upload",
@@ -2271,6 +2323,8 @@
       "payTitle": "Ready to pay",
       "payHint": "Select it on To pay and create a Fio run. Invoicey never authorizes the payment.",
       "payCta": "Go to To pay",
+      "configureTitle": "Payment details need attention",
+      "configureHint": "Complete the beneficiary and payment details, or resolve the current payment blocker before creating a run.",
       "rejectedTitle": "Rejected",
       "acceptedTitle": "Accepted",
       "acceptedHint": "Approval rules are evaluating this invoice.",
@@ -2316,11 +2370,34 @@
       "selectHint": "Tick the invoices to include, then create the run.",
       "selectAll": "Select all",
       "noAccount": "Connect a paying account before you can create a run.",
-      "connectBank": "Bank connections"
+      "connectBank": "Bank connections",
+      "selectFirst": "Select an invoice to choose its paying entity, currency, and compatible account.",
+      "selectionSummary": "{issuer} · {currency}",
+      "selectionIncompatible": "Choose invoices for the same paying entity and currency.",
+      "noCompatibleAccount": "No connected paying account matches this entity and currency."
     },
     "detail": {
       "untitled": "No number",
       "document": "Document",
+      "progress": "Processing progress",
+      "nextAction": {
+        "review": "Next: review the extracted fields.",
+        "resolve_exception": "Next: resolve the exception before continuing.",
+        "waiting": "Next: wait while approval rules prepare the task.",
+        "approve": "Next: complete the required approval.",
+        "schedule_payment": "Next: add it to a payment run.",
+        "configure_payment": "Next: complete the payment details or resolve the payment blocker.",
+        "view_payment_run": "Next: follow this invoice in its payment run.",
+        "none": "No further action is required."
+      },
+      "progressSteps": {
+        "capture": "Captured",
+        "extraction": "Extracted",
+        "review": "Reviewed",
+        "approval": "Approved",
+        "payment_run": "Payment run",
+        "payment": "Paid"
+      },
       "noDocument": "No document available",
       "exceptions": "Exceptions",
       "number": "Number",

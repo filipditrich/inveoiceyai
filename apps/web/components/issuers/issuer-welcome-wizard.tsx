@@ -15,6 +15,12 @@ import {
 } from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  clearWelcomeRecovery,
+  loadWelcomeRecovery,
+  saveWelcomeRecovery,
+} from "@/lib/issuer-welcome-recovery";
+import { emitProductEvent } from "@/lib/product-analytics";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
@@ -23,6 +29,7 @@ import * as React from "react";
 type Step = "identity" | "bank" | "done";
 
 export function IssuerWelcomeWizard(props: {
+  workspaceId: string;
   invalidQuery?: string | null;
   doneIssuerId?: string | null;
 }) {
@@ -53,14 +60,95 @@ export function IssuerWelcomeWizard(props: {
   const bank = useCzechIbanSuggest();
   const [bic, setBic] = React.useState("");
   const [msg, setMsg] = React.useState<string | null>(null);
-  const visibleMessage = invalidFromQuery ?? msg;
+  const [hideQueryError, setHideQueryError] = React.useState(false);
+  const analyticsEmitted = React.useRef(false);
+  const visibleMessage = msg ?? (hideQueryError ? null : invalidFromQuery);
   const currentStep = step === "identity" ? 1 : step === "bank" ? 2 : 3;
   const steps = ["business", "bank", "ready"] as const;
+
+  function clearStaleQueryError() {
+    if (!props.invalidQuery) return;
+    setHideQueryError(true);
+    window.history.replaceState(window.history.state, "", "/welcome");
+  }
+
+  React.useEffect(() => {
+    const recovered = loadWelcomeRecovery(
+      window.sessionStorage,
+      props.workspaceId,
+    );
+    if (!recovered) return;
+    const timeout = window.setTimeout(() => {
+      setIcoInput(recovered.icoInput);
+      setName(recovered.name);
+      setDic(recovered.dic);
+      setStreet(recovered.street);
+      setCity(recovered.city);
+      setZip(recovered.zip);
+      setContactEmail(recovered.contactEmail);
+      setVatPayer(recovered.vatPayer);
+      bank.seedBank(recovered.accountNumber, recovered.iban || undefined);
+      setBic(recovered.bic);
+    }, 0);
+    return () => window.clearTimeout(timeout);
+    // `bank` is a stable hook API, and recovery must load once only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.workspaceId]);
+
+  React.useEffect(() => {
+    if (step === "done") return;
+    const timeout = window.setTimeout(() => {
+      saveWelcomeRecovery(window.sessionStorage, props.workspaceId, {
+        icoInput,
+        name,
+        dic,
+        street,
+        city,
+        zip,
+        contactEmail,
+        vatPayer,
+        accountNumber: bank.accountNumber,
+        iban: bank.iban,
+        bic,
+      });
+    }, 300);
+    return () => window.clearTimeout(timeout);
+  }, [
+    bank.accountNumber,
+    bank.iban,
+    bic,
+    city,
+    contactEmail,
+    dic,
+    icoInput,
+    name,
+    props.workspaceId,
+    step,
+    street,
+    vatPayer,
+    zip,
+  ]);
+
+  React.useEffect(() => {
+    if (analyticsEmitted.current) return;
+    analyticsEmitted.current = true;
+    emitProductEvent(
+      props.doneIssuerId ? "onboarding_completed" : "onboarding_started",
+      { routeKind: "welcome" },
+    );
+  }, [props.doneIssuerId]);
+
+  React.useEffect(() => {
+    if (step === "done" || props.doneIssuerId) {
+      clearWelcomeRecovery(window.sessionStorage, props.workspaceId);
+    }
+  }, [props.doneIssuerId, props.workspaceId, step]);
 
   async function onUploadIssuedPdf(file: File | null) {
     if (!file) {
       return;
     }
+    clearStaleQueryError();
     setMsg(null);
     setUploadPending(true);
     try {
@@ -93,6 +181,7 @@ export function IssuerWelcomeWizard(props: {
   }
 
   async function onLookupFromAres() {
+    clearStaleQueryError();
     setMsg(null);
     setLookupPending(true);
     try {
@@ -122,6 +211,7 @@ export function IssuerWelcomeWizard(props: {
   function onIdentityNext(e: FormEvent) {
     e.preventDefault();
     setMsg(null);
+    clearStaleQueryError();
     if (
       !icoInput.trim() ||
       !name.trim() ||
@@ -198,6 +288,13 @@ export function IssuerWelcomeWizard(props: {
               {t("editBusiness")}
             </Button>
           ) : null}
+          <Button
+            render={<Link href="/dashboard" prefetch />}
+            size="sm"
+            variant="ghost"
+          >
+            {t("goDashboard")}
+          </Button>
         </div>
       </div>
     );
@@ -224,6 +321,7 @@ export function IssuerWelcomeWizard(props: {
             disabled={skipPending || pending}
             onClick={() => {
               startSkip(async () => {
+                clearWelcomeRecovery(window.sessionStorage, props.workspaceId);
                 await dismissIssuerWelcome();
               });
             }}
