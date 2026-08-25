@@ -31,7 +31,11 @@ export function payableEligibility(input: {
   if (input.status !== "approved") reasons.push("not_approved");
   const today = new Date().toISOString().slice(0, 10);
   if (input.holdUntil && input.holdUntil >= today) reasons.push("on_hold");
-  if (input.paymentState === "paid" || Number(input.outstanding) <= 0) {
+  if (
+    input.paymentState === "paid" ||
+    input.paymentState === "overpaid" ||
+    Number(input.outstanding) <= 0
+  ) {
     reasons.push("nothing_to_pay");
   }
   if (input.currency !== input.runCurrency) reasons.push("currency_mismatch");
@@ -48,4 +52,11 @@ export function payableEligibility(input: {
   if (input.activePaymentRunId) reasons.push("already_in_run");
   if (input.docType === "credit_note") reasons.push("credit_note");
   return reasons;
+}
+
+/** The single source of truth used by queues and run creation. */
+export function isIncomingInvoicePaymentRunEligible(
+  input: Parameters<typeof payableEligibility>[0],
+): boolean {
+  return payableEligibility(input).length === 0;
 }

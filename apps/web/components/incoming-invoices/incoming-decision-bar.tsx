@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { incomingPaymentAction } from "@/components/incoming-invoices/incoming-invoice-activity";
 import { incomingStatusMessageKey } from "@/lib/incoming-invoices/status-message";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -18,6 +19,12 @@ const REVIEWABLE = new Set(["needs_review", "extract_failed", "on_hold"]);
 export function IncomingDecisionBar({
   invoiceId,
   status,
+  paymentState = "unpaid",
+  docType,
+  paymentEligible,
+  paymentBlocker,
+  activePaymentRunId,
+  activePaymentRunStatus,
   pendingTaskId,
   nextId,
   variant = "full",
@@ -25,6 +32,12 @@ export function IncomingDecisionBar({
 }: {
   invoiceId: string;
   status: string;
+  paymentState?: string;
+  docType?: string;
+  paymentEligible?: boolean;
+  paymentBlocker?: string | null;
+  activePaymentRunId?: string | null;
+  activePaymentRunStatus?: string | null;
   pendingTaskId?: string | null;
   nextId?: string | null;
   variant?: "full" | "row";
@@ -34,7 +47,18 @@ export function IncomingDecisionBar({
   const [rejecting, setRejecting] = useState(false);
   const reviewable = REVIEWABLE.has(status);
   const awaitingApproval = status === "pending_approval";
-  const readyToPay = status === "approved";
+  const paymentAction = incomingPaymentAction({
+    status,
+    paymentState,
+    docType,
+    paymentEligible,
+    paymentBlocker,
+    activePaymentRunId,
+    activePaymentRunStatus,
+  });
+  const readyToPay = paymentAction === "schedule_payment";
+  const hasActivePaymentRun =
+    paymentAction === "view_payment_run" && Boolean(activePaymentRunId);
 
   if (variant === "row") {
     return (
@@ -71,6 +95,20 @@ export function IncomingDecisionBar({
               ) : null}
               <SubmitButton size="sm">{t("detail.approve")}</SubmitButton>
             </form>
+          ) : null}
+          {hasActivePaymentRun ? (
+            <Button
+              size="sm"
+              variant="outline"
+              render={
+                <Link
+                  href={`/incoming-invoices/runs/${activePaymentRunId}`}
+                  prefetch
+                />
+              }
+            >
+              {t("gate.open")}
+            </Button>
           ) : null}
           <Button
             size="sm"
@@ -189,6 +227,42 @@ export function IncomingDecisionBar({
         </div>
         <Button render={<Link href="/incoming-invoices?tab=pay" prefetch />}>
           {t("gate.payCta")}
+        </Button>
+      </section>
+    );
+  }
+
+  if (paymentAction === "configure_payment") {
+    return (
+      <section className="bg-card sticky top-4 z-10 space-y-2 rounded-xl border p-4 shadow-sm">
+        <h2 className="text-sm font-semibold">{t("gate.configureTitle")}</h2>
+        <p className="text-muted-foreground text-sm">
+          {t("gate.configureHint")}
+        </p>
+      </section>
+    );
+  }
+
+  if (hasActivePaymentRun) {
+    return (
+      <section className="bg-card sticky top-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4 shadow-sm">
+        <div>
+          <h2 className="text-sm font-semibold">{t("runs.title")}</h2>
+          {activePaymentRunStatus ? (
+            <p className="text-muted-foreground text-sm">
+              {t(`runs.runStatus.${activePaymentRunStatus}` as never)}
+            </p>
+          ) : null}
+        </div>
+        <Button
+          render={
+            <Link
+              href={`/incoming-invoices/runs/${activePaymentRunId}`}
+              prefetch
+            />
+          }
+        >
+          {t("gate.open")}
         </Button>
       </section>
     );

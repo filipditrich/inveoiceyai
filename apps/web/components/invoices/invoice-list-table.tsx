@@ -44,7 +44,7 @@ import {
   parseInvoiceSort,
   serializeInvoiceSort,
   type InvoiceSortKey,
-} from "@/lib/invoices/list-query";
+} from "@/lib/invoices/list-sort";
 import { DISPLAY_STATUS_ROW_ACCENT } from "@/lib/invoice-status-ui";
 import { cn } from "@/lib/utils";
 import { InvoiceOriginProviderSchema } from "@invoicey/invoice-core/import";

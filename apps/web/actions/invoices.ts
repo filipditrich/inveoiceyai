@@ -46,6 +46,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { sendInvoiceEmailById } from "@invoicey/invoice-tools/email";
+import { isInvoiceDraftRecoveryAttempt } from "@/lib/invoice-draft-recovery";
 
 function optionalTrim(value: FormDataEntryValue | null): string | undefined {
   if (typeof value !== "string") {
@@ -282,6 +283,9 @@ async function replaceItems(
 export async function saveInvoiceDraft(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
   const existingId = optionalTrim(formData.get("id"));
+  const recoveryAttempt = existingId
+    ? undefined
+    : optionalTrim(formData.get("recoveryAttempt"));
   const errBase =
     existingId !== undefined ? `/invoices/${existingId}/edit` : "/invoices/new";
   const fields = formToBuilderFields(formData);
@@ -384,13 +388,20 @@ export async function saveInvoiceDraft(formData: FormData): Promise<void> {
 
   revalidatePath("/invoices");
   revalidatePath("/dashboard");
-  redirect(`/invoices/${id}/edit?toast=invoice_saved`);
+  const successQuery = new URLSearchParams({ toast: "invoice_saved" });
+  if (isInvoiceDraftRecoveryAttempt(recoveryAttempt)) {
+    successQuery.set("recoveryAttempt", recoveryAttempt);
+  }
+  redirect(`/invoices/${id}/edit?${successQuery}`);
 }
 
 /** Issue: lock numbering, assign number, freeze snapshots. */
 export async function issueInvoice(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
   const existingId = optionalTrim(formData.get("id"));
+  const recoveryAttempt = existingId
+    ? undefined
+    : optionalTrim(formData.get("recoveryAttempt"));
   const errBase =
     existingId !== undefined ? `/invoices/${existingId}/edit` : "/invoices/new";
   const fields = formToBuilderFields(formData);
@@ -574,7 +585,11 @@ export async function issueInvoice(formData: FormData): Promise<void> {
 
   revalidatePath("/invoices");
   revalidatePath("/dashboard");
-  redirect(`/invoices/${invoiceId}?toast=invoice_issued`);
+  const successQuery = new URLSearchParams({ toast: "invoice_issued" });
+  if (isInvoiceDraftRecoveryAttempt(recoveryAttempt)) {
+    successQuery.set("recoveryAttempt", recoveryAttempt);
+  }
+  redirect(`/invoices/${invoiceId}?${successQuery}`);
 }
 
 /** Issue a saved draft by id (detail / list / bulk). */

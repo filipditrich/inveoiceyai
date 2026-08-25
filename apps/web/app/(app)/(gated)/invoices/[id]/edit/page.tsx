@@ -1,4 +1,5 @@
 import { InvoiceBuilderForm } from "@/components/invoices/invoice-builder-form";
+import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 import { PageHeader } from "@/components/layout/page-header";
 import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
@@ -12,7 +13,11 @@ import { notFound, redirect } from "next/navigation";
 import { FilePenLineIcon } from "lucide-react";
 
 type Params = Promise<{ id: string }>;
-type Search = Promise<{ invalid?: string }>;
+type Search = Promise<{
+  invalid?: string;
+  toast?: string;
+  recoveryAttempt?: string;
+}>;
 
 export default async function InvoiceEditPage({
   params,
@@ -57,6 +62,16 @@ export default async function InvoiceEditPage({
 
   return (
     <div className="space-y-6">
+      <ProductToastTracker
+        clearNewInvoiceRecoveryWorkspaceId={workspaceId}
+        properties={{
+          creationEntry: "structured",
+          documentType: inv.meta.docType,
+          currency: inv.meta.currency,
+        }}
+        successInvoiceId={id}
+        toast={sp.toast ?? null}
+      />
       <PageHeader
         description={t("subtitle")}
         icon={<FilePenLineIcon />}
@@ -69,6 +84,7 @@ export default async function InvoiceEditPage({
         issuers={issuers}
         lastInvoice={lastInvoice}
         mode="edit"
+        workspaceId={workspaceId}
         initial={{
           issuerId: row.issuerId,
           clientId: row.clientId,

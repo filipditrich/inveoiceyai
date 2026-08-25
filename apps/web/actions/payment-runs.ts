@@ -7,7 +7,6 @@ import {
   paymentAuditEvents,
   paymentRunLines,
   paymentRuns,
-  supplierBankAccounts,
   suppliers,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
@@ -25,8 +24,10 @@ import { redirect } from "next/navigation";
 import { decryptBankToken } from "@/lib/payments/token-crypto";
 
 import { requireWorkspace, requireWorkspaceRole } from "@/lib/auth/session";
-import { payableEligibility } from "@/lib/incoming-invoices/eligibility";
-import { selectEligiblePaymentRunIds } from "@/lib/incoming-invoices/payment-run-selection";
+import {
+  EmptyPaymentRunError,
+  createPaymentRunTransaction,
+} from "@/lib/incoming-invoices/payment-run-transaction";
 
 function optionalTrim(value: FormDataEntryValue | null): string | null {
   if (typeof value !== "string") return null;
@@ -44,9 +45,13 @@ export async function createPaymentRunAction(
   const executionDate =
     optionalTrim(formData.get("executionDate")) ??
     new Date().toISOString().slice(0, 10);
-  const ids = formData
-    .getAll("ids")
-    .filter((id): id is string => typeof id === "string");
+  const ids = [
+    ...new Set(
+      formData
+        .getAll("ids")
+        .filter((id): id is string => typeof id === "string"),
+    ),
+  ];
   if (!issuerId || !bankAccountId) {
     redirect("/incoming-invoices?invalid=required_fields");
   }
@@ -55,149 +60,29 @@ export async function createPaymentRunAction(
   }
   const now = new Date();
   const week = `${now.getUTCFullYear()}-W${String(getIsoWeek(now)).padStart(2, "0")}`;
-  const [run] = await db
-    .insert(paymentRuns)
-    .values({
+  let run: { id: string } | null;
+  try {
+    run = await createPaymentRunTransaction({
       workspaceId,
+      userId,
       issuerId,
       bankAccountId,
-      name: `Platby ${week}`,
-      executionDate,
       currency,
-      createdByUserId: userId,
-    })
-    .returning({ id: paymentRuns.id });
-  if (!run) {
+      executionDate,
+      name: `Platby ${week}`,
+      ids,
+    });
+  } catch (error) {
+    if (error instanceof EmptyPaymentRunError) {
+      redirect("/incoming-invoices?invalid=empty_run");
+    }
     redirect("/incoming-invoices?invalid=run_create_failed");
   }
-  if (ids.length > 0) {
-    const includedCount = await addInvoicesToRun(
-      workspaceId,
-      run.id,
-      ids,
-      currency,
-    );
-    if (includedCount === 0) {
-      await db.delete(paymentRuns).where(eq(paymentRuns.id, run.id));
-      redirect(`/incoming-invoices?invalid=empty_run`);
-    }
+  if (!run) {
+    redirect("/incoming-invoices?invalid=forbidden");
   }
   revalidatePath("/incoming-invoices/runs");
   redirect(`/incoming-invoices/runs/${run.id}?toast=payment_run_created`);
-}
-
-async function addInvoicesToRun(
-  workspaceId: string,
-  runId: string,
-  invoiceIds: string[],
-  runCurrency: string,
-): Promise<number> {
-  const invoices = await db
-    .select()
-    .from(incomingInvoices)
-    .where(
-      and(
-        eq(incomingInvoices.workspaceId, workspaceId),
-        inArray(incomingInvoices.id, invoiceIds),
-      ),
-    );
-  const eligibility = new Map<
-    string,
-    { blockers: string[]; rail: string; outstanding: string }
-  >();
-  for (const invoice of invoices) {
-    const [account] = invoice.supplierBankAccountId
-      ? await db
-          .select()
-          .from(supplierBankAccounts)
-          .where(eq(supplierBankAccounts.id, invoice.supplierBankAccountId))
-          .limit(1)
-      : [];
-    const outstanding = String(
-      Math.max(0, Number(invoice.total ?? 0) - Number(invoice.paidAmount ?? 0)),
-    );
-    const blockers = payableEligibility({
-      status: invoice.status,
-      holdUntil: invoice.holdUntil,
-      paymentState: invoice.paymentState,
-      outstanding,
-      currency: invoice.currency,
-      runCurrency,
-      paymentMethod: invoice.paymentMethod,
-      beneficiaryConfirmed: Boolean(account?.confirmedAt),
-      hasBeneficiary: Boolean(
-        invoice.beneficiaryIban ||
-        (invoice.beneficiaryAccountNumber && invoice.beneficiaryBankCode),
-      ),
-      iban: invoice.beneficiaryIban,
-      accountNumber: invoice.beneficiaryAccountNumber,
-      bankCode: invoice.beneficiaryBankCode,
-      activePaymentRunId: invoice.activePaymentRunId,
-      docType: invoice.docType,
-    });
-    if (blockers.length > 0) {
-      eligibility.set(invoice.id, { blockers, rail: "", outstanding });
-      continue;
-    }
-    const rail = classifyFioRail({
-      iban: invoice.beneficiaryIban,
-      accountNumber: invoice.beneficiaryAccountNumber,
-      bankCode: invoice.beneficiaryBankCode,
-    });
-    if (rail === "foreign") {
-      eligibility.set(invoice.id, {
-        blockers: ["foreign_rail"],
-        rail,
-        outstanding,
-      });
-      continue;
-    }
-    eligibility.set(invoice.id, { blockers: [], rail, outstanding });
-  }
-  const eligibleIds = new Set(
-    selectEligiblePaymentRunIds(
-      invoices.map((invoice) => ({
-        id: invoice.id,
-        blockers: eligibility.get(invoice.id)?.blockers ?? ["not_found"],
-      })),
-    ),
-  );
-  for (const invoice of invoices) {
-    if (!eligibleIds.has(invoice.id)) continue;
-    const eligible = eligibility.get(invoice.id);
-    if (!eligible?.rail) continue;
-    const [supplier] = invoice.supplierId
-      ? await db
-          .select({ name: suppliers.name })
-          .from(suppliers)
-          .where(eq(suppliers.id, invoice.supplierId))
-          .limit(1)
-      : [];
-    await db.insert(paymentRunLines).values({
-      workspaceId,
-      paymentRunId: runId,
-      incomingInvoiceId: invoice.id,
-      amount: eligible.outstanding,
-      currency: invoice.currency,
-      beneficiaryName: supplier?.name ?? invoice.supplierNameRaw,
-      beneficiaryIban: invoice.beneficiaryIban,
-      beneficiaryAccountNumber: invoice.beneficiaryAccountNumber,
-      beneficiaryBankCode: invoice.beneficiaryBankCode,
-      beneficiaryBic: invoice.beneficiaryBic,
-      variableSymbol: invoice.variableSymbol,
-      constantSymbol: invoice.constantSymbol,
-      specificSymbol: invoice.specificSymbol,
-      messageForRecipient: invoice.messageForRecipient,
-      comment: `inv/${invoice.id.slice(0, 8)}`,
-      rail: eligible.rail,
-    });
-    await db
-      .update(incomingInvoices)
-      .set({ activePaymentRunId: runId, updatedAt: new Date() })
-      .where(eq(incomingInvoices.id, invoice.id));
-  }
-  await refreshRunTotals(runId);
-  return eligibleIds.size;
 }
 
 async function refreshRunTotals(runId: string) {

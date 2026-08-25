@@ -40,6 +40,7 @@ test.describe("public platform", () => {
   test("public page has no serious accessibility violations", async ({
     page,
   }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])

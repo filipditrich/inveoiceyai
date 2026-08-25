@@ -4,6 +4,11 @@ import {
 } from "@/actions/incoming-invoices";
 import { IncomingDecisionBar } from "@/components/incoming-invoices/incoming-decision-bar";
 import { IncomingExceptionBadge } from "@/components/incoming-invoices/incoming-exception-badge";
+import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
+import {
+  incomingActivitySteps,
+  incomingNextAction,
+} from "@/components/incoming-invoices/incoming-invoice-activity";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,21 +20,25 @@ import { formatDateTime, formatMoneyCode } from "@/lib/format";
 import { incomingPaymentStateMessageKey } from "@/lib/incoming-invoices/payment-state-message";
 import { incomingStatusMessageKey } from "@/lib/incoming-invoices/status-message";
 import { invalidMessage } from "@/lib/invalid-message";
+import { payableEligibility } from "@/lib/incoming-invoices/eligibility";
 import {
   approvalTasks,
   incomingDocuments,
   incomingInvoiceLines,
   incomingInvoices,
   paymentAuditEvents,
+  paymentRuns,
+  supplierBankAccounts,
   suppliers,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { and, desc, eq } from "drizzle-orm";
 import { FileTextIcon } from "lucide-react";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 
-type Search = Promise<{ invalid?: string }>;
+type Search = Promise<{ invalid?: string; toast?: string }>;
 
 export default async function IncomingInvoiceDetailPage({
   params,
@@ -61,11 +70,35 @@ export default async function IncomingInvoiceDetailPage({
   if (!invoice) {
     notFound();
   }
+  const [activePaymentRun] = invoice.activePaymentRunId
+    ? await db
+        .select({ id: paymentRuns.id, status: paymentRuns.status })
+        .from(paymentRuns)
+        .where(
+          and(
+            eq(paymentRuns.id, invoice.activePaymentRunId),
+            eq(paymentRuns.workspaceId, workspaceId),
+          ),
+        )
+        .limit(1)
+    : [];
   const [supplier] = invoice.supplierId
     ? await db
         .select()
         .from(suppliers)
         .where(eq(suppliers.id, invoice.supplierId))
+        .limit(1)
+    : [];
+  const [supplierAccount] = invoice.supplierBankAccountId
+    ? await db
+        .select({ confirmedAt: supplierBankAccounts.confirmedAt })
+        .from(supplierBankAccounts)
+        .where(
+          and(
+            eq(supplierBankAccounts.id, invoice.supplierBankAccountId),
+            eq(supplierBankAccounts.workspaceId, workspaceId),
+          ),
+        )
         .limit(1)
     : [];
   const [document] = invoice.primaryDocumentId
@@ -117,9 +150,46 @@ export default async function IncomingInvoiceDetailPage({
   const amount = invoice.total
     ? formatMoneyCode(Number(invoice.total), invoice.currency, appLocale)
     : null;
+  const paymentBlockers = payableEligibility({
+    status: invoice.status,
+    holdUntil: invoice.holdUntil,
+    paymentState: invoice.paymentState,
+    outstanding: String(
+      Math.max(0, Number(invoice.total ?? 0) - Number(invoice.paidAmount ?? 0)),
+    ),
+    currency: invoice.currency,
+    runCurrency: invoice.currency,
+    paymentMethod: invoice.paymentMethod,
+    beneficiaryConfirmed: Boolean(supplierAccount?.confirmedAt),
+    hasBeneficiary: Boolean(
+      invoice.beneficiaryIban ||
+      (invoice.beneficiaryAccountNumber && invoice.beneficiaryBankCode),
+    ),
+    iban: invoice.beneficiaryIban,
+    accountNumber: invoice.beneficiaryAccountNumber,
+    bankCode: invoice.beneficiaryBankCode,
+    activePaymentRunId: invoice.activePaymentRunId,
+    docType: invoice.docType,
+  });
+  const activityInput = {
+    status: invoice.status,
+    paymentState: invoice.paymentState,
+    exceptions: invoice.exceptionCodes,
+    docType: invoice.docType,
+    activePaymentRunId: activePaymentRun?.id ?? null,
+    activePaymentRunStatus: activePaymentRun?.status ?? null,
+    paymentEligible: paymentBlockers.length === 0,
+    paymentBlocker: paymentBlockers[0] ?? null,
+  };
+  const nextAction = incomingNextAction(activityInput);
+  const activitySteps = incomingActivitySteps(activityInput);
 
   return (
     <div className="space-y-4">
+      <ProductToastTracker
+        properties={{ routeKind: "incoming" }}
+        toast={sp.toast ?? null}
+      />
       <PageHeader
         icon={<FileTextIcon />}
         title={invoice.number ?? t("untitled")}
@@ -144,9 +214,53 @@ export default async function IncomingInvoiceDetailPage({
       <IncomingDecisionBar
         invoiceId={invoice.id}
         status={invoice.status}
+        paymentState={invoice.paymentState}
+        docType={invoice.docType}
+        paymentEligible={paymentBlockers.length === 0}
+        paymentBlocker={paymentBlockers[0] ?? null}
+        activePaymentRunId={activePaymentRun?.id}
+        activePaymentRunStatus={activePaymentRun?.status}
         pendingTaskId={pendingTask?.id}
         nextId={nextId}
       />
+      <section
+        className="bg-muted/40 rounded-xl border p-4"
+        aria-labelledby="incoming-progress"
+      >
+        <h2 className="text-sm font-semibold" id="incoming-progress">
+          {t("progress" as never)}
+        </h2>
+        <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+          <p>{t(`nextAction.${nextAction}` as never)}</p>
+          {nextAction === "view_payment_run" && activePaymentRun ? (
+            <Link
+              className="text-brand font-medium underline-offset-2 hover:underline"
+              href={`/incoming-invoices/runs/${activePaymentRun.id}`}
+            >
+              {tStatus("gate.open")}
+            </Link>
+          ) : null}
+        </div>
+        <ol
+          className={`mt-3 grid gap-2 text-xs ${activePaymentRun ? "sm:grid-cols-6" : "sm:grid-cols-5"}`}
+        >
+          {activitySteps.map((item) => (
+            <li
+              className={
+                item.complete
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground"
+              }
+              key={item.step}
+            >
+              {t(`progressSteps.${item.step}` as never)}
+              {item.state
+                ? ` · ${tStatus(`runs.runStatus.${item.state}` as never)}`
+                : null}
+            </li>
+          ))}
+        </ol>
+      </section>
       {invoice.exceptionCodes.length > 0 ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
           <h2 className="mb-2 text-sm font-semibold">{t("exceptions")}</h2>

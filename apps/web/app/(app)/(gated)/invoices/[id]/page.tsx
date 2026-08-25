@@ -9,6 +9,8 @@ import { reversePayment } from "@/actions/payments";
 import { InvoiceCancelSheet } from "@/components/invoices/invoice-cancel-sheet";
 import { SaveRecurringSheet } from "@/components/invoices/save-recurring-sheet";
 import { InvoiceEmailTimeline } from "@/components/invoices/invoice-email-timeline";
+import { InvoiceLifecycleGuidance } from "@/components/invoices/invoice-lifecycle-guidance";
+import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
 import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
 import { SendInvoiceEmailSheet } from "@/components/invoices/send-invoice-email-sheet";
@@ -70,7 +72,7 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 
 type Params = Promise<{ id: string }>;
-type Search = Promise<{ invalid?: string }>;
+type Search = Promise<{ invalid?: string; toast?: string }>;
 
 export default async function InvoiceDetailPage({
   params,
@@ -234,6 +236,26 @@ export default async function InvoiceDetailPage({
 
   return (
     <div className="space-y-6">
+      <ProductToastTracker
+        clearNewInvoiceRecoveryWorkspaceId={workspaceId}
+        properties={{
+          documentType: [
+            "invoice",
+            "proforma",
+            "advance",
+            "credit_note",
+          ].includes(row.docType)
+            ? (row.docType as
+                "invoice" | "proforma" | "advance" | "credit_note")
+            : undefined,
+          currency: ["CZK", "EUR", "USD"].includes(row.currency)
+            ? (row.currency as "CZK" | "EUR" | "USD")
+            : undefined,
+          hasIsdoc: Boolean(row.isdocUrl),
+        }}
+        successInvoiceId={id}
+        toast={sp.toast ?? null}
+      />
       <Link
         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
         href="/invoices"
@@ -433,6 +455,11 @@ export default async function InvoiceDetailPage({
           <dd>{row.paidAt ? formatDateTime(row.paidAt, locale) : "—"}</dd>
         </div>
       </dl>
+
+      <InvoiceLifecycleGuidance
+        displayStatus={displayStatus}
+        paymentState={row.paymentState}
+      />
 
       {row.issuedAt ? (
         <Card id="payment-ledger">

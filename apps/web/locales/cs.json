@@ -1007,6 +1007,42 @@
       "languageCs": "Čeština",
       "languageEn": "English",
       "emailHeading": "E-maily",
+      "emailResendHint": "V případě potřeby opravte příjemce a volbou Odeslat e-mailem vytvořte nový pokus o doručení. Dřívější pokusy zůstanou v historii.",
+      "lifecycleTitle": "Životní cyklus faktury",
+      "lifecycle": {
+        "draft": {
+          "body": "Tento návrh lze upravit a nemá přidělené číslo faktury.",
+          "action": "Zkontrolujte ho a vystavte až po dokončení údajů."
+        },
+        "unpaid": {
+          "body": "Vystavená faktura zatím nemá potvrzenou platbu.",
+          "action": "Odešlete ji nebo po přijetí platbu potvrďte."
+        },
+        "partial": {
+          "body": "Potvrzená platba pokrývá jen část faktury.",
+          "action": "Nechte zbývající částku otevřenou do doplacení."
+        },
+        "overdue": {
+          "body": "Splatnost uplynula a platba stále chybí.",
+          "action": "Připomeňte se odběrateli nebo zaznamenejte platbu."
+        },
+        "paid": {
+          "body": "Potvrzené platby pokrývají fakturu v plné výši.",
+          "action": "Historii plateb ponechte jako účetní záznam."
+        },
+        "overpaid": {
+          "body": "Potvrzené platby převyšují celkovou částku faktury.",
+          "action": "Před opravou nebo vrácením peněz zkontrolujte přiřazení."
+        },
+        "future": {
+          "body": "Tato faktura má datum vystavení v budoucnu a zatím není aktuální.",
+          "action": "Před odesláním nebo čekáním na platbu zkontrolujte datum vystavení."
+        },
+        "cancelled": {
+          "body": "Faktura zůstává v účetní historii jako stornovaná.",
+          "action": "Náhradní doklad vytvořte jen tehdy, pokud je potřeba nový."
+        }
+      },
       "currencyNote": "(zatím pouze CZK)",
       "total": "Celkem",
       "paidAt": "Zaplaceno",
@@ -1227,6 +1263,11 @@
       "itemVatAria": "Sazba DPH položky {n}",
       "itemVatCustomAria": "Vlastní sazba DPH položky {n}",
       "removeItem": "Odebrat položku {n}",
+      "duplicate": "Duplikovat",
+      "duplicateItem": "Duplikovat položku {n}",
+      "recoveredDraft": "Obnovili jsme neuložený místní návrh.",
+      "savedLocally": "Neuložený návrh je uložený v této relaci prohlížeče.",
+      "discardRecoveredDraft": "Zahodit obnovený návrh",
       "errors": {
         "invalidDate": "Zadejte platné datum",
         "selectIssuer": "Vyberte dodavatele",
@@ -1333,7 +1374,8 @@
       "title": "Odeslat fakturu",
       "description": "PDF se připojí vždy. ISDOC lze vypnout.",
       "notConfigured": "RESEND_API_KEY není nastavený — odeslání nebude fungovat.",
-      "suppressed": "Adresa je na suppress seznamu (bounce/complaint). Manuální odeslání je stále možné.",
+      "suppressed": "Adresa je na suppress seznamu (bounce/complaint). Před odesláním zvolte jinou adresu příjemce.",
+      "invalidRecipient": "Před odesláním zadejte platnou adresu příjemce do Komu i do všech kopií.",
       "subject": "Předmět",
       "to": "Komu",
       "cc": "Kopie (volitelné)",
@@ -2248,6 +2290,16 @@
     }
   },
   "IncomingInvoices": {
+    "nextAction": {
+      "review": "Další krok: zkontrolujte načtená pole.",
+      "resolve_exception": "Další krok: před pokračováním vyřešte výjimku.",
+      "waiting": "Další krok: vyčkejte, než pravidla připraví schvalovací úkol.",
+      "approve": "Další krok: dokončete požadované schválení.",
+      "schedule_payment": "Další krok: přidejte ji do platební dávky.",
+      "configure_payment": "Další krok: doplňte platební údaje nebo vyřešte překážku platby.",
+      "view_payment_run": "Další krok: sledujte fakturu v platební dávce.",
+      "none": "Není nutná žádná další akce."
+    },
     "title": "Přijaté faktury",
     "subtitle": "Zkontrolujte dokument, schvalte ho a potom vyberte připravené faktury na K zaplacení. Invoicey odešle dávku do Fio k podpisu, ale platbu nikdy neautorizuje.",
     "upload": "Nahrát",
@@ -2280,6 +2332,8 @@
       "payTitle": "Připraveno k platbě",
       "payHint": "Vyberte ji na K zaplacení a vytvořte dávku pro Fio. Invoicey platbu nikdy neautorizuje.",
       "payCta": "Přejít na K zaplacení",
+      "configureTitle": "Platební údaje vyžadují pozornost",
+      "configureHint": "Před vytvořením dávky doplňte údaje příjemce a platby nebo vyřešte aktuální překážku.",
       "rejectedTitle": "Zamítnuto",
       "acceptedTitle": "Přijato",
       "acceptedHint": "Pravidla schválení tuto fakturu právě vyhodnocují.",
@@ -2327,11 +2381,34 @@
       "blocked": "Otevřete fakturu, dokončete kontrolu a potvrďte účet příjemce. Teprve pak ji lze přidat do dávky.",
       "selectAll": "Vybrat vše",
       "noAccount": "Než vytvoříte dávku, připojte platící účet.",
-      "connectBank": "Bankovní spojení"
+      "connectBank": "Bankovní spojení",
+      "selectFirst": "Výběrem faktury určíte platící subjekt, měnu a kompatibilní účet.",
+      "selectionSummary": "{issuer} · {currency}",
+      "selectionIncompatible": "Vyberte faktury se stejným platícím subjektem a měnou.",
+      "noCompatibleAccount": "Pro tento subjekt a měnu není připojený kompatibilní platící účet."
     },
     "detail": {
       "untitled": "Bez čísla",
       "document": "Dokument",
+      "progress": "Průběh zpracování",
+      "nextAction": {
+        "review": "Další krok: zkontrolujte načtená pole.",
+        "resolve_exception": "Další krok: před pokračováním vyřešte výjimku.",
+        "waiting": "Další krok: vyčkejte, než pravidla připraví schvalovací úkol.",
+        "approve": "Další krok: dokončete požadované schválení.",
+        "schedule_payment": "Další krok: přidejte ji do platební dávky.",
+        "configure_payment": "Další krok: doplňte platební údaje nebo vyřešte překážku platby.",
+        "view_payment_run": "Další krok: sledujte fakturu v platební dávce.",
+        "none": "Není nutná žádná další akce."
+      },
+      "progressSteps": {
+        "capture": "Zachyceno",
+        "extraction": "Načteno",
+        "review": "Zkontrolováno",
+        "approval": "Schváleno",
+        "payment_run": "Platební dávka",
+        "payment": "Zaplaceno"
+      },
       "noDocument": "Dokument není k dispozici",
       "exceptions": "Výjimky",
       "number": "Číslo",

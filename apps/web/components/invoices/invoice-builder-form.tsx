@@ -40,6 +40,15 @@ import {
 } from "@/lib/last-invoice-suggestions";
 import type { AppLocale } from "@/i18n/config";
 import { cn } from "@/lib/utils";
+import {
+  clearRecoveredInvoiceDraft,
+  loadRecoveredInvoiceDraft,
+  markNewInvoiceRecoverySubmission,
+  normalizeRecoveredInvoiceBuilderDraft,
+  recoveredInvoiceBuilderIssuerIsAvailable,
+  saveRecoveredInvoiceDraft,
+} from "@/lib/invoice-draft-recovery";
+import { emitProductEvent } from "@/lib/product-analytics";
 import { nextInvoiceNumber } from "@invoicey/invoice-core/numbering";
 import type { Invoice } from "@invoicey/invoice-core/schema";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
@@ -178,6 +187,7 @@ export type { ClientOption, IssuerOption };
 
 export interface InvoiceBuilderFormProps {
   mode: "create" | "edit";
+  workspaceId: string;
   invoiceId?: string;
   invalidQuery?: string | null;
   issuers: IssuerOption[];
@@ -207,6 +217,7 @@ function fieldError(
 
 export function InvoiceBuilderForm({
   mode,
+  workspaceId,
   invoiceId,
   invalidQuery,
   issuers,
@@ -302,6 +313,12 @@ export function InvoiceBuilderForm({
   >(null);
   const [clientLookupError, setClientLookupError] = React.useState(false);
   const [addingClient, setAddingClient] = React.useState(false);
+  const [recoveredDraft, setRecoveredDraft] = React.useState(false);
+  const [localDraftSaved, setLocalDraftSaved] = React.useState(false);
+  const [savedLocalSnapshot, setSavedLocalSnapshot] = React.useState<
+    string | null
+  >(null);
+  const lineDescriptionRefs = React.useRef<Array<HTMLInputElement | null>>([]);
   const skipLastFetchRef = React.useRef(true);
 
   const selectedIssuer = issuers.find((i) => i.id === watched.issuerId);
@@ -309,6 +326,68 @@ export function InvoiceBuilderForm({
   const issuerVatPayer = selectedIssuer?.snapshot.vatPayer ?? true;
   const hideRatePicker =
     !issuerVatPayer || watched.vatMode === "reverse_charge";
+  const watchedSnapshot = JSON.stringify(watched);
+
+  React.useEffect(() => {
+    if (mode !== "create" || !firstIssuer || typeof window === "undefined") {
+      return;
+    }
+    const recovered = loadRecoveredInvoiceDraft<unknown>(
+      window.sessionStorage,
+      { workspaceId, issuerId: firstIssuer.id },
+    );
+    const restored = normalizeRecoveredInvoiceBuilderDraft(recovered);
+    if (
+      restored &&
+      recoveredInvoiceBuilderIssuerIsAvailable(
+        restored,
+        issuers.map((issuer) => issuer.id),
+      )
+    ) {
+      form.reset(restored);
+      setRecoveredDraft(true);
+      emitProductEvent("invoice_draft_recovered", {
+        creationEntry: "structured",
+      });
+    } else if (recovered) {
+      clearRecoveredInvoiceDraft(window.sessionStorage, workspaceId);
+    }
+    // Recovery is intentionally read only once. A later issuer selection must
+    // not replace the form currently being edited.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(() => {
+    if (
+      mode !== "create" ||
+      !watched.issuerId ||
+      !form.formState.isDirty ||
+      typeof window === "undefined"
+    ) {
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      const snapshot = JSON.stringify(form.getValues());
+      saveRecoveredInvoiceDraft(window.sessionStorage, {
+        context: { workspaceId, issuerId: watched.issuerId },
+        value: form.getValues(),
+      });
+      setLocalDraftSaved(true);
+      setSavedLocalSnapshot(snapshot);
+    }, 400);
+    return () => window.clearTimeout(timeout);
+  }, [form, mode, watched, workspaceId]);
+
+  React.useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        void submit("draft");
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
 
   React.useEffect(() => {
     return () => {
@@ -630,6 +709,14 @@ export function InvoiceBuilderForm({
     setFormErrorList([]);
     setSubmitting(action);
     const fd = new FormData();
+    if (mode === "create" && typeof window !== "undefined") {
+      const recoveryAttempt = crypto.randomUUID();
+      markNewInvoiceRecoverySubmission(window.sessionStorage, {
+        workspaceId,
+        attempt: recoveryAttempt,
+      });
+      fd.set("recoveryAttempt", recoveryAttempt);
+    }
     if (invoiceId) {
       fd.set("id", invoiceId);
     }
@@ -782,6 +869,35 @@ export function InvoiceBuilderForm({
               ))}
             </ul>
           </div>
+        ) : null}
+        {mode === "create" && recoveredDraft ? (
+          <div
+            className="bg-muted/50 flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm"
+            role="status"
+          >
+            <span>{t("recoveredDraft" as never)}</span>
+            <Button
+              onClick={() => {
+                clearRecoveredInvoiceDraft(window.sessionStorage, workspaceId);
+                form.reset();
+                setRecoveredDraft(false);
+                setLocalDraftSaved(false);
+                setSavedLocalSnapshot(null);
+              }}
+              size="sm"
+              type="button"
+              variant="ghost"
+            >
+              {t("discardRecoveredDraft" as never)}
+            </Button>
+          </div>
+        ) : null}
+        {mode === "create" &&
+        localDraftSaved &&
+        savedLocalSnapshot === watchedSnapshot ? (
+          <p className="text-muted-foreground text-xs" role="status">
+            {t("savedLocally" as never)}
+          </p>
         ) : null}
 
         <FormSection
@@ -1347,6 +1463,9 @@ export function InvoiceBuilderForm({
                       ? 0
                       : defaultLineVatRate(issuerVatPayer),
                   });
+                  window.requestAnimationFrame(() => {
+                    lineDescriptionRefs.current[fields.length]?.focus();
+                  });
                 }}
                 size="sm"
                 type="button"
@@ -1401,6 +1520,9 @@ export function InvoiceBuilderForm({
           <div className="space-y-4">
             {fields.map((field, index) => {
               const line = watched.items[index];
+              const descriptionRegistration = form.register(
+                `items.${index}.description`,
+              );
               const lastLine = lastInvoice?.items[index];
               const qty = Number(line?.quantity) || 0;
               const unitPrice = Number(line?.unitPriceWithoutVat) || 0;
@@ -1446,6 +1568,27 @@ export function InvoiceBuilderForm({
                     >
                       <Trash2Icon />
                     </Button>
+                    <Button
+                      aria-label={t("duplicateItem", { n: String(index + 1) })}
+                      onClick={() => {
+                        append({
+                          description: line?.description ?? "",
+                          quantity: Number(line?.quantity) || 1,
+                          unit: line?.unit ?? "ks",
+                          unitPriceWithoutVat:
+                            Number(line?.unitPriceWithoutVat) || 0,
+                          vatRate: Number(line?.vatRate) || 0,
+                        });
+                        window.requestAnimationFrame(() => {
+                          lineDescriptionRefs.current[fields.length]?.focus();
+                        });
+                      }}
+                      size="sm"
+                      type="button"
+                      variant="ghost"
+                    >
+                      {t("duplicate" as never)}
+                    </Button>
                   </div>
                   <Field
                     error={descErr}
@@ -1468,7 +1611,11 @@ export function InvoiceBuilderForm({
                     <Input
                       aria-invalid={Boolean(descErr)}
                       placeholder={t("descriptionPlaceholder")}
-                      {...form.register(`items.${index}.description`)}
+                      {...descriptionRegistration}
+                      ref={(element) => {
+                        descriptionRegistration.ref(element);
+                        lineDescriptionRefs.current[index] = element;
+                      }}
                     />
                   </Field>
                   <div

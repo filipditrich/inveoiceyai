@@ -29,10 +29,10 @@ export default function Providers({ children }: PropsWithChildren) {
         <TooltipProvider delay={0}>
           <ModalsProvider modals={registeredModals}>
             <C15tProvider>
+              <ConsentAwareAnalytics />
               <NavigationProgressProvider>
                 {children}
               </NavigationProgressProvider>
-              <ConsentAwareAnalytics />
               <C15tBanner />
               <C15tDialog />
             </C15tProvider>

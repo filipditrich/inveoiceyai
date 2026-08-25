@@ -99,6 +99,7 @@ export default async function InvoiceNewPage({
         issuers={issuers}
         lastInvoice={lastInvoice}
         mode="create"
+        workspaceId={workspaceId}
       />
     </div>
   );
