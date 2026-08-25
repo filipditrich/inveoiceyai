@@ -88,6 +88,13 @@ export type ResolvedStep = {
   /** How many approvals complete the step. */
   required: number;
   assignees: string[];
+  /**
+   * True when the step needs nobody because everyone it names already approved
+   * an earlier step. The caller advances past it. This is distinct from a step
+   * that resolves to nobody for any other reason, which is `step_unreachable`
+   * and must never be treated as approval.
+   */
+  satisfied: boolean;
 };
 
 export type ResolvedPath =
@@ -193,14 +200,26 @@ export function resolveWorkflowPath(input: {
   const steps: ResolvedStep[] = [];
 
   for (const step of [...path.steps].sort((a, b) => a.position - b.position)) {
-    let assignees = expandApprovers(step.approvers, context);
+    let eligible = expandApprovers(step.approvers, context);
     if (path.fourEyes && context.excludeUserId) {
-      assignees = assignees.filter((id) => id !== context.excludeUserId);
+      eligible = eligible.filter((id) => id !== context.excludeUserId);
     }
     // Someone who already approved an earlier step does not approve again.
-    assignees = assignees.filter((id) => !already.has(id));
+    const assignees = eligible.filter((id) => !already.has(id));
 
     if (assignees.length === 0) {
+      // Emptied only because everyone here already approved: the step has
+      // nothing left to ask, so it is satisfied rather than broken.
+      if (eligible.length > 0) {
+        steps.push({
+          position: step.position,
+          mode: step.mode,
+          required: 0,
+          assignees: [],
+          satisfied: true,
+        });
+        continue;
+      }
       return { kind: "fallback", reason: "step_unreachable" };
     }
 
@@ -220,6 +239,7 @@ export function resolveWorkflowPath(input: {
       mode: step.mode,
       required,
       assignees,
+      satisfied: false,
     });
   }
 

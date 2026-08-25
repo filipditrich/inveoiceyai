@@ -351,9 +351,16 @@ async function applyResolved(
     return { status: "approved" };
   }
 
-  const first = input.resolved.steps[0];
+  const first = input.resolved.steps.find((step) => !step.satisfied);
   if (!first) {
-    return { status: "unassigned", reason: "no_steps" };
+    // Every step was already satisfied by earlier approvals.
+    await approveInvoice(tx, {
+      workspaceId: input.workspaceId,
+      invoiceId: input.invoiceId,
+      actorUserId: input.validatedByUserId,
+      payload: { pathId: input.pathId, reason: "all_steps_satisfied" },
+    });
+    return { status: "approved" };
   }
   await tx.insert(approvalTasks).values(
     stepTaskRows({
@@ -547,7 +554,7 @@ export async function decideApprovalTask(input: {
         // not excluded from the reopened step's successors.
         alreadyApprovedUserIds: [],
       });
-      if (!reopened) {
+      if (reopened.kind !== "created") {
         return { ok: false, error: "step_unreachable" };
       }
       await addAuditEvent(tx, {
@@ -599,17 +606,41 @@ export async function decideApprovalTask(input: {
       );
 
     if (task.pathId) {
-      const created = await createStepTasks(tx, {
+      // Everyone who has approved anywhere on this invoice, not just this step.
+      const approvedByAnyone = await tx
+        .select({ userId: approvalTasks.decidedByUserId })
+        .from(approvalTasks)
+        .where(
+          and(
+            eq(approvalTasks.incomingInvoiceId, invoice.id),
+            eq(approvalTasks.status, "approved"),
+          ),
+        );
+      const advanced = await createStepTasks(tx, {
         workspaceId: input.workspaceId,
         invoice,
         pathId: task.pathId,
         ruleId: task.ruleId,
         position: task.step + 1,
-        alreadyApprovedUserIds: approvals
-          .map((row) => row.decidedByUserId)
+        alreadyApprovedUserIds: approvedByAnyone
+          .map((row) => row.userId)
           .filter((id): id is string => Boolean(id)),
       });
-      if (created) return { ok: true };
+      if (advanced.kind === "created") return { ok: true };
+      if (advanced.kind === "unreachable") {
+        // The path cannot continue. Leaving the invoice unapproved and visible
+        // is the only safe outcome; approving it here is how routing failures
+        // used to become silent approvals.
+        await addAuditEvent(tx, {
+          workspaceId: input.workspaceId,
+          action: "approval.unassigned",
+          actorUserId: input.actorUserId,
+          entityType: "incoming_invoice",
+          entityId: invoice.id,
+          payload: { fromStep: task.step, reason: advanced.reason },
+        });
+        return { ok: true };
+      }
     }
 
     await approveInvoice(tx, {
@@ -643,8 +674,18 @@ async function cancelPending(
     );
 }
 
-/** Creates the tasks for one step of a path. Returns false when there is no
- * such step, so the caller can finish the path. */
+export type AdvanceResult =
+  /** Tasks were created; the invoice stays in approval. */
+  | { kind: "created" }
+  /** No step left to run; the path is finished. */
+  | { kind: "complete" }
+  /** A step exists but resolves to nobody. Never treat this as approval. */
+  | { kind: "unreachable"; reason: string };
+
+/**
+ * Creates the tasks for the next step of a path that still needs someone,
+ * skipping steps already satisfied by earlier approvals.
+ */
 async function createStepTasks(
   tx: DbTransaction,
   input: {
@@ -655,11 +696,11 @@ async function createStepTasks(
     position: number;
     alreadyApprovedUserIds: string[];
   },
-): Promise<boolean> {
+): Promise<AdvanceResult> {
   const path = await loadWorkflowPath(tx, input.workspaceId, input.pathId);
-  if (!path) return false;
-  if (!path.steps.some((step) => step.position === input.position)) {
-    return false;
+  if (!path) return { kind: "unreachable", reason: "path_missing" };
+  if (!path.steps.some((step) => step.position >= input.position)) {
+    return { kind: "complete" };
   }
 
   const context = await buildResolutionContext(tx, input.workspaceId, {
@@ -679,9 +720,17 @@ async function createStepTasks(
     },
     context,
   });
-  if (resolved.kind !== "steps") return false;
-  const step = resolved.steps.find((row) => row.position === input.position);
-  if (!step) return false;
+  if (resolved.kind === "auto_approve") {
+    // An auto-approve path has no steps to advance into.
+    return { kind: "complete" };
+  }
+  if (resolved.kind === "fallback") {
+    return { kind: "unreachable", reason: resolved.reason };
+  }
+  const step = resolved.steps.find(
+    (row) => row.position >= input.position && !row.satisfied,
+  );
+  if (!step) return { kind: "complete" };
 
   await tx.insert(approvalTasks).values(
     stepTaskRows({
@@ -693,5 +742,5 @@ async function createStepTasks(
       step,
     }),
   );
-  return true;
+  return { kind: "created" };
 }

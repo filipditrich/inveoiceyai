@@ -682,8 +682,6 @@ declare const messages: {
         workspace: "Pracovní prostor";
       };
       nav: {
-        workflowPaths: "Schvalovací cesty";
-        teams: "Týmy";
         account: "Účet";
         workspace: "Pracovní prostor";
         security: "Zabezpečení";
@@ -694,10 +692,10 @@ declare const messages: {
         bankConnections: "Bankovní spojení";
         incomingInvoices: "Přijaté faktury";
         integrations: "Integrace";
+        workflowPaths: "Schvalovací cesty";
+        teams: "Týmy";
       };
       navDescriptions: {
-        workflowPaths: "Kdo schvaluje a v jakém pořadí";
-        teams: "Skupiny schvalovatelů";
         account: "Profil, motiv a jazyk";
         workspace: "Název a logo tohoto prostoru";
         security: "Přihlášení, relace a zařízení";
@@ -708,6 +706,8 @@ declare const messages: {
         bankConnections: "Bankovní přehledy jen pro čtení";
         incomingInvoices: "Inbox alias a pravidla schválení";
         integrations: "Slack, MCP a další nástroje";
+        workflowPaths: "Kdo schvaluje a v jakém pořadí";
+        teams: "Skupiny schvalovatelů";
       };
       workspace: {
         pageTitle: "Pracovní prostor";
@@ -1930,6 +1930,8 @@ declare const messages: {
       priorityValue: "Priorita {value}";
       whenCurrency: "Když je měna";
       ruleWhenCurrency: "Když je měna {currency}";
+      showAllPrevious: "Zobrazit všech {count}";
+      hidePrevious: "Zobrazit méně";
       rulePath: "Schvalovací cesta";
       ruleUsesPath: "Použije cestu {path}";
       ruleMissingPath: "Cesta nenastavena";
@@ -1938,73 +1940,6 @@ declare const messages: {
       minTotal: "Od částky";
       minTotalPlaceholder: "např. 50000";
       minTotalHint: "Nepovinné. Pravidlo platí od této částky výš.";
-      showAllPrevious: "Zobrazit všech {count}";
-      hidePrevious: "Zobrazit méně";
-    };
-    teams: {
-      title: "Týmy";
-      subtitle: "Skupiny lidí, které se dají použít ve schvalovacích cestách.";
-      why: "Přiřaďte schválení týmu, ne konkrétnímu člověku. Zástup pak vyřešíte změnou složení týmu, ne přepisem cesty.";
-      empty: "Zatím žádné týmy.";
-      name: "Název";
-      description: "Popis";
-      createTeam: "Vytvořit tým";
-      deleteTeam: "Smazat tým";
-      addMember: "Přidat člena";
-      removeMember: "Odebrat z týmu";
-      noMembers: "Tým je prázdný.";
-      memberCount: "{count} členů";
-    };
-    workflowPaths: {
-      title: "Schvalovací cesty";
-      subtitle: "Pojmenované cesty, které používají pravidla i ruční přiřazení.";
-      detailSubtitle: "Úrovně se procházejí odshora dolů.";
-      backToPaths: "Zpět na cesty";
-      empty: "Zatím žádné cesty.";
-      name: "Název";
-      description: "Popis";
-      stage: "Fáze";
-      stageValidation: "Kontrola";
-      stageApproval: "Schválení";
-      fourEyes: "Čtyři oči";
-      active: "Aktivní";
-      inactive: "Neaktivní";
-      isFallback: "Záložní";
-      isFallbackHint: "Použít jako záložní cestu pro tuto fázi";
-      autoApprove: "Schvalovat automaticky do limitu";
-      autoApproveHint: "Limit platí jen pro důvěryhodné dodavatele bez nálezů. Nový bankovní účet automatické schválení vždy zruší.";
-      autoApproveSummary: "Automaticky do {max} {currency}";
-      maxTotal: "Limit";
-      currency: "Měna";
-      createPath: "Vytvořit cestu";
-      deletePath: "Smazat cestu";
-      savePath: "Uložit cestu";
-      reminderAfterDays: "Připomenout po (dnech)";
-      escalateAfterDays: "Eskalovat po (dnech)";
-      steps: "Úrovně";
-      stepsEmpty: "Cesta zatím nemá žádnou úroveň.";
-      stepCount: "{count} úrovní";
-      addStep: "Přidat úroveň";
-      deleteStep: "Smazat úroveň";
-      moveUp: "Nahoru";
-      moveDown: "Dolů";
-      stepTitle: "{position}. úroveň — {mode}";
-      stepLabel: "Popisek";
-      mode: "Režim";
-      modeAnyOne: "kdokoliv z";
-      modeAllOf: "všichni z";
-      modeQuorum: "alespoň n z";
-      quorum: "Počet schválení";
-      quorumBadge: "potřeba {count}";
-      approversEmpty: "Bez schvalovatele se úroveň nedá projít.";
-      addApprover: "Přidat schvalovatele";
-      removeApprover: "Odebrat schvalovatele";
-      groupTeams: "Týmy";
-      groupPeople: "Lidé";
-      groupRoles: "Role";
-      teamLabel: "Tým {name}";
-      roleLabel: "Role {role}";
-      dynamicLabel: "Dynamicky: {which}";
     };
     bankConnections: {
       pageTitle: "Bankovní spojení";
@@ -2111,6 +2046,71 @@ declare const messages: {
         missing_payment_token_expiry: "Zadejte datum vypršení tokenu z Fio.";
         payment_token_expired: "Token pro odesílání vypršel. Zadejte nový.";
       };
+    };
+    teams: {
+      title: "Týmy";
+      subtitle: "Skupiny lidí, které se dají použít ve schvalovacích cestách.";
+      why: "Přiřaďte schválení týmu, ne konkrétnímu člověku. Zástup pak vyřešíte změnou složení týmu, ne přepisem cesty.";
+      empty: "Zatím žádné týmy.";
+      name: "Název";
+      description: "Popis";
+      createTeam: "Vytvořit tým";
+      deleteTeam: "Smazat tým";
+      addMember: "Přidat člena";
+      removeMember: "Odebrat z týmu";
+      noMembers: "Tým je prázdný.";
+      memberCount: "{count} členů";
+    };
+    workflowPaths: {
+      title: "Schvalovací cesty";
+      subtitle: "Pojmenované cesty, které používají pravidla i ruční přiřazení.";
+      detailSubtitle: "Úrovně se procházejí odshora dolů.";
+      backToPaths: "Zpět na cesty";
+      empty: "Zatím žádné cesty.";
+      name: "Název";
+      description: "Popis";
+      stage: "Fáze";
+      stageValidation: "Kontrola";
+      stageApproval: "Schválení";
+      fourEyes: "Čtyři oči";
+      active: "Aktivní";
+      inactive: "Neaktivní";
+      isFallback: "Záložní";
+      isFallbackHint: "Použít jako záložní cestu pro tuto fázi";
+      autoApprove: "Schvalovat automaticky do limitu";
+      autoApproveHint: "Limit platí jen pro důvěryhodné dodavatele bez nálezů. Nový bankovní účet automatické schválení vždy zruší.";
+      autoApproveSummary: "Automaticky do {max} {currency}";
+      maxTotal: "Limit";
+      currency: "Měna";
+      createPath: "Vytvořit cestu";
+      deletePath: "Smazat cestu";
+      savePath: "Uložit cestu";
+      reminderAfterDays: "Připomenout po (dnech)";
+      escalateAfterDays: "Eskalovat po (dnech)";
+      steps: "Úrovně";
+      stepsEmpty: "Cesta zatím nemá žádnou úroveň.";
+      stepCount: "{count} úrovní";
+      addStep: "Přidat úroveň";
+      deleteStep: "Smazat úroveň";
+      moveUp: "Nahoru";
+      moveDown: "Dolů";
+      stepTitle: "{position}. úroveň — {mode}";
+      stepLabel: "Popisek";
+      mode: "Režim";
+      modeAnyOne: "kdokoliv z";
+      modeAllOf: "všichni z";
+      modeQuorum: "alespoň n z";
+      quorum: "Počet schválení";
+      quorumBadge: "potřeba {count}";
+      approversEmpty: "Bez schvalovatele se úroveň nedá projít.";
+      addApprover: "Přidat schvalovatele";
+      removeApprover: "Odebrat schvalovatele";
+      groupTeams: "Týmy";
+      groupPeople: "Lidé";
+      groupRoles: "Role";
+      teamLabel: "Tým {name}";
+      roleLabel: "Role {role}";
+      dynamicLabel: "Dynamicky: {which}";
     };
   };
   Payments: {
@@ -2437,14 +2437,6 @@ declare const messages: {
       rejected: "Zamítnuto";
       cancelled: "Zrušeno";
     };
-    accountingStatus: {
-      not_applicable: "Bez účetnictví";
-      pending: "Čeká na zaúčtování";
-      queued: "Ve frontě k exportu";
-      exported: "Zaúčtováno";
-      failed: "Export selhal";
-      settled: "Zlikvidováno";
-    };
     run: {
       issuer: "Platící subjekt";
       account: "Účet";
@@ -2597,6 +2589,14 @@ declare const messages: {
       drop: "Vyřadit";
       submit: "Odeslat do Fio";
       submitHint: "Invoicey platbu autorizovat neumí. Po odeslání dávku podepište v internetovém bankovnictví Fio.";
+    };
+    accountingStatus: {
+      not_applicable: "Bez účetnictví";
+      pending: "Čeká na zaúčtování";
+      queued: "Ve frontě k exportu";
+      exported: "Zaúčtováno";
+      failed: "Export selhal";
+      settled: "Zlikvidováno";
     };
   };
   Suppliers: {

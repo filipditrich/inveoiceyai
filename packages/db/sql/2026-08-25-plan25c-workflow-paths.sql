@@ -19,8 +19,17 @@
 --
 -- Run after 2026-08-25-plan25a-payables-reset.sql, in the same db:push.
 --
--- The one statement db:push will not do on its own, because it drops a column
--- that still exists in a database pushed before 25c:
+-- The statements db:push will not do on its own, because they drop things that
+-- only exist in a database pushed before 25c. A database that went through the
+-- 25a reset has no approval_rules table at this point, so both are skipped.
 
-ALTER TABLE approval_rules DROP COLUMN IF EXISTS path;
-DROP INDEX IF EXISTS approval_rules_workspace_priority_uidx;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'approval_rules'
+  ) THEN
+    ALTER TABLE approval_rules DROP COLUMN IF EXISTS path;
+    DROP INDEX IF EXISTS approval_rules_workspace_priority_uidx;
+  END IF;
+END $$;

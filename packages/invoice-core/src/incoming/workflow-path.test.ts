@@ -63,6 +63,7 @@ describe("resolveWorkflowPath — steps", () => {
           mode: "any_one",
           required: 1,
           assignees: ["jana", "petr"],
+          satisfied: false,
         },
       ],
     });
@@ -173,6 +174,43 @@ describe("resolveWorkflowPath — steps", () => {
       }),
       facts: facts(),
       context: context({ excludeUserId: "jana" }),
+    });
+    expect(result).toEqual({ kind: "fallback", reason: "step_unreachable" });
+  });
+
+  it("marks a step satisfied when everyone on it already approved", () => {
+    const result = resolveWorkflowPath({
+      path: path({
+        steps: [
+          {
+            position: 1,
+            mode: "any_one",
+            approvers: [{ kind: "user", userId: "jana" }],
+          },
+        ],
+      }),
+      facts: facts(),
+      context: context({ alreadyApprovedUserIds: ["jana"] }),
+    });
+    expect(result).toMatchObject({
+      kind: "steps",
+      steps: [{ position: 1, satisfied: true, required: 0, assignees: [] }],
+    });
+  });
+
+  it("still falls back when a step empties for any other reason", () => {
+    const result = resolveWorkflowPath({
+      path: path({
+        steps: [
+          {
+            position: 1,
+            mode: "any_one",
+            approvers: [{ kind: "team", teamId: "empty" }],
+          },
+        ],
+      }),
+      facts: facts(),
+      context: context({ teamMembers: { empty: [] } }),
     });
     expect(result).toEqual({ kind: "fallback", reason: "step_unreachable" });
   });
