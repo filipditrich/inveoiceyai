@@ -102,3 +102,4 @@ export {
   reversePayableAllocation,
   type PayableAllocationResult,
 } from "./payables-repo";
+export { withDbTransaction, type DbTransaction } from "./transaction";

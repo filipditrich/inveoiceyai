@@ -3,6 +3,7 @@
 import {
   teamMembers,
   teams,
+  withDbTransaction,
   workflowPathStepApprovers,
   workflowPathSteps,
   workflowPaths,
@@ -125,7 +126,7 @@ export async function updateWorkflowPathAction(
   if (!id) redirect(`${PATHS}?invalid=missing_id`);
   const isFallback = formData.get("isFallback") === "on";
 
-  await db.transaction(async (tx) => {
+  await withDbTransaction(async (tx) => {
     const [path] = await tx
       .select()
       .from(workflowPaths)
@@ -194,7 +195,7 @@ export async function addPathStepAction(formData: FormData): Promise<void> {
     redirect(`${PATHS}/${pathId}?invalid=quorum_requires_count`);
   }
 
-  await db.transaction(async (tx) => {
+  await withDbTransaction(async (tx) => {
     const [last] = await tx
       .select({ position: workflowPathSteps.position })
       .from(workflowPathSteps)
@@ -219,7 +220,7 @@ export async function deletePathStepAction(formData: FormData): Promise<void> {
   const id = trimmed(formData.get("id"));
   const pathId = trimmed(formData.get("pathId"));
   if (!id || !pathId) redirect(`${PATHS}?invalid=missing_id`);
-  await db.transaction(async (tx) => {
+  await withDbTransaction(async (tx) => {
     await tx
       .delete(workflowPathSteps)
       .where(
@@ -252,7 +253,7 @@ export async function movePathStepAction(formData: FormData): Promise<void> {
   const direction = trimmed(formData.get("direction"));
   if (!id || !pathId) redirect(`${PATHS}?invalid=missing_id`);
 
-  await db.transaction(async (tx) => {
+  await withDbTransaction(async (tx) => {
     const steps = await tx
       .select()
       .from(workflowPathSteps)
