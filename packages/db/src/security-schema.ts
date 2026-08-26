@@ -28,6 +28,13 @@ export type SecurityAuditEventType =
   | "member_role_update"
   | "platform_admin_grant"
   | "platform_admin_revoke"
+  /* Cross-tenant writes from the platform ops console (ADR 0024). The actor is
+     always the admin; `workspaceId`/`metadata` name what they acted on. */
+  | "platform_tokens_grant"
+  | "platform_workspace_rename"
+  | "platform_workspace_delete"
+  | "platform_member_remove"
+  | "platform_invite_cancel"
   | "slack_link"
   | "slack_unlink"
   | "slack_rebind";

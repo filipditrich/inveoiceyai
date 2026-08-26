@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { setPlatformRoleAction } from "@/actions/admin";
 import { AdminCopyId } from "@/components/admin/admin-copy-id";
 import { AppDataGrid } from "@/components/data-grid/app-data-grid";
@@ -118,12 +120,15 @@ export function AdminUsersGrid({
           <DataGridColumnHeader column={column} title={t("columns.name")} />
         ),
         cell: ({ row }) => (
-          <div className="min-w-0">
+          <Link
+            className="block min-w-0 hover:underline"
+            href={`/admin/users/${row.original.id}`}
+          >
             <div className="truncate font-medium">{row.original.name}</div>
             <div className="text-muted-foreground truncate text-xs">
               {row.original.email}
             </div>
-          </div>
+          </Link>
         ),
         meta: { headerTitle: t("columns.name"), autoSize: true },
       },

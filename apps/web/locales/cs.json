@@ -141,7 +141,18 @@
     "platform_admin_last": "Nelze odebrat posledního platformního admina",
     "platform_admin_failed": "Platformní roli se nepodařilo změnit",
     "fio_payments_enabled": "Fio token pro odesílání uložen",
-    "fio_payments_disabled": "Práva k odesílání plateb odebrána"
+    "fio_payments_disabled": "Práva k odesílání plateb odebrána",
+    "admin_tokens_granted": "Tokeny darovány",
+    "admin_workspace_renamed": "Prostor přejmenován",
+    "admin_workspace_deleted": "Prostor smazán",
+    "admin_member_removed": "Člen odebrán",
+    "admin_invite_canceled": "Pozvánka zrušena",
+    "admin_not_found": "Záznam nenalezen",
+    "admin_invalid_amount": "Neplatný počet tokenů",
+    "admin_name_required": "Zadejte název",
+    "admin_last_owner": "Nelze odebrat posledního vlastníka",
+    "admin_confirmation_mismatch": "Potvrzení nesouhlasí",
+    "admin_action_failed": "Akce se nezdařila"
   },
   "ToastDescriptions": {
     "issuer_saved": "Údaje firmy jsou připravené pro další faktury.",
@@ -176,7 +187,18 @@
     "platform_admin_last": "Musí zůstat alespoň jeden platformní administrátor.",
     "platform_admin_failed": "Přístup se nezměnil.",
     "fio_payments_enabled": "Invoicey teď může navrhnout dávku. Platbu pořád autorizujete ve Fio.",
-    "fio_payments_disabled": "Synchronizace výpisů zůstává. Nové dávky nelze odeslat."
+    "fio_payments_disabled": "Synchronizace výpisů zůstává. Nové dávky nelze odeslat.",
+    "admin_tokens_granted": "Přičteno k darovanému zůstatku prostoru.",
+    "admin_workspace_renamed": "Nový název vidí všichni členové.",
+    "admin_workspace_deleted": "Prostor i jeho data byly odstraněny.",
+    "admin_member_removed": "Uživatel už do prostoru nemá přístup.",
+    "admin_invite_canceled": "Odkaz z pozvánky přestal platit.",
+    "admin_not_found": "Záznam mezitím zmizel — obnovte stránku.",
+    "admin_invalid_amount": "Zadejte celé číslo mezi 1 a 10 000 000.",
+    "admin_name_required": "Název prostoru nesmí být prázdný.",
+    "admin_last_owner": "Prostor musí mít vždy alespoň jednoho vlastníka.",
+    "admin_confirmation_mismatch": "Přepište slug prostoru přesně.",
+    "admin_action_failed": "Zkuste to znovu, nebo se podívejte do logů."
   },
   "Status": {
     "invoice": {
@@ -2068,14 +2090,17 @@
       "issuers": "Dodavatelé",
       "backToApp": "Zpět do aplikace",
       "productGroup": "Produkt",
-      "productDashboard": "Produktový přehled"
+      "productDashboard": "Produktový přehled",
+      "audit": "Audit log"
     },
     "breadcrumb": {
       "root": "Admin",
       "users": "Uživatelé",
       "workspaces": "Pracovní prostory",
       "invoices": "Faktury",
-      "issuers": "Dodavatelé"
+      "issuers": "Dodavatelé",
+      "audit": "Audit log",
+      "detail": "Detail"
     },
     "table": {
       "search": "Hledat",
@@ -2204,6 +2229,96 @@
         "updatedAt": "Aktualizováno",
         "id": "ID dodavatele",
         "workspaceId": "ID prostoru"
+      }
+    },
+    "audit": {
+      "title": "Audit log platformy",
+      "subtitle": "Každý zápis provedený z admin konzole napříč prostory. Vlastníci prostoru tyto zásahy nevidí — tohle je jediné místo, kde jsou dohledatelné.",
+      "recentTitle": "Poslední akce",
+      "count": "{count, plural, one {# záznam} few {# záznamy} other {# záznamů}}",
+      "empty": "Zatím žádné akce.",
+      "columns": {
+        "event": "Akce",
+        "actor": "Provedl",
+        "workspace": "Prostor",
+        "details": "Detaily",
+        "at": "Kdy"
+      }
+    },
+    "userDetail": {
+      "eyebrow": "Uživatel",
+      "back": "Zpět na uživatele",
+      "profileTitle": "Profil",
+      "membershipsTitle": "Členství",
+      "membershipsDescription": "Prostory, do kterých tento účet patří.",
+      "noMemberships": "Žádná členství.",
+      "referralsTitle": "Doporučení",
+      "referralsDescription": "Účty, které se registrovaly přes kód tohoto uživatele.",
+      "noReferrals": "Zatím nikoho nedoporučil.",
+      "allUsers": "Všichni uživatelé",
+      "auditTitle": "Bezpečnostní historie",
+      "auditDescription": "Přihlášení, změny přístupů a zásahy admina týkající se tohoto účtu.",
+      "columns": {
+        "workspace": "Prostor",
+        "role": "Role",
+        "joined": "Připojen",
+        "email": "E-mail",
+        "signedUp": "Registrace"
+      }
+    },
+    "workspaceDetail": {
+      "eyebrow": "Pracovní prostor",
+      "back": "Zpět na prostory",
+      "overviewTitle": "Přehled",
+      "tokensTitle": "AI tokeny",
+      "tokensDescription": "Zůstatek prostoru. Darované tokeny se čerpají jako první, takže podpora nenafoukne měsíční limit.",
+      "tokens": {
+        "gifted": "Darované",
+        "monthly": "Měsíční",
+        "purchased": "Zakoupené",
+        "renewsAt": "Obnova",
+        "missing": "Tento prostor zatím nemá záznam o zůstatku. Darování ho založí."
+      },
+      "grant": {
+        "amountLabel": "Počet tokenů",
+        "noteLabel": "Poznámka",
+        "notePlaceholder": "např. kompenzace za výpadek",
+        "hint": "Připočte se k darovanému zůstatku a zapíše do audit logu.",
+        "submit": "Darovat tokeny"
+      },
+      "membersTitle": "Členové",
+      "noMembers": "Žádní členové.",
+      "invitesTitle": "Čekající pozvánky",
+      "invitesDescription": "Pozvánky, které zatím nikdo nepřijal.",
+      "noInvites": "Žádné čekající pozvánky.",
+      "issuersTitle": "Firmy",
+      "noIssuers": "Žádné firmy.",
+      "auditTitle": "Historie prostoru",
+      "auditDescription": "Zásahy admina a bezpečnostní události v tomto prostoru.",
+      "dangerTitle": "Nevratné akce",
+      "dangerDescription": "Zasahují do dat, která patří někomu jinému. Vše se zapisuje do audit logu.",
+      "rename": {
+        "label": "Název prostoru",
+        "submit": "Přejmenovat"
+      },
+      "delete": {
+        "label": "Smazání potvrdíte přepsáním „{slug}“",
+        "hint": "Smaže prostor včetně {count} faktur, firem, klientů a členství. Nelze vzít zpět.",
+        "submit": "Smazat prostor"
+      },
+      "actions": {
+        "removeMember": "Odebrat",
+        "cancelInvite": "Zrušit"
+      },
+      "columns": {
+        "member": "Člen",
+        "role": "Role",
+        "joined": "Připojen",
+        "email": "E-mail",
+        "invitedBy": "Pozval",
+        "expires": "Platí do",
+        "issuer": "Firma",
+        "ico": "IČO"
       }
     }
   },

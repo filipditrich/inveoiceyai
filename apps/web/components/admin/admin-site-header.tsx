@@ -26,7 +26,11 @@ export function AdminSiteHeader() {
     workspaces: t("breadcrumb.workspaces"),
     invoices: t("breadcrumb.invoices"),
     issuers: t("breadcrumb.issuers"),
+    audit: t("breadcrumb.audit"),
   };
+
+  /** Detail routes end in an id; a raw UUID is not a useful crumb label. */
+  const looksLikeId = (segment: string) => segment.length >= 16;
 
   const segments = pathname.split("/").filter(Boolean);
   const crumbs: { readonly href: string; readonly label: string }[] = [];
@@ -35,7 +39,9 @@ export function AdminSiteHeader() {
     acc += `/${segment}`;
     crumbs.push({
       href: acc,
-      label: segmentLabels[segment] ?? segment,
+      label:
+        segmentLabels[segment] ??
+        (looksLikeId(segment) ? t("breadcrumb.detail") : segment),
     });
   }
 

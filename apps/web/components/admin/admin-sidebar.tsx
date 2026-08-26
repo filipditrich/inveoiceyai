@@ -19,6 +19,7 @@ import {
   FileTextIcon,
   LayoutDashboardIcon,
   ShieldIcon,
+  ScrollTextIcon,
   UsersIcon,
   WarehouseIcon,
 } from "lucide-react";
@@ -66,6 +67,12 @@ export function AdminSidebar({
       url: "/admin/issuers",
       icon: <Building2Icon />,
       isActive: pathname.startsWith("/admin/issuers"),
+    },
+    {
+      title: t("nav.audit"),
+      url: "/admin/audit",
+      icon: <ScrollTextIcon />,
+      isActive: pathname.startsWith("/admin/audit"),
     },
   ];
 
