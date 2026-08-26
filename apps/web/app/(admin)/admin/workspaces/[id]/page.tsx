@@ -82,15 +82,15 @@ export default async function AdminWorkspaceDetailPage({
           items={[
             {
               label: tWorkspaces("columns.members"),
-              value: String(detail.members.length),
+              value: format.number(detail.members.length),
             },
             {
               label: tWorkspaces("columns.invoices"),
-              value: String(detail.invoiceCount),
+              value: format.number(detail.invoiceCount),
             },
             {
               label: tWorkspaces("columns.issuers"),
-              value: String(detail.issuers.length),
+              value: format.number(detail.issuers.length),
             },
             {
               label: tWorkspaces("columns.createdAt"),
@@ -120,15 +120,15 @@ export default async function AdminWorkspaceDetailPage({
             items={[
               {
                 label: t("tokens.gifted"),
-                value: String(tokens.giftedRemaining),
+                value: format.number(tokens.giftedRemaining),
               },
               {
                 label: t("tokens.monthly"),
-                value: `${tokens.monthlyRemaining} / ${tokens.monthlyLimit}`,
+                value: `${format.number(tokens.monthlyRemaining)} / ${format.number(tokens.monthlyLimit)}`,
               },
               {
                 label: t("tokens.purchased"),
-                value: String(tokens.purchasedRemaining),
+                value: format.number(tokens.purchasedRemaining),
               },
               {
                 label: t("tokens.renewsAt"),
@@ -302,7 +302,7 @@ export default async function AdminWorkspaceDetailPage({
             />
           </div>
           <p className="text-muted-foreground text-xs">
-            {t("delete.hint", { count: String(detail.invoiceCount) })}
+            {t("delete.hint", { count: format.number(detail.invoiceCount) })}
           </p>
           <SubmitButton size="sm" variant="destructive">
             {t("delete.submit")}
