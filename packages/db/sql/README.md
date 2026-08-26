@@ -10,7 +10,19 @@ re-running one is a no-op.
 
 ## Why these exist
 
-`bun db:push` **cannot be run unattended on this database.** On the Plan 14
+`bun db:push` **could not be run unattended on this database.** The two false
+positives below were fixed on 2026-08-26 by
+`2026-08-26-unique-constraints-to-indexes.sql` — drizzle-kit does not match
+composite `unique(name).on(a, b)` against what it introspects, but does match
+`uniqueIndex()`, so the schema now uses the latter throughout. Push no longer
+offers to truncate anything.
+
+One genuine drift remains: `clients_workspace_ico_uidx` cannot be created while
+duplicate clients exist (NFCtron a.s. ×3, NFCtron Pay a.s. ×2). Merging them
+repoints invoices, so it needs a decision rather than a migration. Until then
+push fails cleanly on that index instead of threatening data.
+
+Historically: On the Plan 14
 schema it twice offered to _truncate a table containing production rows_:
 
 - adding `workspaces.slug` as `NOT NULL UNIQUE` to a table with 1 row →
@@ -40,20 +52,21 @@ two steps (add nullable + backfill, then tighten), as
 
 ## Recorded files
 
-| File                                                  | Plan                                              |
-| ----------------------------------------------------- | ------------------------------------------------- |
-| `2026-08-11-plan14-*.sql`                             | Plan 14 auth / workspaces                         |
-| `2026-08-11-plan16-account-security.sql`              | Plan 16 trusted devices + audit                   |
-| `2026-08-11-plan19-invites-referrals.sql`             | Plan 19 referral columns + `referral_events`      |
-| `2026-08-12-ai-token-usage.sql`                       | Plan 21 AI token balances + usage                 |
-| `2026-08-12-plan10-recurring.sql`                     | Plan 10 templates + recurring schedules           |
-| `2026-08-13-default-issuer.sql`                       | `issuer_businesses.is_default`                    |
-| `2026-08-13-issued-artifact-hashes.sql`               | Immutable issued artifact SHA-256 metadata        |
-| `2026-08-15-plan22-payments-fio.sql`                  | Payment ledger + Fio read-only integration        |
-| `2026-08-15-invoice-payment-identifiers-backfill.sql` | Repair web-issued invoice matching identifiers    |
-| `2026-08-15-fio-auto-match.sql`                       | Opt-in exact Fio payment auto-matching            |
-| `2026-08-15-moneta-provider.sql`                      | Allow `moneta` on `bank_connections.provider`     |
-| `2026-08-15-client-identity-dedup.sql`                | Client cleanup + identity uniqueness indexes      |
-| `2026-08-16-plan24-incoming-invoices.sql`             | Incoming invoices, approvals, payables, Fio write |
+| File                                                  | Plan                                                                               |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `2026-08-11-plan14-*.sql`                             | Plan 14 auth / workspaces                                                          |
+| `2026-08-11-plan16-account-security.sql`              | Plan 16 trusted devices + audit                                                    |
+| `2026-08-11-plan19-invites-referrals.sql`             | Plan 19 referral columns + `referral_events`                                       |
+| `2026-08-12-ai-token-usage.sql`                       | Plan 21 AI token balances + usage                                                  |
+| `2026-08-12-plan10-recurring.sql`                     | Plan 10 templates + recurring schedules                                            |
+| `2026-08-13-default-issuer.sql`                       | `issuer_businesses.is_default`                                                     |
+| `2026-08-13-issued-artifact-hashes.sql`               | Immutable issued artifact SHA-256 metadata                                         |
+| `2026-08-15-plan22-payments-fio.sql`                  | Payment ledger + Fio read-only integration                                         |
+| `2026-08-15-invoice-payment-identifiers-backfill.sql` | Repair web-issued invoice matching identifiers                                     |
+| `2026-08-15-fio-auto-match.sql`                       | Opt-in exact Fio payment auto-matching                                             |
+| `2026-08-15-moneta-provider.sql`                      | Allow `moneta` on `bank_connections.provider`                                      |
+| `2026-08-15-client-identity-dedup.sql`                | Client cleanup + identity uniqueness indexes                                       |
+| `2026-08-26-drop-incoming-invoices.sql`               | Removed the incoming-invoices / payables domain                                    |
+| `2026-08-26-unique-constraints-to-indexes.sql`        | Fixed the drizzle-kit drift that made `db:push` offer to truncate populated tables |
 
 Apply Plan 19 before deploying referral routes (`/r/*`, `/settings/referrals`, admin users list).

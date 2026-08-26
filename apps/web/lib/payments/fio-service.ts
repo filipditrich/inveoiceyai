@@ -55,9 +55,6 @@ export type FioConnectionSummary = {
   lastSyncSucceededAt: Date | null;
   lastSyncErrorCode: string | null;
   nextSyncAt: Date | null;
-  accessMode: string;
-  paymentEnabledAt: Date | null;
-  paymentTokenExpiresAt: Date | null;
 };
 
 export async function listFioConnections(
@@ -74,9 +71,6 @@ export async function listFioConnections(
       lastSyncSucceededAt: bankConnections.lastSyncSucceededAt,
       lastSyncErrorCode: bankConnections.lastSyncErrorCode,
       nextSyncAt: bankConnections.nextSyncAt,
-      accessMode: bankConnections.accessMode,
-      paymentEnabledAt: bankConnections.paymentEnabledAt,
-      paymentTokenExpiresAt: bankConnections.paymentTokenExpiresAt,
     })
     .from(bankConnections)
     .innerJoin(bankAccounts, eq(bankAccounts.connectionId, bankConnections.id))
@@ -369,90 +363,6 @@ export async function setFioAutoMatch(input: {
     entityType: "bank_connection",
     entityId: updated.id,
     payloadJson: { exactOnly: true },
-  });
-  return true;
-}
-
-export async function saveFioPaymentToken(input: {
-  workspaceId: string;
-  connectionId: string;
-  userId: string;
-  token: string;
-  expiresAt: Date;
-}): Promise<boolean> {
-  const secret = encryptBankToken(input.token);
-  const now = new Date();
-  const [updated] = await db
-    .update(bankConnections)
-    .set({
-      paymentSecretCiphertext: secret.ciphertext,
-      paymentSecretFingerprint: secret.fingerprint,
-      paymentKeyVersion: secret.keyVersion,
-      paymentTokenExpiresAt: input.expiresAt,
-      paymentEnabledAt: now,
-      paymentEnabledByUserId: input.userId,
-      accessMode: "read_write",
-      updatedAt: now,
-    })
-    .where(
-      and(
-        eq(bankConnections.id, input.connectionId),
-        eq(bankConnections.workspaceId, input.workspaceId),
-        eq(bankConnections.provider, "fio"),
-        eq(bankConnections.status, "active"),
-      ),
-    )
-    .returning({ id: bankConnections.id });
-  if (!updated) return false;
-  await db
-    .update(bankAccounts)
-    .set({ importScope: "all", updatedAt: now })
-    .where(eq(bankAccounts.connectionId, updated.id));
-  await db.insert(paymentAuditEvents).values({
-    workspaceId: input.workspaceId,
-    action: "bank_connection.payment_enabled",
-    actorType: "user",
-    actorUserId: input.userId,
-    entityType: "bank_connection",
-    entityId: updated.id,
-  });
-  return true;
-}
-
-export async function clearFioPaymentToken(input: {
-  workspaceId: string;
-  connectionId: string;
-  userId: string;
-}): Promise<boolean> {
-  const [updated] = await db
-    .update(bankConnections)
-    .set({
-      paymentSecretCiphertext: null,
-      paymentSecretFingerprint: null,
-      paymentKeyVersion: null,
-      paymentTokenExpiresAt: null,
-      paymentLastRequestAt: null,
-      paymentEnabledAt: null,
-      paymentEnabledByUserId: null,
-      accessMode: "read",
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(bankConnections.id, input.connectionId),
-        eq(bankConnections.workspaceId, input.workspaceId),
-        eq(bankConnections.provider, "fio"),
-      ),
-    )
-    .returning({ id: bankConnections.id });
-  if (!updated) return false;
-  await db.insert(paymentAuditEvents).values({
-    workspaceId: input.workspaceId,
-    action: "bank_connection.payment_disabled",
-    actorType: "user",
-    actorUserId: input.userId,
-    entityType: "bank_connection",
-    entityId: updated.id,
   });
   return true;
 }

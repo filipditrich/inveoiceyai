@@ -8,7 +8,6 @@ import {
   pgTable,
   text,
   timestamp,
-  unique,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -142,7 +141,10 @@ export const issuerNumberingSchemes = pgTable(
       .notNull(),
   },
   (t) => [
-    unique("issuer_numbering_schemes_issuer_doc").on(t.issuerId, t.docType),
+    uniqueIndex("issuer_numbering_schemes_issuer_doc").on(
+      t.issuerId,
+      t.docType,
+    ),
     index("issuer_numbering_schemes_workspace_idx").on(t.workspaceId),
   ],
 );
@@ -175,7 +177,7 @@ export const invoiceTemplates = pgTable(
       .notNull(),
   },
   (t) => [
-    unique("invoice_templates_workspace_name").on(t.workspaceId, t.name),
+    uniqueIndex("invoice_templates_workspace_name").on(t.workspaceId, t.name),
     index("invoice_templates_workspace_idx").on(t.workspaceId),
   ],
 );
@@ -204,7 +206,7 @@ export const recurringSchedules = pgTable(
       .notNull(),
   },
   (t) => [
-    unique("recurring_schedules_template").on(t.templateId),
+    uniqueIndex("recurring_schedules_template").on(t.templateId),
     index("recurring_schedules_due_idx").on(t.paused, t.nextRunOn),
     index("recurring_schedules_workspace_idx").on(t.workspaceId),
   ],
@@ -295,7 +297,7 @@ export const invoices = pgTable(
       .notNull(),
   },
   (t) => [
-    unique("invoices_issuer_number").on(t.issuerId, t.number),
+    uniqueIndex("invoices_issuer_number").on(t.issuerId, t.number),
     index("invoices_workspace_issue_date_idx").on(t.workspaceId, t.issueDate),
     index("invoices_workspace_issuer_idx").on(t.workspaceId, t.issuerId),
     index("invoices_workspace_client_idx").on(t.workspaceId, t.clientId),
@@ -374,7 +376,6 @@ export const bankConnections = pgTable(
       .references(() => workspaces.id, { onDelete: "cascade" }),
     provider: text("provider").notNull(),
     status: text("status").notNull().default("active"),
-    accessMode: text("access_mode").notNull().default("read"),
     /** Opt-in: confirm only blocker-free, exact matcher proposals. */
     autoConfirmExactMatches: boolean("auto_confirm_exact_matches")
       .notNull()
@@ -390,21 +391,6 @@ export const bankConnections = pgTable(
       { onDelete: "set null" },
     ),
     tokenExpiresAt: timestamp("token_expires_at", { withTimezone: true }),
-    /** Optional Fio submit token (ADR 0033). Never returned after write. */
-    paymentSecretCiphertext: text("payment_secret_ciphertext"),
-    paymentSecretFingerprint: text("payment_secret_fingerprint"),
-    paymentKeyVersion: integer("payment_key_version"),
-    paymentTokenExpiresAt: timestamp("payment_token_expires_at", {
-      withTimezone: true,
-    }),
-    paymentLastRequestAt: timestamp("payment_last_request_at", {
-      withTimezone: true,
-    }),
-    paymentEnabledAt: timestamp("payment_enabled_at", { withTimezone: true }),
-    paymentEnabledByUserId: text("payment_enabled_by_user_id").references(
-      () => user.id,
-      { onDelete: "set null" },
-    ),
     syncCoverageThrough: text("sync_coverage_through"),
     lastRequestAt: timestamp("last_request_at", { withTimezone: true }),
     leaseUntil: timestamp("lease_until", { withTimezone: true }),
