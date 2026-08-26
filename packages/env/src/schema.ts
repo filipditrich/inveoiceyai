@@ -149,28 +149,8 @@ export const privateEnvSchema = z.object({
   /**
    * Resend Inbound receiving domain (Plan 24b), e.g. inbox.invoicey.ditrich.me.
    */
-  INVOICEY_INBOUND_EMAIL_DOMAIN: z.preprocess(
-    emptyEnvToUndefined,
-    z.string().min(1).optional(),
-  ),
   /** Svix secret for the email.received webhook. Distinct from delivery events. */
-  RESEND_INBOUND_WEBHOOK_SECRET: z.preprocess(
-    emptyEnvToUndefined,
-    z.string().min(1).optional(),
-  ),
-  INVOICEY_INBOUND_MAX_ATTACHMENT_BYTES: z.preprocess(
-    emptyEnvToUndefined,
-    z.coerce.number().int().positive().default(20_971_520),
-  ),
-  INVOICEY_INBOUND_MAX_MESSAGES_PER_DAY: z.preprocess(
-    emptyEnvToUndefined,
-    z.coerce.number().int().positive().default(200),
-  ),
   /** Document-capable AI Gateway model for incoming-invoice extraction (Plan 24c). */
-  INVOICEY_AI_EXTRACT_MODEL: z.preprocess(
-    emptyEnvToUndefined,
-    z.string().min(1).optional(),
-  ),
   /**
    * Shared secret for the agent/bot login page. Unset disables the route.
    * Does not reintroduce product password auth (ADR 0018).

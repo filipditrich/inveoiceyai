@@ -36,7 +36,6 @@ If a doc disagrees with the code, the doc is right and the code is a bug — or 
 - [Payment ledger and bank integration](./research/payment-ledger-bank-integration.md)
   — Fio shipped; Czech bank API matrix concludes other direct adapters are
   deferred (paid, cert/OAuth-heavy, or PSD2-TPP-only).
-- [Incoming invoices](./research/incoming-invoices.md) — promoted to Plan 24;
   capture, extraction ladder, approval rules, and bank-signed payment batches
   for supplier invoices.
 - [Czech OSVČ companion](./research/osvc-companion.md) — exploratory and not

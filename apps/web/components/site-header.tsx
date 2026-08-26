@@ -28,8 +28,6 @@ export function SiteHeader() {
   const segmentLabels: Record<string, string> = {
     dashboard: t("breadcrumb.dashboard"),
     invoices: t("breadcrumb.invoices"),
-    "incoming-invoices": t("breadcrumb.incoming-invoices"),
-    suppliers: t("breadcrumb.suppliers"),
     payments: t("breadcrumb.payments"),
     welcome: t("breadcrumb.welcome"),
     inbox: t("breadcrumb.inbox"),

@@ -7,7 +7,8 @@ Accepted
 ## Context
 
 Resend is the only transactional transport ([ADR 0022](./0022-resend-and-react-email.md))
-and the only inbound capture path ([ADR 0032](./0032-inbound-email-capture-resend.md)).
+and, until incoming invoices were removed on 2026-08-26, the only inbound
+capture path.
 That was the right MVP choice: Vercel-hosted, react-email templates, metadata-only
 inbound webhooks that do not push invoice PDFs through a function body.
 
@@ -61,6 +62,5 @@ delivery status mapping assumed Resend event names.
 ## References
 
 - [`docs/specs/email.md`](../specs/email.md)
-- [`docs/specs/inbound-email-capture.md`](../specs/inbound-email-capture.md)
+- the inbound capture spec (removed 2026-08-26)
 - [0022 — Resend + react-email](./0022-resend-and-react-email.md)
-- [0032 — Inbound email capture through Resend](./0032-inbound-email-capture-resend.md)

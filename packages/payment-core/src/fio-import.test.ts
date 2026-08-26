@@ -6,11 +6,6 @@ import {
   parseFioImportResponse,
   splitFioImportBatches,
 } from "./fio-import";
-import {
-  isExactAutoMatchPayable,
-  proposePayableMatches,
-} from "./payable-matcher";
-import type { NormalizedBankTransaction } from "./types";
 
 const domesticLine = {
   amount: "1210.00",
@@ -93,74 +88,5 @@ describe("fio import xml", () => {
     for (const batch of batches) {
       expect(batch.byteLength).toBeLessThanOrEqual(2 * 1024 * 1024);
     }
-  });
-});
-
-describe("payable matcher", () => {
-  const transaction: NormalizedBankTransaction = {
-    provider: "fio",
-    providerTransactionId: "1",
-    providerInstructionId: null,
-    bookingDate: "2026-08-18",
-    amount: "1210.00",
-    currency: "CZK",
-    direction: "debit",
-    counterpartyAccount: "CZ6508000000192000145399",
-    counterpartyBankCode: "0800",
-    counterpartyName: "Supplier",
-    counterpartyBankName: null,
-    bic: null,
-    variableSymbol: "2026001",
-    constantSymbol: null,
-    specificSymbol: null,
-    message: null,
-    userIdentification: null,
-    detail: null,
-    comment: null,
-    payerReference: null,
-    providerType: "1",
-    providerPayloadHash: "abc",
-  };
-
-  it("scores a submitted run line + exact VS + exact amount", () => {
-    const [proposal] = proposePayableMatches({
-      transaction,
-      payingIban: "CZ6508000000192000145399",
-      payables: [
-        {
-          id: "inv-1",
-          supplierId: "s1",
-          dueDate: "2026-08-20",
-          issueDate: "2026-08-01",
-          cancelledAt: null,
-          status: "approved",
-          total: "1210.00",
-          outstanding: "1210.00",
-          currency: "CZK",
-          variableSymbol: "2026001",
-          beneficiaryIban: "CZ6508000000192000145399",
-          knownSupplierAccounts: ["CZ6508000000192000145399"],
-          submittedRunLine: {
-            amount: "1210.00",
-            variableSymbol: "2026001",
-            beneficiaryIban: "CZ6508000000192000145399",
-          },
-        },
-      ],
-    });
-    expect(proposal).toBeTruthy();
-    expect(proposal!.reasons).toContain("payment_run_line");
-    expect(proposal!.reasons).toContain("exact_variable_symbol");
-    expect(isExactAutoMatchPayable(proposal!)).toBe(true);
-  });
-
-  it("ignores credits", () => {
-    expect(
-      proposePayableMatches({
-        transaction: { ...transaction, direction: "credit" },
-        payingIban: "CZ00",
-        payables: [],
-      }),
-    ).toEqual([]);
   });
 });

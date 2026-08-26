@@ -7,7 +7,7 @@ const enabled = Boolean(process.env.INVOICEY_E2E_AUTH_STORAGE_STATE);
 // Session storage authenticates only; this explicit ID binds the detail test
 // to a deterministic, pre-seeded issued invoice without creating any data.
 const seededInvoiceId = process.env.INVOICEY_E2E_SEEDED_INVOICE_ID;
-const routes = ["/invoices/new", "/payments", "/incoming-invoices"];
+const routes = ["/invoices/new", "/payments", "/dashboard"];
 
 async function navigateWithSidebar(
   page: import("@playwright/test").Page,
@@ -51,13 +51,10 @@ test.describe("authenticated production journeys", () => {
     await expect(page.locator("h1")).toHaveCount(1);
   });
 
-  test("sidebar navigation reaches invoices, payments, and incoming invoices", async ({
-    page,
-  }) => {
+  test("sidebar navigation reaches invoices and payments", async ({ page }) => {
     await page.goto("/dashboard");
     await navigateWithSidebar(page, "/invoices");
     await navigateWithSidebar(page, "/payments");
-    await navigateWithSidebar(page, "/incoming-invoices");
   });
 
   test("a seeded invoice exposes lifecycle guidance and blocks invalid email without sending", async ({
@@ -93,10 +90,10 @@ test.describe("authenticated production journeys", () => {
     ).toBeDisabled();
   });
 
-  test("representative authenticated pages and the incoming queue have no serious axe violation", async ({
+  test("representative authenticated pages have no serious axe violation", async ({
     page,
   }) => {
-    for (const route of ["/invoices/new", "/incoming-invoices?tab=pay"]) {
+    for (const route of ["/invoices/new", "/payments"]) {
       await page.goto(route);
       const results = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])

@@ -10,8 +10,7 @@
     "./status": "./src/status.ts",
     "./status-display": "./src/status-display.ts",
     "./totals": "./src/totals.ts",
-    "./import": "./src/import/index.ts",
-    "./incoming": "./src/incoming/index.ts"
+    "./import": "./src/import/index.ts"
   },
   "scripts": {
     "lint": "eslint .",

@@ -13,6 +13,6 @@ setup("create the local agent session", async ({ page }) => {
   await page.goto("/agent-login");
   await page.getByLabel("Shared secret").fill(agentLoginSecret);
   await page.getByRole("button", { name: "Issue session" }).click();
-  await expect(page).toHaveURL(/\/incoming-invoices$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
   await page.context().storageState({ path: storageStatePath });
 });

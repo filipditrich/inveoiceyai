@@ -90,20 +90,6 @@ export function AppSidebar({
       isActive: invoicesOpen,
     },
     {
-      title: t("nav.incomingInvoices"),
-      url: "/incoming-invoices",
-      icon: <InboxIcon />,
-      isActive:
-        pathname === "/incoming-invoices" ||
-        pathname.startsWith("/incoming-invoices/"),
-    },
-    {
-      title: t("nav.suppliers"),
-      url: "/suppliers",
-      icon: <TruckIcon />,
-      isActive: pathname === "/suppliers" || pathname.startsWith("/suppliers/"),
-    },
-    {
       title: t("nav.payments"),
       url: "/payments",
       icon: <LandmarkIcon />,

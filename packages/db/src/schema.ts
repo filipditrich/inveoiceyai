@@ -876,5 +876,3 @@ export const emailSuppressions = pgTable(
     ),
   ],
 );
-
-export * from "./incoming-schema";

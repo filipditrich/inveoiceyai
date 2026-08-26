@@ -1,5 +1,10 @@
 # Invoicey current user flows and UX map
 
+> **Historical snapshot.** Incoming invoices were removed from the product on
+> 2026-08-26 (see [roadmap](../roadmap.md), Plan 24). Section 10 and the incoming
+> rows below describe a surface that no longer exists; they are kept because this
+> is a dated record of the audit, not a description of the current product.
+
 - **Audit date:** 24 August 2026 (Europe/Prague)
 - **Product build:** local development build of the Invoicey monorepo
 - **Audited user:** `agent@invoicey.local`
@@ -215,11 +220,11 @@ Usage is visible at `/settings/usage`: free-plan monthly and gifted balances, re
 
 The incoming-invoice area is a staged processing pipeline rather than an immediate payment action:
 
-1. **Overview:** tabs for upload, processing, approval, payment, all, inbox, and batches; the audit workspace started empty ([36-incoming-invoices.png](./screenshots/36-incoming-invoices.png)).
-2. **Inbox:** raw email/upload intake view, empty in the audit ([37-incoming-inbox.png](./screenshots/37-incoming-inbox.png)).
-3. **Upload:** select receiving issuer, upload PDF/ISDOC/PNG/JPG up to 16 MB, then process ([38-incoming-upload.png](./screenshots/38-incoming-upload.png)).
+1. **Overview:** tabs for upload, processing, approval, payment, all, inbox, and batches; the audit workspace started empty (36-incoming-invoices.png (screenshot removed)).
+2. **Inbox:** raw email/upload intake view, empty in the audit (37-incoming-inbox.png (screenshot removed)).
+3. **Upload:** select receiving issuer, upload PDF/ISDOC/PNG/JPG up to 16 MB, then process (38-incoming-upload.png (screenshot removed)).
 4. **Review/approval:** settings expose approval rules with name, priority, currency, action, and amount limit. No rule was created.
-5. **Payment batches:** batches wait for bank authorization; the page explicitly says nothing is paid until the debit is authorized ([39-incoming-runs.png](./screenshots/39-incoming-runs.png)).
+5. **Payment batches:** batches wait for bank authorization; the page explicitly says nothing is paid until the debit is authorized (39-incoming-runs.png (screenshot removed)).
 
 The inbox alias, rotation, and active toggle are available under **Settings → Incoming invoices**. This was inspected but not used to send an email.
 
@@ -265,7 +270,7 @@ The settings area is split into focused routes and promoted as navigation items 
 | Workspace         | Workspace name/logo, slug display, save, member-management shortcut                                             | [30-settings-workspace.png](./screenshots/30-settings-workspace.png)               |
 | Members           | Current members/roles, invite by email and role, pending invitations, remove member                             | [31-settings-members.png](./screenshots/31-settings-members.png)                   |
 | API keys          | Create/revoke key surface, one-workspace/full-access explanation, MCP endpoint/config sample                    | [32-settings-api-keys.png](./screenshots/32-settings-api-keys.png)                 |
-| Incoming invoices | Inbox alias/status/rotation, approval-rule editor                                                               | [33-settings-incoming.png](./screenshots/33-settings-incoming.png)                 |
+| Incoming invoices | Inbox alias/status/rotation, approval-rule editor                                                               | 33-settings-incoming.png (screenshot removed)                                      |
 | Bank connections  | Fio and MONETA token-based setup; issuer/account selection; deferred/unplanned bank tiles                       | [34-settings-bank-connections.png](./screenshots/34-settings-bank-connections.png) |
 | Integrations      | Slack link flow, Eve approval actions, remote MCP and CLI setup links                                           | [35-settings-integrations.png](./screenshots/35-settings-integrations.png)         |
 | AI usage          | Balance, renewal period, chart, product/model history, token accounting                                         | [26-ai-usage.png](./screenshots/26-ai-usage.png)                                   |
@@ -318,7 +323,7 @@ The table below maps the audited route families to captured evidence. “Observe
 | Invoices                    | `/invoices`, `/invoices/new`, `/invoices/[id]/edit`, `/invoices/[id]`          | [19–23](./screenshots/19-invoice-builder-empty.png)                                                                                                                                               |
 | Invoice actions             | email, recurring, cancel, payment ledger                                       | [47](./screenshots/47-partial-payment.png), [57](./screenshots/57-invoice-email-modal.png), [58](./screenshots/58-recurring-setup-modal.png), [59](./screenshots/59-invoice-cancelled-detail.png) |
 | AI                          | `/invoices/ai`, `/settings/usage`                                              | [24–26](./screenshots/24-ai-invoice-draft.png)                                                                                                                                                    |
-| Incoming                    | `/incoming-invoices*`, settings approval rules                                 | [33](./screenshots/33-settings-incoming.png), [36–39](./screenshots/36-incoming-invoices.png)                                                                                                     |
+| Incoming                    | `/incoming-invoices*`, settings approval rules                                 | 33 (screenshot removed), 36–39 (screenshot removed)                                                                                                                                               |
 | Suppliers/payments          | `/suppliers*`, `/payments`                                                     | [40–41](./screenshots/40-suppliers.png), [45–47](./screenshots/45-supplier-created.png)                                                                                                           |
 | Import/JSON/recurring       | `/invoices/import`, `/invoices/from-json`, `/invoices/recurring`               | [42–44](./screenshots/42-recurring.png)                                                                                                                                                           |
 | Workspace settings          | account, security, referrals, workspace, members, API keys, bank, integrations | [27–35](./screenshots/27-settings-account.png), [61](./screenshots/61-settings-security-loaded.png)                                                                                               |
