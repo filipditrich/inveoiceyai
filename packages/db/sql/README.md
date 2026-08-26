@@ -17,10 +17,17 @@ composite `unique(name).on(a, b)` against what it introspects, but does match
 `uniqueIndex()`, so the schema now uses the latter throughout. Push no longer
 offers to truncate anything.
 
-One genuine drift remains: `clients_workspace_ico_uidx` cannot be created while
-duplicate clients exist (NFCtron a.s. ×3, NFCtron Pay a.s. ×2). Merging them
-repoints invoices, so it needs a decision rather than a migration. Until then
-push fails cleanly on that index instead of threatening data.
+The last genuine drift — `clients_workspace_ico_uidx` could not be created
+while duplicate clients existed — was cleared on 2026-08-26 by finally applying
+`2026-08-15-client-identity-dedup.sql`. The duplicates were three identical
+`NFCtron a.s.` rows and two identical `NFCtron Pay a.s.` rows in the seed
+workspace, created seconds apart by repeated ARES lookups. None carried an
+invoice, so nothing was repointed; the rows holding all 97 real invoices live in
+a different workspace and were never duplicates.
+
+**`bun db:push` now runs clean.** Keep it that way: prefer `uniqueIndex()` over
+`unique()` for anything composite, and let `.unique()` name itself rather than
+pinning a Postgres-generated name.
 
 Historically: On the Plan 14
 schema it twice offered to _truncate a table containing production rows_:
