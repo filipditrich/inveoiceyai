@@ -66,12 +66,6 @@ const WORKSPACE_LINKS = [
     icon: KeyRoundIcon,
   },
   {
-    href: "/settings/incoming-invoices",
-    key: "incomingInvoices" as const,
-    exact: false,
-    icon: InboxIcon,
-  },
-  {
     href: "/settings/bank-connections",
     key: "bankConnections" as const,
     exact: false,

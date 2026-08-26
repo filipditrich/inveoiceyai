@@ -6,21 +6,15 @@ import {
   bankAccounts,
   bankConnections,
   bankTransactions,
-  incomingInvoices,
   invoicePaymentAllocations,
   invoices,
-  payableMatchProposals,
-  payablePaymentAllocations,
   paymentMatchProposals,
-  paymentRunLines,
-  supplierBankAccounts,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { sendPaymentReceivedEmailIfEnabled } from "@invoicey/invoice-tools/email";
 import {
   isExactAutoMatchProposal,
   proposeInvoiceMatches,
-  proposePayableMatches,
   type BankProvider,
   type NormalizedTransactionBatch,
 } from "@invoicey/payment-core";
@@ -225,18 +219,6 @@ export async function importBankTransactionBatch(input: {
     }
   }
 
-  if (persistDebits) {
-    proposed += await proposePayableMatchesForBatch({
-      workspaceId: input.workspaceId,
-      bankAccountId: input.bankAccountId,
-      payingIban: input.receivingIban,
-      matcherVersion: `${input.matcherVersion}-payable`,
-      transactions: input.batch.transactions.filter(
-        (transaction) => transaction.direction === "debit",
-      ),
-    });
-  }
-
   await db
     .update(bankAccounts)
     .set({
@@ -289,161 +271,4 @@ export async function markBankSyncFailed(input: {
       updatedAt: now,
     })
     .where(eq(bankConnections.id, input.connectionId));
-}
-
-async function proposePayableMatchesForBatch(input: {
-  workspaceId: string;
-  bankAccountId: string;
-  payingIban: string;
-  matcherVersion: string;
-  transactions: NormalizedTransactionBatch["transactions"];
-}): Promise<number> {
-  const debits = input.transactions;
-  if (debits.length === 0) return 0;
-
-  const issuerLinks = await db
-    .select({ issuerId: bankAccountIssuers.issuerId })
-    .from(bankAccountIssuers)
-    .where(eq(bankAccountIssuers.bankAccountId, input.bankAccountId));
-  if (issuerLinks.length === 0) return 0;
-
-  const payableRows = await db
-    .select({
-      id: incomingInvoices.id,
-      supplierId: incomingInvoices.supplierId,
-      dueDate: incomingInvoices.dueDate,
-      issueDate: incomingInvoices.issueDate,
-      cancelledAt: incomingInvoices.cancelledAt,
-      status: incomingInvoices.status,
-      total: incomingInvoices.total,
-      outstanding: sql<string>`greatest(abs(coalesce(${incomingInvoices.total}, 0)) - ${incomingInvoices.paidAmount}, 0)::text`,
-      currency: incomingInvoices.currency,
-      variableSymbol: incomingInvoices.variableSymbol,
-      beneficiaryIban: incomingInvoices.beneficiaryIban,
-    })
-    .from(incomingInvoices)
-    .where(
-      and(
-        eq(incomingInvoices.workspaceId, input.workspaceId),
-        inArray(
-          incomingInvoices.issuerId,
-          issuerLinks.map((link) => link.issuerId),
-        ),
-        eq(incomingInvoices.status, "approved"),
-        isNull(incomingInvoices.cancelledAt),
-        sql`${incomingInvoices.paidAmount} < abs(coalesce(${incomingInvoices.total}, 0))`,
-      ),
-    );
-  if (payableRows.length === 0) return 0;
-
-  const supplierIds = payableRows
-    .map((row) => row.supplierId)
-    .filter((id): id is string => Boolean(id));
-  const knownAccounts = supplierIds.length
-    ? await db
-        .select({
-          supplierId: supplierBankAccounts.supplierId,
-          iban: supplierBankAccounts.iban,
-          accountNumber: supplierBankAccounts.accountNumber,
-          bankCode: supplierBankAccounts.bankCode,
-        })
-        .from(supplierBankAccounts)
-        .where(inArray(supplierBankAccounts.supplierId, supplierIds))
-    : [];
-  const accountsBySupplier = new Map<string, string[]>();
-  for (const account of knownAccounts) {
-    const list = accountsBySupplier.get(account.supplierId) ?? [];
-    if (account.iban) list.push(account.iban);
-    if (account.accountNumber && account.bankCode) {
-      list.push(`${account.accountNumber}/${account.bankCode}`);
-    }
-    accountsBySupplier.set(account.supplierId, list);
-  }
-
-  const runLines = await db
-    .select({
-      incomingInvoiceId: paymentRunLines.incomingInvoiceId,
-      amount: paymentRunLines.amount,
-      variableSymbol: paymentRunLines.variableSymbol,
-      beneficiaryIban: paymentRunLines.beneficiaryIban,
-    })
-    .from(paymentRunLines)
-    .where(
-      and(
-        eq(paymentRunLines.workspaceId, input.workspaceId),
-        eq(paymentRunLines.status, "submitted"),
-        inArray(
-          paymentRunLines.incomingInvoiceId,
-          payableRows.map((row) => row.id),
-        ),
-      ),
-    );
-  const runByInvoice = new Map(
-    runLines.map((line) => [line.incomingInvoiceId, line]),
-  );
-
-  const stored = await db
-    .select({
-      id: bankTransactions.id,
-      providerTransactionId: bankTransactions.providerTransactionId,
-    })
-    .from(bankTransactions)
-    .where(
-      and(
-        eq(bankTransactions.bankAccountId, input.bankAccountId),
-        inArray(
-          bankTransactions.providerTransactionId,
-          debits.map((transaction) => transaction.providerTransactionId),
-        ),
-        sql`not exists (
-          select 1
-          from ${payablePaymentAllocations}
-          where ${payablePaymentAllocations.bankTransactionId} = ${bankTransactions.id}
-            and ${payablePaymentAllocations.reversedAt} is null
-        )`,
-      ),
-    );
-  const matchableByProviderId = new Map(
-    stored.map((row) => [row.providerTransactionId, row.id]),
-  );
-
-  let proposed = 0;
-  for (const transaction of debits) {
-    const bankTransactionId = matchableByProviderId.get(
-      transaction.providerTransactionId,
-    );
-    if (!bankTransactionId) continue;
-    const proposals = proposePayableMatches({
-      transaction,
-      payingIban: input.payingIban,
-      payables: payableRows.map((row) => ({
-        ...row,
-        total: row.total ?? "0.00",
-        knownSupplierAccounts: row.supplierId
-          ? (accountsBySupplier.get(row.supplierId) ?? [])
-          : [],
-        submittedRunLine: runByInvoice.get(row.id) ?? null,
-      })),
-    });
-    if (proposals.length === 0) continue;
-    const insertedProposals = await db
-      .insert(payableMatchProposals)
-      .values(
-        proposals.map((proposal) => ({
-          workspaceId: input.workspaceId,
-          bankTransactionId,
-          incomingInvoiceId: proposal.incomingInvoiceId,
-          proposedAmount: proposal.proposedAmount,
-          score: proposal.score,
-          confidence: proposal.confidence,
-          reasonCodes: proposal.reasons,
-          blockerCodes: proposal.blockers,
-          matcherVersion: input.matcherVersion,
-        })),
-      )
-      .onConflictDoNothing()
-      .returning({ id: payableMatchProposals.id });
-    proposed += insertedProposals.length;
-  }
-  return proposed;
 }

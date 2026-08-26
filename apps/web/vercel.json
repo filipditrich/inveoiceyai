@@ -5,10 +5,6 @@
       "schedule": "0 5 * * *"
     },
     {
-      "path": "/api/cron/inbound-ingest",
-      "schedule": "10 5 * * *"
-    },
-    {
       "path": "/api/cron/recurring-drafts",
       "schedule": "20 5 * * *"
     },

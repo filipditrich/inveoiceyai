@@ -88,5 +88,5 @@ export async function agentLoginAction(formData: FormData): Promise<void> {
     secure: process.env.NODE_ENV === "production",
     expires: expiresAt,
   });
-  redirect("/incoming-invoices");
+  redirect("/dashboard");
 }
