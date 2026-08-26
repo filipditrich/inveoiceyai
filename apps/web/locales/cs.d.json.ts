@@ -1552,13 +1552,14 @@ declare const messages: {
     };
     welcome: {
       step: "Krok {current} / {total}";
-      title: "Nastavte svou firmu";
+      title: "Nastavte si Invoicey";
       identityHint: "Začněte IČO své firmy a potvrďte její kontaktní údaje.";
       bankHint: "Přidejte účet, který bude na fakturách a platebních QR kódech. Invoicey peníze nepřevádí.";
       skip: "Přeskočit pro teď";
       skipping: "Přeskakuji…";
       skipHint: "Nastavení můžete dokončit později, ale před vystavením faktury je firma potřeba.";
       steps: {
+        workspace: "Prostor";
         business: "Firma";
         bank: "Bankovní účet";
         ready: "Připraveno";
@@ -1581,6 +1582,13 @@ declare const messages: {
       goDashboard: "Přejít na přehled";
       createFirstInvoice: "Vytvořit první fakturu";
       editBusiness: "Nastavení firmy";
+      workspaceHint: "Pojmenujte prostor, ve kterém budou vaše faktury žít.";
+      workspaceTitle: "Váš pracovní prostor";
+      workspaceBody: "Prostor drží vaše firmy, klienty a faktury. Název a logo vidíte v přepínači vlevo nahoře — a uvidí je i lidé, které sem později pozvete.";
+      workspaceNameLabel: "Název prostoru";
+      workspaceLogoLabel: "Logo prostoru";
+      workspaceLogoHint: "Nepovinné. PNG nebo JPEG do 1 MB. Bez loga se použijí iniciály.";
+      workspaceNameRequired: "Zadejte název prostoru.";
     };
     emailForm: {
       subject: "Šablona předmětu";

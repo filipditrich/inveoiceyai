@@ -5,6 +5,7 @@ import {
   dismissIssuerWelcome,
   parseIssuerFromWelcomePdf,
 } from "@/actions/issuers";
+import { updateWorkspaceAction } from "@/actions/workspace";
 import {
   BankAccountFields,
   FieldGroup,
@@ -15,6 +16,9 @@ import {
 } from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ImageUploadField } from "@/components/upload/image-upload-field";
+import { WorkspaceMark } from "@/components/workspace-mark";
 import {
   clearWelcomeRecovery,
   loadWelcomeRecovery,
@@ -26,10 +30,13 @@ import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import * as React from "react";
 
-type Step = "identity" | "bank" | "done";
+type Step = "workspace" | "identity" | "bank" | "done";
 
 export function IssuerWelcomeWizard(props: {
   workspaceId: string;
+  workspaceName: string;
+  workspaceLogo: string | null;
+  uploadConfigured: boolean;
   invalidQuery?: string | null;
   doneIssuerId?: string | null;
 }) {
@@ -37,9 +44,10 @@ export function IssuerWelcomeWizard(props: {
   const tForm = useTranslations("Issuers.form");
   const tAres = useTranslations("Issuers.ares");
   const tCommon = useTranslations("Common");
+  const tWorkspaceErrors = useTranslations("App.workspaceErrors");
   const invalidFromQuery = useInvalidQueryMessage(props.invalidQuery);
   const [step, setStep] = React.useState<Step>(
-    props.doneIssuerId ? "done" : "identity",
+    props.doneIssuerId ? "done" : "workspace",
   );
   const [createdId] = React.useState(() => crypto.randomUUID());
   const [doneId, setDoneId] = React.useState(props.doneIssuerId ?? "");
@@ -59,12 +67,23 @@ export function IssuerWelcomeWizard(props: {
   const [vatPayer, setVatPayer] = React.useState(true);
   const bank = useCzechIbanSuggest();
   const [bic, setBic] = React.useState("");
+  const [workspaceName, setWorkspaceName] = React.useState(props.workspaceName);
+  const [workspaceLogo, setWorkspaceLogo] = React.useState(
+    props.workspaceLogo ?? "",
+  );
   const [msg, setMsg] = React.useState<string | null>(null);
   const [hideQueryError, setHideQueryError] = React.useState(false);
   const analyticsEmitted = React.useRef(false);
   const visibleMessage = msg ?? (hideQueryError ? null : invalidFromQuery);
-  const currentStep = step === "identity" ? 1 : step === "bank" ? 2 : 3;
-  const steps = ["business", "bank", "ready"] as const;
+  const currentStep =
+    step === "workspace"
+      ? 1
+      : step === "identity"
+        ? 2
+        : step === "bank"
+          ? 3
+          : 4;
+  const steps = ["workspace", "business", "bank", "ready"] as const;
 
   function clearStaleQueryError() {
     if (!props.invalidQuery) return;
@@ -208,6 +227,40 @@ export function IssuerWelcomeWizard(props: {
     }
   }
 
+  /**
+   * Saves the workspace name/logo before moving on. A workspace is created
+   * silently on first sign-in, so this is the only place the owner sees what it
+   * is called before they start issuing invoices from it.
+   */
+  function onWorkspaceNext(e: FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    clearStaleQueryError();
+    const trimmedName = workspaceName.trim();
+    if (!trimmedName) {
+      setMsg(t("workspaceNameRequired"));
+      return;
+    }
+    const unchanged =
+      trimmedName === props.workspaceName.trim() &&
+      workspaceLogo.trim() === (props.workspaceLogo ?? "").trim();
+    if (unchanged) {
+      setStep("identity");
+      return;
+    }
+    startTransition(async () => {
+      const result = await updateWorkspaceAction({
+        name: trimmedName,
+        logo: workspaceLogo.trim() || null,
+      });
+      if (!result.ok) {
+        setMsg(tWorkspaceErrors(result.errorCode));
+        return;
+      }
+      setStep("identity");
+    });
+  }
+
   function onIdentityNext(e: FormEvent) {
     e.preventDefault();
     setMsg(null);
@@ -264,7 +317,7 @@ export function IssuerWelcomeWizard(props: {
       <div className="mx-auto max-w-2xl space-y-6">
         <WelcomeProgress
           ariaLabel={t("progressLabel")}
-          current={3}
+          current={steps.length}
           labels={steps.map((key) => t(`steps.${key}`))}
         />
         <div className="bg-card space-y-2 rounded-xl border p-6 shadow-sm">
@@ -314,7 +367,11 @@ export function IssuerWelcomeWizard(props: {
               {t("title")}
             </h1>
             <p className="text-muted-foreground text-sm">
-              {step === "identity" ? t("identityHint") : t("bankHint")}
+              {step === "workspace"
+                ? t("workspaceHint")
+                : step === "identity"
+                  ? t("identityHint")
+                  : t("bankHint")}
             </p>
           </div>
           <Button
@@ -338,6 +395,57 @@ export function IssuerWelcomeWizard(props: {
           <p className="text-destructive text-sm" role="alert">
             {visibleMessage}
           </p>
+        ) : null}
+
+        {step === "workspace" ? (
+          <form className="space-y-6" onSubmit={onWorkspaceNext}>
+            <fieldset className="space-y-4">
+              <legend className="font-medium">{t("workspaceTitle")}</legend>
+              <p className="text-muted-foreground text-sm">
+                {t("workspaceBody")}
+              </p>
+              <div className="flex items-center gap-3">
+                <WorkspaceMark
+                  className="size-12 rounded-xl text-base"
+                  logo={workspaceLogo.trim() || null}
+                  name={workspaceName.trim() || "?"}
+                />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Label htmlFor="welcome-workspace-name">
+                    {t("workspaceNameLabel")}
+                  </Label>
+                  <Input
+                    id="welcome-workspace-name"
+                    onChange={(ev) => setWorkspaceName(ev.target.value)}
+                    required
+                    value={workspaceName}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="space-y-1">
+                  <Label>{t("workspaceLogoLabel")}</Label>
+                  <p className="text-muted-foreground text-xs">
+                    {t("workspaceLogoHint")}
+                  </p>
+                </div>
+                {props.uploadConfigured ? (
+                  <ImageUploadField
+                    alt={t("workspaceLogoLabel")}
+                    disabled={pending}
+                    endpoint="workspaceLogo"
+                    onUrl={(url) => setWorkspaceLogo(url ?? "")}
+                    url={workspaceLogo}
+                  />
+                ) : null}
+              </div>
+            </fieldset>
+            <div className="flex flex-wrap gap-2">
+              <Button disabled={pending} type="submit">
+                {pending ? tCommon("loading") : t("continue")}
+              </Button>
+            </div>
+          </form>
         ) : null}
 
         {step === "identity" ? (

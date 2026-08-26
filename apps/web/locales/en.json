@@ -1549,13 +1549,14 @@
     },
     "welcome": {
       "step": "Step {current} / {total}",
-      "title": "Set up your business",
+      "title": "Set up Invoicey",
       "identityHint": "Start with your company’s IČO and confirm its contact details.",
       "bankHint": "Add the account shown on invoices and payment QR codes. Invoicey never moves money.",
       "skip": "Skip for now",
       "skipping": "Skipping…",
       "skipHint": "You can resume setup later, but a business is required before you issue an invoice.",
       "steps": {
+        "workspace": "Workspace",
         "business": "Business",
         "bank": "Bank account",
         "ready": "Ready"
@@ -1577,7 +1578,14 @@
       "doneBody": "Numbering and email templates have sensible defaults. You can add a logo, stamp, and more details in business settings at any time.",
       "goDashboard": "Go to dashboard",
       "createFirstInvoice": "Create first invoice",
-      "editBusiness": "Business settings"
+      "editBusiness": "Business settings",
+      "workspaceHint": "Name the workspace your invoices will live in.",
+      "workspaceTitle": "Your workspace",
+      "workspaceBody": "A workspace holds your businesses, clients, and invoices. Its name and logo show in the switcher at the top left — and to anyone you invite here later.",
+      "workspaceNameLabel": "Workspace name",
+      "workspaceLogoLabel": "Workspace logo",
+      "workspaceLogoHint": "Optional. PNG or JPEG up to 1 MB. Initials are used without one.",
+      "workspaceNameRequired": "Enter a workspace name."
     },
     "emailForm": {
       "subject": "Subject template",
