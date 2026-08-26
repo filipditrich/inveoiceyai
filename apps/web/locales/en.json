@@ -845,9 +845,31 @@
       "invite_missing_workspace": "Invitation is missing a workspace",
       "forbidden": "You do not have permission for this action"
     },
-    "search": {
-      "label": "Search",
-      "placeholder": "Type to search…"
+    "palette": {
+      "trigger": "Search…",
+      "title": "Quick search",
+      "description": "Find an invoice or client, or jump anywhere in the app.",
+      "placeholder": "Invoice number, client, IČO, or a page name…",
+      "empty": "Nothing found.",
+      "groups": {
+        "go": "Go to",
+        "create": "Create",
+        "settings": "Settings"
+      },
+      "commands": {
+        "dashboard": "Overview",
+        "invoices": "Invoices",
+        "payments": "Payments",
+        "clients": "Clients",
+        "issuers": "My businesses",
+        "newInvoice": "New invoice",
+        "aiDraft": "Create invoice with AI",
+        "recurring": "Recurring invoices",
+        "fromJson": "JSON invoice",
+        "import": "Import past invoices",
+        "workspaceSettings": "Workspace settings",
+        "accountSettings": "Account settings"
+      }
     }
   },
   "Dashboard": {

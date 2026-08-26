@@ -848,9 +848,31 @@ declare const messages: {
       invite_missing_workspace: "Pozvánka neobsahuje pracovní prostor";
       forbidden: "Pro tuto akci nemáte oprávnění";
     };
-    search: {
-      label: "Hledat";
-      placeholder: "Zadejte hledaný výraz…";
+    palette: {
+      trigger: "Hledat…";
+      title: "Rychlé hledání";
+      description: "Najděte fakturu nebo klienta, nebo přejděte kamkoli v aplikaci.";
+      placeholder: "Číslo faktury, klient, IČO nebo název stránky…";
+      empty: "Nic nenalezeno.";
+      groups: {
+        go: "Přejít na";
+        create: "Vytvořit";
+        settings: "Nastavení";
+      };
+      commands: {
+        dashboard: "Přehled";
+        invoices: "Faktury";
+        payments: "Platby";
+        clients: "Klienti";
+        issuers: "Moje firmy";
+        newInvoice: "Nová faktura";
+        aiDraft: "Vytvořit fakturu s AI";
+        recurring: "Opakované faktury";
+        fromJson: "Faktura z JSON";
+        import: "Importovat staré faktury";
+        workspaceSettings: "Nastavení prostoru";
+        accountSettings: "Nastavení účtu";
+      };
     };
   };
   Dashboard: {
