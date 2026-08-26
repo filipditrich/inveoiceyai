@@ -17,10 +17,8 @@ import Image from "next/image";
 
 import {
   connectFio,
-  disableFioPayments,
   disconnectFio,
   disconnectMoneta,
-  enableFioPayments,
   syncFio,
   syncMoneta,
   toggleFioAutoMatch,
@@ -46,7 +44,6 @@ import { requireWorkspace } from "@/lib/auth/session";
 import { formatDateTime } from "@/lib/format";
 import { messageLookup } from "@/lib/i18n-lookup";
 import { listFioConnections } from "@/lib/payments/fio-service";
-import { fioAccessState } from "@/lib/payments/fio-access";
 import { listMonetaConnections } from "@/lib/payments/moneta-service";
 import { isBankTokenEncryptionConfigured } from "@/lib/payments/token-crypto";
 
@@ -166,13 +163,6 @@ export default async function BankConnectionsPage() {
 
       {connections.map((connection) => {
         const isMoneta = connection.provider === "moneta";
-        const fioAccess = isMoneta
-          ? "read_only"
-          : fioAccessState({
-              accessMode: connection.accessMode,
-              paymentEnabledAt: connection.paymentEnabledAt,
-              paymentTokenExpiresAt: connection.paymentTokenExpiresAt,
-            });
         const providerName = isMoneta
           ? t("providers.moneta")
           : t("providers.fio");
@@ -196,16 +186,8 @@ export default async function BankConnectionsPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <CardTitle>{providerName}</CardTitle>
                       <Badge variant="outline" className="gap-1">
-                        {fioAccess === "submit_enabled" ? (
-                          <ShieldCheckIcon className="size-3" />
-                        ) : (
-                          <LockKeyholeIcon className="size-3" />
-                        )}
-                        {fioAccess === "submit_enabled"
-                          ? t("submitRights")
-                          : fioAccess === "submit_expired"
-                            ? t("submitExpired")
-                            : t("readOnly")}
+                        <LockKeyholeIcon className="size-3" />
+                        {t("readOnly")}
                       </Badge>
                     </div>
                     <CardDescription className="mt-1 truncate font-mono">
@@ -267,84 +249,6 @@ export default async function BankConnectionsPage() {
                   action={toggleAction}
                 />
               </div>
-              {canManage && connection.status === "active" && !isMoneta ? (
-                <div className="space-y-3 rounded-2xl border p-4">
-                  <p className="font-medium">{t("paymentsTitle")}</p>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {t("paymentsCannotAuthorize")}
-                  </p>
-                  {"paymentEnabledAt" in connection &&
-                  connection.paymentEnabledAt ? (
-                    <p className="text-sm">
-                      {t("paymentsEnabled")}
-                      {connection.paymentTokenExpiresAt
-                        ? ` · ${t("paymentsExpires", {
-                            date: formatDateTime(
-                              connection.paymentTokenExpiresAt,
-                              locale,
-                            ),
-                          })}`
-                        : ""}
-                    </p>
-                  ) : null}
-                  {fioAccess !== "submit_enabled" ? (
-                    <form
-                      action={enableFioPayments}
-                      className="grid gap-3 sm:grid-cols-2"
-                    >
-                      <input
-                        type="hidden"
-                        name="connectionId"
-                        value={connection.id}
-                      />
-                      <div className="space-y-1 sm:col-span-2">
-                        <Label htmlFor={`paymentToken-${connection.id}`}>
-                          {t("paymentsTokenLabel")}
-                        </Label>
-                        <Input
-                          id={`paymentToken-${connection.id}`}
-                          name="paymentToken"
-                          type="password"
-                          required
-                          minLength={64}
-                          autoComplete="off"
-                          spellCheck={false}
-                          placeholder={t("paymentsTokenPlaceholder")}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor={`paymentTokenExpiresAt-${connection.id}`}
-                        >
-                          {t("paymentsExpiresLabel")}
-                        </Label>
-                        <Input
-                          id={`paymentTokenExpiresAt-${connection.id}`}
-                          name="paymentTokenExpiresAt"
-                          type="date"
-                          required
-                        />
-                      </div>
-                      <div className="flex items-end">
-                        <Button type="submit">{t("paymentsEnable")}</Button>
-                      </div>
-                    </form>
-                  ) : null}
-                  {"paymentEnabledAt" in connection &&
-                  connection.paymentEnabledAt ? (
-                    <form action={disableFioPayments}>
-                      <input
-                        type="hidden"
-                        name="connectionId"
-                        value={connection.id}
-                      />
-                      <Button type="submit" variant="outline">
-                        {t("paymentsDisable")}
-                      </Button>
-                    </form>
-                  ) : null}
-                </div>
-              ) : null}
               {canManage && connection.status === "active" ? (
                 <div className="flex flex-wrap gap-2">
                   <form action={syncAction}>

@@ -19,12 +19,7 @@ const required = new Map([
   ],
   [
     "bank_connections",
-    new Set([
-      "secret_ciphertext",
-      "lease_until",
-      "auto_confirm_exact_matches",
-      "payment_secret_ciphertext",
-    ]),
+    new Set(["secret_ciphertext", "lease_until", "auto_confirm_exact_matches"]),
   ],
   ["bank_accounts", new Set(["iban", "currency"])],
   ["bank_transactions", new Set(["provider_transaction_id", "amount"])],
