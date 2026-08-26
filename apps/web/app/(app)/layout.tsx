@@ -52,6 +52,7 @@ export default async function AppShellLayout({
             }
           : null
       }
+      uploadConfigured={Boolean(process.env.UPLOADTHING_TOKEN?.trim())}
       user={{
         name: user.name,
         email: user.email,

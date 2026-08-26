@@ -392,7 +392,7 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
               <ExternalLinkIcon className="size-3.5" />
             </Link>
             <Link
-              href="/settings/integrations"
+              href="/settings/workspace/integrations"
               className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 hover:underline"
             >
               {t("integrationsLink")}

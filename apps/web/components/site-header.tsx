@@ -36,6 +36,7 @@ export function SiteHeader() {
     clients: t("breadcrumb.clients"),
     issuers: t("breadcrumb.issuers"),
     settings: t("breadcrumb.settings"),
+    account: t("breadcrumb.account"),
     ai: t("breadcrumb.ai"),
     security: t("breadcrumb.security"),
     workspace: t("breadcrumb.workspace"),

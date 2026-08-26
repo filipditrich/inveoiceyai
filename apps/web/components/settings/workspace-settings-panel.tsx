@@ -106,7 +106,10 @@ export function WorkspaceSettingsPanel({
               ) : null}
               {pending ? t("saving") : t("save")}
             </Button>
-            <Button variant="ghost" render={<Link href="/settings/members" />}>
+            <Button
+              variant="ghost"
+              render={<Link href="/settings/workspace/members" />}
+            >
               {t("membersLink")}
             </Button>
           </div>

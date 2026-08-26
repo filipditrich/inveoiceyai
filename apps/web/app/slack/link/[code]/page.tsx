@@ -129,7 +129,7 @@ export default async function SlackLinkPage({
             <Button
               className="w-full"
               variant="ghost"
-              render={<Link href="/settings/integrations" />}
+              render={<Link href="/settings/workspace/integrations" />}
             >
               {t("backToApp")}
             </Button>

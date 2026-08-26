@@ -95,13 +95,14 @@ describe("email renders", () => {
       userAgent: "Chrome",
       signedInAt: "11. 8. 2026 13:00",
       trustUrl: "https://invoicey.ditrich.me/security/trust?token=abc",
-      securitySettingsUrl: "https://invoicey.ditrich.me/settings/security",
+      securitySettingsUrl:
+        "https://invoicey.ditrich.me/settings/account/security",
     });
     expect(out.subject).toContain("přihlášení");
     expect(out.html).toContain("Důvěřovat tomuto zařízení");
     expect(out.html).toContain("/brand/invoicey-logo-192.png");
     expect(out.html).toContain("Nastavení zabezpečení");
     expect(out.html).toContain("Toto je systémový e-mail od Invoicey.");
-    expect(out.text).toContain("settings/security");
+    expect(out.text).toContain("settings/account/security");
   });
 });

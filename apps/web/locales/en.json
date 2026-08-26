@@ -576,8 +576,6 @@
       "group": "Workspace",
       "dashboard": "Overview",
       "invoices": "Invoices",
-      "invoicesList": "List",
-      "invoicesNew": "Create",
       "invoicesAi": "Create with AI",
       "invoicesImport": "Import past invoices",
       "invoicesFromJson": "JSON invoice",
@@ -586,18 +584,13 @@
       "clients": "Clients",
       "issuers": "My businesses",
       "newInvoice": "New invoice",
-      "automationGroup": "Automation",
-      "toolsGroup": "Import & developer tools",
-      "manageGroup": "Manage workspace",
-      "settings": "Workspace settings",
-      "workspace": "Workspace",
-      "members": "Members",
-      "bankConnections": "Bank connections",
-      "integrations": "Integrations",
-      "usage": "Usage",
+      "toolsGroup": "Import & tools",
       "resourcesGroup": "Resources",
       "docs": "Docs",
-      "collapseToggle": "Expand or collapse {title}"
+      "collapseToggle": "Expand or collapse {title}",
+      "newInvoiceMore": "More ways to create",
+      "createGroup": "Create",
+      "invoiceBlank": "Blank invoice"
     },
     "breadcrumb": {
       "dashboard": "Dashboard",
@@ -627,7 +620,8 @@
       "api-keys": "API Keys",
       "integrations": "Integrations",
       "usage": "Usage",
-      "bank-connections": "Bank connections"
+      "bank-connections": "Bank connections",
+      "account": "Account"
     },
     "a11y": {
       "toggleSidebar": "Toggle sidebar",
@@ -636,13 +630,9 @@
       "navigating": "Loading page"
     },
     "settings": {
-      "title": "Settings",
-      "eyebrow": "Account and workspace",
-      "subtitle": "Customize the interface, secure your account, and manage access for people and connected tools.",
-      "navigationLabel": "Settings sections",
-      "navGroups": {
-        "you": "You",
-        "workspace": "Workspace"
+      "navigationLabel": {
+        "account": "Account settings sections",
+        "workspace": "Workspace settings sections"
       },
       "nav": {
         "account": "Account",
@@ -771,6 +761,18 @@
           "viewUsage": "View usage",
           "upgrade": "Upgrade"
         }
+      },
+      "scopes": {
+        "account": {
+          "eyebrow": "Your account",
+          "title": "{name}",
+          "subtitle": "Profile, appearance, and sign-in security. These follow you across every workspace."
+        },
+        "workspace": {
+          "eyebrow": "Workspace settings",
+          "title": "Workspace",
+          "subtitle": "The businesses, clients, and invoices in this workspace. Changes apply to every member."
+        }
       }
     },
     "theme": {
@@ -780,7 +782,7 @@
       "system": "System"
     },
     "userMenu": {
-      "settings": "Settings",
+      "settings": "Account settings",
       "platformAdmin": "Platform admin",
       "logOut": "Log out",
       "signingOut": "Signing out…"
@@ -801,7 +803,14 @@
         "owner": "Owner",
         "admin": "Admin",
         "member": "Member"
-      }
+      },
+      "manageLabel": "This workspace",
+      "settings": "Workspace settings",
+      "members": "Members",
+      "logoLabel": "Logo",
+      "logoHint": "Shown in the workspace switcher. PNG or JPEG up to 1 MB.",
+      "logoOptional": "Optional — initials are used without one.",
+      "uploadUnavailable": "File uploads are not configured."
     },
     "workspaceErrors": {
       "name_required": "Enter a workspace name",

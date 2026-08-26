@@ -87,7 +87,7 @@ export function isIssuerWelcomeGatePath(pathname: string): boolean {
     pathname.startsWith("/welcome/") ||
     pathname === "/issuers" ||
     pathname.startsWith("/issuers/") ||
-    pathname === "/settings" ||
+    pathname === "/settings/account" ||
     pathname.startsWith("/settings/")
   ) {
     return false;

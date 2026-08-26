@@ -31,7 +31,7 @@ export async function revokeTrustedDeviceAction(deviceId: string) {
       metadata: { deviceId },
     });
   }
-  revalidatePath("/settings/security");
+  revalidatePath("/settings/account/security");
   return { ok };
 }
 
@@ -66,6 +66,6 @@ export async function recordAccountSecurityEventAction(input: {
     type: input.type,
     metadata: input.metadata ?? {},
   });
-  revalidatePath("/settings/security");
+  revalidatePath("/settings/account/security");
   return { ok: true as const };
 }

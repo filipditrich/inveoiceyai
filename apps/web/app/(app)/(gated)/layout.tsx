@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 /**
  * Issuer welcome gate for product surfaces that need an issuer.
- * Kept outside `/welcome`, `/issuers`, and `/settings` so a soft redirect
+ * Kept outside `/welcome`, `/issuers`, and `/settings/account` so a soft redirect
  * cannot loop when `x-pathname` is stale across Next.js RSC redirects.
  */
 export default async function IssuerWelcomeGateLayout({

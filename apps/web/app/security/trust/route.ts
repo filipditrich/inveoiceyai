@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   const token = url.searchParams.get("token")?.trim();
   const origin = appOrigin();
   const fail = NextResponse.redirect(
-    `${origin}/settings/security?trust=invalid`,
+    `${origin}/settings/account/security?trust=invalid`,
   );
 
   if (!token) return fail;
@@ -40,7 +40,9 @@ export async function GET(request: Request) {
       metadata: { deviceId, via: "email_link" },
     });
 
-    const res = NextResponse.redirect(`${origin}/settings/security?trust=ok`);
+    const res = NextResponse.redirect(
+      `${origin}/settings/account/security?trust=ok`,
+    );
     const cookie = deviceCookieOptions(payload.d);
     res.cookies.set(cookie.name, cookie.value, cookie.attributes);
     return res;

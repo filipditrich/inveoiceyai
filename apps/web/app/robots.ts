@@ -13,7 +13,7 @@ export default function robots(): MetadataRoute.Robots {
         "/invoices",
         "/clients",
         "/issuers",
-        "/settings",
+        "/settings/account",
         "/onboarding",
         "/sign-in",
         "/eve/",

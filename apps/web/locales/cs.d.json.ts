@@ -579,8 +579,6 @@ declare const messages: {
       group: "Pracovní prostor";
       dashboard: "Přehled";
       invoices: "Faktury";
-      invoicesList: "Seznam";
-      invoicesNew: "Vytvořit";
       invoicesAi: "Vytvořit s AI";
       invoicesImport: "Importovat staré faktury";
       invoicesFromJson: "Faktura z JSON";
@@ -589,18 +587,13 @@ declare const messages: {
       clients: "Klienti";
       issuers: "Moje firmy";
       newInvoice: "Nová faktura";
-      automationGroup: "Automatizace";
-      toolsGroup: "Import a vývojářské nástroje";
-      manageGroup: "Správa workspace";
-      settings: "Nastavení workspace";
-      workspace: "Pracovní prostor";
-      members: "Členové";
-      bankConnections: "Bankovní spojení";
-      integrations: "Integrace";
-      usage: "Využití";
+      toolsGroup: "Import a nástroje";
       resourcesGroup: "Zdroje";
       docs: "Dokumentace";
       collapseToggle: "Rozbalit nebo sbalit {title}";
+      newInvoiceMore: "Další způsoby vytvoření";
+      createGroup: "Vytvořit";
+      invoiceBlank: "Prázdná faktura";
     };
     breadcrumb: {
       dashboard: "Přehled";
@@ -631,6 +624,7 @@ declare const messages: {
       integrations: "Integrace";
       usage: "Využití";
       "bank-connections": "Bankovní spojení";
+      account: "Účet";
     };
     a11y: {
       toggleSidebar: "Přepnout postranní panel";
@@ -639,13 +633,9 @@ declare const messages: {
       navigating: "Načítání stránky";
     };
     settings: {
-      title: "Nastavení";
-      eyebrow: "Účet a pracovní prostor";
-      subtitle: "Přizpůsobte rozhraní, zabezpečte účet a spravujte přístup lidí i připojených nástrojů.";
-      navigationLabel: "Sekce nastavení";
-      navGroups: {
-        you: "Vy";
-        workspace: "Pracovní prostor";
+      navigationLabel: {
+        account: "Sekce nastavení účtu";
+        workspace: "Sekce nastavení prostoru";
       };
       nav: {
         account: "Účet";
@@ -775,6 +765,18 @@ declare const messages: {
           upgrade: "Upgrade";
         };
       };
+      scopes: {
+        account: {
+          eyebrow: "Váš účet";
+          title: "{name}";
+          subtitle: "Profil, vzhled a zabezpečení přihlášení. Platí pro vás ve všech pracovních prostorech.";
+        };
+        workspace: {
+          eyebrow: "Nastavení prostoru";
+          title: "Pracovní prostor";
+          subtitle: "Firmy, klienti a faktury tohoto prostoru. Změny vidí všichni jeho členové.";
+        };
+      };
     };
     theme: {
       label: "Vzhled";
@@ -783,7 +785,7 @@ declare const messages: {
       system: "Systém";
     };
     userMenu: {
-      settings: "Nastavení";
+      settings: "Nastavení účtu";
       platformAdmin: "Platformní admin";
       logOut: "Odhlásit se";
       signingOut: "Odhlašuji…";
@@ -805,6 +807,13 @@ declare const messages: {
         admin: "Správce";
         member: "Člen";
       };
+      manageLabel: "Tento prostor";
+      settings: "Nastavení prostoru";
+      members: "Členové";
+      logoLabel: "Logo";
+      logoHint: "Zobrazuje se v přepínači prostorů. PNG nebo JPEG do 1 MB.";
+      logoOptional: "Nepovinné — bez loga se použijí iniciály.";
+      uploadUnavailable: "Nahrávání souborů není nakonfigurováno.";
     };
     workspaceErrors: {
       name_required: "Zadejte název pracovního prostoru";

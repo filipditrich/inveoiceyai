@@ -73,14 +73,22 @@ export async function switchWorkspaceAction(
 
 /**
  * Creates a workspace via Better Auth, makes it active + default, then
- * redirects to the dashboard (issuer welcome gate still applies).
+ * redirects to the dashboard (issuer welcome gate still applies). The logo is
+ * set at creation so a new workspace is recognisable in the switcher straight
+ * away instead of showing two grey initials until someone visits settings.
  */
-export async function createWorkspaceAction(
-  name: string,
-): Promise<WorkspaceActionResult> {
-  const trimmed = name.trim();
+export async function createWorkspaceAction(input: {
+  name: string;
+  logo?: string | null;
+}): Promise<WorkspaceActionResult> {
+  const trimmed = input.name.trim();
   if (!trimmed) {
     return { ok: false, errorCode: "name_required" };
+  }
+
+  const logo = input.logo?.trim() || "";
+  if (logo && !isTrustedInvoiceImageUrl(logo)) {
+    return { ok: false, errorCode: "logo_invalid" };
   }
 
   let createdId: string | undefined;
@@ -95,7 +103,7 @@ export async function createWorkspaceAction(
       try {
         const org = await auth.api.createOrganization({
           headers: hdrs,
-          body: { name: trimmed, slug },
+          body: { name: trimmed, slug, ...(logo ? { logo } : {}) },
         });
         createdId = org.id;
         break;
@@ -173,7 +181,7 @@ export async function setDefaultWorkspaceAction(
     const user = await requireSession();
     await assertWorkspaceMember(organizationId);
     await setUserDefaultWorkspace(user.id, organizationId);
-    revalidatePath("/settings/api-keys");
+    revalidatePath("/settings/workspace/api-keys");
     revalidatePath("/", "layout");
     return { ok: true };
   } catch (error) {

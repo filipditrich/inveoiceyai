@@ -191,7 +191,7 @@ export function LinkedAccountsPanel({
       try {
         await authClient.linkSocial({
           provider,
-          callbackURL: "/settings/security?linked=1",
+          callbackURL: "/settings/account/security?linked=1",
         });
       } finally {
         setBusyKey(null);

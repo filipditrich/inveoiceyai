@@ -45,7 +45,7 @@ Renewal sets `monthly_remaining = monthly_limit` and advances `period_start` / `
 
 ## UI
 
-- Settings → **Usage** (`/settings/usage`): plan stub, balance breakdown, 30-day chart, history, top-up stubs.
+- Settings → **Usage** (`/settings/workspace/usage`): plan stub, balance breakdown, 30-day chart, history, top-up stubs.
 - Sidebar token chip with popover breakdown (all members).
 
 ## Ops notes

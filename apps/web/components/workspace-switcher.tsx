@@ -9,11 +9,13 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ImageUploadField } from "@/components/upload/image-upload-field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -38,8 +40,11 @@ import {
   KeyRoundIcon,
   LoaderCircleIcon,
   PlusIcon,
+  Settings2Icon,
+  UsersRoundIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -56,14 +61,21 @@ function toastActionError(
   toast.error(tErrors(errorCode));
 }
 
+/**
+ * Also the door to workspace-scoped settings — the user menu is the door to
+ * account settings. Two triggers, two scopes, no shared "Settings" page that
+ * mixes them.
+ */
 export function WorkspaceSwitcher({
   activeWorkspaceId,
   defaultWorkspaceId,
   workspaces,
+  uploadConfigured = true,
 }: {
   activeWorkspaceId: string;
   defaultWorkspaceId: string | null;
   workspaces: WorkspaceListItem[];
+  uploadConfigured?: boolean;
 }) {
   const { isMobile } = useSidebar();
   const t = useTranslations("App.workspaceSwitcher");
@@ -71,6 +83,7 @@ export function WorkspaceSwitcher({
   const [pending, startTransition] = useTransition();
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState("");
+  const [newLogo, setNewLogo] = useState("");
 
   const active =
     workspaces.find((w) => w.id === activeWorkspaceId) ?? workspaces[0];
@@ -90,16 +103,24 @@ export function WorkspaceSwitcher({
     });
   }
 
+  function closeCreate() {
+    setCreateOpen(false);
+    setNewName("");
+    setNewLogo("");
+  }
+
   function createWorkspace() {
     if (pending) return;
     startTransition(async () => {
-      const result = await createWorkspaceAction(newName);
+      const result = await createWorkspaceAction({
+        name: newName,
+        logo: newLogo.trim() || null,
+      });
       if (result && !result.ok) {
         toastActionError(tErrors, result.errorCode);
         return;
       }
-      setCreateOpen(false);
-      setNewName("");
+      closeCreate();
     });
   }
 
@@ -139,11 +160,27 @@ export function WorkspaceSwitcher({
               )}
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="min-w-56 rounded-lg"
+              className="min-w-64 rounded-lg"
               side={isMobile ? "bottom" : "right"}
               align="start"
               sideOffset={4}
             >
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>{t("manageLabel")}</DropdownMenuLabel>
+                <DropdownMenuItem
+                  render={<Link href="/settings/workspace" prefetch />}
+                >
+                  <Settings2Icon />
+                  {t("settings")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  render={<Link href="/settings/workspace/members" prefetch />}
+                >
+                  <UsersRoundIcon />
+                  {t("members")}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
               <DropdownMenuLabel>{t("label")}</DropdownMenuLabel>
               {defaultDiverges ? (
                 <div className="text-muted-foreground px-1.5 pb-1.5 text-xs leading-snug">
@@ -197,37 +234,65 @@ export function WorkspaceSwitcher({
         </SidebarMenuItem>
       </SidebarMenu>
 
-      <Sheet open={createOpen} onOpenChange={setCreateOpen}>
+      <Sheet
+        open={createOpen}
+        onOpenChange={(open) => (open ? setCreateOpen(true) : closeCreate())}
+      >
         <SheetContent side="right" className="sm:max-w-md">
           <SheetHeader>
             <SheetTitle>{t("createTitle")}</SheetTitle>
             <SheetDescription>{t("createDescription")}</SheetDescription>
           </SheetHeader>
-          <div className="flex flex-col gap-3 px-4">
-            <div className="space-y-2">
-              <Label htmlFor="workspace-name">{t("nameLabel")}</Label>
-              <Input
-                id="workspace-name"
-                autoFocus
-                value={newName}
-                onChange={(event) => setNewName(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    createWorkspace();
-                  }
-                }}
-                placeholder={t("namePlaceholder")}
-                disabled={pending}
+          <div className="flex flex-col gap-5 px-4">
+            <div className="flex items-center gap-3">
+              <WorkspaceMark
+                className="size-12 rounded-xl text-base"
+                logo={newLogo.trim() || null}
+                name={newName.trim() || "?"}
               />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Label htmlFor="workspace-name">{t("nameLabel")}</Label>
+                <Input
+                  id="workspace-name"
+                  autoFocus
+                  value={newName}
+                  onChange={(event) => setNewName(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      createWorkspace();
+                    }
+                  }}
+                  placeholder={t("namePlaceholder")}
+                  disabled={pending}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <Label>{t("logoLabel")}</Label>
+                <p className="text-muted-foreground text-xs">{t("logoHint")}</p>
+              </div>
+              {uploadConfigured ? (
+                <ImageUploadField
+                  alt={t("logoLabel")}
+                  disabled={pending}
+                  endpoint="workspaceLogo"
+                  onUrl={(url) => setNewLogo(url ?? "")}
+                  url={newLogo}
+                />
+              ) : (
+                <p className="text-muted-foreground text-xs">
+                  {t("uploadUnavailable")}
+                </p>
+              )}
+              <p className="text-muted-foreground text-xs">
+                {t("logoOptional")}
+              </p>
             </div>
           </div>
           <SheetFooter>
-            <Button
-              variant="outline"
-              disabled={pending}
-              onClick={() => setCreateOpen(false)}
-            >
+            <Button variant="outline" disabled={pending} onClick={closeCreate}>
               {t("cancel")}
             </Button>
             <Button

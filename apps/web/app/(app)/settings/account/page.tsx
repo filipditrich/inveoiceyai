@@ -84,7 +84,7 @@ export default async function SettingsAccountPage() {
           </div>
           <Link
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-            href="/settings/security"
+            href="/settings/account/security"
             prefetch
           >
             <ShieldCheckIcon className="size-4" />

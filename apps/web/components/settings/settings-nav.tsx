@@ -5,91 +5,119 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   ActivityIcon,
-  LandmarkIcon,
   Building2Icon,
-  InboxIcon,
   GiftIcon,
   KeyRoundIcon,
+  LandmarkIcon,
   PlugZapIcon,
   ShieldCheckIcon,
   UserRoundIcon,
   UsersRoundIcon,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import { NavLinkPending } from "@/components/navigation/nav-link-pending";
 import { cn } from "@/lib/utils";
 
-const YOU_LINKS = [
+/**
+ * Settings live behind two doors — the avatar menu opens `/settings/account/*`,
+ * the workspace switcher opens `/settings/workspace/*` — so each scope shows
+ * only its own links. Mixing both in one list was what made "whose setting is
+ * this?" ambiguous.
+ */
+export type SettingsScope = "account" | "workspace";
+
+interface SettingsLink {
+  href: string;
+  key:
+    | "account"
+    | "security"
+    | "referrals"
+    | "workspace"
+    | "members"
+    | "usage"
+    | "apiKeys"
+    | "bankConnections"
+    | "integrations";
+  exact: boolean;
+  icon: LucideIcon;
+}
+
+const ACCOUNT_LINKS: SettingsLink[] = [
   {
-    href: "/settings",
-    key: "account" as const,
+    href: "/settings/account",
+    key: "account",
     exact: true,
     icon: UserRoundIcon,
   },
   {
-    href: "/settings/security",
-    key: "security" as const,
+    href: "/settings/account/security",
+    key: "security",
     exact: false,
     icon: ShieldCheckIcon,
   },
   {
-    href: "/settings/referrals",
-    key: "referrals" as const,
+    href: "/settings/account/referrals",
+    key: "referrals",
     exact: false,
     icon: GiftIcon,
   },
 ];
 
-const WORKSPACE_LINKS = [
+const WORKSPACE_LINKS: SettingsLink[] = [
   {
     href: "/settings/workspace",
-    key: "workspace" as const,
-    exact: false,
+    key: "workspace",
+    exact: true,
     icon: Building2Icon,
   },
   {
-    href: "/settings/members",
-    key: "members" as const,
+    href: "/settings/workspace/members",
+    key: "members",
     exact: false,
     icon: UsersRoundIcon,
   },
   {
-    href: "/settings/usage",
-    key: "usage" as const,
+    href: "/settings/workspace/usage",
+    key: "usage",
     exact: false,
     icon: ActivityIcon,
   },
   {
-    href: "/settings/api-keys",
-    key: "apiKeys" as const,
+    href: "/settings/workspace/api-keys",
+    key: "apiKeys",
     exact: false,
     icon: KeyRoundIcon,
   },
   {
-    href: "/settings/bank-connections",
-    key: "bankConnections" as const,
+    href: "/settings/workspace/bank-connections",
+    key: "bankConnections",
     exact: false,
     icon: LandmarkIcon,
   },
   {
-    href: "/settings/integrations",
-    key: "integrations" as const,
+    href: "/settings/workspace/integrations",
+    key: "integrations",
     exact: false,
     icon: PlugZapIcon,
   },
 ];
 
-function SettingsNavLinks({
-  links,
-}: {
-  links: typeof YOU_LINKS | typeof WORKSPACE_LINKS;
-}) {
+const LINKS_BY_SCOPE: Record<SettingsScope, SettingsLink[]> = {
+  account: ACCOUNT_LINKS,
+  workspace: WORKSPACE_LINKS,
+};
+
+export function SettingsNav({ scope }: { scope: SettingsScope }) {
   const pathname = usePathname();
   const t = useTranslations("App.settings");
 
   return (
-    <div className="flex gap-1 md:flex-col md:gap-0.5">
-      {links.map((link) => {
+    <nav
+      aria-label={t(`navigationLabel.${scope}`)}
+      className="scroll-fade-x -mx-4 flex gap-1 overflow-x-auto px-4 pb-2 md:sticky md:top-[calc(var(--header-height)+1.5rem)] md:mx-0 md:flex-col md:gap-0.5 md:overflow-visible md:px-0 md:pb-0"
+    >
+      {LINKS_BY_SCOPE[scope].map((link) => {
         const active = link.exact
           ? pathname === link.href
           : pathname === link.href || pathname.startsWith(`${link.href}/`);
@@ -125,33 +153,6 @@ function SettingsNavLinks({
           </Link>
         );
       })}
-    </div>
-  );
-}
-
-export function SettingsNav() {
-  const t = useTranslations("App.settings");
-
-  return (
-    <nav
-      aria-label={t("navigationLabel")}
-      className="scroll-fade-x -mx-4 flex gap-4 overflow-x-auto px-4 pb-2 md:sticky md:top-[calc(var(--header-height)+1.5rem)] md:mx-0 md:flex-col md:gap-6 md:overflow-visible md:px-0 md:pb-0"
-    >
-      {/* `shrink-0` keeps each group at its content width so the nav scrolls
-          horizontally on mobile — without it the groups collapse and the
-          `shrink-0` links inside overlap each other. */}
-      <div className="shrink-0 md:min-w-0 md:shrink">
-        <p className="text-muted-foreground mb-1.5 px-3 text-[0.65rem] font-medium uppercase tracking-[0.14em]">
-          {t("navGroups.you")}
-        </p>
-        <SettingsNavLinks links={YOU_LINKS} />
-      </div>
-      <div className="shrink-0 md:min-w-0 md:shrink">
-        <p className="text-muted-foreground mb-1.5 px-3 text-[0.65rem] font-medium uppercase tracking-[0.14em]">
-          {t("navGroups.workspace")}
-        </p>
-        <SettingsNavLinks links={WORKSPACE_LINKS} />
-      </div>
     </nav>
   );
 }
