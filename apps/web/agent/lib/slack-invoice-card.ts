@@ -13,18 +13,20 @@ import {
   type CardChild,
   type CardElement,
   type LinkButtonElement,
-  type SelectElement,
+  type SelectOptionElement,
 } from "eve/channels/slack";
 
-import type { PendingInvoiceCard } from "./slack-channel-extras";
+import { copyFor } from "./invoice-card-i18n";
 import type { InvoiceCardModel } from "./invoice-card-model";
+import type { PendingInvoiceCard } from "./slack-channel-extras";
 import {
   CURRENCY_OPTIONS,
   DUE_DATE_PRESETS,
   INVOICEY_ACTIONS,
   LANGUAGE_OPTIONS,
   VAT_OPTIONS,
-  encodeSelectValue,
+  encodeButtonValue,
+  encodeChangeValue,
 } from "./slack-invoice-actions";
 
 /** Slack renders at most 10 fields in one section. */
@@ -44,143 +46,74 @@ export function formatInvoiceAmount(total: unknown, currency: unknown): string {
 }
 
 /**
- * One-line summary of everything the normalizer guessed.
+ * Everything still standing on a default, with its reason.
  *
- * The individual fields are already tagged inline; this block exists so the
- * reader gets the *reasons* in one place, and so the notice survives Slack's
- * field truncation.
+ * Suspects lead: a value that looks invented is worse than one we defaulted,
+ * and the two should not read as the same kind of note.
  */
-function assumptionsNotice(model: InvoiceCardModel): string | null {
-  /**
-   * Routine defaults (issue date is today, DUZP follows it) stay tagged on
-   * their field but out of the warning. A notice that flags seven things flags
-   * nothing — it is the two or three that could be wrong that need to stand out.
-   */
-  const notable = model.assumptions.filter(
-    (assumption) => assumption.severity !== "routine",
-  );
-  if (notable.length === 0) return null;
-
-  const suspects = notable.filter((a) => a.kind === "suspect");
-  const defaults = notable.filter((a) => a.kind !== "suspect");
+function noticeText(model: InvoiceCardModel): string | null {
+  if (model.notice.length === 0) return null;
+  const copy = copyFor(model.locale);
+  const suspects = model.notice.filter((entry) => entry.kind === "suspect");
+  const defaults = model.notice.filter((entry) => entry.kind !== "suspect");
 
   const lines: string[] = [];
-  /** Suspects lead: a value that looks invented is worse than one we defaulted. */
+  const render = (entry: (typeof model.notice)[number]): string =>
+    `• *${entry.label}* → ${entry.value}  _(${entry.reason})_`;
+
   if (suspects.length > 0) {
-    lines.push(":rotating_light: *Check this before issuing.*");
-    for (const s of suspects) {
-      lines.push(`• *${s.label}* → ${s.value}  _(${s.reason})_`);
-    }
+    lines.push(copy.text.suspectHeading, ...suspects.map(render));
   }
   if (defaults.length > 0) {
-    lines.push(
-      ":warning: *Assumed — you did not say.* Change it below, or just tell me.",
-    );
-    for (const d of defaults) {
-      lines.push(`• *${d.label}* → ${d.value}  _(${d.reason})_`);
-    }
+    lines.push(copy.text.assumedHeading, ...defaults.map(render));
   }
   return lines.join("\n");
 }
 
-function dueDatePresetValue(model: InvoiceCardModel): string | undefined {
-  const issue = model.fields.find((f) => f.label === "Issue date")?.value;
-  const due = model.fields.find((f) => f.label === "Due date")?.value;
-  if (!issue || !due) return undefined;
-  const issueMs = Date.parse(`${issue.slice(0, 10)}T12:00:00Z`);
-  const dueMs = Date.parse(`${due.slice(0, 10)}T12:00:00Z`);
-  if (Number.isNaN(issueMs) || Number.isNaN(dueMs)) return undefined;
-  const days = Math.round((dueMs - issueMs) / 86_400_000);
-  return DUE_DATE_PRESETS.find((preset) => preset.days === days)?.value;
-}
-
-function currentFieldValue(
-  model: InvoiceCardModel,
-  label: string,
-): string | undefined {
-  const raw = model.fields.find((f) => f.label === label)?.value;
-  if (!raw) return undefined;
-  /** Strip the inline `assumed` tag so it can be matched against option values. */
-  return raw.split("  ·  ")[0]?.trim();
-}
-
 /**
- * The adjust row: one click changes the field most likely to have been guessed
- * wrong, with no modal and no second turn of the model.
+ * One menu holding every draft adjustment.
+ *
+ * Four separate selects each got a quarter of the actions row and collapsed to
+ * a single letter in a Slack thread pane. A lone select spans the row, and the
+ * option labels already name their field, so the merge costs nothing.
  */
-function adjustActions(model: InvoiceCardModel): SelectElement[] {
+function changeOptions(model: InvoiceCardModel): SelectOptionElement[] {
   const invoiceId = model.invoiceId;
   if (!invoiceId) return [];
+  const copy = copyFor(model.locale);
+  const assumedPaths = model.assumedPaths;
 
-  const currency = currentFieldValue(model, "Currency");
-  const language = currentFieldValue(model, "Language");
-  const vat = currentFieldValue(model, "VAT treatment");
-  const duePreset = dueDatePresetValue(model);
-
-  const vatInitial = VAT_OPTIONS.find((option) => option.label === vat)?.value;
+  const option = (
+    field: Parameters<typeof encodeChangeValue>[0]["field"],
+    value: string,
+    label: string,
+  ): SelectOptionElement =>
+    SelectOption({
+      label,
+      value: encodeChangeValue({ invoiceId, assumedPaths, field, value }),
+    });
 
   return [
-    Select({
-      id: INVOICEY_ACTIONS.setDue,
-      label: "Due date",
-      placeholder: "Due date",
-      ...(duePreset
-        ? { initialOption: encodeSelectValue(invoiceId, duePreset) }
-        : {}),
-      options: DUE_DATE_PRESETS.map((preset) =>
-        SelectOption({
-          label: `Due ${preset.label}`,
-          value: encodeSelectValue(invoiceId, preset.value),
-        }),
+    ...DUE_DATE_PRESETS.map((preset) =>
+      option(
+        "d",
+        preset.value,
+        `${copy.option.due} ${preset.days} ${copy.option.days}`,
       ),
-    }),
-    Select({
-      id: INVOICEY_ACTIONS.setCurrency,
-      label: "Currency",
-      placeholder: "Currency",
-      ...(currency
-        ? { initialOption: encodeSelectValue(invoiceId, currency) }
-        : {}),
-      options: CURRENCY_OPTIONS.map((code) =>
-        SelectOption({
-          label: `Currency ${code}`,
-          value: encodeSelectValue(invoiceId, code),
-        }),
+    ),
+    ...CURRENCY_OPTIONS.map((code) =>
+      option("c", code, `${copy.option.currency} ${code}`),
+    ),
+    ...VAT_OPTIONS.map((vat) =>
+      option(
+        "v",
+        vat.value,
+        `${copy.option.vat} ${copy.vatMode[vat.mode] ?? vat.mode} · ${copy.suppliesAbroad[vat.suppliesAbroad] ?? vat.suppliesAbroad}`,
       ),
-    }),
-    Select({
-      id: INVOICEY_ACTIONS.setVat,
-      label: "VAT treatment",
-      placeholder: "VAT treatment",
-      ...(vatInitial
-        ? { initialOption: encodeSelectValue(invoiceId, vatInitial) }
-        : {}),
-      options: VAT_OPTIONS.map((option) =>
-        SelectOption({
-          label: `VAT ${option.label}`,
-          value: encodeSelectValue(invoiceId, option.value),
-        }),
-      ),
-    }),
-    Select({
-      id: INVOICEY_ACTIONS.setLanguage,
-      label: "Document language",
-      placeholder: "Document language",
-      ...(language
-        ? {
-            initialOption: encodeSelectValue(
-              invoiceId,
-              language === "English" ? "en" : "cs",
-            ),
-          }
-        : {}),
-      options: LANGUAGE_OPTIONS.map((option) =>
-        SelectOption({
-          label: `Language ${option.label}`,
-          value: encodeSelectValue(invoiceId, option.value),
-        }),
-      ),
-    }),
+    ),
+    ...LANGUAGE_OPTIONS.map((code) =>
+      option("l", code, `${copy.option.language} ${copy.language[code]}`),
+    ),
   ];
 }
 
@@ -189,20 +122,24 @@ function primaryActions(
   model: InvoiceCardModel,
 ): Array<ButtonElement | LinkButtonElement> {
   const invoiceId = model.invoiceId;
+  const copy = copyFor(model.locale);
   const actions: Array<ButtonElement | LinkButtonElement> = [];
+  const value = invoiceId
+    ? encodeButtonValue(invoiceId, model.assumedPaths)
+    : "";
 
   if (invoiceId && model.state === "draft") {
     actions.push(
       Button({
         id: INVOICEY_ACTIONS.issue,
-        label: "Issue invoice",
+        label: copy.action.issue,
         style: "primary",
-        value: invoiceId,
+        value,
       }),
       Button({
         id: INVOICEY_ACTIONS.previewPdf,
-        label: "Preview PDF",
-        value: invoiceId,
+        label: copy.action.previewPdf,
+        value,
       }),
     );
   }
@@ -212,22 +149,22 @@ function primaryActions(
       actions.push(
         Button({
           id: INVOICEY_ACTIONS.markPaid,
-          label: "Mark paid",
+          label: copy.action.markPaid,
           style: "primary",
-          value: invoiceId,
+          value,
         }),
       );
     }
     actions.push(
       Button({
         id: INVOICEY_ACTIONS.sendEmail,
-        label: "Send to client",
-        value: invoiceId,
+        label: copy.action.sendEmail,
+        value,
       }),
       Button({
         id: INVOICEY_ACTIONS.previewPdf,
-        label: "Get PDF",
-        value: invoiceId,
+        label: copy.action.getPdf,
+        value,
       }),
     );
   }
@@ -237,7 +174,7 @@ function primaryActions(
       LinkButton({
         id: INVOICEY_ACTIONS.openWeb,
         url: model.webUrl,
-        label: "Open in Invoicey",
+        label: copy.action.openWeb,
       }),
     );
   }
@@ -246,9 +183,9 @@ function primaryActions(
     actions.push(
       Button({
         id: INVOICEY_ACTIONS.discard,
-        label: "Discard",
+        label: copy.action.discard,
         style: "danger",
-        value: invoiceId,
+        value,
       }),
     );
   }
@@ -258,6 +195,7 @@ function primaryActions(
 
 /** Renders one invoice card model into an Eve Card, controls included. */
 export function buildInvoiceModelCard(model: InvoiceCardModel): CardElement {
+  const copy = copyFor(model.locale);
   const children: CardChild[] = [
     Fields(
       model.fields
@@ -266,11 +204,9 @@ export function buildInvoiceModelCard(model: InvoiceCardModel): CardElement {
     ),
   ];
 
-  if (model.linesText) {
-    children.push(CardText(model.linesText));
-  }
+  if (model.linesText) children.push(CardText(model.linesText));
 
-  const notice = assumptionsNotice(model);
+  const notice = noticeText(model);
   if (notice) {
     children.push(Divider());
     children.push(CardText(notice));
@@ -282,9 +218,18 @@ export function buildInvoiceModelCard(model: InvoiceCardModel): CardElement {
     children.push(Actions(primary));
   }
 
-  const adjust = model.state === "draft" ? adjustActions(model) : [];
-  if (adjust.length > 0) {
-    children.push(Actions(adjust));
+  const options = model.state === "draft" ? changeOptions(model) : [];
+  if (options.length > 0) {
+    children.push(
+      Actions([
+        Select({
+          id: INVOICEY_ACTIONS.change,
+          label: copy.action.change,
+          placeholder: copy.action.change,
+          options,
+        }),
+      ]),
+    );
   }
 
   return Card({ title: model.title, subtitle: model.subtitle, children });
@@ -306,7 +251,7 @@ export function buildInvoiceCard(pending: PendingInvoiceCard): CardElement {
       Actions([
         LinkButton({
           url: pending.webUrl,
-          label: "Open in Invoicey",
+          label: "Otevřít v Invoicey",
           style: "primary",
         }),
       ]),
@@ -366,9 +311,9 @@ export function invoiceCardFromGetResult(output: {
     title: number,
     subtitle: clientName,
     fields: [
-      { label: "Status", value: displayStatus },
-      { label: "Total", value: amount },
-      { label: "Client", value: clientName },
+      { label: "Stav", value: displayStatus },
+      { label: "Celkem", value: amount },
+      { label: "Klient", value: clientName },
     ],
     webUrl,
     fallbackText: `${number} · ${clientName} · ${amount} · ${displayStatus}`,
@@ -397,22 +342,19 @@ export function invoiceCardFromListResult(output: {
           ? row.status
           : "—";
     const amount = formatInvoiceAmount(row.total, row.currency);
-    return {
-      label: number,
-      value: `${client} · ${amount} · ${status}`,
-    };
+    return { label: number, value: `${client} · ${amount} · ${status}` };
   });
   const more =
     output.invoices.length > rows.length
-      ? ` (+${output.invoices.length - rows.length} more)`
+      ? ` (+${output.invoices.length - rows.length})`
       : "";
   return {
     kind: "list",
-    title: `Invoices${more}`,
-    subtitle: `${output.invoices.length} shown`,
+    title: `Faktury${more}`,
+    subtitle: `${output.invoices.length}`,
     fields,
     webUrl: null,
-    fallbackText: `Invoices: ${fields.map((f) => `${f.label} ${f.value}`).join("; ")}`,
+    fallbackText: `Faktury: ${fields.map((f) => `${f.label} ${f.value}`).join("; ")}`,
   };
 }
 
@@ -428,15 +370,15 @@ export function invoiceCardFromPaidResult(output: {
   const amount = formatInvoiceAmount(summary.total, summary.currency);
   return {
     kind: "invoice",
-    title: `Paid · ${number}`,
+    title: `Zaplaceno · ${number}`,
     subtitle: clientName,
     fields: [
-      { label: "Status", value: "Paid" },
-      { label: "Total", value: amount },
-      { label: "Client", value: clientName },
+      { label: "Stav", value: "Zaplaceno" },
+      { label: "Celkem", value: amount },
+      { label: "Klient", value: clientName },
     ],
     webUrl: null,
-    fallbackText: `Paid ${number} · ${clientName} · ${amount}`,
+    fallbackText: `Zaplaceno ${number} · ${clientName} · ${amount}`,
   };
 }
 
@@ -468,25 +410,23 @@ export function pendingCardFromToolResult(
       if (!base) {
         return {
           kind: "invoice",
-          title: "Email sent",
+          title: "Odesláno",
           fields: [
-            { label: "Status", value: "Sent" },
-            ...(to ? [{ label: "To", value: to }] : []),
+            { label: "Stav", value: "Odesláno" },
+            ...(to ? [{ label: "Komu", value: to }] : []),
           ],
           webUrl,
-          fallbackText: to
-            ? `Invoice email sent to ${to}`
-            : "Invoice email sent",
+          fallbackText: to ? `Faktura odeslána na ${to}` : "Faktura odeslána",
         };
       }
       return {
         ...base,
         fields: [
-          { label: "Status", value: "Email sent" },
-          ...(to ? [{ label: "To", value: to }] : []),
-          ...base.fields.filter((f) => f.label !== "Status"),
+          { label: "Stav", value: "Odesláno" },
+          ...(to ? [{ label: "Komu", value: to }] : []),
+          ...base.fields.filter((f) => f.label !== "Stav"),
         ],
-        fallbackText: `Email sent · ${base.fallbackText}`,
+        fallbackText: `Odesláno · ${base.fallbackText}`,
       };
     }
     default:

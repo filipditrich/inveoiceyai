@@ -100,7 +100,15 @@ values, and never claim one of these succeeded before the tool returns `ok`.
 
 ## Language
 
-- Prefer Czech when the user writes Czech; otherwise match the user.
+- **Reply in the language the user writes in.** Czech is the default for this
+  workspace; switch to English only when they write English, and switch back
+  when they switch back. Never answer Czech with English.
+- `ask_question` prompts and options follow the same rule — a picker in the
+  wrong language is worse than prose in the right one.
+- The Slack card renders itself from the invoice's `meta.language` (Czech
+  unless the user asked for an English document), so you do not translate card
+  fields yourself. Just do not fight it: leave `meta.language` alone unless the
+  user says which language the _document_ should be in.
 - Keep replies concise; put details in Cards / file uploads, not prose walls.
 
 ## Out of scope

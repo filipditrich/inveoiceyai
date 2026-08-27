@@ -55,8 +55,17 @@ Card controls are handled by `slack-interactions.ts`, wired to
 `slackChannel({ onInteraction })`:
 
 - Every id is namespaced `invoicey:` — Eve owns `eve_input:` / `eve_input_freeform:`
-  and forwards the rest. Selects report only `selected_option.value`, so the
-  invoice id rides inside the option value (`<uuid>|<value>`).
+  and forwards the rest. Selects report only `selected_option.value`, so state
+  rides inside the option value: `<uuid>|<mask>|<field>:<value>`.
+- **One select, not four.** Slack splits an actions block's width evenly across
+  its elements, so four selects collapse to single letters in a thread pane. A
+  lone select spans the row; each option label already names its field.
+- **`<mask>` is the still-assumed set**, a base-36 bitmask over `ASSUMABLE_PATHS`
+  (`invoice-card-i18n.ts`). Slack caps an option value at 75 chars and a uuid
+  eats 36, so a path list does not fit and a 2-char mask does. Without it a
+  rebuilt card would drop every `assumed` tag, and editing one field would
+  quietly stop flagging the others. Append to `ASSUMABLE_PATHS` only — removing
+  or reordering shifts every later bit and mis-decodes live cards.
 - A click resolves the **clicker's** linked workspace via `resolveLinkedSlackPrincipal`
   and runs under `runWithInvoiceyContext`. Unlinked clickers get an ephemeral
   refusal and nothing runs. This is stricter than the Slack-global Allow/Deny.
@@ -65,6 +74,15 @@ Card controls are handled by `slack-interactions.ts`, wired to
 - Failures are reported with `postEphemeral` to the clicker, never in-channel.
 - The `Open in Invoicey` link button carries `invoicey:open_web` purely so the
   click it still emits is recognised and ignored.
+
+### Language
+
+Card copy is rendered from the invoice's `meta.language` (`invoice-card-i18n.ts`),
+defaulting to `cs`. There is no per-user locale to read: `users` has no locale
+column and the web app's locale lives in a `NEXT_LOCALE` cookie the agent cannot
+see. A true per-user setting would need either that column or the Slack
+`users:read` scope for `users.info().locale`. Model prose follows the language
+the user writes in — see `instructions.md`.
 
 Clicking `Issue` runs `issueInvoiceById` directly rather than going through the
 model and a second Allow/Deny: the button sits on a card that already shows the
@@ -154,7 +172,9 @@ The agent cannot complete these steps:
 | 12  | Unlinked Slack user               | No agent turn; DM with `/slack/link/…`; channel does not contain the URL                                                                                                                                                                                                                       |
 | 13  | Confirm link in current workspace | Next Slack message creates invoices in that workspace; Settings shows the link                                                                                                                                                                                                                 |
 | 14  | Card **due-date select**          | Picking “Due in 30 days” rewrites `due_date` off the issue date and the card re-renders in place; the `assumed` tag on Due date is gone                                                                                                                                                        |
-| 15  | Card **currency / VAT select**    | Totals recompute (VAT changes with reverse charge); an invalid combination (OSS · domestic) is refused with an ephemeral message and the card is untouched                                                                                                                                     |
+| 15  | Card **currency / VAT change**    | Totals recompute (VAT changes with reverse charge); an invalid combination (OSS · domestic) is refused with an ephemeral message and the card is untouched                                                                                                                                     |
+| 15b | Assumption carry-forward          | After changing the due date, `Splatnost` loses its tag while `Měna` / `Jazyk dokladu` keep theirs and stay in the warning block                                                                                                                                                                |
+| 15c | One change menu                   | The draft card shows a single full-width **Změnit…** select, not four one-letter boxes                                                                                                                                                                                                         |
 | 16  | Card **Discard**                  | Draft row deleted; card replaced by a tombstone naming the clicker                                                                                                                                                                                                                             |
 | 17  | Card click by unlinked user       | Ephemeral refusal; nothing mutates                                                                                                                                                                                                                                                             |
 | 18  | Correction in words               | “make it EUR” calls `update_invoice_draft` on the same id — no second draft row                                                                                                                                                                                                                |

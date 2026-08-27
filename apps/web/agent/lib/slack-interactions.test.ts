@@ -54,7 +54,7 @@ vi.mock("./upload-slack-files", () => ({
 }));
 
 const { handleInvoiceyInteraction } = await import("./slack-interactions");
-const { INVOICEY_ACTIONS, encodeSelectValue } =
+const { INVOICEY_ACTIONS, encodeButtonValue, encodeChangeValue } =
   await import("./slack-invoice-actions");
 
 const INVOICE_ID = "11111111-1111-4111-8111-111111111111";
@@ -104,19 +104,31 @@ function makeCtx() {
   };
 }
 
-function buttonClick(actionId: string, value = INVOICE_ID) {
+function buttonClick(
+  actionId: string,
+  assumedPaths: string[] = ["meta.currency"],
+) {
   return {
     actionId,
-    value,
+    value: encodeButtonValue(INVOICE_ID, assumedPaths),
     messageTs: MESSAGE_TS,
     user: { id: "U123" },
   } as never;
 }
 
-function selectClick(actionId: string, optionValue: string) {
+function changeClick(
+  field: "d" | "c" | "l" | "v",
+  value: string,
+  assumedPaths: string[] = ["meta.dueDate", "meta.currency", "meta.language"],
+) {
   return {
-    actionId,
-    selectedOptionValue: encodeSelectValue(INVOICE_ID, optionValue),
+    actionId: INVOICEY_ACTIONS.change,
+    selectedOptionValue: encodeChangeValue({
+      invoiceId: INVOICE_ID,
+      assumedPaths,
+      field,
+      value,
+    }),
     messageTs: MESSAGE_TS,
     user: { id: "U123" },
   } as never;
@@ -165,7 +177,7 @@ describe("handleInvoiceyInteraction: gating", () => {
     expect(ops.issueInvoiceById).not.toHaveBeenCalled();
     expect(postEphemeral).toHaveBeenCalledWith(
       "U123",
-      expect.stringContaining("not linked"),
+      expect.stringContaining("není propojený"),
     );
   });
 
@@ -177,7 +189,7 @@ describe("handleInvoiceyInteraction: gating", () => {
     );
     expect(postEphemeral).toHaveBeenCalledWith(
       "U123",
-      expect.stringContaining("missing its invoice reference"),
+      expect.stringContaining("chybí odkaz na fakturu"),
     );
   });
 });
@@ -185,10 +197,7 @@ describe("handleInvoiceyInteraction: gating", () => {
 describe("handleInvoiceyInteraction: draft edits", () => {
   it("turns a due-date preset into an absolute date off the issue date", async () => {
     const { ctx } = makeCtx();
-    await handleInvoiceyInteraction(
-      selectClick(INVOICEY_ACTIONS.setDue, "30"),
-      ctx,
-    );
+    await handleInvoiceyInteraction(changeClick("d", "30"), ctx);
     expect(ops.updateDraftInvoice).toHaveBeenCalledWith({
       id: INVOICE_ID,
       patch: { meta: { dueDate: "2026-09-25" } },
@@ -197,31 +206,22 @@ describe("handleInvoiceyInteraction: draft edits", () => {
 
   it("patches currency and language straight through", async () => {
     const { ctx } = makeCtx();
-    await handleInvoiceyInteraction(
-      selectClick(INVOICEY_ACTIONS.setCurrency, "EUR"),
-      ctx,
-    );
+    await handleInvoiceyInteraction(changeClick("c", "EUR"), ctx);
     expect(ops.updateDraftInvoice).toHaveBeenCalledWith({
       id: INVOICE_ID,
       patch: { meta: { currency: "EUR" } },
     });
 
-    await handleInvoiceyInteraction(
-      selectClick(INVOICEY_ACTIONS.setLanguage, "en"),
-      ctx,
-    );
+    await handleInvoiceyInteraction(changeClick("l", "en"), ctx);
     expect(ops.updateDraftInvoice).toHaveBeenLastCalledWith({
       id: INVOICE_ID,
       patch: { meta: { language: "en" } },
     });
   });
 
-  it("splits the compound VAT option into mode and supplies", async () => {
+  it("expands the compact VAT code into mode and supplies", async () => {
     const { ctx } = makeCtx();
-    await handleInvoiceyInteraction(
-      selectClick(INVOICEY_ACTIONS.setVat, "reverse_charge|eu"),
-      ctx,
-    );
+    await handleInvoiceyInteraction(changeClick("v", "rc-eu"), ctx);
     expect(ops.updateDraftInvoice).toHaveBeenCalledWith({
       id: INVOICE_ID,
       patch: { vat: { mode: "reverse_charge", suppliesAbroad: "eu" } },
@@ -230,14 +230,36 @@ describe("handleInvoiceyInteraction: draft edits", () => {
 
   it("edits the clicked card in place instead of posting a new one", async () => {
     const { ctx, request } = makeCtx();
-    await handleInvoiceyInteraction(
-      selectClick(INVOICEY_ACTIONS.setCurrency, "EUR"),
-      ctx,
-    );
+    await handleInvoiceyInteraction(changeClick("c", "EUR"), ctx);
     expect(request).toHaveBeenCalledWith(
       "chat.update",
       expect.objectContaining({ channel: "C1", ts: MESSAGE_TS }),
     );
+  });
+
+  it("keeps the other fields flagged after editing one of them", async () => {
+    const { ctx, request } = makeCtx();
+    await handleInvoiceyInteraction(
+      changeClick("d", "30", [
+        "meta.dueDate",
+        "meta.currency",
+        "meta.language",
+      ]),
+      ctx,
+    );
+
+    const update = request.mock.calls.find((call) => call[0] === "chat.update");
+    const blocks = (update?.[1] as { blocks: Array<Record<string, unknown>> })
+      .blocks;
+    const notice = blocks
+      .map((block) => JSON.stringify(block))
+      .find((json) => json.includes("Doplnili jsme"));
+
+    /** The edited field drops out of the warning... */
+    expect(notice).not.toContain("Splatnost");
+    /** ...while the ones the user still has not stated stay in it. */
+    expect(notice).toContain("Měna");
+    expect(notice).toContain("Jazyk dokladu");
   });
 
   it("surfaces a rejected edit to the clicker and leaves the card alone", async () => {
@@ -246,10 +268,7 @@ describe("handleInvoiceyInteraction: draft edits", () => {
       issues: [{ path: "vat.suppliesAbroad", message: "oss requires abroad" }],
     });
     const { ctx, request, postEphemeral } = makeCtx();
-    await handleInvoiceyInteraction(
-      selectClick(INVOICEY_ACTIONS.setVat, "oss|none"),
-      ctx,
-    );
+    await handleInvoiceyInteraction(changeClick("v", "o-eu"), ctx);
     expect(request).not.toHaveBeenCalled();
     expect(postEphemeral).toHaveBeenCalledWith(
       "U123",
@@ -315,7 +334,7 @@ describe("handleInvoiceyInteraction: lifecycle actions", () => {
       ids: [INVOICE_ID],
     });
     const update = request.mock.calls.find((c) => c[0] === "chat.update");
-    expect(JSON.stringify(update?.[1])).toContain("discarded");
+    expect(JSON.stringify(update?.[1])).toContain("Zahozeno");
   });
 
   it("refuses to pretend a blocked discard worked", async () => {
@@ -329,7 +348,7 @@ describe("handleInvoiceyInteraction: lifecycle actions", () => {
     expect(request).not.toHaveBeenCalled();
     expect(postEphemeral).toHaveBeenCalledWith(
       "U123",
-      expect.stringContaining("already be issued"),
+      expect.stringContaining("už je vystavený"),
     );
   });
 
@@ -345,7 +364,7 @@ describe("handleInvoiceyInteraction: lifecycle actions", () => {
     );
     expect(postEphemeral).toHaveBeenCalledWith(
       "U123",
-      expect.stringContaining("no e-mail address on file"),
+      expect.stringContaining("nemá uložený e-mail"),
     );
   });
 
