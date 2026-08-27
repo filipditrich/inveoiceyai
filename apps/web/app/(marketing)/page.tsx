@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import {
@@ -9,7 +10,6 @@ import {
   Building2Icon,
   CalendarSyncIcon,
   CheckCircle2Icon,
-  CircleDollarSignIcon,
   CoinsIcon,
   DatabaseIcon,
   FileArchiveIcon,
@@ -28,8 +28,13 @@ import {
 
 import { ProductPreview } from "@/components/marketing/product-preview";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
+import {
+  FloatingInvoiceyGuide,
+  InteractiveInvoicey,
+} from "@/components/marketing/interactive-invoicey";
 import motionStyles from "@/components/marketing/marketing-motion.module.css";
 import { MarketingSignedInChip } from "@/components/marketing/marketing-signed-in";
+import { BrandLogo } from "@/components/brand-logo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getOptionalSession } from "@/lib/auth/session";
@@ -166,12 +171,22 @@ export default async function HomePage() {
     { question: t("faq.q4"), answer: t("faq.a4") },
     { question: t("faq.q5"), answer: t("faq.a5") },
   ];
+  const mascotMessages = [
+    t("mascot.message1"),
+    t("mascot.message2"),
+    t("mascot.message3"),
+  ];
+  const floatingMascotMessages = [
+    t("mascot.floating1"),
+    t("mascot.floating2"),
+    t("mascot.floating3"),
+  ];
   return (
     <>
       <section className="relative overflow-hidden">
         <div className="marketing-grid absolute inset-0 -z-20 opacity-55" />
         <div className="bg-brand/20 absolute -top-48 left-1/2 -z-10 size-[38rem] -translate-x-1/2 rounded-full blur-3xl" />
-        <div className="mx-auto grid max-w-7xl gap-14 px-4 pb-20 pt-16 sm:px-6 sm:pb-28 sm:pt-24 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16 lg:px-8 lg:pt-28">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 pb-16 pt-12 sm:px-6 sm:pb-20 sm:pt-20 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-12 lg:px-8 lg:py-16">
           <div className={`${motionStyles.heroCopy} max-w-2xl`}>
             <Badge
               variant="outline"
@@ -235,7 +250,11 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <ProductPreview />
+          <InteractiveInvoicey
+            ariaLabel={t("mascot.ariaLabel")}
+            clickHint={t("mascot.clickHint")}
+            messages={mascotMessages}
+          />
         </div>
       </section>
 
@@ -253,6 +272,19 @@ export default async function HomePage() {
               {item.label}
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="overflow-hidden px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <SectionIntro
+            eyebrow={t("preview.eyebrow")}
+            title={t("preview.title")}
+            description={t("preview.description")}
+          />
+          <div className="mx-auto mt-14 max-w-4xl">
+            <ProductPreview />
+          </div>
         </div>
       </section>
 
@@ -387,9 +419,7 @@ export default async function HomePage() {
             <div className="bg-brand/20 absolute -right-20 -top-20 size-64 rounded-full blur-3xl" />
             <div className="dark:border-border dark:bg-background/50 relative rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
               <div className="dark:border-border flex items-center gap-3 border-b border-white/10 pb-4">
-                <span className="bg-brand text-brand-foreground grid size-9 place-items-center rounded-xl">
-                  <MessageSquareTextIcon className="size-4" />
-                </span>
+                <BrandLogo size={36} className="rounded-xl" />
                 <div>
                   <p className="text-sm font-medium">
                     {t("automation.chatTitle")}
@@ -539,8 +569,16 @@ export default async function HomePage() {
         <div
           className={`${motionStyles.scrollReveal} from-brand/35 via-brand/15 bg-linear-to-br to-background relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] border p-8 sm:p-12 lg:p-16`}
         >
-          <CircleDollarSignIcon className="text-primary/15 absolute -bottom-12 -right-8 size-64 -rotate-12" />
-          <div className="relative max-w-2xl">
+          <Image
+            alt=""
+            aria-hidden="true"
+            className={`${motionStyles.ctaMascot} absolute -bottom-16 -right-12 hidden h-auto w-[25rem] select-none lg:block`}
+            height={900}
+            sizes="400px"
+            src="/brand/illustrations/invoicey-mascot-branded.webp"
+            width={900}
+          />
+          <div className="relative max-w-2xl lg:max-w-[58%]">
             <p className="dark:text-primary text-sm font-semibold uppercase tracking-wide text-[#914522]">
               {t("cta.eyebrow")}
             </p>
@@ -569,6 +607,10 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      <FloatingInvoiceyGuide
+        ariaLabel={t("mascot.floatingAriaLabel")}
+        messages={floatingMascotMessages}
+      />
     </>
   );
 }

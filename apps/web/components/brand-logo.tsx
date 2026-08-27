@@ -8,7 +8,7 @@ type BrandLogoProps = {
 };
 
 /**
- * Invoicey robot mark for app chrome.
+ * Invoicey product mark for app chrome.
  */
 export function BrandLogo({
   className,

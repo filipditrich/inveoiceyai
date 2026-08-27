@@ -275,7 +275,21 @@ declare const messages: {
       betaAccess: "Beta přístup";
       bankMatching: "Párování plateb";
     };
+    mascot: {
+      ariaLabel: "Invoicey — kliknutím zobrazíte další hlášku";
+      clickHint: "Klikněte na Invoicey";
+      message1: "Povinná pole hlídám já. Vy hlídáte podnikání.";
+      message2: "Jedna faktura dovnitř. PDF, ISDOC a QR ven.";
+      message3: "Nevymýšlím IČO. ARES je rychlejší a spolehlivější.";
+      floatingAriaLabel: "Invoicey — zobrazit další tip";
+      floating1: "Psst — zkuste dole přepsat částku v ukázce.";
+      floating2: "Tahle stránka má víc pohybu. Faktury pak mají méně.";
+      floating3: "Ano, kontroluji i to, zda jste opravdu klikli na mě.";
+    };
     preview: {
+      eyebrow: "Živá ukázka";
+      title: "Napište zadání. Invoicey poskládá data.";
+      description: "Vyzkoušejte si princip přímo tady. Upravte částku, DPH nebo splatnost a náhled faktury se přepočítá bez dalšího formuláře.";
       inputLabel: "Popište fakturu vlastními slovy";
       enterHint: "Enter aktualizuje náhled";
       ariaLabel: "Pokyn pro vytvoření faktury";

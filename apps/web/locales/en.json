@@ -272,7 +272,21 @@
       "betaAccess": "Beta access",
       "bankMatching": "Bank matching"
     },
+    "mascot": {
+      "ariaLabel": "Invoicey — click for another message",
+      "clickHint": "Click Invoicey",
+      "message1": "I watch the required fields. You watch the business.",
+      "message2": "One invoice in. PDF, ISDOC, and QR out.",
+      "message3": "I don't invent company IDs. ARES is faster and safer.",
+      "floatingAriaLabel": "Invoicey — show another tip",
+      "floating1": "Psst — try changing the amount in the demo below.",
+      "floating2": "This page moves more, so your invoices have to move less.",
+      "floating3": "Yes, I also check whether you actually clicked me."
+    },
     "preview": {
+      "eyebrow": "Live demo",
+      "title": "Write the brief. Invoicey structures the data.",
+      "description": "Try the idea right here. Change the amount, VAT, or due date and the invoice preview recalculates without another form.",
       "inputLabel": "Describe an invoice in your own words",
       "enterHint": "Press Enter to update",
       "ariaLabel": "Invoice creation instruction",
