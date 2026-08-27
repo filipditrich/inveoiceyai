@@ -2,7 +2,7 @@ import {
   ArrowLeftIcon,
   CheckCircle2Icon,
   FileCheck2Icon,
-  QrCodeIcon,
+  LandmarkIcon,
   SearchCheckIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -17,6 +17,24 @@ export async function AuthShell({
 }: Readonly<{ children: ReactNode }>) {
   const t = await getTranslations("Auth.shell");
   const tFooter = await getTranslations("Marketing.footer");
+
+  const benefits = [
+    {
+      icon: SearchCheckIcon,
+      title: t("benefit1Title"),
+      description: t("benefit1Description"),
+    },
+    {
+      icon: FileCheck2Icon,
+      title: t("benefit2Title"),
+      description: t("benefit2Description"),
+    },
+    {
+      icon: LandmarkIcon,
+      title: t("benefit3Title"),
+      description: t("benefit3Description"),
+    },
+  ];
 
   return (
     <main className="grid min-h-svh lg:grid-cols-[1.05fr_0.95fr]">
@@ -41,26 +59,50 @@ export async function AuthShell({
         </Link>
 
         <div className="relative my-auto max-w-xl py-16">
-          <p className="text-brand text-sm font-semibold uppercase tracking-wide">
+          <span className="dark:border-border dark:bg-muted inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium">
+            {t("badge")}
+          </span>
+          <p className="text-brand mt-6 text-sm font-semibold uppercase tracking-wide">
             {t("eyebrow")}
           </p>
-          <h2 className="mt-5 text-balance text-5xl font-semibold leading-[1.02] tracking-[-0.05em]">
+          <h2 className="mt-4 text-balance text-5xl font-semibold leading-[1.02] tracking-[-0.05em]">
             {t("title")}
           </h2>
           <p className="text-background/60 dark:text-muted-foreground mt-6 max-w-lg text-lg leading-relaxed">
             {t("description")}
           </p>
 
-          <div className="mt-10 grid grid-cols-3 gap-3">
-            <AuthFeature icon={<SearchCheckIcon />} label="ARES" />
-            <AuthFeature icon={<FileCheck2Icon />} label="PDF + ISDOC" />
-            <AuthFeature icon={<QrCodeIcon />} label="QR" />
-          </div>
+          <ul className="mt-10 space-y-3">
+            {benefits.map((benefit) => (
+              <li
+                key={benefit.title}
+                className="dark:border-border dark:bg-background/50 flex items-start gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm"
+              >
+                <span className="text-brand [&_svg]:size-4.5 mt-0.5">
+                  <benefit.icon />
+                </span>
+                <span>
+                  <span className="block text-sm font-medium">
+                    {benefit.title}
+                  </span>
+                  <span className="text-background/55 dark:text-muted-foreground mt-1 block text-xs leading-relaxed">
+                    {benefit.description}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <div className="text-background/75 dark:text-muted-foreground relative flex items-center gap-2 text-xs">
-          <CheckCircle2Icon className="size-3.5" />
-          {t("oauthNote")}
+        <div className="text-background/75 dark:text-muted-foreground relative space-y-2 text-xs">
+          <p className="flex items-center gap-2">
+            <CheckCircle2Icon className="size-3.5 shrink-0" />
+            {t("oauthNote")}
+          </p>
+          <p className="flex items-center gap-2">
+            <CheckCircle2Icon className="size-3.5 shrink-0" />
+            {t("footerNote")}
+          </p>
         </div>
       </section>
 
@@ -113,17 +155,5 @@ export async function AuthShell({
         </nav>
       </section>
     </main>
-  );
-}
-
-function AuthFeature({
-  icon,
-  label,
-}: Readonly<{ icon: ReactNode; label: string }>) {
-  return (
-    <div className="dark:border-border dark:bg-background/50 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-      <span className="text-brand [&_svg]:size-4">{icon}</span>
-      <p className="mt-3 text-xs font-medium">{label}</p>
-    </div>
   );
 }

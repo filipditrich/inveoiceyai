@@ -208,9 +208,9 @@ declare const messages: {
   Marketing: {
     meta: {
       title: "Automatizace faktur bez zbytečného klikání";
-      description: "Invoicey propojuje validovaná data, PDF, ISDOC, SPAYD QR a ARES s moderním webem a AI automatizací.";
+      description: "Invoicey propojuje validovaná data, PDF, ISDOC, SPAYD QR a ARES s moderním webem, párováním plateb z banky a AI automatizací.";
       ogTitle: "Invoicey — automatizace faktur bez zbytečného klikání";
-      ogDescription: "Jedna validovaná faktura. Web, PDF, ISDOC, QR i AI automatizace.";
+      ogDescription: "Jedna validovaná faktura. Web, PDF, ISDOC, QR, platby z banky i AI automatizace.";
     };
     nav: {
       howItWorks: "Jak to funguje";
@@ -226,6 +226,8 @@ declare const messages: {
       openMenu: "Otevřít nabídku";
       skipToContent: "Přeskočit na obsah";
       ariaLabel: "Hlavní navigace";
+      payments: "Platby";
+      integrations: "Napojení";
     };
     footer: {
       description: "Faktury jako strukturovaná data. Vytvořte je ve webu, přes JSON nebo s pomocí AI a pokaždé získejte stejný validovaný výstup.";
@@ -241,7 +243,7 @@ declare const messages: {
       badge: "Připraveno pro web, JSON i AI";
       titleLine1: "Fakturace, která začíná daty.";
       titleLine2: "Ne formulářem.";
-      subtitle: "Vystavujte doklady ve webu, z JSONu nebo přes AI. Invoicey je pokaždé ověří a vytvoří stejné PDF, ISDOC i platební QR — včetně ARES, DPH a českých reálií.";
+      subtitle: "Vystavujte doklady ve webu, z JSONu nebo přes AI. Invoicey je pokaždé ověří, vytvoří stejné PDF, ISDOC i platební QR — a příchozí platbu z banky navrhne spárovat s fakturou.";
       ctaPrimary: "Otevřít Invoicey";
       ctaPrimarySignedIn: "Pokračovat do aplikace";
       ctaSecondary: "Jak to funguje";
@@ -249,6 +251,7 @@ declare const messages: {
       noPassword: "Bez hesla";
       czechUi: "Czech-first";
       betaAccess: "Beta přístup";
+      bankMatching: "Párování plateb";
     };
     preview: {
       inputLabel: "Popište fakturu vlastními slovy";
@@ -286,6 +289,9 @@ declare const messages: {
       aresLookup: "ARES podle IČO";
       multiIssuer: "Více firem";
       ariaLabel: "Klíčové formáty";
+      bankSync: "Fio a MONETA";
+      currencies: "Více měn";
+      recurring: "Opakované faktury";
     };
     workflow: {
       eyebrow: "Od zadání po zaplacení";
@@ -295,8 +301,8 @@ declare const messages: {
       step1Description: "Vyberte firmu, dohledejte klienta podle IČO a doplňte položky. Nebo pošlete stejná data jako JSON či pokyn agentovi.";
       step2Title: "Ověřte a vystavte";
       step2Description: "Jedno schéma zkontroluje povinné údaje, DPH i součty. Teprve potom vznikne neměnný doklad, PDF, ISDOC a QR.";
-      step3Title: "Odešlete a sledujte";
-      step3Description: "Pošlete fakturu klientovi, sledujte doručení a splatnost a označte úhradu ve stejném přehledu.";
+      step3Title: "Odešlete a spárujte";
+      step3Description: "Pošlete fakturu klientovi, sledujte doručení a splatnost a nechte připojenou banku navrhnout párování úhrady.";
     };
     capabilities: {
       eyebrow: "Doménová realita";
@@ -314,6 +320,12 @@ declare const messages: {
       schemaDescription: "Jedno validační schéma pohání web, JSON i nástroje pro agenty. Výsledek se nemění podle toho, odkud faktura vznikla.";
       securityTitle: "Oddělené pracovní prostory";
       securityDescription: "OAuth přihlášení přes Google nebo GitHub a kontrola členství pracovního prostoru na každé serverové hranici.";
+      paymentsTitle: "Platby v jedné knize";
+      paymentsDescription: "Připojte Fio nebo MONETA. Příchozí platby se navrhnou k faktuře podle VS, částky i účtu a stav dokladu vzniká z potvrzených alokací.";
+      recurringTitle: "Opakované doklady bez hlídání";
+      recurringDescription: "Nastavte kadenci a den v měsíci. Invoicey pravidelně připraví návrh s aktuálními údaji dodavatele i klienta a nechá ho na potvrzení.";
+      currencyTitle: "Více měn a jazyk dokladu";
+      currencyDescription: "Fakturujte v CZK i cizí měně, s DPH i bez ní, a jazyk konkrétní faktury (čeština nebo angličtina) volíte nezávisle na jazyku aplikace.";
     };
     automation: {
       badge: "Automatizace · beta";
@@ -349,6 +361,12 @@ declare const messages: {
       importItem1: "PDF s vloženým ISDOC";
       importItem2: "Archivní režim bez ISDOC";
       importItem3: "Původ dokladu a neměnné soubory";
+      recurringEyebrow: "Opakované doklady";
+      recurringTitle: "Pravidelná fakturace, kterou schvalujete vy.";
+      recurringDescription: "Nastavte kadenci, den v měsíci a šablonu dokladu. Invoicey připraví návrh s aktuálním dodavatelem i klientem a nechá ho čekat na potvrzení.";
+      recurringItem1: "Měsíčně, čtvrtletně i vlastní kadence";
+      recurringItem2: "První nebo poslední den v měsíci";
+      recurringItem3: "Návrh čeká na potvrzení";
     };
     faq: {
       eyebrow: "Časté otázky";
@@ -364,6 +382,12 @@ declare const messages: {
       a4: "Ano. Hromadný import přijímá PDF a ISDOC. Pokud PDF obsahuje vložený ISDOC, Invoicey načte i strukturovaná data; jinak zachová originál jako archivní doklad.";
       q5: "Je Invoicey účetní nebo daňové poradenství?";
       a5: "Ne. Invoicey pomáhá připravit a spravovat doklady, ale správnost konkrétního obchodního a daňového případu vždy odpovídá uživateli a jeho účetnímu či daňovému poradci.";
+      q6: "Jak funguje párování plateb z banky?";
+      a6: "Připojíte účet Fio nebo MONETA tokenem, který vydá banka na vaše jméno. Invoicey stáhne příchozí platby a navrhne párování podle variabilního symbolu, částky, měny a účtu. Automatické potvrzení je ve výchozím stavu vypnuté a i po zapnutí projde jen přesná shoda — ostatní návrhy čekají na člověka.";
+      q7: "Umí Invoicey opakované faktury?";
+      a7: "Ano. Nastavíte kadenci a den v měsíci a Invoicey pravidelně připraví návrh s aktuálními údaji dodavatele i klienta. Doklad se nevydá sám, potvrzení zůstává na vás.";
+      q8: "Můžu fakturovat v cizí měně nebo anglicky?";
+      a8: "Ano. Doklad může být v jiné měně než CZK, s DPH i bez ní, a jazyk konkrétní faktury (čeština nebo angličtina) volíte nezávisle na jazyku aplikace.";
     };
     cta: {
       eyebrow: "Připraveno k vystavení";
@@ -443,6 +467,49 @@ declare const messages: {
         s4Body: "Nastavení můžete otevřít tlačítkem výše nebo odkazem „Nastavení cookies“ v patičce. Volba „Pouze nezbytné“ odmítne nebo odvolá měření. Vymazání dat webu v prohlížeči odstraní i uloženou volbu a při příští návštěvě se zeptáme znovu.";
       };
     };
+    payments: {
+      badge: "Bankovní napojení";
+      eyebrow: "Platební kniha";
+      title: "Zaplaceno pozná Invoicey z výpisu, ne z vaší paměti.";
+      description: "Připojte účet tokenem, který vydá banka na vaše jméno. Invoicey stáhne příchozí platby, navrhne párování s vydanou fakturou a stav dokladu odvodí z potvrzených alokací — včetně částečných úhrad a přeplatků.";
+      item1: "Fio a MONETA přes token účtu, bez PSD2 prostředníka";
+      item2: "Návrhy párování podle VS, částky, měny i účtu";
+      item3: "Automatické potvrzení jen u přesné shody a jen když ho zapnete";
+      item4: "Částečné úhrady, přeplatky i ruční platby v jedné knize";
+      cardTitle: "Příchozí platba";
+      cardSubtitle: "Fio · 2301234567/2010";
+      creditAmountLabel: "Částka";
+      creditAmount: "35 000 Kč";
+      creditVsLabel: "Variabilní symbol";
+      creditVs: "20260042";
+      creditDateLabel: "Připsáno";
+      creditDate: "12. 8. 2026";
+      matchTitle: "Návrh párování";
+      matchInvoiceLabel: "Faktura";
+      matchInvoice: "2026-0042 · Studio Sever";
+      matchStateLabel: "Po potvrzení";
+      matchState: "Zaplaceno v plné výši";
+      matchAction: "Zkontrolovat a potvrdit";
+      disclaimer: "Automatické potvrzení je ve výchozím stavu vypnuté";
+    };
+    integrations: {
+      eyebrow: "Napojení";
+      title: "Fakturujte i mimo Invoicey.";
+      description: "Slack, MCP klienti i vlastní skripty používají stejné nástroje a stejnou validaci jako web. Každé napojení má vlastní přístup a bez oprávnění neprojde.";
+      slackTitle: "Slack";
+      slackDescription: "Návrh faktury přímo z threadu, potvrzení v Slacku, výsledek ve stejném pracovním prostoru.";
+      mcpTitle: "MCP · Claude a Cursor";
+      mcpDescription: "Vzdálený MCP server s API klíčem pracovního prostoru. Stejné nástroje jako ve webu.";
+      banksTitle: "Fio a MONETA";
+      banksDescription: "Příchozí platby a návrhy párování přes token vydaný bankou na váš účet.";
+      aresTitle: "ARES";
+      aresDescription: "Dohledání firmy podle IČO nebo názvu při zakládání klienta i dodavatele.";
+      emailTitle: "E-mail klientovi";
+      emailDescription: "Odeslání PDF a ISDOC pod vaším jménem se sledováním doručení.";
+      apiTitle: "JSON a API klíče";
+      apiDescription: "Validovaný InvoiceSchema JSON a klíče pro vlastní automatizaci.";
+      docsCta: "Dokumentace napojení";
+    };
   };
   Auth: {
     meta: {
@@ -451,7 +518,7 @@ declare const messages: {
     };
     eyebrow: "Vítejte zpět";
     title: "Přihlášení do Invoicey";
-    subtitle: "Pokračujte účtem Google nebo GitHub. Invoicey nevytváří ani neukládá další heslo.";
+    subtitle: "Pokračujte účtem Google nebo GitHub. Invoicey nevytváří ani neukládá další heslo — přístup můžete kdykoli odebrat u poskytovatele.";
     noProviders: "Není nastavený žádný poskytovatel přihlášení. Doplňte přístupové údaje Google nebo GitHub a stránku načtěte znovu.";
     continueWith: "Pokračovat přes {provider}";
     consent: "Pokračováním potvrzujete, že jste se seznámili s podmínkami používání a zásadami ochrany soukromí.";
@@ -462,11 +529,23 @@ declare const messages: {
       description: "Web, PDF, ISDOC, SPAYD QR i agentní nástroje pracují se stejnou validovanou fakturou.";
       oauthNote: "OAuth přihlášení · žádné další heslo";
       backHome: "Zpět na Invoicey";
+      badge: "Neveřejná beta";
+      benefit1Title: "České reálie v základu";
+      benefit1Description: "Klient podle IČO z ARES, režimy DPH, DUZP i symboly.";
+      benefit2Title: "PDF, ISDOC a QR najednou";
+      benefit2Description: "Jeden validovaný doklad, tři výstupy ze stejných dat.";
+      benefit3Title: "Platby z banky";
+      benefit3Description: "Fio a MONETA navrhnou párování úhrady k faktuře.";
+      footerNote: "Faktury, doklady i platby zůstávají ve vašem pracovním prostoru.";
     };
     redirecting: "Přesměrovávám…";
     failed: "Přihlášení se nepodařilo. Zkuste to prosím znovu.";
     continueGoogle: "Pokračovat přes Google";
     continueGitHub: "Pokračovat přes GitHub";
+    continueNote: "Po přihlášení vás vrátíme tam, kam jste mířili.";
+    secureNote: "Přihlášení probíhá u poskytovatele, heslo Invoicey nevidí.";
+    docsPrompt: "Ještě zvažujete?";
+    docsCta: "Projděte dokumentaci";
   };
   Onboarding: {
     meta: {

@@ -2,14 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import {
+  ArrowDownIcon,
   ArrowRightIcon,
+  ArrowUpRightIcon,
   BotIcon,
   Building2Icon,
+  CalendarSyncIcon,
   CheckCircle2Icon,
   CircleDollarSignIcon,
+  CoinsIcon,
   DatabaseIcon,
   FileArchiveIcon,
   FileCheck2Icon,
+  KeyRoundIcon,
   LandmarkIcon,
   MailCheckIcon,
   MessageSquareTextIcon,
@@ -18,6 +23,7 @@ import {
   SendIcon,
   ShieldCheckIcon,
   SparklesIcon,
+  WalletIcon,
 } from "lucide-react";
 
 import { ProductPreview } from "@/components/marketing/product-preview";
@@ -49,6 +55,8 @@ export default async function HomePage() {
     { icon: FileCheck2Icon, label: t("trust.pdfIsdoc") },
     { icon: QrCodeIcon, label: t("trust.spaydQr") },
     { icon: SearchCheckIcon, label: t("trust.aresLookup") },
+    { icon: LandmarkIcon, label: t("trust.bankSync") },
+    { icon: CalendarSyncIcon, label: t("trust.recurring") },
     { icon: Building2Icon, label: t("trust.multiIssuer") },
   ];
   const capabilities = [
@@ -68,6 +76,21 @@ export default async function HomePage() {
       description: t("capabilities.emailDescription"),
     },
     {
+      icon: WalletIcon,
+      title: t("capabilities.paymentsTitle"),
+      description: t("capabilities.paymentsDescription"),
+    },
+    {
+      icon: CalendarSyncIcon,
+      title: t("capabilities.recurringTitle"),
+      description: t("capabilities.recurringDescription"),
+    },
+    {
+      icon: CoinsIcon,
+      title: t("capabilities.currencyTitle"),
+      description: t("capabilities.currencyDescription"),
+    },
+    {
       icon: FileArchiveIcon,
       title: t("capabilities.historyTitle"),
       description: t("capabilities.historyDescription"),
@@ -83,15 +106,62 @@ export default async function HomePage() {
       description: t("capabilities.securityDescription"),
     },
   ];
+  const paymentItems = [
+    t("payments.item1"),
+    t("payments.item2"),
+    t("payments.item3"),
+    t("payments.item4"),
+  ];
   const automationItems = [
     t("automation.item1"),
     t("automation.item2"),
     t("automation.item3"),
     t("automation.item4"),
   ];
+  const integrations = [
+    {
+      icon: MessageSquareTextIcon,
+      title: t("integrations.slackTitle"),
+      description: t("integrations.slackDescription"),
+      href: "/docs/integrations/slack",
+    },
+    {
+      icon: BotIcon,
+      title: t("integrations.mcpTitle"),
+      description: t("integrations.mcpDescription"),
+      href: "/docs/integrations/mcp",
+    },
+    {
+      icon: LandmarkIcon,
+      title: t("integrations.banksTitle"),
+      description: t("integrations.banksDescription"),
+      href: "/docs/integrations/bank-connections",
+    },
+    {
+      icon: SearchCheckIcon,
+      title: t("integrations.aresTitle"),
+      description: t("integrations.aresDescription"),
+      href: "/docs/guides/clients",
+    },
+    {
+      icon: MailCheckIcon,
+      title: t("integrations.emailTitle"),
+      description: t("integrations.emailDescription"),
+      href: "/docs/guides/sending-email",
+    },
+    {
+      icon: KeyRoundIcon,
+      title: t("integrations.apiTitle"),
+      description: t("integrations.apiDescription"),
+      href: "/docs/integrations/api-keys",
+    },
+  ];
   const faq = [
     { question: t("faq.q1"), answer: t("faq.a1") },
     { question: t("faq.q2"), answer: t("faq.a2") },
+    { question: t("faq.q6"), answer: t("faq.a6") },
+    { question: t("faq.q7"), answer: t("faq.a7") },
+    { question: t("faq.q8"), answer: t("faq.a8") },
     { question: t("faq.q3"), answer: t("faq.a3") },
     { question: t("faq.q4"), answer: t("faq.a4") },
     { question: t("faq.q5"), answer: t("faq.a5") },
@@ -156,6 +226,10 @@ export default async function HomePage() {
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2Icon className="text-primary size-3.5" />
+                {t("hero.bankMatching")}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2Icon className="text-primary size-3.5" />
                 {t("hero.betaAccess")}
               </span>
             </div>
@@ -169,13 +243,13 @@ export default async function HomePage() {
         aria-label={t("trust.ariaLabel")}
         className="bg-muted/25 border-y"
       >
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-4 sm:px-6 md:grid-cols-4 lg:px-8">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-4 sm:px-6 md:grid-cols-3 lg:grid-cols-6 lg:px-8">
           {trustItems.map((item) => (
             <div
               key={item.label}
-              className={`${motionStyles.trustItem} md:border-border/60 flex items-center justify-center gap-2.5 border-x border-transparent px-3 py-5 text-sm font-medium`}
+              className={`${motionStyles.trustItem} md:border-border/60 flex items-center justify-center gap-2.5 border-x border-transparent px-3 py-5 text-center text-sm font-medium`}
             >
-              <item.icon className="text-primary size-4" />
+              <item.icon className="text-primary size-4 shrink-0" />
               {item.label}
             </div>
           ))}
@@ -251,8 +325,40 @@ export default async function HomePage() {
       </section>
 
       <section
-        id="automatizace"
+        id="platby"
         className="scroll-mt-24 overflow-hidden px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+      >
+        <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2 lg:gap-20">
+          <PaymentLedgerCard />
+
+          <div className={`${motionStyles.scrollReveal} lg:order-first`}>
+            <Badge variant="secondary" className="h-7 gap-1.5 px-3">
+              <LandmarkIcon data-icon="inline-start" /> {t("payments.badge")}
+            </Badge>
+            <p className="dark:text-primary mt-6 text-sm font-semibold uppercase tracking-wide text-[#914522]">
+              {t("payments.eyebrow")}
+            </p>
+            <h2 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
+              {t("payments.title")}
+            </h2>
+            <p className="text-muted-foreground mt-6 text-lg leading-relaxed">
+              {t("payments.description")}
+            </p>
+            <ul className="mt-8 space-y-3 text-sm">
+              {paymentItems.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <CheckCircle2Icon className="text-primary mt-0.5 size-4 shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="automatizace"
+        className="bg-muted/25 scroll-mt-24 overflow-hidden border-y px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2 lg:gap-20">
           <div className={motionStyles.scrollReveal}>
@@ -329,9 +435,52 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section
+        id="napojeni"
+        className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+      >
+        <div className="mx-auto max-w-7xl">
+          <SectionIntro
+            eyebrow={t("integrations.eyebrow")}
+            title={t("integrations.title")}
+            description={t("integrations.description")}
+          />
+          <div
+            className={`${motionStyles.scrollReveal} mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3`}
+          >
+            {integrations.map((integration) => (
+              <Link
+                key={integration.title}
+                href={integration.href}
+                className={`${motionStyles.liftCard} bg-card shadow-xs hover:border-primary/40 focus-visible:ring-3 focus-visible:ring-ring/50 group rounded-2xl border p-6 outline-none transition-colors`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span className="bg-brand/12 grid size-10 place-items-center rounded-xl">
+                    <integration.icon className="size-4.5" />
+                  </span>
+                  <ArrowUpRightIcon className="text-muted-foreground group-hover:text-foreground size-4 transition-colors" />
+                </div>
+                <h3 className="mt-5 text-base font-semibold tracking-tight">
+                  {integration.title}
+                </h3>
+                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                  {integration.description}
+                </p>
+              </Link>
+            ))}
+          </div>
+          <div className={`${motionStyles.scrollReveal} mt-8 text-center`}>
+            <Button variant="outline" render={<Link href="/docs" />}>
+              {t("integrations.docsCta")}
+              <ArrowRightIcon data-icon="inline-end" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
       <section className="bg-muted/25 border-y px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
         <div
-          className={`${motionStyles.scrollReveal} mx-auto grid max-w-7xl gap-5 lg:grid-cols-2`}
+          className={`${motionStyles.scrollReveal} mx-auto grid max-w-7xl gap-5 md:grid-cols-2 lg:grid-cols-3`}
         >
           <FeaturePanel
             icon={<Building2Icon />}
@@ -342,6 +491,17 @@ export default async function HomePage() {
               t("featurePanels.multiIssuerItem1"),
               t("featurePanels.multiIssuerItem2"),
               t("featurePanels.multiIssuerItem3"),
+            ]}
+          />
+          <FeaturePanel
+            icon={<CalendarSyncIcon />}
+            eyebrow={t("featurePanels.recurringEyebrow")}
+            title={t("featurePanels.recurringTitle")}
+            description={t("featurePanels.recurringDescription")}
+            items={[
+              t("featurePanels.recurringItem1"),
+              t("featurePanels.recurringItem2"),
+              t("featurePanels.recurringItem3"),
             ]}
           />
           <FeaturePanel
@@ -410,6 +570,78 @@ export default async function HomePage() {
         </div>
       </section>
     </>
+  );
+}
+
+/** Bank credit → match proposal, the shape the payment ledger actually works in. */
+async function PaymentLedgerCard() {
+  const t = await getTranslations("Marketing.payments");
+
+  return (
+    <div
+      className={`${motionStyles.scrollReveal} ${motionStyles.chatStage} bg-card relative overflow-hidden rounded-[2rem] border p-4 shadow-2xl sm:p-6`}
+    >
+      <div className="bg-brand/15 absolute -left-24 -top-24 size-64 rounded-full blur-3xl" />
+
+      <div className="bg-background relative rounded-2xl border p-5">
+        <div className="flex items-center gap-3 border-b pb-4">
+          <span className="bg-muted grid size-9 place-items-center rounded-xl">
+            <LandmarkIcon className="size-4" />
+          </span>
+          <div>
+            <p className="text-sm font-medium">{t("cardTitle")}</p>
+            <p className="text-muted-foreground text-xs">{t("cardSubtitle")}</p>
+          </div>
+        </div>
+        <div className="mt-4 space-y-2.5 text-sm">
+          <LedgerRow label={t("creditAmountLabel")} value={t("creditAmount")} />
+          <LedgerRow label={t("creditVsLabel")} value={t("creditVs")} mono />
+          <LedgerRow label={t("creditDateLabel")} value={t("creditDate")} />
+        </div>
+      </div>
+
+      <div className="relative flex justify-center py-3">
+        <span className="bg-brand text-brand-foreground grid size-8 place-items-center rounded-full shadow-lg">
+          <ArrowDownIcon className="size-4" />
+        </span>
+      </div>
+
+      <div className="border-primary/30 bg-brand/10 relative rounded-2xl border p-5">
+        <p className="flex items-center gap-2 text-sm font-medium">
+          <SparklesIcon className="text-primary size-4" />
+          {t("matchTitle")}
+        </p>
+        <div className="mt-4 space-y-2.5 text-sm">
+          <LedgerRow label={t("matchInvoiceLabel")} value={t("matchInvoice")} />
+          <LedgerRow label={t("matchStateLabel")} value={t("matchState")} />
+        </div>
+        <div className="bg-foreground text-background mt-4 inline-flex rounded-lg px-3 py-2 text-xs font-semibold">
+          {t("matchAction")}
+        </div>
+      </div>
+
+      <p className="text-muted-foreground relative mt-4 flex items-center gap-2 text-[0.65rem]">
+        <ShieldCheckIcon className="size-3.5" />
+        {t("disclaimer")}
+      </p>
+    </div>
+  );
+}
+
+function LedgerRow({
+  label,
+  mono = false,
+  value,
+}: Readonly<{ label: string; mono?: boolean; value: string }>) {
+  return (
+    <div className="flex items-baseline justify-between gap-4">
+      <span className="text-muted-foreground text-xs">{label}</span>
+      <span
+        className={`text-right text-sm font-medium ${mono ? "font-mono" : ""}`}
+      >
+        {value}
+      </span>
+    </div>
   );
 }
 
@@ -504,7 +736,7 @@ function FeaturePanel({
       <p className="dark:text-primary mt-8 text-xs font-semibold uppercase tracking-wide text-[#914522]">
         {eyebrow}
       </p>
-      <h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.035em]">
+      <h2 className="mt-3 text-balance text-2xl font-semibold tracking-[-0.035em]">
         {title}
       </h2>
       <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
