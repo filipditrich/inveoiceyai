@@ -33,15 +33,15 @@ function createRenderer(canvas: HTMLCanvasElement) {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.06;
+  renderer.toneMappingExposure = 1;
   renderer.setClearColor(0x000000, 0);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
   return renderer;
 }
 
 function addLighting(scene: THREE.Scene) {
-  const hemisphere = new THREE.HemisphereLight(0xfff7eb, 0x47271d, 2.4);
-  const key = new THREE.DirectionalLight(0xffe1c6, 5.2);
+  const hemisphere = new THREE.HemisphereLight(0xfff8ee, 0x5a3326, 2.15);
+  const key = new THREE.DirectionalLight(0xffe5cf, 3.25);
   key.position.set(-4.5, 6.5, 7);
   key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024);
@@ -52,9 +52,12 @@ function addLighting(scene: THREE.Scene) {
   key.shadow.camera.top = 6;
   key.shadow.camera.bottom = -5;
 
-  const rim = new THREE.DirectionalLight(0xd88050, 3.2);
+  key.shadow.bias = -0.0004;
+  key.shadow.normalBias = 0.025;
+
+  const rim = new THREE.DirectionalLight(0xd88050, 1.65);
   rim.position.set(5, 2.5, 2);
-  const fill = new THREE.PointLight(0xffffff, 1.8, 18);
+  const fill = new THREE.PointLight(0xffffff, 1.15, 18);
   fill.position.set(0, -1, 7);
   scene.add(hemisphere, key, rim, fill);
 }
@@ -65,12 +68,12 @@ function addGroundShadow(scene: THREE.Scene) {
     new THREE.MeshBasicMaterial({
       color: 0x2e1a14,
       depthWrite: false,
-      opacity: 0.13,
+      opacity: 0.09,
       transparent: true,
     }),
   );
   shadow.position.set(0, -3.3, -0.45);
-  shadow.scale.set(1.35, 0.3, 1);
+  shadow.scale.set(1.18, 0.25, 1);
   scene.add(shadow);
   return shadow;
 }
@@ -87,11 +90,13 @@ export function createInvoicey3DScene(
   addLighting(scene);
   const groundShadow = addGroundShadow(scene);
   const rig = createInvoiceyModel();
+  const tokenRestY = rig.token.position.y;
   scene.add(rig.root);
 
   let active = true;
   let celebrationStartedAt: number | null = null;
   let currentPointer: InvoiceyPointer = { x: 0, y: 0 };
+  let currentScale = 0.92;
   let frameId: number | null = null;
   let hovered = false;
   let lastFrameAt = performance.now();
@@ -135,19 +140,32 @@ export function createInvoicey3DScene(
     rig.root.position.y = pose.bodyPositionY;
     rig.root.rotation.x = -0.03 + pose.bodyRotationX;
     rig.root.rotation.y = pose.bodyRotationY;
-    rig.rightArm.rotation.z = -pose.handLift;
+    rig.root.rotation.z = pose.bodyRotationZ;
+    rig.leftArm.rotation.z = pose.leftArmRotationZ;
+    rig.rightArm.rotation.z = pose.rightArmRotationZ;
+    rig.legs[0].rotation.z = pose.legSwing;
+    rig.legs[1].rotation.z = -pose.legSwing;
+    rig.token.position.y = tokenRestY + pose.tokenPositionY;
+    rig.token.rotation.y = pose.tokenRotationY;
     rig.token.rotation.z = pose.tokenRotationZ;
-    for (const eye of rig.eyes) {
-      eye.rotation.x = pose.eyeY;
-      eye.rotation.y = pose.eyeX;
+    for (const [index, eye] of rig.eyes.entries()) {
+      eye.scale.y = pose.eyeScaleY;
+      const pupil = rig.pupils[index];
+      if (!pupil) continue;
+      pupil.position.x = pose.eyeX;
+      pupil.position.y = pose.eyeY;
     }
     const targetScale = hovered ? 0.95 : 0.92;
-    const scale = THREE.MathUtils.lerp(
-      rig.root.scale.x,
+    currentScale = THREE.MathUtils.lerp(
+      currentScale,
       targetScale,
       smoothingFactor(deltaSeconds, 8),
     );
-    rig.root.scale.setScalar(scale);
+    rig.root.scale.set(
+      currentScale * pose.bodyScaleX,
+      currentScale * pose.bodyScaleY,
+      currentScale,
+    );
 
     renderer.render(scene, camera);
     if (active) frameId = window.requestAnimationFrame(renderFrame);

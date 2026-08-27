@@ -34,12 +34,13 @@ capsules, curves and physical materials; `invoicey-3d-scene.ts` owns lighting,
 rendering and animation; and `invoicey-3d-canvas.tsx` controls browser loading
 and lifecycle.
 
-The model follows the pointer, subtly responds to hero scroll, grows on hover
-and performs a short hop/wave when clicked. It is dynamically imported only on
-fine-pointer screens at least 768 px wide, pauses outside the viewport and caps
-device pixel ratio. The existing mascot WebP remains the automatic fallback for
-touch/mobile layouts, reduced-motion preferences, WebGL failures and lost GPU
-contexts.
+The model follows the pointer with its body, pupils and approval token, subtly
+responds to hero scroll, blinks, breathes, shifts its feet and grows on hover.
+Clicking triggers a short squash-and-stretch hop with an asymmetric arm wave.
+It is dynamically imported only on fine-pointer screens at least 768 px wide,
+pauses outside the viewport and caps device pixel ratio. The existing mascot
+WebP remains the automatic fallback for touch/mobile layouts, reduced-motion
+preferences, WebGL failures and lost GPU contexts.
 
 ## External update checklist
 

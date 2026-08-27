@@ -2,6 +2,9 @@ import * as THREE from "three";
 
 export type InvoiceyRig = Readonly<{
   eyes: readonly [THREE.Object3D, THREE.Object3D];
+  leftArm: THREE.Group;
+  legs: readonly [THREE.Group, THREE.Group];
+  pupils: readonly [THREE.Object3D, THREE.Object3D];
   root: THREE.Group;
   rightArm: THREE.Group;
   token: THREE.Group;
@@ -135,29 +138,48 @@ function createPaperBody(materials: InvoiceyMaterials) {
   const paper = createRoundedPanel(3.14, 4.16, 0.3, 0.3, materials.cream);
   paper.position.z = 0.08;
 
-  const foldGeometry = new THREE.BufferGeometry();
-  foldGeometry.setAttribute(
-    "position",
-    new THREE.Float32BufferAttribute([0, 0, 0, 1.08, 0, 0, 1.08, -1.08, 0], 3),
+  const foldShape = new THREE.Shape();
+  foldShape.moveTo(0, 0);
+  foldShape.lineTo(1.02, -1.02);
+  foldShape.lineTo(1.02, 0);
+  foldShape.closePath();
+  const fold = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(foldShape, {
+      bevelEnabled: true,
+      bevelSegments: 3,
+      bevelSize: 0.035,
+      bevelThickness: 0.035,
+      curveSegments: 8,
+      depth: 0.1,
+      steps: 1,
+    }),
+    materials.copperLight,
   );
-  foldGeometry.setIndex([0, 1, 2]);
-  foldGeometry.computeVertexNormals();
-  const fold = new THREE.Mesh(foldGeometry, materials.copperLight);
-  fold.position.set(0.47, 2.08, 0.29);
+  fold.position.set(0.48, 2.05, 0.25);
 
-  group.add(rim, paper, fold);
+  const crease = createTube(
+    [
+      new THREE.Vector3(0.5, 2.04, 0.42),
+      new THREE.Vector3(0.98, 1.58, 0.45),
+      new THREE.Vector3(1.46, 1.08, 0.42),
+    ],
+    0.032,
+    materials.copper,
+  );
+
+  group.add(rim, paper, fold, crease);
   addInvoiceMarks(group, materials);
   return group;
 }
 
 function addInvoiceMarks(group: THREE.Group, materials: InvoiceyMaterials) {
   const marks = [
-    { width: 0.92, x: -0.74, y: 1.72, material: materials.dark },
-    { width: 0.56, x: -0.92, y: 1.44, material: materials.copper },
-    { width: 1.74, x: -0.34, y: -0.22, material: materials.line },
-    { width: 2.12, x: 0, y: -0.55, material: materials.line },
-    { width: 1.02, x: -0.54, y: -0.88, material: materials.line },
-    { width: 1.7, x: -0.22, y: -1.2, material: materials.line },
+    { width: 0.9, x: -0.82, y: 1.76, material: materials.dark },
+    { width: 0.52, x: -1.01, y: 1.5, material: materials.copper },
+    { width: 1.65, x: -0.36, y: -0.38, material: materials.line },
+    { width: 1.98, x: -0.04, y: -0.7, material: materials.line },
+    { width: 0.96, x: -0.58, y: -1.02, material: materials.line },
+    { width: 1.58, x: -0.26, y: -1.34, material: materials.line },
   ];
 
   for (const mark of marks) {
@@ -169,65 +191,66 @@ function addInvoiceMarks(group: THREE.Group, materials: InvoiceyMaterials) {
       mark.material,
     );
     mesh.position.set(mark.x, mark.y, 0.31);
+    mesh.userData.isSurfaceDetail = true;
     group.add(mesh);
   }
 }
 
 function createEye(materials: InvoiceyMaterials, x: number) {
   const eye = new THREE.Group();
-  eye.position.set(x, 0.78, 0.34);
+  eye.position.set(x, 0.72, 0.36);
 
   const white = new THREE.Mesh(
-    new THREE.SphereGeometry(0.39, 24, 18),
+    new THREE.SphereGeometry(0.35, 24, 18),
     materials.white,
   );
-  white.scale.set(0.9, 1.14, 0.34);
+  white.scale.set(0.92, 1.1, 0.3);
 
   const pupil = new THREE.Mesh(
-    new THREE.SphereGeometry(0.22, 20, 16),
+    new THREE.SphereGeometry(0.18, 20, 16),
     materials.dark,
   );
-  pupil.position.z = 0.23;
-  pupil.scale.z = 0.4;
+  pupil.position.z = 0.22;
+  pupil.scale.z = 0.36;
 
   const highlight = new THREE.Mesh(
     new THREE.SphereGeometry(0.065, 12, 8),
     materials.white,
   );
-  highlight.position.set(-0.07, 0.09, 0.37);
+  highlight.position.set(-0.055, 0.075, 0.34);
 
   eye.add(white, pupil, highlight);
-  return eye;
+  return { eye, pupil };
 }
 
 function createFace(materials: InvoiceyMaterials) {
   const group = new THREE.Group();
-  const leftEye = createEye(materials, -0.62);
-  const rightEye = createEye(materials, 0.62);
+  const left = createEye(materials, -0.58);
+  const right = createEye(materials, 0.58);
 
   const leftBrow = createTube(
     [
-      new THREE.Vector3(-0.9, 1.35, 0.59),
-      new THREE.Vector3(-0.65, 1.48, 0.64),
-      new THREE.Vector3(-0.4, 1.38, 0.6),
+      new THREE.Vector3(-0.86, 1.22, 0.59),
+      new THREE.Vector3(-0.62, 1.34, 0.64),
+      new THREE.Vector3(-0.39, 1.25, 0.6),
     ],
     0.055,
     materials.dark,
   );
   const rightBrow = createTube(
     [
-      new THREE.Vector3(0.4, 1.38, 0.6),
-      new THREE.Vector3(0.65, 1.48, 0.64),
-      new THREE.Vector3(0.9, 1.35, 0.59),
+      new THREE.Vector3(0.39, 1.25, 0.6),
+      new THREE.Vector3(0.62, 1.34, 0.64),
+      new THREE.Vector3(0.86, 1.22, 0.59),
     ],
     0.055,
     materials.dark,
   );
   const smile = createTube(
     [
-      new THREE.Vector3(-0.34, 0.08, 0.61),
-      new THREE.Vector3(0, -0.12, 0.66),
-      new THREE.Vector3(0.34, 0.08, 0.61),
+      new THREE.Vector3(-0.31, 0.03, 0.61),
+      new THREE.Vector3(0, -0.13, 0.66),
+      new THREE.Vector3(0.31, 0.03, 0.61),
     ],
     0.05,
     materials.dark,
@@ -237,21 +260,25 @@ function createFace(materials: InvoiceyMaterials) {
     new THREE.SphereGeometry(0.19, 16, 10),
     materials.peach,
   );
-  leftCheek.position.set(-1.08, 0.18, 0.53);
-  leftCheek.scale.set(1.25, 0.58, 0.25);
+  leftCheek.position.set(-1.03, 0.12, 0.53);
+  leftCheek.scale.set(1.08, 0.5, 0.22);
   const rightCheek = leftCheek.clone();
-  rightCheek.position.x = 1.08;
+  rightCheek.position.x = 1.03;
 
   group.add(
-    leftEye,
-    rightEye,
+    left.eye,
+    right.eye,
     leftBrow,
     rightBrow,
     smile,
     leftCheek,
     rightCheek,
   );
-  return { eyes: [leftEye, rightEye] as const, group };
+  return {
+    eyes: [left.eye, right.eye] as const,
+    group,
+    pupils: [left.pupil, right.pupil] as const,
+  };
 }
 
 function createGlove(materials: InvoiceyMaterials) {
@@ -276,24 +303,24 @@ function createGlove(materials: InvoiceyMaterials) {
 function createApprovalToken(materials: InvoiceyMaterials) {
   const group = new THREE.Group();
   const disc = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.55, 0.55, 0.18, 36),
+    new THREE.CylinderGeometry(0.49, 0.49, 0.16, 36),
     materials.dark,
   );
   disc.rotation.x = Math.PI / 2;
 
   const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(0.51, 0.09, 10, 36),
+    new THREE.TorusGeometry(0.46, 0.075, 10, 36),
     materials.copperLight,
   );
   ring.position.z = 0.13;
 
   const check = createTube(
     [
-      new THREE.Vector3(-0.24, 0.02, 0.24),
-      new THREE.Vector3(-0.06, -0.18, 0.24),
-      new THREE.Vector3(0.3, 0.23, 0.24),
+      new THREE.Vector3(-0.21, 0.01, 0.22),
+      new THREE.Vector3(-0.05, -0.16, 0.22),
+      new THREE.Vector3(0.27, 0.2, 0.22),
     ],
-    0.075,
+    0.064,
     materials.copperLight,
   );
   group.add(disc, ring, check);
@@ -302,18 +329,19 @@ function createApprovalToken(materials: InvoiceyMaterials) {
 
 function createRightArm(materials: InvoiceyMaterials) {
   const pivot = new THREE.Group();
-  pivot.position.set(1.36, 0.1, 0.02);
+  pivot.position.set(1.34, 0.04, -0.02);
 
   const arm = createCapsule(0.19, 0.78, materials.dark);
-  arm.position.set(0.35, 0.3, -0.04);
+  arm.position.set(0.34, 0.34, -0.06);
   arm.rotation.z = -0.66;
 
   const glove = createGlove(materials);
-  glove.position.set(0.74, 0.76, 0.25);
+  glove.position.set(0.72, 0.78, 0.23);
+  glove.scale.setScalar(0.9);
   glove.rotation.z = -0.28;
 
   const token = createApprovalToken(materials);
-  token.position.set(0.78, 1.46, 0.18);
+  token.position.set(0.78, 1.47, 0.14);
   token.rotation.z = -0.08;
 
   pivot.add(arm, glove, token);
@@ -322,9 +350,15 @@ function createRightArm(materials: InvoiceyMaterials) {
 
 function createClipboard(materials: InvoiceyMaterials) {
   const group = new THREE.Group();
-  const board = createRoundedPanel(1.12, 1.48, 0.18, 0.16, materials.dark);
-  const clip = createRoundedPanel(0.55, 0.2, 0.14, 0.08, materials.copperLight);
-  clip.position.set(0, 0.76, 0.08);
+  const board = createRoundedPanel(1.03, 1.35, 0.17, 0.15, materials.dark);
+  const clip = createRoundedPanel(
+    0.5,
+    0.18,
+    0.13,
+    0.075,
+    materials.copperLight,
+  );
+  clip.position.set(0, 0.69, 0.08);
 
   const markOne = createRoundedPanel(
     0.3,
@@ -351,55 +385,70 @@ function createLeftArm(materials: InvoiceyMaterials) {
   arm.rotation.z = -0.72;
 
   const clipboard = createClipboard(materials);
-  clipboard.position.set(-0.55, -0.46, 0.42);
+  clipboard.position.set(-0.52, -0.43, 0.4);
   clipboard.rotation.z = 0.12;
 
   const glove = createGlove(materials);
-  glove.position.set(-0.42, -0.58, 0.62);
-  glove.scale.setScalar(0.88);
+  glove.position.set(-0.39, -0.55, 0.62);
+  glove.scale.setScalar(0.82);
   glove.rotation.z = 0.8;
 
   pivot.add(arm, clipboard, glove);
   return pivot;
 }
 
+function createLeg(materials: InvoiceyMaterials, side: -1 | 1) {
+  const pivot = new THREE.Group();
+  pivot.position.set(side * 0.68, -1.98, -0.04);
+
+  const leg = createCapsule(0.21, 0.62, materials.dark);
+  leg.position.set(0, -0.34, 0);
+
+  const shoe = createCapsule(0.27, 0.68, materials.dark);
+  shoe.position.set(0, -0.92, 0.16);
+  shoe.rotation.z = Math.PI / 2 + side * 0.05;
+  shoe.scale.set(1.06, 1, 0.74);
+
+  const sole = createRoundedPanel(0.88, 0.13, 0.19, 0.065, materials.sole);
+  sole.position.set(0, -1.16, 0.19);
+  sole.rotation.z = side * 0.05;
+
+  const buckle = createRoundedPanel(
+    0.34,
+    0.13,
+    0.075,
+    0.045,
+    materials.copperLight,
+  );
+  buckle.position.set(0, -0.72, 0.46);
+  buckle.rotation.z = side * 0.05;
+
+  pivot.add(leg, shoe, sole, buckle);
+  return pivot;
+}
+
 function createLegs(materials: InvoiceyMaterials) {
   const group = new THREE.Group();
-
-  for (const side of [-1, 1]) {
-    const leg = createCapsule(0.23, 0.68, materials.dark);
-    leg.position.set(side * 0.68, -2.31, -0.04);
-
-    const shoe = createCapsule(0.28, 0.72, materials.dark);
-    shoe.position.set(side * 0.68, -2.92, 0.12);
-    shoe.rotation.z = Math.PI / 2 + side * 0.05;
-    shoe.scale.set(1.08, 1, 0.76);
-
-    const sole = createRoundedPanel(0.92, 0.14, 0.21, 0.07, materials.sole);
-    sole.position.set(side * 0.68, -3.16, 0.15);
-    sole.rotation.z = side * 0.05;
-
-    const buckle = createRoundedPanel(
-      0.36,
-      0.14,
-      0.08,
-      0.05,
-      materials.copperLight,
-    );
-    buckle.position.set(side * 0.68, -2.72, 0.47);
-    buckle.rotation.z = side * 0.05;
-
-    group.add(leg, shoe, sole, buckle);
-  }
-
-  return group;
+  const left = createLeg(materials, -1);
+  const right = createLeg(materials, 1);
+  group.add(left, right);
+  return { group, legs: [left, right] as const };
 }
 
 function prepareMeshes(root: THREE.Object3D) {
   root.traverse((child) => {
     if (!(child instanceof THREE.Mesh)) return;
-    child.castShadow = true;
-    child.receiveShadow = true;
+    const isSurfaceDetail = child.userData.isSurfaceDetail === true;
+    child.castShadow = !isSurfaceDetail;
+    child.receiveShadow = !isSurfaceDetail;
+  });
+}
+
+function softenDetailShadows(root: THREE.Object3D) {
+  root.traverse((child) => {
+    if (!(child instanceof THREE.Mesh)) return;
+    child.castShadow = false;
+    child.receiveShadow = false;
   });
 }
 
@@ -408,21 +457,21 @@ export function createInvoiceyModel(): InvoiceyRig {
   const root = new THREE.Group();
   const body = createPaperBody(materials);
   const face = createFace(materials);
+  const leftArm = createLeftArm(materials);
+  const legs = createLegs(materials);
   const rightArm = createRightArm(materials);
 
-  root.add(
-    createLegs(materials),
-    body,
-    face.group,
-    createLeftArm(materials),
-    rightArm.pivot,
-  );
+  root.add(legs.group, body, face.group, leftArm, rightArm.pivot);
   root.rotation.x = -0.03;
   root.scale.setScalar(0.92);
   prepareMeshes(root);
+  softenDetailShadows(face.group);
 
   return {
     eyes: face.eyes,
+    leftArm,
+    legs: legs.legs,
+    pupils: face.pupils,
     rightArm: rightArm.pivot,
     root,
     token: rightArm.token,
