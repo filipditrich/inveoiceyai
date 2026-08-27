@@ -46,7 +46,7 @@ function paymentRedirect(params: Record<string, string>): never {
 
 function settingsRedirect(params: Record<string, string>): never {
   redirect(
-    `/settings/bank-connections?${new URLSearchParams(params).toString()}`,
+    `/settings/workspace/bank-connections?${new URLSearchParams(params).toString()}`,
   );
 }
 
@@ -81,7 +81,7 @@ export async function connectFio(formData: FormData): Promise<void> {
   } catch (error) {
     settingsRedirect({ error: normalizeFioError(error) });
   }
-  revalidatePath("/settings/bank-connections");
+  revalidatePath("/settings/workspace/bank-connections");
   revalidatePath("/payments");
   settingsRedirect({ toast: "bank_connected" });
 }
@@ -91,7 +91,7 @@ export async function syncFio(formData: FormData): Promise<void> {
   const connectionId = field(formData, "connectionId");
   if (!connectionId) settingsRedirect({ error: "missing_connection" });
   const result = await syncFioConnection({ workspaceId, connectionId });
-  revalidatePath("/settings/bank-connections");
+  revalidatePath("/settings/workspace/bank-connections");
   revalidatePath("/payments");
   settingsRedirect(
     result.ok
@@ -115,7 +115,7 @@ export async function disconnectFio(formData: FormData): Promise<void> {
     connectionId,
     userId,
   });
-  revalidatePath("/settings/bank-connections");
+  revalidatePath("/settings/workspace/bank-connections");
   settingsRedirect(
     disconnected ? { toast: "bank_disconnected" } : { error: "not_found" },
   );
@@ -132,7 +132,7 @@ export async function toggleFioAutoMatch(formData: FormData): Promise<void> {
     userId,
     enabled,
   });
-  revalidatePath("/settings/bank-connections");
+  revalidatePath("/settings/workspace/bank-connections");
   settingsRedirect(
     updated
       ? {
@@ -205,7 +205,7 @@ export async function connectMoneta(formData: FormData): Promise<void> {
         error instanceof Error ? error.message : "moneta_connection_failed",
     });
   }
-  revalidatePath("/settings/bank-connections");
+  revalidatePath("/settings/workspace/bank-connections");
   revalidatePath("/payments");
   settingsRedirect({ toast: "bank_connected" });
 }
@@ -215,7 +215,7 @@ export async function syncMoneta(formData: FormData): Promise<void> {
   const connectionId = field(formData, "connectionId");
   if (!connectionId) settingsRedirect({ error: "missing_connection" });
   const result = await syncMonetaConnection({ workspaceId, connectionId });
-  revalidatePath("/settings/bank-connections");
+  revalidatePath("/settings/workspace/bank-connections");
   revalidatePath("/payments");
   settingsRedirect(
     result.ok
@@ -239,7 +239,7 @@ export async function disconnectMoneta(formData: FormData): Promise<void> {
     connectionId,
     userId,
   });
-  revalidatePath("/settings/bank-connections");
+  revalidatePath("/settings/workspace/bank-connections");
   settingsRedirect(
     disconnected ? { toast: "bank_disconnected" } : { error: "not_found" },
   );
@@ -256,7 +256,7 @@ export async function toggleMonetaAutoMatch(formData: FormData): Promise<void> {
     userId,
     enabled,
   });
-  revalidatePath("/settings/bank-connections");
+  revalidatePath("/settings/workspace/bank-connections");
   settingsRedirect(
     updated
       ? {

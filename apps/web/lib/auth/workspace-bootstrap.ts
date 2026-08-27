@@ -61,9 +61,10 @@ export async function createPersonalWorkspace(
   user: CreatedUser,
 ): Promise<string> {
   const workspaceId = crypto.randomUUID();
-  const name = user.name
-    ? `${user.name} – pracovní prostor`
-    : "Můj pracovní prostor";
+  // This hook runs outside a request, so there is no UI locale to translate a
+  // suffix into. The user's own name reads correctly in either catalog, and the
+  // welcome wizard asks them to confirm or change it before they issue anything.
+  const name = user.name?.trim() || user.email?.split("@")[0] || "Workspace";
   const base = slugBase(user);
 
   // The slug retry wraps the transaction rather than sitting inside it: a

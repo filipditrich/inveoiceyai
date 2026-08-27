@@ -39,11 +39,44 @@ const TOAST_KEYS = [
   "platform_admin_revoked",
   "platform_admin_last",
   "platform_admin_failed",
+  "admin_tokens_granted",
+  "admin_workspace_renamed",
+  "admin_workspace_deleted",
+  "admin_member_removed",
+  "admin_invite_canceled",
+  "admin_not_found",
+  "admin_invalid_amount",
+  "admin_name_required",
+  "admin_last_owner",
+  "admin_confirmation_mismatch",
+  "admin_action_failed",
   "fio_payments_enabled",
   "fio_payments_disabled",
 ] as const;
 
 type ToastKey = (typeof TOAST_KEYS)[number];
+
+/**
+ * Failures — from the platform console and the platform-role form. Everything
+ * else in `TOAST_KEYS` reads as success. Listed as a literal tuple so the keys
+ * narrow: the wider `ToastKey` union includes entries that take ICU arguments.
+ */
+const ERROR_KEYS = [
+  "platform_admin_last",
+  "platform_admin_failed",
+  "admin_not_found",
+  "admin_invalid_amount",
+  "admin_name_required",
+  "admin_last_owner",
+  "admin_confirmation_mismatch",
+  "admin_action_failed",
+] as const;
+
+type ErrorToastKey = (typeof ERROR_KEYS)[number];
+
+function isErrorToastKey(value: string | null): value is ErrorToastKey {
+  return value !== null && (ERROR_KEYS as readonly string[]).includes(value);
+}
 
 function isToastKey(value: string | null): value is ToastKey {
   return value !== null && (TOAST_KEYS as readonly string[]).includes(value);
@@ -97,10 +130,7 @@ function ToastFromSearchParamsInner() {
           failed: String(Number(failed) || 0),
         }),
       );
-    } else if (
-      toastKey === "platform_admin_last" ||
-      toastKey === "platform_admin_failed"
-    ) {
+    } else if (isErrorToastKey(toastKey)) {
       toast.error(t(toastKey), { description: descriptions(toastKey) });
     } else if (isToastKey(toastKey)) {
       const detail =

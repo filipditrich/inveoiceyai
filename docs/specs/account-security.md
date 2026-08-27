@@ -4,14 +4,14 @@ Plan 16 (+ Plan 19 invites/referrals). ADR [0020](../decisions/0020-slack-identi
 
 ## Settings IA
 
-| Route                    | Purpose                                                                  |
-| ------------------------ | ------------------------------------------------------------------------ |
-| `/settings`              | Appearance (theme)                                                       |
-| `/settings/security`     | Sign-in methods, sessions, trusted devices, recent audit                 |
-| `/settings/members`      | Workspace members + email invites                                        |
-| `/settings/referrals`    | Personal product referral link + click/signup stats                      |
-| `/settings/api-keys`     | Personal access tokens + interactive remote MCP setup                    |
-| `/settings/integrations` | Slack identity (unlink/rebind), Slack (use + operator), MCP entry points |
+| Route                              | Purpose                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------ |
+| `/settings/account`                | Appearance (theme)                                                       |
+| `/settings/account/security`       | Sign-in methods, sessions, trusted devices, recent audit                 |
+| `/settings/workspace/members`      | Workspace members + email invites                                        |
+| `/settings/account/referrals`      | Personal product referral link + click/signup stats                      |
+| `/settings/workspace/api-keys`     | Personal access tokens + interactive remote MCP setup                    |
+| `/settings/workspace/integrations` | Slack identity (unlink/rebind), Slack (use + operator), MCP entry points |
 
 Nav: user menu → Settings. Workspace invite accept: `/invite/[id]` (requires sign-in). Slack link confirm: `/slack/link/[code]` (requires sign-in). Product referral landing: `/r/[code]` (public).
 
@@ -69,7 +69,7 @@ MCP tools resolve workspace via request ALS; Eve Slack via the linked identity o
 - Public `GET /r/[code]` sets httpOnly cookie `invoicey_ref` (~30d), logs `referral_events` (`click`) when the cookie changes, then redirects to `/r/[code]/land`.
 - Session create attributes only for accounts created within ~1 hour when `referred_by` is still null (cookie → referrer; reject self-referral); logs `signup` event.
 - Referrals never create workspace membership (ADR 0025).
-- Settings `/settings/referrals`: personal link + click/signup counts. Admin users list shows code / referred-by when present.
+- Settings `/settings/account/referrals`: personal link + click/signup counts. Admin users list shows code / referred-by when present.
 
 ## Audit events
 

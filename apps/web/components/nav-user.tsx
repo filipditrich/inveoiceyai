@@ -127,7 +127,9 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem render={<Link href="/settings" prefetch />}>
+              <DropdownMenuItem
+                render={<Link href="/settings/account" prefetch />}
+              >
                 <SettingsIcon />
                 {t("settings")}
               </DropdownMenuItem>

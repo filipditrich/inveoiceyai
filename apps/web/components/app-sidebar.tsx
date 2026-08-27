@@ -4,6 +4,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
+import { NewInvoiceButton } from "@/components/new-invoice-button";
 import { TokenBalanceChip } from "@/components/settings/token-balance-chip";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 import {
@@ -19,29 +20,23 @@ import {
 import { APP_GIT_SHA, APP_VERSION } from "@/lib/app-build-info";
 import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 import {
-  ActivityIcon,
-  ArchiveRestoreIcon,
   BookOpenIcon,
-  BracesIcon,
   Building2Icon,
   FileTextIcon,
-  LayoutDashboardIcon,
   LandmarkIcon,
-  PlugZapIcon,
-  PlusIcon,
-  RepeatIcon,
-  Settings2Icon,
-  SparklesIcon,
-  InboxIcon,
-  TruckIcon,
+  LayoutDashboardIcon,
   UsersIcon,
-  UsersRoundIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
+/**
+ * Six destinations, one create button, two settings doors (the workspace
+ * switcher and the user menu). Everything that used to sit in the Automation,
+ * Tools, and Manage groups now hangs off whichever of those it belongs to.
+ */
 export function AppSidebar({
   user,
   isPlatformAdmin = false,
@@ -49,6 +44,7 @@ export function AppSidebar({
   defaultWorkspaceId,
   workspaces,
   tokenBalance = null,
+  uploadConfigured = true,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: { name: string; email: string; avatar: string };
@@ -63,11 +59,13 @@ export function AppSidebar({
     totalAvailable: number;
     monthlyLimit: number;
   } | null;
+  uploadConfigured?: boolean;
 }) {
   const pathname = usePathname();
   const t = useTranslations("App");
 
-  const invoicesOpen =
+  /** The create routes live under /invoices but belong to the create button. */
+  const invoicesActive =
     pathname === "/invoices" ||
     (pathname.startsWith("/invoices/") &&
       !pathname.startsWith("/invoices/new") &&
@@ -87,7 +85,7 @@ export function AppSidebar({
       title: t("nav.invoices"),
       url: "/invoices",
       icon: <FileTextIcon />,
-      isActive: invoicesOpen,
+      isActive: invoicesActive,
     },
     {
       title: t("nav.payments"),
@@ -139,106 +137,16 @@ export function AppSidebar({
         <WorkspaceSwitcher
           activeWorkspaceId={activeWorkspaceId}
           defaultWorkspaceId={defaultWorkspaceId}
+          uploadConfigured={uploadConfigured}
           workspaces={workspaces}
         />
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground shadow-xs"
-              isActive={pathname === "/invoices/new"}
-              render={<Link href="/invoices/new" prefetch />}
-              tooltip={t("nav.newInvoice")}
-            >
-              <PlusIcon className="size-4" />
-              <span className="font-medium">{t("nav.newInvoice")}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <NewInvoiceButton pathname={pathname} />
       </SidebarHeader>
       <SidebarContent className="pt-1">
         <NavMain
           collapseLabel={(title) => t("nav.collapseToggle", { title })}
           groupLabel={t("nav.group")}
           items={navMain}
-        />
-        <NavSecondary
-          groupLabel={t("nav.automationGroup")}
-          items={[
-            {
-              title: t("nav.invoicesAi"),
-              url: "/invoices/ai",
-              icon: <SparklesIcon />,
-              isActive: pathname === "/invoices/ai",
-            },
-            {
-              title: t("nav.invoicesRecurring"),
-              url: "/invoices/recurring",
-              icon: <RepeatIcon />,
-              isActive: pathname === "/invoices/recurring",
-            },
-          ]}
-        />
-        <NavSecondary
-          groupLabel={t("nav.toolsGroup")}
-          items={[
-            {
-              title: t("nav.invoicesImport"),
-              url: "/invoices/import",
-              icon: <ArchiveRestoreIcon />,
-              isActive: pathname === "/invoices/import",
-            },
-            {
-              title: t("nav.invoicesFromJson"),
-              url: "/invoices/from-json",
-              icon: <BracesIcon />,
-              isActive: pathname === "/invoices/from-json",
-            },
-          ]}
-        />
-        <NavSecondary
-          groupLabel={t("nav.manageGroup")}
-          items={[
-            {
-              title: t("nav.workspace"),
-              url: "/settings/workspace",
-              icon: <Settings2Icon />,
-              isActive:
-                pathname === "/settings/workspace" ||
-                pathname.startsWith("/settings/workspace/"),
-            },
-            {
-              title: t("nav.members"),
-              url: "/settings/members",
-              icon: <UsersRoundIcon />,
-              isActive:
-                pathname === "/settings/members" ||
-                pathname.startsWith("/settings/members/"),
-            },
-            {
-              title: t("nav.bankConnections"),
-              url: "/settings/bank-connections",
-              icon: <LandmarkIcon />,
-              isActive:
-                pathname === "/settings/bank-connections" ||
-                pathname.startsWith("/settings/bank-connections/"),
-            },
-            {
-              title: t("nav.integrations"),
-              url: "/settings/integrations",
-              icon: <PlugZapIcon />,
-              isActive:
-                pathname === "/settings/integrations" ||
-                pathname.startsWith("/settings/integrations/"),
-            },
-            {
-              title: t("nav.usage"),
-              url: "/settings/usage",
-              icon: <ActivityIcon />,
-              isActive:
-                pathname === "/settings/usage" ||
-                pathname.startsWith("/settings/usage/"),
-            },
-          ]}
         />
         <NavSecondary
           groupLabel={t("nav.resourcesGroup")}

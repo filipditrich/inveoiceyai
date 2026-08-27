@@ -196,7 +196,7 @@ export default async function PaymentsPage({
       <PageHeader
         actions={
           <Button
-            render={<Link href="/settings/bank-connections" />}
+            render={<Link href="/settings/workspace/bank-connections" />}
             variant="outline"
           >
             <LandmarkIcon /> {t("bankConnections")}

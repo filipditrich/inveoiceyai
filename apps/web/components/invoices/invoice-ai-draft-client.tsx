@@ -150,7 +150,7 @@ export function InvoiceAiDraftClient({
             })}
           </span>
           <Link
-            href="/settings/usage"
+            href="/settings/workspace/usage"
             className="text-foreground underline-offset-4 hover:underline"
           >
             {t("viewUsage")}
@@ -207,7 +207,7 @@ export function InvoiceAiDraftClient({
             {error}{" "}
             {outOfTokens || error === t("outOfTokens") ? (
               <Link
-                href="/settings/usage"
+                href="/settings/workspace/usage"
                 className="underline underline-offset-4"
               >
                 {t("viewUsage")}

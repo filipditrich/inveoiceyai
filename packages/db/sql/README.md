@@ -76,4 +76,4 @@ two steps (add nullable + backfill, then tighten), as
 | `2026-08-26-drop-incoming-invoices.sql`               | Removed the incoming-invoices / payables domain                                    |
 | `2026-08-26-unique-constraints-to-indexes.sql`        | Fixed the drizzle-kit drift that made `db:push` offer to truncate populated tables |
 
-Apply Plan 19 before deploying referral routes (`/r/*`, `/settings/referrals`, admin users list).
+Apply Plan 19 before deploying referral routes (`/r/*`, `/settings/account/referrals`, admin users list).

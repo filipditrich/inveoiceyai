@@ -1,5 +1,6 @@
 import { IssuerWelcomeWizard } from "@/components/issuers/issuer-welcome-wizard";
 import { requireWorkspace } from "@/lib/auth/session";
+import { listUserWorkspaces } from "@/lib/auth/workspaces";
 import { welcomeDoneIssuerId } from "@/lib/issuer-welcome-query";
 import { issuerBusinesses } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
@@ -13,8 +14,16 @@ export default async function WelcomePage({
 }: {
   searchParams: Search;
 }) {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWorkspace();
   const sp = await searchParams;
+
+  const workspaces = await listUserWorkspaces(userId);
+  const activeWorkspace = workspaces.find((item) => item.id === workspaceId);
+  const workspaceProps = {
+    workspaceName: activeWorkspace?.name ?? "",
+    workspaceLogo: activeWorkspace?.logo ?? null,
+    uploadConfigured: Boolean(process.env.UPLOADTHING_TOKEN?.trim()),
+  };
 
   const countRow = await db
     .select({ count: sql<number>`count(*)::int` })
@@ -44,6 +53,7 @@ export default async function WelcomePage({
           doneIssuerId={issuer?.id ?? null}
           invalidQuery={sp.invalid ?? (issuer ? null : "not_found")}
           workspaceId={workspaceId}
+          {...workspaceProps}
         />
       </div>
     );
@@ -58,6 +68,7 @@ export default async function WelcomePage({
       <IssuerWelcomeWizard
         invalidQuery={sp.invalid ?? null}
         workspaceId={workspaceId}
+        {...workspaceProps}
       />
     </div>
   );

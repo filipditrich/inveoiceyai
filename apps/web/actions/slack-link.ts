@@ -71,8 +71,8 @@ export async function confirmSlackLinkAction(
     },
   });
 
-  revalidatePath("/settings/integrations");
-  revalidatePath("/settings/security");
+  revalidatePath("/settings/workspace/integrations");
+  revalidatePath("/settings/account/security");
   return { ok: true, decision };
 }
 
@@ -97,8 +97,8 @@ export async function unlinkSlackIdentityAction(input: {
       },
     });
   }
-  revalidatePath("/settings/integrations");
-  revalidatePath("/settings/security");
+  revalidatePath("/settings/workspace/integrations");
+  revalidatePath("/settings/account/security");
   return { ok };
 }
 
@@ -126,7 +126,7 @@ export async function rebindSlackIdentityAction(input: {
       },
     });
   }
-  revalidatePath("/settings/integrations");
-  revalidatePath("/settings/security");
+  revalidatePath("/settings/workspace/integrations");
+  revalidatePath("/settings/account/security");
   return { ok };
 }

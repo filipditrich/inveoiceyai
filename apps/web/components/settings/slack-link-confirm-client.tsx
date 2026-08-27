@@ -47,7 +47,7 @@ export function SlackLinkConfirmClient({
       toast.success(
         result.decision === "rebind" ? t("rebindSuccess") : t("confirmSuccess"),
       );
-      router.push("/settings/integrations");
+      router.push("/settings/workspace/integrations");
       router.refresh();
     });
   };

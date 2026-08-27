@@ -141,7 +141,18 @@
     "platform_admin_last": "Cannot revoke the last platform admin",
     "platform_admin_failed": "Could not update platform role",
     "fio_payments_enabled": "Fio payment token saved",
-    "fio_payments_disabled": "Fio payment rights removed"
+    "fio_payments_disabled": "Fio payment rights removed",
+    "admin_tokens_granted": "Tokens granted",
+    "admin_workspace_renamed": "Workspace renamed",
+    "admin_workspace_deleted": "Workspace deleted",
+    "admin_member_removed": "Member removed",
+    "admin_invite_canceled": "Invite canceled",
+    "admin_not_found": "Record not found",
+    "admin_invalid_amount": "Invalid token amount",
+    "admin_name_required": "Enter a name",
+    "admin_last_owner": "Cannot remove the last owner",
+    "admin_confirmation_mismatch": "Confirmation does not match",
+    "admin_action_failed": "Action failed"
   },
   "ToastDescriptions": {
     "issuer_saved": "Your business details are ready for future invoices.",
@@ -176,7 +187,18 @@
     "platform_admin_last": "At least one platform administrator must remain.",
     "platform_admin_failed": "No access change was made.",
     "fio_payments_enabled": "Invoicey can now propose batches. You still authorize every payment in Fio.",
-    "fio_payments_disabled": "Statement sync is unchanged. New payment runs cannot be submitted."
+    "fio_payments_disabled": "Statement sync is unchanged. New payment runs cannot be submitted.",
+    "admin_tokens_granted": "Added to the workspace's gifted balance.",
+    "admin_workspace_renamed": "Every member sees the new name.",
+    "admin_workspace_deleted": "The workspace and its data are gone.",
+    "admin_member_removed": "They no longer have access to the workspace.",
+    "admin_invite_canceled": "The invite link stopped working.",
+    "admin_not_found": "The record disappeared — reload the page.",
+    "admin_invalid_amount": "Enter a whole number between 1 and 10,000,000.",
+    "admin_name_required": "A workspace name cannot be empty.",
+    "admin_last_owner": "A workspace must always keep at least one owner.",
+    "admin_confirmation_mismatch": "Retype the workspace slug exactly.",
+    "admin_action_failed": "Try again, or check the logs."
   },
   "Status": {
     "invoice": {
@@ -576,8 +598,6 @@
       "group": "Workspace",
       "dashboard": "Overview",
       "invoices": "Invoices",
-      "invoicesList": "List",
-      "invoicesNew": "Create",
       "invoicesAi": "Create with AI",
       "invoicesImport": "Import past invoices",
       "invoicesFromJson": "JSON invoice",
@@ -586,18 +606,13 @@
       "clients": "Clients",
       "issuers": "My businesses",
       "newInvoice": "New invoice",
-      "automationGroup": "Automation",
-      "toolsGroup": "Import & developer tools",
-      "manageGroup": "Manage workspace",
-      "settings": "Workspace settings",
-      "workspace": "Workspace",
-      "members": "Members",
-      "bankConnections": "Bank connections",
-      "integrations": "Integrations",
-      "usage": "Usage",
+      "toolsGroup": "Import & tools",
       "resourcesGroup": "Resources",
       "docs": "Docs",
-      "collapseToggle": "Expand or collapse {title}"
+      "collapseToggle": "Expand or collapse {title}",
+      "newInvoiceMore": "More ways to create",
+      "createGroup": "Create",
+      "invoiceBlank": "Blank invoice"
     },
     "breadcrumb": {
       "dashboard": "Dashboard",
@@ -627,7 +642,8 @@
       "api-keys": "API Keys",
       "integrations": "Integrations",
       "usage": "Usage",
-      "bank-connections": "Bank connections"
+      "bank-connections": "Bank connections",
+      "account": "Account"
     },
     "a11y": {
       "toggleSidebar": "Toggle sidebar",
@@ -636,13 +652,9 @@
       "navigating": "Loading page"
     },
     "settings": {
-      "title": "Settings",
-      "eyebrow": "Account and workspace",
-      "subtitle": "Customize the interface, secure your account, and manage access for people and connected tools.",
-      "navigationLabel": "Settings sections",
-      "navGroups": {
-        "you": "You",
-        "workspace": "Workspace"
+      "navigationLabel": {
+        "account": "Account settings sections",
+        "workspace": "Workspace settings sections"
       },
       "nav": {
         "account": "Account",
@@ -771,6 +783,18 @@
           "viewUsage": "View usage",
           "upgrade": "Upgrade"
         }
+      },
+      "scopes": {
+        "account": {
+          "eyebrow": "Your account",
+          "title": "{name}",
+          "subtitle": "Profile, appearance, and sign-in security. These follow you across every workspace."
+        },
+        "workspace": {
+          "eyebrow": "Workspace settings",
+          "title": "Workspace",
+          "subtitle": "The businesses, clients, and invoices in this workspace. Changes apply to every member."
+        }
       }
     },
     "theme": {
@@ -780,7 +804,7 @@
       "system": "System"
     },
     "userMenu": {
-      "settings": "Settings",
+      "settings": "Account settings",
       "platformAdmin": "Platform admin",
       "logOut": "Log out",
       "signingOut": "Signing out…"
@@ -801,7 +825,14 @@
         "owner": "Owner",
         "admin": "Admin",
         "member": "Member"
-      }
+      },
+      "manageLabel": "This workspace",
+      "settings": "Workspace settings",
+      "members": "Members",
+      "logoLabel": "Logo",
+      "logoHint": "Shown in the workspace switcher. PNG or JPEG up to 1 MB.",
+      "logoOptional": "Optional — initials are used without one.",
+      "uploadUnavailable": "File uploads are not configured."
     },
     "workspaceErrors": {
       "name_required": "Enter a workspace name",
@@ -814,9 +845,31 @@
       "invite_missing_workspace": "Invitation is missing a workspace",
       "forbidden": "You do not have permission for this action"
     },
-    "search": {
-      "label": "Search",
-      "placeholder": "Type to search…"
+    "palette": {
+      "trigger": "Search…",
+      "title": "Quick search",
+      "description": "Find an invoice or client, or jump anywhere in the app.",
+      "placeholder": "Invoice number, client, IČO, or a page name…",
+      "empty": "Nothing found.",
+      "groups": {
+        "go": "Go to",
+        "create": "Create",
+        "settings": "Settings"
+      },
+      "commands": {
+        "dashboard": "Overview",
+        "invoices": "Invoices",
+        "payments": "Payments",
+        "clients": "Clients",
+        "issuers": "My businesses",
+        "newInvoice": "New invoice",
+        "aiDraft": "Create invoice with AI",
+        "recurring": "Recurring invoices",
+        "fromJson": "JSON invoice",
+        "import": "Import past invoices",
+        "workspaceSettings": "Workspace settings",
+        "accountSettings": "Account settings"
+      }
     }
   },
   "Dashboard": {
@@ -1540,13 +1593,14 @@
     },
     "welcome": {
       "step": "Step {current} / {total}",
-      "title": "Set up your business",
+      "title": "Set up Invoicey",
       "identityHint": "Start with your company’s IČO and confirm its contact details.",
       "bankHint": "Add the account shown on invoices and payment QR codes. Invoicey never moves money.",
       "skip": "Skip for now",
       "skipping": "Skipping…",
       "skipHint": "You can resume setup later, but a business is required before you issue an invoice.",
       "steps": {
+        "workspace": "Workspace",
         "business": "Business",
         "bank": "Bank account",
         "ready": "Ready"
@@ -1568,7 +1622,14 @@
       "doneBody": "Numbering and email templates have sensible defaults. You can add a logo, stamp, and more details in business settings at any time.",
       "goDashboard": "Go to dashboard",
       "createFirstInvoice": "Create first invoice",
-      "editBusiness": "Business settings"
+      "editBusiness": "Business settings",
+      "workspaceHint": "Name the workspace your invoices will live in.",
+      "workspaceTitle": "Your workspace",
+      "workspaceBody": "A workspace holds your businesses, clients, and invoices. Its name and logo show in the switcher at the top left — and to anyone you invite here later.",
+      "workspaceNameLabel": "Workspace name",
+      "workspaceLogoLabel": "Workspace logo",
+      "workspaceLogoHint": "Optional. PNG or JPEG up to 1 MB. Initials are used without one.",
+      "workspaceNameRequired": "Enter a workspace name."
     },
     "emailForm": {
       "subject": "Subject template",
@@ -2051,14 +2112,17 @@
       "issuers": "Issuers",
       "backToApp": "Back to app",
       "productGroup": "Product",
-      "productDashboard": "Product dashboard"
+      "productDashboard": "Product dashboard",
+      "audit": "Audit log"
     },
     "breadcrumb": {
       "root": "Admin",
       "users": "Users",
       "workspaces": "Workspaces",
       "invoices": "Invoices",
-      "issuers": "Issuers"
+      "issuers": "Issuers",
+      "audit": "Audit log",
+      "detail": "Detail"
     },
     "table": {
       "search": "Search",
@@ -2187,6 +2251,96 @@
         "updatedAt": "Updated",
         "id": "Issuer id",
         "workspaceId": "Workspace id"
+      }
+    },
+    "audit": {
+      "title": "Platform audit log",
+      "subtitle": "Every cross-tenant write made from the admin console. Workspace owners cannot see these happen — this is the only place they are reviewable.",
+      "recentTitle": "Recent actions",
+      "count": "{count, plural, one {# entry} other {# entries}}",
+      "empty": "No actions yet.",
+      "columns": {
+        "event": "Action",
+        "actor": "By",
+        "workspace": "Workspace",
+        "details": "Details",
+        "at": "When"
+      }
+    },
+    "userDetail": {
+      "eyebrow": "User",
+      "back": "Back to users",
+      "profileTitle": "Profile",
+      "membershipsTitle": "Memberships",
+      "membershipsDescription": "Workspaces this account belongs to.",
+      "noMemberships": "No memberships.",
+      "referralsTitle": "Referrals",
+      "referralsDescription": "Accounts that signed up through this user's code.",
+      "noReferrals": "Has not referred anyone yet.",
+      "allUsers": "All users",
+      "auditTitle": "Security history",
+      "auditDescription": "Sign-ins, access changes, and admin actions touching this account.",
+      "columns": {
+        "workspace": "Workspace",
+        "role": "Role",
+        "joined": "Joined",
+        "email": "Email",
+        "signedUp": "Signed up"
+      }
+    },
+    "workspaceDetail": {
+      "eyebrow": "Workspace",
+      "back": "Back to workspaces",
+      "overviewTitle": "Overview",
+      "tokensTitle": "AI tokens",
+      "tokensDescription": "This workspace's balance. Gifted tokens are spent first, so a support grant does not inflate the monthly allowance.",
+      "tokens": {
+        "gifted": "Gifted",
+        "monthly": "Monthly",
+        "purchased": "Purchased",
+        "renewsAt": "Renews",
+        "missing": "This workspace has no balance row yet. Granting creates one."
+      },
+      "grant": {
+        "amountLabel": "Tokens",
+        "noteLabel": "Note",
+        "notePlaceholder": "e.g. goodwill for an outage",
+        "hint": "Added to the gifted balance and written to the audit log.",
+        "submit": "Grant tokens"
+      },
+      "membersTitle": "Members",
+      "noMembers": "No members.",
+      "invitesTitle": "Pending invites",
+      "invitesDescription": "Invitations nobody has accepted yet.",
+      "noInvites": "No pending invites.",
+      "issuersTitle": "Businesses",
+      "noIssuers": "No businesses.",
+      "auditTitle": "Workspace history",
+      "auditDescription": "Admin actions and security events in this workspace.",
+      "dangerTitle": "Irreversible actions",
+      "dangerDescription": "These touch data that belongs to someone else. Everything here is written to the audit log.",
+      "rename": {
+        "label": "Workspace name",
+        "submit": "Rename"
+      },
+      "delete": {
+        "label": "Type “{slug}” to confirm deletion",
+        "hint": "Deletes the workspace along with {count} invoices, its businesses, clients, and memberships. This cannot be undone.",
+        "submit": "Delete workspace"
+      },
+      "actions": {
+        "removeMember": "Remove",
+        "cancelInvite": "Cancel"
+      },
+      "columns": {
+        "member": "Member",
+        "role": "Role",
+        "joined": "Joined",
+        "email": "Email",
+        "invitedBy": "Invited by",
+        "expires": "Expires",
+        "issuer": "Business",
+        "ico": "IČO"
       }
     }
   },

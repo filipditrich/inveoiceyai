@@ -100,7 +100,7 @@ export async function onSessionCreated(
       rawDeviceToken: rawToken,
     });
     const trustUrl = `${origin}/security/trust?token=${encodeURIComponent(trustToken)}`;
-    const securitySettingsUrl = `${origin}/settings/security`;
+    const securitySettingsUrl = `${origin}/settings/account/security`;
     const signedInAt = new Intl.DateTimeFormat("cs-CZ", {
       dateStyle: "medium",
       timeStyle: "short",

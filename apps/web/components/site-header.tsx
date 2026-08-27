@@ -1,6 +1,6 @@
 "use client";
 
-import { SearchForm } from "@/components/search-form";
+import { CommandPalette } from "@/components/command-palette";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Breadcrumb,
@@ -16,7 +16,6 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
-import { SearchIcon } from "lucide-react";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -36,6 +35,7 @@ export function SiteHeader() {
     clients: t("breadcrumb.clients"),
     issuers: t("breadcrumb.issuers"),
     settings: t("breadcrumb.settings"),
+    account: t("breadcrumb.account"),
     ai: t("breadcrumb.ai"),
     security: t("breadcrumb.security"),
     workspace: t("breadcrumb.workspace"),
@@ -128,16 +128,7 @@ export function SiteHeader() {
           </BreadcrumbList>
         </Breadcrumb>
         <div className="flex items-center gap-1.5">
-          <SearchForm className="hidden w-full sm:block sm:max-w-xs" />
-          <details className="group relative sm:hidden">
-            <summary className="hover:bg-muted focus-visible:ring-ring flex size-10 cursor-pointer list-none items-center justify-center rounded-md outline-none focus-visible:ring-2 [&::-webkit-details-marker]:hidden">
-              <SearchIcon className="size-4" aria-hidden="true" />
-              <span className="sr-only">{t("search.label")}</span>
-            </summary>
-            <div className="bg-popover absolute right-0 top-10 z-50 w-[min(20rem,calc(100vw-2rem))] rounded-lg border p-3 shadow-xl">
-              <SearchForm inputId="mobile-search" />
-            </div>
-          </details>
+          <CommandPalette />
           <ThemeToggle className="size-10 sm:size-7" />
         </div>
       </div>

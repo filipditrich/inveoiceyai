@@ -30,6 +30,7 @@ export function AppShell({
   defaultWorkspaceId,
   workspaces,
   tokenBalance,
+  uploadConfigured = true,
 }: Readonly<{
   children: ReactNode;
   user: AppShellUser;
@@ -38,6 +39,7 @@ export function AppShell({
   defaultWorkspaceId: string | null;
   workspaces: WorkspaceListItem[];
   tokenBalance?: AppShellTokenBalance | null;
+  uploadConfigured?: boolean;
 }>) {
   return (
     <SidebarProvider
@@ -53,6 +55,7 @@ export function AppShell({
         defaultWorkspaceId={defaultWorkspaceId}
         isPlatformAdmin={isPlatformAdmin}
         tokenBalance={tokenBalance}
+        uploadConfigured={uploadConfigured}
         user={user}
         workspaces={workspaces}
       />

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { AdminCopyId } from "@/components/admin/admin-copy-id";
 import { AppDataGrid } from "@/components/data-grid/app-data-grid";
 import {
@@ -93,12 +95,15 @@ export function AdminWorkspacesGrid({
           <DataGridColumnHeader column={column} title={t("columns.name")} />
         ),
         cell: ({ row }) => (
-          <div className="min-w-0">
+          <Link
+            className="block min-w-0 hover:underline"
+            href={`/admin/workspaces/${row.original.id}`}
+          >
             <div className="truncate font-medium">{row.original.name}</div>
             <div className="text-muted-foreground truncate font-mono text-xs">
               {row.original.slug}
             </div>
-          </div>
+          </Link>
         ),
         meta: { headerTitle: t("columns.name"), autoSize: true },
       },

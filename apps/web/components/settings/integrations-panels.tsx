@@ -68,7 +68,7 @@ export function IntegrationsPanels({
             ))}
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button render={<Link href="/settings/api-keys#mcp" />}>
+            <Button render={<Link href="/settings/workspace/api-keys#mcp" />}>
               {t("connectMcp")}
               <ArrowRightIcon data-icon="inline-end" />
             </Button>

@@ -497,7 +497,7 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 - [x] Rich `/invite/[id]` (workspace/inviter/role/expiry, mismatch/expired/reject)
 - [x] Schema: `users.referral_code`, `users.referred_by_user_id`, `referral_events`
 - [x] `/r/[code]` landing + `invoicey_ref` cookie; signup attribution once
-- [x] `/settings/referrals` (link + stats); admin users show code / referred-by
+- [x] `/settings/account/referrals` (link + stats); admin users show code / referred-by
 - [x] ADR 0025 + specs + this roadmap section
 - [x] Typecheck / focused tests
 - [x] Plan 19 SQL applied on Neon (`packages/db/sql/2026-08-11-plan19-invites-referrals.sql`)

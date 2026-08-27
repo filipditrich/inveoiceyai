@@ -54,8 +54,31 @@ const withNextIntl = createNextIntlPlugin({
   },
 });
 
+/**
+ * Settings moved from one flat list to `/settings/account/*` (you) and
+ * `/settings/workspace/*` (this workspace). The old paths are in sent emails,
+ * Slack link cards, and bookmarks, so they keep resolving.
+ */
+const legacySettingsRedirects = [
+  ["/settings", "/settings/account"],
+  ["/settings/security", "/settings/account/security"],
+  ["/settings/referrals", "/settings/account/referrals"],
+  ["/settings/members", "/settings/workspace/members"],
+  ["/settings/usage", "/settings/workspace/usage"],
+  ["/settings/api-keys", "/settings/workspace/api-keys"],
+  ["/settings/bank-connections", "/settings/workspace/bank-connections"],
+  ["/settings/integrations", "/settings/workspace/integrations"],
+] as const;
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  async redirects() {
+    return legacySettingsRedirects.map(([source, destination]) => ({
+      source,
+      destination,
+      permanent: true,
+    }));
+  },
   async headers() {
     return [
       {

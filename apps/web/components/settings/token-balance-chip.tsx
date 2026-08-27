@@ -97,7 +97,7 @@ export function TokenBalanceChip({
         </dl>
         <div className="flex flex-col gap-2 border-t p-3">
           <Link
-            href="/settings/usage"
+            href="/settings/workspace/usage"
             className={cn(
               buttonVariants({ variant: "outline", size: "sm" }),
               "w-full",
