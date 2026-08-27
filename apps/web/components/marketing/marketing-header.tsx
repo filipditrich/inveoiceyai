@@ -19,8 +19,10 @@ export async function MarketingHeader() {
 
   const navItems = [
     { href: "/#jak-to-funguje", label: t("howItWorks") },
-    { href: "/#automatizace", label: t("automation") },
     { href: "/#prehled", label: t("capabilities") },
+    { href: "/#platby", label: t("payments") },
+    { href: "/#automatizace", label: t("automation") },
+    { href: "/#napojeni", label: t("integrations") },
     { href: "/#faq", label: t("faq") },
     { href: "/docs", label: t("docs") },
   ];
@@ -49,20 +51,20 @@ export async function MarketingHeader() {
 
         <nav
           aria-label={t("ariaLabel")}
-          className="ml-auto hidden items-center gap-1 lg:flex"
+          className="ml-auto hidden items-center gap-1 xl:flex"
         >
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+              className="text-muted-foreground hover:bg-muted hover:text-foreground whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors"
             >
               {item.label}
             </Link>
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2 lg:ml-2">
+        <div className="ml-auto flex items-center gap-2 xl:ml-2">
           <LocaleSwitcher compact className="hidden sm:inline-flex" />
           {user ? (
             <Link
@@ -90,7 +92,7 @@ export async function MarketingHeader() {
             {user ? t("continueToApp") : t("openApp")}
             <ArrowRightIcon data-icon="inline-end" />
           </Button>
-          <details className="group relative sm:hidden">
+          <details className="group relative xl:hidden">
             <summary className="border-input hover:bg-muted focus-visible:ring-ring flex size-9 cursor-pointer list-none items-center justify-center rounded-md border outline-none focus-visible:ring-2 [&::-webkit-details-marker]:hidden">
               <MenuIcon className="size-4" aria-hidden="true" />
               <span className="sr-only">{t("openMenu")}</span>

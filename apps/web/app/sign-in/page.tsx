@@ -1,9 +1,11 @@
 import { AuthShell } from "@/components/auth/auth-shell";
 import { auth } from "@/lib/auth/auth";
 import { safeNext } from "@/lib/auth/safe-next";
+import { ArrowRightIcon, ShieldCheckIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { SignInForm } from "./sign-in-form";
@@ -42,10 +44,12 @@ export default async function SignInPage({
   }
 
   const providers = configuredProviders();
+  /** The visitor was bounced here from a gated page, so promise them the way back. */
+  const returnsToRequestedPage = target !== "/dashboard";
 
   return (
     <AuthShell>
-      <div>
+      <div className="bg-card shadow-xs rounded-3xl border p-7 sm:p-8">
         <p className="text-primary text-sm font-semibold uppercase tracking-wide">
           {t("eyebrow")}
         </p>
@@ -56,7 +60,13 @@ export default async function SignInPage({
           {t("subtitle")}
         </p>
 
-        <div className="mt-8">
+        {returnsToRequestedPage ? (
+          <p className="bg-muted text-muted-foreground mt-5 rounded-xl px-4 py-3 text-xs leading-relaxed">
+            {t("continueNote")}
+          </p>
+        ) : null}
+
+        <div className="mt-7">
           {providers.length > 0 ? (
             <SignInForm next={target} providers={providers} />
           ) : (
@@ -66,10 +76,26 @@ export default async function SignInPage({
           )}
         </div>
 
-        <p className="text-muted-foreground mt-6 text-center text-xs leading-relaxed">
+        <p className="text-muted-foreground mt-5 flex items-start gap-2 text-xs leading-relaxed">
+          <ShieldCheckIcon className="mt-0.5 size-3.5 shrink-0" />
+          {t("secureNote")}
+        </p>
+
+        <p className="text-muted-foreground mt-6 border-t pt-5 text-center text-xs leading-relaxed">
           {t("consent")}
         </p>
       </div>
+
+      <p className="text-muted-foreground mt-6 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs">
+        {t("docsPrompt")}
+        <Link
+          href="/docs"
+          className="text-foreground hover:text-primary inline-flex items-center gap-1 font-medium transition-colors"
+        >
+          {t("docsCta")}
+          <ArrowRightIcon className="size-3" />
+        </Link>
+      </p>
     </AuthShell>
   );
 }

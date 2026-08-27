@@ -227,9 +227,9 @@
   "Marketing": {
     "meta": {
       "title": "Invoice automation without the busywork",
-      "description": "Invoicey connects validated data, PDF, ISDOC, SPAYD QR and ARES with a modern web app and AI automation.",
+      "description": "Invoicey connects validated data, PDF, ISDOC, SPAYD QR and ARES with a modern web app, bank payment matching and AI automation.",
       "ogTitle": "Invoicey — invoice automation without the busywork",
-      "ogDescription": "One validated invoice. Web, PDF, ISDOC, QR and AI automation."
+      "ogDescription": "One validated invoice. Web, PDF, ISDOC, QR, bank payments and AI automation."
     },
     "nav": {
       "howItWorks": "How it works",
@@ -244,7 +244,9 @@
       "signedInAs": "Signed in as {name}",
       "openMenu": "Open menu",
       "skipToContent": "Skip to content",
-      "ariaLabel": "Main navigation"
+      "ariaLabel": "Main navigation",
+      "payments": "Payments",
+      "integrations": "Integrations"
     },
     "footer": {
       "description": "Invoices as structured data. Create them in the web, via JSON, or with AI — and always get the same validated output.",
@@ -260,14 +262,15 @@
       "badge": "Built for web, JSON, and AI",
       "titleLine1": "Invoicing that starts with data.",
       "titleLine2": "Not a form.",
-      "subtitle": "Issue documents from the web, JSON, or AI. Invoicey validates every time and produces the same PDF, ISDOC, and payment QR — including ARES, VAT, and Czech document rules.",
+      "subtitle": "Issue documents from the web, JSON, or AI. Invoicey validates every time and produces the same PDF, ISDOC, and payment QR — then proposes a match when the money lands in your bank.",
       "ctaPrimary": "Open Invoicey",
       "ctaPrimarySignedIn": "Continue to app",
       "ctaSecondary": "How it works",
       "signedInAs": "Signed in as {name}",
       "noPassword": "No password",
       "czechUi": "Czech-first",
-      "betaAccess": "Beta access"
+      "betaAccess": "Beta access",
+      "bankMatching": "Bank matching"
     },
     "preview": {
       "inputLabel": "Describe an invoice in your own words",
@@ -304,7 +307,10 @@
       "spaydQr": "SPAYD QR payment",
       "aresLookup": "ARES by ICO",
       "multiIssuer": "Multiple businesses",
-      "ariaLabel": "Key formats"
+      "ariaLabel": "Key formats",
+      "bankSync": "Fio & MONETA",
+      "currencies": "Multi-currency",
+      "recurring": "Recurring invoices"
     },
     "workflow": {
       "eyebrow": "From entry to payment",
@@ -314,8 +320,8 @@
       "step1Description": "Pick a business, look up a client by ICO, and add line items. Or send the same data as JSON or an agent instruction.",
       "step2Title": "Validate & issue",
       "step2Description": "One schema checks required fields, VAT, and totals. Only then is an immutable document created — PDF, ISDOC, and QR.",
-      "step3Title": "Send & track",
-      "step3Description": "Email the invoice to the client, track delivery and due date, and mark payment in the same overview."
+      "step3Title": "Send & reconcile",
+      "step3Description": "Email the invoice, track delivery and due date, and let the connected bank propose the matching payment."
     },
     "capabilities": {
       "eyebrow": "Domain reality",
@@ -332,7 +338,13 @@
       "schemaTitle": "Data first, PDF second",
       "schemaDescription": "One validation schema powers the web, JSON, and agent tools. The result doesn't change based on how the invoice was created.",
       "securityTitle": "Isolated workspaces",
-      "securityDescription": "OAuth sign-in via Google or GitHub and workspace membership checks on every server boundary."
+      "securityDescription": "OAuth sign-in via Google or GitHub and workspace membership checks on every server boundary.",
+      "paymentsTitle": "One payment ledger",
+      "paymentsDescription": "Connect Fio or MONETA. Incoming credits are proposed against invoices by variable symbol, amount, and account, and invoice status derives from confirmed allocations.",
+      "recurringTitle": "Recurring documents, unattended",
+      "recurringDescription": "Set a cadence and day of month. Invoicey prepares a draft with current issuer and client details and leaves it waiting for your confirmation.",
+      "currencyTitle": "Currencies and document language",
+      "currencyDescription": "Invoice in CZK or a foreign currency, with or without VAT, and pick each document's language (Czech or English) independently of the app language."
     },
     "automation": {
       "badge": "Automation · beta",
@@ -367,7 +379,13 @@
       "importDescription": "Upload older PDFs or ISDOCs in bulk. Invoicey preserves the original files, marks their source, and won't let you overwrite an issued archive document.",
       "importItem1": "PDF with embedded ISDOC",
       "importItem2": "Archive mode without ISDOC",
-      "importItem3": "Document origin & immutable files"
+      "importItem3": "Document origin & immutable files",
+      "recurringEyebrow": "Recurring documents",
+      "recurringTitle": "Regular invoicing that still waits for your approval.",
+      "recurringDescription": "Set a cadence, a day of month, and a document template. Invoicey prepares the draft with current issuer and client details and leaves it pending.",
+      "recurringItem1": "Monthly, quarterly, or custom cadence",
+      "recurringItem2": "First or last day of the month",
+      "recurringItem3": "Draft waits for confirmation"
     },
     "faq": {
       "eyebrow": "FAQ",
@@ -382,7 +400,13 @@
       "q4": "Can I import old invoices?",
       "a4": "Yes. Bulk import accepts PDF and ISDOC. If the PDF contains an embedded ISDOC, Invoicey also reads the structured data; otherwise it preserves the original as an archive document.",
       "q5": "Is Invoicey accounting or tax advice?",
-      "a5": "No. Invoicey helps prepare and manage documents, but responsibility for each specific business and tax case always rests with the user and their accountant or tax advisor."
+      "a5": "No. Invoicey helps prepare and manage documents, but responsibility for each specific business and tax case always rests with the user and their accountant or tax advisor.",
+      "q6": "How does bank payment matching work?",
+      "a6": "You connect a Fio or MONETA account with a token your bank issues in your name. Invoicey pulls incoming credits and proposes matches by variable symbol, amount, currency, and receiving account. Automatic confirmation is off by default, and even when enabled only an exact match passes — everything else waits for a person.",
+      "q7": "Does Invoicey support recurring invoices?",
+      "a7": "Yes. Set a cadence and day of month and Invoicey regularly prepares a draft with current issuer and client details. Nothing is issued on its own — confirmation stays with you.",
+      "q8": "Can I invoice in a foreign currency or in English?",
+      "a8": "Yes. A document can be in a currency other than CZK, with or without VAT, and each invoice's language (Czech or English) is chosen independently of the app language."
     },
     "cta": {
       "eyebrow": "Ready to issue",
@@ -461,6 +485,49 @@
         "s4Title": "4. Changing or Revoking Consent",
         "s4Body": "You can open settings using the button above or the 'Cookie settings' link in the footer. Choosing 'Essential only' rejects or revokes measurement. Clearing site data in your browser also removes the stored choice, and we will ask again on your next visit."
       }
+    },
+    "payments": {
+      "badge": "Bank connections",
+      "eyebrow": "Payment ledger",
+      "title": "Invoicey learns “paid” from the statement, not your memory.",
+      "description": "Connect an account with a token your bank issues in your name. Invoicey pulls incoming credits, proposes a match against an issued invoice, and derives document status from confirmed allocations — partial payments and overpayments included.",
+      "item1": "Fio and MONETA via account tokens, no PSD2 middleman",
+      "item2": "Match proposals by variable symbol, amount, currency, and account",
+      "item3": "Auto-confirm only on an exact match, and only if you turn it on",
+      "item4": "Partial payments, overpayments, and manual entries in one ledger",
+      "cardTitle": "Incoming payment",
+      "cardSubtitle": "Fio · 2301234567/2010",
+      "creditAmountLabel": "Amount",
+      "creditAmount": "CZK 35,000",
+      "creditVsLabel": "Variable symbol",
+      "creditVs": "20260042",
+      "creditDateLabel": "Credited",
+      "creditDate": "12 Aug 2026",
+      "matchTitle": "Match proposal",
+      "matchInvoiceLabel": "Invoice",
+      "matchInvoice": "2026-0042 · Studio Sever",
+      "matchStateLabel": "After confirming",
+      "matchState": "Paid in full",
+      "matchAction": "Review & confirm",
+      "disclaimer": "Automatic confirmation is off by default"
+    },
+    "integrations": {
+      "eyebrow": "Integrations",
+      "title": "Invoice from wherever you already work.",
+      "description": "Slack, MCP clients, and your own scripts use the same tools and the same validation as the web app. Every integration has its own credential and fails closed without one.",
+      "slackTitle": "Slack",
+      "slackDescription": "Draft an invoice straight from a thread, confirm in Slack, land it in the same workspace.",
+      "mcpTitle": "MCP · Claude & Cursor",
+      "mcpDescription": "Remote MCP server behind a workspace API key. The same tools the web app uses.",
+      "banksTitle": "Fio & MONETA",
+      "banksDescription": "Incoming payments and match proposals via a token your bank issues for your account.",
+      "aresTitle": "ARES",
+      "aresDescription": "Look up a company by ICO or name when creating clients and issuers.",
+      "emailTitle": "Client email",
+      "emailDescription": "Send PDF and ISDOC under your own name with delivery tracking.",
+      "apiTitle": "JSON & API keys",
+      "apiDescription": "Validated InvoiceSchema JSON and keys for your own automation.",
+      "docsCta": "Integration docs"
     }
   },
   "Auth": {
@@ -470,7 +537,7 @@
     },
     "eyebrow": "Welcome back",
     "title": "Sign in to Invoicey",
-    "subtitle": "Continue with your Google or GitHub account. Invoicey does not create or store a separate password.",
+    "subtitle": "Continue with your Google or GitHub account. Invoicey never creates or stores a separate password — you can revoke access at your provider any time.",
     "noProviders": "No sign-in provider is configured. Add Google or GitHub credentials and reload this page.",
     "continueWith": "Continue with {provider}",
     "consent": "By continuing you confirm that you have read the terms of use and privacy policy.",
@@ -480,12 +547,24 @@
       "title": "From data to a finished document without detours.",
       "description": "Web, PDF, ISDOC, SPAYD QR, and agent tools all use the same validated invoice.",
       "oauthNote": "OAuth sign-in · no extra password",
-      "backHome": "Back to Invoicey"
+      "backHome": "Back to Invoicey",
+      "badge": "Private beta",
+      "benefit1Title": "Czech rules built in",
+      "benefit1Description": "Clients from ARES by ICO, VAT regimes, tax point dates, symbols.",
+      "benefit2Title": "PDF, ISDOC, and QR at once",
+      "benefit2Description": "One validated document, three outputs from the same data.",
+      "benefit3Title": "Bank payments",
+      "benefit3Description": "Fio and MONETA propose the matching payment for an invoice.",
+      "footerNote": "Invoices, documents, and payments stay inside your workspace."
     },
     "redirecting": "Redirecting…",
     "failed": "Sign-in failed. Please try again.",
     "continueGoogle": "Continue with Google",
-    "continueGitHub": "Continue with GitHub"
+    "continueGitHub": "Continue with GitHub",
+    "continueNote": "After signing in we'll take you back where you were heading.",
+    "secureNote": "Sign-in happens at your provider; Invoicey never sees a password.",
+    "docsPrompt": "Still deciding?",
+    "docsCta": "Read the docs"
   },
   "Onboarding": {
     "meta": {
