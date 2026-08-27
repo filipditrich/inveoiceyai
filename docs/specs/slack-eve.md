@@ -29,16 +29,48 @@ flowchart TB
 
 Invoicey’s Slack channel overrides Eve defaults for richer UX (Linear-style progress):
 
-| Phase        | Mechanism                                                                                                                                    |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Turn start   | Typing `Working…`; Thinking Steps stream opens on the **first tool batch** (clarify-only turns stay quiet)                                   |
-| Tool calls   | `chat.appendStream` `task_update` chunks with domain labels (ARES, create draft, upload, …)                                                  |
-| HITL         | Stream stops with “Waiting for approval…” **before** Eve Allow/Deny cards; `session.waiting` is a safety net                                 |
-| Tool results | Stash invoice/list Card payload; mark tasks complete with a short result snippet (no View link on the step)                                  |
-| Final reply  | Stop stream with **Card only** when a card exists (no model markdown, no extra View task); otherwise markdown. Fallback: `thread.post(Card)` |
-| Artifacts    | PDF/ISDOC file uploads stay separate thread messages                                                                                         |
+| Phase        | Mechanism                                                                                                                                                                                                         |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Turn start   | Typing `Working…`; Thinking Steps stream opens on the **first tool batch** (clarify-only turns stay quiet)                                                                                                        |
+| Tool calls   | `chat.appendStream` `task_update` chunks with domain labels (ARES, create draft, upload, …)                                                                                                                       |
+| HITL         | Stream stops with “Waiting for approval…” (tool approval) or “Waiting for your answer…” (`ask_question`) **before** the Eve card; the reason is kept on channel state so the `session.waiting` safety net matches |
+| Tool results | Stash invoice/list Card payload; mark tasks complete with a short result snippet (no View link on the step)                                                                                                       |
+| Final reply  | Stop stream with **Card only** when a card exists (no model markdown, no extra View task); otherwise markdown. Fallback: `thread.post(Card)`                                                                      |
+| Card actions | Draft cards carry `Issue` / `Preview PDF` / `Discard` plus due-date, currency, VAT and language selects; issued cards carry `Mark paid` / `Send to client` / `Get PDF`. Handled by `onInteraction` — see below    |
+| Artifacts    | PDF/ISDOC file uploads stay separate thread messages                                                                                                                                                              |
 
-Helpers: `agent/lib/slack-thinking-stream.ts`, `slack-invoice-card.ts`, `slack-tool-labels.ts`, `slack-channel-extras.ts`.
+Helpers: `agent/lib/slack-thinking-stream.ts`, `slack-invoice-card.ts`, `slack-tool-labels.ts`, `slack-channel-extras.ts`, `invoice-card-model.ts`, `slack-invoice-actions.ts`, `slack-interactions.ts`.
+
+### Review card and card actions
+
+`create_invoice` and `update_invoice_draft` attach an `InvoiceCardModel` to their
+result; the channel renders it. The card shows every field a wrong guess could
+land in, and `normalizeDraftToInvoice` now returns `assumptions` — each field it
+filled in, with a reason and a `severity`. `notable` assumptions (due date,
+currency, language, price basis, VAT) get a warning block; `routine` ones (issue
+date is today, DUZP follows it, docType is `invoice`) are tagged on the field
+only. Nothing reaches `issue` without having been visible first.
+
+Card controls are handled by `slack-interactions.ts`, wired to
+`slackChannel({ onInteraction })`:
+
+- Every id is namespaced `invoicey:` — Eve owns `eve_input:` / `eve_input_freeform:`
+  and forwards the rest. Selects report only `selected_option.value`, so the
+  invoice id rides inside the option value (`<uuid>|<value>`).
+- A click resolves the **clicker's** linked workspace via `resolveLinkedSlackPrincipal`
+  and runs under `runWithInvoiceyContext`. Unlinked clickers get an ephemeral
+  refusal and nothing runs. This is stricter than the Slack-global Allow/Deny.
+- The clicked message is replaced in place via `chat.update`, so a thread with
+  five adjustments still has exactly one card per invoice.
+- Failures are reported with `postEphemeral` to the clicker, never in-channel.
+- The `Open in Invoicey` link button carries `invoicey:open_web` purely so the
+  click it still emits is recognised and ignored.
+
+Clicking `Issue` runs `issueInvoiceById` directly rather than going through the
+model and a second Allow/Deny: the button sits on a card that already shows the
+number, client and total, which is a more specific act of consent than a
+sentence the model has to re-interpret. The `approval: always()` gate stays on
+the tool for the typed path.
 
 **Auth policy**
 
@@ -61,17 +93,19 @@ Helpers: `agent/lib/slack-thinking-stream.ts`, `slack-invoice-card.ts`, `slack-t
 
 ## Tools
 
-| Tool                                          | Notes                                                                                        |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `search_business`                             | ARES by company name → matches with IČO + address                                            |
-| `lookup_business`                             | ARES by IČO → full client draft                                                              |
-| `list_presets` / `get_preset` / `save_preset` | Preset CRUD only when the user asks; never during invoice create. Placeholder UUIDs rejected |
-| `create_invoice`                              | Draft persist + render; workspace issuer locked; no preset id args; auto-uploads in Slack    |
-| `upload_invoice_files`                        | Explicit upload (by `invoiceId` or base64)                                                   |
-| `list_invoices` / `get_invoice`               | Workspace-scoped follow-ups                                                                  |
-| `issue_invoice`                               | `approval: always()` HITL; numbering + re-upload                                             |
-| `mark_invoice_paid`                           | `approval: always()` HITL                                                                    |
-| `send_invoice_email`                          | `approval: always()` HITL; PDF + optional ISDOC via Resend                                   |
+| Tool                                          | Notes                                                                                                                                              |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `search_business`                             | ARES by company name → matches with IČO + address                                                                                                  |
+| `lookup_business`                             | ARES by IČO → full client draft                                                                                                                    |
+| `list_presets` / `get_preset` / `save_preset` | Preset CRUD only when the user asks; never during invoice create. Placeholder UUIDs rejected                                                       |
+| `create_invoice`                              | Draft persist + render; workspace issuer locked; no preset id args; posts the review card. Does **not** upload artifacts — a draft is a proposal   |
+| `update_invoice_draft`                        | Patch an existing draft (dates, currency, VAT, language, payment, client, items) and re-post its card. Totals recomputed; issued invoices rejected |
+| `ask_question` (built-in)                     | Eve harness tool. Used for ARES disambiguation, price basis, currency, VAT on foreign clients                                                      |
+| `upload_invoice_files`                        | Explicit upload (by `invoiceId` or base64)                                                                                                         |
+| `list_invoices` / `get_invoice`               | Workspace-scoped follow-ups                                                                                                                        |
+| `issue_invoice`                               | `approval: always()` HITL; requires `confirm { clientName, total }` so the Allow/Deny card shows more than a uuid; numbering + upload              |
+| `mark_invoice_paid`                           | `approval: always()` HITL; requires `confirm { number, total }`                                                                                    |
+| `send_invoice_email`                          | `approval: always()` HITL; requires `confirm { number, clientName }`; PDF + optional ISDOC via Resend                                              |
 
 Skill: `skills/create-czech-invoice.md`.
 
@@ -107,10 +141,10 @@ The agent cannot complete these steps:
 
 | #   | Scenario                          | Pass                                                                                                                                                                                                                                                                                           |
 | --- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | `@Invoicey` + NL invoice + IČO    | Draft in Neon; PDF+ISDOC in thread; reply has `invoiceId` + `/invoices/{id}`                                                                                                                                                                                                                   |
+| 1   | `@Invoicey` + NL invoice + IČO    | Draft in Neon; **review card** posted with all fields, assumed ones tagged; no PDF uploaded yet                                                                                                                                                                                                |
 | 2   | Thread follow-up without `@`      | Session continues                                                                                                                                                                                                                                                                              |
-| 3   | HITL **Issue**                    | Number from scheme; `issued_at`; new PDF                                                                                                                                                                                                                                                       |
-| 4   | HITL **Mark paid**                | `paid_at` set                                                                                                                                                                                                                                                                                  |
+| 3   | Card **Issue invoice**            | Number from scheme; `issued_at`; PDF+ISDOC upload; the same card message updates in place to the issued state                                                                                                                                                                                  |
+| 4   | Card **Mark paid**                | `paid_at` set; card updates in place                                                                                                                                                                                                                                                           |
 | 5   | Unpaid list                       | `list_invoices` / `get_invoice` answer from Neon                                                                                                                                                                                                                                               |
 | 6   | Presets                           | `save_preset` / `list_presets` hit Neon                                                                                                                                                                                                                                                        |
 | 7   | Deploy                            | `GET /eve/v1/health` OK; Connect hits `/eve/v1/slack`                                                                                                                                                                                                                                          |
@@ -119,6 +153,13 @@ The agent cannot complete these steps:
 | 10  | List Card                         | `list_invoices` yields a compact multi-field Card (not a long prose table)                                                                                                                                                                                                                     |
 | 12  | Unlinked Slack user               | No agent turn; DM with `/slack/link/…`; channel does not contain the URL                                                                                                                                                                                                                       |
 | 13  | Confirm link in current workspace | Next Slack message creates invoices in that workspace; Settings shows the link                                                                                                                                                                                                                 |
+| 14  | Card **due-date select**          | Picking “Due in 30 days” rewrites `due_date` off the issue date and the card re-renders in place; the `assumed` tag on Due date is gone                                                                                                                                                        |
+| 15  | Card **currency / VAT select**    | Totals recompute (VAT changes with reverse charge); an invalid combination (OSS · domestic) is refused with an ephemeral message and the card is untouched                                                                                                                                     |
+| 16  | Card **Discard**                  | Draft row deleted; card replaced by a tombstone naming the clicker                                                                                                                                                                                                                             |
+| 17  | Card click by unlinked user       | Ephemeral refusal; nothing mutates                                                                                                                                                                                                                                                             |
+| 18  | Correction in words               | “make it EUR” calls `update_invoice_draft` on the same id — no second draft row                                                                                                                                                                                                                |
+| 19  | Ambiguous client                  | `ask_question` renders as radio/select options, one per ARES match; thread says “Waiting for your answer…”, not “Waiting for approval…”                                                                                                                                                        |
+| 20  | Typed **Issue**                   | Allow/Deny card shows client + total from `confirm`, not a bare uuid                                                                                                                                                                                                                           |
 
 ## Deploy note
 
