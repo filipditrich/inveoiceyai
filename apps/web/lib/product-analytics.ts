@@ -10,13 +10,11 @@ export const PRODUCT_EVENT_PROPERTIES = {
   invoice_issued: ["documentType", "currency", "lifecycleStatus"] as const,
   invoice_email_requested: ["documentType", "hasIsdoc"] as const,
   payment_match_confirmed: ["lifecycleStatus"] as const,
-  incoming_invoice_accepted: ["routeKind"] as const,
-  incoming_invoice_rejected: ["routeKind"] as const,
 } as const;
 
 export type ProductEventName = keyof typeof PRODUCT_EVENT_PROPERTIES;
 export type ProductAnalyticsProperties = Partial<{
-  routeKind: "welcome" | "invoice" | "payments" | "incoming";
+  routeKind: "welcome" | "invoice" | "payments";
   creationEntry: "structured" | "ai" | "json" | "duplicate";
   documentType: "invoice" | "proforma" | "advance" | "credit_note";
   currency: "CZK" | "EUR" | "USD";
@@ -33,12 +31,7 @@ export type ProductAnalyticsAdapter = {
 };
 
 export type ProductToastTransition =
-  | "invoice_issued"
-  | "invoice_saved"
-  | "invoice_emailed"
-  | "payment_confirmed"
-  | "incoming_accepted"
-  | "incoming_rejected";
+  "invoice_issued" | "invoice_saved" | "invoice_emailed" | "payment_confirmed";
 
 export function isProductEventName(value: unknown): value is ProductEventName {
   return (
@@ -58,10 +51,6 @@ export function productEventFromToast(
       return "invoice_email_requested";
     case "payment_confirmed":
       return "payment_match_confirmed";
-    case "incoming_accepted":
-      return "incoming_invoice_accepted";
-    case "incoming_rejected":
-      return "incoming_invoice_rejected";
     default:
       return null;
   }
@@ -82,7 +71,7 @@ const allowedValues: Record<
   keyof ProductAnalyticsProperties,
   readonly (string | boolean)[]
 > = {
-  routeKind: ["welcome", "invoice", "payments", "incoming"],
+  routeKind: ["welcome", "invoice", "payments"],
   creationEntry: ["structured", "ai", "json", "duplicate"],
   documentType: ["invoice", "proforma", "advance", "credit_note"],
   currency: ["CZK", "EUR", "USD"],

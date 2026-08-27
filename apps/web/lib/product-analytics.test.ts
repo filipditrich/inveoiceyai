@@ -67,11 +67,11 @@ describe("successful toast transitions", () => {
 
   it("tracks only the server toast still present in the current URL", () => {
     expect(
-      productToastTransitionFromUrl("incoming_accepted", "incoming_accepted"),
-    ).toBe("incoming_invoice_accepted");
-    expect(productToastTransitionFromUrl("incoming_accepted", null)).toBeNull();
+      productToastTransitionFromUrl("payment_confirmed", "payment_confirmed"),
+    ).toBe("payment_match_confirmed");
+    expect(productToastTransitionFromUrl("payment_confirmed", null)).toBeNull();
     expect(
-      productToastTransitionFromUrl("incoming_accepted", "incoming_rejected"),
+      productToastTransitionFromUrl("payment_confirmed", "invoice_issued"),
     ).toBeNull();
   });
   it("keeps only properties allowed by the mapped event", () => {
