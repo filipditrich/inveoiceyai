@@ -5,7 +5,7 @@ import {
   resolveCelebrationProgress,
   type InvoiceyPointer,
 } from "./invoicey-3d-motion";
-import { createInvoiceyModel, disposeInvoiceyModel } from "./invoicey-3d-model";
+import { disposeInvoiceyModel, loadInvoiceyModel } from "./invoicey-3d-asset";
 
 export type Invoicey3DScene = Readonly<{
   celebrate: () => void;
@@ -78,9 +78,9 @@ function addGroundShadow(scene: THREE.Scene) {
   return shadow;
 }
 
-export function createInvoicey3DScene(
+export async function createInvoicey3DScene(
   canvas: HTMLCanvasElement,
-): Invoicey3DScene {
+): Promise<Invoicey3DScene> {
   const renderer = createRenderer(canvas);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 40);
@@ -89,9 +89,13 @@ export function createInvoicey3DScene(
 
   addLighting(scene);
   const groundShadow = addGroundShadow(scene);
-  const rig = createInvoiceyModel();
-  const tokenRestY = rig.token.position.y;
-  scene.add(rig.root);
+  const model = await loadInvoiceyModel().catch((error: unknown) => {
+    groundShadow.geometry.dispose();
+    groundShadow.material.dispose();
+    renderer.dispose();
+    throw error;
+  });
+  scene.add(model);
 
   let active = true;
   let celebrationStartedAt: number | null = null;
@@ -137,35 +141,24 @@ export function createInvoicey3DScene(
       scrollProgress,
     });
 
-    rig.root.position.y = pose.bodyPositionY;
-    rig.root.rotation.x = -0.03 + pose.bodyRotationX;
-    rig.root.rotation.y = pose.bodyRotationY;
-    rig.root.rotation.z = pose.bodyRotationZ;
-    rig.leftArm.rotation.z = pose.leftArmRotationZ;
-    rig.rightArm.rotation.z = pose.rightArmRotationZ;
-    rig.legs[0].rotation.z = pose.legSwing;
-    rig.legs[1].rotation.z = -pose.legSwing;
-    rig.token.position.y = tokenRestY + pose.tokenPositionY;
-    rig.token.rotation.y = pose.tokenRotationY;
-    rig.token.rotation.z = pose.tokenRotationZ;
-    for (const [index, eye] of rig.eyes.entries()) {
-      eye.scale.y = pose.eyeScaleY;
-      const pupil = rig.pupils[index];
-      if (!pupil) continue;
-      pupil.position.x = pose.eyeX;
-      pupil.position.y = pose.eyeY;
-    }
+    model.position.x = pose.bodyPositionX;
+    model.position.y = pose.bodyPositionY;
+    model.rotation.x = -0.025 + pose.bodyRotationX;
+    model.rotation.y = pose.bodyRotationY;
+    model.rotation.z = pose.bodyRotationZ;
     const targetScale = hovered ? 0.95 : 0.92;
     currentScale = THREE.MathUtils.lerp(
       currentScale,
       targetScale,
       smoothingFactor(deltaSeconds, 8),
     );
-    rig.root.scale.set(
+    model.scale.set(
       currentScale * pose.bodyScaleX,
       currentScale * pose.bodyScaleY,
       currentScale,
     );
+    groundShadow.scale.set(1.18 * pose.shadowScale, 0.25 * pose.shadowScale, 1);
+    groundShadow.material.opacity = pose.shadowOpacity;
 
     renderer.render(scene, camera);
     if (active) frameId = window.requestAnimationFrame(renderFrame);
@@ -191,7 +184,7 @@ export function createInvoicey3DScene(
       active = false;
       if (frameId !== null) window.cancelAnimationFrame(frameId);
       frameId = null;
-      disposeInvoiceyModel(rig.root);
+      disposeInvoiceyModel(model);
       groundShadow.geometry.dispose();
       groundShadow.material.dispose();
       renderer.dispose();

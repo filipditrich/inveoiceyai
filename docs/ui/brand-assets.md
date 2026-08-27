@@ -17,6 +17,7 @@ other large placements.
 | `apps/web/public/brand/illustrations/invoicey-document.webp`       | Decorative document/check mark                      |
 | `apps/web/public/brand/illustrations/invoicey-mascot-branded.webp` | Large CTA artwork                                   |
 | `apps/web/public/brand/illustrations/invoicey-wordmark.webp`       | Wide dark brand artwork; do not use as a small logo |
+| `apps/web/public/brand/models/invoicey.glb`                        | Optimized interactive hero model                    |
 | `apps/web/app/opengraph-image.png`                                 | Social sharing preview                              |
 | `apps/web/public/brand/external/invoicey-slack-512.png`            | Slack app/bot icon                                  |
 | `apps/web/public/brand/external/invoicey-google-oauth-120.png`     | Google OAuth consent-screen logo                    |
@@ -28,15 +29,18 @@ from these repository assets. They update with the next production deployment.
 
 ## Interactive hero model
 
-The landing-page hero uses a procedural Three.js model rather than a checked-in
-GLB file. `invoicey-3d-model.ts` builds the character from rounded panels,
-capsules, curves and physical materials; `invoicey-3d-scene.ts` owns lighting,
-rendering and animation; and `invoicey-3d-canvas.tsx` controls browser loading
-and lifecycle.
+The landing-page hero uses a checked-in GLB rendered by Three.js.
+`invoicey-3d-asset.ts` loads, normalizes and disposes the asset;
+`invoicey-3d-scene.ts` owns lighting, rendering and animation; and
+`invoicey-3d-canvas.tsx` controls browser loading and lifecycle. The production
+asset is derived from the Hi3D export supplied on 2026-08-27. It is simplified,
+quantized and uses 1024 px WebP textures; do not replace it with the 57 MB source
+export.
 
-The model follows the pointer with its body, pupils and approval token, subtly
-responds to hero scroll, blinks, breathes, shifts its feet and grows on hover.
-Clicking triggers a short squash-and-stretch hop with an asymmetric arm wave.
+The model follows the pointer, subtly floats and responds to hero scroll, and
+grows on hover. Clicking triggers a short squash-and-stretch hop. The supplied
+GLB is a single static mesh without a skeleton or animation clips, so individual
+eyes, hands and feet cannot move independently without a future rigged export.
 It is dynamically imported only on fine-pointer screens at least 768 px wide,
 pauses outside the viewport and caps device pixel ratio. The existing mascot
 WebP remains the automatic fallback for touch/mobile layouts, reduced-motion

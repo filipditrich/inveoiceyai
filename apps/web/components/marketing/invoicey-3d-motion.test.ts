@@ -15,21 +15,15 @@ describe("calculateInvoiceyPose", () => {
         scrollProgress: 0,
       }),
     ).toEqual({
+      bodyPositionX: 0,
       bodyPositionY: 0,
       bodyRotationX: 0,
       bodyRotationY: 0,
       bodyRotationZ: 0,
       bodyScaleX: 1,
       bodyScaleY: 1,
-      eyeX: 0,
-      eyeY: 0,
-      eyeScaleY: 1,
-      leftArmRotationZ: 0,
-      legSwing: 0,
-      rightArmRotationZ: 0,
-      tokenPositionY: 0,
-      tokenRotationY: 0,
-      tokenRotationZ: 0,
+      shadowOpacity: 0.1,
+      shadowScale: 1,
     });
   });
 
@@ -41,15 +35,13 @@ describe("calculateInvoiceyPose", () => {
       scrollProgress: 1,
     });
 
-    expect(pose.bodyRotationX).toBeCloseTo(0.12);
-    expect(pose.bodyRotationY).toBeCloseTo(0.19);
+    expect(pose.bodyRotationX).toBeCloseTo(0.09);
+    expect(pose.bodyRotationY).toBeCloseTo(0.15);
     expect(pose.bodyPositionY).toBeCloseTo(-0.12);
-    expect(pose.eyeX).toBeCloseTo(0.04);
-    expect(pose.eyeY).toBeCloseTo(0.03);
-    expect(pose.tokenRotationY).toBeGreaterThan(0);
+    expect(pose.bodyPositionX).toBeCloseTo(0.07);
   });
 
-  it("adds a celebratory hop, wave, and squash-and-stretch at the midpoint", () => {
+  it("adds a celebratory hop and squash-and-stretch at the midpoint", () => {
     const pose = calculateInvoiceyPose({
       celebrationProgress: 0.5,
       elapsedSeconds: 0,
@@ -61,28 +53,8 @@ describe("calculateInvoiceyPose", () => {
     expect(pose.bodyRotationY).toBeCloseTo(0);
     expect(pose.bodyScaleX).toBeLessThan(1);
     expect(pose.bodyScaleY).toBeGreaterThan(1);
-    expect(pose.rightArmRotationZ).toBeLessThan(-0.15);
-    expect(pose.leftArmRotationZ).toBeGreaterThan(0);
-    expect(Math.abs(pose.tokenRotationZ)).toBeLessThan(0.08);
-  });
-
-  it("blinks briefly while keeping the approval check upright", () => {
-    const blink = calculateInvoiceyPose({
-      celebrationProgress: 0,
-      elapsedSeconds: 3.75,
-      pointer: { x: 0, y: 0 },
-      scrollProgress: 0,
-    });
-    const awake = calculateInvoiceyPose({
-      celebrationProgress: 0,
-      elapsedSeconds: 2,
-      pointer: { x: 0, y: 0 },
-      scrollProgress: 0,
-    });
-
-    expect(blink.eyeScaleY).toBeLessThan(0.2);
-    expect(awake.eyeScaleY).toBe(1);
-    expect(Math.abs(blink.tokenRotationZ)).toBeLessThan(0.08);
+    expect(pose.shadowOpacity).toBeLessThan(0.1);
+    expect(pose.shadowScale).toBeLessThan(1);
   });
 });
 

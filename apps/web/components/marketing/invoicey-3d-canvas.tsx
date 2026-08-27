@@ -60,7 +60,7 @@ export function Invoicey3DCanvas({
     const initialize = async () => {
       try {
         const { createInvoicey3DScene } = await import("./invoicey-3d-scene");
-        const scene = createInvoicey3DScene(canvas);
+        const scene = await createInvoicey3DScene(canvas);
         if (cancelled) {
           scene.dispose();
           return;
