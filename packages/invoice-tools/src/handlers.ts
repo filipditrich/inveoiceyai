@@ -11,9 +11,10 @@ import {
 } from "@invoicey/invoice-core/schema";
 
 import { DEMO_ISSUER_ID } from "./demo-issuer";
-import { resolveDefaultIssuer } from "./invoice-ops";
+import { getInvoice, resolveDefaultIssuer } from "./invoice-ops";
 import {
   normalizeDraftToInvoice,
+  type DraftAssumption,
   type NormalizedIssue,
 } from "./normalize-draft-invoice";
 import { getPreset } from "./presets";
@@ -84,6 +85,8 @@ export type CreateAndRenderResult =
       filenamePdf: string;
       filenameIsdoc: string;
       invoiceId?: string;
+      /** Fields the normalizer filled in — show these before issuing. */
+      assumptions: DraftAssumption[];
     }
   | { ok: false; issues: NormalizedIssue[] }
   | { ok: false; error: string };
@@ -195,5 +198,107 @@ export async function createAndRenderInvoice(options: {
     filenamePdf: `faktura-${safeName}-isdoc.pdf`,
     filenameIsdoc: `faktura-${safeName}.isdoc`,
     invoiceId,
+    assumptions: normalized.assumptions,
+  };
+}
+
+/**
+ * Patch a persisted draft invoice and re-derive everything downstream of the
+ * change (VAT, line totals, invoice totals), then write it back in place.
+ *
+ * The stored draft is turned back into a draft-shaped payload, deep-merged
+ * with the patch, and pushed through {@link normalizeDraftToInvoice} again so
+ * an edit cannot produce a document the create path would have rejected. The
+ * issuer frozen onto the draft is reused rather than re-resolved — the seller
+ * is locked at create time and an edit must not silently re-point it.
+ */
+export type UpdateDraftInvoiceResult =
+  | {
+      ok: true;
+      invoice: Invoice;
+      invoiceId: string;
+      assumptions: DraftAssumption[];
+    }
+  | { ok: false; issues: NormalizedIssue[] }
+  | { ok: false; error: string };
+
+export async function updateDraftInvoice(options: {
+  id: string;
+  patch: Record<string, unknown>;
+  workspaceId?: string;
+}): Promise<UpdateDraftInvoiceResult> {
+  const loaded = await getInvoice({
+    id: options.id,
+    workspaceId: options.workspaceId,
+  });
+  if (!loaded.ok) return { ok: false, error: loaded.error };
+  if (loaded.summary.issuedAt && !loaded.summary.cancelledAt) {
+    return {
+      ok: false,
+      error:
+        "invoice is already issued — issued invoices are immutable, cancel and re-draft instead",
+    };
+  }
+  const current = loaded.invoice;
+  if (!current) {
+    return {
+      ok: false,
+      error: `draft ${options.id} has no readable payload — edit it in the web app`,
+    };
+  }
+
+  const base: Record<string, unknown> = {
+    meta: {
+      docType: current.meta.docType,
+      number: current.meta.number,
+      issueDate: current.meta.issueDate,
+      dueDate: current.meta.dueDate,
+      duzp: current.meta.duzp,
+      language: current.meta.language,
+      currency: current.meta.currency,
+      correctedInvoiceNumber: current.meta.correctedInvoiceNumber,
+    },
+    client: current.client,
+    vat: current.vat,
+    payment: current.payment,
+    items: current.items.map((item) => ({
+      position: item.position,
+      description: item.description,
+      quantity: item.quantity,
+      unit: item.unit,
+      unitPriceWithoutVat: item.unitPriceWithoutVat,
+      vatRate: item.vatRate,
+    })),
+    ...(current.notes === undefined ? {} : { notes: current.notes }),
+  };
+
+  /** A patched `items` array replaces the list rather than merging by index. */
+  const merged = deepMergeDraft(base, options.patch);
+  if (Array.isArray(options.patch.items)) {
+    merged.items = options.patch.items;
+  }
+
+  const normalized = normalizeDraftToInvoice(merged, current.issuer);
+  if (!normalized.ok) return { ok: false, issues: normalized.issues };
+
+  const database = tryCreateDbFromEnv();
+  if (!database) {
+    return { ok: false, error: "no database configured" };
+  }
+  try {
+    await persistDraftInvoice(database, normalized.invoice, {
+      workspaceId: resolveWorkspaceId(options.workspaceId),
+      invoiceId: options.id,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return { ok: false, error: `failed to update draft invoice: ${message}` };
+  }
+
+  return {
+    ok: true,
+    invoice: normalized.invoice,
+    invoiceId: options.id,
+    assumptions: normalized.assumptions,
   };
 }
