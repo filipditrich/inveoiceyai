@@ -8,9 +8,17 @@ import { withEveToolWorkspace } from "../lib/tool-workspace";
 
 export default defineTool({
   description:
-    "Email an issued invoice (PDF + optional ISDOC) to the client. Requires Slack Allow/Deny — check recipient (`to`) and invoice id on the approval card. Pass `to` when client has no contactEmail.",
+    "Email an issued invoice (PDF + optional ISDOC) to the client. Requires Slack Allow/Deny. Pass `confirm` with the invoice number and the client name — Slack renders the tool input on the approval card, and the reviewer needs to see who is about to receive it. Pass `to` when the client has no contactEmail.",
   inputSchema: z.object({
     id: z.string().uuid(),
+    confirm: z
+      .object({
+        number: z.string().min(1).describe("Invoice number as shown"),
+        clientName: z.string().min(1).describe("Client name as shown"),
+      })
+      .describe(
+        "Shown to the human on the approval card. Copy, do not invent.",
+      ),
     to: z.string().email().optional(),
     cc: z.array(z.string().email()).optional(),
     coverText: z.string().optional(),
@@ -18,7 +26,7 @@ export default defineTool({
     subject: z.string().optional(),
   }),
   approval: always(),
-  async execute(input, ctx) {
+  async execute({ confirm: _confirm, ...input }, ctx) {
     return withEveToolWorkspace(ctx, async () => {
       const result = await sendInvoiceEmailById(input);
       if (!result.ok) return result;

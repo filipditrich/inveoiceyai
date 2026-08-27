@@ -3,13 +3,13 @@ import { resolveDefaultIssuer } from "@invoicey/invoice-tools/ops";
 import { defineTool } from "eve/tools";
 
 import { CreateInvoiceInputSchema } from "../lib/create-invoice-input";
-import { appOrigin, slackThreadFromCtx } from "../lib/slack-thread";
+import { buildInvoiceCardModel } from "../lib/invoice-card-model";
+import { appOrigin } from "../lib/slack-thread";
 import { withEveToolWorkspace } from "../lib/tool-workspace";
-import { uploadInvoiceArtifacts } from "../lib/upload-slack-files";
 
 export default defineTool({
   description:
-    "Assemble a draft invoice, persist to Neon when DATABASE_URL is set, and render PDF + ISDOC. Issuer is locked server-side (do not pass issuer, issuerPresetId, or templatePresetId — those fields do not exist). Uploads files automatically in a Slack thread. Call only with draft: meta, client (structured address from ARES), vat, payment.method, and items.",
+    "Assemble a draft invoice, persist it, and post a review card in Slack with every field visible — including anything that had to be assumed. Issuer is locked server-side (do not pass issuer, issuerPresetId, or templatePresetId — those fields do not exist). Nothing is issued or e-mailed here: the user reviews the card and issues it from the button. Call only with draft: meta, client (structured address from ARES), vat, payment.method, and items.",
   inputSchema: CreateInvoiceInputSchema,
   async execute({ draft }, ctx) {
     return withEveToolWorkspace(ctx, async () => {
@@ -27,18 +27,15 @@ export default defineTool({
       });
       if (!result.ok) return result;
 
-      const thread = slackThreadFromCtx(ctx);
-      const upload = thread
-        ? await uploadInvoiceArtifacts({
-            channelId: thread.channelId,
-            threadTs: thread.threadTs,
-            filenamePdf: result.filenamePdf,
-            filenameIsdoc: result.filenameIsdoc,
-            pdfBase64: result.pdfBase64,
-            isdocXml: result.isdocXml,
-          })
+      const webUrl = result.invoiceId
+        ? `${appOrigin()}/invoices/${result.invoiceId}`
         : null;
 
+      /**
+       * The PDF is deliberately not uploaded here. A draft is a proposal, and
+       * uploading two files per revision buries the thread; the review card
+       * carries a `Preview PDF` button for when the user actually wants it.
+       */
       return {
         ok: true as const,
         invoiceId: result.invoiceId ?? null,
@@ -46,13 +43,15 @@ export default defineTool({
         total: String(result.invoice.totals.total),
         currency: result.invoice.meta.currency,
         clientName: result.invoice.client.name,
-        filenamePdf: result.filenamePdf,
-        filenameIsdoc: result.filenameIsdoc,
-        webUrl: result.invoiceId
-          ? `${appOrigin()}/invoices/${result.invoiceId}`
-          : null,
-        uploadedToSlack: upload?.ok === true,
-        uploadError: upload && !upload.ok ? upload.error : null,
+        assumptions: result.assumptions,
+        webUrl,
+        card: buildInvoiceCardModel({
+          invoice: result.invoice,
+          invoiceId: result.invoiceId ?? null,
+          state: "draft",
+          assumptions: result.assumptions,
+          webUrl,
+        }),
       };
     });
   },

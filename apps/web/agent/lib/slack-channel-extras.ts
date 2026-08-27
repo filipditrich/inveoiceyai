@@ -1,5 +1,7 @@
 import type { SlackChannelState } from "eve/channels/slack";
 
+import type { InvoiceCardModel } from "./invoice-card-model";
+
 /** Serializable card snapshot built from tool results for Slack finals. */
 export interface PendingInvoiceCard {
   kind: "invoice" | "list";
@@ -8,6 +10,12 @@ export interface PendingInvoiceCard {
   fields: Array<{ label: string; value: string }>;
   webUrl?: string | null;
   fallbackText: string;
+  /**
+   * Full card model when the tool produced one. Present for invoice cards
+   * that carry interactive controls; absent for the flat legacy snapshots
+   * (lists, email receipts) that only ever render fields.
+   */
+  model?: InvoiceCardModel;
 }
 
 /**
@@ -20,6 +28,12 @@ export interface InvoiceySlackExtras {
   /** open task ids → title (for complete-on-result) */
   thinkingOpenTasks?: Record<string, string>;
   pendingInvoiceCard?: PendingInvoiceCard | null;
+  /**
+   * Why the turn is parked, set when the pause is requested. `session.waiting`
+   * fires without the originating actions, so without this the safety-net
+   * notice would call a question an approval.
+   */
+  pendingPauseReason?: "approval" | "question" | null;
 }
 
 export type InvoiceySlackState = SlackChannelState & InvoiceySlackExtras;

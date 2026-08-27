@@ -7,9 +7,17 @@ import { withEveToolWorkspace } from "../lib/tool-workspace";
 
 export default defineTool({
   description:
-    "Mark an issued invoice as paid. Requires Slack Allow/Deny — confirm the invoice id and amount on the approval card before allowing.",
+    "Mark an issued invoice as paid. Requires Slack Allow/Deny. Pass `confirm` with the invoice number and total exactly as shown on the card — Slack renders the tool input on the approval card, so without it the reviewer is approving a bare id.",
   inputSchema: z.object({
     id: z.string().uuid(),
+    confirm: z
+      .object({
+        number: z.string().min(1).describe("Invoice number as shown"),
+        total: z.string().min(1).describe("Total with currency"),
+      })
+      .describe(
+        "Shown to the human on the approval card. Copy, do not invent.",
+      ),
   }),
   approval: always(),
   async execute({ id }, ctx) {
