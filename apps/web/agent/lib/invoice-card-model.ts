@@ -125,25 +125,6 @@ export function buildInvoiceCardModel(input: {
   const notice: CardNotice[] = [];
   const assumedPaths = new Set<string>();
 
-  if (input.assumptions) {
-    for (const assumption of input.assumptions) {
-      if (assumption.kind !== "suspect") assumedPaths.add(assumption.path);
-      if (assumption.severity === "routine") continue;
-      notice.push({
-        kind: assumption.kind,
-        label: labelFor(assumption.path, locale) ?? assumption.label,
-        value: assumption.value,
-        /** A suspect's reason carries a computed day count; keep it verbatim. */
-        reason:
-          assumption.kind === "suspect"
-            ? assumption.reason
-            : (reasonFor(assumption.path, locale) ?? assumption.reason),
-      });
-    }
-  } else if (input.assumedPaths) {
-    for (const path of input.assumedPaths) assumedPaths.add(path);
-  }
-
   /** Current on-invoice value for a path, so a rebuilt notice quotes real data. */
   const valueForPath = (path: string): string => {
     switch (path) {
@@ -165,6 +146,34 @@ export function buildInvoiceCardModel(input: {
         return `${copy.vatMode[invoice.vat.mode] ?? invoice.vat.mode} · ${copy.suppliesAbroad[invoice.vat.suppliesAbroad] ?? invoice.vat.suppliesAbroad}`;
     }
   };
+
+  if (input.assumptions) {
+    for (const assumption of input.assumptions) {
+      if (assumption.kind !== "suspect") assumedPaths.add(assumption.path);
+      if (assumption.severity === "routine") continue;
+      notice.push({
+        kind: assumption.kind,
+        label: labelFor(assumption.path, locale) ?? assumption.label,
+        /**
+         * The normalizer's own `value` is English (it has no locale). Re-derive
+         * it from the invoice so the notice does not read "Jazyk dokladu →
+         * Czech" next to a field that says "čeština". A suspect's value is a
+         * raw date the normalizer measured, so that one passes through.
+         */
+        value:
+          assumption.kind === "suspect"
+            ? assumption.value
+            : valueForPath(assumption.path),
+        /** A suspect's reason carries a computed day count; keep it verbatim. */
+        reason:
+          assumption.kind === "suspect"
+            ? assumption.reason
+            : (reasonFor(assumption.path, locale) ?? assumption.reason),
+      });
+    }
+  } else if (input.assumedPaths) {
+    for (const path of input.assumedPaths) assumedPaths.add(path);
+  }
 
   /**
    * Rebuilt cards have no `assumptions` to read — the normalizer cannot tell,

@@ -132,6 +132,14 @@ describe("buildInvoiceCardModel", () => {
     expect(model.title).not.toContain("DRAFT-");
   });
 
+  it("localizes the notice values, not just its labels", () => {
+    const notice = draftModel().notice.find(
+      (entry) => entry.label === "Jazyk dokladu",
+    );
+    /** The normalizer reports "Czech"; the card must not leak that through. */
+    expect(notice?.value).toBe("čeština");
+  });
+
   it("speaks the invoice's language", () => {
     const cs = draftModel();
     const en = draftModel({ language: "en" });
