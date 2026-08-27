@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { getDemoIssuer } from "./demo-issuer";
-import { normalizeDraftToInvoice } from "./normalize-draft-invoice";
+import {
+  addCalendarDaysYmd,
+  normalizeDraftToInvoice,
+  todayPragueYmd,
+} from "./normalize-draft-invoice";
 
 describe("normalizeDraftToInvoice", () => {
   it("builds a valid invoice from a minimal draft", () => {
@@ -319,6 +323,7 @@ describe("normalizeDraftToInvoice", () => {
 });
 
 describe("normalizeDraftToInvoice assumptions", () => {
+  const today = todayPragueYmd();
   const client = {
     name: "Test s.r.o.",
     ico: "44444444",
@@ -380,9 +385,9 @@ describe("normalizeDraftToInvoice assumptions", () => {
       {
         meta: {
           docType: "invoice",
-          issueDate: "2026-03-01",
-          dueDate: "2026-03-31",
-          duzp: "2026-03-01",
+          issueDate: today,
+          dueDate: addCalendarDaysYmd(today, 30),
+          duzp: today,
           currency: "EUR",
           language: "en",
         },
@@ -417,5 +422,87 @@ describe("normalizeDraftToInvoice assumptions", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.assumptions.map((a) => a.path)).not.toContain("pricesIncludeVat");
+  });
+});
+
+describe("normalizeDraftToInvoice suspect dates", () => {
+  const today = todayPragueYmd();
+  const client = {
+    name: "Test s.r.o.",
+    ico: "44444444",
+    dic: "CZ44444444",
+    address: {
+      street: "Nákupní 1",
+      city: "Ostrava",
+      zip: "709 00",
+      country: "CZ",
+    },
+  };
+  const items = [
+    {
+      position: 1,
+      description: "Konzultace",
+      quantity: 1,
+      unit: "ks",
+      unitPriceWithoutVat: 10_000,
+      vatRate: 21,
+    },
+  ];
+
+  function normalizeWithIssueDate(issueDate: string) {
+    return normalizeDraftToInvoice(
+      {
+        meta: {
+          docType: "invoice",
+          issueDate,
+          currency: "CZK",
+          language: "en",
+        },
+        client,
+        vat: { mode: "regular", suppliesAbroad: "none" },
+        payment: { method: "transfer" },
+        pricesIncludeVat: false,
+        items,
+      },
+      getDemoIssuer(),
+    );
+  }
+
+  it("flags a supplied issue date that is nowhere near today", () => {
+    const r = normalizeWithIssueDate("2023-10-09");
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const suspect = r.assumptions.find((a) => a.kind === "suspect");
+    expect(suspect).toMatchObject({
+      path: "meta.issueDate",
+      label: "Issue date",
+      value: "2023-10-09",
+      severity: "notable",
+    });
+    expect(suspect?.reason).toContain("days from today");
+  });
+
+  it("leaves a plausible back-date alone", () => {
+    const r = normalizeWithIssueDate(addCalendarDaysYmd(today, -10));
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.assumptions.some((a) => a.kind === "suspect")).toBe(false);
+  });
+
+  it("does not flag a date it defaulted itself", () => {
+    const r = normalizeDraftToInvoice(
+      {
+        meta: { docType: "invoice", currency: "CZK", language: "en" },
+        client,
+        vat: { mode: "regular", suppliesAbroad: "none" },
+        payment: { method: "transfer" },
+        pricesIncludeVat: false,
+        items,
+      },
+      getDemoIssuer(),
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.assumptions.every((a) => a.kind === "default")).toBe(true);
   });
 });

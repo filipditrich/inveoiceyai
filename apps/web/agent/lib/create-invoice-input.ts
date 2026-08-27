@@ -28,15 +28,27 @@ const DraftMetaSchema = z
       .enum(["invoice", "proforma", "advance", "credit_note"])
       .optional(),
     number: z.string().min(1).max(64).optional(),
-    issueDate: z.string().date().optional(),
-    dueDate: z.string().date().optional(),
+    issueDate: z
+      .string()
+      .date()
+      .optional()
+      .describe(
+        "ONLY when the user stated a date. Omit otherwise - the server uses today. Never infer or invent one.",
+      ),
+    dueDate: z
+      .string()
+      .date()
+      .optional()
+      .describe(
+        "ONLY when the user stated a due date or a term. Omit otherwise - the server uses issue date + 14 days. Never invent one.",
+      ),
     duzp: z.string().date().optional(),
     language: z.enum(["cs", "en"]).optional(),
     currency: z.enum(["CZK", "EUR", "USD"]).optional(),
     correctedInvoiceNumber: z.string().min(1).max(64).optional(),
   })
   .describe(
-    "Dates as yyyy-MM-dd. Omit number (server assigns DRAFT-…). Omit issueDate to use today.",
+    "Dates as yyyy-MM-dd. Omit number (server assigns DRAFT-…). Omit EVERY field the user did not state: an omitted field gets a server default that is shown to the user tagged `assumed` and is one click to fix, whereas a value you supply is treated as the user's own and is never flagged. Inventing a value hides it from them.",
   );
 
 const DraftItemSchema = z.object({

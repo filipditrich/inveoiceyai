@@ -22,6 +22,9 @@ import {
 
 const PRAGUE = "Europe/Prague";
 
+/** Beyond this, a supplied issue date reads as invented rather than intended. */
+const SUSPECT_DATE_DRIFT_DAYS = 45;
+
 export type VatPreset = "neplatce" | "regular" | "reverse_charge" | "oss";
 
 export interface NormalizedIssue {
@@ -53,6 +56,14 @@ export interface DraftAssumption {
    * tagged in place on the card; only `notable` ones are worth a warning.
    */
   severity: "notable" | "routine";
+  /**
+   * `default` — the caller left the field out and we filled it in.
+   * `suspect` — the caller *did* supply a value, but it does not survive a
+   * sanity check. A model asked for an invoice with no date will sometimes
+   * invent one rather than omit it, and a supplied value is otherwise treated
+   * as the user's own and never flagged. This is the backstop for that.
+   */
+  kind: "default" | "suspect";
 }
 
 const LANGUAGE_LABELS: Record<InvoiceLanguage, string> = {
@@ -157,7 +168,33 @@ export function normalizeDraftToInvoice(
       value: issueDate,
       reason: "today in Europe/Prague",
       severity: "routine",
+      kind: "default",
     });
+  }
+
+  /**
+   * A supplied issue date far from today is almost always invented rather than
+   * meant: real back-dating lands within weeks, and nobody bills far forward.
+   * Flag it instead of trusting it — a supplied value is otherwise never
+   * questioned, and an unquestioned wrong date is exactly what this mechanism
+   * exists to prevent.
+   */
+  if (issueDateGiven) {
+    const drift = Math.abs(
+      (Date.parse(`${issueDate}T12:00:00Z`) -
+        Date.parse(`${todayPragueYmd()}T12:00:00Z`)) /
+        86_400_000,
+    );
+    if (Number.isFinite(drift) && drift > SUSPECT_DATE_DRIFT_DAYS) {
+      assumptions.push({
+        path: "meta.issueDate",
+        label: "Issue date",
+        value: issueDate,
+        reason: `${Math.round(drift)} days from today — check this is what you meant`,
+        severity: "notable",
+        kind: "suspect",
+      });
+    }
   }
 
   const draftStamp = formatInTimeZone(new Date(), PRAGUE, "yyyyMMdd-HHmm");
@@ -173,6 +210,7 @@ export function normalizeDraftToInvoice(
       value: dueDate,
       reason: "issue date + 14 days",
       severity: "notable",
+      kind: "default",
     });
   }
 
@@ -185,6 +223,7 @@ export function normalizeDraftToInvoice(
       value: duzp,
       reason: "same as issue date",
       severity: "routine",
+      kind: "default",
     });
   }
 
@@ -199,6 +238,7 @@ export function normalizeDraftToInvoice(
       value: LANGUAGE_LABELS[language],
       reason: "not specified",
       severity: "notable",
+      kind: "default",
     });
   }
 
@@ -213,6 +253,7 @@ export function normalizeDraftToInvoice(
       value: currency,
       reason: "not specified",
       severity: "notable",
+      kind: "default",
     });
   }
 
@@ -224,6 +265,7 @@ export function normalizeDraftToInvoice(
       value: DOC_TYPE_LABELS[docType] ?? docType,
       reason: "not specified",
       severity: "routine",
+      kind: "default",
     });
   }
 
@@ -315,6 +357,7 @@ export function normalizeDraftToInvoice(
       value: VAT_MODE_LABELS.regular,
       reason: "issuer is not a VAT payer",
       severity: "notable",
+      kind: "default",
     });
     vatData = { ...vatData, mode: "regular" };
   } else if (!issuer.vatPayer) {
@@ -328,6 +371,7 @@ export function normalizeDraftToInvoice(
       value: formatVatIntent(vatData),
       reason: `expanded from preset "${String(draft.vatPreset)}"`,
       severity: "notable",
+      kind: "default",
     });
   }
 
@@ -439,6 +483,7 @@ export function normalizeDraftToInvoice(
       value: "excluding VAT",
       reason: "not specified",
       severity: "notable",
+      kind: "default",
     });
   }
 

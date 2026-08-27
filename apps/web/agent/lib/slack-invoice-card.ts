@@ -60,14 +60,27 @@ function assumptionsNotice(model: InvoiceCardModel): string | null {
     (assumption) => assumption.severity !== "routine",
   );
   if (notable.length === 0) return null;
-  const rows = notable.map(
-    (assumption) =>
-      `• *${assumption.label}* → ${assumption.value}  _(${assumption.reason})_`,
-  );
-  return [
-    ":warning: *Assumed — not stated by you.* Adjust below or just say what to change.",
-    ...rows,
-  ].join("\n");
+
+  const suspects = notable.filter((a) => a.kind === "suspect");
+  const defaults = notable.filter((a) => a.kind !== "suspect");
+
+  const lines: string[] = [];
+  /** Suspects lead: a value that looks invented is worse than one we defaulted. */
+  if (suspects.length > 0) {
+    lines.push(":rotating_light: *Check this before issuing.*");
+    for (const s of suspects) {
+      lines.push(`• *${s.label}* → ${s.value}  _(${s.reason})_`);
+    }
+  }
+  if (defaults.length > 0) {
+    lines.push(
+      ":warning: *Assumed — you did not say.* Change it below, or just tell me.",
+    );
+    for (const d of defaults) {
+      lines.push(`• *${d.label}* → ${d.value}  _(${d.reason})_`);
+    }
+  }
+  return lines.join("\n");
 }
 
 function dueDatePresetValue(model: InvoiceCardModel): string | undefined {
