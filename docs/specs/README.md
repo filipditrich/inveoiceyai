@@ -15,7 +15,7 @@ Per-feature implementation specs. Written **just-in-time** before the plan that 
 > Plan 25 design specs and the mPohoda API analysis, is preserved on the
 > `feat/payables-lifecycle` branch (tag `archive/payables-lifecycle`).
 
-**Planned specs:** [`production-ux-finish.md`](./production-ux-finish.md) is the active cross-feature production UX program.
+**Planned specs:** [`production-ux-finish.md`](./production-ux-finish.md) is the active cross-feature production UX program. [`plans-entitlements.md`](./plans-entitlements.md) is the active Plan 26 spec (plans, entitlements, managed clients, permissions).
 
 Just-in-time convention: write the remaining specs before the plan that consumes them ([lifecycle](../README.md#lifecycle-conventions)).
 
@@ -36,6 +36,7 @@ Just-in-time convention: write the remaining specs before the plan that consumes
 | `recurring.md`             | Plan 10              | Invoice templates, monthly/quarterly schedules, cron drafts (HITL)                                                                   |
 | `payment-ledger-fio.md`    | Plan 22              | Provider-neutral allocations, deterministic matching, encrypted Fio connection, sync, reconciliation UI                              |
 | `payment-ledger-moneta.md` | Plan 23              | MONETA VIP AISP read-only adapter on the same ledger                                                                                 |
+| `plans-entitlements.md`    | Plan 26              | `plans` table, entitlement resolution, managed client catalogs, token grant rules, permission catalog                                |
 
 ## Spec format conventions
 

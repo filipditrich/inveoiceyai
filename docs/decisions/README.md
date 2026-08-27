@@ -45,3 +45,7 @@ When a decision changes:
 | [0029](./0029-payment-ledger-fio-first.md)                 | Provider-neutral payment ledger with Fio first             | Accepted                          |
 | [0030](./0030-moneta-second-adapter.md)                    | MONETA as second read-only bank adapter                    | Accepted                          |
 | [0034](./0034-email-transport-adapters.md)                 | Provider-neutral email transport with Resend first         | Accepted                          |
+| [0035](./0035-plans-are-shared-entitlement-rows.md)        | Plans are shared entitlement rows, not per-workspace flags | Accepted                          |
+| [0036](./0036-managed-client-catalogs.md)                  | Managed client catalogs sync into workspaces               | Accepted                          |
+| [0037](./0037-declarative-token-grants.md)                 | Token grants are declarative rules on one ledger           | Accepted                          |
+| [0038](./0038-permission-catalog-with-role-presets.md)     | Permission catalog with role presets + member overrides    | Accepted                          |

@@ -612,6 +612,62 @@ payment runs and Fio submission, the payables half of bank import, all nineteen
 database tables, and the related environment variables. The payment **ledger**
 (Plan 22/23, issued-side reconciliation) is untouched.
 
+### Plan 26 — Plans, entitlements, and workspace permissions
+
+**Status:** Planned  
+**ADR:** [0035](./decisions/0035-plans-are-shared-entitlement-rows.md) ·
+[0036](./decisions/0036-managed-client-catalogs.md) ·
+[0037](./decisions/0037-declarative-token-grants.md) ·
+[0038](./decisions/0038-permission-catalog-with-role-presets.md) ·
+[spec](./specs/plans-entitlements.md) ·
+[plan](../.cursor/plans/plan-26-plans-entitlements.md)
+
+**Goal:** One `plans` table (Free / Pro / Enterprise / custom) driving every
+workspace limit and feature flag through resolved entitlements, activated
+manually by platform admin. Enables the sponsored-plan use case — NFCtron
+contractors each in their own isolated workspace, restricted to a managed client
+catalog — and lands the permission chokepoint that Pro teams need.
+
+**26a — plans and entitlement resolution:**
+
+- [ ] `plans` table, `workspaces.plan_id` + `entitlement_overrides`, seeded
+      Free / Pro / Enterprise rows and the NFCtron custom row
+- [ ] `EntitlementsSchema` + `resolveEntitlements()` + `requireEntitlement()`,
+      memoized alongside `requireWorkspace()`
+- [ ] Domain-based assignment at workspace bootstrap; manual assignment wins
+- [ ] `/admin/plans` CRUD and per-workspace assignment + overrides
+- [ ] Workspace settings plan card showing resolved entitlements
+
+**26b — token grants:**
+
+- [ ] `workspace_token_grants` ledger; signup + `first_invoice_issued` rules
+- [ ] Platform-admin discretionary grant with attribution and note
+- [ ] `monthly_limit` seeded from the plan on assignment and renewal
+- [ ] First-invoice reward notification (in-app + email), once per workspace
+- [ ] Top-up UI stub (no payment path)
+
+**26c — managed clients:**
+
+- [ ] `plan_clients` catalog seeded from ARES by IČO; `clients.plan_client_id`
+- [ ] Sync on catalog write and on plan assignment; non-destructive revocation
+- [ ] `createMode: "managed"` enforced in web, import, MCP, and Eve/Slack
+
+**26d — permissions:**
+
+- [ ] Permission catalog + `assertCan()` wired into every mutation surface
+- [ ] Role presets; `requireRole()` removed from call sites
+- [ ] Per-member overrides UI, gated on `permissions.mode === "advanced"`
+
+**26e — quotas and Enterprise policy:**
+
+- [ ] Seat and issuer quotas on the write path only
+- [ ] `allowedEmailDomains` enforced at invite _and_ at accept
+- [ ] Audit retention honoured per plan
+
+**Out of Plan 26:** payment-driven activation and billing, pooled cross-workspace
+token budgets, workspace-authored custom roles, per-member client/issuer
+scoping.
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:
