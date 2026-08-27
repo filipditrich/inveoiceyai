@@ -26,6 +26,21 @@ The web app, docs shell, sign-in shell, Slack-link page, sidebars, transactional
 emails, favicon, Apple icon, PWA manifest and social sharing metadata all read
 from these repository assets. They update with the next production deployment.
 
+## Interactive hero model
+
+The landing-page hero uses a procedural Three.js model rather than a checked-in
+GLB file. `invoicey-3d-model.ts` builds the character from rounded panels,
+capsules, curves and physical materials; `invoicey-3d-scene.ts` owns lighting,
+rendering and animation; and `invoicey-3d-canvas.tsx` controls browser loading
+and lifecycle.
+
+The model follows the pointer, subtly responds to hero scroll, grows on hover
+and performs a short hop/wave when clicked. It is dynamically imported only on
+fine-pointer screens at least 768 px wide, pauses outside the viewport and caps
+device pixel ratio. The existing mascot WebP remains the automatic fallback for
+touch/mobile layouts, reduced-motion preferences, WebGL failures and lost GPU
+contexts.
+
 ## External update checklist
 
 Repository deployment cannot change provider-hosted branding. Update each

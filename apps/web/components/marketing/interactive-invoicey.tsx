@@ -4,6 +4,7 @@ import Image from "next/image";
 import type { RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 
+import { Invoicey3DCanvas } from "./invoicey-3d-canvas";
 import {
   normalizePointerPosition,
   shouldShowFloatingGuide,
@@ -71,7 +72,8 @@ export function InteractiveInvoicey({
   messages,
 }: InteractiveInvoiceyProps) {
   const stageRef = useRef<HTMLDivElement>(null);
-  const [messageIndex, setMessageIndex] = useState(0);
+  const [interactionCount, setInteractionCount] = useState(0);
+  const [threeReady, setThreeReady] = useState(false);
   usePointerMotion(stageRef);
 
   return (
@@ -83,16 +85,14 @@ export function InteractiveInvoicey({
       </div>
       <div className={`${styles.orbitChip} ${styles.orbitChipAres}`}>ARES</div>
       <div className={styles.mascotMessage} aria-live="polite">
-        <span>{messages[messageIndex]}</span>
+        <span>{messages[interactionCount % messages.length]}</span>
         <small>{clickHint}</small>
       </div>
       <button
         type="button"
-        className={styles.mascotButton}
+        className={`${styles.mascotButton} ${threeReady ? styles.mascotButton3DReady : ""}`}
         aria-label={ariaLabel}
-        onClick={() =>
-          setMessageIndex((current) => nextMessage(current, messages))
-        }
+        onClick={() => setInteractionCount((current) => current + 1)}
       >
         <Image
           alt=""
@@ -102,6 +102,10 @@ export function InteractiveInvoicey({
           sizes="(max-width: 1023px) 82vw, 520px"
           src="/brand/illustrations/invoicey-mascot.webp"
           width={1000}
+        />
+        <Invoicey3DCanvas
+          celebrationId={interactionCount}
+          onReadyChange={setThreeReady}
         />
       </button>
       <Image
