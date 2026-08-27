@@ -29,11 +29,16 @@ import {
   type InvoiceCardModel,
 } from "./invoice-card-model";
 import { buildInvoiceModelCard } from "./slack-invoice-card";
+import { copyFor, type CardLocale } from "./invoice-card-i18n";
 import {
   DUE_DATE_PRESETS,
+  FIELD_TO_PATH,
   INVOICEY_ACTIONS,
-  decodeSelectValue,
+  decodeButtonValue,
+  decodeChangeValue,
   isInvoiceyAction,
+  vatOptionFor,
+  type ChangeField,
 } from "./slack-invoice-actions";
 import { appOrigin } from "./slack-thread";
 import { uploadInvoiceArtifacts } from "./upload-slack-files";
@@ -77,9 +82,16 @@ function webUrlFor(invoiceId: string): string {
   return `${appOrigin()}/invoices/${invoiceId}`;
 }
 
-/** Re-reads the invoice and rebuilds its card from the persisted truth. */
+/**
+ * Re-reads the invoice and rebuilds its card from the persisted truth.
+ *
+ * `assumedPaths` comes back off the clicked control. Without it a rebuilt card
+ * would drop every "assumed" tag, so editing one field would quietly stop
+ * flagging all the others — which is the whole point of the card.
+ */
 async function cardModelFor(
   invoiceId: string,
+  assumedPaths: readonly string[],
 ): Promise<InvoiceCardModel | null> {
   const loaded = await getInvoice({ id: invoiceId });
   if (!loaded.ok || !loaded.invoice) return null;
@@ -87,8 +99,15 @@ async function cardModelFor(
     invoice: loaded.invoice,
     invoiceId,
     state: cardStateFromSummary(loaded.summary),
+    assumedPaths,
     webUrl: webUrlFor(invoiceId),
   });
+}
+
+/** Card locale, for the confirmation lines appended after an action. */
+async function localeFor(invoiceId: string): Promise<CardLocale> {
+  const loaded = await getInvoice({ id: invoiceId });
+  return loaded.ok && loaded.invoice?.meta.language === "en" ? "en" : "cs";
 }
 
 /**
@@ -116,9 +135,10 @@ async function refreshCard(
   ctx: SlackInteractionContext,
   action: SlackInteractionAction,
   invoiceId: string,
+  assumedPaths: readonly string[],
   note?: string,
 ): Promise<void> {
-  const model = await cardModelFor(invoiceId);
+  const model = await cardModelFor(invoiceId, assumedPaths);
   if (!model) return;
   const card = buildInvoiceModelCard(model);
   if (note) card.children.push(CardText(note));
@@ -156,6 +176,7 @@ async function patchDraft(
   ctx: SlackInteractionContext,
   action: SlackInteractionAction,
   invoiceId: string,
+  assumedPaths: readonly string[],
   patch: Record<string, unknown>,
 ): Promise<void> {
   const result = await updateDraftInvoice({ id: invoiceId, patch });
@@ -166,52 +187,95 @@ async function patchDraft(
         : result.issues
             .map((issue) => `${issue.path}: ${issue.message}`)
             .join(", ");
-    await fail(ctx, action, `Could not apply that change — ${reason}`);
+    await fail(ctx, action, `Změnu se nepodařilo použít — ${reason}`);
     return;
   }
-  await refreshCard(ctx, action, invoiceId);
+  await refreshCard(ctx, action, invoiceId, assumedPaths);
 }
 
-async function handleSetDue(
+/**
+ * Applies one option from the change menu.
+ *
+ * The path the option targets is dropped from the carried set, so the field
+ * the user just chose stops being flagged while the rest stay flagged.
+ */
+async function handleChange(
   ctx: SlackInteractionContext,
   action: SlackInteractionAction,
-  invoiceId: string,
-  value: string,
+  input: {
+    invoiceId: string;
+    assumedPaths: readonly string[];
+    field: ChangeField;
+    value: string;
+  },
 ): Promise<void> {
-  const preset = DUE_DATE_PRESETS.find((option) => option.value === value);
-  if (!preset) {
-    await fail(ctx, action, `Unknown due-date option "${value}".`);
-    return;
-  }
-  const loaded = await getInvoice({ id: invoiceId });
-  if (!loaded.ok || !loaded.invoice) {
-    await fail(ctx, action, "That invoice is no longer available.");
-    return;
-  }
-  const dueDate = addCalendarDaysYmd(
-    loaded.invoice.meta.issueDate,
-    preset.days,
+  const { invoiceId, field, value } = input;
+  const remaining = input.assumedPaths.filter(
+    (path) => path !== FIELD_TO_PATH[field],
   );
-  await patchDraft(ctx, action, invoiceId, { meta: { dueDate } });
+
+  switch (field) {
+    case "d": {
+      const preset = DUE_DATE_PRESETS.find((option) => option.value === value);
+      if (!preset) return;
+      const loaded = await getInvoice({ id: invoiceId });
+      if (!loaded.ok || !loaded.invoice) {
+        await fail(ctx, action, "Tato faktura už není dostupná.");
+        return;
+      }
+      const dueDate = addCalendarDaysYmd(
+        loaded.invoice.meta.issueDate,
+        preset.days,
+      );
+      return patchDraft(ctx, action, invoiceId, remaining, {
+        meta: { dueDate },
+      });
+    }
+    case "c":
+      return patchDraft(ctx, action, invoiceId, remaining, {
+        meta: { currency: value },
+      });
+    case "l":
+      return patchDraft(ctx, action, invoiceId, remaining, {
+        meta: { language: value },
+      });
+    case "v": {
+      const vat = vatOptionFor(value);
+      if (!vat) return;
+      /** `vat.mode` shares the same field, so clear both flags. */
+      return patchDraft(
+        ctx,
+        action,
+        invoiceId,
+        remaining.filter((path) => path !== "vat.mode"),
+        { vat },
+      );
+    }
+    default:
+      return;
+  }
 }
 
 async function handleIssue(
   ctx: SlackInteractionContext,
   action: SlackInteractionAction,
   invoiceId: string,
+  assumedPaths: readonly string[],
 ): Promise<void> {
   const result = await issueInvoiceById({ id: invoiceId });
   if (!result.ok) {
-    await fail(ctx, action, `Could not issue — ${result.error}`);
+    await fail(ctx, action, `Fakturu se nepodařilo vystavit — ${result.error}`);
     return;
   }
+  const copy = copyFor(await localeFor(invoiceId));
   await refreshCard(
     ctx,
     action,
     invoiceId,
+    assumedPaths,
     result.alreadyIssued
-      ? "_Already issued._"
-      : `:white_check_mark: Issued as *${result.invoice.meta.number}* by <@${action.user.id}>.`,
+      ? copy.text.alreadyIssued
+      : `:white_check_mark: ${copy.text.issuedBy} *${result.invoice.meta.number}* ${copy.text.by} <@${action.user.id}>.`,
   );
   await uploadArtifacts(ctx, result.invoice);
 }
@@ -220,17 +284,24 @@ async function handleMarkPaid(
   ctx: SlackInteractionContext,
   action: SlackInteractionAction,
   invoiceId: string,
+  assumedPaths: readonly string[],
 ): Promise<void> {
   const result = await markInvoicePaidById({ id: invoiceId });
   if (!result.ok) {
-    await fail(ctx, action, `Could not mark paid — ${result.error}`);
+    await fail(
+      ctx,
+      action,
+      `Nepodařilo se označit jako zaplacené — ${result.error}`,
+    );
     return;
   }
+  const copy = copyFor(await localeFor(invoiceId));
   await refreshCard(
     ctx,
     action,
     invoiceId,
-    `:white_check_mark: Marked paid by <@${action.user.id}>.`,
+    assumedPaths,
+    `:white_check_mark: ${copy.text.markedPaidBy} ${copy.text.by} <@${action.user.id}>.`,
   );
 }
 
@@ -238,21 +309,24 @@ async function handleSendEmail(
   ctx: SlackInteractionContext,
   action: SlackInteractionAction,
   invoiceId: string,
+  assumedPaths: readonly string[],
 ): Promise<void> {
   const result = await sendInvoiceEmailById({ id: invoiceId });
   if (!result.ok) {
     const hint =
       result.error === "missing_recipient"
-        ? "the client has no e-mail address on file — say “send it to name@example.com” instead"
+        ? "klient nemá uložený e-mail — napište mi „pošli to na jmeno@example.com“"
         : result.error;
-    await fail(ctx, action, `Could not send — ${hint}`);
+    await fail(ctx, action, `Nepodařilo se odeslat — ${hint}`);
     return;
   }
+  const copy = copyFor(await localeFor(invoiceId));
   await refreshCard(
     ctx,
     action,
     invoiceId,
-    `:incoming_envelope: Sent to *${result.to}* by <@${action.user.id}>.`,
+    assumedPaths,
+    `:incoming_envelope: ${copy.text.sentTo} *${result.to}* ${copy.text.by} <@${action.user.id}>.`,
   );
 }
 
@@ -261,13 +335,15 @@ async function handleDiscard(
   action: SlackInteractionAction,
   invoiceId: string,
 ): Promise<void> {
-  const model = await cardModelFor(invoiceId);
+  const locale = await localeFor(invoiceId);
+  const copy = copyFor(locale);
+  const model = await cardModelFor(invoiceId, []);
   const result = await bulkDeleteDraftInvoices({ ids: [invoiceId] });
   if (result.ok !== 1) {
     await fail(
       ctx,
       action,
-      "Could not discard that draft — it may already be issued.",
+      "Návrh se nepodařilo zahodit — možná už je vystavený.",
     );
     return;
   }
@@ -276,10 +352,10 @@ async function handleDiscard(
     action.messageTs,
     Card({
       title: model
-        ? `Discarded · ${model.title.split(" · ").pop()}`
-        : "Discarded",
+        ? `${copy.text.discarded} · ${model.title.split(" · ").pop()}`
+        : copy.text.discarded,
       subtitle: model?.subtitle,
-      children: [CardText(`Draft discarded by <@${action.user.id}>.`)],
+      children: [CardText(`${copy.text.discardedBy} <@${action.user.id}>.`)],
     }),
   );
 }
@@ -291,23 +367,10 @@ async function handlePreviewPdf(
 ): Promise<void> {
   const loaded = await getInvoice({ id: invoiceId });
   if (!loaded.ok || !loaded.invoice) {
-    await fail(ctx, action, "That invoice is no longer available.");
+    await fail(ctx, action, "Tato faktura už není dostupná.");
     return;
   }
   await uploadArtifacts(ctx, loaded.invoice);
-}
-
-/** Splits a click into `{ invoiceId, value }` for both buttons and selects. */
-function targetOf(
-  action: SlackInteractionAction,
-): { invoiceId: string; value: string | null } | null {
-  const selected = decodeSelectValue(action.selectedOptionValue);
-  if (selected) {
-    return { invoiceId: selected.invoiceId, value: selected.value };
-  }
-  const buttonValue = action.value?.trim();
-  if (buttonValue) return { invoiceId: buttonValue, value: null };
-  return null;
 }
 
 /**
@@ -324,9 +387,13 @@ export async function handleInvoiceyInteraction(
   /** A URL button still reports a click; opening the link is the whole effect. */
   if (action.actionId === INVOICEY_ACTIONS.openWeb) return;
 
-  const target = targetOf(action);
-  if (!target) {
-    await fail(ctx, action, "That button is missing its invoice reference.");
+  const change = decodeChangeValue(action.selectedOptionValue);
+  const button = decodeButtonValue(action.value ?? undefined);
+  const invoiceId = change?.invoiceId ?? button?.invoiceId;
+  const assumedPaths = change?.assumedPaths ?? button?.assumedPaths ?? [];
+
+  if (!invoiceId) {
+    await fail(ctx, action, "Tomuto tlačítku chybí odkaz na fakturu.");
     return;
   }
 
@@ -335,45 +402,26 @@ export async function handleInvoiceyInteraction(
     await fail(
       ctx,
       action,
-      "Your Slack account is not linked to an Invoicey workspace, so this action was not run. Mention me to get a fresh link.",
+      "Váš účet Slacku není propojený s Invoicey, akce se neprovedla. Zmiňte mě a pošlu vám nový odkaz.",
     );
     return;
   }
 
   await runWithInvoiceyContext(principal, async () => {
-    const { invoiceId, value } = target;
     switch (action.actionId) {
+      case INVOICEY_ACTIONS.change:
+        if (!change) return;
+        return handleChange(ctx, action, change);
       case INVOICEY_ACTIONS.issue:
-        return handleIssue(ctx, action, invoiceId);
+        return handleIssue(ctx, action, invoiceId, assumedPaths);
       case INVOICEY_ACTIONS.markPaid:
-        return handleMarkPaid(ctx, action, invoiceId);
+        return handleMarkPaid(ctx, action, invoiceId, assumedPaths);
       case INVOICEY_ACTIONS.sendEmail:
-        return handleSendEmail(ctx, action, invoiceId);
+        return handleSendEmail(ctx, action, invoiceId, assumedPaths);
       case INVOICEY_ACTIONS.discard:
         return handleDiscard(ctx, action, invoiceId);
       case INVOICEY_ACTIONS.previewPdf:
         return handlePreviewPdf(ctx, action, invoiceId);
-      case INVOICEY_ACTIONS.setDue:
-        if (!value) return;
-        return handleSetDue(ctx, action, invoiceId, value);
-      case INVOICEY_ACTIONS.setCurrency:
-        if (!value) return;
-        return patchDraft(ctx, action, invoiceId, {
-          meta: { currency: value },
-        });
-      case INVOICEY_ACTIONS.setLanguage:
-        if (!value) return;
-        return patchDraft(ctx, action, invoiceId, {
-          meta: { language: value },
-        });
-      case INVOICEY_ACTIONS.setVat: {
-        if (!value) return;
-        const [mode, suppliesAbroad] = value.split("|");
-        if (!mode || !suppliesAbroad) return;
-        return patchDraft(ctx, action, invoiceId, {
-          vat: { mode, suppliesAbroad },
-        });
-      }
       default:
         return;
     }

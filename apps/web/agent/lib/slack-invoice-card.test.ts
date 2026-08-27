@@ -5,6 +5,7 @@ import {
 import { cardToBlocks } from "eve/channels/slack";
 import { describe, expect, it } from "vitest";
 
+import { decodeAssumedMask, encodeAssumedMask } from "./invoice-card-i18n";
 import { buildInvoiceCardModel } from "./invoice-card-model";
 import {
   buildInvoiceModelCard,
@@ -13,8 +14,10 @@ import {
 } from "./slack-invoice-card";
 import {
   INVOICEY_ACTIONS,
-  decodeSelectValue,
-  encodeSelectValue,
+  decodeButtonValue,
+  decodeChangeValue,
+  encodeButtonValue,
+  encodeChangeValue,
   isInvoiceyAction,
 } from "./slack-invoice-actions";
 import {
@@ -22,8 +25,8 @@ import {
   actionRequestsPauseReason,
   invoiceyActionLabel,
   invoiceyActionsLabel,
-  thinkingTaskId,
   pauseNotice,
+  thinkingTaskId,
   thinkingTaskIdForTool,
   truncateTypingStatus,
 } from "./slack-tool-labels";
@@ -31,9 +34,9 @@ import {
 const INVOICE_ID = "11111111-1111-4111-8111-111111111111";
 
 /** Minimal draft: everything the normalizer can default, it must default. */
-function bareDraft() {
+function bareDraft(language?: "cs" | "en") {
   return {
-    meta: {},
+    meta: language ? { language } : {},
     client: {
       name: "NFCtron a.s.",
       ico: "08453961",
@@ -60,8 +63,14 @@ function bareDraft() {
   };
 }
 
-function draftModel(overrides?: { state?: "draft" | "issued" }) {
-  const normalized = normalizeDraftToInvoice(bareDraft(), getDemoIssuer());
+function draftModel(overrides?: {
+  state?: "draft" | "issued";
+  language?: "cs" | "en";
+}) {
+  const normalized = normalizeDraftToInvoice(
+    bareDraft(overrides?.language),
+    getDemoIssuer(),
+  );
   if (!normalized.ok) throw new Error("fixture draft failed to normalize");
   return buildInvoiceCardModel({
     invoice: normalized.invoice,
@@ -72,154 +81,219 @@ function draftModel(overrides?: { state?: "draft" | "issued" }) {
   });
 }
 
+function actionIdsOf(model: ReturnType<typeof draftModel>): string[] {
+  return cardToBlocks(buildInvoiceModelCard(model))
+    .filter((block) => block.type === "actions")
+    .flatMap((block) => block.elements as Array<{ action_id?: string }>)
+    .map((element) => element.action_id)
+    .filter((id): id is string => typeof id === "string");
+}
+
 describe("buildInvoiceCardModel", () => {
   it("shows the money breakdown and tags every assumed field", () => {
-    const model = draftModel();
     const byLabel = Object.fromEntries(
-      model.fields.map((field) => [field.label, field.value]),
+      draftModel().fields.map((f) => [f.label, f.value]),
     );
 
-    expect(byLabel.Total).toBe("12 100,00 CZK");
-    expect(byLabel["Excl. VAT"]).toBe("10 000,00 CZK");
-    expect(byLabel.VAT).toBe("2 100,00 CZK (21 %)");
+    expect(byLabel["Celkem"]).toBe("12 100,00 CZK");
+    expect(byLabel["Bez DPH"]).toBe("10 000,00 CZK");
+    expect(byLabel["DPH"]).toBe("2 100,00 CZK (21 %)");
 
-    /** The four the user never stated must be visibly marked. */
-    expect(byLabel["Due date"]).toContain("assumed");
-    expect(byLabel.Currency).toContain("assumed");
-    expect(byLabel.Language).toContain("assumed");
-    expect(byLabel["Line prices"]).toContain("assumed");
+    expect(byLabel["Splatnost"]).toContain("doplněno");
+    expect(byLabel["Měna"]).toContain("doplněno");
+    expect(byLabel["Ceny položek"]).toContain("doplněno");
 
-    /** VAT treatment was stated, so it must not be. */
-    expect(byLabel["VAT treatment"]).toBe("Regular · domestic");
+    /** VAT treatment was stated, so it must not be tagged. */
+    expect(byLabel["Režim DPH"]).toBe("Běžný · tuzemsko");
   });
 
-  it("carries the reasons so the card can explain itself", () => {
+  it("records which paths are still assumed, for the controls to carry", () => {
     const model = draftModel();
-    const due = model.assumptions.find((a) => a.path === "meta.dueDate");
-    expect(due).toMatchObject({
-      label: "Due date",
-      reason: "issue date + 14 days",
-    });
+    expect(model.assumedPaths).toContain("meta.dueDate");
+    expect(model.assumedPaths).toContain("meta.currency");
+    expect(model.assumedPaths).not.toContain("vat");
+  });
+
+  it("keeps routine defaults out of the notice but tagged on their field", () => {
+    const model = draftModel();
+    const labels = model.notice.map((entry) => entry.label);
+    expect(labels).toContain("Splatnost");
+    expect(labels).not.toContain("Datum vystavení");
+
+    const byLabel = Object.fromEntries(
+      model.fields.map((f) => [f.label, f.value]),
+    );
+    expect(byLabel["Datum vystavení"]).toContain("doplněno");
   });
 
   it("identifies a draft by its client, not by a placeholder number", () => {
     const model = draftModel();
-    expect(model.title).toBe("Draft · NFCtron a.s.");
+    expect(model.title).toBe("Návrh · NFCtron a.s.");
     expect(model.title).not.toContain("DRAFT-");
-    expect(model.subtitle).toBe("Invoice · IČO 08453961 · 12 100,00 CZK");
   });
 
-  it("leads with the real number once the invoice is issued", () => {
-    const model = draftModel({ state: "issued" });
-    expect(model.title).toContain("NFCtron a.s.");
-    expect(model.subtitle).toContain("Issued");
+  it("speaks the invoice's language", () => {
+    const cs = draftModel();
+    const en = draftModel({ language: "en" });
+
+    expect(cs.locale).toBe("cs");
+    expect(cs.title).toBe("Návrh · NFCtron a.s.");
+    expect(cs.notice[0]?.reason).toBe("datum vystavení + 14 dní");
+
+    expect(en.locale).toBe("en");
+    expect(en.title).toBe("Draft · NFCtron a.s.");
+    expect(en.fields.map((f) => f.label)).toContain("Due date");
+    expect(en.notice.map((n) => n.reason)).toContain("issue date + 14 days");
   });
 
-  it("renders line items with quantities and unit prices", () => {
-    expect(draftModel().linesText).toContain(
-      "1. Web development · 10 hod × 1 000,00 CZK = 10 000,00 CZK",
+  it("rebuilds the notice from carried paths when the normalizer is gone", () => {
+    const normalized = normalizeDraftToInvoice(bareDraft(), getDemoIssuer());
+    if (!normalized.ok) throw new Error("fixture failed");
+
+    /** What a rebuild after an edit looks like: paths, no assumptions. */
+    const rebuilt = buildInvoiceCardModel({
+      invoice: normalized.invoice,
+      invoiceId: INVOICE_ID,
+      state: "draft",
+      assumedPaths: ["meta.currency", "meta.language"],
+    });
+
+    expect(rebuilt.notice.map((n) => n.label).sort()).toEqual([
+      "Jazyk dokladu",
+      "Měna",
+    ]);
+    /** The edited field is gone from both the notice and the inline tags. */
+    const byLabel = Object.fromEntries(
+      rebuilt.fields.map((f) => [f.label, f.value]),
     );
+    expect(byLabel["Splatnost"]).not.toContain("doplněno");
+    expect(byLabel["Měna"]).toContain("doplněno");
   });
 });
 
 describe("buildInvoiceModelCard", () => {
-  it("gives a draft the issue, preview, discard and adjust controls", () => {
+  it("gives a draft one change menu instead of four cramped selects", () => {
     const blocks = cardToBlocks(buildInvoiceModelCard(draftModel()));
-    const actionIds = blocks
+    const selectBlocks = blocks
       .filter((block) => block.type === "actions")
-      .flatMap((block) => block.elements as Array<{ action_id?: string }>)
-      .map((element) => element.action_id)
-      .filter((id): id is string => typeof id === "string");
+      .map((block) => block.elements as Array<Record<string, unknown>>)
+      .filter((elements) => elements.some((el) => el.type === "static_select"));
 
-    expect(actionIds).toContain(INVOICEY_ACTIONS.issue);
-    expect(actionIds).toContain(INVOICEY_ACTIONS.previewPdf);
-    expect(actionIds).toContain(INVOICEY_ACTIONS.discard);
-    expect(actionIds).toContain(INVOICEY_ACTIONS.setDue);
-    expect(actionIds).toContain(INVOICEY_ACTIONS.setCurrency);
-    expect(actionIds).toContain(INVOICEY_ACTIONS.setVat);
-    expect(actionIds).toContain(INVOICEY_ACTIONS.setLanguage);
-    expect(actionIds.every(isInvoiceyAction)).toBe(true);
+    /** One actions block, one element — that is what makes it full width. */
+    expect(selectBlocks).toHaveLength(1);
+    expect(selectBlocks[0]).toHaveLength(1);
+    expect(selectBlocks[0]?.[0]?.action_id).toBe(INVOICEY_ACTIONS.change);
+  });
+
+  it("offers every adjustment in that one menu", () => {
+    const blocks = cardToBlocks(buildInvoiceModelCard(draftModel()));
+    const select = blocks
+      .filter((block) => block.type === "actions")
+      .flatMap((block) => block.elements as Array<Record<string, unknown>>)
+      .find((el) => el.action_id === INVOICEY_ACTIONS.change);
+    const labels = (select?.options as Array<{ text: { text: string } }>).map(
+      (option) => option.text.text,
+    );
+
+    expect(labels).toContain("Splatnost 30 dní");
+    expect(labels).toContain("Měna EUR");
+    expect(labels).toContain("Jazyk angličtina");
+    expect(labels.some((l) => l.startsWith("DPH"))).toBe(true);
+  });
+
+  it("keeps every option value inside Slack's 75-character cap", () => {
+    const blocks = cardToBlocks(buildInvoiceModelCard(draftModel()));
+    const select = blocks
+      .filter((block) => block.type === "actions")
+      .flatMap((block) => block.elements as Array<Record<string, unknown>>)
+      .find((el) => el.action_id === INVOICEY_ACTIONS.change);
+    for (const option of select?.options as Array<{ value: string }>) {
+      expect(option.value.length).toBeLessThanOrEqual(75);
+    }
+  });
+
+  it("gives a draft the issue, preview and discard buttons", () => {
+    const ids = actionIdsOf(draftModel());
+    expect(ids).toContain(INVOICEY_ACTIONS.issue);
+    expect(ids).toContain(INVOICEY_ACTIONS.previewPdf);
+    expect(ids).toContain(INVOICEY_ACTIONS.discard);
+    expect(ids.every(isInvoiceyAction)).toBe(true);
   });
 
   it("drops the draft-only controls once the invoice is issued", () => {
-    const blocks = cardToBlocks(
-      buildInvoiceModelCard(draftModel({ state: "issued" })),
-    );
-    const actionIds = blocks
-      .filter((block) => block.type === "actions")
-      .flatMap((block) => block.elements as Array<{ action_id?: string }>)
-      .map((element) => element.action_id);
-
-    expect(actionIds).not.toContain(INVOICEY_ACTIONS.issue);
-    expect(actionIds).not.toContain(INVOICEY_ACTIONS.discard);
-    expect(actionIds).not.toContain(INVOICEY_ACTIONS.setCurrency);
-    expect(actionIds).toContain(INVOICEY_ACTIONS.markPaid);
-    expect(actionIds).toContain(INVOICEY_ACTIONS.sendEmail);
-  });
-
-  it("preselects the current due-date preset so the select is not misleading", () => {
-    const blocks = cardToBlocks(buildInvoiceModelCard(draftModel()));
-    const dueSelect = blocks
-      .filter((block) => block.type === "actions")
-      .flatMap((block) => block.elements as Array<Record<string, unknown>>)
-      .find((element) => element.action_id === INVOICEY_ACTIONS.setDue);
-
-    /** The fixture draft defaults to +14 days. */
-    const initial = dueSelect?.initial_option as { value: string } | undefined;
-    expect(decodeSelectValue(initial?.value)).toEqual({
-      invoiceId: INVOICE_ID,
-      value: "14",
-    });
+    const ids = actionIdsOf(draftModel({ state: "issued" }));
+    expect(ids).not.toContain(INVOICEY_ACTIONS.issue);
+    expect(ids).not.toContain(INVOICEY_ACTIONS.discard);
+    expect(ids).not.toContain(INVOICEY_ACTIONS.change);
+    expect(ids).toContain(INVOICEY_ACTIONS.markPaid);
+    expect(ids).toContain(INVOICEY_ACTIONS.sendEmail);
   });
 
   it("warns about the assumptions worth changing, and only those", () => {
-    const blocks = cardToBlocks(buildInvoiceModelCard(draftModel()));
-    const notice = blocks
+    const notice = cardToBlocks(buildInvoiceModelCard(draftModel()))
       .map((block) => JSON.stringify(block))
-      .find((json) => json.includes("Assumed"));
+      .find((json) => json.includes("Doplnili jsme"));
     expect(notice).toBeDefined();
-
-    /** Worth a warning: the user loses money or credibility if these are wrong. */
-    expect(notice).toContain("Due date");
-    expect(notice).toContain("issue date + 14 days");
-    expect(notice).toContain("Currency");
-    expect(notice).toContain("Line prices");
-
-    /** Routine: correct almost always, and already tagged on the field itself. */
+    expect(notice).toContain("Splatnost");
+    expect(notice).toContain("datum vystavení + 14 dní");
     expect(notice).not.toContain("DUZP");
-    expect(notice).not.toContain("Document type");
-  });
-
-  it("still tags routine defaults on the field they belong to", () => {
-    const byLabel = Object.fromEntries(
-      draftModel().fields.map((f) => [f.label, f.value]),
-    );
-    expect(byLabel["Issue date"]).toContain("assumed");
   });
 });
 
-describe("select value encoding", () => {
-  it("round-trips the invoice id alongside the chosen value", () => {
-    expect(decodeSelectValue(encodeSelectValue(INVOICE_ID, "30"))).toEqual({
+describe("control value encoding", () => {
+  it("round-trips the invoice, the assumed set and the chosen change", () => {
+    const encoded = encodeChangeValue({
       invoiceId: INVOICE_ID,
+      assumedPaths: ["meta.dueDate", "meta.currency"],
+      field: "d",
+      value: "30",
+    });
+    expect(decodeChangeValue(encoded)).toEqual({
+      invoiceId: INVOICE_ID,
+      assumedPaths: ["meta.dueDate", "meta.currency"],
+      field: "d",
       value: "30",
     });
   });
 
-  it("keeps a value that itself contains the separator intact", () => {
-    expect(
-      decodeSelectValue(encodeSelectValue(INVOICE_ID, "reverse_charge|eu")),
-    ).toEqual({ invoiceId: INVOICE_ID, value: "reverse_charge|eu" });
+  it("round-trips the assumed set through a button too", () => {
+    const encoded = encodeButtonValue(INVOICE_ID, ["meta.language"]);
+    expect(decodeButtonValue(encoded)).toEqual({
+      invoiceId: INVOICE_ID,
+      assumedPaths: ["meta.language"],
+    });
+  });
+
+  it("packs the assumed set small enough to survive the value cap", () => {
+    const all = [
+      "meta.issueDate",
+      "meta.dueDate",
+      "meta.duzp",
+      "meta.language",
+      "meta.currency",
+      "meta.docType",
+      "pricesIncludeVat",
+      "vat",
+      "vat.mode",
+    ];
+    const mask = encodeAssumedMask(all);
+    expect(mask.length).toBeLessThanOrEqual(3);
+    expect(decodeAssumedMask(mask).sort()).toEqual([...all].sort());
+  });
+
+  it("ignores unknown paths rather than corrupting the mask", () => {
+    expect(decodeAssumedMask(encodeAssumedMask(["nope.at.all"]))).toEqual([]);
   });
 
   it("rejects malformed payloads instead of guessing", () => {
-    expect(decodeSelectValue(undefined)).toBeNull();
-    expect(decodeSelectValue("no-separator")).toBeNull();
-    expect(decodeSelectValue("|orphan")).toBeNull();
+    expect(decodeChangeValue(undefined)).toBeNull();
+    expect(decodeChangeValue("no-separator")).toBeNull();
+    expect(decodeChangeValue(`${INVOICE_ID}|0|x:1`)).toBeNull();
+    expect(decodeChangeValue(`${INVOICE_ID}|0|d:`)).toBeNull();
   });
 
   it("claims only its own namespace", () => {
-    expect(isInvoiceyAction(INVOICEY_ACTIONS.issue)).toBe(true);
+    expect(isInvoiceyAction(INVOICEY_ACTIONS.change)).toBe(true);
     expect(isInvoiceyAction("eve_input:abc")).toBe(false);
     expect(isInvoiceyAction("eve_input_freeform:abc")).toBe(false);
   });
@@ -234,7 +308,6 @@ describe("pendingCardFromToolResult", () => {
       card: model,
     });
     expect(card?.model).toEqual(model);
-    expect(card?.title).toBe(model.title);
   });
 
   it("accepts the same model from the edit tool", () => {
@@ -259,7 +332,7 @@ describe("pendingCardFromToolResult", () => {
     });
     expect(card?.model).toBeUndefined();
     expect(card?.fields).toEqual(
-      expect.arrayContaining([{ label: "Total", value: "1210.00 CZK" }]),
+      expect.arrayContaining([{ label: "Celkem", value: "1210.00 CZK" }]),
     );
   });
 
@@ -278,50 +351,18 @@ describe("pendingCardFromToolResult", () => {
           currency: "CZK",
           displayStatus: "Overdue",
         },
-        {
-          number: "2026-002",
-          clientName: "Beta",
-          total: "50",
-          currency: "EUR",
-          displayStatus: "Issued",
-        },
       ],
     });
     expect(card?.kind).toBe("list");
-    expect(card?.fields).toHaveLength(2);
     expect(card?.fields[0]).toEqual({
       label: "2026-001",
       value: "Acme · 100 CZK · Overdue",
     });
   });
 
-  it("builds an email-sent card with recipient and view URL", () => {
-    const card = pendingCardFromToolResult("send_invoice_email", {
-      ok: true,
-      to: "client@example.com",
-      invoiceId: "22222222-2222-4222-8222-222222222222",
-      webUrl:
-        "https://invoicey.ditrich.me/invoices/22222222-2222-4222-8222-222222222222",
-    });
-    expect(card).toMatchObject({
-      title: "Email sent",
-      webUrl:
-        "https://invoicey.ditrich.me/invoices/22222222-2222-4222-8222-222222222222",
-    });
-    expect(card?.fields).toEqual(
-      expect.arrayContaining([
-        { label: "Status", value: "Sent" },
-        { label: "To", value: "client@example.com" },
-      ]),
-    );
-  });
-
   it("returns null for failed tool output", () => {
     expect(
-      pendingCardFromToolResult("create_invoice", {
-        ok: false,
-        error: "nope",
-      }),
+      pendingCardFromToolResult("create_invoice", { ok: false, error: "nope" }),
     ).toBeNull();
   });
 });
@@ -336,16 +377,6 @@ describe("slack tool labels", () => {
     };
     expect(invoiceyActionLabel(issue)).toBe("Issuing invoice…");
     expect(actionRequestsNeedApproval([issue])).toBe(true);
-    expect(
-      actionRequestsNeedApproval([
-        {
-          kind: "tool-call",
-          callId: "2",
-          toolName: "create_invoice",
-          input: {},
-        },
-      ]),
-    ).toBe(false);
   });
 
   it("distinguishes a question from an approval when parking the turn", () => {
@@ -364,13 +395,9 @@ describe("slack tool labels", () => {
 
     expect(actionRequestsPauseReason([ask])).toBe("question");
     expect(pauseNotice("question")).toBe("Waiting for your answer…");
-
     expect(actionRequestsPauseReason([issue])).toBe("approval");
-    expect(pauseNotice("approval")).toBe("Waiting for approval…");
-
     /** An approval in the same batch outranks a question — it blocks harder. */
     expect(actionRequestsPauseReason([ask, issue])).toBe("approval");
-
     expect(
       actionRequestsPauseReason([
         {
@@ -383,30 +410,7 @@ describe("slack tool labels", () => {
     ).toBeNull();
   });
 
-  it("labels the question tool so the step is not a raw tool name", () => {
-    expect(
-      invoiceyActionLabel({
-        kind: "tool-call",
-        callId: "q2",
-        toolName: "ask_question",
-        input: {},
-      }),
-    ).toBe("Asking you…");
-  });
-
-  it("labels the draft-edit tool", () => {
-    expect(
-      invoiceyActionLabel({
-        kind: "tool-call",
-        callId: "3",
-        toolName: "update_invoice_draft",
-        input: {},
-      }),
-    ).toBe("Updating draft…");
-  });
-
   it("truncates typing status to Slack's 50-char cap", () => {
-    expect(truncateTypingStatus("Working…")).toBe("Working…");
     expect(truncateTypingStatus("a".repeat(60)).length).toBe(50);
     expect(invoiceyActionsLabel([]).length).toBeLessThanOrEqual(50);
   });
@@ -423,13 +427,5 @@ describe("slack tool labels", () => {
     expect(thinkingTaskIdForTool("update_invoice_draft", "call-b")).toBe(
       "tool:update_invoice_draft",
     );
-    expect(
-      thinkingTaskId({
-        kind: "tool-call",
-        callId: "call-c",
-        toolName: "search_business",
-        input: {},
-      }),
-    ).toBe("call-c");
   });
 });

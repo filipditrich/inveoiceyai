@@ -1,5 +1,13 @@
-import { formatVatIntent, type DraftAssumption } from "@invoicey/invoice-tools";
 import type { Invoice } from "@invoicey/invoice-core/schema";
+import type { DraftAssumption } from "@invoicey/invoice-tools";
+
+import {
+  ROUTINE_PATHS,
+  copyFor,
+  labelFor,
+  reasonFor,
+  type CardLocale,
+} from "./invoice-card-i18n";
 
 /**
  * Serializable description of one invoice Card.
@@ -17,37 +25,31 @@ export interface InvoiceCardModel {
   subtitle: string;
   /** Lifecycle label driving which actions render. */
   state: InvoiceCardState;
+  locale: CardLocale;
   fields: Array<{ label: string; value: string }>;
   /** Rendered line-item block, omitted when there is nothing useful to show. */
   linesText?: string;
-  assumptions: DraftAssumption[];
+  notice: CardNotice[];
+  /**
+   * Draft paths still standing on their default. Round-tripped through the
+   * card's own controls so an edit to one field does not silently clear the
+   * warnings on the others.
+   */
+  assumedPaths: string[];
   webUrl: string | null;
   fallbackText: string;
 }
 
+/** One line of the "we filled this in" / "check this" block. */
+export interface CardNotice {
+  kind: "default" | "suspect";
+  label: string;
+  value: string;
+  reason: string;
+}
+
 export type InvoiceCardState =
   "draft" | "issued" | "paid" | "cancelled" | "readonly";
-
-/** Marks a value the user never supplied, so the card can flag it inline. */
-const ASSUMED_SUFFIX = "  ·  _assumed_";
-
-const LANGUAGE_LABELS: Record<string, string> = {
-  cs: "Czech",
-  en: "English",
-};
-
-const PAYMENT_LABELS: Record<string, string> = {
-  transfer: "Bank transfer",
-  cash: "Cash",
-  card: "Card",
-};
-
-const DOC_TYPE_LABELS: Record<string, string> = {
-  invoice: "Invoice",
-  proforma: "Proforma",
-  advance: "Advance",
-  credit_note: "Credit note",
-};
 
 /** Czech-style money: `12 100,00 CZK`. */
 export function formatMoney(amount: number, currency: string): string {
@@ -55,19 +57,12 @@ export function formatMoney(amount: number, currency: string): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
-  /** Normalize the various no-break spaces Intl emits so tests stay stable. */
-  return `${formatted.replace(/[  ]/gu, " ")} ${currency}`;
-}
-
-/** `NFCtron a.s. · IČO 08453961` */
-export function clientLine(invoice: Invoice): string {
-  const parts = [invoice.client.name];
-  if (invoice.client.ico) parts.push(`IČO ${invoice.client.ico}`);
-  return parts.join(" · ");
-}
-
-function assumedPaths(assumptions: readonly DraftAssumption[]): Set<string> {
-  return new Set(assumptions.map((a) => a.path));
+  /**
+   * Intl groups thousands with a non-breaking space (U+00A0, and a narrow one
+   * in some locales). Fold every Unicode space separator to a plain space so
+   * the string is comparable and copy-pastes cleanly out of Slack.
+   */
+  return `${formatted.replace(/\p{Zs}/gu, " ")} ${currency}`;
 }
 
 function vatRateSummary(invoice: Invoice): string | null {
@@ -78,9 +73,9 @@ function vatRateSummary(invoice: Invoice): string | null {
   return rates.map((rate) => `${rate} %`).join(", ");
 }
 
-/** Up to five lines as `1. Web development · 10 hod × 1 000,00 = 10 000,00`. */
-function renderLines(invoice: Invoice): string | undefined {
+function renderLines(invoice: Invoice, locale: CardLocale): string | undefined {
   if (invoice.items.length === 0) return undefined;
+  const copy = copyFor(locale);
   const shown = invoice.items.slice(0, 5);
   const rows = shown.map((item) => {
     const unitPrice = formatMoney(
@@ -91,93 +86,165 @@ function renderLines(invoice: Invoice): string | undefined {
     return `${item.position}. ${item.description} · ${item.quantity} ${item.unit} × ${unitPrice} = ${lineTotal}`;
   });
   const hidden = invoice.items.length - shown.length;
-  if (hidden > 0) rows.push(`_+${hidden} more line(s)_`);
-  return `*Lines* _(excl. VAT)_\n${rows.join("\n")}`;
+  if (hidden > 0) rows.push(`_+${hidden} ${copy.text.moreLines}_`);
+  return `*${copy.text.lines}* _(${copy.text.linesNote})_\n${rows.join("\n")}`;
 }
+
+const STATE_LABEL_KEYS = {
+  draft: "draft",
+  issued: "issued",
+  paid: "paid",
+  cancelled: "cancelled",
+  readonly: "readonly",
+} as const;
 
 /**
  * Builds the full card model for one invoice.
  *
- * Every field a wrong guess could land in is shown, and any field the
- * normalizer filled in itself is tagged `assumed` in place — the point is that
- * nothing reaches `issue` without having been visible first.
+ * Every field a wrong guess could land in is shown, and any field still
+ * standing on a server default is tagged in place — nothing reaches `issue`
+ * without having been visible first.
+ *
+ * `assumptions` comes from the normalizer on a fresh draft. On a rebuild after
+ * an edit the normalizer no longer knows what the user originally stated, so
+ * `assumedPaths` is passed instead — recovered from the card's own controls.
  */
 export function buildInvoiceCardModel(input: {
   invoice: Invoice;
   invoiceId: string | null;
   state: InvoiceCardState;
   assumptions?: readonly DraftAssumption[];
+  assumedPaths?: readonly string[];
   webUrl?: string | null;
 }): InvoiceCardModel {
   const { invoice, invoiceId, state } = input;
-  const assumptions = [...(input.assumptions ?? [])];
-  const assumed = assumedPaths(assumptions);
+  const locale: CardLocale = invoice.meta.language === "en" ? "en" : "cs";
+  const copy = copyFor(locale);
   const currency = invoice.meta.currency;
 
+  const notice: CardNotice[] = [];
+  const assumedPaths = new Set<string>();
+
+  if (input.assumptions) {
+    for (const assumption of input.assumptions) {
+      if (assumption.kind !== "suspect") assumedPaths.add(assumption.path);
+      if (assumption.severity === "routine") continue;
+      notice.push({
+        kind: assumption.kind,
+        label: labelFor(assumption.path, locale) ?? assumption.label,
+        value: assumption.value,
+        /** A suspect's reason carries a computed day count; keep it verbatim. */
+        reason:
+          assumption.kind === "suspect"
+            ? assumption.reason
+            : (reasonFor(assumption.path, locale) ?? assumption.reason),
+      });
+    }
+  } else if (input.assumedPaths) {
+    for (const path of input.assumedPaths) assumedPaths.add(path);
+  }
+
+  /** Current on-invoice value for a path, so a rebuilt notice quotes real data. */
+  const valueForPath = (path: string): string => {
+    switch (path) {
+      case "meta.issueDate":
+        return invoice.meta.issueDate;
+      case "meta.dueDate":
+        return invoice.meta.dueDate;
+      case "meta.duzp":
+        return invoice.meta.duzp;
+      case "meta.language":
+        return copy.language[locale];
+      case "meta.currency":
+        return currency;
+      case "meta.docType":
+        return copy.docType[invoice.meta.docType] ?? invoice.meta.docType;
+      case "pricesIncludeVat":
+        return copy.text.excludingVat;
+      default:
+        return `${copy.vatMode[invoice.vat.mode] ?? invoice.vat.mode} · ${copy.suppliesAbroad[invoice.vat.suppliesAbroad] ?? invoice.vat.suppliesAbroad}`;
+    }
+  };
+
+  /**
+   * Rebuilt cards have no `assumptions` to read — the normalizer cannot tell,
+   * after the fact, which values the user actually stated. The notice is
+   * reconstructed from the carried paths instead, which is what keeps the
+   * other warnings standing when one field is edited.
+   */
+  if (!input.assumptions) {
+    for (const path of assumedPaths) {
+      if (ROUTINE_PATHS.has(path)) continue;
+      const label = labelFor(path, locale);
+      const reason = reasonFor(path, locale);
+      if (!label || !reason) continue;
+      notice.push({
+        kind: "default",
+        label,
+        value: valueForPath(path),
+        reason,
+      });
+    }
+  }
+
   const mark = (path: string, value: string): string =>
-    assumed.has(path) ? `${value}${ASSUMED_SUFFIX}` : value;
+    assumedPaths.has(path) ? `${value}  ·  _${copy.text.assumedTag}_` : value;
 
   const vatRates = vatRateSummary(invoice);
   const fields: Array<{ label: string; value: string }> = [
     {
-      label: "Total",
+      label: copy.field.total,
       value: formatMoney(invoice.totals.total, currency),
     },
     {
-      label: "Excl. VAT",
+      label: copy.field.subtotal,
       value: formatMoney(invoice.totals.subtotal, currency),
     },
     {
-      label: "VAT",
+      label: copy.field.vat,
       value:
         invoice.totals.vatTotal === 0
           ? "—"
           : `${formatMoney(invoice.totals.vatTotal, currency)}${vatRates ? ` (${vatRates})` : ""}`,
     },
+    { label: copy.field.currency, value: mark("meta.currency", currency) },
     {
-      label: "Currency",
-      value: mark("meta.currency", currency),
-    },
-    {
-      label: "Issue date",
+      label: copy.field.issueDate,
       value: mark("meta.issueDate", invoice.meta.issueDate),
     },
     {
-      label: "Due date",
+      label: copy.field.dueDate,
       value: mark("meta.dueDate", invoice.meta.dueDate),
     },
     {
-      label: "VAT treatment",
+      label: copy.field.vatTreatment,
       value: mark(
-        assumed.has("vat.mode") ? "vat.mode" : "vat",
-        formatVatIntent(invoice.vat),
+        assumedPaths.has("vat.mode") ? "vat.mode" : "vat",
+        `${copy.vatMode[invoice.vat.mode] ?? invoice.vat.mode} · ${copy.suppliesAbroad[invoice.vat.suppliesAbroad] ?? invoice.vat.suppliesAbroad}`,
       ),
     },
     {
-      label: "Payment",
-      value: PAYMENT_LABELS[invoice.payment.method] ?? invoice.payment.method,
+      label: copy.field.payment,
+      value: copy.payment[invoice.payment.method] ?? invoice.payment.method,
     },
     {
-      label: "Language",
-      value: mark(
-        "meta.language",
-        LANGUAGE_LABELS[invoice.meta.language] ?? invoice.meta.language,
-      ),
+      label: copy.field.language,
+      value: mark("meta.language", copy.language[locale]),
     },
     {
-      label: "Line prices",
-      value: mark("pricesIncludeVat", "excluding VAT"),
+      label: copy.field.priceBasis,
+      value: mark("pricesIncludeVat", copy.text.excludingVat),
     },
   ];
 
+  const stateLabel = copy.state[STATE_LABEL_KEYS[state]];
   const docTypeLabel =
-    DOC_TYPE_LABELS[invoice.meta.docType] ?? invoice.meta.docType;
-  const stateLabel = STATE_LABELS[state];
+    copy.docType[invoice.meta.docType] ?? invoice.meta.docType;
 
   /**
-   * A draft's number is a `DRAFT-<timestamp>` placeholder that is replaced at
-   * issue, so leading with it says nothing. The client is what identifies a
-   * draft to a person; the real number only earns the headline once it exists.
+   * A draft's number is a `DRAFT-<timestamp>` placeholder replaced at issue, so
+   * leading with it says nothing. The client identifies a draft to a person;
+   * the real number only earns the headline once it exists.
    */
   const title =
     state === "draft"
@@ -198,21 +265,15 @@ export function buildInvoiceCardModel(input: {
     title,
     subtitle,
     state,
+    locale,
     fields,
-    linesText: renderLines(invoice),
-    assumptions,
+    linesText: renderLines(invoice, locale),
+    notice,
+    assumedPaths: [...assumedPaths],
     webUrl: input.webUrl ?? null,
     fallbackText: `${stateLabel} ${invoice.meta.number} · ${invoice.client.name} · ${formatMoney(invoice.totals.total, currency)}`,
   };
 }
-
-const STATE_LABELS: Record<InvoiceCardState, string> = {
-  draft: "Draft",
-  issued: "Issued",
-  paid: "Paid",
-  cancelled: "Cancelled",
-  readonly: "Invoice",
-};
 
 /** Maps a persisted summary's lifecycle flags onto a card state. */
 export function cardStateFromSummary(summary: {
