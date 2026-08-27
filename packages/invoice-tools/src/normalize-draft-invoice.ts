@@ -29,6 +29,67 @@ export interface NormalizedIssue {
   message: string;
 }
 
+/**
+ * One field the normalizer filled in because the caller left it out.
+ *
+ * Callers surface these so a person can see what was assumed and correct it
+ * before the invoice is issued — a silent default the user never sees is the
+ * same bug as a wrong one.
+ */
+export interface DraftAssumption {
+  /** Dotted draft path, e.g. `meta.dueDate`. Stable enough to patch by. */
+  path: string;
+  /** Short human label, e.g. `Due date`. */
+  label: string;
+  /** Resolved value, already display-formatted. */
+  value: string;
+  /** Why this value was chosen. */
+  reason: string;
+  /**
+   * `notable` when a person plausibly wants this changed and getting it wrong
+   * costs them something — the due date, the currency, the price basis.
+   * `routine` when the default is what almost everyone means (issue date is
+   * today, DUZP follows the issue date, a document is an invoice). Both are
+   * tagged in place on the card; only `notable` ones are worth a warning.
+   */
+  severity: "notable" | "routine";
+}
+
+const LANGUAGE_LABELS: Record<InvoiceLanguage, string> = {
+  cs: "Czech",
+  en: "English",
+};
+
+const DOC_TYPE_LABELS: Record<string, string> = {
+  invoice: "Invoice",
+  proforma: "Proforma",
+  advance: "Advance",
+  credit_note: "Credit note",
+};
+
+const VAT_MODE_LABELS: Record<string, string> = {
+  regular: "Regular",
+  reverse_charge: "Reverse charge",
+  oss: "OSS",
+};
+
+const SUPPLIES_ABROAD_LABELS: Record<string, string> = {
+  none: "domestic",
+  eu: "EU",
+  non_eu: "outside EU",
+};
+
+/** `Regular · domestic` — the pair a person actually reads. */
+export function formatVatIntent(vat: {
+  mode: string;
+  suppliesAbroad: string;
+}): string {
+  const mode = VAT_MODE_LABELS[vat.mode] ?? vat.mode;
+  const abroad =
+    SUPPLIES_ABROAD_LABELS[vat.suppliesAbroad] ?? vat.suppliesAbroad;
+  return `${mode} · ${abroad}`;
+}
+
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
 }
@@ -65,7 +126,10 @@ function vatFromPreset(preset: unknown): Record<string, unknown> | undefined {
 export function normalizeDraftToInvoice(
   draft: unknown,
   issuer: IssuerSnapshot,
-): { ok: true; invoice: Invoice } | { ok: false; issues: NormalizedIssue[] } {
+):
+  | { ok: true; invoice: Invoice; assumptions: DraftAssumption[] }
+  | { ok: false; issues: NormalizedIssue[] } {
+  const assumptions: DraftAssumption[] = [];
   if (!isRecord(draft)) {
     return {
       ok: false,
@@ -81,37 +145,99 @@ export function normalizeDraftToInvoice(
     };
   }
 
-  const issueDate =
-    typeof metaRaw.issueDate === "string" && metaRaw.issueDate.length > 0
-      ? metaRaw.issueDate
-      : todayPragueYmd();
+  const issueDateGiven =
+    typeof metaRaw.issueDate === "string" && metaRaw.issueDate.length > 0;
+  const issueDate = issueDateGiven
+    ? (metaRaw.issueDate as string)
+    : todayPragueYmd();
+  if (!issueDateGiven) {
+    assumptions.push({
+      path: "meta.issueDate",
+      label: "Issue date",
+      value: issueDate,
+      reason: "today in Europe/Prague",
+      severity: "routine",
+    });
+  }
 
   const draftStamp = formatInTimeZone(new Date(), PRAGUE, "yyyyMMdd-HHmm");
   const dueDefault = addCalendarDaysYmd(issueDate, 14);
 
+  const dueDateGiven =
+    typeof metaRaw.dueDate === "string" && metaRaw.dueDate.length > 0;
+  const dueDate = dueDateGiven ? (metaRaw.dueDate as string) : dueDefault;
+  if (!dueDateGiven) {
+    assumptions.push({
+      path: "meta.dueDate",
+      label: "Due date",
+      value: dueDate,
+      reason: "issue date + 14 days",
+      severity: "notable",
+    });
+  }
+
+  const duzpGiven = typeof metaRaw.duzp === "string" && metaRaw.duzp.length > 0;
+  const duzp = duzpGiven ? (metaRaw.duzp as string) : issueDate;
+  if (!duzpGiven) {
+    assumptions.push({
+      path: "meta.duzp",
+      label: "DUZP",
+      value: duzp,
+      reason: "same as issue date",
+      severity: "routine",
+    });
+  }
+
+  const languageParsed = InvoiceLanguageSchema.safeParse(metaRaw.language);
+  const language = languageParsed.success
+    ? languageParsed.data
+    : ("cs" as InvoiceLanguage);
+  if (!languageParsed.success) {
+    assumptions.push({
+      path: "meta.language",
+      label: "Document language",
+      value: LANGUAGE_LABELS[language],
+      reason: "not specified",
+      severity: "notable",
+    });
+  }
+
+  const currencyParsed = InvoiceCurrencySchema.safeParse(metaRaw.currency);
+  const currency = currencyParsed.success
+    ? currencyParsed.data
+    : ("CZK" as InvoiceCurrency);
+  if (!currencyParsed.success) {
+    assumptions.push({
+      path: "meta.currency",
+      label: "Currency",
+      value: currency,
+      reason: "not specified",
+      severity: "notable",
+    });
+  }
+
+  const docType = (metaRaw.docType ?? "invoice") as string;
+  if (metaRaw.docType == null) {
+    assumptions.push({
+      path: "meta.docType",
+      label: "Document type",
+      value: DOC_TYPE_LABELS[docType] ?? docType,
+      reason: "not specified",
+      severity: "routine",
+    });
+  }
+
   const mergedMeta = {
-    docType: metaRaw.docType ?? "invoice",
+    docType,
     number:
       typeof metaRaw.number === "string" && metaRaw.number.length > 0
         ? metaRaw.number
         : `DRAFT-${draftStamp}`,
     issueDate,
-    dueDate:
-      typeof metaRaw.dueDate === "string" && metaRaw.dueDate.length > 0
-        ? metaRaw.dueDate
-        : dueDefault,
-    duzp:
-      typeof metaRaw.duzp === "string" && metaRaw.duzp.length > 0
-        ? metaRaw.duzp
-        : issueDate,
-    language: (() => {
-      const parsed = InvoiceLanguageSchema.safeParse(metaRaw.language);
-      return parsed.success ? parsed.data : ("cs" as InvoiceLanguage);
-    })(),
-    currency: (() => {
-      const parsed = InvoiceCurrencySchema.safeParse(metaRaw.currency);
-      return parsed.success ? parsed.data : ("CZK" as InvoiceCurrency);
-    })(),
+    dueDate,
+    duzp,
+    language,
+    currency,
     correctedInvoiceNumber:
       typeof metaRaw.correctedInvoiceNumber === "string"
         ? metaRaw.correctedInvoiceNumber
@@ -182,8 +308,27 @@ export function normalizeDraftToInvoice(
   }
 
   let vatData = vatParsed.data;
-  if (!issuer.vatPayer) {
+  if (!issuer.vatPayer && vatData.mode !== "regular") {
+    assumptions.push({
+      path: "vat.mode",
+      label: "VAT mode",
+      value: VAT_MODE_LABELS.regular,
+      reason: "issuer is not a VAT payer",
+      severity: "notable",
+    });
     vatData = { ...vatData, mode: "regular" };
+  } else if (!issuer.vatPayer) {
+    vatData = { ...vatData, mode: "regular" };
+  }
+  /** A bare `vatPreset` reached here without an explicit `vat` intent. */
+  if (!isRecord(draft.vat)) {
+    assumptions.push({
+      path: "vat",
+      label: "VAT treatment",
+      value: formatVatIntent(vatData),
+      reason: `expanded from preset "${String(draft.vatPreset)}"`,
+      severity: "notable",
+    });
   }
 
   const paymentRaw = draft.payment;
@@ -278,6 +423,25 @@ export function normalizeDraftToInvoice(
     i += 1;
   }
 
+  /**
+   * "10 000 for the website" is ambiguous the moment VAT applies, and the
+   * gap between the two readings is the VAT rate. Surface the reading we
+   * took whenever the caller did not state one.
+   */
+  const vatApplies =
+    issuer.vatPayer &&
+    vatData.mode !== "reverse_charge" &&
+    lineInputs.some((line) => line.vatRate > 0);
+  if (draft.pricesIncludeVat == null && vatApplies) {
+    assumptions.push({
+      path: "pricesIncludeVat",
+      label: "Line prices",
+      value: "excluding VAT",
+      reason: "not specified",
+      severity: "notable",
+    });
+  }
+
   const metaParsed = InvoiceMetaSchema.safeParse(mergedMeta);
   if (!metaParsed.success) {
     return {
@@ -322,5 +486,5 @@ export function normalizeDraftToInvoice(
     };
   }
 
-  return { ok: true, invoice: invParsed.data };
+  return { ok: true, invoice: invParsed.data, assumptions };
 }

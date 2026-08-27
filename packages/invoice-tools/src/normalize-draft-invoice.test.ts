@@ -317,3 +317,105 @@ describe("normalizeDraftToInvoice", () => {
     }
   });
 });
+
+describe("normalizeDraftToInvoice assumptions", () => {
+  const client = {
+    name: "Test s.r.o.",
+    ico: "44444444",
+    dic: "CZ44444444",
+    address: {
+      street: "Nákupní 1",
+      city: "Ostrava",
+      zip: "709 00",
+      country: "CZ",
+    },
+  };
+  const items = [
+    {
+      position: 1,
+      description: "Konzultace",
+      quantity: 1,
+      unit: "ks",
+      unitPriceWithoutVat: 10_000,
+      vatRate: 21,
+    },
+  ];
+
+  it("reports every field it filled in for a bare draft", () => {
+    const r = normalizeDraftToInvoice(
+      {
+        meta: {},
+        client,
+        vat: { mode: "regular", suppliesAbroad: "none" },
+        payment: { method: "transfer" },
+        items,
+      },
+      getDemoIssuer(),
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    const byPath = Object.fromEntries(r.assumptions.map((a) => [a.path, a]));
+    expect(Object.keys(byPath).sort()).toEqual([
+      "meta.currency",
+      "meta.docType",
+      "meta.dueDate",
+      "meta.duzp",
+      "meta.issueDate",
+      "meta.language",
+      "pricesIncludeVat",
+    ]);
+    expect(byPath["meta.dueDate"]).toMatchObject({
+      label: "Due date",
+      value: r.invoice.meta.dueDate,
+      reason: "issue date + 14 days",
+    });
+    expect(byPath["pricesIncludeVat"]).toMatchObject({
+      value: "excluding VAT",
+    });
+  });
+
+  it("stays silent about fields the caller supplied", () => {
+    const r = normalizeDraftToInvoice(
+      {
+        meta: {
+          docType: "invoice",
+          issueDate: "2026-03-01",
+          dueDate: "2026-03-31",
+          duzp: "2026-03-01",
+          currency: "EUR",
+          language: "en",
+        },
+        client,
+        vat: { mode: "regular", suppliesAbroad: "none" },
+        payment: { method: "transfer" },
+        pricesIncludeVat: false,
+        items,
+      },
+      getDemoIssuer(),
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.assumptions).toEqual([]);
+  });
+
+  it("does not claim a price basis when no VAT applies", () => {
+    const r = normalizeDraftToInvoice(
+      {
+        meta: { docType: "invoice", currency: "CZK", language: "cs" },
+        client,
+        vat: {
+          mode: "reverse_charge",
+          suppliesAbroad: "eu",
+          localReverseChargeCode: "1",
+        },
+        payment: { method: "transfer" },
+        items,
+      },
+      getDemoIssuer(),
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.assumptions.map((a) => a.path)).not.toContain("pricesIncludeVat");
+  });
+});
