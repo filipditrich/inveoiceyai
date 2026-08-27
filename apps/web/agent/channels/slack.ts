@@ -8,6 +8,7 @@ import {
 } from "../lib/slack-channel-extras";
 import { SLACK_CONNECT_UID } from "../lib/slack-connect";
 import { handleSlackInbound } from "../lib/slack-inbound";
+import { handleInvoiceyInteraction } from "../lib/slack-interactions";
 import {
   buildInvoiceCard,
   pendingCardFromToolResult,
@@ -23,7 +24,8 @@ import { appOrigin } from "../lib/slack-thread";
 import {
   invoiceyActionLabel,
   invoiceyActionsLabel,
-  actionRequestsNeedApproval,
+  actionRequestsPauseReason,
+  pauseNotice,
   thinkingTaskId,
   thinkingTaskIdForTool,
   truncateTypingStatus,
@@ -69,10 +71,12 @@ export default slackChannel({
     handleSlackInbound(ctx, message, { alwaysHandle: true }),
   onMessage: (ctx, message) =>
     handleSlackInbound(ctx, message, { alwaysHandle: false }),
+  onInteraction: handleInvoiceyInteraction,
   events: {
     async "turn.started"(_data, channel) {
       const state = asInvoiceyState(channel.state);
       state.pendingToolCallMessage = null;
+      state.pendingPauseReason = null;
       state.lastReasoningTypingAtMs = null;
       state.lastReasoningTypingStatus = null;
       clearPendingCard(state);
@@ -106,9 +110,11 @@ export default slackChannel({
 
       if (streaming) {
         await appendThinkingTasks(channel, tasks);
-        if (actionRequestsNeedApproval(data.actions)) {
+        const pause = actionRequestsPauseReason(data.actions);
+        if (pause) {
+          state.pendingPauseReason = pause;
           await stopThinkingStream(channel, {
-            markdown: "Waiting for approval…",
+            markdown: pauseNotice(pause),
           });
         }
         return;
@@ -227,8 +233,9 @@ export default slackChannel({
 
     async "session.waiting"(_data, channel) {
       if (hasActiveThinkingStream(channel)) {
+        const state = asInvoiceyState(channel.state);
         await stopThinkingStream(channel, {
-          markdown: "Waiting for approval…",
+          markdown: pauseNotice(state.pendingPauseReason ?? "approval"),
         });
       }
     },

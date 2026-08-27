@@ -11,13 +11,23 @@ export const HITL_TOOL_NAMES = new Set([
   "send_invoice_email",
 ]);
 
+/**
+ * Eve's built-in question tool. It parks the turn like an approval does, but
+ * the two ask the user for different things and must not share wording — being
+ * told you are "waiting for approval" when the bot asked you a question is
+ * how a thread stalls.
+ */
+export const ASK_QUESTION_TOOL = "ask_question";
+
 const TOOL_LABELS: Record<string, string> = {
+  ask_question: "Asking you…",
   search_business: "Searching ARES…",
   lookup_business: "Looking up company in ARES…",
   list_presets: "Loading presets…",
   get_preset: "Loading preset…",
   save_preset: "Saving preset…",
   create_invoice: "Creating invoice draft…",
+  update_invoice_draft: "Updating draft…",
   upload_invoice_files: "Uploading PDF and ISDOC…",
   list_invoices: "Listing invoices…",
   get_invoice: "Loading invoice…",
@@ -27,7 +37,11 @@ const TOOL_LABELS: Record<string, string> = {
 };
 
 /** Tools whose retries share one Thinking Steps row (last result wins). */
-const COLLAPSE_TOOL_TASKS = new Set(["create_invoice", "upload_invoice_files"]);
+const COLLAPSE_TOOL_TASKS = new Set([
+  "create_invoice",
+  "update_invoice_draft",
+  "upload_invoice_files",
+]);
 
 /** Human-readable typing / task title for one Eve action request. */
 export function invoiceyActionLabel(action: ActionRequest): string {
@@ -62,6 +76,29 @@ export function actionRequestsNeedApproval(
     (action) =>
       action.kind === "tool-call" && HITL_TOOL_NAMES.has(action.toolName),
   );
+}
+
+/** Why this batch is about to park, so the thread can say the right thing. */
+export type PauseReason = "approval" | "question";
+
+export function actionRequestsPauseReason(
+  actions: readonly ActionRequest[],
+): PauseReason | null {
+  if (actionRequestsNeedApproval(actions)) return "approval";
+  const asks = actions.some(
+    (action) =>
+      action.kind === "tool-call" && action.toolName === ASK_QUESTION_TOOL,
+  );
+  return asks ? "question" : null;
+}
+
+const PAUSE_NOTICES: Record<PauseReason, string> = {
+  approval: "Waiting for approval…",
+  question: "Waiting for your answer…",
+};
+
+export function pauseNotice(reason: PauseReason): string {
+  return PAUSE_NOTICES[reason];
 }
 
 /** Typing indicator for a batch of requested actions. */
