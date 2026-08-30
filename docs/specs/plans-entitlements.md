@@ -165,10 +165,11 @@ const TokenGrantRuleSchema = z.object({
 });
 ```
 
-Platform-admin discretionary grants ride the same ledger with
+The existing `adminGrantTokens` path rides the same ledger with
 `ruleKey = "manual:<uuid>"` and `grantedBy` set — one table, one audit trail,
-one code path (ADR 0037). This is the capability that does not exist today:
-there is currently no way to gift a workspace tokens without a SQL console.
+one code path (ADR 0037). Admin gifting already works today; what it gains is a
+row saying which award a balance came from, so support can read one table
+instead of inferring.
 
 `ai_token_balances.monthlyLimit` (`packages/db/src/ai-usage.ts:53`) stops
 defaulting to a module constant and is seeded and re-seeded from

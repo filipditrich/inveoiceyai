@@ -33,8 +33,10 @@ Nothing in the app may branch on `plan.key`. Behaviour reads only
   `plan_id` backfill must run before the NOT NULL)
 
 **Backfill order:** insert the four seed plans → set every existing workspace to
-`free` → add NOT NULL. Existing workspaces keep today's allowances via a
-one-off override rather than being silently downgraded to Free's 100k.
+`free` → add NOT NULL. No grandfathering overrides: everyone lands on Free, and
+platform admin upgrades the ones that should be higher. That makes admin
+assignment and discretionary token grants load-bearing from day one rather than
+nice-to-have, so both ship in 26a/26b as real UI, not scripts.
 
 **Resolution** (`apps/web/lib/entitlements/`):
 
@@ -65,8 +67,8 @@ usage against them.
   transaction; returns whether it fired (drives the notification)
 - `signup` rules applied in bootstrap; `first_invoice_issued` applied inside
   `issueInvoiceById` after numbering succeeds
-- `grantTokensManually()` behind `requirePlatformAdmin()`, `rule_key
-= "manual:<uuid>"`, note + attribution, surfaced in `/admin`
+- Move the existing `adminGrantTokens` onto the ledger: `rule_key =
+"manual:<uuid>"`, note + attribution kept, security-audit event kept
 - `ai_token_balances.monthly_limit` seeded from the plan on assignment and on
   renewal; `renew` cron reads the plan
 - First-invoice reward notification (in-app toast + `@invoicey/emails`

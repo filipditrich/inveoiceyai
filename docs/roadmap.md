@@ -641,7 +641,7 @@ catalog — and lands the permission chokepoint that Pro teams need.
 **26b — token grants:**
 
 - [ ] `workspace_token_grants` ledger; signup + `first_invoice_issued` rules
-- [ ] Platform-admin discretionary grant with attribution and note
+- [ ] Existing `adminGrantTokens` moved onto the ledger, attribution kept
 - [ ] `monthly_limit` seeded from the plan on assignment and renewal
 - [ ] First-invoice reward notification (in-app + email), once per workspace
 - [ ] Top-up UI stub (no payment path)
