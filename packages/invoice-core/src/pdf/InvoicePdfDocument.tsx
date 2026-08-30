@@ -18,6 +18,7 @@ import {
   type InvoiceLabels,
 } from "../labels";
 import { parseInlineMarkdown } from "./inline-markdown";
+import { invoiceShowsIssuerAsset } from "./issuer-assets";
 
 const INVOICEY_SITE_URL = "https://ditrich.me/";
 
@@ -195,12 +196,12 @@ const styles = StyleSheet.create({
     fontWeight: 400,
     color: MUTED,
   },
-  thDesc: { width: "30%" },
-  thQty: { width: "9%", textAlign: "right", paddingRight: 4 },
-  thUnit: { width: "8%" },
+  thDesc: { width: "46%" },
+  thQty: { width: "8%", textAlign: "right", paddingRight: 4 },
+  thUnit: { width: "7%" },
   thUnitPx: { width: "16%", textAlign: "right" },
-  thVat: { width: "12%", textAlign: "right", paddingRight: 4 },
-  thTot: { width: "25%", textAlign: "right" },
+  thVat: { width: "6%", textAlign: "right", paddingRight: 2 },
+  thTot: { width: "17%", textAlign: "right" },
   lineRow: {
     flexDirection: "row",
     paddingVertical: 6,
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: LINE,
   },
-  descCol: { width: "30%", paddingRight: 6 },
+  descCol: { width: "46%", paddingRight: 8 },
   lineSub: {
     fontFamily: F_SANS,
     fontSize: 7.75,
@@ -398,8 +399,14 @@ const styles = StyleSheet.create({
   },
   stampSigBox: { marginLeft: 16 },
   stampSig: {
-    width: 120,
-    height: 48,
+    width: 88,
+    height: 88,
+    objectFit: "contain",
+    objectPosition: "bottom",
+  },
+  signatureImg: {
+    width: 140,
+    height: 52,
     objectFit: "contain",
     objectPosition: "bottom",
   },
@@ -641,8 +648,10 @@ export function InvoicePdfDocument({
 }: InvoicePdfDocumentProps) {
   const labels = invoiceLabels(inv.meta.language);
   const intlLocale = toInvoiceIntlLocale(inv.meta.language);
-  const showStamp = inv.customization?.showStamp === true;
-  const showSignature = inv.customization?.showSignature === true;
+  const showStamp = invoiceShowsIssuerAsset(inv.customization?.showStamp);
+  const showSignature = invoiceShowsIssuerAsset(
+    inv.customization?.showSignature,
+  );
 
   const showDuzp =
     inv.meta.docType !== "proforma" && inv.meta.docType !== "advance";
@@ -1010,7 +1019,7 @@ export function InvoicePdfDocument({
               )}
               {showSignature && assets.signature ? (
                 <View style={styles.stampSigBox}>
-                  <Image style={styles.stampSig} src={assets.signature} />
+                  <Image style={styles.signatureImg} src={assets.signature} />
                 </View>
               ) : null}
             </View>

@@ -226,8 +226,8 @@ export const InvoiceCustomizationSchema = z.object({
   accentColor: z
     .enum(["neutral", "blue", "green", "amber", "rose", "violet"])
     .default("neutral"),
-  showStamp: z.boolean().default(false),
-  showSignature: z.boolean().default(false),
+  showStamp: z.boolean().default(true),
+  showSignature: z.boolean().default(true),
 });
 
 export const InvoiceSchema = z
