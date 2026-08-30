@@ -5,6 +5,7 @@ import { useMessages, useTranslations } from "next-intl";
 import { Suspense, useEffect } from "react";
 import { toast } from "sonner";
 
+import { formatTokenCount } from "@/lib/ai/format-tokens";
 import { messageLookup } from "@/lib/i18n-lookup";
 
 const TOAST_KEYS = [
@@ -100,6 +101,7 @@ function ToastFromSearchParamsInner() {
   const imported = searchParams.get("imported");
   const proposed = searchParams.get("proposed");
   const autoMatched = searchParams.get("autoMatched");
+  const rewardTokens = searchParams.get("tokens");
 
   useEffect(() => {
     if (!toastKey && !error) {
@@ -122,6 +124,16 @@ function ToastFromSearchParamsInner() {
           repointed: mergeRepointed ?? "0",
         }),
       );
+    } else if (toastKey === "invoice_issued_rewarded") {
+      // The first-invoice reward. Celebrated rather than merged into the plain
+      // issue toast, because it happens once per workspace and the plan chose
+      // to announce it.
+      toast.success(t("invoice_issued"), {
+        description: descriptions("invoice_issued_rewarded", {
+          tokens: formatTokenCount(Number(rewardTokens) || 0),
+        }),
+        duration: 8000,
+      });
     } else if (toastKey === "bulk_summary") {
       toast.success(
         t("bulk_summary", {
@@ -165,12 +177,14 @@ function ToastFromSearchParamsInner() {
     url.searchParams.delete("imported");
     url.searchParams.delete("proposed");
     url.searchParams.delete("autoMatched");
+    url.searchParams.delete("tokens");
     router.replace(`${url.pathname}${url.search}${url.hash}`, {
       scroll: false,
     });
   }, [
     toastKey,
     error,
+    rewardTokens,
     mergeGroups,
     mergeRemoved,
     mergeRepointed,

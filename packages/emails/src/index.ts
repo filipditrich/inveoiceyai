@@ -5,6 +5,7 @@ export {
   renderNewSignInEmail,
   renderOverdueReminderEmail,
   renderPaymentReceivedEmail,
+  renderTokenRewardEmail,
   renderWorkspaceInviteEmail,
   type EmailTemplateId,
   type RenderedEmail,
@@ -37,6 +38,10 @@ export {
   PaymentReceivedEmail,
   type PaymentReceivedEmailProps,
 } from "./templates/payment-received";
+export {
+  TokenRewardEmail,
+  type TokenRewardEmailProps,
+} from "./templates/token-reward";
 export {
   WorkspaceInviteEmail,
   type WorkspaceInviteEmailProps,

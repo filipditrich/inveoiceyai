@@ -63,6 +63,12 @@ type SystemEmailCopy = {
   signInTrustLead: string;
   signInTrust: string;
   securitySettings: string;
+  tokenRewardSubject: string;
+  tokenRewardTitle: string;
+  tokenRewardPreview: string;
+  tokenRewardHello: (name: string) => string;
+  tokenRewardBody: (tokens: string, workspace: string) => string;
+  tokenRewardCta: string;
   footerSystem: string;
 };
 
@@ -150,6 +156,13 @@ const SYSTEM_CS: SystemEmailCopy = {
     "Pokud jste to byli vy, můžete zařízení označit jako důvěryhodné. Pokud ne, odvolejte relace v nastavení zabezpečení.",
   signInTrust: "Důvěřovat tomuto zařízení",
   securitySettings: "Nastavení zabezpečení",
+  tokenRewardSubject: "Máte bonusové AI tokeny",
+  tokenRewardTitle: "První faktura je na světě",
+  tokenRewardPreview: "Za první vystavenou fakturu jsme přidali AI tokeny",
+  tokenRewardHello: (name) => `Gratulujeme, ${name}!`,
+  tokenRewardBody: (tokens, workspace) =>
+    `Vystavili jste první fakturu ve workspace ${workspace}. Přidali jsme vám ${tokens} AI tokenů navíc — použijte je na koncepty faktur, Slack nebo MCP.`,
+  tokenRewardCta: "Zobrazit spotřebu",
   footerSystem: "Toto je systémový e-mail od Invoicey.",
 };
 
@@ -186,6 +199,13 @@ const SYSTEM_EN: SystemEmailCopy = {
     "If this was you, you can mark the device as trusted. If not, revoke sessions in security settings.",
   signInTrust: "Trust this device",
   securitySettings: "Security settings",
+  tokenRewardSubject: "You've earned bonus AI tokens",
+  tokenRewardTitle: "Your first invoice is out",
+  tokenRewardPreview: "We added AI tokens for issuing your first invoice",
+  tokenRewardHello: (name) => `Congratulations, ${name}!`,
+  tokenRewardBody: (tokens, workspace) =>
+    `You issued your first invoice in ${workspace}. We've added ${tokens} bonus AI tokens — spend them on invoice drafts, Slack, or MCP.`,
+  tokenRewardCta: "View usage",
   footerSystem: "This is a system email from Invoicey.",
 };
 

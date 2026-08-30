@@ -32,6 +32,16 @@ export type UsageBalanceProps = {
   monthlyIncluded: number;
 };
 
+/** One row of the grant ledger (ADR 0037) — how a balance came to be. */
+export type UsageGrantRow = {
+  id: string;
+  /** Literal union so the catalog key stays checkable. */
+  trigger: "signup" | "first_invoice_issued" | "manual";
+  tokens: number;
+  note: string | null;
+  createdAtIso: string;
+};
+
 export type UsageHistoryRow = {
   id: string;
   product: string;
@@ -46,10 +56,15 @@ export function AiUsagePanels({
   balance,
   chart,
   history,
+  grants,
+  topUpEnabled,
 }: {
   balance: UsageBalanceProps;
   chart: UsageDayPoint[];
   history: UsageHistoryRow[];
+  grants: UsageGrantRow[];
+  /** Plan entitlement. A sponsored plan pays for its own tokens (ADR 0035). */
+  topUpEnabled: boolean;
 }) {
   const t = useTranslations("App.settings.usage");
   const format = useFormatter();
@@ -214,20 +229,71 @@ export function AiUsagePanels({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="border-b">
-          <CardTitle>{t("topup.title")}</CardTitle>
-          <CardDescription>{t("topup.subtitle")}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-2 pt-5">
-          <Button type="button" variant="outline" disabled>
-            {t("topup.redeem")}
-          </Button>
-          <Button type="button" disabled>
-            {t("topup.buy")}
-          </Button>
-        </CardContent>
-      </Card>
+      {grants.length > 0 ? (
+        <Card>
+          <CardHeader className="border-b">
+            <CardTitle>{t("grants.title")}</CardTitle>
+            <CardDescription>{t("grants.subtitle")}</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-5">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("grants.columns.reason")}</TableHead>
+                  <TableHead>{t("grants.columns.tokens")}</TableHead>
+                  <TableHead>{t("grants.columns.date")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {grants.map((grant) => (
+                  <TableRow key={grant.id}>
+                    <TableCell>
+                      {t(`grants.trigger.${grant.trigger}`)}
+                      {grant.note ? (
+                        <span className="text-muted-foreground block text-xs">
+                          {grant.note}
+                        </span>
+                      ) : null}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      +{formatTokenCount(grant.tokens)}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {format.dateTime(new Date(grant.createdAtIso), {
+                        dateStyle: "medium",
+                      })}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {topUpEnabled ? (
+        <Card>
+          <CardHeader className="border-b">
+            <CardTitle>{t("topup.title")}</CardTitle>
+            <CardDescription>{t("topup.subtitle")}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-5">
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" disabled>
+                {t("topup.redeem")}
+              </Button>
+              <Button type="button" disabled>
+                {t("topup.buy")}
+              </Button>
+            </div>
+            {/* Honest about the stub: the buttons are disabled because there
+                is no payment path yet, not because something is broken. */}
+            <p className="text-muted-foreground text-xs">
+              {t("topup.comingSoon")}
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }

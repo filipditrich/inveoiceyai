@@ -22,6 +22,10 @@ import {
   type NewSignInEmailProps,
 } from "./templates/new-sign-in";
 import {
+  TokenRewardEmail,
+  type TokenRewardEmailProps,
+} from "./templates/token-reward";
+import {
   WorkspaceInviteEmail,
   type WorkspaceInviteEmailProps,
 } from "./templates/workspace-invite";
@@ -39,6 +43,7 @@ export const EMAIL_TEMPLATES = [
   "payment_received",
   "bank_payment_auto_matched",
   "new_sign_in",
+  "token_reward",
 ] as const;
 
 export type EmailTemplateId = (typeof EMAIL_TEMPLATES)[number];
@@ -123,6 +128,21 @@ export async function renderNewSignInEmail(
   ]);
   return {
     subject: systemEmailCopy(props.locale ?? "cs").signInSubject,
+    html,
+    text,
+  };
+}
+
+export async function renderTokenRewardEmail(
+  props: TokenRewardEmailProps,
+): Promise<RenderedEmail> {
+  const element = TokenRewardEmail(props);
+  const [html, text] = await Promise.all([
+    render(element),
+    render(element, { plainText: true }),
+  ]);
+  return {
+    subject: systemEmailCopy(props.locale ?? "cs").tokenRewardSubject,
     html,
     text,
   };

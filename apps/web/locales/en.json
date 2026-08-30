@@ -198,7 +198,8 @@
     "admin_name_required": "A workspace name cannot be empty.",
     "admin_last_owner": "A workspace must always keep at least one owner.",
     "admin_confirmation_mismatch": "Retype the workspace slug exactly.",
-    "admin_action_failed": "Try again, or check the logs."
+    "admin_action_failed": "Try again, or check the logs.",
+    "invoice_issued_rewarded": "You issued your first invoice — {tokens} bonus AI tokens added."
   },
   "Status": {
     "invoice": {
@@ -881,7 +882,8 @@
           "title": "Top up",
           "subtitle": "Buying extra tokens and redeeming codes will arrive later. Buttons are placeholders for now.",
           "redeem": "Redeem code",
-          "buy": "Buy tokens"
+          "buy": "Buy tokens",
+          "comingSoon": "Buying tokens isn't available yet — we'll let you know when it is."
         },
         "chip": {
           "title": "Token balance",
@@ -892,6 +894,20 @@
           "purchased": "Purchased",
           "viewUsage": "View usage",
           "upgrade": "Upgrade"
+        },
+        "grants": {
+          "title": "Bonus tokens",
+          "subtitle": "One-time awards credited to this workspace.",
+          "columns": {
+            "reason": "Reason",
+            "tokens": "Tokens",
+            "date": "Date"
+          },
+          "trigger": {
+            "signup": "Welcome bonus",
+            "first_invoice_issued": "First invoice issued",
+            "manual": "Granted by Invoicey"
+          }
         }
       },
       "scopes": {

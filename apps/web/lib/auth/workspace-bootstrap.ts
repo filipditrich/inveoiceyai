@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  applyTriggerGrants,
   initialAiTokenBalanceValues,
   member,
   resolvePlanForNewWorkspace,
@@ -98,20 +99,22 @@ export async function createPersonalWorkspace(
           createdAt: new Date(),
         });
 
-        // Signup grants are declared by the plan, so a sponsored plan that
-        // pays for its own tokens can grant none (ADR 0037). Stage 26b moves
-        // the application onto the idempotent grant ledger; the amount is
-        // already plan-driven here.
-        const signupGiftedTokens = plan.entitlements.ai.grants
-          .filter((grant) => grant.trigger === "signup")
-          .reduce((total, grant) => total + grant.tokens, 0);
-
+        // The balance starts empty of gifted tokens; the signup award is then
+        // applied through the grant ledger like every other award, so one
+        // table explains any balance (ADR 0037). A sponsored plan that pays
+        // for its own tokens simply declares no signup rule.
         await tx.insert(aiTokenBalances).values(
           initialAiTokenBalanceValues(workspaceId, new Date(), {
             monthlyIncludedTokens: plan.entitlements.ai.monthlyIncludedTokens,
-            signupGiftedTokens,
+            signupGiftedTokens: 0,
           }),
         );
+
+        await applyTriggerGrants(tx, {
+          workspaceId,
+          entitlements: plan.entitlements,
+          trigger: "signup",
+        });
 
         await tx
           .update(userTable)

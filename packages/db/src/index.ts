@@ -94,6 +94,14 @@ export {
 } from "./entitlements";
 export { DEFAULT_PLAN_KEY, PLAN_SEEDS, type PlanSeed } from "./plan-presets";
 export {
+  applyGrantRule,
+  applyTriggerGrants,
+  grantTokensManually,
+  listWorkspaceTokenGrants,
+  type AppliedGrant,
+  type TokenGrantListItem,
+} from "./token-grants";
+export {
   PlanNotFoundError,
   assignWorkspacePlan,
   countWorkspacesByPlan,

@@ -1,8 +1,8 @@
 import "server-only";
 
 import {
-  aiTokenBalances,
   ensureAiTokenBalance,
+  grantTokensManually,
   invitation,
   member,
   user,
@@ -58,13 +58,15 @@ export async function adminGrantTokens(input: {
 
   try {
     await ensureAiTokenBalance(db, workspace.id);
-    await db
-      .update(aiTokenBalances)
-      .set({
-        giftedRemaining: sql`${aiTokenBalances.giftedRemaining} + ${input.amount}`,
-        updatedAt: new Date(),
-      })
-      .where(eq(aiTokenBalances.workspaceId, workspace.id));
+    // Rides the same ledger as plan and milestone awards (ADR 0037), so the
+    // balance is explainable from one table rather than being an anonymous
+    // increment nobody can later account for.
+    await grantTokensManually({
+      workspaceId: workspace.id,
+      tokens: input.amount,
+      grantedBy: input.actorUserId,
+      note: input.note.slice(0, 500) || null,
+    });
   } catch (error) {
     console.error("[admin] token grant failed", error);
     return { ok: false, error: "failed" };

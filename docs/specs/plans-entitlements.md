@@ -171,6 +171,11 @@ one code path (ADR 0037). Admin gifting already works today; what it gains is a
 row saying which award a balance came from, so support can read one table
 instead of inferring.
 
+Workspaces that predate the ledger get a backfilled `signup_v1` row for the old
+hardcoded 500k award. It credits nothing — those tokens are already in the
+balance — but it claims the key, so enabling the rule cannot hand the same
+workspace a second signup award.
+
 `ai_token_balances.monthlyLimit` (`packages/db/src/ai-usage.ts:53`) stops
 defaulting to a module constant and is seeded and re-seeded from
 `entitlements.ai.monthlyIncludedTokens` on assignment and on renewal.

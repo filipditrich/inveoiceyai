@@ -1,11 +1,14 @@
 import {
+  applyTriggerGrants,
   createManualPaymentAllocation,
+  getWorkspaceEntitlements,
   invoiceItems,
   invoices,
   issuerBusinesses,
   issuerNumberingSchemes,
   reverseAllInvoicePaymentAllocations,
   tryCreateDbFromEnv,
+  type AppliedGrant,
   type InvoiceyDb,
 } from "@invoicey/db";
 import {
@@ -493,6 +496,12 @@ export async function issueInvoiceById(options: {
       summary: InvoiceSummary;
       invoice: Invoice;
       alreadyIssued: boolean;
+      /**
+       * Plan awards that fired on this issue (ADR 0037). Empty on every issue
+       * after the first, and on plans that declare no milestone rule. Callers
+       * announce these; nobody has to ask whether it was the first invoice.
+       */
+      grants: AppliedGrant[];
     }
   | { ok: false; error: string }
 > {
@@ -523,6 +532,7 @@ export async function issueInvoiceById(options: {
           summary: rowToSummary(row),
           invoice: parsedExisting.data,
           alreadyIssued: true as const,
+          grants: [] as AppliedGrant[],
         };
       }
 
@@ -670,7 +680,22 @@ export async function issueInvoiceById(options: {
         })
         .where(eq(issuerNumberingSchemes.id, scheme.id));
 
+      // Milestone award, inside the same transaction as numbering: if the
+      // issue rolls back, so does the grant. No "is this the first invoice?"
+      // query is needed — the ledger's unique key makes the rule fire exactly
+      // once per workspace, so applying it on every issue is correct and
+      // cheaper than counting (ADR 0037).
+      const entitled = await getWorkspaceEntitlements(tx, workspaceId);
+      const grants = entitled
+        ? await applyTriggerGrants(tx, {
+            workspaceId,
+            entitlements: entitled.entitlements,
+            trigger: "first_invoice_issued",
+          })
+        : [];
+
       return {
+        grants,
         summary: rowToSummary({
           ...row,
           number,

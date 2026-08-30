@@ -13,6 +13,7 @@ import {
 } from "./ai-usage";
 import { user } from "./auth-schema";
 import type { InvoiceyDb } from "./create-db";
+import { getWorkspaceEntitlements } from "./plans-repo";
 import type { DbTransaction } from "./transaction";
 import { withDbTransaction } from "./transaction";
 
@@ -307,7 +308,14 @@ export async function renewMonthlyPeriod(
     throw new Error(`ai_token_balances missing for ${workspaceId}`);
   }
 
-  const limit = row.monthlyLimit || MONTHLY_INCLUDED_TOKENS;
+  // The plan is the authority on the allowance, so a plan change takes effect
+  // at the next renewal without a separate backfill (ADR 0035). Fall back to
+  // the stored ceiling only if the workspace somehow has no resolvable plan.
+  const resolved = await getWorkspaceEntitlements(db, workspaceId);
+  const limit =
+    resolved?.entitlements.ai.monthlyIncludedTokens ??
+    row.monthlyLimit ??
+    MONTHLY_INCLUDED_TOKENS;
   /** start next window at previous end when renewing on schedule */
   const base = row.periodEnd.getTime() <= now.getTime() ? row.periodEnd : now;
   const { periodStart, periodEnd } = aiTokenPeriodBounds(base);

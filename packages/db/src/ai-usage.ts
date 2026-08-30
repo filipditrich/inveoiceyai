@@ -5,6 +5,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -98,6 +99,57 @@ export const aiUsageEvents = pgTable(
       t.createdAt,
     ),
     index("ai_usage_events_workspace_product_idx").on(t.workspaceId, t.product),
+  ],
+);
+
+/** What caused a one-time token award (ADR 0037). */
+export const TOKEN_GRANT_TRIGGERS = [
+  "signup",
+  "first_invoice_issued",
+  "manual",
+] as const;
+export type TokenGrantTrigger = (typeof TOKEN_GRANT_TRIGGERS)[number];
+
+/**
+ * Append-only ledger of one-time token awards (ADR 0037).
+ *
+ * `(workspace_id, rule_key)` unique **is** the idempotency mechanism: applying
+ * a grant is an insert-or-skip in the same transaction as the credit, so a
+ * retried invoice issue cannot pay out twice and a retried notification cannot
+ * fire twice. Plan rules use their declared key; platform-admin grants use
+ * `manual:<uuid>`, so one table answers "how did this workspace get its
+ * tokens" for every kind of award.
+ */
+export const workspaceTokenGrants = pgTable(
+  "workspace_token_grants",
+  {
+    id: uuid("id").primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    /** Plan rule key, or `manual:<uuid>`. Immutable once published. */
+    ruleKey: text("rule_key").notNull(),
+    trigger: text("trigger").$type<TokenGrantTrigger>().notNull(),
+    bucket: text("bucket").$type<AiTokenBucket>().notNull(),
+    tokens: bigint("tokens", { mode: "number" }).notNull(),
+    /** Platform admin for a manual grant; null when a plan rule fired. */
+    grantedBy: text("granted_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("workspace_token_grants_rule_uidx").on(
+      t.workspaceId,
+      t.ruleKey,
+    ),
+    index("workspace_token_grants_workspace_idx").on(
+      t.workspaceId,
+      t.createdAt,
+    ),
   ],
 );
 

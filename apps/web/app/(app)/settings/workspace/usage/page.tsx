@@ -6,6 +6,7 @@ import {
   aggregateAiUsageByDay,
   getWorkspaceTokenSummary,
   listAiUsageEvents,
+  listWorkspaceTokenGrants,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { ActivityIcon } from "lucide-react";
@@ -15,13 +16,16 @@ export default async function SettingsUsagePage() {
   const { workspaceId } = await requireWorkspace();
   const t = await getTranslations("App.settings.usage");
 
-  const [summary, chart, history, { entitlements }] = await Promise.all([
-    getWorkspaceTokenSummary(db, workspaceId),
-    aggregateAiUsageByDay(db, { workspaceId, days: 30 }),
-    listAiUsageEvents(db, { workspaceId, limit: 40 }),
-    // The included allowance is the plan's, not a module constant (ADR 0035).
-    requireEntitlements(),
-  ]);
+  const [summary, chart, history, grants, { entitlements }] = await Promise.all(
+    [
+      getWorkspaceTokenSummary(db, workspaceId),
+      aggregateAiUsageByDay(db, { workspaceId, days: 30 }),
+      listAiUsageEvents(db, { workspaceId, limit: 40 }),
+      listWorkspaceTokenGrants(db, workspaceId),
+      // The included allowance is the plan's, not a module constant (ADR 0035).
+      requireEntitlements(),
+    ],
+  );
 
   return (
     <div className="space-y-6">
@@ -51,6 +55,14 @@ export default async function SettingsUsagePage() {
           toolName: row.toolName,
           createdAtIso: row.createdAt.toISOString(),
         }))}
+        grants={grants.map((grant) => ({
+          id: grant.id,
+          trigger: grant.trigger,
+          tokens: grant.tokens,
+          note: grant.note,
+          createdAtIso: grant.createdAt.toISOString(),
+        }))}
+        topUpEnabled={entitlements.ai.topUpEnabled}
       />
     </div>
   );

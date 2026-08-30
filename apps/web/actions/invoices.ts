@@ -47,6 +47,7 @@ import { redirect } from "next/navigation";
 
 import { sendInvoiceEmailById } from "@invoicey/invoice-tools/email";
 import { isInvoiceDraftRecoveryAttempt } from "@/lib/invoice-draft-recovery";
+import { notifyTokenRewardByEmail } from "@/lib/ai/token-reward-email";
 
 function optionalTrim(value: FormDataEntryValue | null): string | undefined {
   if (typeof value !== "string") {
@@ -608,6 +609,19 @@ export async function issueSavedInvoice(formData: FormData): Promise<void> {
   revalidatePath("/invoices");
   revalidatePath("/dashboard");
   revalidatePath(`/invoices/${id}`);
+
+  // A plan award that fired on this issue — in practice the first-invoice
+  // reward. `grants` is only non-empty when the ledger actually credited, so
+  // this cannot celebrate twice (ADR 0037).
+  const reward = result.grants.find((grant) => grant.notify);
+  if (reward) {
+    revalidatePath("/settings/workspace/usage");
+    await notifyTokenRewardByEmail({ workspaceId, tokens: reward.tokens });
+    redirect(
+      `/invoices/${id}?toast=invoice_issued_rewarded&tokens=${reward.tokens}`,
+    );
+  }
+
   redirect(`/invoices/${id}?toast=invoice_issued`);
 }
 

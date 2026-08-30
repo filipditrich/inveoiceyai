@@ -614,7 +614,7 @@ database tables, and the related environment variables. The payment **ledger**
 
 ### Plan 26 — Plans, entitlements, and workspace permissions
 
-**Status:** Planned  
+**Status:** In progress — 26a and 26b implemented  
 **ADR:** [0035](./decisions/0035-plans-are-shared-entitlement-rows.md) ·
 [0036](./decisions/0036-managed-client-catalogs.md) ·
 [0037](./decisions/0037-declarative-token-grants.md) ·
@@ -630,21 +630,21 @@ catalog — and lands the permission chokepoint that Pro teams need.
 
 **26a — plans and entitlement resolution:**
 
-- [ ] `plans` table, `workspaces.plan_id` + `entitlement_overrides`, seeded
+- [x] `plans` table, `workspaces.plan_id` + `entitlement_overrides`, seeded
       Free / Pro / Enterprise rows and the NFCtron custom row
-- [ ] `EntitlementsSchema` + `resolveEntitlements()` + `requireEntitlement()`,
+- [x] `EntitlementsSchema` + `resolveEntitlements()` + `requireEntitlement()`,
       memoized alongside `requireWorkspace()`
-- [ ] Domain-based assignment at workspace bootstrap; manual assignment wins
-- [ ] `/admin/plans` CRUD and per-workspace assignment + overrides
-- [ ] Workspace settings plan card showing resolved entitlements
+- [x] Domain-based assignment at workspace bootstrap; manual assignment wins
+- [x] `/admin/plans` CRUD and per-workspace assignment + overrides
+- [x] Workspace settings plan card showing resolved entitlements
 
 **26b — token grants:**
 
-- [ ] `workspace_token_grants` ledger; signup + `first_invoice_issued` rules
-- [ ] Existing `adminGrantTokens` moved onto the ledger, attribution kept
-- [ ] `monthly_limit` seeded from the plan on assignment and renewal
-- [ ] First-invoice reward notification (in-app + email), once per workspace
-- [ ] Top-up UI stub (no payment path)
+- [x] `workspace_token_grants` ledger; signup + `first_invoice_issued` rules
+- [x] Existing `adminGrantTokens` moved onto the ledger, attribution kept
+- [x] `monthly_limit` seeded from the plan on assignment and renewal
+- [x] First-invoice reward notification (in-app + email), once per workspace
+- [x] Top-up UI stub (no payment path)
 
 **26c — managed clients:**
 

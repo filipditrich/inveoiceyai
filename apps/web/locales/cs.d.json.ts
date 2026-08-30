@@ -202,6 +202,7 @@ declare const messages: {
     admin_last_owner: "Prostor musí mít vždy alespoň jednoho vlastníka.";
     admin_confirmation_mismatch: "Přepište slug prostoru přesně.";
     admin_action_failed: "Zkuste to znovu, nebo se podívejte do logů.";
+    invoice_issued_rewarded: "Vystavili jste první fakturu — přidali jsme {tokens} bonusových AI tokenů.";
   };
   Status: {
     invoice: {
@@ -885,6 +886,7 @@ declare const messages: {
           subtitle: "Nákup tokenů a kódy přijdou později. Tlačítka jsou zatím jen zástupné.";
           redeem: "Uplatnit kód";
           buy: "Koupit tokeny";
+          comingSoon: "Nákup tokenů zatím není dostupný — dáme vám vědět, až bude.";
         };
         chip: {
           title: "Zůstatek tokenů";
@@ -895,6 +897,20 @@ declare const messages: {
           purchased: "Zakoupené";
           viewUsage: "Zobrazit využití";
           upgrade: "Upgrade";
+        };
+        grants: {
+          title: "Bonusové tokeny";
+          subtitle: "Jednorázová přidělení připsaná tomuto workspace.";
+          columns: {
+            reason: "Důvod";
+            tokens: "Tokeny";
+            date: "Datum";
+          };
+          trigger: {
+            signup: "Uvítací bonus";
+            first_invoice_issued: "První vystavená faktura";
+            manual: "Přiděleno Invoicey";
+          };
         };
       };
       scopes: {
