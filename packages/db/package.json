@@ -32,6 +32,7 @@
     "typescript": "6.0.3",
     "@invoicey/eslint-config": "workspace:*",
     "eslint": "^9",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@invoicey/ares": "workspace:*"
   }
 }

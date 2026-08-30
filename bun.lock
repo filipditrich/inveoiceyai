@@ -166,6 +166,7 @@
         "zod": "4.4.2",
       },
       "devDependencies": {
+        "@invoicey/ares": "workspace:*",
         "@invoicey/eslint-config": "workspace:*",
         "@types/node": "^22.15.21",
         "@types/ws": "8.18.1",
