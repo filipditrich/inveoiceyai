@@ -1908,7 +1908,8 @@
         "cancel": "Cancel",
         "canceling": "Canceling…",
         "cancelSuccess": "Invitation canceled",
-        "cancelFailed": "Cancel failed"
+        "cancelFailed": "Cancel failed",
+        "seatsFull": "This plan includes {limit} seats. Move to a larger plan to invite more people."
       }
     },
     "referrals": {

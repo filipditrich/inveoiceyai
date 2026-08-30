@@ -1,3 +1,4 @@
+import { assertCan } from "@/lib/authz/can";
 import {
   bankTransactions,
   invoicePaymentAllocations,
@@ -87,6 +88,7 @@ export default async function PaymentsPage({
 }: {
   searchParams: Promise<{ toast?: string }>;
 }) {
+  await assertCan("payments:read");
   const { workspaceId } = await requireWorkspace();
   const [
     t,

@@ -7,6 +7,7 @@ import {
 } from "@/lib/issuer-numbering";
 import { dismissIssuerWelcomeForWorkspace } from "@/lib/issuer-welcome";
 import { requireWorkspace } from "@/lib/auth/session";
+import { assertCan } from "@/lib/authz/can";
 import {
   BankAccountSchema,
   DicSchema,
@@ -351,6 +352,7 @@ function parsePaymentQrFromForm(
  */
 export async function createIssuer(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("issuers:manage");
   const rowId = optionalTrim(formData.get("id")) ?? crypto.randomUUID();
   const next = optionalTrim(formData.get("next"));
   const errBase = next === "welcome" ? "/welcome" : "/issuers/new";
@@ -430,6 +432,7 @@ export async function createIssuer(formData: FormData): Promise<void> {
 /** Update identity fields; keeps bank / assets intact. */
 export async function saveIssuerIdentity(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("issuers:manage");
   const issuerId = optionalTrim(formData.get("id"));
   if (!issuerId) {
     redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
@@ -511,6 +514,7 @@ export async function saveIssuerIdentity(formData: FormData): Promise<void> {
 /** Update bank fields only. */
 export async function saveIssuerBank(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("issuers:manage");
   const issuerId = optionalTrim(formData.get("id"));
   if (!issuerId) {
     redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
@@ -569,6 +573,7 @@ export async function saveIssuerBank(formData: FormData): Promise<void> {
 /** Update logo / stamp / signature URLs. */
 export async function saveIssuerAssets(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("issuers:manage");
   const issuerId = optionalTrim(formData.get("id"));
   if (!issuerId) {
     redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
@@ -636,6 +641,7 @@ export async function saveIssuerAssets(formData: FormData): Promise<void> {
 /** Update numbering schemes for all doc types. */
 export async function saveIssuerNumbering(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("issuers:manage");
   const issuerId = optionalTrim(formData.get("id"));
   if (!issuerId) {
     redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
@@ -678,6 +684,7 @@ export async function saveIssuerNumbering(formData: FormData): Promise<void> {
 /** Update issuer email defaults (fixes prior FormData wiring gap). */
 export async function saveIssuerEmail(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("issuers:manage");
   const issuerId = optionalTrim(formData.get("id"));
   if (!issuerId) {
     redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
@@ -718,6 +725,7 @@ export async function saveIssuerEmail(formData: FormData): Promise<void> {
 export async function setDefaultIssuer(formData: FormData): Promise<void> {
   const issuerId = optionalTrim(formData.get("id"));
   const { workspaceId } = await requireWorkspace();
+  await assertCan("issuers:manage");
   if (!issuerId) {
     redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
   }
@@ -766,6 +774,7 @@ export async function dismissIssuerWelcome(): Promise<void> {
 export async function deleteIssuer(formData: FormData): Promise<void> {
   const id = optionalTrim(formData.get("id"));
   const { workspaceId } = await requireWorkspace();
+  await assertCan("issuers:manage");
   if (!id) {
     redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
   }
@@ -860,6 +869,7 @@ export async function parseIssuerFromWelcomePdf(
   { ok: true; draft: WelcomeIssuerDraft } | { ok: false; message: string }
 > {
   await requireWorkspace();
+  await assertCan("issuers:manage");
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
     return { ok: false, message: "Vyberte PDF fakturu." };

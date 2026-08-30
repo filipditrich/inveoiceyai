@@ -1,6 +1,7 @@
 "use server";
 
 import { requireWorkspace } from "@/lib/auth/session";
+import { assertCan } from "@/lib/authz/can";
 import { assertClientsWritable } from "@/lib/entitlements/managed-clients";
 import { lookupAresByIcoCached } from "@/lib/cached-ares";
 import {
@@ -56,6 +57,7 @@ export type CreateClientFromAresResult =
 export async function createClientFromAres(
   icoInput: string,
 ): Promise<CreateClientFromAresResult> {
+  await assertCan("clients:manage");
   const { workspaceId } = await requireWorkspace();
   // A managed workspace bills only its plan catalog (ADR 0036), so an ARES
   // lookup here could only ever end in a client it may not use.
@@ -124,6 +126,7 @@ export async function createClientFromAres(
 
 /** UPSERT validated `ClientSnapshot` in default workspace. */
 export async function saveClient(formData: FormData): Promise<void> {
+  await assertCan("clients:manage");
   const { workspaceId } = await requireWorkspace();
   await assertClientsWritable(workspaceId);
   const rowId = optionalTrim(formData.get("id")) ?? crypto.randomUUID();
@@ -223,6 +226,7 @@ export async function saveClient(formData: FormData): Promise<void> {
 export async function deleteClient(formData: FormData): Promise<void> {
   const id = optionalTrim(formData.get("id"));
   const { workspaceId } = await requireWorkspace();
+  await assertCan("clients:manage");
   await assertClientsWritable(workspaceId);
   if (!id) {
     redirect(`/clients?invalid=${encodeURIComponent("missing_id")}`);
@@ -259,6 +263,7 @@ export async function deleteClient(formData: FormData): Promise<void> {
 
 /** Collapse duplicate clients by IČO or normalized legal name + full address. */
 export async function mergeClientsAction(): Promise<void> {
+  await assertCan("clients:manage");
   const { workspaceId } = await requireWorkspace();
   // Merging rewrites and removes client rows, so it is a client mutation like
   // any other — and on a managed workspace the catalog sync already guarantees

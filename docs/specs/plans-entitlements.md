@@ -289,6 +289,15 @@ assertCan(ctx, "payments:manage");
 The "payments layer" requirement falls out of this with no special case:
 `payments:read` off the `issuer` and `viewer` presets.
 
+**What `assertCan` does not cover.** Workspace invitations, member removal, and
+role changes go through Better Auth's own organization endpoints, not through
+our server actions, so the chokepoint never sees them. Seat and domain policy
+is therefore enforced in a `before` hook on `/organization/invite-member`
+(`apps/web/lib/auth/invite-policy.ts`). Better Auth's own owner/admin check
+still governs who may call those endpoints at all; `members:manage` governs our
+UI and any of our own actions. This split is a real seam, not an oversight —
+anything relying on it must be enforced in the hook, not in the catalog.
+
 ## Enterprise auth policy
 
 `auth.allowedEmailDomains` does double duty — it is the acquisition rule at

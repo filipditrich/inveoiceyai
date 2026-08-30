@@ -5,7 +5,7 @@ import { authSchema } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
 import { betterAuth } from "better-auth";
-import { createAuthMiddleware } from "better-auth/api";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { mcp, organization } from "better-auth/plugins";
@@ -19,6 +19,7 @@ import {
 import { onSessionCreated } from "./on-session-created";
 import { takePendingDeviceToken } from "./pending-device-cookie";
 import { assignReferralCodeOnCreate } from "./referral";
+import { checkInvitePolicy } from "./invite-policy";
 import {
   createPersonalWorkspace,
   resolveInitialWorkspaceId,
@@ -149,6 +150,28 @@ export const auth = betterAuth({
 
   /** Persist pending `invoicey_did`; `nextCookies` (last plugin) writes Set-Cookie. */
   hooks: {
+    /**
+     * Invitations go through Better Auth's own organization endpoint, so
+     * `assertCan` never sees them. Seat and domain policy is enforced here or
+     * nowhere — the UI hint alone would not be enforcement (ADR 0035).
+     */
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/organization/invite-member") return;
+
+      const workspaceId =
+        (ctx.body as { organizationId?: string } | undefined)?.organizationId ??
+        ctx.context.session?.session.activeOrganizationId;
+      const email = (ctx.body as { email?: string } | undefined)?.email;
+      if (!workspaceId || !email) return;
+
+      const verdict = await checkInvitePolicy({ workspaceId, email });
+      if (!verdict.ok) {
+        throw new APIError("FORBIDDEN", {
+          code: verdict.code.toUpperCase(),
+          message: verdict.message,
+        });
+      }
+    }),
     after: createAuthMiddleware(async (ctx) => {
       const created = ctx.context.newSession?.session;
       if (!created?.id) return;

@@ -1912,6 +1912,7 @@ declare const messages: {
         canceling: "Ruším…";
         cancelSuccess: "Pozvánka zrušena";
         cancelFailed: "Zrušení selhalo";
+        seatsFull: "Tarif zahrnuje {limit} míst. Pro více lidí přejděte na vyšší tarif.";
       };
     };
     referrals: {

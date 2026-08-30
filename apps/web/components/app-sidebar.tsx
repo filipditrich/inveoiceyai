@@ -58,6 +58,7 @@ export function AppSidebar({
   workspaces,
   tokenBalance = null,
   uploadConfigured = true,
+  canSeePayments = true,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: { name: string; email: string; avatar: string };
@@ -65,6 +66,11 @@ export function AppSidebar({
   activeWorkspaceId: string;
   defaultWorkspaceId: string | null;
   workspaces: WorkspaceListItem[];
+  /**
+   * Resolved from the permission catalog (ADR 0038). Hiding is in addition to
+   * the server gate on `/payments`, never instead of it.
+   */
+  canSeePayments?: boolean;
   tokenBalance?: {
     giftedRemaining: number;
     monthlyRemaining: number;
@@ -116,24 +122,31 @@ export function AppSidebar({
         },
       ],
     },
-    {
-      title: t("nav.payments"),
-      url: "/payments",
-      icon: <LandmarkIcon />,
-      isActive: pathname === "/payments" || pathname.startsWith("/payments/"),
-      defaultOpen:
-        pathname.startsWith("/payments") ||
-        pathname.startsWith("/settings/workspace/bank-connections"),
-      items: [
-        {
-          /** Lives in workspace settings, but it is the payments feature's plumbing. */
-          title: t("nav.bankConnections"),
-          url: "/settings/workspace/bank-connections",
-          icon: <LandmarkIcon />,
-          isActive: pathname.startsWith("/settings/workspace/bank-connections"),
-        },
-      ],
-    },
+    ...(canSeePayments
+      ? [
+          {
+            title: t("nav.payments"),
+            url: "/payments",
+            icon: <LandmarkIcon />,
+            isActive:
+              pathname === "/payments" || pathname.startsWith("/payments/"),
+            defaultOpen:
+              pathname.startsWith("/payments") ||
+              pathname.startsWith("/settings/workspace/bank-connections"),
+            items: [
+              {
+                /** Lives in workspace settings, but it is the payments feature's plumbing. */
+                title: t("nav.bankConnections"),
+                url: "/settings/workspace/bank-connections",
+                icon: <LandmarkIcon />,
+                isActive: pathname.startsWith(
+                  "/settings/workspace/bank-connections",
+                ),
+              },
+            ],
+          },
+        ]
+      : []),
     {
       title: t("nav.clients"),
       url: "/clients",

@@ -5,6 +5,7 @@ import {
   boolean,
   index,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -155,8 +156,18 @@ export const member = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    /** owner | admin | member */
+    /** owner | admin | member, or a workspace role preset (ADR 0038). */
     role: text("role").notNull().default("member"),
+    /**
+     * Explicit per-member deviations from the role preset, as
+     * `{ grant: [...], deny: [...] }` (ADR 0038). Only read when the plan's
+     * `permissions.mode` is `advanced`, so a downgrade stops enforcing rules
+     * the workspace can no longer see or edit.
+     */
+    permissionOverrides: jsonb("permission_overrides").$type<{
+      grant?: string[];
+      deny?: string[];
+    }>(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

@@ -7,6 +7,7 @@ import {
   type BuilderLineInput,
 } from "@/lib/build-invoice";
 import { requireWorkspace } from "@/lib/auth/session";
+import { assertCan } from "@/lib/authz/can";
 import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
 import type { LastInvoiceSuggestions } from "@/lib/last-invoice-suggestions";
 import { invoicePaymentIdentifiers } from "@/lib/payments/invoice-payment-identifiers";
@@ -282,6 +283,7 @@ async function replaceItems(
 
 /** Persist draft without consuming a number. */
 export async function saveInvoiceDraft(formData: FormData): Promise<void> {
+  await assertCan("invoices:create");
   const { workspaceId } = await requireWorkspace();
   const existingId = optionalTrim(formData.get("id"));
   const recoveryAttempt = existingId
@@ -399,6 +401,7 @@ export async function saveInvoiceDraft(formData: FormData): Promise<void> {
 /** Issue: lock numbering, assign number, freeze snapshots. */
 export async function issueInvoice(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("invoices:issue");
   const existingId = optionalTrim(formData.get("id"));
   const recoveryAttempt = existingId
     ? undefined
@@ -595,6 +598,7 @@ export async function issueInvoice(formData: FormData): Promise<void> {
 
 /** Issue a saved draft by id (detail / list / bulk). */
 export async function issueSavedInvoice(formData: FormData): Promise<void> {
+  await assertCan("invoices:issue");
   const { workspaceId } = await requireWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
@@ -626,6 +630,7 @@ export async function issueSavedInvoice(formData: FormData): Promise<void> {
 }
 
 export async function bulkIssueInvoice(formData: FormData): Promise<void> {
+  await assertCan("invoices:issue");
   const { workspaceId } = await requireWorkspace();
   const ids = collectIds(formData);
   if (ids.length === 0) {
@@ -635,6 +640,7 @@ export async function bulkIssueInvoice(formData: FormData): Promise<void> {
 }
 
 export async function markInvoicePaid(formData: FormData): Promise<void> {
+  await assertCan("payments:manage");
   const { workspaceId } = await requireWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
@@ -651,6 +657,7 @@ export async function markInvoicePaid(formData: FormData): Promise<void> {
 }
 
 export async function unmarkInvoicePaid(formData: FormData): Promise<void> {
+  await assertCan("payments:manage");
   const { workspaceId, userId } = await requireWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
@@ -695,6 +702,7 @@ function bulkRedirect(result: {
 
 export async function bulkMarkInvoicePaid(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("payments:manage");
   const ids = collectIds(formData);
   if (ids.length === 0) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
@@ -704,6 +712,7 @@ export async function bulkMarkInvoicePaid(formData: FormData): Promise<void> {
 
 export async function bulkUnmarkInvoicePaid(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("payments:manage");
   const ids = collectIds(formData);
   if (ids.length === 0) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
@@ -712,6 +721,7 @@ export async function bulkUnmarkInvoicePaid(formData: FormData): Promise<void> {
 }
 
 export async function bulkCancelInvoice(formData: FormData): Promise<void> {
+  await assertCan("invoices:issue");
   const { workspaceId } = await requireWorkspace();
   const ids = collectIds(formData);
   if (ids.length === 0) {
@@ -721,6 +731,7 @@ export async function bulkCancelInvoice(formData: FormData): Promise<void> {
 }
 
 export async function bulkDeleteInvoice(formData: FormData): Promise<void> {
+  await assertCan("invoices:delete");
   const { workspaceId } = await requireWorkspace();
   const ids = collectIds(formData);
   if (ids.length === 0) {
@@ -731,6 +742,7 @@ export async function bulkDeleteInvoice(formData: FormData): Promise<void> {
 
 /** Cancel an issued (unpaid) invoice. */
 export async function cancelInvoice(formData: FormData): Promise<void> {
+  await assertCan("invoices:issue");
   const { workspaceId } = await requireWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
@@ -749,6 +761,7 @@ export async function cancelInvoice(formData: FormData): Promise<void> {
 export async function deleteInvoice(formData: FormData): Promise<void> {
   const id = optionalTrim(formData.get("id"));
   const { workspaceId } = await requireWorkspace();
+  await assertCan("invoices:delete");
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
   }
@@ -775,6 +788,7 @@ export async function deleteInvoice(formData: FormData): Promise<void> {
 export async function duplicateInvoice(formData: FormData): Promise<void> {
   const id = optionalTrim(formData.get("id"));
   const { workspaceId } = await requireWorkspace();
+  await assertCan("invoices:create");
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
   }
@@ -820,6 +834,7 @@ export async function duplicateInvoice(formData: FormData): Promise<void> {
 export async function sendInvoiceEmail(formData: FormData): Promise<void> {
   const id = optionalTrim(formData.get("id"));
   const { workspaceId, userId } = await requireWorkspace();
+  await assertCan("invoices:send");
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
   }

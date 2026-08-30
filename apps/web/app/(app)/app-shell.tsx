@@ -33,6 +33,7 @@ export function AppShell({
   workspaces,
   tokenBalance,
   uploadConfigured = true,
+  canSeePayments = true,
 }: Readonly<{
   children: ReactNode;
   user: AppShellUser;
@@ -42,6 +43,7 @@ export function AppShell({
   workspaces: WorkspaceListItem[];
   tokenBalance?: AppShellTokenBalance | null;
   uploadConfigured?: boolean;
+  canSeePayments?: boolean;
 }>) {
   return (
     <AssistantProvider
@@ -58,6 +60,7 @@ export function AppShell({
       >
         <AppSidebar
           activeWorkspaceId={activeWorkspaceId}
+          canSeePayments={canSeePayments}
           defaultWorkspaceId={defaultWorkspaceId}
           isPlatformAdmin={isPlatformAdmin}
           tokenBalance={tokenBalance}

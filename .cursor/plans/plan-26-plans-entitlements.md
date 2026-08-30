@@ -1,6 +1,6 @@
 # Plan — Plans, entitlements, and workspace permissions
 
-**Status:** 26a–26c implemented; 26d–26e pending  
+**Status:** 26a–26d implemented (26d editor UI pending); 26e pending  
 **ADR:** [0035](../../docs/decisions/0035-plans-are-shared-entitlement-rows.md) ·
 [0036](../../docs/decisions/0036-managed-client-catalogs.md) ·
 [0037](../../docs/decisions/0037-declarative-token-grants.md) ·

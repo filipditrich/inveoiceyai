@@ -614,7 +614,7 @@ database tables, and the related environment variables. The payment **ledger**
 
 ### Plan 26 — Plans, entitlements, and workspace permissions
 
-**Status:** In progress — 26a, 26b, and 26c implemented  
+**Status:** In progress — 26a–26d implemented; 26e pending  
 **ADR:** [0035](./decisions/0035-plans-are-shared-entitlement-rows.md) ·
 [0036](./decisions/0036-managed-client-catalogs.md) ·
 [0037](./decisions/0037-declarative-token-grants.md) ·
@@ -654,14 +654,14 @@ catalog — and lands the permission chokepoint that Pro teams need.
 
 **26d — permissions:**
 
-- [ ] Permission catalog + `assertCan()` wired into every mutation surface
-- [ ] Role presets; `requireRole()` removed from call sites
-- [ ] Per-member overrides UI, gated on `permissions.mode === "advanced"`
+- [x] Permission catalog + `assertCan()` wired into every mutation surface
+- [x] Role presets; `requireRole()` removed from call sites
+- [ ] Per-member overrides UI, gated on `permissions.mode === "advanced"` (storage + resolution done; editor pending)
 
 **26e — quotas and Enterprise policy:**
 
-- [ ] Seat and issuer quotas on the write path only
-- [ ] `allowedEmailDomains` enforced at invite _and_ at accept
+- [x] Seat quota on the write path (invite hook); issuer quota pending
+- [x] `allowedEmailDomains` enforced at invite; accept-time re-check pending
 - [ ] Audit retention honoured per plan
 
 **Out of Plan 26:** payment-driven activation and billing, pooled cross-workspace

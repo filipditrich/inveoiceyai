@@ -10,6 +10,8 @@ import {
 import { getWorkspaceTokenSummary } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 
+import { can } from "@/lib/authz/can";
+
 import { AppShell } from "./app-shell";
 
 export default async function AppShellLayout({
@@ -24,21 +26,30 @@ export default async function AppShellLayout({
     requireSession(),
     requireWorkspace(),
   ]);
-  const [platformAdmin, workspaces, defaultWorkspaceId, tokenSummary] =
-    await Promise.all([
-      isPlatformAdmin(),
-      listUserWorkspaces(user.id),
-      getUserDefaultWorkspaceId(user.id),
-      getWorkspaceTokenSummary(db, workspaceId).catch((error: unknown) => {
-        /** schema may lag deploy — do not 500/404 the whole app shell */
-        console.error("[app-shell] token summary unavailable", error);
-        return null;
-      }),
-    ]);
+  const [
+    platformAdmin,
+    workspaces,
+    defaultWorkspaceId,
+    tokenSummary,
+    canSeePayments,
+  ] = await Promise.all([
+    isPlatformAdmin(),
+    listUserWorkspaces(user.id),
+    getUserDefaultWorkspaceId(user.id),
+    getWorkspaceTokenSummary(db, workspaceId).catch((error: unknown) => {
+      /** schema may lag deploy — do not 500/404 the whole app shell */
+      console.error("[app-shell] token summary unavailable", error);
+      return null;
+    }),
+    // Hides the payments nav for a member without the permission. The route
+    // itself is gated too — this only avoids offering a dead end (ADR 0038).
+    can("payments:read").catch(() => false),
+  ]);
 
   return (
     <AppShell
       activeWorkspaceId={workspaceId}
+      canSeePayments={canSeePayments}
       defaultWorkspaceId={defaultWorkspaceId}
       isPlatformAdmin={platformAdmin}
       tokenBalance={

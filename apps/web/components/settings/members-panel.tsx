@@ -52,15 +52,21 @@ function roleKey(role: string): "owner" | "admin" | "member" | null {
 export function MembersPanel({
   workspaceId,
   canManage,
+  seatLimit,
   appOrigin,
 }: {
   workspaceId: string;
   canManage: boolean;
+  /** Plan seat ceiling; `null` is unlimited (ADR 0035). */
+  seatLimit: number | null;
   appOrigin: string;
 }) {
   const t = useTranslations("Settings.members");
   const locale = useLocale() as AppLocale;
   const [members, setMembers] = useState<MemberRow[]>([]);
+  // Seats are enforced on the server at invite time (ADR 0035); this only
+  // explains the limit before someone types an address they cannot use.
+  const seatsFull = seatLimit !== null && members.length >= seatLimit;
   const [invites, setInvites] = useState<InviteRow[]>([]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("member");
@@ -327,7 +333,11 @@ export function MembersPanel({
               <MailPlusIcon className="text-muted-foreground size-4" />
               {t("invite.title")}
             </CardTitle>
-            <CardDescription>{t("invite.description")}</CardDescription>
+            <CardDescription>
+              {seatsFull
+                ? t("invite.seatsFull", { limit: String(seatLimit) })
+                : t("invite.description")}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5 pt-5">
             <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_9rem_auto] sm:items-end">

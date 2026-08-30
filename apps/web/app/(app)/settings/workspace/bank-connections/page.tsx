@@ -1,3 +1,4 @@
+import { assertCan } from "@/lib/authz/can";
 import { issuerBusinesses } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { asc, eq } from "drizzle-orm";
@@ -118,6 +119,7 @@ function BankLogoTile({
 }
 
 export default async function BankConnectionsPage() {
+  await assertCan("bank:manage");
   const { workspaceId, role } = await requireWorkspace();
   const [t, localeValue, messages, fioConnections, monetaConnections, issuers] =
     await Promise.all([

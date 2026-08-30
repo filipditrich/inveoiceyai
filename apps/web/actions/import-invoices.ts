@@ -1,6 +1,7 @@
 "use server";
 
 import { requireWorkspace } from "@/lib/auth/session";
+import { assertCan } from "@/lib/authz/can";
 import {
   detectInvoiceOrigin,
   extractIsdocFromPdf,
@@ -105,6 +106,7 @@ export async function classifyImportPdfs(input: {
   defaultPaid?: boolean;
 }): Promise<{ rows: ClassifiedImportFile[]; error?: string }> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("import:run");
   const issuer = await loadIssuer(workspaceId, input.issuerId);
   if (!issuer) {
     return { rows: [], error: "issuer_not_found" };
@@ -204,6 +206,7 @@ export async function commitInvoiceImport(input: {
   errors: Array<{ fileName: string; error: string }>;
 }> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("import:run");
   const issuer = await loadIssuer(workspaceId, input.issuerId);
   if (!issuer) {
     return {

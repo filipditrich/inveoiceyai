@@ -1,3 +1,4 @@
+import { assertCan } from "@/lib/authz/can";
 import { ApiKeysDefaultWorkspacePanel } from "@/components/settings/api-keys-default-workspace-panel";
 import { ApiKeysPanel } from "@/components/settings/api-keys-panel";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
@@ -11,6 +12,7 @@ import { KeyRoundIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 export default async function SettingsApiKeysPage() {
+  await assertCan("apikeys:manage");
   const { workspaceId } = await requireWorkspace();
   const user = await requireSession();
   const [workspaces, defaultWorkspaceId] = await Promise.all([

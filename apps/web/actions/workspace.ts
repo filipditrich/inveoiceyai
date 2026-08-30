@@ -12,11 +12,8 @@ import { isTrustedInvoiceImageUrl } from "@invoicey/invoice-core";
 import { auth } from "@/lib/auth/auth";
 import { ForbiddenError } from "@/lib/auth/errors";
 import { recordSecurityAuditEvent } from "@/lib/auth/security-audit";
-import {
-  assertWorkspaceMember,
-  requireSession,
-  requireWorkspaceRole,
-} from "@/lib/auth/session";
+import { assertWorkspaceMember, requireSession } from "@/lib/auth/session";
+import { assertCan } from "@/lib/authz/can";
 import {
   isOrganizationSlugConflict,
   randomSlugSuffix,
@@ -158,7 +155,7 @@ export async function updateWorkspaceAction(input: {
   }
 
   try {
-    await requireWorkspaceRole("admin");
+    await assertCan("workspace:manage");
     await auth.api.updateOrganization({
       headers: await headers(),
       body: { data },

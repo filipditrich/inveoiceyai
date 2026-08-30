@@ -5,11 +5,19 @@ import { UsersRoundIcon } from "lucide-react";
 import { MembersPanel } from "@/components/settings/members-panel";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { requireWorkspace } from "@/lib/auth/session";
+import { can } from "@/lib/authz/can";
+import { requireEntitlements } from "@/lib/entitlements/entitlements";
 
 export default async function SettingsMembersPage() {
   const ws = await requireWorkspace();
   const t = await getTranslations("Settings.members");
-  const canManage = ws.role === "owner" || ws.role === "admin";
+  // Read from the permission catalog rather than the role rank, so a preset or
+  // a per-member override actually takes effect here (ADR 0038).
+  const [canManage, { entitlements }] = await Promise.all([
+    can("members:manage"),
+    requireEntitlements(),
+  ]);
+  const seatLimit = entitlements.seats.max;
   const appOrigin = env.BETTER_AUTH_URL ?? env.NEXT_PUBLIC_APP_URL;
 
   return (
@@ -22,6 +30,7 @@ export default async function SettingsMembersPage() {
       <MembersPanel
         workspaceId={ws.workspaceId}
         canManage={canManage}
+        seatLimit={seatLimit}
         appOrigin={appOrigin}
       />
     </div>

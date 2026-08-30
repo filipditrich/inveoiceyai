@@ -1,6 +1,7 @@
 "use server";
 
 import { requireWorkspace } from "@/lib/auth/session";
+import { assertCan } from "@/lib/authz/can";
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
 import {
   createRecurringFromInvoice,
@@ -35,6 +36,7 @@ export async function saveRecurringFromInvoice(
   formData: FormData,
 ): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("recurring:manage");
   const invoiceId = optionalTrim(formData.get("invoiceId"));
   const name = optionalTrim(formData.get("name"));
   const cadence = parseCadence(optionalTrim(formData.get("cadence")));
@@ -67,6 +69,7 @@ export async function saveRecurringFromInvoice(
 
 export async function setRecurringPaused(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("recurring:manage");
   const scheduleId = optionalTrim(formData.get("scheduleId"));
   const paused = optionalTrim(formData.get("paused")) === "1";
   if (!scheduleId) {
@@ -90,6 +93,7 @@ export async function setRecurringPaused(formData: FormData): Promise<void> {
 
 export async function skipRecurringNext(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  await assertCan("recurring:manage");
   const scheduleId = optionalTrim(formData.get("scheduleId"));
   if (!scheduleId) {
     fail("/invoices/recurring", "missing_id");
@@ -107,6 +111,7 @@ export async function skipRecurringNext(formData: FormData): Promise<void> {
 }
 
 export async function runRecurringNow(formData: FormData): Promise<void> {
+  await assertCan("recurring:manage");
   const { workspaceId } = await requireWorkspace();
   const scheduleId = optionalTrim(formData.get("scheduleId"));
   if (!scheduleId) {
@@ -127,6 +132,7 @@ export async function runRecurringNow(formData: FormData): Promise<void> {
 }
 
 export async function deleteRecurring(formData: FormData): Promise<void> {
+  await assertCan("recurring:manage");
   const { workspaceId } = await requireWorkspace();
   const templateId = optionalTrim(formData.get("templateId"));
   if (!templateId) {
