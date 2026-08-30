@@ -8,6 +8,7 @@ import {
 import { dismissIssuerWelcomeForWorkspace } from "@/lib/issuer-welcome";
 import { requireWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
+import { assertIssuerQuota } from "@/lib/entitlements/quotas";
 import {
   BankAccountSchema,
   DicSchema,
@@ -353,6 +354,9 @@ function parsePaymentQrFromForm(
 export async function createIssuer(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
   await assertCan("issuers:manage");
+  // Write path only: an over-limit workspace after a downgrade stays readable,
+  // it just cannot add another issuer (ADR 0035).
+  await assertIssuerQuota(workspaceId);
   const rowId = optionalTrim(formData.get("id")) ?? crypto.randomUUID();
   const next = optionalTrim(formData.get("next"));
   const errBase = next === "welcome" ? "/welcome" : "/issuers/new";

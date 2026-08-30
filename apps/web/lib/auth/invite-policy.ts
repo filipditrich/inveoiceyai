@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getWorkspaceEntitlements, member } from "@invoicey/db";
+import { getWorkspaceEntitlements, invitation, member } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { eq } from "drizzle-orm";
 
@@ -16,6 +16,32 @@ import { eq } from "drizzle-orm";
 export type InvitePolicyResult =
   | { ok: true }
   | { ok: false; code: "seats_full" | "domain_not_allowed"; message: string };
+
+/**
+ * Same policy, resolved from an invitation row rather than raw inputs — used at
+ * accept time, when the caller supplies only an invitation id.
+ */
+export async function checkAcceptPolicy(
+  invitationId: string,
+): Promise<InvitePolicyResult> {
+  const [row] = await db
+    .select({
+      workspaceId: invitation.organizationId,
+      email: invitation.email,
+    })
+    .from(invitation)
+    .where(eq(invitation.id, invitationId))
+    .limit(1);
+
+  // Better Auth rejects an unknown or expired invitation on its own; this hook
+  // only adds the plan policy on top.
+  if (!row) return { ok: true };
+
+  return checkInvitePolicy({
+    workspaceId: row.workspaceId,
+    email: row.email,
+  });
+}
 
 export async function checkInvitePolicy(input: {
   workspaceId: string;

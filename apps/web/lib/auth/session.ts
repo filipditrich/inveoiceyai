@@ -36,12 +36,6 @@ export interface WorkspaceContext {
   role: WorkspaceRole;
 }
 
-const ROLE_RANK: Record<WorkspaceRole, number> = {
-  member: 0,
-  admin: 1,
-  owner: 2,
-};
-
 /**
  * Raw session read, memoised per request so a page calling `requireWorkspace()`
  * three times issues one lookup.
@@ -151,17 +145,6 @@ export async function assertWorkspaceMember(
     workspaceId,
     role: row.role as WorkspaceRole,
   };
-}
-
-/** Role gate for destructive workspace operations. */
-export async function requireWorkspaceRole(
-  minimum: "owner" | "admin",
-): Promise<WorkspaceContext> {
-  const context = await requireWorkspace();
-  if (ROLE_RANK[context.role] < ROLE_RANK[minimum]) {
-    throw new ForbiddenError(`Requires ${minimum} role`);
-  }
-  return context;
 }
 
 /** True when the signed-in user has `users.platform_role = admin` (DB flag). */

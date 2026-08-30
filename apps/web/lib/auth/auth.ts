@@ -19,7 +19,7 @@ import {
 import { onSessionCreated } from "./on-session-created";
 import { takePendingDeviceToken } from "./pending-device-cookie";
 import { assignReferralCodeOnCreate } from "./referral";
-import { checkInvitePolicy } from "./invite-policy";
+import { checkAcceptPolicy, checkInvitePolicy } from "./invite-policy";
 import { applyWorkspacePlanBootstrap } from "./workspace-plan-bootstrap";
 import {
   createPersonalWorkspace,
@@ -157,20 +157,40 @@ export const auth = betterAuth({
      * nowhere — the UI hint alone would not be enforcement (ADR 0035).
      */
     before: createAuthMiddleware(async (ctx) => {
-      if (ctx.path !== "/organization/invite-member") return;
-
-      const workspaceId =
-        (ctx.body as { organizationId?: string } | undefined)?.organizationId ??
-        ctx.context.session?.session.activeOrganizationId;
-      const email = (ctx.body as { email?: string } | undefined)?.email;
-      if (!workspaceId || !email) return;
-
-      const verdict = await checkInvitePolicy({ workspaceId, email });
-      if (!verdict.ok) {
+      const refuse = (verdict: {
+        ok: false;
+        code: string;
+        message: string;
+      }) => {
         throw new APIError("FORBIDDEN", {
           code: verdict.code.toUpperCase(),
           message: verdict.message,
         });
+      };
+
+      if (ctx.path === "/organization/invite-member") {
+        const workspaceId =
+          (ctx.body as { organizationId?: string } | undefined)
+            ?.organizationId ??
+          ctx.context.session?.session.activeOrganizationId;
+        const email = (ctx.body as { email?: string } | undefined)?.email;
+        if (!workspaceId || !email) return;
+
+        const verdict = await checkInvitePolicy({ workspaceId, email });
+        if (!verdict.ok) refuse(verdict);
+        return;
+      }
+
+      // Re-checked at accept, not only at send: invitations live 48 hours, so a
+      // seat can be taken or a domain rule tightened in between. Checking once
+      // would let a stale invitation walk past the limit (ADR 0035).
+      if (ctx.path === "/organization/accept-invitation") {
+        const invitationId = (ctx.body as { invitationId?: string } | undefined)
+          ?.invitationId;
+        if (!invitationId) return;
+
+        const verdict = await checkAcceptPolicy(invitationId);
+        if (!verdict.ok) refuse(verdict);
       }
     }),
     after: createAuthMiddleware(async (ctx) => {

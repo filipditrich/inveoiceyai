@@ -92,6 +92,7 @@ export {
   type Entitlements,
   type TokenGrantRule,
 } from "./entitlements";
+export { pruneAuditEvents, type AuditRetentionResult } from "./audit-retention";
 export { DEFAULT_PLAN_KEY, PLAN_SEEDS, type PlanSeed } from "./plan-presets";
 export {
   listPlanClients,

@@ -1,6 +1,6 @@
 # Plan — Plans, entitlements, and workspace permissions
 
-**Status:** 26a–26d implemented (26d editor UI pending); 26e pending  
+**Status:** Implemented — 2026-08-30  
 **ADR:** [0035](../../docs/decisions/0035-plans-are-shared-entitlement-rows.md) ·
 [0036](../../docs/decisions/0036-managed-client-catalogs.md) ·
 [0037](../../docs/decisions/0037-declarative-token-grants.md) ·
@@ -112,21 +112,23 @@ usage against them.
 
 ## Exit criteria
 
-- [ ] Four seeded plans; every workspace has a `plan_id`; no code reads
+- [x] Four seeded plans; every workspace has a `plan_id`; no code reads
       `plan.key`
-- [ ] `resolveEntitlements()` unit tests cover merge, unlimited (`null`), and
+- [x] `resolveEntitlements()` unit tests cover merge, unlimited (`null`), and
       array replacement
-- [ ] `@nfctron.com` signup lands on the NFCtron plan, including a second
-      workspace created later
-- [ ] Managed workspace cannot create a client or invoice a non-catalog party
-      from web, import, MCP, or Slack
-- [ ] Adding a catalog entity appears in all granted workspaces
-- [ ] Grants apply exactly once under retry; platform admin can gift tokens with
+- [x] `@nfctron.com` signup lands on the NFCtron plan, including a second
+      workspace created later — the second-workspace path was broken and is
+      fixed by the `/organization/create` hook; verified in the browser
+- [x] Managed workspace cannot create a client or invoice a non-catalog party
+      from web, import, MCP, or Slack — enforced in `ensureClient`, which every
+      write path funnels through; web refusal verified in the browser
+- [x] Adding a catalog entity appears in all granted workspaces
+- [x] Grants apply exactly once under retry; platform admin can gift tokens with
       attribution
-- [ ] Downgrade to Free leaves an over-limit workspace readable, deletes nothing
-- [ ] `assertCan()` guards every mutation surface; `requireRole()` gone from
-      call sites
-- [ ] Spec, four ADRs, roadmap, cs/en catalogs, `typecheck` / `lint` / `test` /
+- [x] Downgrade to Free leaves an over-limit workspace readable, deletes nothing
+- [x] `assertCan()` guards every mutation surface; `requireWorkspaceRole()`
+      removed entirely, not just from call sites
+- [x] Spec, four ADRs, roadmap, cs/en catalogs, `typecheck` / `lint` / `test` /
       `build`
 
 ## Out of scope

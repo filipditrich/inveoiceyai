@@ -319,12 +319,37 @@ still governs who may call those endpoints at all; `members:manage` governs our
 UI and any of our own actions. This split is a real seam, not an oversight —
 anything relying on it must be enforced in the hook, not in the catalog.
 
+## Quotas
+
+Seats and issuers are checked **only when something is created**
+(`apps/web/lib/entitlements/quotas.ts`). Seats have a second check in the Better
+Auth invite hook, because invitations never reach our server actions.
+
+Nothing is checked on a read, and nothing is ever removed to fit a smaller
+plan. A workspace that exceeds its limits after a downgrade stays fully
+readable and simply cannot grow.
+
+## Audit retention
+
+`pruneAuditEvents` (daily cron, `/api/cron/audit-retention`) deletes
+security-audit events past each workspace's `audit.retentionDays`.
+
+Grouped by resolved retention rather than iterated per workspace, so a
+plan-wide policy is one statement. `null` means keep forever and is skipped
+entirely — never translated into a large number, which would silently start
+deleting Enterprise history the day someone lowered the constant. Events with
+no `workspace_id` (sign-ins, device trust) belong to a user rather than a
+workspace and are never touched here.
+
 ## Enterprise auth policy
 
 `auth.allowedEmailDomains` does double duty — it is the acquisition rule at
 workspace bootstrap _and_ the membership rule on invite and join. When set,
 `members:manage` may only invite matching addresses, and accepting an invitation
-re-checks the domain at accept time, not just at send time.
+re-checks at accept time too — invitations live 48 hours, so a seat can be taken
+or a rule tightened in between, and checking only at send would let a stale
+invitation walk past the limit. Both checks run in the same Better Auth `before`
+hook.
 
 ## Open questions
 

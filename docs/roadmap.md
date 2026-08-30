@@ -614,7 +614,7 @@ database tables, and the related environment variables. The payment **ledger**
 
 ### Plan 26 — Plans, entitlements, and workspace permissions
 
-**Status:** In progress — 26a–26d implemented; 26e pending  
+**Status:** Implemented — 2026-08-30  
 **ADR:** [0035](./decisions/0035-plans-are-shared-entitlement-rows.md) ·
 [0036](./decisions/0036-managed-client-catalogs.md) ·
 [0037](./decisions/0037-declarative-token-grants.md) ·
@@ -660,13 +660,16 @@ catalog — and lands the permission chokepoint that Pro teams need.
 
 **26e — quotas and Enterprise policy:**
 
-- [x] Seat quota on the write path (invite hook); issuer quota pending
-- [x] `allowedEmailDomains` enforced at invite; accept-time re-check pending
-- [ ] Audit retention honoured per plan
+- [x] Seat and issuer quotas on the write path only
+- [x] `allowedEmailDomains` enforced at invite _and_ at accept
+- [x] Audit retention honoured per plan (daily cron)
 
 **Out of Plan 26:** payment-driven activation and billing, pooled cross-workspace
 token budgets, workspace-authored custom roles, per-member client/issuer
 scoping.
+
+**Follow-ups:** the per-member permission editor is a first pass — no grouping
+by area, no marking of permissions the plan does not include, no bulk edit.
 
 ## Plans not yet promised
 
