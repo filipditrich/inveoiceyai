@@ -656,7 +656,7 @@ catalog — and lands the permission chokepoint that Pro teams need.
 
 - [x] Permission catalog + `assertCan()` wired into every mutation surface
 - [x] Role presets; `requireRole()` removed from call sites
-- [ ] Per-member overrides UI, gated on `permissions.mode === "advanced"` (storage + resolution done; editor pending)
+- [x] Per-member overrides UI, gated on `permissions.mode === "advanced"` — first pass; needs grouping, plan-availability hints, and bulk edit
 
 **26e — quotas and Enterprise policy:**
 

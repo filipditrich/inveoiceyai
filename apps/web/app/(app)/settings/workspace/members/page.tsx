@@ -2,6 +2,7 @@ import { env } from "@invoicey/env/server";
 import { getTranslations } from "next-intl/server";
 import { UsersRoundIcon } from "lucide-react";
 
+import { MemberPermissionsSection } from "@/components/settings/member-permissions-section";
 import { MembersPanel } from "@/components/settings/members-panel";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { requireWorkspace } from "@/lib/auth/session";
@@ -33,6 +34,11 @@ export default async function SettingsMembersPage() {
         seatLimit={seatLimit}
         appOrigin={appOrigin}
       />
+      {/* Only offered when the plan includes per-member permissions; the
+          action re-checks, so hiding is convenience, not enforcement. */}
+      {canManage && entitlements.permissions.mode === "advanced" ? (
+        <MemberPermissionsSection workspaceId={ws.workspaceId} />
+      ) : null}
     </div>
   );
 }

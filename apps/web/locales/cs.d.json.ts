@@ -1914,6 +1914,16 @@ declare const messages: {
         cancelFailed: "Zrušení selhalo";
         seatsFull: "Tarif zahrnuje {limit} míst. Pro více lidí přejděte na vyšší tarif.";
       };
+      permissions: {
+        sectionDescription: "Jemné výjimky nad rámec role. Vlastníka upravit nelze.";
+        noMembers: "Zatím není koho nastavovat.";
+        title: "Oprávnění";
+        description: "Zaškrtnuté položky člen smí. Označené už vyplývají z jeho role.";
+        descriptionOverridden: "Tento člen se odchyluje od své role. Zaškrtnuté položky smí.";
+        fromRole: "role";
+        save: "Uložit oprávnění";
+        sectionTitle: "Oprávnění jednotlivých členů";
+      };
     };
     referrals: {
       pageTitle: "Doporučení";

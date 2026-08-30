@@ -275,7 +275,18 @@ reads and issue), `issuer` (invoice create/issue/send, `clients:read`), `viewer`
 (reads only).
 
 **Per-member overrides** are an explicit grant/deny list layered on the preset,
-available only when `permissions.mode === "advanced"`. `mode: "roles"` gives
+available only when `permissions.mode === "advanced"`.
+
+The editor takes the **desired effective set** and derives grant/deny from the
+preset, rather than asking anyone to reason about the diff. That keeps a stored
+override meaningful when the preset later changes: a permission the preset gains
+stays granted unless it was explicitly denied. Owners are not editable —
+stripping `workspace:manage` from the last owner would leave a workspace nobody
+can administer.
+
+The current surface is a first pass: a flat checkbox per permission. Grouping by
+area, marking permissions the plan does not include, and bulk editing are not
+built. `mode: "roles"` gives
 presets without per-member editing; `mode: "off"` hides the whole surface and
 treats every member as their preset.
 

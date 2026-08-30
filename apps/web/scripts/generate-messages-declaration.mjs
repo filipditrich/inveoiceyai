@@ -17,7 +17,7 @@
  * Keep `MESSAGES_PATHS` in sync with `createMessagesDeclaration` in
  * `next.config.ts`.
  */
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
 
 const MESSAGES_PATHS = ["./locales/cs.json"];
 
@@ -32,10 +32,16 @@ for (const messagesPath of MESSAGES_PATHS) {
 declare const messages: ${content.trim()};
 export default messages;`;
 
-  // Only write on change, so a no-op typecheck does not bump the mtime and
-  // invalidate TypeScript's incremental cache on every run.
+  // Only write on change, so a no-op typecheck keeps the fast incremental path.
   const current = await readFile(declarationPath, "utf-8").catch(() => null);
   if (current !== next) {
     await writeFile(declarationPath, next);
+
+    // TypeScript's incremental cache does not reliably notice this file being
+    // rewritten underneath it: `tsc` then reports missing-key errors against a
+    // declaration that is already correct on disk — precisely the confusing
+    // failure this script exists to prevent. Dropping the build info forces
+    // one clean check, and only on the runs where the catalog actually moved.
+    await rm("tsconfig.tsbuildinfo", { force: true });
   }
 }

@@ -1910,6 +1910,16 @@
         "cancelSuccess": "Invitation canceled",
         "cancelFailed": "Cancel failed",
         "seatsFull": "This plan includes {limit} seats. Move to a larger plan to invite more people."
+      },
+      "permissions": {
+        "sectionDescription": "Fine-grained overrides on top of each member's role. Owners are not editable.",
+        "noMembers": "No members to configure yet.",
+        "title": "Permissions",
+        "description": "Ticked boxes are what this member can do. The role already grants the ones marked below.",
+        "descriptionOverridden": "This member deviates from their role. Ticked boxes are what they can do.",
+        "fromRole": "role",
+        "save": "Save permissions",
+        "sectionTitle": "Per-member permissions"
       }
     },
     "referrals": {
