@@ -2,2662 +2,2662 @@
 // See: https://next-intl.dev/docs/workflows/typescript#messages-arguments
 
 declare const messages: {
-  Common: {
-    save: "Uložit";
-    delete: "Smazat";
-    edit: "Upravit";
-    cancel: "Zrušit";
-    back: "Zpět";
-    loading: "Načítání…";
-    search: "Hledat";
-    emptyDash: "—";
-    all: "Vše";
-    apply: "Použít";
-    yes: "Ano";
-    no: "Ne";
-    create: "Vytvořit";
-    copy: "Kopírovat";
-    close: "Zavřít";
-    confirm: "Potvrdit";
-    filter: "Filtrovat";
-    previous: "předchozí";
-    next: "další";
-    locale: {
-      label: "Jazyk";
-      cs: "Čeština";
-      en: "English";
-    };
-  };
-  Upload: {
-    dropTitle: "Vyberte soubor nebo ho sem přetáhněte";
-    browse: "Vybrat soubor";
-    browseFiles: "Vybrat soubory";
-    change: "Změnit";
-    remove: "Odebrat";
-    uploading: "Nahrávám…";
-    hintImage: "PNG nebo JPG, max. {maxSize}";
-    hintPdf: "PDF";
-    hintIncoming: "PDF, ISDOC, PNG nebo JPG";
-    hintMax: "max. {maxSize} na soubor";
-    failed: "Nahrání se nezdařilo";
-    replaceHint: "Klikněte nebo přetáhněte pro výměnu";
-  };
-  Filters: {
-    addFilter: "Přidat filtr";
-    searchFields: "Hledat pole…";
-    noFieldsFound: "Žádná pole";
-    noResultsFound: "Nic nenalezeno";
-    select: "Vybrat";
-    addFilterTitle: "Přidat filtr";
-  };
-  DataGrid: {
-    empty: "Žádné záznamy.";
-    columns: "Sloupce";
-    rowsPerPage: "Řádků na stránku";
-    nextPage: "Další stránka";
-    previousPage: "Předchozí stránka";
-    info: "{from} – {to} z {count}";
-  };
-  PdfPreview: {
-    updating: "Aktualizuji…";
-    empty: "Vyplň položky pro náhled…";
-    title: "Náhled faktury PDF";
-    open: "Otevřít PDF";
-  };
-  Errors: {
-    invalid: {
-      required_fields: "Vyplňte povinná pole.";
-      missing_parties: "Dodavatel nebo odběratel nenalezen.";
-      validation: "Faktura neprošla validací schématu.";
-      missing_scheme: "Chybí číslovací schéma pro typ dokladu.";
-      already_issued: "Faktura už je vystavená.";
-      not_draft: "Lze upravit jen návrh.";
-      cannot_issue: "Návrh nelze vystavit.";
-      has_invoices: "Nelze smazat firmu s existujícími fakturami.";
-      missing_id: "Chybí identifikátor.";
-      missing_name: "Název je povinný.";
-      duplicate_name: "Šablona s tímto názvem už existuje.";
-      unsupported_doc_type: "Opakovat lze jen běžné faktury.";
-      not_found: "Nenalezeno.";
-      invalid_day: "Zvolte první, poslední, nebo den v měsíci.";
-      invalid_cadence: "Zvolte týdně, měsíčně, čtvrtletně nebo ročně.";
-      open_draft: "Pro tento plán už existuje nevystavený návrh.";
-      invalid_payload: "Uložená šablona není platná faktura.";
-      has_templates: "Nelze smazat, dokud existují opakované šablony.";
-      has_client_invoices: "Nelze smazat klienta s existujícími fakturami.";
-      bad_ico: "Neplatné IČO.";
-      bad_dic: "Neplatné DIČ.";
-      bad_bank: "Neplatný účet / IBAN.";
-      snapshot_validation: "Údaje neodpovídají schématu.";
-      missing_row: "Záznam nenalezen.";
-      save_failed: "Uložení se nezdařilo.";
-      generic: "Chyba: {code}";
-      not_reviewable: "Tato faktura už není ke kontrole.";
-      missing_required_field: "Chybí povinné pole.";
-      duplicate_invoice: "Faktura se stejným dodavatelem a číslem už existuje.";
-      retention_window: "Přijatou fakturu nelze smazat v archivační lhůtě.";
-      reason_required: "Důvod je povinný.";
-      four_eyes: "Kdo fakturu přijal, nemůže být jediný schvalovatel.";
-      forbidden: "Na tuto akci nemáte oprávnění.";
-      not_ready: "Dávka ještě není připravená k odeslání.";
-      empty_run: "Dávka nemá žádné způsobilé položky.";
-      payment_token_missing: "Nejdřív uložte Fio token pro odesílání v nastavení banky.";
-      payment_token_expired: "Fio token pro odesílání vypršel.";
-      fio_throttled_locally: "Fio je dočasně omezené. Zkuste to za 30 sekund.";
-      sum_mismatch: "Fio přijalo jinou částku, než je v dávce.";
-      run_create_failed: "Platební dávku se nepodařilo vytvořit.";
-    };
-  };
-  Toasts: {
-    issuer_saved: "Firma uložena";
-    issuer_deleted: "Firma smazána";
-    client_saved: "Klient uložen";
-    client_deleted: "Klient smazán";
-    invoice_saved: "Návrh uložen";
-    invoice_issued: "Faktura vystavena";
-    invoice_paid: "Označeno jako zaplaceno";
-    invoice_unpaid: "Označeno jako nezaplaceno";
-    invoice_cancelled: "Faktura stornována";
-    invoice_deleted: "Smazáno";
-    invoice_duplicated: "Faktura duplikována";
-    invoice_emailed: "Faktura odeslána e-mailem";
-    recurring_saved: "Opakovaný plán uložen";
-    recurring_paused: "Plán pozastaven";
-    recurring_resumed: "Plán obnoven";
-    recurring_skipped: "Další běh přeskočen";
-    recurring_drafted: "Návrh vytvořen z plánu";
-    recurring_deleted: "Opakovaná šablona smazána";
-    payment_confirmed: "Platba spárována";
-    payment_rejected: "Návrh zamítnut";
-    payment_added: "Platba zaznamenána";
-    payment_reversed: "Platba stornována";
-    bank_connected: "Banka připojena";
-    bank_disconnected: "Bankovní připojení odebráno";
-    bank_synced: "Bankovní data jsou aktuální";
-    bank_auto_match_enabled: "Automatické párování zapnuto";
-    bank_auto_match_disabled: "Automatické párování vypnuto";
-    action_failed: "Akci se nepodařilo dokončit";
-    bulk_summary: "Dokončeno: {ok} úspěšně, {skipped} přeskočeno, {failed} se nezdařilo.";
-    clients_merged: "Sloučeno {groups} skupin — odstraněno {removed} klientů, přesměrováno {repointed} faktur";
-    platform_admin_granted: "Platformní admin udělen";
-    platform_admin_revoked: "Platformní admin odebrán";
-    platform_admin_last: "Nelze odebrat posledního platformního admina";
-    platform_admin_failed: "Platformní roli se nepodařilo změnit";
-    fio_payments_enabled: "Fio token pro odesílání uložen";
-    fio_payments_disabled: "Práva k odesílání plateb odebrána";
-    admin_tokens_granted: "Tokeny darovány";
-    admin_workspace_renamed: "Prostor přejmenován";
-    admin_workspace_deleted: "Prostor smazán";
-    admin_member_removed: "Člen odebrán";
-    admin_invite_canceled: "Pozvánka zrušena";
-    admin_not_found: "Záznam nenalezen";
-    admin_invalid_amount: "Neplatný počet tokenů";
-    admin_name_required: "Zadejte název";
-    admin_last_owner: "Nelze odebrat posledního vlastníka";
-    admin_confirmation_mismatch: "Potvrzení nesouhlasí";
-    admin_action_failed: "Akce se nezdařila";
-    admin_plan_assigned: "Tarif přiřazen";
-    admin_plan_updated: "Tarif upraven";
-    admin_plan_client_added: "Subjekt přidán do katalogu";
-    admin_plan_client_removed: "Subjekt odebrán z katalogu";
-    admin_invalid_ico: "Neplatné IČO";
-    admin_ares_failed: "Načtení z ARES selhalo";
-  };
-  ToastDescriptions: {
-    issuer_saved: "Údaje firmy jsou připravené pro další faktury.";
-    issuer_deleted: "Firma byla odebrána z tohoto pracovního prostoru.";
-    client_saved: "Klient a jeho fakturační údaje byly uloženy.";
-    client_deleted: "Klient byl odebrán z tohoto workspace.";
-    invoice_saved: "K návrhu se můžete kdykoli vrátit.";
-    invoice_issued: "Faktura je uzamčená a připravená k odeslání.";
-    invoice_paid: "Ruční záznam v evidenci nyní pokrývá celou fakturu.";
-    invoice_unpaid: "Aktivní platba byla stornována. Propojený bankovní návrh je znovu připraven ke kontrole.";
-    invoice_cancelled: "Faktura zůstává v evidenci jako stornovaná.";
-    invoice_deleted: "Vybraný záznam byl smazán.";
-    invoice_duplicated: "Z původní faktury vznikl nový návrh.";
-    invoice_emailed: "Zpráva a přílohy byly zařazeny k odeslání.";
-    recurring_saved: "Invoicey použije toto nastavení pro budoucí návrhy.";
-    recurring_paused: "Dokud plán neobnovíte, nevzniknou žádné nové návrhy.";
-    recurring_resumed: "Plán bude pokračovat dalším naplánovaným během.";
-    recurring_skipped: "Následující naplánovaný výskyt byl přeskočen.";
-    recurring_drafted: "Před vystavením nový návrh zkontrolujte.";
-    recurring_deleted: "Plán byl odebrán; existující faktury se nezměnily.";
-    payment_confirmed: "Bankovní transakce byla přiřazena k faktuře v evidenci plateb.";
-    payment_rejected: "Transakce zůstává dostupná pro jinou fakturu nebo ruční kontrolu.";
-    payment_added: "Ruční záznam se nyní započítává do zůstatku faktury.";
-    payment_reversed: "Evidence zachovává původní záznam i jeho storno pro úplnou historii.";
-    bank_connected: "Příchozí CZK transakce lze nyní importovat do tohoto workspace.";
-    bank_disconnected: "Importované transakce a historie přiřazení zůstaly zachované.";
-    bank_synced: "{imported} nových transakcí, {proposed} návrhů, {autoMatched} automaticky spárováno.";
-    bank_auto_match_enabled: "Automaticky se potvrdí jen přesná shoda účtu, měny, variabilního symbolu a celé částky.";
-    bank_auto_match_disabled: "Nové návrhy plateb budou čekat na vaše potvrzení.";
-    platform_admin_granted: "Uživatel nyní může spravovat platformu.";
-    platform_admin_revoked: "Přístup ke správě platformy byl odebrán.";
-    platform_admin_last: "Musí zůstat alespoň jeden platformní administrátor.";
-    platform_admin_failed: "Přístup se nezměnil.";
-    fio_payments_enabled: "Invoicey teď může navrhnout dávku. Platbu pořád autorizujete ve Fio.";
-    fio_payments_disabled: "Synchronizace výpisů zůstává. Nové dávky nelze odeslat.";
-    admin_tokens_granted: "Přičteno k darovanému zůstatku prostoru.";
-    admin_workspace_renamed: "Nový název vidí všichni členové.";
-    admin_workspace_deleted: "Prostor i jeho data byly odstraněny.";
-    admin_member_removed: "Uživatel už do prostoru nemá přístup.";
-    admin_invite_canceled: "Odkaz z pozvánky přestal platit.";
-    admin_not_found: "Záznam mezitím zmizel — obnovte stránku.";
-    admin_invalid_amount: "Zadejte celé číslo mezi 1 a 10 000 000.";
-    admin_name_required: "Název prostoru nesmí být prázdný.";
-    admin_last_owner: "Prostor musí mít vždy alespoň jednoho vlastníka.";
-    admin_confirmation_mismatch: "Přepište slug prostoru přesně.";
-    admin_action_failed: "Zkuste to znovu, nebo se podívejte do logů.";
-    invoice_issued_rewarded: "Vystavili jste první fakturu — přidali jsme {tokens} bonusových AI tokenů.";
-    admin_plan_assigned: "Nic se nesmazalo — workspacy nad limit zůstávají čitelné.";
-    admin_plan_updated: "Všechny workspacy na tomto tarifu nyní používají nová oprávnění.";
-    admin_plan_client_added: "Synchronizováno do všech workspaců na tomto tarifu.";
-    admin_plan_client_removed: "Existující odběratelé zůstali, ale už jim nelze fakturovat.";
-    admin_invalid_ico: "IČO má 8 číslic.";
-    admin_ares_failed: "Registr pro toto IČO nevrátil data.";
-  };
-  Status: {
-    invoice: {
-      draft: "Návrh";
-      unpaid: "Nezaplaceno";
-      overdue: "Po splatnosti";
-      paid: "Zaplaceno";
-      future: "Budoucí";
-      cancelled: "Stornováno";
-    };
-    invoiceCount: {
-      label: "{count, plural, one {# faktura} few {# faktury} other {# faktur}}";
-    };
-    email: {
-      queued: "Ve frontě";
-      sent: "Odesláno";
-      delivered: "Doručeno";
-      delayed: "Zpožděno";
-      failed: "Selhalo";
-      opened: "Otevřeno";
-      clicked: "Kliknuto";
-      bounced: "Nedoručeno";
-      complained: "Stížnost";
-    };
-  };
-  Marketing: {
-    meta: {
-      title: "Automatizace faktur bez zbytečného klikání";
-      description: "Invoicey propojuje validovaná data, PDF, ISDOC, SPAYD QR a ARES s moderním webem, párováním plateb z banky a AI automatizací.";
-      ogTitle: "Invoicey — automatizace faktur bez zbytečného klikání";
-      ogDescription: "Jedna validovaná faktura. Web, PDF, ISDOC, QR, platby z banky i AI automatizace.";
-    };
-    nav: {
-      howItWorks: "Jak to funguje";
-      automation: "Automatizace";
-      capabilities: "Co umí";
-      faq: "Otázky";
-      docs: "Dokumentace";
-      signIn: "Přihlásit se";
-      openApp: "Otevřít aplikaci";
-      continueToApp: "Pokračovat do aplikace";
-      signedIn: "Přihlášeni";
-      signedInAs: "Přihlášeni jako {name}";
-      openMenu: "Otevřít nabídku";
-      skipToContent: "Přeskočit na obsah";
-      ariaLabel: "Hlavní navigace";
-      payments: "Platby";
-      integrations: "Napojení";
-    };
-    footer: {
-      description: "Faktury jako strukturovaná data. Vytvořte je ve webu, přes JSON nebo s pomocí AI a pokaždé získejte stejný validovaný výstup.";
-      docs: "Dokumentace";
-      privacy: "Soukromí";
-      terms: "Podmínky";
-      cookies: "Cookies";
-      cookieSettings: "Nastavení cookies";
-      copyright: "© {year} Invoicey · Neveřejná beta";
-      legalNav: "Právní informace";
-    };
-    hero: {
-      badge: "Připraveno pro web, JSON i AI";
-      titleLine1: "Fakturace, která začíná daty.";
-      titleLine2: "Ne formulářem.";
-      subtitle: "Vystavujte doklady ve webu, z JSONu nebo přes AI. Invoicey je pokaždé ověří, vytvoří stejné PDF, ISDOC i platební QR — a příchozí platbu z banky navrhne spárovat s fakturou.";
-      ctaPrimary: "Otevřít Invoicey";
-      ctaPrimarySignedIn: "Pokračovat do aplikace";
-      ctaSecondary: "Jak to funguje";
-      signedInAs: "Přihlášeni jako {name}";
-      noPassword: "Bez hesla";
-      czechUi: "Czech-first";
-      betaAccess: "Beta přístup";
-      bankMatching: "Párování plateb";
-    };
-    mascot: {
-      ariaLabel: "Invoicey — kliknutím zobrazíte další hlášku";
-      clickHint: "Klikněte na Invoicey";
-      message1: "Povinná pole hlídám já. Vy hlídáte podnikání.";
-      message2: "Jedna faktura dovnitř. PDF, ISDOC a QR ven.";
-      message3: "Nevymýšlím IČO. ARES je rychlejší a spolehlivější.";
-      floatingAriaLabel: "Invoicey — zobrazit další tip";
-      floating1: "Psst — zkuste dole přepsat částku v ukázce.";
-      floating2: "Tahle stránka má víc pohybu. Faktury pak mají méně.";
-      floating3: "Ano, kontroluji i to, zda jste opravdu klikli na mě.";
-    };
-    preview: {
-      eyebrow: "Živá ukázka";
-      title: "Napište zadání. Invoicey poskládá data.";
-      description: "Vyzkoušejte si princip přímo tady. Upravte částku, DPH nebo splatnost a náhled faktury se přepočítá bez dalšího formuláře.";
-      inputLabel: "Popište fakturu vlastními slovy";
-      enterHint: "Enter aktualizuje náhled";
-      ariaLabel: "Pokyn pro vytvoření faktury";
-      updateButton: "Aktualizovat náhled";
-      updated: "Náhled aktualizován · povinné údaje ověřeny";
-      exampleServices: "Měsíční služby";
-      exampleWebdesign: "Webdesign";
-      exampleConsulting: "Konzultace";
-      promptServices: "Vystav fakturu pro Studio Sever za měsíční služby, 35 000 Kč bez DPH, splatnost 14 dní.";
-      promptWebdesign: "Vystav fakturu pro Ateliér 21 za návrh webu, 48 000 Kč + DPH, splatnost 10 dní.";
-      promptConsulting: "Vystav fakturu pro Kavárnu Místo za konzultace, 18 500 Kč + DPH, splatnost 7 dní.";
-      serviceMonthly: "Měsíční služby";
-      serviceWebdesign: "Návrh webu";
-      serviceConsulting: "Produktové konzultace";
-      aresVerified: "IČO {companyId} · ověřeno v ARES";
-      issuerCompanyId: "IČO 123 45 678";
-      issuer: "Dodavatel";
-      invoice: "Faktura";
-      ready: "Připraveno";
-      customer: "Odběratel";
-      due: "Splatnost";
-      days: "{count, plural, one {# den} few {# dny} other {# dní}}";
-      vat: "DPH {rate} %";
-      withoutVat: "Bez DPH";
-      item: "Položka";
-      amount: "Částka";
-      mobilePayment: "Platba mobilem";
-      total: "Celkem";
-    };
-    trust: {
-      pdfIsdoc: "PDF + ISDOC";
-      spaydQr: "SPAYD QR platba";
-      aresLookup: "ARES podle IČO";
-      multiIssuer: "Více firem";
-      ariaLabel: "Klíčové formáty";
-      bankSync: "Fio a MONETA";
-      currencies: "Více měn";
-      recurring: "Opakované faktury";
-    };
-    workflow: {
-      eyebrow: "Od zadání po zaplacení";
-      title: "Méně ruční práce. Pořád máte kontrolu.";
-      description: "Invoicey drží celý životní cyklus dokladu pohromadě a citlivé kroky nechává ve vašich rukou.";
-      step1Title: "Připravte údaje";
-      step1Description: "Vyberte firmu, dohledejte klienta podle IČO a doplňte položky. Nebo pošlete stejná data jako JSON či pokyn agentovi.";
-      step2Title: "Ověřte a vystavte";
-      step2Description: "Jedno schéma zkontroluje povinné údaje, DPH i součty. Teprve potom vznikne neměnný doklad, PDF, ISDOC a QR.";
-      step3Title: "Odešlete a spárujte";
-      step3Description: "Pošlete fakturu klientovi, sledujte doručení a splatnost a nechte připojenou banku navrhnout párování úhrady.";
-    };
-    capabilities: {
-      eyebrow: "Doménová realita";
-      title: "To podstatné je součást základu.";
-      description: "Ne další vrstva kolem generátoru PDF. Invoicey staví na údajích, které doklad skutečně potřebuje — včetně ARES, DPH a ISDOC.";
-      docsTitle: "Doklady bez slepých míst";
-      docsDescription: "Faktury, zálohy, proformy i dobropisy. DPH, DUZP, symboly, QR platba a ISDOC jsou součást stejného výstupu.";
-      issuersTitle: "Každá firma má vlastní pravidla";
-      issuersDescription: "Bankovní účet, číselná řada, plátcovství DPH i vizuální prvky zůstávají u správné firmy.";
-      emailTitle: "Od vystavení po úhradu";
-      emailDescription: "Odešlete PDF a ISDOC, sledujte doručení, splatnost a úhradu bez přepisování stavu mezi několika nástroji.";
-      historyTitle: "Historie zůstává historií";
-      historyDescription: "Vydané doklady jsou neměnné. Starší PDF a ISDOC můžete importovat a zachovat jejich původ i přesnou podobu.";
-      schemaTitle: "Data jsou první, PDF až druhé";
-      schemaDescription: "Jedno validační schéma pohání web, JSON i nástroje pro agenty. Výsledek se nemění podle toho, odkud faktura vznikla.";
-      securityTitle: "Oddělené pracovní prostory";
-      securityDescription: "OAuth přihlášení přes Google nebo GitHub a kontrola členství pracovního prostoru na každé serverové hranici.";
-      paymentsTitle: "Platby v jedné knize";
-      paymentsDescription: "Připojte Fio nebo MONETA. Příchozí platby se navrhnou k faktuře podle VS, částky i účtu a stav dokladu vzniká z potvrzených alokací.";
-      recurringTitle: "Opakované doklady bez hlídání";
-      recurringDescription: "Nastavte kadenci a den v měsíci. Invoicey pravidelně připraví návrh s aktuálními údaji dodavatele i klienta a nechá ho na potvrzení.";
-      currencyTitle: "Více měn a jazyk dokladu";
-      currencyDescription: "Fakturujte v CZK i cizí měně, s DPH i bez ní, a jazyk konkrétní faktury (čeština nebo angličtina) volíte nezávisle na jazyku aplikace.";
-    };
-    automation: {
-      badge: "Automatizace · beta";
-      title: "Agent připraví návrh. Pravidla rozhodnou, co projde.";
-      description: "Slack a MCP používají stejné nástroje jako web. AI může dohledat firmu, sestavit návrh a připravit soubory, ale nevymýšlí chybějící povinné údaje a potvrzení citlivých akcí zůstává na vás.";
-      item1: "ARES dohledání podle názvu nebo IČO";
-      item2: "Validovaný návrh podle InvoiceSchema";
-      item3: "PDF a ISDOC ze stejného zdroje dat";
-      item4: "Potvrzení před vydáním, odesláním nebo úhradou";
-      chatTitle: "Invoicey v Slacku";
-      chatSubtitle: "Strukturovaný návrh, ne volný text";
-      chatUserMessage: "@Invoicey vystav měsíční fakturu pro Studio Sever, 35 000 Kč bez DPH, splatnost 14 dní.";
-      chatReplyTitle: "Návrh je připravený";
-      chatClientLabel: "Klient";
-      chatClient: "Studio Sever · ARES ověřeno";
-      chatAmountLabel: "Částka";
-      chatAmount: "35 000 Kč";
-      chatOutputLabel: "Výstup";
-      chatOutput: "PDF + ISDOC + SPAYD";
-      chatAction: "Zkontrolovat a vystavit";
-      chatDisclaimer: "Vydání faktury vždy vyžaduje potvrzení";
-    };
-    featurePanels: {
-      multiIssuerEyebrow: "Více firem";
-      multiIssuerTitle: "Živnost a s.r.o. bez přepínacího chaosu.";
-      multiIssuerDescription: "Vyberete firmu, která fakturu vystavuje, a Invoicey použije její účet, číselnou řadu, DPH režim a vizuální prvky. Sdílený klient zůstává jeden.";
-      multiIssuerItem1: "Vlastní číselné řady";
-      multiIssuerItem2: "Bankovní údaje a QR";
-      multiIssuerItem3: "Logo, podpis a razítko";
-      importEyebrow: "Historický import";
-      importTitle: "Začněte dnes, historii nechte beze změny.";
-      importDescription: "Nahrajte starší PDF nebo ISDOC hromadně. Invoicey zachová původní soubory, označí jejich zdroj a nedovolí přepsat vydaný archivní doklad.";
-      importItem1: "PDF s vloženým ISDOC";
-      importItem2: "Archivní režim bez ISDOC";
-      importItem3: "Původ dokladu a neměnné soubory";
-      recurringEyebrow: "Opakované doklady";
-      recurringTitle: "Pravidelná fakturace, kterou schvalujete vy.";
-      recurringDescription: "Nastavte kadenci, den v měsíci a šablonu dokladu. Invoicey připraví návrh s aktuálním dodavatelem i klientem a nechá ho čekat na potvrzení.";
-      recurringItem1: "Měsíčně, čtvrtletně i vlastní kadence";
-      recurringItem2: "První nebo poslední den v měsíci";
-      recurringItem3: "Návrh čeká na potvrzení";
-    };
-    faq: {
-      eyebrow: "Časté otázky";
-      title: "Než otevřete první fakturu.";
-      description: "Stručně a bez produktové omáčky.";
-      q1: "Je Invoicey určené jen pro plátce DPH?";
-      a1: "Ne. Podporuje plátce i neplátce, běžný režim DPH, přenesenou daňovou povinnost a další údaje českých dokladů.";
-      q2: "Můžu fakturovat z více firem nebo živností?";
-      a2: "Ano. Každá firma má vlastní banku, číselné řady, DPH nastavení, logo i kontaktní údaje. Klienti přitom zůstávají sdílení v jednom pracovním prostoru.";
-      q3: "Co znamená AI fakturace?";
-      a3: "Agent neskládá PDF od oka. Připraví strukturovaný návrh, který projde stejnou validací jako faktura vytvořená ve webu. Vydání nebo odeslání citlivého dokladu zůstává potvrzovaná akce.";
-      q4: "Lze přenést staré faktury?";
-      a4: "Ano. Hromadný import přijímá PDF a ISDOC. Pokud PDF obsahuje vložený ISDOC, Invoicey načte i strukturovaná data; jinak zachová originál jako archivní doklad.";
-      q5: "Je Invoicey účetní nebo daňové poradenství?";
-      a5: "Ne. Invoicey pomáhá připravit a spravovat doklady, ale správnost konkrétního obchodního a daňového případu vždy odpovídá uživateli a jeho účetnímu či daňovému poradci.";
-      q6: "Jak funguje párování plateb z banky?";
-      a6: "Připojíte účet Fio nebo MONETA tokenem, který vydá banka na vaše jméno. Invoicey stáhne příchozí platby a navrhne párování podle variabilního symbolu, částky, měny a účtu. Automatické potvrzení je ve výchozím stavu vypnuté a i po zapnutí projde jen přesná shoda — ostatní návrhy čekají na člověka.";
-      q7: "Umí Invoicey opakované faktury?";
-      a7: "Ano. Nastavíte kadenci a den v měsíci a Invoicey pravidelně připraví návrh s aktuálními údaji dodavatele i klienta. Doklad se nevydá sám, potvrzení zůstává na vás.";
-      q8: "Můžu fakturovat v cizí měně nebo anglicky?";
-      a8: "Ano. Doklad může být v jiné měně než CZK, s DPH i bez ní, a jazyk konkrétní faktury (čeština nebo angličtina) volíte nezávisle na jazyku aplikace.";
-    };
-    cta: {
-      eyebrow: "Připraveno k vystavení";
-      title: "Dejte fakturám jedno místo a jeden zdroj pravdy.";
-      description: "Přihlaste se přes Google nebo GitHub. Heslo u Invoicey vytvářet nemusíte.";
-      descriptionSignedIn: "Jste přihlášeni. Pokračujte ke svým fakturám.";
-      button: "Otevřít Invoicey";
-      buttonSignedIn: "Otevřít přehled";
-    };
-    legal: {
-      terms: {
-        metaTitle: "Podmínky používání";
-        metaDescription: "Podmínky používání Invoicey v průběhu neveřejné beta verze.";
-        eyebrow: "Právní informace";
-        title: "Podmínky používání";
-        description: "Pravidla pro používání aktuální beta verze Invoicey a rozdělení odpovědnosti mezi službu a uživatele.";
-        betaNotice: "Neveřejná beta verze. Tyto podmínky jsou pracovní verzí pro omezený beta provoz. Identifikace provozovatele, placené tarify, úroveň podpory a komerční podmínky budou doplněny před veřejným spuštěním.";
-        s1Title: "1. Služba";
-        s1Body: "Invoicey je nástroj pro přípravu, správu, import, vykreslení a odesílání fakturačních dokladů. Některé funkce mohou být dostupné jako beta, experiment nebo pouze vybraným uživatelům. Aktuální rozsah služby se může během beta provozu měnit.";
-        s2Title: "2. Účet a přístup";
-        s2Body: "Přihlášení probíhá přes podporovaného OAuth poskytovatele, aktuálně Google nebo GitHub. Uživatel odpovídá za zabezpečení tohoto účtu a za činnost osob, které pozve do svého pracovního prostoru. Přístup není dovoleno sdílet způsobem, který obchází oprávnění nebo technická omezení služby.";
-        s3Title: "3. Odpovědnost za doklady";
-        s3Body: "Invoicey provádí technické a schématické kontroly, ale neposkytuje účetní, daňové ani právní poradenství. Uživatel odpovídá za pravdivost vstupních údajů, volbu daňového režimu, oprávnění doklad vystavit a jeho soulad s konkrétním obchodním případem. Před vydáním má uživatel doklad zkontrolovat.";
-        s4Title: "4. Agentní a automatizované funkce";
-        s4Body: "AI může připravit návrh nebo navrhnout další krok. Výstup může být neúplný nebo chybný a musí projít stejnou validací a lidskou kontrolou jako ručně zadané údaje. Uživatel nesmí automatizaci využít k podvodu, vydávání dokladů bez oprávnění nebo jinému protiprávnímu jednání.";
-        s5Title: "5. Data a soubory";
-        s5Body: "Uživatel si ponechává práva ke svým údajům a souborům a uděluje Invoicey oprávnění zpracovat je pouze pro poskytnutí služby. Uživatel musí mít právo zpracovávat osobní a obchodní údaje, které do služby vloží. Důležité doklady je vhodné uchovávat také ve vlastním archivu.";
-        s6Title: "6. Dostupnost a změny";
-        s6Body: "Beta verze je poskytována bez záruky nepřetržité dostupnosti. Služba může být změněna, dočasně omezena nebo ukončena, zejména kvůli údržbě, bezpečnosti nebo změnám dodavatelů. Pokud to okolnosti dovolí, významnou změnu oznámíme přiměřeným způsobem.";
-        s7Title: "7. Zakázané použití";
-        s7Body: "Službu nelze používat k porušování právních předpisů, zasílání spamu, neoprávněnému přístupu, obcházení zabezpečení, šíření škodlivého kódu nebo vytěžování služby způsobem, který ji nepřiměřeně zatěžuje.";
-        s8Title: "8. Omezení odpovědnosti";
-        s8Body: "V rozsahu dovoleném právem neodpovídá beta služba za nepřímou škodu, ušlý zisk ani důsledky rozhodnutí založených na nezkontrolovaném automatizovaném výstupu. Tím nejsou dotčena práva, která podle zákona nelze smluvně omezit.";
-        s9Title: "9. Změny podmínek";
-        s9Body: "Podmínky mohou být upraveny spolu s vývojem služby. Nová verze bude zveřejněna zde s datem aktualizace. Pokračování v používání po účinnosti změny znamená přijetí aktualizovaných podmínek, pokud právní předpis nevyžaduje jiný postup.";
-      };
-      privacy: {
-        metaTitle: "Ochrana soukromí";
-        metaDescription: "Jak Invoicey pracuje s osobními údaji v průběhu neveřejné beta verze.";
-        eyebrow: "Právní informace";
-        title: "Ochrana soukromí";
-        description: "Přehled údajů, které Invoicey potřebuje k provozu služby, proč je zpracovává a jaké máte možnosti.";
-        betaNotice: "Neveřejná beta verze. Invoicey je nyní poskytováno omezenému okruhu uživatelů. Úplné identifikační a kontaktní údaje provozovatele budou doplněny před veřejným komerčním spuštěním. Do té doby použijte pro požadavky stejný kontaktní kanál, kterým jste získali přístup.";
-        s1Title: "1. Jaké údaje zpracováváme";
-        s1Intro: "Podle toho, jak Invoicey používáte, může služba zpracovávat:";
-        s1Items: "jméno, e-mail a profilový obrázek z Google nebo GitHub účtu;členství a roli v pracovním prostoru;údaje dodavatelů, klientů a faktur, včetně kontaktních údajů, bankovních údajů, IČO, DIČ a položek dokladů;nahrané logo, podpis, razítko a archivní fakturační soubory;záznamy o odeslání, doručení a stavu fakturačních e-mailů;technické bezpečnostní záznamy a, pokud s tím souhlasíte, anonymní souhrnné měření návštěvnosti.";
-        s2Title: "2. Proč údaje používáme";
-        s2Intro: "Údaje používáme pouze v rozsahu potřebném pro:";
-        s2Items: "přihlášení, správu účtu a oddělení pracovních prostorů;vytvoření, uložení, vykreslení, import a odeslání faktur;ochranu služby, diagnostiku chyb a prevenci zneužití;splnění zákonných povinností spojených s účetními doklady;měření výkonu a používání veřejného webu, pouze pokud udělíte souhlas s kategorií „Anonymní měření“.";
-        s3Title: "3. Právní základ";
-        s3Body: "Provoz účtu a fakturačních funkcí je založen na plnění služby, o kterou uživatel požádal. Bezpečnostní a nezbytné provozní záznamy zpracováváme na základě oprávněného zájmu na bezpečném provozu. Volitelné měření je založeno na souhlasu, který lze kdykoliv změnit.";
-        s4Title: "4. Dodavatelé služby";
-        s4Body: "Invoicey používá specializované dodavatele infrastruktury. Podle zapnutých funkcí jde zejména o Vercel (hosting a volitelné měření), Neon (databáze), UploadThing (soubory), Resend (transakční e-mail), Google/GitHub (OAuth přihlášení) a Slack/Vercel Connect pro agentní integraci. Tito dodavatelé zpracovávají údaje jen pro zajištění dané funkce a podle svých smluvních a bezpečnostních podmínek.";
-        s5Title: "5. Doba uchování";
-        s5Body: "Účetní a vystavené doklady mohou podléhat zákonným archivačním povinnostem a nejsou automaticky přepisovány při změně živých údajů. Ostatní údaje uchováváme po dobu aktivního účtu a následně jen po dobu nezbytnou k ochraně služby, řešení nároků nebo splnění právní povinnosti. Konkrétní retenční lhůty budou před veřejným spuštěním doplněny do této stránky.";
-        s6Title: "6. Vaše práva";
-        s6Body: "V mezích GDPR můžete požádat o přístup, opravu, výmaz, omezení zpracování, přenositelnost nebo vznést námitku. Souhlas s měřením lze odvolat okamžitě přes nastavení cookies. Některé údaje z účetních dokladů nemusí být možné vymazat, pokud jejich uchování vyžaduje zákon.";
-        s7Title: "7. Zabezpečení a změny";
-        s7Body: "Přístup do aplikace používá OAuth bez vlastního hesla u Invoicey. Pracovní data jsou vždy dotazována v kontextu ověřeného členství v pracovním prostoru. Žádné internetové službě však nelze slíbit absolutní bezpečnost. Tuto stránku upravíme při změně významného způsobu zpracování a zveřejníme nové datum aktualizace.";
-      };
-      cookies: {
-        metaTitle: "Používání cookies";
-        metaDescription: "Jaké cookies a lokální úložiště Invoicey používá a jak změnit volbu.";
-        eyebrow: "Právní informace";
-        title: "Používání cookies";
-        description: "Dvě srozumitelné kategorie. Nezbytné technologie pro provoz a volitelné anonymní měření. Žádné reklamní cookies.";
-        changeChoiceTitle: "Chcete změnit svou volbu?";
-        changeChoiceDescription: "Nastavení otevřete kdykoliv. Odvolání analytického souhlasu se projeví bez dalšího sledování.";
-        changeChoiceButton: "Otevřít nastavení cookies";
-        s1Title: "1. Nezbytné technologie";
-        s1Body: "Tyto technologie nelze vypnout, protože zajišťují přihlášení, zabezpečení relace, oddělení pracovního prostoru a zapamatování vaší volby soukromí. Patří sem zejména bezpečné cookies Better Auth a záznam c15t-consent, který uchovává vaši volbu nejdéle jeden rok. Rozhraní může v lokálním úložišti ukládat také čistě funkční preference, například motiv vzhledu.";
-        s2Title: "2. Anonymní měření";
-        s2Body: "Po vašem souhlasu načteme Vercel Analytics. Poskytuje souhrnné informace o návštěvnosti a výkonu veřejných stránek. Nepoužíváme je k reklamnímu profilování ani je nekombinujeme s fakturačním obsahem. Bez souhlasu se analytická komponenta nenačte.";
-        s3Title: "3. Co nepoužíváme";
-        s3Body: "Invoicey v současnosti nepoužívá reklamní sítě, remarketingové pixely ani cookies pro sledování napříč weby. Pokud by se to změnilo, tato stránka i volby souhlasu budou aktualizovány před jejich zapnutím.";
-        s4Title: "4. Změna nebo odvolání souhlasu";
-        s4Body: "Nastavení můžete otevřít tlačítkem výše nebo odkazem „Nastavení cookies“ v patičce. Volba „Pouze nezbytné“ odmítne nebo odvolá měření. Vymazání dat webu v prohlížeči odstraní i uloženou volbu a při příští návštěvě se zeptáme znovu.";
-      };
-    };
-    payments: {
-      badge: "Bankovní napojení";
-      eyebrow: "Platební kniha";
-      title: "Zaplaceno pozná Invoicey z výpisu, ne z vaší paměti.";
-      description: "Připojte účet tokenem, který vydá banka na vaše jméno. Invoicey stáhne příchozí platby, navrhne párování s vydanou fakturou a stav dokladu odvodí z potvrzených alokací — včetně částečných úhrad a přeplatků.";
-      item1: "Fio a MONETA přes token účtu, bez PSD2 prostředníka";
-      item2: "Návrhy párování podle VS, částky, měny i účtu";
-      item3: "Automatické potvrzení jen u přesné shody a jen když ho zapnete";
-      item4: "Částečné úhrady, přeplatky i ruční platby v jedné knize";
-      cardTitle: "Příchozí platba";
-      cardSubtitle: "Fio · 2301234567/2010";
-      creditAmountLabel: "Částka";
-      creditAmount: "35 000 Kč";
-      creditVsLabel: "Variabilní symbol";
-      creditVs: "20260042";
-      creditDateLabel: "Připsáno";
-      creditDate: "12. 8. 2026";
-      matchTitle: "Návrh párování";
-      matchInvoiceLabel: "Faktura";
-      matchInvoice: "2026-0042 · Studio Sever";
-      matchStateLabel: "Po potvrzení";
-      matchState: "Zaplaceno v plné výši";
-      matchAction: "Zkontrolovat a potvrdit";
-      disclaimer: "Automatické potvrzení je ve výchozím stavu vypnuté";
-    };
-    integrations: {
-      eyebrow: "Napojení";
-      title: "Fakturujte i mimo Invoicey.";
-      description: "Slack, MCP klienti i vlastní skripty používají stejné nástroje a stejnou validaci jako web. Každé napojení má vlastní přístup a bez oprávnění neprojde.";
-      slackTitle: "Slack";
-      slackDescription: "Návrh faktury přímo z threadu, potvrzení v Slacku, výsledek ve stejném pracovním prostoru.";
-      mcpTitle: "MCP · Claude a Cursor";
-      mcpDescription: "Vzdálený MCP server s API klíčem pracovního prostoru. Stejné nástroje jako ve webu.";
-      banksTitle: "Fio a MONETA";
-      banksDescription: "Příchozí platby a návrhy párování přes token vydaný bankou na váš účet.";
-      aresTitle: "ARES";
-      aresDescription: "Dohledání firmy podle IČO nebo názvu při zakládání klienta i dodavatele.";
-      emailTitle: "E-mail klientovi";
-      emailDescription: "Odeslání PDF a ISDOC pod vaším jménem se sledováním doručení.";
-      apiTitle: "JSON a API klíče";
-      apiDescription: "Validovaný InvoiceSchema JSON a klíče pro vlastní automatizaci.";
-      docsCta: "Dokumentace napojení";
-    };
-  };
-  Auth: {
-    meta: {
-      title: "Přihlášení";
-      description: "Přihlaste se do Invoicey přes Google nebo GitHub.";
-    };
-    eyebrow: "Vítejte zpět";
-    title: "Přihlášení do Invoicey";
-    subtitle: "Pokračujte účtem Google nebo GitHub. Invoicey nevytváří ani neukládá další heslo — přístup můžete kdykoli odebrat u poskytovatele.";
-    noProviders: "Není nastavený žádný poskytovatel přihlášení. Doplňte přístupové údaje Google nebo GitHub a stránku načtěte znovu.";
-    continueWith: "Pokračovat přes {provider}";
-    consent: "Pokračováním potvrzujete, že jste se seznámili s podmínkami používání a zásadami ochrany soukromí.";
-    shell: {
-      tagline: "Automatizace faktur";
-      eyebrow: "Jedno schéma, všechny kanály";
-      title: "Od údajů k hotovému dokladu bez zbytečných odboček.";
-      description: "Web, PDF, ISDOC, SPAYD QR i agentní nástroje pracují se stejnou validovanou fakturou.";
-      oauthNote: "OAuth přihlášení · žádné další heslo";
-      backHome: "Zpět na Invoicey";
-      badge: "Neveřejná beta";
-      benefit1Title: "České reálie v základu";
-      benefit1Description: "Klient podle IČO z ARES, režimy DPH, DUZP i symboly.";
-      benefit2Title: "PDF, ISDOC a QR najednou";
-      benefit2Description: "Jeden validovaný doklad, tři výstupy ze stejných dat.";
-      benefit3Title: "Platby z banky";
-      benefit3Description: "Fio a MONETA navrhnou párování úhrady k faktuře.";
-      footerNote: "Faktury, doklady i platby zůstávají ve vašem pracovním prostoru.";
-    };
-    redirecting: "Přesměrovávám…";
-    failed: "Přihlášení se nepodařilo. Zkuste to prosím znovu.";
-    continueGoogle: "Pokračovat přes Google";
-    continueGitHub: "Pokračovat přes GitHub";
-    continueNote: "Po přihlášení vás vrátíme tam, kam jste mířili.";
-    secureNote: "Přihlášení probíhá u poskytovatele, heslo Invoicey nevidí.";
-    docsPrompt: "Ještě zvažujete?";
-    docsCta: "Projděte dokumentaci";
-  };
-  Onboarding: {
-    meta: {
-      title: "Nastavení pracovního prostoru";
-    };
-    title: "Dokončete pracovní prostor";
-    subtitle: "Účet {email} je přihlášený, ale nemá pracovní prostor. Obvykle jej vytvoříme automaticky; tímto krokem dokončíte přerušené nastavení.";
-    benefit1: "Soukromý prostor pro vaše faktury";
-    benefit2: "Role vlastníka pracovního prostoru";
-    benefit3: "Možnost přidat první firmu";
-    submit: "Vytvořit můj pracovní prostor";
-    creating: "Vytvářím…";
-  };
-  Invite: {
-    title: "Pozvánka do pracovního prostoru";
-    description: "Zkontrolujte detaily a pozvánku přijměte nebo odmítněte.";
-    accept: "Přijmout pozvánku";
-    accepting: "Přijímám…";
-    accepted: "Přijato";
-    decline: "Odmítnout";
-    declining: "Odmítám…";
-    declined: "Odmítnuto";
-    backToApp: "Zpět do aplikace";
-    workspace: "Pracovní prostor";
-    inviter: "Pozval";
-    role: "Role";
-    email: "Pozvaný e-mail";
-    expires: "Platnost do";
-    roles: {
-      owner: "Vlastník";
-      admin: "Správce";
-      member: "Člen";
-    };
-    acceptFailed: "Přijetí pozvánky selhalo";
-    declineFailed: "Odmítnutí pozvánky selhalo";
-    acceptSuccess: "Pozvánka přijata";
-    declineSuccess: "Pozvánka odmítnuta";
-    expired: "Tato pozvánka vypršela. Požádejte správce o novou.";
-    unavailable: "Tato pozvánka už není dostupná.";
-    notFound: "Pozvánka nenalezena.";
-    emailMismatch: "Jste přihlášeni jako {signedInEmail}, ale pozvánka byla odeslána na {inviteEmail}. Přihlaste se pozvaným e-mailem.";
-    signedInAs: "Přihlášeni jako {email}";
-  };
-  SlackLink: {
-    title: "Propojit Slack s Invoicey";
-    description: "Tento Slack účet bude moct připravovat faktury v níže uvedeném workspace.";
-    confirm: "Potvrdit propojení";
-    confirming: "Propojuji…";
-    confirmed: "Propojeno";
-    confirmFailed: "Propojení se nepodařilo";
-    confirmSuccess: "Slack účet je propojený. Další zpráva v Slacku už půjde do tohoto workspace.";
-    rebindSuccess: "Slack účet teď používá aktuální pracovní prostor.";
-    backToApp: "Zpět do aplikace";
-    fromSlack: "Ze Slacku";
-    toWorkspace: "Do workspace";
-    slackAccount: "Slack účet";
-    invoiceyAccount: "Invoicey účet";
-    invoicesLandHere: "Nové faktury ze Slacku sem";
-    workspaceCalloutTitle: "Špatný workspace?";
-    workspaceHint: "Přepněte workspace v postranním panelu a otevřete odkaz znovu. Starší Slack faktury v jiném workspace se nemění.";
-    expiresNote: "Odkaz platí 15 minut a jde použít jen jednou.";
-    noEmailMatch: "Slack a Invoicey nespárujeme podle e-mailu — propojí se právě tento Slack účet s přihlášeným uživatelem.";
-    slackUser: "Slack uživatel";
-    workspace: "Pracovní prostor pro nové faktury";
-    signedInAs: "Přihlášeni jako {email}";
-    notFound: "Odkaz na propojení neexistuje. Napište botovi znovu a použijte nový DM.";
-    expired: "Odkaz vypršel (15 minut). Napište botovi znovu.";
-    consumed: "Tento odkaz už byl použit. Napište botovi, pokud potřebujete nový.";
-    stealRefused: "Tento Slack účet je už propojený s jiným Invoicey uživatelem. Nechte ho odpojit v Nastavení → Integrace.";
-  };
-  Referral: {
-    title: "{name} vás zve do Invoicey";
-    titleAnonymous: "Byli jste pozváni do Invoicey";
-    description: "Vytvořte si vlastní pracovní prostor pro české faktury — PDF, ISDOC a AI nástroje. Tento odkaz vás nepřidá do cizího workspace.";
-    cta: "Pokračovat k přihlášení";
-    alreadySignedIn: "Účet Invoicey už máte. Pokračujte do aplikace.";
-    openApp: "Otevřít přehled";
-    invalidTitle: "Odkaz nenalezen";
-    invalidDescription: "Tento pozvánkový odkaz je neplatný nebo už neplatí. Účet Invoicey si můžete vytvořit i bez něj.";
-    signInAnyway: "Přihlásit se do Invoicey";
-  };
-  NotFound: {
-    code: "404";
-    title: "Tahle stránka na faktuře není.";
-    description: "Odkaz mohl zastarat nebo stránka změnila adresu. Veřejný přehled produktu najdete na úvodní stránce.";
-    backButton: "Zpět na Invoicey";
-  };
-  AppError: {
-    title: "Něco se pokazilo";
-    description: "Nastala neočekávaná chyba. Zkuste stránku načíst znovu.";
-    retry: "Zkusit znovu";
-    backToDashboard: "Zpět na přehled";
-  };
-  AppNotFound: {
-    code: "404";
-    title: "Stránka nenalezena";
-    description: "Odkaz mohl zastarat, nebo záznam byl smazán či je v jiném workspace.";
-    backToInvoices: "Zpět na faktury";
-    backToDashboard: "Zpět na přehled";
-  };
-  App: {
-    meta: {
-      title: "Invoicey";
-      description: "Automatizace faktur založená na datech · PDF, ISDOC a SPAYD QR";
-    };
-    brand: {
-      tagline: "Automatizace faktur";
-    };
-    nav: {
-      group: "Pracovní prostor";
-      dashboard: "Přehled";
-      invoices: "Faktury";
-      invoicesAi: "Vytvořit s AI";
-      invoicesImport: "Importovat staré faktury";
-      invoicesFromJson: "Faktura z JSON";
-      invoicesRecurring: "Opakované faktury";
-      payments: "Platby";
-      clients: "Klienti";
-      issuers: "Moje firmy";
-      newInvoice: "Nová faktura";
-      toolsGroup: "Import a nástroje";
-      resourcesGroup: "Zdroje";
-      docs: "Dokumentace";
-      collapseToggle: "Rozbalit nebo sbalit {title}";
-      newInvoiceMore: "Další způsoby vytvoření";
-      createGroup: "Vytvořit";
-      invoiceBlank: "Prázdná faktura";
-      bankConnections: "Bankovní spojení";
-      settingsGroup: "Nastavení";
-      settingsWorkspace: "Pracovní prostor";
-      settingsAccount: "Můj účet";
-      admin: "Administrace";
-    };
-    breadcrumb: {
-      dashboard: "Přehled";
-      invoices: "Faktury";
-      payments: "Platby";
-      welcome: "Začínáme";
-      inbox: "Inbox";
-      runs: "Platební dávky";
-      upload: "Nahrát";
-      clients: "Klienti";
-      issuers: "Moje firmy";
-      settings: "Nastavení";
-      fromJson: "Z JSON";
-      ai: "AI koncept";
-      import: "Import";
-      recurring: "Opakované";
-      new: "Nová";
-      edit: "Upravit";
-      invoice: "Faktura";
-      issuer: "Firma";
-      client: "Klient";
-      detail: "Detail";
-      security: "Zabezpečení";
-      workspace: "Pracovní prostor";
-      members: "Členové";
-      referrals: "Doporučení";
-      "api-keys": "API klíče";
-      integrations: "Integrace";
-      usage: "Využití";
-      "bank-connections": "Bankovní spojení";
-      account: "Účet";
-    };
-    a11y: {
-      toggleSidebar: "Přepnout postranní panel";
-      sidebarTitle: "Postranní panel";
-      sidebarDescription: "Hlavní navigace aplikace";
-      navigating: "Načítání stránky";
-    };
-    settings: {
-      navigationLabel: {
-        account: "Sekce nastavení účtu";
-        workspace: "Sekce nastavení prostoru";
-      };
-      nav: {
-        account: "Účet";
-        workspace: "Pracovní prostor";
-        security: "Zabezpečení";
-        members: "Členové";
-        usage: "Využití";
-        referrals: "Doporučení";
-        apiKeys: "API klíče";
-        bankConnections: "Bankovní spojení";
-        integrations: "Integrace";
-      };
-      navDescriptions: {
-        account: "Profil, motiv a jazyk";
-        workspace: "Název a logo tohoto prostoru";
-        security: "Přihlášení, relace a zařízení";
-        members: "Lidé a oprávnění";
-        usage: "AI tokeny, grafy a historie";
-        referrals: "Pozvěte přátele do Invoicey";
-        apiKeys: "Přístup pro automatizaci";
-        bankConnections: "Bankovní přehledy jen pro čtení";
-        integrations: "Slack, MCP a další nástroje";
-      };
-      workspace: {
-        pageTitle: "Pracovní prostor";
-        pageDescription: "Přejmenujte tento pracovní prostor a nastavte logo pro postranní panel. Slug zůstává pevný pro odkazy a integrace.";
-        nameLabel: "Název";
-        slugLabel: "Slug";
-        slugHint: "Slug nelze po vytvoření změnit.";
-        logoLabel: "Logo";
-        logoHint: "Zobrazuje se v přepínači pracovního prostoru. Faktury dál používají logo jednotlivých firem.";
-        logoSaved: "Logo pracovního prostoru uloženo";
-        removeLogo: "Odebrat logo";
-        uploadUnavailable: "Nahrávání souborů v tomto prostředí není nastavené.";
-        save: "Uložit název";
-        saving: "Ukládám…";
-        saved: "Název pracovního prostoru uložen";
-        membersLink: "Spravovat členy";
-        readOnly: "Název nebo logo může změnit jen vlastník nebo správce.";
-        plan: {
-          title: "Tarif";
-          description: "Co tarif tohoto workspace zahrnuje.";
-          unlimited: "Neomezeně";
-          contact: "Tarify aktivuje Invoicey. Pro změnu se nám ozvěte.";
-          limits: {
-            seats: "Členové";
-            issuers: "Dodavatelé";
-            monthlyTokens: "Měsíční AI tokeny";
-          };
-          features: {
-            bankConnections: "Bankovní propojení";
-            recurring: "Opakované koncepty";
-            historicalImport: "Import historie";
-            agents: "Slack, MCP a Invoicey";
-          };
-        };
-      };
-      account: {
-        pageTitle: "Účet";
-        pageDescription: "Identita z přihlášení a preference, které můžete změnit na tomto zařízení.";
-        profileTitle: "Profil";
-        profileDescription: "Jméno, e-mail a fotka pocházejí z Google nebo GitHub účtu.";
-        oauthNote: "Tato pole se aktualizují při přihlášení přes poskytovatele. Účty propojíte nebo odpojíte v Zabezpečení.";
-        nameLabel: "Jméno";
-        emailLabel: "E-mail";
-        securityLink: "Nastavení zabezpečení";
-      };
-      apiKeysDefault: {
-        title: "Výchozí pracovní prostor pro API klíče";
-        description: "Osobní API klíče vždy používají váš výchozí pracovní prostor — ne ten, který má prohlížeč právě aktivní. Přepnutí v postranním panelu výchozí prostor také nastaví.";
-        current: "Aktuální výchozí";
-        setDefault: "Použít pro API klíče";
-        alreadyDefault: "Používáno pro API klíče";
-        updated: "Výchozí pracovní prostor aktualizován";
-        activeDiffers: "Prohlížeč je teď v „{name}“. API klíče dál používají výchozí výše, dokud ho nezměníte nebo nepřepnete pracovní prostor.";
-        browserActive: "aktivní v prohlížeči";
-      };
-      appearance: {
-        pageTitle: "Vzhled a jazyk";
-        pageDescription: "Nastavte si Invoicey tak, aby se vám dobře používalo na tomto zařízení.";
-        title: "Vzhled";
-        description: "Světlý, tmavý, nebo podle systému. Preference se ukládá v tomto prohlížeči.";
-        languageDescription: "Zvolte jazyk ovládacích prvků a systémových zpráv. Dokumentace zůstává anglicky.";
-        deviceNote: "Motiv a jazyk se ukládají v tomto prohlížeči. Na jiném zařízení je můžete nastavit nezávisle.";
-      };
-      usage: {
-        pageTitle: "Využití AI";
-        pageDescription: "Přehledný zůstatek tokenů a aktivita pro tento pracovní prostor. Sdílené všemi členy.";
-        products: {
-          web: "Web AI";
-          slack: "Slack";
-          mcp: "MCP";
-        };
-        plan: {
-          title: "Aktuální plán";
-          description: "Free plán zahrnuje měsíční AI tokeny pro modely hostované Invoicey.";
-          freeName: "Free";
-          freeIncludes: "Každý měsíc {monthly} tokenů plus jednorázový dárek při založení prostoru.";
-          viewPlans: "Zobrazit plány";
-          upgrade: "Upgrade";
-        };
-        balance: {
-          title: "Zůstatek tokenů";
-          renewal: "Měsíční tokeny se obnoví za {days, plural, one {# den} few {# dny} other {# dní}}. Nevyužité měsíční tokeny se nepřenášejí.";
-          cardLabel: "Prostor";
-          gifted: "Dárkové tokeny";
-          monthly: "Měsíční tokeny";
-          purchased: "Zakoupené tokeny";
-          totalLabel: "Celkem dostupných";
-          noRollover: "Nevyužité měsíční tokeny na konci období propadají. Dárkové a zakoupené zůstávají, dokud je nevyčerpáte.";
-          expiresOn: "Aktuální měsíční období končí {date}.";
-        };
-        chart: {
-          title: "Využití (30 dní)";
-          subtitle: "Web a Slack ukazují tokeny. MCP ukazuje volání nástrojů (klientský LLM účtuje klient).";
-          web: "Web";
-          slack: "Slack";
-          mcp: "MCP volání";
-          mcpNote: "MCP neodečítá tokeny Invoicey — jazykový model běží v Cursoru nebo vašem MCP klientovi.";
-        };
-        history: {
-          title: "Historie aktivity";
-          subtitle: "Nedávné LLM využití a MCP volání nástrojů v tomto prostoru.";
-          empty: "Zatím žádná AI aktivita.";
-          when: "Kdy";
-          product: "Produkt";
-          detail: "Detail";
-          tokens: "Tokeny";
-        };
-        topup: {
-          title: "Dobití";
-          subtitle: "Nákup tokenů a kódy přijdou později. Tlačítka jsou zatím jen zástupné.";
-          redeem: "Uplatnit kód";
-          buy: "Koupit tokeny";
-          comingSoon: "Nákup tokenů zatím není dostupný — dáme vám vědět, až bude.";
-        };
-        chip: {
-          title: "Zůstatek tokenů";
-          remaining: "zbývá {count}";
-          monthlyUsed: "Měsíční tokeny";
-          gifted: "Dárkové";
-          monthly: "Měsíční";
-          purchased: "Zakoupené";
-          viewUsage: "Zobrazit využití";
-          upgrade: "Upgrade";
-        };
-        grants: {
-          title: "Bonusové tokeny";
-          subtitle: "Jednorázová přidělení připsaná tomuto workspace.";
-          columns: {
-            reason: "Důvod";
-            tokens: "Tokeny";
-            date: "Datum";
-          };
-          trigger: {
-            signup: "Uvítací bonus";
-            first_invoice_issued: "První vystavená faktura";
-            manual: "Přiděleno Invoicey";
-          };
-        };
-      };
-      scopes: {
-        account: {
-          eyebrow: "Váš účet";
-          title: "{name}";
-          subtitle: "Profil, vzhled a zabezpečení přihlášení. Platí pro vás ve všech pracovních prostorech.";
-        };
-        workspace: {
-          eyebrow: "Nastavení prostoru";
-          title: "Pracovní prostor";
-          subtitle: "Firmy, klienti a faktury tohoto prostoru. Změny vidí všichni jeho členové.";
-        };
-      };
-    };
-    theme: {
-      label: "Vzhled";
-      light: "Světlý";
-      dark: "Tmavý";
-      system: "Systém";
-    };
-    userMenu: {
-      settings: "Nastavení účtu";
-      platformAdmin: "Platformní admin";
-      logOut: "Odhlásit se";
-      signingOut: "Odhlašuji…";
-    };
-    workspaceSwitcher: {
-      label: "Pracovní prostory";
-      create: "Vytvořit pracovní prostor…";
-      createTitle: "Nový pracovní prostor";
-      createDescription: "Nový prostor má vlastní firmy, klienty a faktury. Přepnutí zároveň nastaví výchozí prostor pro API klíče.";
-      nameLabel: "Název";
-      namePlaceholder: "např. Acme s.r.o.";
-      cancel: "Zrušit";
-      createSubmit: "Vytvořit";
-      apiKeysDefaultBadge: "API klíče";
-      defaultDivergesShort: "API klíče → {name}";
-      defaultDivergesHint: "API klíče stále míří do „{name}“. Přepnutí pracovního prostoru výchozí také aktualizuje.";
-      roles: {
-        owner: "Vlastník";
-        admin: "Správce";
-        member: "Člen";
-      };
-      manageLabel: "Tento prostor";
-      settings: "Nastavení prostoru";
-      members: "Členové";
-      logoLabel: "Logo";
-      logoHint: "Zobrazuje se v přepínači prostorů. PNG nebo JPEG do 1 MB.";
-      logoOptional: "Nepovinné — bez loga se použijí iniciály.";
-      uploadUnavailable: "Nahrávání souborů není nakonfigurováno.";
-    };
-    workspaceErrors: {
-      name_required: "Zadejte název pracovního prostoru";
-      switch_failed: "Nepodařilo se přepnout pracovní prostor";
-      create_failed: "Nepodařilo se vytvořit pracovní prostor";
-      update_failed: "Nepodařilo se uložit nastavení workspace";
-      logo_invalid: "Adresa loga nepochází z důvěryhodného úložiště";
-      default_failed: "Nepodařilo se nastavit výchozí pracovní prostor";
-      invite_failed: "Přijetí pozvánky selhalo";
-      invite_missing_workspace: "Pozvánka neobsahuje pracovní prostor";
-      forbidden: "Pro tuto akci nemáte oprávnění";
-    };
-    palette: {
-      trigger: "Hledat…";
-      title: "Rychlé hledání";
-      description: "Najděte fakturu nebo klienta, nebo přejděte kamkoli v aplikaci.";
-      placeholder: "Číslo faktury, klient, IČO nebo název stránky…";
-      empty: "Nic nenalezeno.";
-      groups: {
-        go: "Přejít na";
-        create: "Vytvořit";
-        settings: "Nastavení";
-      };
-      commands: {
-        dashboard: "Přehled";
-        invoices: "Faktury";
-        payments: "Platby";
-        clients: "Klienti";
-        issuers: "Moje firmy";
-        newInvoice: "Nová faktura";
-        aiDraft: "Vytvořit fakturu s AI";
-        recurring: "Opakované faktury";
-        fromJson: "Faktura z JSON";
-        import: "Importovat staré faktury";
-        workspaceSettings: "Nastavení prostoru";
-        accountSettings: "Nastavení účtu";
-      };
-    };
-  };
-  Dashboard: {
-    title: "Přehled";
-    subtitle: "Stavy faktur a obrat za posledních 12 měsíců.";
-    goToInvoices: "Přejít na faktury";
-    newInvoice: "Nová faktura";
-    empty: {
-      title: "Vítejte v Invoicey";
-      description: "Než vytvoříte první fakturu, přidejte svou firmu.";
-      cta: "Přidat moji firmu";
-    };
-    gettingStarted: {
-      businessReady: "Nastavení firmy je hotové";
-      title: "Vytvořte první fakturu";
-      description: "Při vytváření faktury si vyberete klienta, nebo ho přidáte přes ARES.";
-      create: "Vytvořit fakturu";
-      ai: "Popsat s AI";
-    };
-    issuerFilter: {
-      label: "Firma";
-      all: "Všechny firmy";
-      description: "Zaměřte všechny přehledy a grafy na jednu firmu.";
-    };
-    recent: {
-      title: "Nedávné faktury";
-      client: "Klient";
-      viewAll: "Zobrazit vše";
-      issueDate: "Vystaveno";
-      dueDate: "Splatnost";
-      amount: "Částka";
-      empty: "Zatím žádné faktury.";
-      createFirst: "Vytvořte první fakturu";
-      number: "Číslo";
-      issued: "Vystaveno";
-      due: "Splatnost";
-      total: "Celkem";
-      status: "Stav";
-      draft: "NÁVRH";
-    };
-    balance: {
-      issued12m: "Vystavené faktury (12 měsíců)";
-      outstanding: "Neuhrazeno (včetně po splatnosti a budoucích)";
-    };
-    chart: {
-      title: "Vystaveno vs zaplaceno";
-      issued: "Vystaveno";
-      paid: "Zaplaceno";
-      subtitle: "Posledních 12 měsíců (částka, CZK)";
-    };
-  };
-  Invoices: {
-    list: {
-      title: "Faktury";
-      subtitle: "Stavy, filtry a akce nad fakturami.";
-      newButton: "Nová faktura";
-      aiButton: "AI koncept";
-      importButton: "Import";
-      fromJsonButton: "Z JSON";
-      empty: "Žádné faktury.";
-      createFirst: "Vytvořit první fakturu";
-      page: "Strana {current} / {total} ({records})";
-      records: "{count, plural, one {# záznam} few {# záznamy} other {# záznamů}}";
-      selectAll: "Vybrat vše";
-      number: "Číslo";
-      issued: "Vystaveno";
-      due: "Splatnost";
-      client: "Klient";
-      total: "Celkem";
-      status: "Stav";
-      source: "Zdroj";
-      actions: "Akce";
-      detail: "Detail";
-      issue: "Vystavit";
-      edit: "Upravit";
-      pdf: "PDF";
-      duplicate: "Dup";
-      markPaid: "Zaplaceno";
-      cancel: "Storno";
-      unmarkPaid: "Zrušit zaplacení";
-      delete: "Smazat";
-      draft: "NÁVRH";
-      archive: "archiv";
-      selected: "{count} vybraných";
-      selectedDrafts: "{count, plural, one {# návrh} few {# návrhy} other {# návrhů}}";
-      deleteIssuedHint: "Vystavené faktury jsou chráněné. Smažou se pouze vybrané návrhy.";
-      bulkIssue: "Vystavit";
-      bulkPaid: "Zaplaceno";
-      bulkUnpaid: "Zrušit zaplacení";
-      bulkCancel: "Storno";
-      bulkCancelTitle: "Stornovat vybrané faktury?";
-      bulkCancelDescription: "Před trvalou účetní změnou si vše zkontrolujte.";
-      bulkCancelPermanent: "Storno ponechá čísla faktur a doklady zůstanou v historii.";
-      bulkCancelConfirm: "Trvale stornovat {count, plural, one {# fakturu} few {# faktury} other {# faktur}}";
-      bulkCancelPending: "Stornuji…";
-      bulkDelete: "Smazat";
-      untitledDraft: "Návrh bez čísla";
-      moreActions: "Další akce pro {number}";
-      detailInvoice: "Detail faktury";
-      editDraft: "Upravit návrh";
-      downloadPdf: "Stáhnout PDF";
-      markPaidFull: "Označit jako zaplacenou";
-      cancelInvoice: "Stornovat fakturu";
-      reviewCancellation: "Zkontrolovat storno";
-      paymentStates: {
-        unpaid: "Nezaplaceno";
-        partial: "Částečně zaplaceno";
-        paid: "Zaplaceno";
-        overpaid: "Přeplatek";
-      };
-      deleteDraft: "Smazat";
-      issuing: "Vystavuji…";
-      saving: "Ukládám…";
-      cancelling: "Stornuji…";
-      deleting: "Mazání…";
-      cancelSelection: "Zrušit výběr";
-      previous: "Předchozí";
-      next: "Další";
-      pageMobile: "Strana {current} z {total}";
-    };
-    filter: {
-      status: "Stav";
-      source: "Zdroj";
-      issuer: "Dodavatel";
-      client: "Odběratel";
-      from: "Od";
-      to: "Do";
-      search: "Hledat";
-      searchPlaceholder: "číslo, klient…";
-      sort: "Řazení";
-      sortDateDesc: "Datum ↓";
-      sortDateAsc: "Datum ↑";
-      submit: "Filtrovat";
-    };
-    origin: {
-      invoicey: "Invoicey";
-      fakturaonline: "FakturaOnline.cz";
-      idoklad: "iDoklad";
-      fakturoid: "Fakturoid";
-      pohoda: "Pohoda";
-      money_s3: "Money S3";
-      vyfakturuj: "VyFakturuj.cz";
-      superfaktura: "SuperFaktura";
-      custom: "Jiné / vlastní";
-    };
-    detail: {
-      issueDate: "Datum vystavení";
-      dueDate: "Splatnost";
-      duzp: "DUZP";
-      currency: "Měna";
-      documentLanguage: "Jazyk dokladu";
-      languageCs: "Čeština";
-      languageEn: "English";
-      emailHeading: "E-maily";
-      emailResendHint: "V případě potřeby opravte příjemce a volbou Odeslat e-mailem vytvořte nový pokus o doručení. Dřívější pokusy zůstanou v historii.";
-      lifecycleTitle: "Životní cyklus faktury";
-      lifecycle: {
-        draft: {
-          body: "Tento návrh lze upravit a nemá přidělené číslo faktury.";
-          action: "Zkontrolujte ho a vystavte až po dokončení údajů.";
-        };
-        unpaid: {
-          body: "Vystavená faktura zatím nemá potvrzenou platbu.";
-          action: "Odešlete ji nebo po přijetí platbu potvrďte.";
-        };
-        partial: {
-          body: "Potvrzená platba pokrývá jen část faktury.";
-          action: "Nechte zbývající částku otevřenou do doplacení.";
-        };
-        overdue: {
-          body: "Splatnost uplynula a platba stále chybí.";
-          action: "Připomeňte se odběrateli nebo zaznamenejte platbu.";
-        };
-        paid: {
-          body: "Potvrzené platby pokrývají fakturu v plné výši.";
-          action: "Historii plateb ponechte jako účetní záznam.";
-        };
-        overpaid: {
-          body: "Potvrzené platby převyšují celkovou částku faktury.";
-          action: "Před opravou nebo vrácením peněz zkontrolujte přiřazení.";
-        };
-        future: {
-          body: "Tato faktura má datum vystavení v budoucnu a zatím není aktuální.";
-          action: "Před odesláním nebo čekáním na platbu zkontrolujte datum vystavení.";
-        };
-        cancelled: {
-          body: "Faktura zůstává v účetní historii jako stornovaná.";
-          action: "Náhradní doklad vytvořte jen tehdy, pokud je potřeba nový.";
-        };
-      };
-      currencyNote: "(zatím pouze CZK)";
-      total: "Celkem";
-      paidAt: "Zaplaceno";
-      pdfUnavailable: "PDF zatím není k dispozici.";
-      isdoc: "ISDOC";
-      issuing: "Vystavuji…";
-      saving: "Ukládám…";
-      duplicating: "Duplikuji…";
-      cancelling: "Stornuji…";
-      deleting: "Mazání…";
-      priceExclVat: "Cena bez DPH";
-      vat: "DPH";
-      totalInclVat: "Celkem s DPH";
-      archiveNote: "Archivní import — položky nejsou k dispozici. Stáhněte originální PDF.";
-      invalidPayload: "Uložená data faktury jsou neplatná.";
-      backToList: "← Zpět na seznam";
-      archive: "Archiv";
-      import: "Import";
-      issueButton: "Vystavit";
-      editButton: "Upravit";
-      duplicateButton: "Duplikovat";
-      markPaidButton: "Označit zaplaceno";
-      unmarkPaidButton: "Zrušit zaplaceno";
-      cancelButton: "Stornovat";
-      deleteButton: "Smazat";
-      fromRecurring: "Z opakovaného plánu";
-      viewSchedule: "Opakovaný plán";
-      pdfEmpty: "PDF zatím není k dispozici.";
-      issuingPending: "Vystavuji…";
-      savingPending: "Ukládám…";
-      duplicatingPending: "Duplikuji…";
-      cancellingPending: "Stornuji…";
-      cannotCancelError: "Fakturu se nepodařilo stornovat. Nejdřív stornujte všechna přiřazení plateb a akci opakujte.";
-      payments: {
-        title: "Přehled plateb";
-        description: "Potvrzená přiřazení jsou pro tuto fakturu rozhodující.";
-        open: "Otevřít platby";
-        state: "Stav";
-        allocated: "Přiřazeno";
-        outstanding: "Zbývá uhradit";
-        empty: "K faktuře zatím není přiřazena žádná platba.";
-        reversed: "Stornováno";
-        reverse: "Stornovat platbu";
-        states: {
-          unpaid: "Nezaplaceno";
-          partial: "Částečně zaplaceno";
-          paid: "Zaplaceno";
-          overpaid: "Přeplatek";
-        };
-        sources: {
-          manual: "Ruční platba";
-          legacy_manual: "Importovaná platba";
-          bank_confirmed: "Potvrzená bankovní platba";
-          bank_transaction: "Bankovní transakce";
-          payment_run: "Platební dávka";
-          other: "Jiný zdroj platby";
-        };
-      };
-      cancelSheet: {
-        trigger: "Stornovat";
-        title: "Stornovat tuto fakturu?";
-        description: "Před trvalou účetní změnou si vše zkontrolujte.";
-        permanent: "Storno ponechá číslo faktury a doklad zůstane v historii.";
-        blocked: "K faktuře jsou přiřazené platby. Před stornem je nejdřív stornujte.";
-        reviewPayments: "Zobrazit přehled plateb";
-        confirm: "Trvale stornovat fakturu";
-        pending: "Stornuji…";
-      };
-      deletingPending: "Mazání…";
-      itemsHeader: {
-        position: "#";
-        description: "Popis";
-        quantity: "Množství";
-        price: "Cena bez DPH";
-        vat: "DPH";
-        total: "Celkem s DPH";
-      };
-    };
-    builder: {
-      title: "Nová faktura";
-      subtitle: "Nejprve vytvořte návrh, potom jej zkontrolujte a vystavte. Náhled PDF najdete vedle formuláře nebo pod ním.";
-      builderGuide: "Průvodce formulářem";
-      vatGuide: "Průvodce DPH";
-      officialAres: "Oficiální ARES";
-      draftExplanationTitle: "Začněte návrhem";
-      draftExplanation: "Během práce můžete návrh libovolně ukládat. Nemá finální číslo a zůstává upravitelný.";
-      issueExplanationTitle: "Vystavením se doklad uzamkne";
-      issueExplanation: "Invoicey přidělí číslo a uloží neměnnou podobu stran, dat a částek pro historii.";
-      outputsExplanationTitle: "Všechny výstupy souhlasí";
-      outputsExplanation: "Ze stejných ověřených dat vznikne PDF, ISDOC i platební QR pro CZK.";
-      editTitle: "Úprava návrhu";
-      sectionParties: "Strany";
-      sectionPartiesDescription: "Dodavatel a odběratel na dokladu.";
-      sectionDocument: "Doklad";
-      sectionDocumentDescription: "Typ dokladu, jazyk PDF a měna.";
-      sectionDates: "Data";
-      sectionDatesDescription: "Datum vystavení, splatnost a DUZP.";
-      sectionVat: "DPH a měna";
-      sectionVatDescription: "Jak se na dokladu počítá DPH.";
-      sectionNotes: "Poznámka";
-      issuer: "Dodavatel";
-      issuerDescription: "Vaše firma uvedená na faktuře jako dodavatel.";
-      client: "Odběratel";
-      clientDescription: "Odběratel z registru klientů (ARES).";
-      partyDocs: "Proč se strany ukládají";
-      partyIdentifiers: "IČO {ico} · DIČ {dic}";
-      notSet: "není uvedeno";
-      configureIssuer: "Nastavit dodavatele";
-      addIssuer: "Přidat dodavatele";
-      selectClient: "Vyberte odběratele";
-      addClientManually: "Přidat ručně";
-      quickClientTitle: "Přidat českou firmu podle IČO";
-      quickClientDescription: "Invoicey ověří ARES a při již uloženém IČO použije existujícího klienta.";
-      openAres: "Otevřít ARES";
-      clientIcoPlaceholder: "8místné IČO";
-      addingClient: "Ověřuji…";
-      addClientFromAres: "Přidat z ARES";
-      clientSelected: "Vybrán existující klient {name}.";
-      clientCreated: "Klient {name} byl vytvořen a vybrán.";
-      docType: "Typ dokladu";
-      docTypeDescription: "Typ daňového / platebního dokladu.";
-      docTypeInvoice: "Faktura";
-      docTypeProforma: "Proforma";
-      docTypeAdvance: "Záloha";
-      docTypeCreditNote: "Dobropis";
-      numberPreview: "Náhled čísla";
-      numberPreviewDescription: "Číslo se přiřadí až při vystavení.";
-      issueDate: "Datum vystavení";
-      dueDate: "Splatnost";
-      duzp: "DUZP";
-      duzpDescription: "Datum uskutečnění zdanitelného plnění";
-      currency: "Měna";
-      currencyDescription: "Měna faktury. QR platba (SPAYD) je dostupná jen pro CZK.";
-      language: "Jazyk dokladu";
-      languageDescription: "Jazyk popisků na PDF a ISDOC. Nezávislý na jazyku aplikace.";
-      languageCs: "Čeština";
-      languageEn: "English";
-      vatMode: "Režim DPH";
-      vatModeDescription: "Běžný režim, přenesení DPH nebo rozšířený režim OSS.";
-      vatRegular: "Běžný";
-      vatReverseCharge: "Přenesení DPH";
-      vatOss: "OSS";
-      vatAdvanced: "Zobrazit rozšířený režim OSS";
-      suppliesAbroad: "Dodání do zahraničí";
-      suppliesAbroadDescription: "Pro B2B dodání zboží/služeb do zahraničí.";
-      suppliesNone: "Ne";
-      suppliesEu: "EU";
-      suppliesNonEu: "Mimo EU";
-      legalNote: "Právní doložka";
-      legalNoteDescription: "Text doložky na faktuře (např. Daň odvede zákazník).";
-      legalNotePlaceholder: "Daň odvede zákazník";
-      reverseChargeCode: "Kód přenesení DPH";
-      reverseChargeCodeDescription: "Kód režimu přenesení daňové povinnosti.";
-      correctedInvoice: "Opravovaná faktura";
-      correctedInvoiceDescription: "Číslo původní faktury, kterou opravuješ.";
-      itemsTitle: "Položky";
-      itemsDescription: "Ceny zadávej bez DPH; celkem se počítá automaticky.";
-      itemsDescriptionNonPayer: "Zadávejte konečné ceny. Pole DPH jsou skrytá, protože dodavatel není plátce.";
-      nonVatPayerTitle: "Dodavatel není plátce DPH";
-      nonVatPayerDescription: "Všechny položky mají pevnou sazbu 0 % a ovládací prvky DPH jsou skryté.";
-      addRow: "Přidat řádek";
-      copyLastLines: "Zkopírovat položky z poslední faktury";
-      useLast: "Použít z poslední faktury: {value}";
-      useLastDueDays: "Použít z poslední faktury: {days, plural, one {# den} few {# dny} other {# dní}}";
-      itemN: "Položka {n}";
-      itemDescription: "Popis";
-      itemQuantity: "Množství";
-      itemUnit: "Jednotka";
-      itemPriceExcl: "Cena bez DPH";
-      itemPrice: "Cena";
-      itemPriceIncl: "Cena s DPH";
-      itemVat: "DPH";
-      itemLineTotal: "Řádek celkem";
-      descriptionPlaceholder: "Popis služby / zboží";
-      quantityPlaceholder: "Množství";
-      unitPlaceholder: "ks / hod";
-      pricePlaceholder: "Cena bez DPH";
-      priceSimplePlaceholder: "Cena";
-      vatPlaceholder: "DPH %";
-      totalLine: "Celkem: {total} (DPH {vat})";
-      totalLineNoVat: "Celkem: {total}";
-      notes: "Poznámka";
-      notesDescription: "Volitelný text na PDF pod položkami.";
-      notesPlaceholder: "Např. děkujeme za spolupráci";
-      saveDraft: "Uložit návrh";
-      savingDraft: "Ukládám…";
-      issue: "Vystavit";
-      issuing: "Vystavuji…";
-      modeEdit: "Úprava návrhu";
-      modeCreate: "Nová faktura";
-      missingParties: "Nejprve vytvořte <entities></entities>.";
-      missingIssuer: "dodavatele";
-      missingClient: "odběratele";
-      missingAnd: " a ";
-      missingScheme: "(chybí schéma)";
-      previewError: "Náhled se nepodařilo vytvořit";
-      formErrors: "Opravte chyby ve formuláři";
-      formFallback: "Vyplň povinná pole a alespoň jednu validní položku.";
-      issueDateDescription: "Datum, kdy fakturu vystavujete.";
-      dueDateDescription: "Poslední den pro včasnou úhradu.";
-      vatModeNonPayerHint: "U neplátce je vždy běžný se sazbou 0 %.";
-      vatRegularPayer: "Běžný (plátce)";
-      vatNonPayer: "Neplátce DPH";
-      itemsDescriptionIncl: "Ceny zadáváš včetně DPH; před uložením se převedou na bez DPH.";
-      pricesExcl: "Ceny bez DPH";
-      pricesIncl: "Ceny s DPH";
-      pricesModeAria: "Zadávání cen s DPH nebo bez DPH";
-      priceInclPlaceholder: "Cena s DPH";
-      currencyCzk: "CZK (Kč)";
-      reverseChargeCodePlaceholder: "např. 15";
-      vatOther: "Jiná…";
-      icoSuffix: " · IČO {ico}";
-      itemDescriptionAria: "Popis položky {n}";
-      itemQuantityAria: "Množství položky {n}";
-      itemUnitAria: "Jednotka položky {n}";
-      itemPriceExclAria: "Cena bez DPH položky {n}";
-      itemPriceInclAria: "Cena s DPH položky {n}";
-      itemVatAria: "Sazba DPH položky {n}";
-      itemVatCustomAria: "Vlastní sazba DPH položky {n}";
-      removeItem: "Odebrat položku {n}";
-      duplicate: "Duplikovat";
-      duplicateItem: "Duplikovat položku {n}";
-      recoveredDraft: "Obnovili jsme neuložený místní návrh.";
-      savedLocally: "Neuložený návrh je uložený v této relaci prohlížeče.";
-      discardRecoveredDraft: "Zahodit obnovený návrh";
-      errors: {
-        invalidDate: "Zadejte platné datum";
-        selectIssuer: "Vyberte dodavatele";
-        selectClient: "Vyberte odběratele";
-        descriptionRequired: "Popis je povinný";
-        quantityRequired: "Zadejte množství";
-        quantityZero: "Množství nesmí být 0";
-        unitRequired: "Jednotka je povinná";
-        priceRequired: "Zadejte cenu";
-        priceNegative: "Cena nesmí být záporná";
-        vatRequired: "Zadejte sazbu DPH";
-        itemsMin: "Přidejte alespoň jednu položku";
-        dueBeforeIssue: "Splatnost nesmí být před datem vystavení";
-      };
-    };
-    import: {
-      title: "Import historických faktur";
-      subtitle: "Nahrajte soubory PDF. Pokud obsahují vložený ISDOC, načteme i strukturovaná data. Ostatní uložíme jako archivní originály a základní údaje doplníte ručně.";
-      backLink: "← Faktury";
-      missingIssuer: "Nejprve vytvořte <issuer></issuer>.";
-      issuerLink: "firmu";
-      stepsAria: "Kroky importu";
-      stepSettings: "Nastavení";
-      stepUpload: "Nahrání";
-      stepReview: "Kontrola";
-      issuer: "Dodavatel";
-      defaultOrigin: "Výchozí zdroj (pro nerozpoznané)";
-      defaultOriginHint: "Po nahrání se u každého PDF použije detekovaný zdroj; tento výběr je záloha a hromadná úprava.";
-      originVersion: "Verze (volitelné)";
-      originVersionPlaceholder: "např. 0.4.0";
-      originLabel: "Vlastní popisek (volitelné)";
-      originLabelPlaceholder: "např. stará šablona ve Wordu";
-      defaultPaid: "Výchozí: označit importované jako zaplacené";
-      continueUpload: "Pokračovat k nahrání";
-      uploadTitle: "Nahrajte PDF faktury (až 40 najednou)";
-      toReview: "Ke kontrole ({count})";
-      readyCount: "K importu připraveno: {ready} / {total}";
-      applyOrigin: "Použít výchozí zdroj na všechny";
-      importing: "Importuji…";
-      importN: "Importovat {count} faktur";
-      emptyFiles: "Zatím žádné soubory.";
-      uploadPdfs: "Nahrajte PDF";
-      colFile: "Soubor";
-      colStatus: "Stav";
-      colOrigin: "Zdroj";
-      colNumber: "Číslo";
-      colClient: "Klient";
-      colDate: "Datum";
-      colTotal: "Celkem";
-      colPaid: "Zaplaceno";
-      statusIsdoc: "ISDOC";
-      statusArchive: "Archiv";
-      statusError: "Chyba: {error}";
-      numberPlaceholder: "číslo";
-      clientPlaceholder: "odběratel";
-      archiveHint: "Řádky bez ISDOC: doplňte číslo, odběratele, datum a částku. Uloží se originální PDF (archiv).";
-      addMore: "Přidat další PDF";
-      editSettings: "Upravit nastavení";
-      working: "Pracuji…";
-      done: "Import hotov: {created} vytvořeno, {skipped} přeskočeno, {failed} chyb.";
-    };
-    fromJson: {
-      eyebrow: "Strukturované zadání";
-      title: "Faktura z JSON";
-      subtitle: "Vložte <code>InvoiceSchema</code> JSON, ověřte jeho strukturu a vytvořte náhled PDF.";
-      backToInvoices: "← Zpět na faktury";
-      jsonLabel: "Invoice JSON";
-      loadPreset: "Načíst předvolbu";
-      renderPdf: "Vytvořit náhled PDF";
-      rendering: "Renderuji…";
-      resetSample: "Obnovit ukázku";
-      emptyPreview: "Náhled zobrazíte tlačítkem „Vytvořit náhled PDF“.";
-      parseError: "JSON se nepodařilo zpracovat: opravte syntaxi a zkuste znovu.";
-      validationHelp: "InvoiceSchema ověří strukturu a zvýrazní chyby před vytvořením PDF.";
-    };
-    email: {
-      send: "Odeslat e-mailem";
-      title: "Odeslat fakturu";
-      description: "PDF se připojí vždy. ISDOC lze vypnout.";
-      notConfigured: "RESEND_API_KEY není nastavený — odeslání nebude fungovat.";
-      suppressed: "Adresa je na suppress seznamu (bounce/complaint). Před odesláním zvolte jinou adresu příjemce.";
-      invalidRecipient: "Před odesláním zadejte platnou adresu příjemce do Komu i do všech kopií.";
-      subject: "Předmět";
-      to: "Komu";
-      cc: "Kopie (volitelné)";
-      coverText: "Průvodní text";
-      attachIsdoc: "Přiložit ISDOC";
-      from: "Od";
-      replyTo: "Odpovědět na";
-      submit: "Odeslat";
-      sending: "Odesílám…";
-      timelineTitle: "E-maily";
-    };
-  };
-  Recurring: {
-    list: {
-      title: "Opakované faktury";
-      subtitle: "Šablony, ze kterých vznikne návrh podle plánu. Vystavení a odeslání zůstává na vás.";
-      empty: "Zatím nemáte žádný opakovaný plán.";
-      emptyCta: "Otevřete fakturu a uložte ji jako opakovanou";
-      createFirst: "Nejprve vytvořte fakturu";
-      name: "Název";
-      client: "Odběratel";
-      cadence: "Periodicita";
-      weekly: "Týdně";
-      monthly: "Měsíčně";
-      quarterly: "Čtvrtletně";
-      yearly: "Ročně";
-      day: "den {day}";
-      dayFirst: "první";
-      dayLast: "poslední";
-      nextRun: "Další běh";
-      lastDraft: "Poslední návrh";
-      never: "Nikdy";
-      status: "Stav";
-      active: "Aktivní";
-      paused: "Pozastaveno";
-      actions: "Akce";
-      pause: "Pozastavit";
-      resume: "Obnovit";
-      skip: "Přeskočit";
-      runNow: "Spustit teď";
-      delete: "Smazat";
-      deleteConfirm: "Smazat tuto opakovanou šablonu? Existující návrhy zůstanou.";
-      saving: "Ukládám…";
-      running: "Vytvářím…";
-      deleting: "Mazání…";
-    };
-    sheet: {
-      trigger: "Opakovat";
-      title: "Uložit jako opakovanou";
-      description: "Invoicey k tomuto dni v období vytvoří návrh. Vy ho zkontrolujete, vystavíte a odešlete.";
-      name: "Název";
-      cadence: "Periodicita";
-      weekly: "Týdně";
-      monthly: "Měsíčně";
-      quarterly: "Čtvrtletně";
-      yearly: "Ročně";
-      dayOfMonth: "Den v měsíci";
-      dayFirst: "První den";
-      dayFifteenth: "15.";
-      dayLast: "Poslední den";
-      dayNth: "Den {day}";
-      submit: "Uložit plán";
-      saving: "Ukládám…";
-    };
-  };
-  Clients: {
-    title: "Klienti";
-    subtitle: "Odběratelé — ARES dohledání nebo ruční zadání.";
-    newButton: "Nový klient";
-    empty: "Zatím žádní klienti. Přidejte odběratele přes ARES nebo ručně.";
-    createFirst: "Vytvořit prvního klienta";
-    table: {
-      name: "Jméno";
-      ico: "IČO";
-      city: "Město";
-      source: "Zdroj";
-      actions: "Akce";
-      searchPlaceholder: "jméno, IČO, město…";
-      sourceAres: "ARES";
-      sourceManual: "Ručně";
-      edit: "Upravit";
-      delete: "Smazat";
-      deleting: "Mazání…";
-    };
-    newTitle: "Nový klient";
-    newSubtitle: "Zadejte IČO a načtěte údaje z ARES, nebo klienta vyplňte ručně.";
-    editTitle: "Upravit klienta";
-    editSubtitle: "Aktualizujte údaje odběratele.";
-    mergeDuplicates: "Sloučit duplicity";
-    deleteClient: "Smazat klienta";
-    deleteIrreversible: "Nenávratné.";
-    deleting: "Mazání…";
-    form: {
-      ico: "IČO (ARES)";
-      lookup: "Vyhledat v ARES";
-      lookingUp: "Hledám…";
-      icoHint: "Údaje můžete načíst z ARES nebo zadat ručně, například u zahraničního klienta.";
-      name: "Název";
-      dic: "DIČ";
-      street: "Ulice a číslo";
-      city: "Město";
-      zip: "PSČ";
-      country: "Stát (ISO)";
-      contactEmail: "Kontaktní e-mail";
-      save: "Uložit";
-      saving: "Ukládám…";
-      source: "Zdroj: {source}";
-      sourceAres: "ARES";
-      sourceManual: "Ručně";
-    };
-    managedBadge: "Tarif";
-    managedNotice: "Odběratelé v tomto workspace pocházejí z tarifu a nelze je upravovat.";
-  };
-  Issuers: {
-    title: "Moje firmy";
-    subtitle: "Vaše firmy — ARES, banka, DPH, číslování, logo.";
-    newButton: "Nová firma";
-    empty: "Zatím nemáte žádnou firmu. Přidejte ji a začněte fakturovat.";
-    createFirst: "Vytvořit první firmu";
-    deleting: "Mazání…";
-    editSectionsHint: "Upravte jednotlivé části firmy — uložení je po sekcích.";
-    nav: {
-      identity: "Identita";
-      bank: "Banka";
-      assets: "Assety";
-      numbering: "Číslování";
-      email: "E-mail";
-    };
-    table: {
-      name: "Název";
-      ico: "IČO";
-      dic: "DIČ";
-      vat: "DPH";
-      vatPayer: "Plátce";
-      vatNonPayer: "Neplátce";
-      actions: "Akce";
-      searchPlaceholder: "název, IČO, DIČ…";
-      edit: "Upravit";
-      delete: "Smazat";
-      defaultBadge: "Výchozí";
-      setDefault: "Nastavit jako výchozí";
-    };
-    newTitle: "Nová firma";
-    newSubtitle: "IČO přes ARES, kontaktní e-mail a banka. Ostatní nastavení doplníte v sekcích po vytvoření.";
-    editTitle: "Upravit firmu";
-    editSubtitle: "Aktualizujte firemní údaje, banku a číslování.";
-    form: {
-      ico: "IČO";
-      icoAres: "IČO (ARES)";
-      lookup: "Načíst z ARES";
-      lookingUp: "Hledám…";
-      name: "Název";
-      dic: "DIČ";
-      street: "Ulice a číslo";
-      city: "Město";
-      zip: "PSČ";
-      country: "Stát (ISO)";
-      contactEmail: "Kontaktní e-mail";
-      courtRecord: "Zápis v OR (volitelné)";
-      vatPayer: "Plátce DPH";
-      accountNumber: "Číslo účtu (např. 123456789/0100)";
-      iban: "IBAN";
-      bic: "BIC (volitelné)";
-      accountHint: "Zadejte účet ve tvaru 123456789/0100 nebo 19-2000145399/0800.";
-      ibanInvalid: "IBAN má neplatný kontrolní součet.";
-      qrMessagesTitle: "Zprávy v platebním QR";
-      qrMessagesHint: "Volitelný srozumitelný text v SPAYD QR kódu. Prázdné pole použije výchozí text Invoicey.";
-      qrBeneficiaryMessage: "Zpráva pro příjemce";
-      qrBeneficiaryHint: "Uvidíte ji v detailu příchozí transakce na svém účtu.";
-      qrBeneficiaryDefault: "Faktura {number} od {client}";
-      qrPayerNote: "Poznámka pro plátce";
-      qrPayerHint: "Klient ji uvidí před potvrzením platby.";
-      qrPayerDefault: "Platba faktury {number} pro {issuer}";
-      qrTemplateVariables: "Dostupné proměnné: {number}, {issuer}, {client}";
-      ibanFilled: "IBAN doplněn z čísla účtu.";
-      save: "Uložit";
-      saving: "Ukládám…";
-      create: "Vytvořit firmu";
-      creating: "Vytvářím…";
-      identitySection: "Identita";
-      bankSection: "Banka";
-      defaultsHint: "Číslování a e-mailové šablony nastavíme výchozími hodnotami — upravíte je později v nastavení firmy.";
-      source: "Zdroj: {source}";
-      sourceAres: "ARES";
-      sourceManual: "Ručně";
-      removeAsset: "Odebrat";
-      uploadUnavailable: "Upload není k dispozici — vložte URL níže.";
-      uploadTokenMissing: "UploadThing není nakonfigurován (`UPLOADTHING_TOKEN`) — vložte URL ručně, nebo nastavte token.";
-      hideUrl: "Skrýt URL";
-      pasteUrl: "Vložit URL ručně";
-      logo: "Logo";
-      stamp: "Razítko";
-      signature: "Podpis";
-    };
-    ares: {
-      invalid_ico: "Zadejte platné osmimístné IČO.";
-      ares_no_json: "ARES nevrátila JSON.";
-      ares_no_data: "ARES nevrátila data.";
-      ares_failed: "Vyhledání v ARES se nezdařilo.";
-    };
-    welcome: {
-      step: "Krok {current} / {total}";
-      title: "Nastavte si Invoicey";
-      identityHint: "Začněte IČO své firmy a potvrďte její kontaktní údaje.";
-      bankHint: "Přidejte účet, který bude na fakturách a platebních QR kódech. Invoicey peníze nepřevádí.";
-      skip: "Přeskočit pro teď";
-      skipping: "Přeskakuji…";
-      skipHint: "Nastavení můžete dokončit později, ale před vystavením faktury je firma potřeba.";
-      steps: {
-        workspace: "Prostor";
-        business: "Firma";
-        bank: "Bankovní účet";
-        ready: "Připraveno";
-      };
-      progressLabel: "Průběh nastavení";
-      aresTitle: "Najděte firmu v ARES";
-      aresHint: "Zadejte IČO a předvyplníme veřejně evidované údaje firmy.";
-      businessDetails: "Povinné údaje firmy";
-      contactEmailHint: "Tento e-mail uvedeme jako kontakt na vašich fakturách.";
-      isdocAlternative: "Alternativa: načíst existující fakturu";
-      uploadLabel: "Nahrát PDF s vloženým ISDOC";
-      uploadPending: "Načítám údaje z PDF…";
-      uploadHint: "Nejde o OCR: funguje jen s vloženým ISDOC a předvyplní údaje firmy a banky.";
-      continue: "Pokračovat";
-      identityRequired: "Vyplňte povinná pole identity.";
-      bankRequired: "Vyplňte bankovní účet a IBAN.";
-      bankForBusiness: "Doplňujete účet firmy {business}. Bude na fakturách a platebních QR kódech; Invoicey peníze nepřevádí.";
-      doneTitle: "Firma je připravená";
-      doneBody: "Číslování a e-mailové šablony mají rozumné výchozí hodnoty. Logo, razítko a další údaje kdykoli doplníte v nastavení firmy.";
-      goDashboard: "Přejít na přehled";
-      createFirstInvoice: "Vytvořit první fakturu";
-      editBusiness: "Nastavení firmy";
-      workspaceHint: "Pojmenujte prostor, ve kterém budou vaše faktury žít.";
-      workspaceTitle: "Váš pracovní prostor";
-      workspaceBody: "Prostor drží vaše firmy, klienty a faktury. Název a logo vidíte v přepínači vlevo nahoře — a uvidí je i lidé, které sem později pozvete.";
-      workspaceNameLabel: "Název prostoru";
-      workspaceLogoLabel: "Logo prostoru";
-      workspaceLogoHint: "Nepovinné. PNG nebo JPEG do 1 MB. Bez loga se použijí iniciály.";
-      workspaceNameRequired: "Zadejte název prostoru.";
-    };
-    emailForm: {
-      subject: "Šablona předmětu";
-      body: "Text e-mailu";
-      displayName: "Šablona jména odesílatele";
-      attachIsdoc: "Přikládat ISDOC ve výchozím stavu";
-      overdueReminders: "Posílat připomínky po splatnosti";
-      reminderInterval: "Počet dní mezi připomínkami";
-      paymentReceived: "Posílat potvrzení o přijetí platby";
-    };
-    numbering: {
-      tokensHint: "Dostupné zástupné proměnné. Ruční změna pořadového čísla může vytvořit mezery v řadě.";
-      nextNumber: "Další číslo: {preview}";
-      invalidTemplate: "(neplatná šablona)";
-      counterChanged: "Pořadové číslo bylo změněno — zkontrolujte, že nevzniknou duplicity nebo mezery.";
-      template: "Šablona";
-      padding: "Minimální počet číslic (#)";
-      reset: "Obnova řady";
-      resetYearly: "Roční";
-      resetNever: "Nikdy";
-      counter: "Další pořadové číslo";
-      counterYear: "Rok číselné řady";
-      docTypes: {
-        invoice: "Faktura (FV)";
-        proforma: "Proforma (PF)";
-        advance: "Záloha (ZF)";
-        credit_note: "Dobropis (DOB)";
-      };
-    };
-  };
-  Settings: {
-    security: {
-      pageTitle: "Zabezpečení účtu";
-      pageDescription: "Spravujte způsoby přihlášení, aktivní relace a důvěryhodná zařízení. Invoicey používá pouze OAuth — žádné další heslo.";
-      linkedAfter: "Poskytovatel propojen. Ostatní relace se odvolávají kvůli bezpečnosti.";
-      trustOk: "Zařízení bylo označeno jako důvěryhodné.";
-      trustInvalid: "Odkaz pro důvěru zařízení je neplatný nebo vypršel.";
-      linkedAccounts: {
-        title: "Způsoby přihlášení";
-        description: "Google a GitHub. Poslední poskytovatel nelze odpojit.";
-        linked: "Propojeno";
-        notLinked: "Nepropojeno";
-        link: "Propojit";
-        unlink: "Odpojit";
-        unlinkLastError: "Nelze odpojit poslední způsob přihlášení";
-        unlinkFailed: "Odpojení selhalo";
-        loadFailed: "Nepodařilo se načíst účty";
-        unlinkSuccess: "Poskytovatel odpojen";
-        loading: "Načítám přihlášení…";
-        noProviders: "Žádný poskytovatel není na serveru nastavený. Doplňte OAuth údaje a obnovte stránku.";
-        active: "Aktivní";
-        linking: "Přesměrovávám…";
-        unlinking: "Odpojuji…";
-      };
-      sessions: {
-        title: "Aktivní relace";
-        description: "IP, prohlížeč a možnost odvolat přístup.";
-        revokeOthers: "Odvolat ostatní";
-        revoke: "Odvolat";
-        empty: "Žádné relace.";
-        unknownDevice: "Neznámé zařízení";
-        unknownIp: "IP neznámá";
-        currentSession: "tato relace";
-        revokeFailed: "Odvolání selhalo";
-        revokeSuccess: "Relace odvolána";
-        revokeOthersSuccess: "Ostatní relace odvolány";
-        revokeAfterLink: "Ostatní relace odvolány po propojení účtu";
-        loadFailed: "Nepodařilo se načíst relace";
-        loading: "Načítám relace…";
-        emptyHint: "Žádné aktivní relace. Po přihlášení se tu objeví tento prohlížeč.";
-        since: "od {when}";
-        revoking: "Odvolávám…";
-        browser: "Prohlížeč";
-      };
-      trustedDevices: {
-        title: "Důvěryhodná zařízení";
-        description: "Upozornění na nové zařízení e-mailem. Přihlášení tím není blokováno.";
-        empty: "Zatím žádná důvěryhodná zařízení.";
-        revoke: "Odvolat";
-        revokeFailed: "Odvolání zařízení selhalo";
-        revokeSuccess: "Zařízení odvoláno";
-        lastSeen: "naposledy";
-        loading: "Načítám zařízení…";
-        emptyHint: "Zatím žádná důvěryhodná zařízení. Po přihlášení z nového místa použijte odkaz „Důvěřovat“ v e-mailu.";
-        revoking: "Odvolávám…";
-      };
-      audit: {
-        title: "Nedávná aktivita";
-        description: "Audit přihlášení a bezpečnostních akcí.";
-        empty: "Zatím žádné záznamy.";
-        types: {
-          sign_in: "Přihlášení";
-          session_revoke: "Odvolání relace";
-          account_link: "Propojení účtu";
-          account_unlink: "Odpojení účtu";
-          device_trust: "Důvěra zařízení";
-          device_revoke: "Odvolání zařízení";
-          api_key_create: "Vytvoření API klíče";
-          api_key_revoke: "Odvolání API klíče";
-          invite_create: "Pozvánka vytvořena";
-          invite_resend: "Pozvánka znovu odeslána";
-          invite_cancel: "Pozvánka zrušena";
-          invite_accept: "Pozvánka přijata";
-          invite_reject: "Pozvánka odmítnuta";
-          member_remove: "Člen odebrán";
-          member_role_update: "Změna role člena";
-          platform_admin_grant: "Platformní admin udělen";
-          platform_admin_revoke: "Platformní admin odebrán";
-          slack_link: "Propojení Slacku";
-          slack_unlink: "Odpojení Slacku";
-          slack_rebind: "Změna Slack workspace";
-        };
-      };
-    };
-    members: {
-      pageTitle: "Členové a oprávnění";
-      pageDescription: "Pozvěte kolegy a určete, kdo může spravovat pracovní prostor a fakturační data.";
-      title: "Členové pracovního prostoru";
-      description: "Vlastníci a správci mohou měnit členství. Běžní členové pracují s fakturačními daty.";
-      loading: "Načítám členy…";
-      empty: "V tomto pracovním prostoru zatím nejsou žádní členové.";
-      emailUnavailable: "E-mail není dostupný";
-      remove: "Odebrat";
-      removing: "Odebírám…";
-      removeFailed: "Odebrání selhalo";
-      removeSuccess: "Člen odebrán";
-      roleUpdateFailed: "Změna role selhala";
-      roleUpdateSuccess: "Role aktualizována";
-      loadFailed: "Členové se nenačetli";
-      roles: {
-        owner: "Vlastník";
-        admin: "Správce";
-        member: "Člen";
-      };
-      roleAria: "Role uživatele {name}";
-      removeAria: "Odebrat uživatele {name}";
-      invite: {
-        title: "Pozvat člena";
-        description: "Pošlete pozvánku e-mailem. Odkaz můžete zkopírovat a předat i jinou cestou.";
-        email: "E-mail";
-        emailPlaceholder: "kolega@firma.cz";
-        role: "Role";
-        submit: "Odeslat pozvánku";
-        submitting: "Odesílám…";
-        failed: "Pozvánka selhala";
-        success: "Pozvánka vytvořena";
-        pendingTitle: "Čekající pozvánky";
-        pendingEmpty: "Žádné nevyřízené pozvánky.";
-        expires: "Platí do {when}";
-        expired: "Vypršela";
-        copyLink: "Kopírovat odkaz";
-        linkCopied: "Odkaz zkopírován";
-        resend: "Znovu odeslat";
-        resending: "Odesílám…";
-        resendSuccess: "Pozvánka znovu odeslána";
-        resendFailed: "Opětovné odeslání selhalo";
-        cancel: "Zrušit";
-        canceling: "Ruším…";
-        cancelSuccess: "Pozvánka zrušena";
-        cancelFailed: "Zrušení selhalo";
-        seatsFull: "Tarif zahrnuje {limit} míst. Pro více lidí přejděte na vyšší tarif.";
-      };
-      permissions: {
-        sectionDescription: "Jemné výjimky nad rámec role. Vlastníka upravit nelze.";
-        noMembers: "Zatím není koho nastavovat.";
-        title: "Oprávnění";
-        description: "Zaškrtnuté položky člen smí. Označené už vyplývají z jeho role.";
-        descriptionOverridden: "Tento člen se odchyluje od své role. Zaškrtnuté položky smí.";
-        fromRole: "role";
-        save: "Uložit oprávnění";
-        sectionTitle: "Oprávnění jednotlivých členů";
-      };
-    };
-    referrals: {
-      pageTitle: "Doporučení";
-      pageDescription: "Sdílejte osobní odkaz. Přátelé, kteří se zaregistrují, dostanou vlastní workspace — vy budete zaznamenáni jako doporučující.";
-      title: "Váš doporučující odkaz";
-      description: "Nikomu to nepřidá přístup do vašeho workspace. Kolegy do workspace pozvěte v sekci Členové.";
-      copy: "Kopírovat odkaz";
-      copied: "Odkaz zkopírován";
-      statsTitle: "Aktivita";
-      clicks: "Kliknutí na odkaz";
-      signups: "Připsané registrace";
-      emptyCode: "Odkaz se nepodařilo načíst. Zkuste to později.";
-    };
-    apiKeys: {
-      title: "API klíče";
-      description: "Osobní tokeny pro remote MCP a Invoicey HTTP. Env ops klíč zůstává jako záloha.";
-      namePlaceholder: "Název klíče";
-      nameLabel: "Název klíče";
-      create: "Vytvořit";
-      createKey: "Vytvořit klíč";
-      creating: "Vytvářím…";
-      createFailed: "Vytvoření selhalo";
-      createSuccess: "Klíč vytvořen — zkopírujte ho teď";
-      revoke: "Odvolat";
-      revoking: "Odvolávám…";
-      revokeFailed: "Odvolání selhalo";
-      revokeSuccess: "Klíč odvolán";
-      revokeConfirm: "Opravdu odvolat tento API klíč? Nelze vrátit.";
-      empty: "Žádné klíče.";
-      emptyTitle: "Zatím bez klíčů";
-      emptyHint: "Vytvořte první klíč a použijte ho v konfiguraci MCP níže.";
-      noName: "bez názvu";
-      newKeyTitle: "Nový klíč (zobrazí se jen teď)";
-      once: "Jednorázově";
-      copy: "Kopírovat";
-      copyKey: "Kopírovat klíč";
-      copied: "Zkopírováno";
-      keyCopied: "Klíč zkopírován";
-      hide: "Skrýt";
-      loadFailed: "Klíče se nenačetly";
-      loading: "Načítám klíče…";
-      yourKeys: "Vaše klíče";
-      yourKeysDescription: "Pojmenujte klíč podle aplikace nebo zařízení. Celý token se zobrazí pouze jednou.";
-      createdAt: "vytvořeno {when}";
-      lastUsed: "naposledy {when}";
-      defaultName: "Remote MCP";
-      mcpTitle: "Připojení remote MCP";
-      mcpDescription: "Tři kroky pro Cursor, Claude Code nebo jiného kompatibilního klienta.";
-      mcpStep1Title: "Vytvořte nebo použijte klíč";
-      mcpStep1Ready: "Nový klíč je připravený — je vložený do ukázky níže.";
-      mcpStep1Existing: "Máte existující klíč. Celý token už nejde zobrazit — vytvořte nový, pokud ho nemáte uložený.";
-      mcpStep1Empty: "Nejprve vytvořte klíč výše. Bez něj vzdálené MCP požadavek odmítne.";
-      mcpStep2Title: "Vložte konfiguraci do Cursoru";
-      mcpStep2Body: "Globálně do {global}, nebo do projektového {project} (ten necommitujte).";
-      copyJson: "Kopírovat JSON";
-      copyUrl: "Kopírovat URL";
-      configCopied: "Konfigurace zkopírována";
-      urlCopied: "URL zkopírována";
-      placeholderHint: "Placeholder {placeholder} nahraďte skutečným tokenem.";
-      snippetHasKey: "Ukázka obsahuje právě vytvořený klíč.";
-      mcpStep3Title: "Ověřte nástroje";
-      mcpStep3Body: "V Cursoru by se měly objevit nástroje Invoicey (např. {tool}). Endpoint: {url}";
-      whichKeyTitle: "Který klíč kam patří";
-      whichKeyPat: "Remote MCP přijímá váš PAT nebo ops {env}.";
-      whichKeyStdio: "Local stdio MCP (dev) nepoužívá PAT — viz dokumentaci.";
-      whichKeySlack: "Slack bot a Invoicey HTTP nejdou přes tento klíč (Connect / ops klíče).";
-      docsMcp: "MCP docs";
-      docsCursor: "Cursor setup";
-      docsKeys: "API keys";
-      integrationsLink: "Slack a další integrace";
-    };
-    slack: {
-      title: "Invoicey pro Slack";
-      description: "Připravujte faktury v konverzaci. Vystavení, odeslání a potvrzení platby vždy vyžaduje souhlas.";
-      howTitle: "Jak funguje";
-      howInviteTitle: "Pozvěte Invoicey";
-      howInviteBody: "Přidejte Invoicey do kanálu, nebo mu napište DM.";
-      howLinkTitle: "Potvrďte účet";
-      howLinkBody: "Nespárovaný Slack účet dostane soukromou zprávu s odkazem do Invoicey.";
-      howMentionTitle: "Zmiňte @Invoicey";
-      howMentionBody: "Zmínka nebo DM spustí relaci. Ve stejném vlákně už zmínka není potřeba.";
-      howDraftTitle: "Návrh s přílohami";
-      howDraftBody: "Invoicey připraví fakturu, připojí PDF a ISDOC a odkaz do webové aplikace.";
-      hitlTitle: "Akce vyžadující potvrzení";
-      hitlIntro: "U těchto kroků se agent vždy zastaví a požádá o schválení:";
-      hitlIssue: "Přidělí číslo a zmrazí fakturu — nevratné";
-      hitlPaid: "Tvrdí, že peníze dorazily";
-      hitlEmail: "Odešle e-mail skutečnému klientovi";
-      accessTitle: "Přístup po propojení Slacku";
-      accessBody: "Nespárovaní Slack uživatelé nedostanou žádnou relaci — Invoicey jim pošle DM s odkazem na potvrzení. Propojení platí pro jeden Invoicey účet a jeden workspace. Allow/Deny ve vlákně může kliknout kdokoli v kanálu; držte Invoicey v soukromém kanálu s lidmi, kteří smí fakturovat.";
-      docsLink: "Podrobný návod pro Slack";
-    };
-    integrations: {
-      pageTitle: "Integrace a automatizace";
-      pageDescription: "Propojte Invoicey se Slackem, Cursorem nebo Claude Code. Citlivé operace zůstávají pod vaším potvrzením.";
-      mcpTitle: "Remote MCP";
-      mcpDescription: "Používejte nástroje Invoicey přímo z Cursoru, Claude Code nebo jiného MCP klienta.";
-      mcpFeatureDrafts: "Vytváření validovaných návrhů";
-      mcpFeatureAres: "ARES dohledání klientů";
-      mcpFeatureIssued: "Správa vystavených faktur";
-      connectMcp: "Připojit MCP klienta";
-      docsMcp: "Dokumentace MCP";
-      slackIdentity: {
-        title: "Propojený Slack";
-        description: "Jeden Slack účet patří jednomu Invoicey uživateli a jednomu workspace. Nespárované zmínky Invoicey odmítne.";
-        connected: "Propojeno";
-        emptyTitle: "Zatím žádný Slack";
-        empty: "Napište Invoicey DM ve Slacku. Pošle vám odkaz k potvrzení v prohlížeči.";
-        fromSlack: "Ze Slacku";
-        toWorkspace: "Do workspace";
-        slackAccount: "Váš Slack účet";
-        invoicesGoTo: "Nové faktury ze Slacku sem";
-        otherWorkspace: "Jiný workspace";
-        slackUser: "Slack uživatel {id}";
-        team: "Tým {id}";
-        unlink: "Odpojit";
-        unlinkFailed: "Odpojení selhalo";
-        unlinkSuccess: "Slack účet odpojen";
-        useCurrentWorkspace: "Přepnout na {name}";
-        currentWorkspace: "Tento workspace";
-        rebindFailed: "Změna workspace selhala";
-        rebindSuccess: "Slack teď používá aktuální workspace";
-      };
-    };
-    bankConnections: {
-      pageTitle: "Bankovní spojení";
-      pageDescription: "Připojte k tomuto workspace bankovní přehled jen pro čtení. Samostatný Fio token pro odesílání může vložit dávku do fronty k podpisu; Invoicey platbu nikdy neautorizuje.";
-      unnamedIssuer: "Firma bez názvu";
-      readOnly: "Jen pro čtení";
-      submitRights: "Odesílání povoleno";
-      submitExpired: "Token pro odesílání vypršel";
-      importedCurrency: "Importovaná měna";
-      lastSuccessfulSync: "Poslední úspěšná synchronizace";
-      notSyncedYet: "Zatím nesynchronizováno";
-      lastError: "Poslední chyba: {code}";
-      autoMatchTitle: "Automatické přesné párování";
-      autoMatchDescription: "Když se shoduje přijímací účet, měna CZK, variabilní symbol i celá dlužná částka, faktura se označí jako zaplacená a přijde vám e-mail. Částečné nebo nejednoznačné platby vždy čekají na kontrolu.";
-      autoMatchAria: "Automatické přesné párování";
-      on: "Zap";
-      off: "Vyp";
-      syncNow: "Synchronizovat";
-      disconnect: "Odpojit";
-      encryptionMissing: "Šifrování bankovních tokenů není nastavené. Před připojením účtu nastavte BANK_TOKEN_ENCRYPTION_KEY_V1.";
-      needIssuer: "Nejdřív vytvořte firmu, ke které účet patří.";
-      issuerLabel: "Firma, která přijímá platby";
-      adminOnly: "Bankovní účty může připojit jen správce nebo vlastník workspace.";
-      connectAndVerify: "Připojit a ověřit";
-      moreTitle: "Další bankovní integrace";
-      moreDescription: "Fio a MONETA jsou živé. Ostatní banky z výzkumu zatím nejsou k dispozici.";
-      unavailable: "Nedostupné";
-      noteDeferred: "Odloženo";
-      noteNotPlanned: "Neplánováno";
-      footer: "Připojení patří aktuálnímu workspace, ne vašemu uživatelskému účtu. V každém workspace se banka nastavuje zvlášť. Synchronizace výpisů je jen pro čtení. Samostatný Fio token pro odesílání může vložit dávku do fronty příkazů k podpisu; Invoicey platbu nikdy neautorizuje. Tokeny MONETA obvykle vyprší do 90 dnů a obnovují se v Internet Bance.";
-      paymentsTitle: "Zahájení plateb (Fio)";
-      paymentsCannotAuthorize: "Invoicey platby autorizovat neumí. Token s právem odesílat jen vloží dávku do fronty příkazů k podpisu ve Fio. Podpisník ji musí uvolnit v internetovém bankovnictví.";
-      paymentsEnabled: "Token pro odesílání je uložený šifrovaně.";
-      paymentsExpires: "Vyprší {date}";
-      paymentsTokenLabel: "Fio token pro odesílání";
-      paymentsTokenPlaceholder: "64znakový token s právem odesílat";
-      paymentsExpiresLabel: "Platnost tokenu";
-      paymentsEnable: "Uložit token";
-      paymentsDisable: "Odebrat práva k odesílání";
-      providers: {
-        fio: "Fio banka";
-        moneta: "MONETA Money Bank";
-      };
-      status: {
-        active: "Aktivní";
-        needs_reauth: "Vyžaduje opětovné přihlášení";
-        error: "Chyba";
-        paused: "Pozastaveno";
-        disconnected: "Odpojeno";
-      };
-      fio: {
-        connectTitle: "Připojit Fio API jen pro čtení";
-        connectDescription: "V Fio Internetbankingu vytvořte token jen pro čtení a vložte ho sem. Invoicey ho ověří proti dnešnímu výpisu a uloží šifrovaně. Výchozí přijímací účet vybrané firmy se aktualizuje na ověřený Fio účet.";
-        tokenLabel: "Fio API token";
-        tokenPlaceholder: "64znakový token jen pro čtení";
-        tokenHelp: "V Internetbankingu → Nastavení → API bankovnictví vytvořte token se právem Sledování účtu. 64znakový token začne fungovat zhruba po pěti minutách a může platit až 180 dní, pokud zapnete automatické prodloužení. Znovu ho nezobrazíme a o zápisový přístup nežádáme.";
-        tokenGuide: "Jak vytvořit Fio API token";
-      };
-      moneta: {
-        connectTitle: "Připojit MONETA API jen pro čtení";
-        connectDescription: "V MONETA Internet Bance vytvořte pasivní API token a vložte ho sem. Invoicey vypíše CZK účty na tokenu, ověří dnešní pohyby a token uloží šifrovaně jen pro tento workspace.";
-        tokenLabel: "MONETA API token";
-        tokenPlaceholder: "Token jen pro čtení z Internet Banky";
-        tokenHelp: "V Internet Bance → API tokeny vytvořte pasivní (jen pro čtení) token. Tokeny vyprší do 90 dnů, pokud je neobnovíte. Historie je omezená na 90 dnů.";
-        tokenGuide: "Jak vytvořit MONETA API token";
-        accountLabel: "Účet v CZK";
-        selectAccount: "Vyberte účet";
-        discover: "Načíst účty";
-        discoverHint: "Načtěte účty, pokud token pokrývá víc CZK účtů. Jeden CZK účet se připojí bez výběru.";
-      };
-      banks: {
-        kb: "Komerční banka";
-        rb: "Raiffeisenbank";
-        csas: "Česká spořitelna";
-        csob: "ČSOB";
-        creditas: "CREDITAS";
-        revolut: "Revolut";
-        airbank: "Air Bank";
-        mbank: "mBank";
-        partners: "Partners Banka";
-      };
-      errors: {
-        generic: "{code}";
-        missing_fio_token: "Vložte Fio monitorovací token.";
-        fio_token_must_have_64_characters: "Fio token musí mít 64 znaků.";
-        fio_token_contains_whitespace: "Fio token nesmí obsahovat mezery.";
-        fio_connection_failed: "Fio se nepodařilo připojit.";
-        fio_sync_failed: "Synchronizace Fio selhala.";
-        fio_token_inactive: "Fio tento token neověřilo. Zkontrolujte, že jde o monitorovací token (ne token pro odesílání) a že je ve Fio aktivní.";
-        fio_throttled_locally: "Fio je dočasně omezené. Zkuste to za chvíli.";
-        fio_account_changed: "Fio účet už tomuto připojení neodpovídá.";
-        missing_moneta_token: "Vložte MONETA API token.";
-        moneta_invalid_token_shape: "Tento MONETA token nevypadá platně.";
-        moneta_no_czk_accounts: "Na tokenu nejsou žádné CZK účty.";
-        moneta_discover_failed: "Účty MONETA se nepodařilo načíst.";
-        moneta_select_account: "Vyberte CZK účet k připojení.";
-        moneta_connection_failed: "MONETA se nepodařilo připojit.";
-        moneta_sync_failed: "Synchronizace MONETA selhala.";
-        moneta_throttled: "MONETA je dočasně omezená. Zkuste to za chvíli.";
-        moneta_throttled_locally: "MONETA je dočasně omezená. Zkuste to za chvíli.";
-        moneta_account_changed: "MONETA účet už tomuto připojení neodpovídá.";
-        moneta_unauthorized: "MONETA token byl odmítnut. V Internet Bance vytvořte nový.";
-        not_found: "Připojení nebylo nalezeno.";
-        missing_connection: "Vyberte bankovní připojení.";
-        missing_issuer: "Vyberte firmu, která přijímá platby.";
-        missing_fio_payment_token: "Vložte Fio token s právem odesílat.";
-        missing_payment_token_expiry: "Zadejte datum vypršení tokenu z Fio.";
-        payment_token_expired: "Token pro odesílání vypršel. Zadejte nový.";
-      };
-    };
-  };
-  Payments: {
-    title: "Platby";
-    eyebrow: "Párování";
-    description: "Bankovní transakce zůstávají návrhy, dokud potvrdíte přiřazení. Jedna faktura může dostat částečné platby a každé storno zůstane viditelné.";
-    bankConnections: "Bankovní spojení";
-    suggestedTitle: "Navrhovaná spárování";
-    suggestedDescription: "Deterministické návrhy podle přijímacího IBAN, měny, variabilního symbolu, dlužné částky a data.";
-    suggestedEmpty: "Žádné platby nečekají na kontrolu.";
-    unknownSender: "Neznámý odesílatel";
-    draft: "Návrh";
-    vsMissing: "chybí";
-    vsLabel: "VS {value}";
-    pleaseReview: "Zkontrolujte: {details}";
-    confirmAmount: "Potvrdit {amount}";
-    notThisInvoice: "Není tato faktura";
-    manualTitle: "Přidat ruční platbu";
-    manualDescription: "Pro hotovost, nepřipojenou banku nebo opravu. Záznam jde do stejné evidence jako potvrzené bankovní platby.";
-    manualEmpty: "Žádná vystavená faktura není neuhrazená.";
-    invoice: "Faktura";
-    invoiceOption: "{number} · {client} · {amount} k úhradě";
-    amount: "Částka";
-    paidOn: "Zaplaceno";
-    addPayment: "Přidat platbu";
-    incomingTitle: "Příchozí transakce";
-    incomingDescription: "Nejnovější importované bankovní kredity.";
-    incomingEmpty: "Zatím žádné importované transakce.";
-    incomingFallback: "Příchozí platba";
-    incomingMeta: "{date} · VS {vs}";
-    allocated: "Přiřazeno";
-    readyToMatch: "K párování";
-    historyTitle: "Historie přiřazení";
-    historyDescription: "Potvrzené, ruční a stornované záznamy evidence.";
-    historyEmpty: "Zatím žádná přiřazení.";
-    historyMeta: "{date} · {source}";
-    historyMetaReversed: "{date} · {source} · Stornováno";
-    reversed: "Stornováno";
-    reverse: "Stornovat";
-    match: {
-      exact: "Přesná shoda";
-      high: "Silná shoda";
-      medium: "Pravděpodobná shoda";
-      low: "Vyžaduje kontrolu";
-    };
-    reasons: {
-      receiving_account: "Shoduje se přijímací účet";
-      currency: "Shoduje se měna";
-      exact_variable_symbol: "Přesný variabilní symbol";
-      exact_outstanding_amount: "Přesná dlužná částka";
-      partial_amount: "Částečná platba";
-      overpayment: "Platba je vyšší než dlužná částka";
-      known_client_account: "Známý účet klienta";
-      plausible_date: "Datum platby sedí";
-    };
-    blockers: {
-      ambiguous_variable_symbol: "Variabilní symbol sedí na víc faktur";
-    };
-    sources: {
-      bank_confirmed: "Spárováno z banky";
-      manual: "Přidáno ručně";
-    };
-  };
-  Admin: {
-    brand: {
-      title: "Invoicey Admin";
-      tagline: "Platformní konzole";
-    };
-    nav: {
-      group: "Platforma";
-      dashboard: "Přehled";
-      users: "Uživatelé";
-      workspaces: "Pracovní prostory";
-      invoices: "Faktury";
-      issuers: "Dodavatelé";
-      backToApp: "Zpět do aplikace";
-      productGroup: "Produkt";
-      productDashboard: "Produktový přehled";
-      audit: "Audit log";
-      plans: "Tarify";
-    };
-    breadcrumb: {
-      root: "Admin";
-      users: "Uživatelé";
-      workspaces: "Pracovní prostory";
-      invoices: "Faktury";
-      issuers: "Dodavatelé";
-      audit: "Audit log";
-      detail: "Detail";
-      plans: "Tarify";
-    };
-    table: {
-      search: "Hledat";
-      copyId: "Kopírovat id";
-      copied: "Zkopírováno";
-      columns: "Sloupce";
-      paginationInfo: "'{'from'}' – '{'to'}' z '{'count'}'";
-      nextPage: "Další stránka";
-      previousPage: "Předchozí stránka";
-      rowsPerPage: "Řádků na stránku";
-    };
-    dashboard: {
-      title: "Platformní přehled";
-      subtitle: "Souhrny napříč všemi pracovními prostory.";
-      statusTitle: "Faktury podle stavu";
-      recentTitle: "Nedávné faktury";
-      recentEmpty: "Zatím žádné faktury.";
-      cards: {
-        users: "Uživatelé";
-        workspaces: "Pracovní prostory";
-        invoices: "Faktury";
-        issuers: "Dodavatelé";
-        adminsHint: "{count} platformních adminů";
-        issuedHint: "{count} vystavených za 12 měs. · {volume}";
-      };
-      recent: {
-        number: "Číslo";
-        client: "Klient";
-        workspace: "Pracovní prostor";
-        total: "Celkem";
-        status: "Stav";
-      };
-    };
-    users: {
-      title: "Uživatelé";
-      subtitle: "Všechny účty. Zde udělíte nebo odeberete platformního admina.";
-      empty: "Žádní uživatelé.";
-      count: "{count, plural, one {# uživatel} few {# uživatelé} other {# uživatelů}}";
-      filters: {
-        searchPlaceholder: "jméno, e-mail, id…";
-      };
-      columns: {
-        name: "Jméno";
-        email: "E-mail";
-        verified: "Ověření";
-        role: "Platformní role";
-        memberships: "Členství";
-        referralCode: "Referral kód";
-        referredBy: "Doporučil";
-        defaultWorkspace: "Výchozí prostor";
-        createdAt: "Vytvořeno";
-        id: "ID uživatele";
-        actions: "Akce";
-      };
-      verified: {
-        yes: "Ověřený";
-        no: "Neověřený";
-      };
-      role: {
-        admin: "Admin";
-        none: "Žádná";
-      };
-      actions: {
-        grant: "Udělit admina";
-        revoke: "Odebrat";
-      };
-    };
-    workspaces: {
-      title: "Pracovní prostory";
-      subtitle: "Všechny organizace s počty členů a faktur.";
-      empty: "Žádné pracovní prostory.";
-      count: "{count, plural, one {# prostor} few {# prostory} other {# prostorů}}";
-      filters: {
-        searchPlaceholder: "název, slug, id…";
-      };
-      columns: {
-        name: "Název";
-        slug: "Slug";
-        members: "Členové";
-        invoices: "Faktury";
-        issuers: "Dodavatelé";
-        createdAt: "Vytvořeno";
-        id: "ID prostoru";
-      };
-    };
-    invoices: {
-      title: "Faktury";
-      subtitle: "Seznam faktur napříč tenanty (jen pro čtení).";
-      empty: "Žádné faktury.";
-      count: "{count, plural, one {# faktura} few {# faktury} other {# faktur}}";
-      filters: {
-        searchPlaceholder: "číslo, klient, prostor, dodavatel…";
-      };
-      columns: {
-        number: "Číslo";
-        client: "Klient";
-        workspace: "Pracovní prostor";
-        issuer: "Dodavatel";
-        total: "Celkem";
-        issueDate: "Datum vystavení";
-        dueDate: "Splatnost";
-        status: "Stav";
-        id: "ID faktury";
-        workspaceId: "ID prostoru";
-        issuerId: "ID dodavatele";
-      };
-    };
-    issuers: {
-      title: "Dodavatelé";
-      subtitle: "Dodavatelé napříč tenanty (jen pro čtení).";
-      empty: "Žádní dodavatelé.";
-      count: "{count, plural, one {# dodavatel} few {# dodavatelé} other {# dodavatelů}}";
-      filters: {
-        searchPlaceholder: "název, IČO, DIČ, prostor…";
-      };
-      source: {
-        ares: "ARES";
-        manual: "Ručně";
-      };
-      columns: {
-        name: "Název";
-        ico: "IČO";
-        dic: "DIČ";
-        workspace: "Pracovní prostor";
-        source: "Zdroj";
-        updatedAt: "Aktualizováno";
-        id: "ID dodavatele";
-        workspaceId: "ID prostoru";
-      };
-    };
-    audit: {
-      title: "Audit log platformy";
-      subtitle: "Každý zápis provedený z admin konzole napříč prostory. Vlastníci prostoru tyto zásahy nevidí — tohle je jediné místo, kde jsou dohledatelné.";
-      recentTitle: "Poslední akce";
-      count: "{count, plural, one {# záznam} few {# záznamy} other {# záznamů}}";
-      empty: "Zatím žádné akce.";
-      columns: {
-        event: "Akce";
-        actor: "Provedl";
-        workspace: "Prostor";
-        details: "Detaily";
-        at: "Kdy";
-      };
-    };
-    userDetail: {
-      eyebrow: "Uživatel";
-      back: "Zpět na uživatele";
-      profileTitle: "Profil";
-      membershipsTitle: "Členství";
-      membershipsDescription: "Prostory, do kterých tento účet patří.";
-      noMemberships: "Žádná členství.";
-      referralsTitle: "Doporučení";
-      referralsDescription: "Účty, které se registrovaly přes kód tohoto uživatele.";
-      noReferrals: "Zatím nikoho nedoporučil.";
-      allUsers: "Všichni uživatelé";
-      auditTitle: "Bezpečnostní historie";
-      auditDescription: "Přihlášení, změny přístupů a zásahy admina týkající se tohoto účtu.";
-      columns: {
-        workspace: "Prostor";
-        role: "Role";
-        joined: "Připojen";
-        email: "E-mail";
-        signedUp: "Registrace";
-      };
-    };
-    workspaceDetail: {
-      eyebrow: "Pracovní prostor";
-      back: "Zpět na prostory";
-      overviewTitle: "Přehled";
-      tokensTitle: "AI tokeny";
-      tokensDescription: "Zůstatek prostoru. Darované tokeny se čerpají jako první, takže podpora nenafoukne měsíční limit.";
-      tokens: {
-        gifted: "Darované";
-        monthly: "Měsíční";
-        purchased: "Zakoupené";
-        renewsAt: "Obnova";
-        missing: "Tento prostor zatím nemá záznam o zůstatku. Darování ho založí.";
-      };
-      grant: {
-        amountLabel: "Počet tokenů";
-        noteLabel: "Poznámka";
-        notePlaceholder: "např. kompenzace za výpadek";
-        hint: "Připočte se k darovanému zůstatku a zapíše do audit logu.";
-        submit: "Darovat tokeny";
-      };
-      membersTitle: "Členové";
-      noMembers: "Žádní členové.";
-      invitesTitle: "Čekající pozvánky";
-      invitesDescription: "Pozvánky, které zatím nikdo nepřijal.";
-      noInvites: "Žádné čekající pozvánky.";
-      issuersTitle: "Firmy";
-      noIssuers: "Žádné firmy.";
-      auditTitle: "Historie prostoru";
-      auditDescription: "Zásahy admina a bezpečnostní události v tomto prostoru.";
-      dangerTitle: "Nevratné akce";
-      dangerDescription: "Zasahují do dat, která patří někomu jinému. Vše se zapisuje do audit logu.";
-      rename: {
-        label: "Název prostoru";
-        submit: "Přejmenovat";
-      };
-      delete: {
-        label: "Smazání potvrdíte přepsáním „{slug}“";
-        hint: "Smaže prostor včetně {count} faktur, firem, klientů a členství. Nelze vzít zpět.";
-        submit: "Smazat prostor";
-      };
-      actions: {
-        removeMember: "Odebrat";
-        cancelInvite: "Zrušit";
-      };
-      columns: {
-        member: "Člen";
-        role: "Role";
-        joined: "Připojen";
-        email: "E-mail";
-        invitedBy: "Pozval";
-        expires: "Platí do";
-        issuer: "Firma";
-        ico: "IČO";
-      };
-      plan: {
-        title: "Tarif";
-        description: "Ze kterého komerčního balíčku si workspace odvozuje oprávnění.";
-        current: "Aktuální tarif";
-        overridden: "Má výjimky";
-        assigned: "Přiřazeno";
-        assignedManually: "Ručně administrátorem";
-        assignedAutomatically: "Automaticky podle domény";
-        seats: "Místa";
-        monthlyTokens: "Měsíční tokeny";
-        unlimited: "Neomezeně";
-        selectLabel: "Přesunout na tarif";
-        hint: "Snížení tarifu nikdy nic nemaže. Workspace nad limit zůstane čitelný, jen už nemůže růst.";
-        submit: "Přiřadit tarif";
-        missing: "Pro tento workspace se nepodařilo určit tarif.";
-      };
-    };
-    plans: {
-      eyebrow: "Platforma";
-      title: "Tarify";
-      subtitle: "Komerční balíčky a oprávnění, na která se překládá každý workspace.";
-      hint: "Jeden tarif má mnoho workspaců. Úprava tarifu změní všechny naráz.";
-      unlimited: "Neomezeně";
-      badges: {
-        default: "Výchozí";
-        custom: "Vlastní";
-        archived: "Archivovaný";
-      };
-      clientMode: {
-        open: "Otevřené";
-        managed: "Řízené";
-      };
-      columns: {
-        name: "Tarif";
-        workspaces: "Workspacy";
-        seats: "Místa";
-        monthlyTokens: "Měsíční tokeny";
-        clients: "Odběratelé";
-        domains: "Domény pro přiřazení";
-      };
-    };
-    planDetail: {
-      eyebrow: "Tarif";
-      back: "Zpět na tarify";
-      overviewTitle: "Přehled";
-      editTitle: "Oprávnění";
-      editHint: "Co smí každý workspace na tomto tarifu. Limity se kontrolují při vytváření, nikdy při čtení.";
-      affects: "{count, plural, one {Na tento tarif se překládá # workspace.} few {Na tento tarif se překládají # workspacy.} other {Na tento tarif se překládá # workspaců.}}";
-      save: "Uložit oprávnění";
-      unlimitedPlaceholder: "Neomezeně";
-      foreverPlaceholder: "Uchovávat trvale";
-      noGrants: "Žádné";
-      kind: {
-        builtin: "Vestavěný";
-        custom: "Vlastní";
-      };
-      trigger: {
-        signup: "Při registraci";
-        first_invoice_issued: "První faktura";
-      };
-      clientMode: {
-        open: "Otevřené — workspace si spravuje odběratele sám";
-        managed: "Řízené — pouze katalog tarifu";
-      };
-      permissionsMode: {
-        off: "Vypnuto";
-        roles: "Předvolené role";
-        advanced: "Role + výjimky pro členy";
-      };
-      facts: {
-        kind: "Typ";
-        workspaces: "Workspacy";
-        grants: "Přidělení tokenů";
-      };
-      fields: {
-        seats: "Místa";
-        issuers: "Dodavatelé";
-        monthlyTokens: "Měsíční tokeny";
-        auditRetention: "Uchování auditu (dny)";
-        clientMode: "Správa odběratelů";
-        permissions: "Oprávnění";
-        features: "Funkce";
-        autoAssignDomains: "Domény pro přiřazení";
-        allowedDomains: "Povolené domény členů";
-      };
-      features: {
-        bankConnections: "Bankovní propojení";
-        recurring: "Opakované koncepty";
-        historicalImport: "Import historie";
-        agents: "Slack / MCP / Invoicey";
-        topUpEnabled: "Dobití tokenů";
-      };
-      hints: {
-        autoAssignDomains: "Nové workspacy založené ověřenou adresou na těchto doménách dostanou tento tarif.";
-        allowedDomains: "Pozvat lze jen tyto domény. Prázdné znamená libovolnou adresu.";
-      };
-      catalog: {
-        title: "Řízený katalog odběratelů";
-        description: "Jediní odběratelé, kterým smí workspacy na tomto tarifu fakturovat.";
-        inactive: "Tarif má režim odběratelů Otevřený, katalog se tedy neuplatňuje. Přepněte na Řízený.";
-        empty: "Zatím žádné subjekty.";
-        columns: {
-          name: "Název";
-          ico: "IČO";
-        };
-        icoLabel: "IČO";
-        hint: "Načte se z ARES a synchronizuje do všech workspaců na tomto tarifu. Odebrání položky ponechá existující odběratele — jen zabrání novým fakturám.";
-        add: "Přidat subjekt";
-        remove: "Odebrat";
-      };
-    };
-  };
-  Consent: {
-    banner: {
-      title: "Vaše soukromí, vaše volba";
-      description: "Nezbytné cookies drží Invoicey v chodu. Anonymní měření nám můžete povolit zvlášť. Žádné reklamní cookies.";
-      details: "Podrobnosti";
-      customize: "Nastavení";
-      rejectAll: "Pouze nezbytné";
-      acceptAnalytics: "Povolit analytiku";
-    };
-    dialog: {
-      title: "Nastavení soukromí";
-      description: "Vyberte kategorie, se kterými souhlasíte. Nezbytné nelze vypnout.";
-      necessary: "Nezbytné";
-      necessaryDescription: "Technologie nutné ke správnému fungování aplikace a zabezpečení.";
-      measurement: "Měření";
-      measurementDescription: "Pomáhají pochopení návštěvnosti a výkonu služby.";
-      save: "Uložit";
-      saveChoice: "Uložit volbu";
-      saving: "Ukládám…";
-      rejectAll: "Pouze nezbytné";
-      acceptAll: "Povolit vše";
-      noAds: "Invoicey aktuálně nepoužívá reklamní cookies. Více informací najdete v zásadách používání cookies a ochrany soukromí.";
-      footerHint: "Vyberte, co může Invoicey používat. Volbu můžete kdykoliv změnit v patičce webu.";
-    };
-  };
-  Pwa: {
-    name: "Invoicey";
-    shortName: "Invoicey";
-    description: "Automatizace faktur založená na datech";
-  };
-  Assistant: {
-    title: "Asistent";
-    subtitle: "Návrhy, ARES, vystavení, platby.";
-    close: "Zavřít asistenta";
-    newConversation: "Nová konverzace";
-    openingPanel: "Otevírám asistenta…";
-    thinking: "Přemýšlím…";
-    placeholder: "Zeptejte se nebo popište fakturu…";
-    composerLabel: "Zpráva asistentovi";
-    send: "Odeslat";
-    stop: "Zastavit";
-    tokensAvailable: "K dispozici {available} tokenů";
-    outOfTokens: "Tento workspace nemá žádné AI tokeny.";
-    viewUsage: "Spotřeba a limity";
-    history: "Konverzace";
-    historyEmpty: "Na tomto zařízení zatím žádné dřívější konverzace.";
-    historyCurrent: "{title} · aktuální";
-    untitledConversation: "Bez názvu";
-    deleteConversation: "Smazat konverzaci";
-    contextUsage: "{used} / {limit} kontextu";
-    contextFull: "Tahle konverzace je na limitu kontextu. Začněte novou, ať můžeme pokračovat.";
-    authRequired: "Asistenta se nepodařilo přihlásit. Obnovte stránku a zkuste to znovu.";
-    composerBold: "Tučně";
-    composerItalic: "Kurzíva";
-    composerCode: "Kód";
-    composerList: "Seznam";
-    composerMarkdownHint: "Markdown";
-    empty: {
-      title: "Co pro vás mohu udělat?";
-      subtitle: "Umím připravit a vystavit fakturu, najít firmu v ARESu a hlídat platby. Když by šlo o dohad, radši se zeptám.";
-      mascotAlt: "Invoicey, asistent";
-      suggestions: {
-        draftInvoice: "Fakturuj NFCtron a.s. konzultace, 12 500 Kč, splatnost 14 dní";
-        unpaidInvoices: "Které faktury jsou nezaplacené?";
-        lookupCompany: "Najdi IČO 08453961 v ARESu";
-      };
-    };
-    hitl: {
-      approvalEyebrow: "Potřebuji schválení · {tool}";
-      answered: "Zodpovězeno.";
-      freeformPlaceholder: "Nebo napište odpověď…";
-      send: "Odeslat";
-    };
-    authorization: {
-      connected: "{name} připojeno.";
-      failed: "Autorizace {name}: {outcome}.";
-      signIn: "Přihlásit se k {name}";
-    };
-    card: {
-      actionFailed: "Akce se nezdařila. Zkuste to znovu.";
-    };
-  };
+  "Common": {
+    "save": "Uložit",
+    "delete": "Smazat",
+    "edit": "Upravit",
+    "cancel": "Zrušit",
+    "back": "Zpět",
+    "loading": "Načítání…",
+    "search": "Hledat",
+    "emptyDash": "—",
+    "all": "Vše",
+    "apply": "Použít",
+    "yes": "Ano",
+    "no": "Ne",
+    "create": "Vytvořit",
+    "copy": "Kopírovat",
+    "close": "Zavřít",
+    "confirm": "Potvrdit",
+    "filter": "Filtrovat",
+    "previous": "předchozí",
+    "next": "další",
+    "locale": {
+      "label": "Jazyk",
+      "cs": "Čeština",
+      "en": "English"
+    }
+  },
+  "Upload": {
+    "dropTitle": "Vyberte soubor nebo ho sem přetáhněte",
+    "browse": "Vybrat soubor",
+    "browseFiles": "Vybrat soubory",
+    "change": "Změnit",
+    "remove": "Odebrat",
+    "uploading": "Nahrávám…",
+    "hintImage": "PNG nebo JPG, max. {maxSize}",
+    "hintPdf": "PDF",
+    "hintIncoming": "PDF, ISDOC, PNG nebo JPG",
+    "hintMax": "max. {maxSize} na soubor",
+    "failed": "Nahrání se nezdařilo",
+    "replaceHint": "Klikněte nebo přetáhněte pro výměnu"
+  },
+  "Filters": {
+    "addFilter": "Přidat filtr",
+    "searchFields": "Hledat pole…",
+    "noFieldsFound": "Žádná pole",
+    "noResultsFound": "Nic nenalezeno",
+    "select": "Vybrat",
+    "addFilterTitle": "Přidat filtr"
+  },
+  "DataGrid": {
+    "empty": "Žádné záznamy.",
+    "columns": "Sloupce",
+    "rowsPerPage": "Řádků na stránku",
+    "nextPage": "Další stránka",
+    "previousPage": "Předchozí stránka",
+    "info": "{from} – {to} z {count}"
+  },
+  "PdfPreview": {
+    "updating": "Aktualizuji…",
+    "empty": "Vyplň položky pro náhled…",
+    "title": "Náhled faktury PDF",
+    "open": "Otevřít PDF"
+  },
+  "Errors": {
+    "invalid": {
+      "required_fields": "Vyplňte povinná pole.",
+      "missing_parties": "Dodavatel nebo odběratel nenalezen.",
+      "validation": "Faktura neprošla validací schématu.",
+      "missing_scheme": "Chybí číslovací schéma pro typ dokladu.",
+      "already_issued": "Faktura už je vystavená.",
+      "not_draft": "Lze upravit jen návrh.",
+      "cannot_issue": "Návrh nelze vystavit.",
+      "has_invoices": "Nelze smazat firmu s existujícími fakturami.",
+      "missing_id": "Chybí identifikátor.",
+      "missing_name": "Název je povinný.",
+      "duplicate_name": "Šablona s tímto názvem už existuje.",
+      "unsupported_doc_type": "Opakovat lze jen běžné faktury.",
+      "not_found": "Nenalezeno.",
+      "invalid_day": "Zvolte první, poslední, nebo den v měsíci.",
+      "invalid_cadence": "Zvolte týdně, měsíčně, čtvrtletně nebo ročně.",
+      "open_draft": "Pro tento plán už existuje nevystavený návrh.",
+      "invalid_payload": "Uložená šablona není platná faktura.",
+      "has_templates": "Nelze smazat, dokud existují opakované šablony.",
+      "has_client_invoices": "Nelze smazat klienta s existujícími fakturami.",
+      "bad_ico": "Neplatné IČO.",
+      "bad_dic": "Neplatné DIČ.",
+      "bad_bank": "Neplatný účet / IBAN.",
+      "snapshot_validation": "Údaje neodpovídají schématu.",
+      "missing_row": "Záznam nenalezen.",
+      "save_failed": "Uložení se nezdařilo.",
+      "generic": "Chyba: {code}",
+      "not_reviewable": "Tato faktura už není ke kontrole.",
+      "missing_required_field": "Chybí povinné pole.",
+      "duplicate_invoice": "Faktura se stejným dodavatelem a číslem už existuje.",
+      "retention_window": "Přijatou fakturu nelze smazat v archivační lhůtě.",
+      "reason_required": "Důvod je povinný.",
+      "four_eyes": "Kdo fakturu přijal, nemůže být jediný schvalovatel.",
+      "forbidden": "Na tuto akci nemáte oprávnění.",
+      "not_ready": "Dávka ještě není připravená k odeslání.",
+      "empty_run": "Dávka nemá žádné způsobilé položky.",
+      "payment_token_missing": "Nejdřív uložte Fio token pro odesílání v nastavení banky.",
+      "payment_token_expired": "Fio token pro odesílání vypršel.",
+      "fio_throttled_locally": "Fio je dočasně omezené. Zkuste to za 30 sekund.",
+      "sum_mismatch": "Fio přijalo jinou částku, než je v dávce.",
+      "run_create_failed": "Platební dávku se nepodařilo vytvořit."
+    }
+  },
+  "Toasts": {
+    "issuer_saved": "Firma uložena",
+    "issuer_deleted": "Firma smazána",
+    "client_saved": "Klient uložen",
+    "client_deleted": "Klient smazán",
+    "invoice_saved": "Návrh uložen",
+    "invoice_issued": "Faktura vystavena",
+    "invoice_paid": "Označeno jako zaplaceno",
+    "invoice_unpaid": "Označeno jako nezaplaceno",
+    "invoice_cancelled": "Faktura stornována",
+    "invoice_deleted": "Smazáno",
+    "invoice_duplicated": "Faktura duplikována",
+    "invoice_emailed": "Faktura odeslána e-mailem",
+    "recurring_saved": "Opakovaný plán uložen",
+    "recurring_paused": "Plán pozastaven",
+    "recurring_resumed": "Plán obnoven",
+    "recurring_skipped": "Další běh přeskočen",
+    "recurring_drafted": "Návrh vytvořen z plánu",
+    "recurring_deleted": "Opakovaná šablona smazána",
+    "payment_confirmed": "Platba spárována",
+    "payment_rejected": "Návrh zamítnut",
+    "payment_added": "Platba zaznamenána",
+    "payment_reversed": "Platba stornována",
+    "bank_connected": "Banka připojena",
+    "bank_disconnected": "Bankovní připojení odebráno",
+    "bank_synced": "Bankovní data jsou aktuální",
+    "bank_auto_match_enabled": "Automatické párování zapnuto",
+    "bank_auto_match_disabled": "Automatické párování vypnuto",
+    "action_failed": "Akci se nepodařilo dokončit",
+    "bulk_summary": "Dokončeno: {ok} úspěšně, {skipped} přeskočeno, {failed} se nezdařilo.",
+    "clients_merged": "Sloučeno {groups} skupin — odstraněno {removed} klientů, přesměrováno {repointed} faktur",
+    "platform_admin_granted": "Platformní admin udělen",
+    "platform_admin_revoked": "Platformní admin odebrán",
+    "platform_admin_last": "Nelze odebrat posledního platformního admina",
+    "platform_admin_failed": "Platformní roli se nepodařilo změnit",
+    "fio_payments_enabled": "Fio token pro odesílání uložen",
+    "fio_payments_disabled": "Práva k odesílání plateb odebrána",
+    "admin_tokens_granted": "Tokeny darovány",
+    "admin_workspace_renamed": "Prostor přejmenován",
+    "admin_workspace_deleted": "Prostor smazán",
+    "admin_member_removed": "Člen odebrán",
+    "admin_invite_canceled": "Pozvánka zrušena",
+    "admin_not_found": "Záznam nenalezen",
+    "admin_invalid_amount": "Neplatný počet tokenů",
+    "admin_name_required": "Zadejte název",
+    "admin_last_owner": "Nelze odebrat posledního vlastníka",
+    "admin_confirmation_mismatch": "Potvrzení nesouhlasí",
+    "admin_action_failed": "Akce se nezdařila",
+    "admin_plan_assigned": "Tarif přiřazen",
+    "admin_plan_updated": "Tarif upraven",
+    "admin_plan_client_added": "Subjekt přidán do katalogu",
+    "admin_plan_client_removed": "Subjekt odebrán z katalogu",
+    "admin_invalid_ico": "Neplatné IČO",
+    "admin_ares_failed": "Načtení z ARES selhalo"
+  },
+  "ToastDescriptions": {
+    "issuer_saved": "Údaje firmy jsou připravené pro další faktury.",
+    "issuer_deleted": "Firma byla odebrána z tohoto pracovního prostoru.",
+    "client_saved": "Klient a jeho fakturační údaje byly uloženy.",
+    "client_deleted": "Klient byl odebrán z tohoto workspace.",
+    "invoice_saved": "K návrhu se můžete kdykoli vrátit.",
+    "invoice_issued": "Faktura je uzamčená a připravená k odeslání.",
+    "invoice_paid": "Ruční záznam v evidenci nyní pokrývá celou fakturu.",
+    "invoice_unpaid": "Aktivní platba byla stornována. Propojený bankovní návrh je znovu připraven ke kontrole.",
+    "invoice_cancelled": "Faktura zůstává v evidenci jako stornovaná.",
+    "invoice_deleted": "Vybraný záznam byl smazán.",
+    "invoice_duplicated": "Z původní faktury vznikl nový návrh.",
+    "invoice_emailed": "Zpráva a přílohy byly zařazeny k odeslání.",
+    "recurring_saved": "Invoicey použije toto nastavení pro budoucí návrhy.",
+    "recurring_paused": "Dokud plán neobnovíte, nevzniknou žádné nové návrhy.",
+    "recurring_resumed": "Plán bude pokračovat dalším naplánovaným během.",
+    "recurring_skipped": "Následující naplánovaný výskyt byl přeskočen.",
+    "recurring_drafted": "Před vystavením nový návrh zkontrolujte.",
+    "recurring_deleted": "Plán byl odebrán; existující faktury se nezměnily.",
+    "payment_confirmed": "Bankovní transakce byla přiřazena k faktuře v evidenci plateb.",
+    "payment_rejected": "Transakce zůstává dostupná pro jinou fakturu nebo ruční kontrolu.",
+    "payment_added": "Ruční záznam se nyní započítává do zůstatku faktury.",
+    "payment_reversed": "Evidence zachovává původní záznam i jeho storno pro úplnou historii.",
+    "bank_connected": "Příchozí CZK transakce lze nyní importovat do tohoto workspace.",
+    "bank_disconnected": "Importované transakce a historie přiřazení zůstaly zachované.",
+    "bank_synced": "{imported} nových transakcí, {proposed} návrhů, {autoMatched} automaticky spárováno.",
+    "bank_auto_match_enabled": "Automaticky se potvrdí jen přesná shoda účtu, měny, variabilního symbolu a celé částky.",
+    "bank_auto_match_disabled": "Nové návrhy plateb budou čekat na vaše potvrzení.",
+    "platform_admin_granted": "Uživatel nyní může spravovat platformu.",
+    "platform_admin_revoked": "Přístup ke správě platformy byl odebrán.",
+    "platform_admin_last": "Musí zůstat alespoň jeden platformní administrátor.",
+    "platform_admin_failed": "Přístup se nezměnil.",
+    "fio_payments_enabled": "Invoicey teď může navrhnout dávku. Platbu pořád autorizujete ve Fio.",
+    "fio_payments_disabled": "Synchronizace výpisů zůstává. Nové dávky nelze odeslat.",
+    "admin_tokens_granted": "Přičteno k darovanému zůstatku prostoru.",
+    "admin_workspace_renamed": "Nový název vidí všichni členové.",
+    "admin_workspace_deleted": "Prostor i jeho data byly odstraněny.",
+    "admin_member_removed": "Uživatel už do prostoru nemá přístup.",
+    "admin_invite_canceled": "Odkaz z pozvánky přestal platit.",
+    "admin_not_found": "Záznam mezitím zmizel — obnovte stránku.",
+    "admin_invalid_amount": "Zadejte celé číslo mezi 1 a 10 000 000.",
+    "admin_name_required": "Název prostoru nesmí být prázdný.",
+    "admin_last_owner": "Prostor musí mít vždy alespoň jednoho vlastníka.",
+    "admin_confirmation_mismatch": "Přepište slug prostoru přesně.",
+    "admin_action_failed": "Zkuste to znovu, nebo se podívejte do logů.",
+    "invoice_issued_rewarded": "Vystavili jste první fakturu — přidali jsme {tokens} bonusových AI tokenů.",
+    "admin_plan_assigned": "Nic se nesmazalo — workspacy nad limit zůstávají čitelné.",
+    "admin_plan_updated": "Všechny workspacy na tomto tarifu nyní používají nová oprávnění.",
+    "admin_plan_client_added": "Synchronizováno do všech workspaců na tomto tarifu.",
+    "admin_plan_client_removed": "Existující odběratelé zůstali, ale už jim nelze fakturovat.",
+    "admin_invalid_ico": "IČO má 8 číslic.",
+    "admin_ares_failed": "Registr pro toto IČO nevrátil data."
+  },
+  "Status": {
+    "invoice": {
+      "draft": "Návrh",
+      "unpaid": "Nezaplaceno",
+      "overdue": "Po splatnosti",
+      "paid": "Zaplaceno",
+      "future": "Budoucí",
+      "cancelled": "Stornováno"
+    },
+    "invoiceCount": {
+      "label": "{count, plural, one {# faktura} few {# faktury} other {# faktur}}"
+    },
+    "email": {
+      "queued": "Ve frontě",
+      "sent": "Odesláno",
+      "delivered": "Doručeno",
+      "delayed": "Zpožděno",
+      "failed": "Selhalo",
+      "opened": "Otevřeno",
+      "clicked": "Kliknuto",
+      "bounced": "Nedoručeno",
+      "complained": "Stížnost"
+    }
+  },
+  "Marketing": {
+    "meta": {
+      "title": "Automatizace faktur bez zbytečného klikání",
+      "description": "Invoicey propojuje validovaná data, PDF, ISDOC, SPAYD QR a ARES s moderním webem, párováním plateb z banky a AI automatizací.",
+      "ogTitle": "Invoicey — automatizace faktur bez zbytečného klikání",
+      "ogDescription": "Jedna validovaná faktura. Web, PDF, ISDOC, QR, platby z banky i AI automatizace."
+    },
+    "nav": {
+      "howItWorks": "Jak to funguje",
+      "automation": "Automatizace",
+      "capabilities": "Co umí",
+      "faq": "Otázky",
+      "docs": "Dokumentace",
+      "signIn": "Přihlásit se",
+      "openApp": "Otevřít aplikaci",
+      "continueToApp": "Pokračovat do aplikace",
+      "signedIn": "Přihlášeni",
+      "signedInAs": "Přihlášeni jako {name}",
+      "openMenu": "Otevřít nabídku",
+      "skipToContent": "Přeskočit na obsah",
+      "ariaLabel": "Hlavní navigace",
+      "payments": "Platby",
+      "integrations": "Napojení"
+    },
+    "footer": {
+      "description": "Faktury jako strukturovaná data. Vytvořte je ve webu, přes JSON nebo s pomocí AI a pokaždé získejte stejný validovaný výstup.",
+      "docs": "Dokumentace",
+      "privacy": "Soukromí",
+      "terms": "Podmínky",
+      "cookies": "Cookies",
+      "cookieSettings": "Nastavení cookies",
+      "copyright": "© {year} Invoicey · Neveřejná beta",
+      "legalNav": "Právní informace"
+    },
+    "hero": {
+      "badge": "Připraveno pro web, JSON i AI",
+      "titleLine1": "Fakturace, která začíná daty.",
+      "titleLine2": "Ne formulářem.",
+      "subtitle": "Vystavujte doklady ve webu, z JSONu nebo přes AI. Invoicey je pokaždé ověří, vytvoří stejné PDF, ISDOC i platební QR — a příchozí platbu z banky navrhne spárovat s fakturou.",
+      "ctaPrimary": "Otevřít Invoicey",
+      "ctaPrimarySignedIn": "Pokračovat do aplikace",
+      "ctaSecondary": "Jak to funguje",
+      "signedInAs": "Přihlášeni jako {name}",
+      "noPassword": "Bez hesla",
+      "czechUi": "Czech-first",
+      "betaAccess": "Beta přístup",
+      "bankMatching": "Párování plateb"
+    },
+    "mascot": {
+      "ariaLabel": "Invoicey — kliknutím zobrazíte další hlášku",
+      "clickHint": "Klikněte na Invoicey",
+      "message1": "Povinná pole hlídám já. Vy hlídáte podnikání.",
+      "message2": "Jedna faktura dovnitř. PDF, ISDOC a QR ven.",
+      "message3": "Nevymýšlím IČO. ARES je rychlejší a spolehlivější.",
+      "floatingAriaLabel": "Invoicey — zobrazit další tip",
+      "floating1": "Psst — zkuste dole přepsat částku v ukázce.",
+      "floating2": "Tahle stránka má víc pohybu. Faktury pak mají méně.",
+      "floating3": "Ano, kontroluji i to, zda jste opravdu klikli na mě."
+    },
+    "preview": {
+      "eyebrow": "Živá ukázka",
+      "title": "Napište zadání. Invoicey poskládá data.",
+      "description": "Vyzkoušejte si princip přímo tady. Upravte částku, DPH nebo splatnost a náhled faktury se přepočítá bez dalšího formuláře.",
+      "inputLabel": "Popište fakturu vlastními slovy",
+      "enterHint": "Enter aktualizuje náhled",
+      "ariaLabel": "Pokyn pro vytvoření faktury",
+      "updateButton": "Aktualizovat náhled",
+      "updated": "Náhled aktualizován · povinné údaje ověřeny",
+      "exampleServices": "Měsíční služby",
+      "exampleWebdesign": "Webdesign",
+      "exampleConsulting": "Konzultace",
+      "promptServices": "Vystav fakturu pro Studio Sever za měsíční služby, 35 000 Kč bez DPH, splatnost 14 dní.",
+      "promptWebdesign": "Vystav fakturu pro Ateliér 21 za návrh webu, 48 000 Kč + DPH, splatnost 10 dní.",
+      "promptConsulting": "Vystav fakturu pro Kavárnu Místo za konzultace, 18 500 Kč + DPH, splatnost 7 dní.",
+      "serviceMonthly": "Měsíční služby",
+      "serviceWebdesign": "Návrh webu",
+      "serviceConsulting": "Produktové konzultace",
+      "aresVerified": "IČO {companyId} · ověřeno v ARES",
+      "issuerCompanyId": "IČO 123 45 678",
+      "issuer": "Dodavatel",
+      "invoice": "Faktura",
+      "ready": "Připraveno",
+      "customer": "Odběratel",
+      "due": "Splatnost",
+      "days": "{count, plural, one {# den} few {# dny} other {# dní}}",
+      "vat": "DPH {rate} %",
+      "withoutVat": "Bez DPH",
+      "item": "Položka",
+      "amount": "Částka",
+      "mobilePayment": "Platba mobilem",
+      "total": "Celkem"
+    },
+    "trust": {
+      "pdfIsdoc": "PDF + ISDOC",
+      "spaydQr": "SPAYD QR platba",
+      "aresLookup": "ARES podle IČO",
+      "multiIssuer": "Více firem",
+      "ariaLabel": "Klíčové formáty",
+      "bankSync": "Fio a MONETA",
+      "currencies": "Více měn",
+      "recurring": "Opakované faktury"
+    },
+    "workflow": {
+      "eyebrow": "Od zadání po zaplacení",
+      "title": "Méně ruční práce. Pořád máte kontrolu.",
+      "description": "Invoicey drží celý životní cyklus dokladu pohromadě a citlivé kroky nechává ve vašich rukou.",
+      "step1Title": "Připravte údaje",
+      "step1Description": "Vyberte firmu, dohledejte klienta podle IČO a doplňte položky. Nebo pošlete stejná data jako JSON či pokyn agentovi.",
+      "step2Title": "Ověřte a vystavte",
+      "step2Description": "Jedno schéma zkontroluje povinné údaje, DPH i součty. Teprve potom vznikne neměnný doklad, PDF, ISDOC a QR.",
+      "step3Title": "Odešlete a spárujte",
+      "step3Description": "Pošlete fakturu klientovi, sledujte doručení a splatnost a nechte připojenou banku navrhnout párování úhrady."
+    },
+    "capabilities": {
+      "eyebrow": "Doménová realita",
+      "title": "To podstatné je součást základu.",
+      "description": "Ne další vrstva kolem generátoru PDF. Invoicey staví na údajích, které doklad skutečně potřebuje — včetně ARES, DPH a ISDOC.",
+      "docsTitle": "Doklady bez slepých míst",
+      "docsDescription": "Faktury, zálohy, proformy i dobropisy. DPH, DUZP, symboly, QR platba a ISDOC jsou součást stejného výstupu.",
+      "issuersTitle": "Každá firma má vlastní pravidla",
+      "issuersDescription": "Bankovní účet, číselná řada, plátcovství DPH i vizuální prvky zůstávají u správné firmy.",
+      "emailTitle": "Od vystavení po úhradu",
+      "emailDescription": "Odešlete PDF a ISDOC, sledujte doručení, splatnost a úhradu bez přepisování stavu mezi několika nástroji.",
+      "historyTitle": "Historie zůstává historií",
+      "historyDescription": "Vydané doklady jsou neměnné. Starší PDF a ISDOC můžete importovat a zachovat jejich původ i přesnou podobu.",
+      "schemaTitle": "Data jsou první, PDF až druhé",
+      "schemaDescription": "Jedno validační schéma pohání web, JSON i nástroje pro agenty. Výsledek se nemění podle toho, odkud faktura vznikla.",
+      "securityTitle": "Oddělené pracovní prostory",
+      "securityDescription": "OAuth přihlášení přes Google nebo GitHub a kontrola členství pracovního prostoru na každé serverové hranici.",
+      "paymentsTitle": "Platby v jedné knize",
+      "paymentsDescription": "Připojte Fio nebo MONETA. Příchozí platby se navrhnou k faktuře podle VS, částky i účtu a stav dokladu vzniká z potvrzených alokací.",
+      "recurringTitle": "Opakované doklady bez hlídání",
+      "recurringDescription": "Nastavte kadenci a den v měsíci. Invoicey pravidelně připraví návrh s aktuálními údaji dodavatele i klienta a nechá ho na potvrzení.",
+      "currencyTitle": "Více měn a jazyk dokladu",
+      "currencyDescription": "Fakturujte v CZK i cizí měně, s DPH i bez ní, a jazyk konkrétní faktury (čeština nebo angličtina) volíte nezávisle na jazyku aplikace."
+    },
+    "automation": {
+      "badge": "Automatizace · beta",
+      "title": "Agent připraví návrh. Pravidla rozhodnou, co projde.",
+      "description": "Slack a MCP používají stejné nástroje jako web. AI může dohledat firmu, sestavit návrh a připravit soubory, ale nevymýšlí chybějící povinné údaje a potvrzení citlivých akcí zůstává na vás.",
+      "item1": "ARES dohledání podle názvu nebo IČO",
+      "item2": "Validovaný návrh podle InvoiceSchema",
+      "item3": "PDF a ISDOC ze stejného zdroje dat",
+      "item4": "Potvrzení před vydáním, odesláním nebo úhradou",
+      "chatTitle": "Invoicey v Slacku",
+      "chatSubtitle": "Strukturovaný návrh, ne volný text",
+      "chatUserMessage": "@Invoicey vystav měsíční fakturu pro Studio Sever, 35 000 Kč bez DPH, splatnost 14 dní.",
+      "chatReplyTitle": "Návrh je připravený",
+      "chatClientLabel": "Klient",
+      "chatClient": "Studio Sever · ARES ověřeno",
+      "chatAmountLabel": "Částka",
+      "chatAmount": "35 000 Kč",
+      "chatOutputLabel": "Výstup",
+      "chatOutput": "PDF + ISDOC + SPAYD",
+      "chatAction": "Zkontrolovat a vystavit",
+      "chatDisclaimer": "Vydání faktury vždy vyžaduje potvrzení"
+    },
+    "featurePanels": {
+      "multiIssuerEyebrow": "Více firem",
+      "multiIssuerTitle": "Živnost a s.r.o. bez přepínacího chaosu.",
+      "multiIssuerDescription": "Vyberete firmu, která fakturu vystavuje, a Invoicey použije její účet, číselnou řadu, DPH režim a vizuální prvky. Sdílený klient zůstává jeden.",
+      "multiIssuerItem1": "Vlastní číselné řady",
+      "multiIssuerItem2": "Bankovní údaje a QR",
+      "multiIssuerItem3": "Logo, podpis a razítko",
+      "importEyebrow": "Historický import",
+      "importTitle": "Začněte dnes, historii nechte beze změny.",
+      "importDescription": "Nahrajte starší PDF nebo ISDOC hromadně. Invoicey zachová původní soubory, označí jejich zdroj a nedovolí přepsat vydaný archivní doklad.",
+      "importItem1": "PDF s vloženým ISDOC",
+      "importItem2": "Archivní režim bez ISDOC",
+      "importItem3": "Původ dokladu a neměnné soubory",
+      "recurringEyebrow": "Opakované doklady",
+      "recurringTitle": "Pravidelná fakturace, kterou schvalujete vy.",
+      "recurringDescription": "Nastavte kadenci, den v měsíci a šablonu dokladu. Invoicey připraví návrh s aktuálním dodavatelem i klientem a nechá ho čekat na potvrzení.",
+      "recurringItem1": "Měsíčně, čtvrtletně i vlastní kadence",
+      "recurringItem2": "První nebo poslední den v měsíci",
+      "recurringItem3": "Návrh čeká na potvrzení"
+    },
+    "faq": {
+      "eyebrow": "Časté otázky",
+      "title": "Než otevřete první fakturu.",
+      "description": "Stručně a bez produktové omáčky.",
+      "q1": "Je Invoicey určené jen pro plátce DPH?",
+      "a1": "Ne. Podporuje plátce i neplátce, běžný režim DPH, přenesenou daňovou povinnost a další údaje českých dokladů.",
+      "q2": "Můžu fakturovat z více firem nebo živností?",
+      "a2": "Ano. Každá firma má vlastní banku, číselné řady, DPH nastavení, logo i kontaktní údaje. Klienti přitom zůstávají sdílení v jednom pracovním prostoru.",
+      "q3": "Co znamená AI fakturace?",
+      "a3": "Agent neskládá PDF od oka. Připraví strukturovaný návrh, který projde stejnou validací jako faktura vytvořená ve webu. Vydání nebo odeslání citlivého dokladu zůstává potvrzovaná akce.",
+      "q4": "Lze přenést staré faktury?",
+      "a4": "Ano. Hromadný import přijímá PDF a ISDOC. Pokud PDF obsahuje vložený ISDOC, Invoicey načte i strukturovaná data; jinak zachová originál jako archivní doklad.",
+      "q5": "Je Invoicey účetní nebo daňové poradenství?",
+      "a5": "Ne. Invoicey pomáhá připravit a spravovat doklady, ale správnost konkrétního obchodního a daňového případu vždy odpovídá uživateli a jeho účetnímu či daňovému poradci.",
+      "q6": "Jak funguje párování plateb z banky?",
+      "a6": "Připojíte účet Fio nebo MONETA tokenem, který vydá banka na vaše jméno. Invoicey stáhne příchozí platby a navrhne párování podle variabilního symbolu, částky, měny a účtu. Automatické potvrzení je ve výchozím stavu vypnuté a i po zapnutí projde jen přesná shoda — ostatní návrhy čekají na člověka.",
+      "q7": "Umí Invoicey opakované faktury?",
+      "a7": "Ano. Nastavíte kadenci a den v měsíci a Invoicey pravidelně připraví návrh s aktuálními údaji dodavatele i klienta. Doklad se nevydá sám, potvrzení zůstává na vás.",
+      "q8": "Můžu fakturovat v cizí měně nebo anglicky?",
+      "a8": "Ano. Doklad může být v jiné měně než CZK, s DPH i bez ní, a jazyk konkrétní faktury (čeština nebo angličtina) volíte nezávisle na jazyku aplikace."
+    },
+    "cta": {
+      "eyebrow": "Připraveno k vystavení",
+      "title": "Dejte fakturám jedno místo a jeden zdroj pravdy.",
+      "description": "Přihlaste se přes Google nebo GitHub. Heslo u Invoicey vytvářet nemusíte.",
+      "descriptionSignedIn": "Jste přihlášeni. Pokračujte ke svým fakturám.",
+      "button": "Otevřít Invoicey",
+      "buttonSignedIn": "Otevřít přehled"
+    },
+    "legal": {
+      "terms": {
+        "metaTitle": "Podmínky používání",
+        "metaDescription": "Podmínky používání Invoicey v průběhu neveřejné beta verze.",
+        "eyebrow": "Právní informace",
+        "title": "Podmínky používání",
+        "description": "Pravidla pro používání aktuální beta verze Invoicey a rozdělení odpovědnosti mezi službu a uživatele.",
+        "betaNotice": "Neveřejná beta verze. Tyto podmínky jsou pracovní verzí pro omezený beta provoz. Identifikace provozovatele, placené tarify, úroveň podpory a komerční podmínky budou doplněny před veřejným spuštěním.",
+        "s1Title": "1. Služba",
+        "s1Body": "Invoicey je nástroj pro přípravu, správu, import, vykreslení a odesílání fakturačních dokladů. Některé funkce mohou být dostupné jako beta, experiment nebo pouze vybraným uživatelům. Aktuální rozsah služby se může během beta provozu měnit.",
+        "s2Title": "2. Účet a přístup",
+        "s2Body": "Přihlášení probíhá přes podporovaného OAuth poskytovatele, aktuálně Google nebo GitHub. Uživatel odpovídá za zabezpečení tohoto účtu a za činnost osob, které pozve do svého pracovního prostoru. Přístup není dovoleno sdílet způsobem, který obchází oprávnění nebo technická omezení služby.",
+        "s3Title": "3. Odpovědnost za doklady",
+        "s3Body": "Invoicey provádí technické a schématické kontroly, ale neposkytuje účetní, daňové ani právní poradenství. Uživatel odpovídá za pravdivost vstupních údajů, volbu daňového režimu, oprávnění doklad vystavit a jeho soulad s konkrétním obchodním případem. Před vydáním má uživatel doklad zkontrolovat.",
+        "s4Title": "4. Agentní a automatizované funkce",
+        "s4Body": "AI může připravit návrh nebo navrhnout další krok. Výstup může být neúplný nebo chybný a musí projít stejnou validací a lidskou kontrolou jako ručně zadané údaje. Uživatel nesmí automatizaci využít k podvodu, vydávání dokladů bez oprávnění nebo jinému protiprávnímu jednání.",
+        "s5Title": "5. Data a soubory",
+        "s5Body": "Uživatel si ponechává práva ke svým údajům a souborům a uděluje Invoicey oprávnění zpracovat je pouze pro poskytnutí služby. Uživatel musí mít právo zpracovávat osobní a obchodní údaje, které do služby vloží. Důležité doklady je vhodné uchovávat také ve vlastním archivu.",
+        "s6Title": "6. Dostupnost a změny",
+        "s6Body": "Beta verze je poskytována bez záruky nepřetržité dostupnosti. Služba může být změněna, dočasně omezena nebo ukončena, zejména kvůli údržbě, bezpečnosti nebo změnám dodavatelů. Pokud to okolnosti dovolí, významnou změnu oznámíme přiměřeným způsobem.",
+        "s7Title": "7. Zakázané použití",
+        "s7Body": "Službu nelze používat k porušování právních předpisů, zasílání spamu, neoprávněnému přístupu, obcházení zabezpečení, šíření škodlivého kódu nebo vytěžování služby způsobem, který ji nepřiměřeně zatěžuje.",
+        "s8Title": "8. Omezení odpovědnosti",
+        "s8Body": "V rozsahu dovoleném právem neodpovídá beta služba za nepřímou škodu, ušlý zisk ani důsledky rozhodnutí založených na nezkontrolovaném automatizovaném výstupu. Tím nejsou dotčena práva, která podle zákona nelze smluvně omezit.",
+        "s9Title": "9. Změny podmínek",
+        "s9Body": "Podmínky mohou být upraveny spolu s vývojem služby. Nová verze bude zveřejněna zde s datem aktualizace. Pokračování v používání po účinnosti změny znamená přijetí aktualizovaných podmínek, pokud právní předpis nevyžaduje jiný postup."
+      },
+      "privacy": {
+        "metaTitle": "Ochrana soukromí",
+        "metaDescription": "Jak Invoicey pracuje s osobními údaji v průběhu neveřejné beta verze.",
+        "eyebrow": "Právní informace",
+        "title": "Ochrana soukromí",
+        "description": "Přehled údajů, které Invoicey potřebuje k provozu služby, proč je zpracovává a jaké máte možnosti.",
+        "betaNotice": "Neveřejná beta verze. Invoicey je nyní poskytováno omezenému okruhu uživatelů. Úplné identifikační a kontaktní údaje provozovatele budou doplněny před veřejným komerčním spuštěním. Do té doby použijte pro požadavky stejný kontaktní kanál, kterým jste získali přístup.",
+        "s1Title": "1. Jaké údaje zpracováváme",
+        "s1Intro": "Podle toho, jak Invoicey používáte, může služba zpracovávat:",
+        "s1Items": "jméno, e-mail a profilový obrázek z Google nebo GitHub účtu;členství a roli v pracovním prostoru;údaje dodavatelů, klientů a faktur, včetně kontaktních údajů, bankovních údajů, IČO, DIČ a položek dokladů;nahrané logo, podpis, razítko a archivní fakturační soubory;záznamy o odeslání, doručení a stavu fakturačních e-mailů;technické bezpečnostní záznamy a, pokud s tím souhlasíte, anonymní souhrnné měření návštěvnosti.",
+        "s2Title": "2. Proč údaje používáme",
+        "s2Intro": "Údaje používáme pouze v rozsahu potřebném pro:",
+        "s2Items": "přihlášení, správu účtu a oddělení pracovních prostorů;vytvoření, uložení, vykreslení, import a odeslání faktur;ochranu služby, diagnostiku chyb a prevenci zneužití;splnění zákonných povinností spojených s účetními doklady;měření výkonu a používání veřejného webu, pouze pokud udělíte souhlas s kategorií „Anonymní měření“.",
+        "s3Title": "3. Právní základ",
+        "s3Body": "Provoz účtu a fakturačních funkcí je založen na plnění služby, o kterou uživatel požádal. Bezpečnostní a nezbytné provozní záznamy zpracováváme na základě oprávněného zájmu na bezpečném provozu. Volitelné měření je založeno na souhlasu, který lze kdykoliv změnit.",
+        "s4Title": "4. Dodavatelé služby",
+        "s4Body": "Invoicey používá specializované dodavatele infrastruktury. Podle zapnutých funkcí jde zejména o Vercel (hosting a volitelné měření), Neon (databáze), UploadThing (soubory), Resend (transakční e-mail), Google/GitHub (OAuth přihlášení) a Slack/Vercel Connect pro agentní integraci. Tito dodavatelé zpracovávají údaje jen pro zajištění dané funkce a podle svých smluvních a bezpečnostních podmínek.",
+        "s5Title": "5. Doba uchování",
+        "s5Body": "Účetní a vystavené doklady mohou podléhat zákonným archivačním povinnostem a nejsou automaticky přepisovány při změně živých údajů. Ostatní údaje uchováváme po dobu aktivního účtu a následně jen po dobu nezbytnou k ochraně služby, řešení nároků nebo splnění právní povinnosti. Konkrétní retenční lhůty budou před veřejným spuštěním doplněny do této stránky.",
+        "s6Title": "6. Vaše práva",
+        "s6Body": "V mezích GDPR můžete požádat o přístup, opravu, výmaz, omezení zpracování, přenositelnost nebo vznést námitku. Souhlas s měřením lze odvolat okamžitě přes nastavení cookies. Některé údaje z účetních dokladů nemusí být možné vymazat, pokud jejich uchování vyžaduje zákon.",
+        "s7Title": "7. Zabezpečení a změny",
+        "s7Body": "Přístup do aplikace používá OAuth bez vlastního hesla u Invoicey. Pracovní data jsou vždy dotazována v kontextu ověřeného členství v pracovním prostoru. Žádné internetové službě však nelze slíbit absolutní bezpečnost. Tuto stránku upravíme při změně významného způsobu zpracování a zveřejníme nové datum aktualizace."
+      },
+      "cookies": {
+        "metaTitle": "Používání cookies",
+        "metaDescription": "Jaké cookies a lokální úložiště Invoicey používá a jak změnit volbu.",
+        "eyebrow": "Právní informace",
+        "title": "Používání cookies",
+        "description": "Dvě srozumitelné kategorie. Nezbytné technologie pro provoz a volitelné anonymní měření. Žádné reklamní cookies.",
+        "changeChoiceTitle": "Chcete změnit svou volbu?",
+        "changeChoiceDescription": "Nastavení otevřete kdykoliv. Odvolání analytického souhlasu se projeví bez dalšího sledování.",
+        "changeChoiceButton": "Otevřít nastavení cookies",
+        "s1Title": "1. Nezbytné technologie",
+        "s1Body": "Tyto technologie nelze vypnout, protože zajišťují přihlášení, zabezpečení relace, oddělení pracovního prostoru a zapamatování vaší volby soukromí. Patří sem zejména bezpečné cookies Better Auth a záznam c15t-consent, který uchovává vaši volbu nejdéle jeden rok. Rozhraní může v lokálním úložišti ukládat také čistě funkční preference, například motiv vzhledu.",
+        "s2Title": "2. Anonymní měření",
+        "s2Body": "Po vašem souhlasu načteme Vercel Analytics. Poskytuje souhrnné informace o návštěvnosti a výkonu veřejných stránek. Nepoužíváme je k reklamnímu profilování ani je nekombinujeme s fakturačním obsahem. Bez souhlasu se analytická komponenta nenačte.",
+        "s3Title": "3. Co nepoužíváme",
+        "s3Body": "Invoicey v současnosti nepoužívá reklamní sítě, remarketingové pixely ani cookies pro sledování napříč weby. Pokud by se to změnilo, tato stránka i volby souhlasu budou aktualizovány před jejich zapnutím.",
+        "s4Title": "4. Změna nebo odvolání souhlasu",
+        "s4Body": "Nastavení můžete otevřít tlačítkem výše nebo odkazem „Nastavení cookies“ v patičce. Volba „Pouze nezbytné“ odmítne nebo odvolá měření. Vymazání dat webu v prohlížeči odstraní i uloženou volbu a při příští návštěvě se zeptáme znovu."
+      }
+    },
+    "payments": {
+      "badge": "Bankovní napojení",
+      "eyebrow": "Platební kniha",
+      "title": "Zaplaceno pozná Invoicey z výpisu, ne z vaší paměti.",
+      "description": "Připojte účet tokenem, který vydá banka na vaše jméno. Invoicey stáhne příchozí platby, navrhne párování s vydanou fakturou a stav dokladu odvodí z potvrzených alokací — včetně částečných úhrad a přeplatků.",
+      "item1": "Fio a MONETA přes token účtu, bez PSD2 prostředníka",
+      "item2": "Návrhy párování podle VS, částky, měny i účtu",
+      "item3": "Automatické potvrzení jen u přesné shody a jen když ho zapnete",
+      "item4": "Částečné úhrady, přeplatky i ruční platby v jedné knize",
+      "cardTitle": "Příchozí platba",
+      "cardSubtitle": "Fio · 2301234567/2010",
+      "creditAmountLabel": "Částka",
+      "creditAmount": "35 000 Kč",
+      "creditVsLabel": "Variabilní symbol",
+      "creditVs": "20260042",
+      "creditDateLabel": "Připsáno",
+      "creditDate": "12. 8. 2026",
+      "matchTitle": "Návrh párování",
+      "matchInvoiceLabel": "Faktura",
+      "matchInvoice": "2026-0042 · Studio Sever",
+      "matchStateLabel": "Po potvrzení",
+      "matchState": "Zaplaceno v plné výši",
+      "matchAction": "Zkontrolovat a potvrdit",
+      "disclaimer": "Automatické potvrzení je ve výchozím stavu vypnuté"
+    },
+    "integrations": {
+      "eyebrow": "Napojení",
+      "title": "Fakturujte i mimo Invoicey.",
+      "description": "Slack, MCP klienti i vlastní skripty používají stejné nástroje a stejnou validaci jako web. Každé napojení má vlastní přístup a bez oprávnění neprojde.",
+      "slackTitle": "Slack",
+      "slackDescription": "Návrh faktury přímo z threadu, potvrzení v Slacku, výsledek ve stejném pracovním prostoru.",
+      "mcpTitle": "MCP · Claude a Cursor",
+      "mcpDescription": "Vzdálený MCP server s API klíčem pracovního prostoru. Stejné nástroje jako ve webu.",
+      "banksTitle": "Fio a MONETA",
+      "banksDescription": "Příchozí platby a návrhy párování přes token vydaný bankou na váš účet.",
+      "aresTitle": "ARES",
+      "aresDescription": "Dohledání firmy podle IČO nebo názvu při zakládání klienta i dodavatele.",
+      "emailTitle": "E-mail klientovi",
+      "emailDescription": "Odeslání PDF a ISDOC pod vaším jménem se sledováním doručení.",
+      "apiTitle": "JSON a API klíče",
+      "apiDescription": "Validovaný InvoiceSchema JSON a klíče pro vlastní automatizaci.",
+      "docsCta": "Dokumentace napojení"
+    }
+  },
+  "Auth": {
+    "meta": {
+      "title": "Přihlášení",
+      "description": "Přihlaste se do Invoicey přes Google nebo GitHub."
+    },
+    "eyebrow": "Vítejte zpět",
+    "title": "Přihlášení do Invoicey",
+    "subtitle": "Pokračujte účtem Google nebo GitHub. Invoicey nevytváří ani neukládá další heslo — přístup můžete kdykoli odebrat u poskytovatele.",
+    "noProviders": "Není nastavený žádný poskytovatel přihlášení. Doplňte přístupové údaje Google nebo GitHub a stránku načtěte znovu.",
+    "continueWith": "Pokračovat přes {provider}",
+    "consent": "Pokračováním potvrzujete, že jste se seznámili s podmínkami používání a zásadami ochrany soukromí.",
+    "shell": {
+      "tagline": "Automatizace faktur",
+      "eyebrow": "Jedno schéma, všechny kanály",
+      "title": "Od údajů k hotovému dokladu bez zbytečných odboček.",
+      "description": "Web, PDF, ISDOC, SPAYD QR i agentní nástroje pracují se stejnou validovanou fakturou.",
+      "oauthNote": "OAuth přihlášení · žádné další heslo",
+      "backHome": "Zpět na Invoicey",
+      "badge": "Neveřejná beta",
+      "benefit1Title": "České reálie v základu",
+      "benefit1Description": "Klient podle IČO z ARES, režimy DPH, DUZP i symboly.",
+      "benefit2Title": "PDF, ISDOC a QR najednou",
+      "benefit2Description": "Jeden validovaný doklad, tři výstupy ze stejných dat.",
+      "benefit3Title": "Platby z banky",
+      "benefit3Description": "Fio a MONETA navrhnou párování úhrady k faktuře.",
+      "footerNote": "Faktury, doklady i platby zůstávají ve vašem pracovním prostoru."
+    },
+    "redirecting": "Přesměrovávám…",
+    "failed": "Přihlášení se nepodařilo. Zkuste to prosím znovu.",
+    "continueGoogle": "Pokračovat přes Google",
+    "continueGitHub": "Pokračovat přes GitHub",
+    "continueNote": "Po přihlášení vás vrátíme tam, kam jste mířili.",
+    "secureNote": "Přihlášení probíhá u poskytovatele, heslo Invoicey nevidí.",
+    "docsPrompt": "Ještě zvažujete?",
+    "docsCta": "Projděte dokumentaci"
+  },
+  "Onboarding": {
+    "meta": {
+      "title": "Nastavení pracovního prostoru"
+    },
+    "title": "Dokončete pracovní prostor",
+    "subtitle": "Účet {email} je přihlášený, ale nemá pracovní prostor. Obvykle jej vytvoříme automaticky; tímto krokem dokončíte přerušené nastavení.",
+    "benefit1": "Soukromý prostor pro vaše faktury",
+    "benefit2": "Role vlastníka pracovního prostoru",
+    "benefit3": "Možnost přidat první firmu",
+    "submit": "Vytvořit můj pracovní prostor",
+    "creating": "Vytvářím…"
+  },
+  "Invite": {
+    "title": "Pozvánka do pracovního prostoru",
+    "description": "Zkontrolujte detaily a pozvánku přijměte nebo odmítněte.",
+    "accept": "Přijmout pozvánku",
+    "accepting": "Přijímám…",
+    "accepted": "Přijato",
+    "decline": "Odmítnout",
+    "declining": "Odmítám…",
+    "declined": "Odmítnuto",
+    "backToApp": "Zpět do aplikace",
+    "workspace": "Pracovní prostor",
+    "inviter": "Pozval",
+    "role": "Role",
+    "email": "Pozvaný e-mail",
+    "expires": "Platnost do",
+    "roles": {
+      "owner": "Vlastník",
+      "admin": "Správce",
+      "member": "Člen"
+    },
+    "acceptFailed": "Přijetí pozvánky selhalo",
+    "declineFailed": "Odmítnutí pozvánky selhalo",
+    "acceptSuccess": "Pozvánka přijata",
+    "declineSuccess": "Pozvánka odmítnuta",
+    "expired": "Tato pozvánka vypršela. Požádejte správce o novou.",
+    "unavailable": "Tato pozvánka už není dostupná.",
+    "notFound": "Pozvánka nenalezena.",
+    "emailMismatch": "Jste přihlášeni jako {signedInEmail}, ale pozvánka byla odeslána na {inviteEmail}. Přihlaste se pozvaným e-mailem.",
+    "signedInAs": "Přihlášeni jako {email}"
+  },
+  "SlackLink": {
+    "title": "Propojit Slack s Invoicey",
+    "description": "Tento Slack účet bude moct připravovat faktury v níže uvedeném workspace.",
+    "confirm": "Potvrdit propojení",
+    "confirming": "Propojuji…",
+    "confirmed": "Propojeno",
+    "confirmFailed": "Propojení se nepodařilo",
+    "confirmSuccess": "Slack účet je propojený. Další zpráva v Slacku už půjde do tohoto workspace.",
+    "rebindSuccess": "Slack účet teď používá aktuální pracovní prostor.",
+    "backToApp": "Zpět do aplikace",
+    "fromSlack": "Ze Slacku",
+    "toWorkspace": "Do workspace",
+    "slackAccount": "Slack účet",
+    "invoiceyAccount": "Invoicey účet",
+    "invoicesLandHere": "Nové faktury ze Slacku sem",
+    "workspaceCalloutTitle": "Špatný workspace?",
+    "workspaceHint": "Přepněte workspace v postranním panelu a otevřete odkaz znovu. Starší Slack faktury v jiném workspace se nemění.",
+    "expiresNote": "Odkaz platí 15 minut a jde použít jen jednou.",
+    "noEmailMatch": "Slack a Invoicey nespárujeme podle e-mailu — propojí se právě tento Slack účet s přihlášeným uživatelem.",
+    "slackUser": "Slack uživatel",
+    "workspace": "Pracovní prostor pro nové faktury",
+    "signedInAs": "Přihlášeni jako {email}",
+    "notFound": "Odkaz na propojení neexistuje. Napište botovi znovu a použijte nový DM.",
+    "expired": "Odkaz vypršel (15 minut). Napište botovi znovu.",
+    "consumed": "Tento odkaz už byl použit. Napište botovi, pokud potřebujete nový.",
+    "stealRefused": "Tento Slack účet je už propojený s jiným Invoicey uživatelem. Nechte ho odpojit v Nastavení → Integrace."
+  },
+  "Referral": {
+    "title": "{name} vás zve do Invoicey",
+    "titleAnonymous": "Byli jste pozváni do Invoicey",
+    "description": "Vytvořte si vlastní pracovní prostor pro české faktury — PDF, ISDOC a AI nástroje. Tento odkaz vás nepřidá do cizího workspace.",
+    "cta": "Pokračovat k přihlášení",
+    "alreadySignedIn": "Účet Invoicey už máte. Pokračujte do aplikace.",
+    "openApp": "Otevřít přehled",
+    "invalidTitle": "Odkaz nenalezen",
+    "invalidDescription": "Tento pozvánkový odkaz je neplatný nebo už neplatí. Účet Invoicey si můžete vytvořit i bez něj.",
+    "signInAnyway": "Přihlásit se do Invoicey"
+  },
+  "NotFound": {
+    "code": "404",
+    "title": "Tahle stránka na faktuře není.",
+    "description": "Odkaz mohl zastarat nebo stránka změnila adresu. Veřejný přehled produktu najdete na úvodní stránce.",
+    "backButton": "Zpět na Invoicey"
+  },
+  "AppError": {
+    "title": "Něco se pokazilo",
+    "description": "Nastala neočekávaná chyba. Zkuste stránku načíst znovu.",
+    "retry": "Zkusit znovu",
+    "backToDashboard": "Zpět na přehled"
+  },
+  "AppNotFound": {
+    "code": "404",
+    "title": "Stránka nenalezena",
+    "description": "Odkaz mohl zastarat, nebo záznam byl smazán či je v jiném workspace.",
+    "backToInvoices": "Zpět na faktury",
+    "backToDashboard": "Zpět na přehled"
+  },
+  "App": {
+    "meta": {
+      "title": "Invoicey",
+      "description": "Automatizace faktur založená na datech · PDF, ISDOC a SPAYD QR"
+    },
+    "brand": {
+      "tagline": "Automatizace faktur"
+    },
+    "nav": {
+      "group": "Pracovní prostor",
+      "dashboard": "Přehled",
+      "invoices": "Faktury",
+      "invoicesAi": "Vytvořit s AI",
+      "invoicesImport": "Importovat staré faktury",
+      "invoicesFromJson": "Faktura z JSON",
+      "invoicesRecurring": "Opakované faktury",
+      "payments": "Platby",
+      "clients": "Klienti",
+      "issuers": "Moje firmy",
+      "newInvoice": "Nová faktura",
+      "toolsGroup": "Import a nástroje",
+      "resourcesGroup": "Zdroje",
+      "docs": "Dokumentace",
+      "collapseToggle": "Rozbalit nebo sbalit {title}",
+      "newInvoiceMore": "Další způsoby vytvoření",
+      "createGroup": "Vytvořit",
+      "invoiceBlank": "Prázdná faktura",
+      "bankConnections": "Bankovní spojení",
+      "settingsGroup": "Nastavení",
+      "settingsWorkspace": "Pracovní prostor",
+      "settingsAccount": "Můj účet",
+      "admin": "Administrace"
+    },
+    "breadcrumb": {
+      "dashboard": "Přehled",
+      "invoices": "Faktury",
+      "payments": "Platby",
+      "welcome": "Začínáme",
+      "inbox": "Inbox",
+      "runs": "Platební dávky",
+      "upload": "Nahrát",
+      "clients": "Klienti",
+      "issuers": "Moje firmy",
+      "settings": "Nastavení",
+      "fromJson": "Z JSON",
+      "ai": "AI koncept",
+      "import": "Import",
+      "recurring": "Opakované",
+      "new": "Nová",
+      "edit": "Upravit",
+      "invoice": "Faktura",
+      "issuer": "Firma",
+      "client": "Klient",
+      "detail": "Detail",
+      "security": "Zabezpečení",
+      "workspace": "Pracovní prostor",
+      "members": "Členové",
+      "referrals": "Doporučení",
+      "api-keys": "API klíče",
+      "integrations": "Integrace",
+      "usage": "Využití",
+      "bank-connections": "Bankovní spojení",
+      "account": "Účet"
+    },
+    "a11y": {
+      "toggleSidebar": "Přepnout postranní panel",
+      "sidebarTitle": "Postranní panel",
+      "sidebarDescription": "Hlavní navigace aplikace",
+      "navigating": "Načítání stránky"
+    },
+    "settings": {
+      "navigationLabel": {
+        "account": "Sekce nastavení účtu",
+        "workspace": "Sekce nastavení prostoru"
+      },
+      "nav": {
+        "account": "Účet",
+        "workspace": "Pracovní prostor",
+        "security": "Zabezpečení",
+        "members": "Členové",
+        "usage": "Využití",
+        "referrals": "Doporučení",
+        "apiKeys": "API klíče",
+        "bankConnections": "Bankovní spojení",
+        "integrations": "Integrace"
+      },
+      "navDescriptions": {
+        "account": "Profil, motiv a jazyk",
+        "workspace": "Název a logo tohoto prostoru",
+        "security": "Přihlášení, relace a zařízení",
+        "members": "Lidé a oprávnění",
+        "usage": "AI tokeny, grafy a historie",
+        "referrals": "Pozvěte přátele do Invoicey",
+        "apiKeys": "Přístup pro automatizaci",
+        "bankConnections": "Bankovní přehledy jen pro čtení",
+        "integrations": "Slack, MCP a další nástroje"
+      },
+      "workspace": {
+        "pageTitle": "Pracovní prostor",
+        "pageDescription": "Přejmenujte tento pracovní prostor a nastavte logo pro postranní panel. Slug zůstává pevný pro odkazy a integrace.",
+        "nameLabel": "Název",
+        "slugLabel": "Slug",
+        "slugHint": "Slug nelze po vytvoření změnit.",
+        "logoLabel": "Logo",
+        "logoHint": "Zobrazuje se v přepínači pracovního prostoru. Faktury dál používají logo jednotlivých firem.",
+        "logoSaved": "Logo pracovního prostoru uloženo",
+        "removeLogo": "Odebrat logo",
+        "uploadUnavailable": "Nahrávání souborů v tomto prostředí není nastavené.",
+        "save": "Uložit název",
+        "saving": "Ukládám…",
+        "saved": "Název pracovního prostoru uložen",
+        "membersLink": "Spravovat členy",
+        "readOnly": "Název nebo logo může změnit jen vlastník nebo správce.",
+        "plan": {
+          "title": "Tarif",
+          "description": "Co tarif tohoto workspace zahrnuje.",
+          "unlimited": "Neomezeně",
+          "contact": "Tarify aktivuje Invoicey. Pro změnu se nám ozvěte.",
+          "limits": {
+            "seats": "Členové",
+            "issuers": "Dodavatelé",
+            "monthlyTokens": "Měsíční AI tokeny"
+          },
+          "features": {
+            "bankConnections": "Bankovní propojení",
+            "recurring": "Opakované koncepty",
+            "historicalImport": "Import historie",
+            "agents": "Slack, MCP a Invoicey"
+          }
+        }
+      },
+      "account": {
+        "pageTitle": "Účet",
+        "pageDescription": "Identita z přihlášení a preference, které můžete změnit na tomto zařízení.",
+        "profileTitle": "Profil",
+        "profileDescription": "Jméno, e-mail a fotka pocházejí z Google nebo GitHub účtu.",
+        "oauthNote": "Tato pole se aktualizují při přihlášení přes poskytovatele. Účty propojíte nebo odpojíte v Zabezpečení.",
+        "nameLabel": "Jméno",
+        "emailLabel": "E-mail",
+        "securityLink": "Nastavení zabezpečení"
+      },
+      "apiKeysDefault": {
+        "title": "Výchozí pracovní prostor pro API klíče",
+        "description": "Osobní API klíče vždy používají váš výchozí pracovní prostor — ne ten, který má prohlížeč právě aktivní. Přepnutí v postranním panelu výchozí prostor také nastaví.",
+        "current": "Aktuální výchozí",
+        "setDefault": "Použít pro API klíče",
+        "alreadyDefault": "Používáno pro API klíče",
+        "updated": "Výchozí pracovní prostor aktualizován",
+        "activeDiffers": "Prohlížeč je teď v „{name}“. API klíče dál používají výchozí výše, dokud ho nezměníte nebo nepřepnete pracovní prostor.",
+        "browserActive": "aktivní v prohlížeči"
+      },
+      "appearance": {
+        "pageTitle": "Vzhled a jazyk",
+        "pageDescription": "Nastavte si Invoicey tak, aby se vám dobře používalo na tomto zařízení.",
+        "title": "Vzhled",
+        "description": "Světlý, tmavý, nebo podle systému. Preference se ukládá v tomto prohlížeči.",
+        "languageDescription": "Zvolte jazyk ovládacích prvků a systémových zpráv. Dokumentace zůstává anglicky.",
+        "deviceNote": "Motiv a jazyk se ukládají v tomto prohlížeči. Na jiném zařízení je můžete nastavit nezávisle."
+      },
+      "usage": {
+        "pageTitle": "Využití AI",
+        "pageDescription": "Přehledný zůstatek tokenů a aktivita pro tento pracovní prostor. Sdílené všemi členy.",
+        "products": {
+          "web": "Web AI",
+          "slack": "Slack",
+          "mcp": "MCP"
+        },
+        "plan": {
+          "title": "Aktuální plán",
+          "description": "Free plán zahrnuje měsíční AI tokeny pro modely hostované Invoicey.",
+          "freeName": "Free",
+          "freeIncludes": "Každý měsíc {monthly} tokenů plus jednorázový dárek při založení prostoru.",
+          "viewPlans": "Zobrazit plány",
+          "upgrade": "Upgrade"
+        },
+        "balance": {
+          "title": "Zůstatek tokenů",
+          "renewal": "Měsíční tokeny se obnoví za {days, plural, one {# den} few {# dny} other {# dní}}. Nevyužité měsíční tokeny se nepřenášejí.",
+          "cardLabel": "Prostor",
+          "gifted": "Dárkové tokeny",
+          "monthly": "Měsíční tokeny",
+          "purchased": "Zakoupené tokeny",
+          "totalLabel": "Celkem dostupných",
+          "noRollover": "Nevyužité měsíční tokeny na konci období propadají. Dárkové a zakoupené zůstávají, dokud je nevyčerpáte.",
+          "expiresOn": "Aktuální měsíční období končí {date}."
+        },
+        "chart": {
+          "title": "Využití (30 dní)",
+          "subtitle": "Web a Slack ukazují tokeny. MCP ukazuje volání nástrojů (klientský LLM účtuje klient).",
+          "web": "Web",
+          "slack": "Slack",
+          "mcp": "MCP volání",
+          "mcpNote": "MCP neodečítá tokeny Invoicey — jazykový model běží v Cursoru nebo vašem MCP klientovi."
+        },
+        "history": {
+          "title": "Historie aktivity",
+          "subtitle": "Nedávné LLM využití a MCP volání nástrojů v tomto prostoru.",
+          "empty": "Zatím žádná AI aktivita.",
+          "when": "Kdy",
+          "product": "Produkt",
+          "detail": "Detail",
+          "tokens": "Tokeny"
+        },
+        "topup": {
+          "title": "Dobití",
+          "subtitle": "Nákup tokenů a kódy přijdou později. Tlačítka jsou zatím jen zástupné.",
+          "redeem": "Uplatnit kód",
+          "buy": "Koupit tokeny",
+          "comingSoon": "Nákup tokenů zatím není dostupný — dáme vám vědět, až bude."
+        },
+        "chip": {
+          "title": "Zůstatek tokenů",
+          "remaining": "zbývá {count}",
+          "monthlyUsed": "Měsíční tokeny",
+          "gifted": "Dárkové",
+          "monthly": "Měsíční",
+          "purchased": "Zakoupené",
+          "viewUsage": "Zobrazit využití",
+          "upgrade": "Upgrade"
+        },
+        "grants": {
+          "title": "Bonusové tokeny",
+          "subtitle": "Jednorázová přidělení připsaná tomuto workspace.",
+          "columns": {
+            "reason": "Důvod",
+            "tokens": "Tokeny",
+            "date": "Datum"
+          },
+          "trigger": {
+            "signup": "Uvítací bonus",
+            "first_invoice_issued": "První vystavená faktura",
+            "manual": "Přiděleno Invoicey"
+          }
+        }
+      },
+      "scopes": {
+        "account": {
+          "eyebrow": "Váš účet",
+          "title": "{name}",
+          "subtitle": "Profil, vzhled a zabezpečení přihlášení. Platí pro vás ve všech pracovních prostorech."
+        },
+        "workspace": {
+          "eyebrow": "Nastavení prostoru",
+          "title": "Pracovní prostor",
+          "subtitle": "Firmy, klienti a faktury tohoto prostoru. Změny vidí všichni jeho členové."
+        }
+      }
+    },
+    "theme": {
+      "label": "Vzhled",
+      "light": "Světlý",
+      "dark": "Tmavý",
+      "system": "Systém"
+    },
+    "userMenu": {
+      "settings": "Nastavení účtu",
+      "platformAdmin": "Platformní admin",
+      "logOut": "Odhlásit se",
+      "signingOut": "Odhlašuji…"
+    },
+    "workspaceSwitcher": {
+      "label": "Pracovní prostory",
+      "create": "Vytvořit pracovní prostor…",
+      "createTitle": "Nový pracovní prostor",
+      "createDescription": "Nový prostor má vlastní firmy, klienty a faktury. Přepnutí zároveň nastaví výchozí prostor pro API klíče.",
+      "nameLabel": "Název",
+      "namePlaceholder": "např. Acme s.r.o.",
+      "cancel": "Zrušit",
+      "createSubmit": "Vytvořit",
+      "apiKeysDefaultBadge": "API klíče",
+      "defaultDivergesShort": "API klíče → {name}",
+      "defaultDivergesHint": "API klíče stále míří do „{name}“. Přepnutí pracovního prostoru výchozí také aktualizuje.",
+      "roles": {
+        "owner": "Vlastník",
+        "admin": "Správce",
+        "member": "Člen"
+      },
+      "manageLabel": "Tento prostor",
+      "settings": "Nastavení prostoru",
+      "members": "Členové",
+      "logoLabel": "Logo",
+      "logoHint": "Zobrazuje se v přepínači prostorů. PNG nebo JPEG do 1 MB.",
+      "logoOptional": "Nepovinné — bez loga se použijí iniciály.",
+      "uploadUnavailable": "Nahrávání souborů není nakonfigurováno."
+    },
+    "workspaceErrors": {
+      "name_required": "Zadejte název pracovního prostoru",
+      "switch_failed": "Nepodařilo se přepnout pracovní prostor",
+      "create_failed": "Nepodařilo se vytvořit pracovní prostor",
+      "update_failed": "Nepodařilo se uložit nastavení workspace",
+      "logo_invalid": "Adresa loga nepochází z důvěryhodného úložiště",
+      "default_failed": "Nepodařilo se nastavit výchozí pracovní prostor",
+      "invite_failed": "Přijetí pozvánky selhalo",
+      "invite_missing_workspace": "Pozvánka neobsahuje pracovní prostor",
+      "forbidden": "Pro tuto akci nemáte oprávnění"
+    },
+    "palette": {
+      "trigger": "Hledat…",
+      "title": "Rychlé hledání",
+      "description": "Najděte fakturu nebo klienta, nebo přejděte kamkoli v aplikaci.",
+      "placeholder": "Číslo faktury, klient, IČO nebo název stránky…",
+      "empty": "Nic nenalezeno.",
+      "groups": {
+        "go": "Přejít na",
+        "create": "Vytvořit",
+        "settings": "Nastavení"
+      },
+      "commands": {
+        "dashboard": "Přehled",
+        "invoices": "Faktury",
+        "payments": "Platby",
+        "clients": "Klienti",
+        "issuers": "Moje firmy",
+        "newInvoice": "Nová faktura",
+        "aiDraft": "Vytvořit fakturu s AI",
+        "recurring": "Opakované faktury",
+        "fromJson": "Faktura z JSON",
+        "import": "Importovat staré faktury",
+        "workspaceSettings": "Nastavení prostoru",
+        "accountSettings": "Nastavení účtu"
+      }
+    }
+  },
+  "Dashboard": {
+    "title": "Přehled",
+    "subtitle": "Stavy faktur a obrat za posledních 12 měsíců.",
+    "goToInvoices": "Přejít na faktury",
+    "newInvoice": "Nová faktura",
+    "empty": {
+      "title": "Vítejte v Invoicey",
+      "description": "Než vytvoříte první fakturu, přidejte svou firmu.",
+      "cta": "Přidat moji firmu"
+    },
+    "gettingStarted": {
+      "businessReady": "Nastavení firmy je hotové",
+      "title": "Vytvořte první fakturu",
+      "description": "Při vytváření faktury si vyberete klienta, nebo ho přidáte přes ARES.",
+      "create": "Vytvořit fakturu",
+      "ai": "Popsat s AI"
+    },
+    "issuerFilter": {
+      "label": "Firma",
+      "all": "Všechny firmy",
+      "description": "Zaměřte všechny přehledy a grafy na jednu firmu."
+    },
+    "recent": {
+      "title": "Nedávné faktury",
+      "client": "Klient",
+      "viewAll": "Zobrazit vše",
+      "issueDate": "Vystaveno",
+      "dueDate": "Splatnost",
+      "amount": "Částka",
+      "empty": "Zatím žádné faktury.",
+      "createFirst": "Vytvořte první fakturu",
+      "number": "Číslo",
+      "issued": "Vystaveno",
+      "due": "Splatnost",
+      "total": "Celkem",
+      "status": "Stav",
+      "draft": "NÁVRH"
+    },
+    "balance": {
+      "issued12m": "Vystavené faktury (12 měsíců)",
+      "outstanding": "Neuhrazeno (včetně po splatnosti a budoucích)"
+    },
+    "chart": {
+      "title": "Vystaveno vs zaplaceno",
+      "issued": "Vystaveno",
+      "paid": "Zaplaceno",
+      "subtitle": "Posledních 12 měsíců (částka, CZK)"
+    }
+  },
+  "Invoices": {
+    "list": {
+      "title": "Faktury",
+      "subtitle": "Stavy, filtry a akce nad fakturami.",
+      "newButton": "Nová faktura",
+      "aiButton": "AI koncept",
+      "importButton": "Import",
+      "fromJsonButton": "Z JSON",
+      "empty": "Žádné faktury.",
+      "createFirst": "Vytvořit první fakturu",
+      "page": "Strana {current} / {total} ({records})",
+      "records": "{count, plural, one {# záznam} few {# záznamy} other {# záznamů}}",
+      "selectAll": "Vybrat vše",
+      "number": "Číslo",
+      "issued": "Vystaveno",
+      "due": "Splatnost",
+      "client": "Klient",
+      "total": "Celkem",
+      "status": "Stav",
+      "source": "Zdroj",
+      "actions": "Akce",
+      "detail": "Detail",
+      "issue": "Vystavit",
+      "edit": "Upravit",
+      "pdf": "PDF",
+      "duplicate": "Dup",
+      "markPaid": "Zaplaceno",
+      "cancel": "Storno",
+      "unmarkPaid": "Zrušit zaplacení",
+      "delete": "Smazat",
+      "draft": "NÁVRH",
+      "archive": "archiv",
+      "selected": "{count} vybraných",
+      "selectedDrafts": "{count, plural, one {# návrh} few {# návrhy} other {# návrhů}}",
+      "deleteIssuedHint": "Vystavené faktury jsou chráněné. Smažou se pouze vybrané návrhy.",
+      "bulkIssue": "Vystavit",
+      "bulkPaid": "Zaplaceno",
+      "bulkUnpaid": "Zrušit zaplacení",
+      "bulkCancel": "Storno",
+      "bulkCancelTitle": "Stornovat vybrané faktury?",
+      "bulkCancelDescription": "Před trvalou účetní změnou si vše zkontrolujte.",
+      "bulkCancelPermanent": "Storno ponechá čísla faktur a doklady zůstanou v historii.",
+      "bulkCancelConfirm": "Trvale stornovat {count, plural, one {# fakturu} few {# faktury} other {# faktur}}",
+      "bulkCancelPending": "Stornuji…",
+      "bulkDelete": "Smazat",
+      "untitledDraft": "Návrh bez čísla",
+      "moreActions": "Další akce pro {number}",
+      "detailInvoice": "Detail faktury",
+      "editDraft": "Upravit návrh",
+      "downloadPdf": "Stáhnout PDF",
+      "markPaidFull": "Označit jako zaplacenou",
+      "cancelInvoice": "Stornovat fakturu",
+      "reviewCancellation": "Zkontrolovat storno",
+      "paymentStates": {
+        "unpaid": "Nezaplaceno",
+        "partial": "Částečně zaplaceno",
+        "paid": "Zaplaceno",
+        "overpaid": "Přeplatek"
+      },
+      "deleteDraft": "Smazat",
+      "issuing": "Vystavuji…",
+      "saving": "Ukládám…",
+      "cancelling": "Stornuji…",
+      "deleting": "Mazání…",
+      "cancelSelection": "Zrušit výběr",
+      "previous": "Předchozí",
+      "next": "Další",
+      "pageMobile": "Strana {current} z {total}"
+    },
+    "filter": {
+      "status": "Stav",
+      "source": "Zdroj",
+      "issuer": "Dodavatel",
+      "client": "Odběratel",
+      "from": "Od",
+      "to": "Do",
+      "search": "Hledat",
+      "searchPlaceholder": "číslo, klient…",
+      "sort": "Řazení",
+      "sortDateDesc": "Datum ↓",
+      "sortDateAsc": "Datum ↑",
+      "submit": "Filtrovat"
+    },
+    "origin": {
+      "invoicey": "Invoicey",
+      "fakturaonline": "FakturaOnline.cz",
+      "idoklad": "iDoklad",
+      "fakturoid": "Fakturoid",
+      "pohoda": "Pohoda",
+      "money_s3": "Money S3",
+      "vyfakturuj": "VyFakturuj.cz",
+      "superfaktura": "SuperFaktura",
+      "custom": "Jiné / vlastní"
+    },
+    "detail": {
+      "issueDate": "Datum vystavení",
+      "dueDate": "Splatnost",
+      "duzp": "DUZP",
+      "currency": "Měna",
+      "documentLanguage": "Jazyk dokladu",
+      "languageCs": "Čeština",
+      "languageEn": "English",
+      "emailHeading": "E-maily",
+      "emailResendHint": "V případě potřeby opravte příjemce a volbou Odeslat e-mailem vytvořte nový pokus o doručení. Dřívější pokusy zůstanou v historii.",
+      "lifecycleTitle": "Životní cyklus faktury",
+      "lifecycle": {
+        "draft": {
+          "body": "Tento návrh lze upravit a nemá přidělené číslo faktury.",
+          "action": "Zkontrolujte ho a vystavte až po dokončení údajů."
+        },
+        "unpaid": {
+          "body": "Vystavená faktura zatím nemá potvrzenou platbu.",
+          "action": "Odešlete ji nebo po přijetí platbu potvrďte."
+        },
+        "partial": {
+          "body": "Potvrzená platba pokrývá jen část faktury.",
+          "action": "Nechte zbývající částku otevřenou do doplacení."
+        },
+        "overdue": {
+          "body": "Splatnost uplynula a platba stále chybí.",
+          "action": "Připomeňte se odběrateli nebo zaznamenejte platbu."
+        },
+        "paid": {
+          "body": "Potvrzené platby pokrývají fakturu v plné výši.",
+          "action": "Historii plateb ponechte jako účetní záznam."
+        },
+        "overpaid": {
+          "body": "Potvrzené platby převyšují celkovou částku faktury.",
+          "action": "Před opravou nebo vrácením peněz zkontrolujte přiřazení."
+        },
+        "future": {
+          "body": "Tato faktura má datum vystavení v budoucnu a zatím není aktuální.",
+          "action": "Před odesláním nebo čekáním na platbu zkontrolujte datum vystavení."
+        },
+        "cancelled": {
+          "body": "Faktura zůstává v účetní historii jako stornovaná.",
+          "action": "Náhradní doklad vytvořte jen tehdy, pokud je potřeba nový."
+        }
+      },
+      "currencyNote": "(zatím pouze CZK)",
+      "total": "Celkem",
+      "paidAt": "Zaplaceno",
+      "pdfUnavailable": "PDF zatím není k dispozici.",
+      "isdoc": "ISDOC",
+      "issuing": "Vystavuji…",
+      "saving": "Ukládám…",
+      "duplicating": "Duplikuji…",
+      "cancelling": "Stornuji…",
+      "deleting": "Mazání…",
+      "priceExclVat": "Cena bez DPH",
+      "vat": "DPH",
+      "totalInclVat": "Celkem s DPH",
+      "archiveNote": "Archivní import — položky nejsou k dispozici. Stáhněte originální PDF.",
+      "invalidPayload": "Uložená data faktury jsou neplatná.",
+      "backToList": "← Zpět na seznam",
+      "archive": "Archiv",
+      "import": "Import",
+      "issueButton": "Vystavit",
+      "editButton": "Upravit",
+      "duplicateButton": "Duplikovat",
+      "markPaidButton": "Označit zaplaceno",
+      "unmarkPaidButton": "Zrušit zaplaceno",
+      "cancelButton": "Stornovat",
+      "deleteButton": "Smazat",
+      "fromRecurring": "Z opakovaného plánu",
+      "viewSchedule": "Opakovaný plán",
+      "pdfEmpty": "PDF zatím není k dispozici.",
+      "issuingPending": "Vystavuji…",
+      "savingPending": "Ukládám…",
+      "duplicatingPending": "Duplikuji…",
+      "cancellingPending": "Stornuji…",
+      "cannotCancelError": "Fakturu se nepodařilo stornovat. Nejdřív stornujte všechna přiřazení plateb a akci opakujte.",
+      "payments": {
+        "title": "Přehled plateb",
+        "description": "Potvrzená přiřazení jsou pro tuto fakturu rozhodující.",
+        "open": "Otevřít platby",
+        "state": "Stav",
+        "allocated": "Přiřazeno",
+        "outstanding": "Zbývá uhradit",
+        "empty": "K faktuře zatím není přiřazena žádná platba.",
+        "reversed": "Stornováno",
+        "reverse": "Stornovat platbu",
+        "states": {
+          "unpaid": "Nezaplaceno",
+          "partial": "Částečně zaplaceno",
+          "paid": "Zaplaceno",
+          "overpaid": "Přeplatek"
+        },
+        "sources": {
+          "manual": "Ruční platba",
+          "legacy_manual": "Importovaná platba",
+          "bank_confirmed": "Potvrzená bankovní platba",
+          "bank_transaction": "Bankovní transakce",
+          "payment_run": "Platební dávka",
+          "other": "Jiný zdroj platby"
+        }
+      },
+      "cancelSheet": {
+        "trigger": "Stornovat",
+        "title": "Stornovat tuto fakturu?",
+        "description": "Před trvalou účetní změnou si vše zkontrolujte.",
+        "permanent": "Storno ponechá číslo faktury a doklad zůstane v historii.",
+        "blocked": "K faktuře jsou přiřazené platby. Před stornem je nejdřív stornujte.",
+        "reviewPayments": "Zobrazit přehled plateb",
+        "confirm": "Trvale stornovat fakturu",
+        "pending": "Stornuji…"
+      },
+      "deletingPending": "Mazání…",
+      "itemsHeader": {
+        "position": "#",
+        "description": "Popis",
+        "quantity": "Množství",
+        "price": "Cena bez DPH",
+        "vat": "DPH",
+        "total": "Celkem s DPH"
+      }
+    },
+    "builder": {
+      "title": "Nová faktura",
+      "subtitle": "Nejprve vytvořte návrh, potom jej zkontrolujte a vystavte. Náhled PDF najdete vedle formuláře nebo pod ním.",
+      "builderGuide": "Průvodce formulářem",
+      "vatGuide": "Průvodce DPH",
+      "officialAres": "Oficiální ARES",
+      "draftExplanationTitle": "Začněte návrhem",
+      "draftExplanation": "Během práce můžete návrh libovolně ukládat. Nemá finální číslo a zůstává upravitelný.",
+      "issueExplanationTitle": "Vystavením se doklad uzamkne",
+      "issueExplanation": "Invoicey přidělí číslo a uloží neměnnou podobu stran, dat a částek pro historii.",
+      "outputsExplanationTitle": "Všechny výstupy souhlasí",
+      "outputsExplanation": "Ze stejných ověřených dat vznikne PDF, ISDOC i platební QR pro CZK.",
+      "editTitle": "Úprava návrhu",
+      "sectionParties": "Strany",
+      "sectionPartiesDescription": "Dodavatel a odběratel na dokladu.",
+      "sectionDocument": "Doklad",
+      "sectionDocumentDescription": "Typ dokladu, jazyk PDF a měna.",
+      "sectionDates": "Data",
+      "sectionDatesDescription": "Datum vystavení, splatnost a DUZP.",
+      "sectionVat": "DPH a měna",
+      "sectionVatDescription": "Jak se na dokladu počítá DPH.",
+      "sectionNotes": "Poznámka",
+      "issuer": "Dodavatel",
+      "issuerDescription": "Vaše firma uvedená na faktuře jako dodavatel.",
+      "client": "Odběratel",
+      "clientDescription": "Odběratel z registru klientů (ARES).",
+      "partyDocs": "Proč se strany ukládají",
+      "partyIdentifiers": "IČO {ico} · DIČ {dic}",
+      "notSet": "není uvedeno",
+      "configureIssuer": "Nastavit dodavatele",
+      "addIssuer": "Přidat dodavatele",
+      "selectClient": "Vyberte odběratele",
+      "addClientManually": "Přidat ručně",
+      "quickClientTitle": "Přidat českou firmu podle IČO",
+      "quickClientDescription": "Invoicey ověří ARES a při již uloženém IČO použije existujícího klienta.",
+      "openAres": "Otevřít ARES",
+      "clientIcoPlaceholder": "8místné IČO",
+      "addingClient": "Ověřuji…",
+      "addClientFromAres": "Přidat z ARES",
+      "clientSelected": "Vybrán existující klient {name}.",
+      "clientCreated": "Klient {name} byl vytvořen a vybrán.",
+      "docType": "Typ dokladu",
+      "docTypeDescription": "Typ daňového / platebního dokladu.",
+      "docTypeInvoice": "Faktura",
+      "docTypeProforma": "Proforma",
+      "docTypeAdvance": "Záloha",
+      "docTypeCreditNote": "Dobropis",
+      "numberPreview": "Náhled čísla",
+      "numberPreviewDescription": "Číslo se přiřadí až při vystavení.",
+      "issueDate": "Datum vystavení",
+      "dueDate": "Splatnost",
+      "duzp": "DUZP",
+      "duzpDescription": "Datum uskutečnění zdanitelného plnění",
+      "currency": "Měna",
+      "currencyDescription": "Měna faktury. QR platba (SPAYD) je dostupná jen pro CZK.",
+      "language": "Jazyk dokladu",
+      "languageDescription": "Jazyk popisků na PDF a ISDOC. Nezávislý na jazyku aplikace.",
+      "languageCs": "Čeština",
+      "languageEn": "English",
+      "vatMode": "Režim DPH",
+      "vatModeDescription": "Běžný režim, přenesení DPH nebo rozšířený režim OSS.",
+      "vatRegular": "Běžný",
+      "vatReverseCharge": "Přenesení DPH",
+      "vatOss": "OSS",
+      "vatAdvanced": "Zobrazit rozšířený režim OSS",
+      "suppliesAbroad": "Dodání do zahraničí",
+      "suppliesAbroadDescription": "Pro B2B dodání zboží/služeb do zahraničí.",
+      "suppliesNone": "Ne",
+      "suppliesEu": "EU",
+      "suppliesNonEu": "Mimo EU",
+      "legalNote": "Právní doložka",
+      "legalNoteDescription": "Text doložky na faktuře (např. Daň odvede zákazník).",
+      "legalNotePlaceholder": "Daň odvede zákazník",
+      "reverseChargeCode": "Kód přenesení DPH",
+      "reverseChargeCodeDescription": "Kód režimu přenesení daňové povinnosti.",
+      "correctedInvoice": "Opravovaná faktura",
+      "correctedInvoiceDescription": "Číslo původní faktury, kterou opravuješ.",
+      "itemsTitle": "Položky",
+      "itemsDescription": "Ceny zadávej bez DPH; celkem se počítá automaticky.",
+      "itemsDescriptionNonPayer": "Zadávejte konečné ceny. Pole DPH jsou skrytá, protože dodavatel není plátce.",
+      "nonVatPayerTitle": "Dodavatel není plátce DPH",
+      "nonVatPayerDescription": "Všechny položky mají pevnou sazbu 0 % a ovládací prvky DPH jsou skryté.",
+      "addRow": "Přidat řádek",
+      "copyLastLines": "Zkopírovat položky z poslední faktury",
+      "useLast": "Použít z poslední faktury: {value}",
+      "useLastDueDays": "Použít z poslední faktury: {days, plural, one {# den} few {# dny} other {# dní}}",
+      "itemN": "Položka {n}",
+      "itemDescription": "Popis",
+      "itemQuantity": "Množství",
+      "itemUnit": "Jednotka",
+      "itemPriceExcl": "Cena bez DPH",
+      "itemPrice": "Cena",
+      "itemPriceIncl": "Cena s DPH",
+      "itemVat": "DPH",
+      "itemLineTotal": "Řádek celkem",
+      "descriptionPlaceholder": "Popis služby / zboží",
+      "quantityPlaceholder": "Množství",
+      "unitPlaceholder": "ks / hod",
+      "pricePlaceholder": "Cena bez DPH",
+      "priceSimplePlaceholder": "Cena",
+      "vatPlaceholder": "DPH %",
+      "totalLine": "Celkem: {total} (DPH {vat})",
+      "totalLineNoVat": "Celkem: {total}",
+      "notes": "Poznámka",
+      "notesDescription": "Volitelný text na PDF pod položkami.",
+      "notesPlaceholder": "Např. děkujeme za spolupráci",
+      "saveDraft": "Uložit návrh",
+      "savingDraft": "Ukládám…",
+      "issue": "Vystavit",
+      "issuing": "Vystavuji…",
+      "modeEdit": "Úprava návrhu",
+      "modeCreate": "Nová faktura",
+      "missingParties": "Nejprve vytvořte <entities></entities>.",
+      "missingIssuer": "dodavatele",
+      "missingClient": "odběratele",
+      "missingAnd": " a ",
+      "missingScheme": "(chybí schéma)",
+      "previewError": "Náhled se nepodařilo vytvořit",
+      "formErrors": "Opravte chyby ve formuláři",
+      "formFallback": "Vyplň povinná pole a alespoň jednu validní položku.",
+      "issueDateDescription": "Datum, kdy fakturu vystavujete.",
+      "dueDateDescription": "Poslední den pro včasnou úhradu.",
+      "vatModeNonPayerHint": "U neplátce je vždy běžný se sazbou 0 %.",
+      "vatRegularPayer": "Běžný (plátce)",
+      "vatNonPayer": "Neplátce DPH",
+      "itemsDescriptionIncl": "Ceny zadáváš včetně DPH; před uložením se převedou na bez DPH.",
+      "pricesExcl": "Ceny bez DPH",
+      "pricesIncl": "Ceny s DPH",
+      "pricesModeAria": "Zadávání cen s DPH nebo bez DPH",
+      "priceInclPlaceholder": "Cena s DPH",
+      "currencyCzk": "CZK (Kč)",
+      "reverseChargeCodePlaceholder": "např. 15",
+      "vatOther": "Jiná…",
+      "icoSuffix": " · IČO {ico}",
+      "itemDescriptionAria": "Popis položky {n}",
+      "itemQuantityAria": "Množství položky {n}",
+      "itemUnitAria": "Jednotka položky {n}",
+      "itemPriceExclAria": "Cena bez DPH položky {n}",
+      "itemPriceInclAria": "Cena s DPH položky {n}",
+      "itemVatAria": "Sazba DPH položky {n}",
+      "itemVatCustomAria": "Vlastní sazba DPH položky {n}",
+      "removeItem": "Odebrat položku {n}",
+      "duplicate": "Duplikovat",
+      "duplicateItem": "Duplikovat položku {n}",
+      "recoveredDraft": "Obnovili jsme neuložený místní návrh.",
+      "savedLocally": "Neuložený návrh je uložený v této relaci prohlížeče.",
+      "discardRecoveredDraft": "Zahodit obnovený návrh",
+      "errors": {
+        "invalidDate": "Zadejte platné datum",
+        "selectIssuer": "Vyberte dodavatele",
+        "selectClient": "Vyberte odběratele",
+        "descriptionRequired": "Popis je povinný",
+        "quantityRequired": "Zadejte množství",
+        "quantityZero": "Množství nesmí být 0",
+        "unitRequired": "Jednotka je povinná",
+        "priceRequired": "Zadejte cenu",
+        "priceNegative": "Cena nesmí být záporná",
+        "vatRequired": "Zadejte sazbu DPH",
+        "itemsMin": "Přidejte alespoň jednu položku",
+        "dueBeforeIssue": "Splatnost nesmí být před datem vystavení"
+      }
+    },
+    "import": {
+      "title": "Import historických faktur",
+      "subtitle": "Nahrajte soubory PDF. Pokud obsahují vložený ISDOC, načteme i strukturovaná data. Ostatní uložíme jako archivní originály a základní údaje doplníte ručně.",
+      "backLink": "← Faktury",
+      "missingIssuer": "Nejprve vytvořte <issuer></issuer>.",
+      "issuerLink": "firmu",
+      "stepsAria": "Kroky importu",
+      "stepSettings": "Nastavení",
+      "stepUpload": "Nahrání",
+      "stepReview": "Kontrola",
+      "issuer": "Dodavatel",
+      "defaultOrigin": "Výchozí zdroj (pro nerozpoznané)",
+      "defaultOriginHint": "Po nahrání se u každého PDF použije detekovaný zdroj; tento výběr je záloha a hromadná úprava.",
+      "originVersion": "Verze (volitelné)",
+      "originVersionPlaceholder": "např. 0.4.0",
+      "originLabel": "Vlastní popisek (volitelné)",
+      "originLabelPlaceholder": "např. stará šablona ve Wordu",
+      "defaultPaid": "Výchozí: označit importované jako zaplacené",
+      "continueUpload": "Pokračovat k nahrání",
+      "uploadTitle": "Nahrajte PDF faktury (až 40 najednou)",
+      "toReview": "Ke kontrole ({count})",
+      "readyCount": "K importu připraveno: {ready} / {total}",
+      "applyOrigin": "Použít výchozí zdroj na všechny",
+      "importing": "Importuji…",
+      "importN": "Importovat {count} faktur",
+      "emptyFiles": "Zatím žádné soubory.",
+      "uploadPdfs": "Nahrajte PDF",
+      "colFile": "Soubor",
+      "colStatus": "Stav",
+      "colOrigin": "Zdroj",
+      "colNumber": "Číslo",
+      "colClient": "Klient",
+      "colDate": "Datum",
+      "colTotal": "Celkem",
+      "colPaid": "Zaplaceno",
+      "statusIsdoc": "ISDOC",
+      "statusArchive": "Archiv",
+      "statusError": "Chyba: {error}",
+      "numberPlaceholder": "číslo",
+      "clientPlaceholder": "odběratel",
+      "archiveHint": "Řádky bez ISDOC: doplňte číslo, odběratele, datum a částku. Uloží se originální PDF (archiv).",
+      "addMore": "Přidat další PDF",
+      "editSettings": "Upravit nastavení",
+      "working": "Pracuji…",
+      "done": "Import hotov: {created} vytvořeno, {skipped} přeskočeno, {failed} chyb."
+    },
+    "fromJson": {
+      "eyebrow": "Strukturované zadání",
+      "title": "Faktura z JSON",
+      "subtitle": "Vložte <code>InvoiceSchema</code> JSON, ověřte jeho strukturu a vytvořte náhled PDF.",
+      "backToInvoices": "← Zpět na faktury",
+      "jsonLabel": "Invoice JSON",
+      "loadPreset": "Načíst předvolbu",
+      "renderPdf": "Vytvořit náhled PDF",
+      "rendering": "Renderuji…",
+      "resetSample": "Obnovit ukázku",
+      "emptyPreview": "Náhled zobrazíte tlačítkem „Vytvořit náhled PDF“.",
+      "parseError": "JSON se nepodařilo zpracovat: opravte syntaxi a zkuste znovu.",
+      "validationHelp": "InvoiceSchema ověří strukturu a zvýrazní chyby před vytvořením PDF."
+    },
+    "email": {
+      "send": "Odeslat e-mailem",
+      "title": "Odeslat fakturu",
+      "description": "PDF se připojí vždy. ISDOC lze vypnout.",
+      "notConfigured": "RESEND_API_KEY není nastavený — odeslání nebude fungovat.",
+      "suppressed": "Adresa je na suppress seznamu (bounce/complaint). Před odesláním zvolte jinou adresu příjemce.",
+      "invalidRecipient": "Před odesláním zadejte platnou adresu příjemce do Komu i do všech kopií.",
+      "subject": "Předmět",
+      "to": "Komu",
+      "cc": "Kopie (volitelné)",
+      "coverText": "Průvodní text",
+      "attachIsdoc": "Přiložit ISDOC",
+      "from": "Od",
+      "replyTo": "Odpovědět na",
+      "submit": "Odeslat",
+      "sending": "Odesílám…",
+      "timelineTitle": "E-maily"
+    }
+  },
+  "Recurring": {
+    "list": {
+      "title": "Opakované faktury",
+      "subtitle": "Šablony, ze kterých vznikne návrh podle plánu. Vystavení a odeslání zůstává na vás.",
+      "empty": "Zatím nemáte žádný opakovaný plán.",
+      "emptyCta": "Otevřete fakturu a uložte ji jako opakovanou",
+      "createFirst": "Nejprve vytvořte fakturu",
+      "name": "Název",
+      "client": "Odběratel",
+      "cadence": "Periodicita",
+      "weekly": "Týdně",
+      "monthly": "Měsíčně",
+      "quarterly": "Čtvrtletně",
+      "yearly": "Ročně",
+      "day": "den {day}",
+      "dayFirst": "první",
+      "dayLast": "poslední",
+      "nextRun": "Další běh",
+      "lastDraft": "Poslední návrh",
+      "never": "Nikdy",
+      "status": "Stav",
+      "active": "Aktivní",
+      "paused": "Pozastaveno",
+      "actions": "Akce",
+      "pause": "Pozastavit",
+      "resume": "Obnovit",
+      "skip": "Přeskočit",
+      "runNow": "Spustit teď",
+      "delete": "Smazat",
+      "deleteConfirm": "Smazat tuto opakovanou šablonu? Existující návrhy zůstanou.",
+      "saving": "Ukládám…",
+      "running": "Vytvářím…",
+      "deleting": "Mazání…"
+    },
+    "sheet": {
+      "trigger": "Opakovat",
+      "title": "Uložit jako opakovanou",
+      "description": "Invoicey k tomuto dni v období vytvoří návrh. Vy ho zkontrolujete, vystavíte a odešlete.",
+      "name": "Název",
+      "cadence": "Periodicita",
+      "weekly": "Týdně",
+      "monthly": "Měsíčně",
+      "quarterly": "Čtvrtletně",
+      "yearly": "Ročně",
+      "dayOfMonth": "Den v měsíci",
+      "dayFirst": "První den",
+      "dayFifteenth": "15.",
+      "dayLast": "Poslední den",
+      "dayNth": "Den {day}",
+      "submit": "Uložit plán",
+      "saving": "Ukládám…"
+    }
+  },
+  "Clients": {
+    "title": "Klienti",
+    "subtitle": "Odběratelé — ARES dohledání nebo ruční zadání.",
+    "newButton": "Nový klient",
+    "empty": "Zatím žádní klienti. Přidejte odběratele přes ARES nebo ručně.",
+    "createFirst": "Vytvořit prvního klienta",
+    "table": {
+      "name": "Jméno",
+      "ico": "IČO",
+      "city": "Město",
+      "source": "Zdroj",
+      "actions": "Akce",
+      "searchPlaceholder": "jméno, IČO, město…",
+      "sourceAres": "ARES",
+      "sourceManual": "Ručně",
+      "edit": "Upravit",
+      "delete": "Smazat",
+      "deleting": "Mazání…"
+    },
+    "newTitle": "Nový klient",
+    "newSubtitle": "Zadejte IČO a načtěte údaje z ARES, nebo klienta vyplňte ručně.",
+    "editTitle": "Upravit klienta",
+    "editSubtitle": "Aktualizujte údaje odběratele.",
+    "mergeDuplicates": "Sloučit duplicity",
+    "deleteClient": "Smazat klienta",
+    "deleteIrreversible": "Nenávratné.",
+    "deleting": "Mazání…",
+    "form": {
+      "ico": "IČO (ARES)",
+      "lookup": "Vyhledat v ARES",
+      "lookingUp": "Hledám…",
+      "icoHint": "Údaje můžete načíst z ARES nebo zadat ručně, například u zahraničního klienta.",
+      "name": "Název",
+      "dic": "DIČ",
+      "street": "Ulice a číslo",
+      "city": "Město",
+      "zip": "PSČ",
+      "country": "Stát (ISO)",
+      "contactEmail": "Kontaktní e-mail",
+      "save": "Uložit",
+      "saving": "Ukládám…",
+      "source": "Zdroj: {source}",
+      "sourceAres": "ARES",
+      "sourceManual": "Ručně"
+    },
+    "managedBadge": "Tarif",
+    "managedNotice": "Odběratelé v tomto workspace pocházejí z tarifu a nelze je upravovat."
+  },
+  "Issuers": {
+    "title": "Moje firmy",
+    "subtitle": "Vaše firmy — ARES, banka, DPH, číslování, logo.",
+    "newButton": "Nová firma",
+    "empty": "Zatím nemáte žádnou firmu. Přidejte ji a začněte fakturovat.",
+    "createFirst": "Vytvořit první firmu",
+    "deleting": "Mazání…",
+    "editSectionsHint": "Upravte jednotlivé části firmy — uložení je po sekcích.",
+    "nav": {
+      "identity": "Identita",
+      "bank": "Banka",
+      "assets": "Assety",
+      "numbering": "Číslování",
+      "email": "E-mail"
+    },
+    "table": {
+      "name": "Název",
+      "ico": "IČO",
+      "dic": "DIČ",
+      "vat": "DPH",
+      "vatPayer": "Plátce",
+      "vatNonPayer": "Neplátce",
+      "actions": "Akce",
+      "searchPlaceholder": "název, IČO, DIČ…",
+      "edit": "Upravit",
+      "delete": "Smazat",
+      "defaultBadge": "Výchozí",
+      "setDefault": "Nastavit jako výchozí"
+    },
+    "newTitle": "Nová firma",
+    "newSubtitle": "IČO přes ARES, kontaktní e-mail a banka. Ostatní nastavení doplníte v sekcích po vytvoření.",
+    "editTitle": "Upravit firmu",
+    "editSubtitle": "Aktualizujte firemní údaje, banku a číslování.",
+    "form": {
+      "ico": "IČO",
+      "icoAres": "IČO (ARES)",
+      "lookup": "Načíst z ARES",
+      "lookingUp": "Hledám…",
+      "name": "Název",
+      "dic": "DIČ",
+      "street": "Ulice a číslo",
+      "city": "Město",
+      "zip": "PSČ",
+      "country": "Stát (ISO)",
+      "contactEmail": "Kontaktní e-mail",
+      "courtRecord": "Zápis v OR (volitelné)",
+      "vatPayer": "Plátce DPH",
+      "accountNumber": "Číslo účtu (např. 123456789/0100)",
+      "iban": "IBAN",
+      "bic": "BIC (volitelné)",
+      "accountHint": "Zadejte účet ve tvaru 123456789/0100 nebo 19-2000145399/0800.",
+      "ibanInvalid": "IBAN má neplatný kontrolní součet.",
+      "qrMessagesTitle": "Zprávy v platebním QR",
+      "qrMessagesHint": "Volitelný srozumitelný text v SPAYD QR kódu. Prázdné pole použije výchozí text Invoicey.",
+      "qrBeneficiaryMessage": "Zpráva pro příjemce",
+      "qrBeneficiaryHint": "Uvidíte ji v detailu příchozí transakce na svém účtu.",
+      "qrBeneficiaryDefault": "Faktura {number} od {client}",
+      "qrPayerNote": "Poznámka pro plátce",
+      "qrPayerHint": "Klient ji uvidí před potvrzením platby.",
+      "qrPayerDefault": "Platba faktury {number} pro {issuer}",
+      "qrTemplateVariables": "Dostupné proměnné: {number}, {issuer}, {client}",
+      "ibanFilled": "IBAN doplněn z čísla účtu.",
+      "save": "Uložit",
+      "saving": "Ukládám…",
+      "create": "Vytvořit firmu",
+      "creating": "Vytvářím…",
+      "identitySection": "Identita",
+      "bankSection": "Banka",
+      "defaultsHint": "Číslování a e-mailové šablony nastavíme výchozími hodnotami — upravíte je později v nastavení firmy.",
+      "source": "Zdroj: {source}",
+      "sourceAres": "ARES",
+      "sourceManual": "Ručně",
+      "removeAsset": "Odebrat",
+      "uploadUnavailable": "Upload není k dispozici — vložte URL níže.",
+      "uploadTokenMissing": "UploadThing není nakonfigurován (`UPLOADTHING_TOKEN`) — vložte URL ručně, nebo nastavte token.",
+      "hideUrl": "Skrýt URL",
+      "pasteUrl": "Vložit URL ručně",
+      "logo": "Logo",
+      "stamp": "Razítko",
+      "signature": "Podpis"
+    },
+    "ares": {
+      "invalid_ico": "Zadejte platné osmimístné IČO.",
+      "ares_no_json": "ARES nevrátila JSON.",
+      "ares_no_data": "ARES nevrátila data.",
+      "ares_failed": "Vyhledání v ARES se nezdařilo."
+    },
+    "welcome": {
+      "step": "Krok {current} / {total}",
+      "title": "Nastavte si Invoicey",
+      "identityHint": "Začněte IČO své firmy a potvrďte její kontaktní údaje.",
+      "bankHint": "Přidejte účet, který bude na fakturách a platebních QR kódech. Invoicey peníze nepřevádí.",
+      "skip": "Přeskočit pro teď",
+      "skipping": "Přeskakuji…",
+      "skipHint": "Nastavení můžete dokončit později, ale před vystavením faktury je firma potřeba.",
+      "steps": {
+        "workspace": "Prostor",
+        "business": "Firma",
+        "bank": "Bankovní účet",
+        "ready": "Připraveno"
+      },
+      "progressLabel": "Průběh nastavení",
+      "aresTitle": "Najděte firmu v ARES",
+      "aresHint": "Zadejte IČO a předvyplníme veřejně evidované údaje firmy.",
+      "businessDetails": "Povinné údaje firmy",
+      "contactEmailHint": "Tento e-mail uvedeme jako kontakt na vašich fakturách.",
+      "isdocAlternative": "Alternativa: načíst existující fakturu",
+      "uploadLabel": "Nahrát PDF s vloženým ISDOC",
+      "uploadPending": "Načítám údaje z PDF…",
+      "uploadHint": "Nejde o OCR: funguje jen s vloženým ISDOC a předvyplní údaje firmy a banky.",
+      "continue": "Pokračovat",
+      "identityRequired": "Vyplňte povinná pole identity.",
+      "bankRequired": "Vyplňte bankovní účet a IBAN.",
+      "bankForBusiness": "Doplňujete účet firmy {business}. Bude na fakturách a platebních QR kódech; Invoicey peníze nepřevádí.",
+      "doneTitle": "Firma je připravená",
+      "doneBody": "Číslování a e-mailové šablony mají rozumné výchozí hodnoty. Logo, razítko a další údaje kdykoli doplníte v nastavení firmy.",
+      "goDashboard": "Přejít na přehled",
+      "createFirstInvoice": "Vytvořit první fakturu",
+      "editBusiness": "Nastavení firmy",
+      "workspaceHint": "Pojmenujte prostor, ve kterém budou vaše faktury žít.",
+      "workspaceTitle": "Váš pracovní prostor",
+      "workspaceBody": "Prostor drží vaše firmy, klienty a faktury. Název a logo vidíte v přepínači vlevo nahoře — a uvidí je i lidé, které sem později pozvete.",
+      "workspaceNameLabel": "Název prostoru",
+      "workspaceLogoLabel": "Logo prostoru",
+      "workspaceLogoHint": "Nepovinné. PNG nebo JPEG do 1 MB. Bez loga se použijí iniciály.",
+      "workspaceNameRequired": "Zadejte název prostoru."
+    },
+    "emailForm": {
+      "subject": "Šablona předmětu",
+      "body": "Text e-mailu",
+      "displayName": "Šablona jména odesílatele",
+      "attachIsdoc": "Přikládat ISDOC ve výchozím stavu",
+      "overdueReminders": "Posílat připomínky po splatnosti",
+      "reminderInterval": "Počet dní mezi připomínkami",
+      "paymentReceived": "Posílat potvrzení o přijetí platby"
+    },
+    "numbering": {
+      "tokensHint": "Dostupné zástupné proměnné. Ruční změna pořadového čísla může vytvořit mezery v řadě.",
+      "nextNumber": "Další číslo: {preview}",
+      "invalidTemplate": "(neplatná šablona)",
+      "counterChanged": "Pořadové číslo bylo změněno — zkontrolujte, že nevzniknou duplicity nebo mezery.",
+      "template": "Šablona",
+      "padding": "Minimální počet číslic (#)",
+      "reset": "Obnova řady",
+      "resetYearly": "Roční",
+      "resetNever": "Nikdy",
+      "counter": "Další pořadové číslo",
+      "counterYear": "Rok číselné řady",
+      "docTypes": {
+        "invoice": "Faktura (FV)",
+        "proforma": "Proforma (PF)",
+        "advance": "Záloha (ZF)",
+        "credit_note": "Dobropis (DOB)"
+      }
+    }
+  },
+  "Settings": {
+    "security": {
+      "pageTitle": "Zabezpečení účtu",
+      "pageDescription": "Spravujte způsoby přihlášení, aktivní relace a důvěryhodná zařízení. Invoicey používá pouze OAuth — žádné další heslo.",
+      "linkedAfter": "Poskytovatel propojen. Ostatní relace se odvolávají kvůli bezpečnosti.",
+      "trustOk": "Zařízení bylo označeno jako důvěryhodné.",
+      "trustInvalid": "Odkaz pro důvěru zařízení je neplatný nebo vypršel.",
+      "linkedAccounts": {
+        "title": "Způsoby přihlášení",
+        "description": "Google a GitHub. Poslední poskytovatel nelze odpojit.",
+        "linked": "Propojeno",
+        "notLinked": "Nepropojeno",
+        "link": "Propojit",
+        "unlink": "Odpojit",
+        "unlinkLastError": "Nelze odpojit poslední způsob přihlášení",
+        "unlinkFailed": "Odpojení selhalo",
+        "loadFailed": "Nepodařilo se načíst účty",
+        "unlinkSuccess": "Poskytovatel odpojen",
+        "loading": "Načítám přihlášení…",
+        "noProviders": "Žádný poskytovatel není na serveru nastavený. Doplňte OAuth údaje a obnovte stránku.",
+        "active": "Aktivní",
+        "linking": "Přesměrovávám…",
+        "unlinking": "Odpojuji…"
+      },
+      "sessions": {
+        "title": "Aktivní relace",
+        "description": "IP, prohlížeč a možnost odvolat přístup.",
+        "revokeOthers": "Odvolat ostatní",
+        "revoke": "Odvolat",
+        "empty": "Žádné relace.",
+        "unknownDevice": "Neznámé zařízení",
+        "unknownIp": "IP neznámá",
+        "currentSession": "tato relace",
+        "revokeFailed": "Odvolání selhalo",
+        "revokeSuccess": "Relace odvolána",
+        "revokeOthersSuccess": "Ostatní relace odvolány",
+        "revokeAfterLink": "Ostatní relace odvolány po propojení účtu",
+        "loadFailed": "Nepodařilo se načíst relace",
+        "loading": "Načítám relace…",
+        "emptyHint": "Žádné aktivní relace. Po přihlášení se tu objeví tento prohlížeč.",
+        "since": "od {when}",
+        "revoking": "Odvolávám…",
+        "browser": "Prohlížeč"
+      },
+      "trustedDevices": {
+        "title": "Důvěryhodná zařízení",
+        "description": "Upozornění na nové zařízení e-mailem. Přihlášení tím není blokováno.",
+        "empty": "Zatím žádná důvěryhodná zařízení.",
+        "revoke": "Odvolat",
+        "revokeFailed": "Odvolání zařízení selhalo",
+        "revokeSuccess": "Zařízení odvoláno",
+        "lastSeen": "naposledy",
+        "loading": "Načítám zařízení…",
+        "emptyHint": "Zatím žádná důvěryhodná zařízení. Po přihlášení z nového místa použijte odkaz „Důvěřovat“ v e-mailu.",
+        "revoking": "Odvolávám…"
+      },
+      "audit": {
+        "title": "Nedávná aktivita",
+        "description": "Audit přihlášení a bezpečnostních akcí.",
+        "empty": "Zatím žádné záznamy.",
+        "types": {
+          "sign_in": "Přihlášení",
+          "session_revoke": "Odvolání relace",
+          "account_link": "Propojení účtu",
+          "account_unlink": "Odpojení účtu",
+          "device_trust": "Důvěra zařízení",
+          "device_revoke": "Odvolání zařízení",
+          "api_key_create": "Vytvoření API klíče",
+          "api_key_revoke": "Odvolání API klíče",
+          "invite_create": "Pozvánka vytvořena",
+          "invite_resend": "Pozvánka znovu odeslána",
+          "invite_cancel": "Pozvánka zrušena",
+          "invite_accept": "Pozvánka přijata",
+          "invite_reject": "Pozvánka odmítnuta",
+          "member_remove": "Člen odebrán",
+          "member_role_update": "Změna role člena",
+          "platform_admin_grant": "Platformní admin udělen",
+          "platform_admin_revoke": "Platformní admin odebrán",
+          "slack_link": "Propojení Slacku",
+          "slack_unlink": "Odpojení Slacku",
+          "slack_rebind": "Změna Slack workspace"
+        }
+      }
+    },
+    "members": {
+      "pageTitle": "Členové a oprávnění",
+      "pageDescription": "Pozvěte kolegy a určete, kdo může spravovat pracovní prostor a fakturační data.",
+      "title": "Členové pracovního prostoru",
+      "description": "Vlastníci a správci mohou měnit členství. Běžní členové pracují s fakturačními daty.",
+      "loading": "Načítám členy…",
+      "empty": "V tomto pracovním prostoru zatím nejsou žádní členové.",
+      "emailUnavailable": "E-mail není dostupný",
+      "remove": "Odebrat",
+      "removing": "Odebírám…",
+      "removeFailed": "Odebrání selhalo",
+      "removeSuccess": "Člen odebrán",
+      "roleUpdateFailed": "Změna role selhala",
+      "roleUpdateSuccess": "Role aktualizována",
+      "loadFailed": "Členové se nenačetli",
+      "roles": {
+        "owner": "Vlastník",
+        "admin": "Správce",
+        "member": "Člen"
+      },
+      "roleAria": "Role uživatele {name}",
+      "removeAria": "Odebrat uživatele {name}",
+      "invite": {
+        "title": "Pozvat člena",
+        "description": "Pošlete pozvánku e-mailem. Odkaz můžete zkopírovat a předat i jinou cestou.",
+        "email": "E-mail",
+        "emailPlaceholder": "kolega@firma.cz",
+        "role": "Role",
+        "submit": "Odeslat pozvánku",
+        "submitting": "Odesílám…",
+        "failed": "Pozvánka selhala",
+        "success": "Pozvánka vytvořena",
+        "pendingTitle": "Čekající pozvánky",
+        "pendingEmpty": "Žádné nevyřízené pozvánky.",
+        "expires": "Platí do {when}",
+        "expired": "Vypršela",
+        "copyLink": "Kopírovat odkaz",
+        "linkCopied": "Odkaz zkopírován",
+        "resend": "Znovu odeslat",
+        "resending": "Odesílám…",
+        "resendSuccess": "Pozvánka znovu odeslána",
+        "resendFailed": "Opětovné odeslání selhalo",
+        "cancel": "Zrušit",
+        "canceling": "Ruším…",
+        "cancelSuccess": "Pozvánka zrušena",
+        "cancelFailed": "Zrušení selhalo",
+        "seatsFull": "Tarif zahrnuje {limit} míst. Pro více lidí přejděte na vyšší tarif."
+      },
+      "permissions": {
+        "sectionDescription": "Jemné výjimky nad rámec role. Vlastníka upravit nelze.",
+        "noMembers": "Zatím není koho nastavovat.",
+        "title": "Oprávnění",
+        "description": "Zaškrtnuté položky člen smí. Označené už vyplývají z jeho role.",
+        "descriptionOverridden": "Tento člen se odchyluje od své role. Zaškrtnuté položky smí.",
+        "fromRole": "role",
+        "save": "Uložit oprávnění",
+        "sectionTitle": "Oprávnění jednotlivých členů"
+      }
+    },
+    "referrals": {
+      "pageTitle": "Doporučení",
+      "pageDescription": "Sdílejte osobní odkaz. Přátelé, kteří se zaregistrují, dostanou vlastní workspace — vy budete zaznamenáni jako doporučující.",
+      "title": "Váš doporučující odkaz",
+      "description": "Nikomu to nepřidá přístup do vašeho workspace. Kolegy do workspace pozvěte v sekci Členové.",
+      "copy": "Kopírovat odkaz",
+      "copied": "Odkaz zkopírován",
+      "statsTitle": "Aktivita",
+      "clicks": "Kliknutí na odkaz",
+      "signups": "Připsané registrace",
+      "emptyCode": "Odkaz se nepodařilo načíst. Zkuste to později."
+    },
+    "apiKeys": {
+      "title": "API klíče",
+      "description": "Osobní tokeny pro remote MCP a Invoicey HTTP. Env ops klíč zůstává jako záloha.",
+      "namePlaceholder": "Název klíče",
+      "nameLabel": "Název klíče",
+      "create": "Vytvořit",
+      "createKey": "Vytvořit klíč",
+      "creating": "Vytvářím…",
+      "createFailed": "Vytvoření selhalo",
+      "createSuccess": "Klíč vytvořen — zkopírujte ho teď",
+      "revoke": "Odvolat",
+      "revoking": "Odvolávám…",
+      "revokeFailed": "Odvolání selhalo",
+      "revokeSuccess": "Klíč odvolán",
+      "revokeConfirm": "Opravdu odvolat tento API klíč? Nelze vrátit.",
+      "empty": "Žádné klíče.",
+      "emptyTitle": "Zatím bez klíčů",
+      "emptyHint": "Vytvořte první klíč a použijte ho v konfiguraci MCP níže.",
+      "noName": "bez názvu",
+      "newKeyTitle": "Nový klíč (zobrazí se jen teď)",
+      "once": "Jednorázově",
+      "copy": "Kopírovat",
+      "copyKey": "Kopírovat klíč",
+      "copied": "Zkopírováno",
+      "keyCopied": "Klíč zkopírován",
+      "hide": "Skrýt",
+      "loadFailed": "Klíče se nenačetly",
+      "loading": "Načítám klíče…",
+      "yourKeys": "Vaše klíče",
+      "yourKeysDescription": "Pojmenujte klíč podle aplikace nebo zařízení. Celý token se zobrazí pouze jednou.",
+      "createdAt": "vytvořeno {when}",
+      "lastUsed": "naposledy {when}",
+      "defaultName": "Remote MCP",
+      "mcpTitle": "Připojení remote MCP",
+      "mcpDescription": "Tři kroky pro Cursor, Claude Code nebo jiného kompatibilního klienta.",
+      "mcpStep1Title": "Vytvořte nebo použijte klíč",
+      "mcpStep1Ready": "Nový klíč je připravený — je vložený do ukázky níže.",
+      "mcpStep1Existing": "Máte existující klíč. Celý token už nejde zobrazit — vytvořte nový, pokud ho nemáte uložený.",
+      "mcpStep1Empty": "Nejprve vytvořte klíč výše. Bez něj vzdálené MCP požadavek odmítne.",
+      "mcpStep2Title": "Vložte konfiguraci do Cursoru",
+      "mcpStep2Body": "Globálně do {global}, nebo do projektového {project} (ten necommitujte).",
+      "copyJson": "Kopírovat JSON",
+      "copyUrl": "Kopírovat URL",
+      "configCopied": "Konfigurace zkopírována",
+      "urlCopied": "URL zkopírována",
+      "placeholderHint": "Placeholder {placeholder} nahraďte skutečným tokenem.",
+      "snippetHasKey": "Ukázka obsahuje právě vytvořený klíč.",
+      "mcpStep3Title": "Ověřte nástroje",
+      "mcpStep3Body": "V Cursoru by se měly objevit nástroje Invoicey (např. {tool}). Endpoint: {url}",
+      "whichKeyTitle": "Který klíč kam patří",
+      "whichKeyPat": "Remote MCP přijímá váš PAT nebo ops {env}.",
+      "whichKeyStdio": "Local stdio MCP (dev) nepoužívá PAT — viz dokumentaci.",
+      "whichKeySlack": "Slack bot a Invoicey HTTP nejdou přes tento klíč (Connect / ops klíče).",
+      "docsMcp": "MCP docs",
+      "docsCursor": "Cursor setup",
+      "docsKeys": "API keys",
+      "integrationsLink": "Slack a další integrace"
+    },
+    "slack": {
+      "title": "Invoicey pro Slack",
+      "description": "Připravujte faktury v konverzaci. Vystavení, odeslání a potvrzení platby vždy vyžaduje souhlas.",
+      "howTitle": "Jak funguje",
+      "howInviteTitle": "Pozvěte Invoicey",
+      "howInviteBody": "Přidejte Invoicey do kanálu, nebo mu napište DM.",
+      "howLinkTitle": "Potvrďte účet",
+      "howLinkBody": "Nespárovaný Slack účet dostane soukromou zprávu s odkazem do Invoicey.",
+      "howMentionTitle": "Zmiňte @Invoicey",
+      "howMentionBody": "Zmínka nebo DM spustí relaci. Ve stejném vlákně už zmínka není potřeba.",
+      "howDraftTitle": "Návrh s přílohami",
+      "howDraftBody": "Invoicey připraví fakturu, připojí PDF a ISDOC a odkaz do webové aplikace.",
+      "hitlTitle": "Akce vyžadující potvrzení",
+      "hitlIntro": "U těchto kroků se agent vždy zastaví a požádá o schválení:",
+      "hitlIssue": "Přidělí číslo a zmrazí fakturu — nevratné",
+      "hitlPaid": "Tvrdí, že peníze dorazily",
+      "hitlEmail": "Odešle e-mail skutečnému klientovi",
+      "accessTitle": "Přístup po propojení Slacku",
+      "accessBody": "Nespárovaní Slack uživatelé nedostanou žádnou relaci — Invoicey jim pošle DM s odkazem na potvrzení. Propojení platí pro jeden Invoicey účet a jeden workspace. Allow/Deny ve vlákně může kliknout kdokoli v kanálu; držte Invoicey v soukromém kanálu s lidmi, kteří smí fakturovat.",
+      "docsLink": "Podrobný návod pro Slack"
+    },
+    "integrations": {
+      "pageTitle": "Integrace a automatizace",
+      "pageDescription": "Propojte Invoicey se Slackem, Cursorem nebo Claude Code. Citlivé operace zůstávají pod vaším potvrzením.",
+      "mcpTitle": "Remote MCP",
+      "mcpDescription": "Používejte nástroje Invoicey přímo z Cursoru, Claude Code nebo jiného MCP klienta.",
+      "mcpFeatureDrafts": "Vytváření validovaných návrhů",
+      "mcpFeatureAres": "ARES dohledání klientů",
+      "mcpFeatureIssued": "Správa vystavených faktur",
+      "connectMcp": "Připojit MCP klienta",
+      "docsMcp": "Dokumentace MCP",
+      "slackIdentity": {
+        "title": "Propojený Slack",
+        "description": "Jeden Slack účet patří jednomu Invoicey uživateli a jednomu workspace. Nespárované zmínky Invoicey odmítne.",
+        "connected": "Propojeno",
+        "emptyTitle": "Zatím žádný Slack",
+        "empty": "Napište Invoicey DM ve Slacku. Pošle vám odkaz k potvrzení v prohlížeči.",
+        "fromSlack": "Ze Slacku",
+        "toWorkspace": "Do workspace",
+        "slackAccount": "Váš Slack účet",
+        "invoicesGoTo": "Nové faktury ze Slacku sem",
+        "otherWorkspace": "Jiný workspace",
+        "slackUser": "Slack uživatel {id}",
+        "team": "Tým {id}",
+        "unlink": "Odpojit",
+        "unlinkFailed": "Odpojení selhalo",
+        "unlinkSuccess": "Slack účet odpojen",
+        "useCurrentWorkspace": "Přepnout na {name}",
+        "currentWorkspace": "Tento workspace",
+        "rebindFailed": "Změna workspace selhala",
+        "rebindSuccess": "Slack teď používá aktuální workspace"
+      }
+    },
+    "bankConnections": {
+      "pageTitle": "Bankovní spojení",
+      "pageDescription": "Připojte k tomuto workspace bankovní přehled jen pro čtení. Samostatný Fio token pro odesílání může vložit dávku do fronty k podpisu; Invoicey platbu nikdy neautorizuje.",
+      "unnamedIssuer": "Firma bez názvu",
+      "readOnly": "Jen pro čtení",
+      "submitRights": "Odesílání povoleno",
+      "submitExpired": "Token pro odesílání vypršel",
+      "importedCurrency": "Importovaná měna",
+      "lastSuccessfulSync": "Poslední úspěšná synchronizace",
+      "notSyncedYet": "Zatím nesynchronizováno",
+      "lastError": "Poslední chyba: {code}",
+      "autoMatchTitle": "Automatické přesné párování",
+      "autoMatchDescription": "Když se shoduje přijímací účet, měna CZK, variabilní symbol i celá dlužná částka, faktura se označí jako zaplacená a přijde vám e-mail. Částečné nebo nejednoznačné platby vždy čekají na kontrolu.",
+      "autoMatchAria": "Automatické přesné párování",
+      "on": "Zap",
+      "off": "Vyp",
+      "syncNow": "Synchronizovat",
+      "disconnect": "Odpojit",
+      "encryptionMissing": "Šifrování bankovních tokenů není nastavené. Před připojením účtu nastavte BANK_TOKEN_ENCRYPTION_KEY_V1.",
+      "needIssuer": "Nejdřív vytvořte firmu, ke které účet patří.",
+      "issuerLabel": "Firma, která přijímá platby",
+      "adminOnly": "Bankovní účty může připojit jen správce nebo vlastník workspace.",
+      "connectAndVerify": "Připojit a ověřit",
+      "moreTitle": "Další bankovní integrace",
+      "moreDescription": "Fio a MONETA jsou živé. Ostatní banky z výzkumu zatím nejsou k dispozici.",
+      "unavailable": "Nedostupné",
+      "noteDeferred": "Odloženo",
+      "noteNotPlanned": "Neplánováno",
+      "footer": "Připojení patří aktuálnímu workspace, ne vašemu uživatelskému účtu. V každém workspace se banka nastavuje zvlášť. Synchronizace výpisů je jen pro čtení. Samostatný Fio token pro odesílání může vložit dávku do fronty příkazů k podpisu; Invoicey platbu nikdy neautorizuje. Tokeny MONETA obvykle vyprší do 90 dnů a obnovují se v Internet Bance.",
+      "paymentsTitle": "Zahájení plateb (Fio)",
+      "paymentsCannotAuthorize": "Invoicey platby autorizovat neumí. Token s právem odesílat jen vloží dávku do fronty příkazů k podpisu ve Fio. Podpisník ji musí uvolnit v internetovém bankovnictví.",
+      "paymentsEnabled": "Token pro odesílání je uložený šifrovaně.",
+      "paymentsExpires": "Vyprší {date}",
+      "paymentsTokenLabel": "Fio token pro odesílání",
+      "paymentsTokenPlaceholder": "64znakový token s právem odesílat",
+      "paymentsExpiresLabel": "Platnost tokenu",
+      "paymentsEnable": "Uložit token",
+      "paymentsDisable": "Odebrat práva k odesílání",
+      "providers": {
+        "fio": "Fio banka",
+        "moneta": "MONETA Money Bank"
+      },
+      "status": {
+        "active": "Aktivní",
+        "needs_reauth": "Vyžaduje opětovné přihlášení",
+        "error": "Chyba",
+        "paused": "Pozastaveno",
+        "disconnected": "Odpojeno"
+      },
+      "fio": {
+        "connectTitle": "Připojit Fio API jen pro čtení",
+        "connectDescription": "V Fio Internetbankingu vytvořte token jen pro čtení a vložte ho sem. Invoicey ho ověří proti dnešnímu výpisu a uloží šifrovaně. Výchozí přijímací účet vybrané firmy se aktualizuje na ověřený Fio účet.",
+        "tokenLabel": "Fio API token",
+        "tokenPlaceholder": "64znakový token jen pro čtení",
+        "tokenHelp": "V Internetbankingu → Nastavení → API bankovnictví vytvořte token se právem Sledování účtu. 64znakový token začne fungovat zhruba po pěti minutách a může platit až 180 dní, pokud zapnete automatické prodloužení. Znovu ho nezobrazíme a o zápisový přístup nežádáme.",
+        "tokenGuide": "Jak vytvořit Fio API token"
+      },
+      "moneta": {
+        "connectTitle": "Připojit MONETA API jen pro čtení",
+        "connectDescription": "V MONETA Internet Bance vytvořte pasivní API token a vložte ho sem. Invoicey vypíše CZK účty na tokenu, ověří dnešní pohyby a token uloží šifrovaně jen pro tento workspace.",
+        "tokenLabel": "MONETA API token",
+        "tokenPlaceholder": "Token jen pro čtení z Internet Banky",
+        "tokenHelp": "V Internet Bance → API tokeny vytvořte pasivní (jen pro čtení) token. Tokeny vyprší do 90 dnů, pokud je neobnovíte. Historie je omezená na 90 dnů.",
+        "tokenGuide": "Jak vytvořit MONETA API token",
+        "accountLabel": "Účet v CZK",
+        "selectAccount": "Vyberte účet",
+        "discover": "Načíst účty",
+        "discoverHint": "Načtěte účty, pokud token pokrývá víc CZK účtů. Jeden CZK účet se připojí bez výběru."
+      },
+      "banks": {
+        "kb": "Komerční banka",
+        "rb": "Raiffeisenbank",
+        "csas": "Česká spořitelna",
+        "csob": "ČSOB",
+        "creditas": "CREDITAS",
+        "revolut": "Revolut",
+        "airbank": "Air Bank",
+        "mbank": "mBank",
+        "partners": "Partners Banka"
+      },
+      "errors": {
+        "generic": "{code}",
+        "missing_fio_token": "Vložte Fio monitorovací token.",
+        "fio_token_must_have_64_characters": "Fio token musí mít 64 znaků.",
+        "fio_token_contains_whitespace": "Fio token nesmí obsahovat mezery.",
+        "fio_connection_failed": "Fio se nepodařilo připojit.",
+        "fio_sync_failed": "Synchronizace Fio selhala.",
+        "fio_token_inactive": "Fio tento token neověřilo. Zkontrolujte, že jde o monitorovací token (ne token pro odesílání) a že je ve Fio aktivní.",
+        "fio_throttled_locally": "Fio je dočasně omezené. Zkuste to za chvíli.",
+        "fio_account_changed": "Fio účet už tomuto připojení neodpovídá.",
+        "missing_moneta_token": "Vložte MONETA API token.",
+        "moneta_invalid_token_shape": "Tento MONETA token nevypadá platně.",
+        "moneta_no_czk_accounts": "Na tokenu nejsou žádné CZK účty.",
+        "moneta_discover_failed": "Účty MONETA se nepodařilo načíst.",
+        "moneta_select_account": "Vyberte CZK účet k připojení.",
+        "moneta_connection_failed": "MONETA se nepodařilo připojit.",
+        "moneta_sync_failed": "Synchronizace MONETA selhala.",
+        "moneta_throttled": "MONETA je dočasně omezená. Zkuste to za chvíli.",
+        "moneta_throttled_locally": "MONETA je dočasně omezená. Zkuste to za chvíli.",
+        "moneta_account_changed": "MONETA účet už tomuto připojení neodpovídá.",
+        "moneta_unauthorized": "MONETA token byl odmítnut. V Internet Bance vytvořte nový.",
+        "not_found": "Připojení nebylo nalezeno.",
+        "missing_connection": "Vyberte bankovní připojení.",
+        "missing_issuer": "Vyberte firmu, která přijímá platby.",
+        "missing_fio_payment_token": "Vložte Fio token s právem odesílat.",
+        "missing_payment_token_expiry": "Zadejte datum vypršení tokenu z Fio.",
+        "payment_token_expired": "Token pro odesílání vypršel. Zadejte nový."
+      }
+    }
+  },
+  "Payments": {
+    "title": "Platby",
+    "eyebrow": "Párování",
+    "description": "Bankovní transakce zůstávají návrhy, dokud potvrdíte přiřazení. Jedna faktura může dostat částečné platby a každé storno zůstane viditelné.",
+    "bankConnections": "Bankovní spojení",
+    "suggestedTitle": "Navrhovaná spárování",
+    "suggestedDescription": "Deterministické návrhy podle přijímacího IBAN, měny, variabilního symbolu, dlužné částky a data.",
+    "suggestedEmpty": "Žádné platby nečekají na kontrolu.",
+    "unknownSender": "Neznámý odesílatel",
+    "draft": "Návrh",
+    "vsMissing": "chybí",
+    "vsLabel": "VS {value}",
+    "pleaseReview": "Zkontrolujte: {details}",
+    "confirmAmount": "Potvrdit {amount}",
+    "notThisInvoice": "Není tato faktura",
+    "manualTitle": "Přidat ruční platbu",
+    "manualDescription": "Pro hotovost, nepřipojenou banku nebo opravu. Záznam jde do stejné evidence jako potvrzené bankovní platby.",
+    "manualEmpty": "Žádná vystavená faktura není neuhrazená.",
+    "invoice": "Faktura",
+    "invoiceOption": "{number} · {client} · {amount} k úhradě",
+    "amount": "Částka",
+    "paidOn": "Zaplaceno",
+    "addPayment": "Přidat platbu",
+    "incomingTitle": "Příchozí transakce",
+    "incomingDescription": "Nejnovější importované bankovní kredity.",
+    "incomingEmpty": "Zatím žádné importované transakce.",
+    "incomingFallback": "Příchozí platba",
+    "incomingMeta": "{date} · VS {vs}",
+    "allocated": "Přiřazeno",
+    "readyToMatch": "K párování",
+    "historyTitle": "Historie přiřazení",
+    "historyDescription": "Potvrzené, ruční a stornované záznamy evidence.",
+    "historyEmpty": "Zatím žádná přiřazení.",
+    "historyMeta": "{date} · {source}",
+    "historyMetaReversed": "{date} · {source} · Stornováno",
+    "reversed": "Stornováno",
+    "reverse": "Stornovat",
+    "match": {
+      "exact": "Přesná shoda",
+      "high": "Silná shoda",
+      "medium": "Pravděpodobná shoda",
+      "low": "Vyžaduje kontrolu"
+    },
+    "reasons": {
+      "receiving_account": "Shoduje se přijímací účet",
+      "currency": "Shoduje se měna",
+      "exact_variable_symbol": "Přesný variabilní symbol",
+      "exact_outstanding_amount": "Přesná dlužná částka",
+      "partial_amount": "Částečná platba",
+      "overpayment": "Platba je vyšší než dlužná částka",
+      "known_client_account": "Známý účet klienta",
+      "plausible_date": "Datum platby sedí"
+    },
+    "blockers": {
+      "ambiguous_variable_symbol": "Variabilní symbol sedí na víc faktur"
+    },
+    "sources": {
+      "bank_confirmed": "Spárováno z banky",
+      "manual": "Přidáno ručně"
+    }
+  },
+  "Admin": {
+    "brand": {
+      "title": "Invoicey Admin",
+      "tagline": "Platformní konzole"
+    },
+    "nav": {
+      "group": "Platforma",
+      "dashboard": "Přehled",
+      "users": "Uživatelé",
+      "workspaces": "Pracovní prostory",
+      "invoices": "Faktury",
+      "issuers": "Dodavatelé",
+      "backToApp": "Zpět do aplikace",
+      "productGroup": "Produkt",
+      "productDashboard": "Produktový přehled",
+      "audit": "Audit log",
+      "plans": "Tarify"
+    },
+    "breadcrumb": {
+      "root": "Admin",
+      "users": "Uživatelé",
+      "workspaces": "Pracovní prostory",
+      "invoices": "Faktury",
+      "issuers": "Dodavatelé",
+      "audit": "Audit log",
+      "detail": "Detail",
+      "plans": "Tarify"
+    },
+    "table": {
+      "search": "Hledat",
+      "copyId": "Kopírovat id",
+      "copied": "Zkopírováno",
+      "columns": "Sloupce",
+      "paginationInfo": "'{'from'}' – '{'to'}' z '{'count'}'",
+      "nextPage": "Další stránka",
+      "previousPage": "Předchozí stránka",
+      "rowsPerPage": "Řádků na stránku"
+    },
+    "dashboard": {
+      "title": "Platformní přehled",
+      "subtitle": "Souhrny napříč všemi pracovními prostory.",
+      "statusTitle": "Faktury podle stavu",
+      "recentTitle": "Nedávné faktury",
+      "recentEmpty": "Zatím žádné faktury.",
+      "cards": {
+        "users": "Uživatelé",
+        "workspaces": "Pracovní prostory",
+        "invoices": "Faktury",
+        "issuers": "Dodavatelé",
+        "adminsHint": "{count} platformních adminů",
+        "issuedHint": "{count} vystavených za 12 měs. · {volume}"
+      },
+      "recent": {
+        "number": "Číslo",
+        "client": "Klient",
+        "workspace": "Pracovní prostor",
+        "total": "Celkem",
+        "status": "Stav"
+      }
+    },
+    "users": {
+      "title": "Uživatelé",
+      "subtitle": "Všechny účty. Zde udělíte nebo odeberete platformního admina.",
+      "empty": "Žádní uživatelé.",
+      "count": "{count, plural, one {# uživatel} few {# uživatelé} other {# uživatelů}}",
+      "filters": {
+        "searchPlaceholder": "jméno, e-mail, id…"
+      },
+      "columns": {
+        "name": "Jméno",
+        "email": "E-mail",
+        "verified": "Ověření",
+        "role": "Platformní role",
+        "memberships": "Členství",
+        "referralCode": "Referral kód",
+        "referredBy": "Doporučil",
+        "defaultWorkspace": "Výchozí prostor",
+        "createdAt": "Vytvořeno",
+        "id": "ID uživatele",
+        "actions": "Akce"
+      },
+      "verified": {
+        "yes": "Ověřený",
+        "no": "Neověřený"
+      },
+      "role": {
+        "admin": "Admin",
+        "none": "Žádná"
+      },
+      "actions": {
+        "grant": "Udělit admina",
+        "revoke": "Odebrat"
+      }
+    },
+    "workspaces": {
+      "title": "Pracovní prostory",
+      "subtitle": "Všechny organizace s počty členů a faktur.",
+      "empty": "Žádné pracovní prostory.",
+      "count": "{count, plural, one {# prostor} few {# prostory} other {# prostorů}}",
+      "filters": {
+        "searchPlaceholder": "název, slug, id…"
+      },
+      "columns": {
+        "name": "Název",
+        "slug": "Slug",
+        "members": "Členové",
+        "invoices": "Faktury",
+        "issuers": "Dodavatelé",
+        "createdAt": "Vytvořeno",
+        "id": "ID prostoru"
+      }
+    },
+    "invoices": {
+      "title": "Faktury",
+      "subtitle": "Seznam faktur napříč tenanty (jen pro čtení).",
+      "empty": "Žádné faktury.",
+      "count": "{count, plural, one {# faktura} few {# faktury} other {# faktur}}",
+      "filters": {
+        "searchPlaceholder": "číslo, klient, prostor, dodavatel…"
+      },
+      "columns": {
+        "number": "Číslo",
+        "client": "Klient",
+        "workspace": "Pracovní prostor",
+        "issuer": "Dodavatel",
+        "total": "Celkem",
+        "issueDate": "Datum vystavení",
+        "dueDate": "Splatnost",
+        "status": "Stav",
+        "id": "ID faktury",
+        "workspaceId": "ID prostoru",
+        "issuerId": "ID dodavatele"
+      }
+    },
+    "issuers": {
+      "title": "Dodavatelé",
+      "subtitle": "Dodavatelé napříč tenanty (jen pro čtení).",
+      "empty": "Žádní dodavatelé.",
+      "count": "{count, plural, one {# dodavatel} few {# dodavatelé} other {# dodavatelů}}",
+      "filters": {
+        "searchPlaceholder": "název, IČO, DIČ, prostor…"
+      },
+      "source": {
+        "ares": "ARES",
+        "manual": "Ručně"
+      },
+      "columns": {
+        "name": "Název",
+        "ico": "IČO",
+        "dic": "DIČ",
+        "workspace": "Pracovní prostor",
+        "source": "Zdroj",
+        "updatedAt": "Aktualizováno",
+        "id": "ID dodavatele",
+        "workspaceId": "ID prostoru"
+      }
+    },
+    "audit": {
+      "title": "Audit log platformy",
+      "subtitle": "Každý zápis provedený z admin konzole napříč prostory. Vlastníci prostoru tyto zásahy nevidí — tohle je jediné místo, kde jsou dohledatelné.",
+      "recentTitle": "Poslední akce",
+      "count": "{count, plural, one {# záznam} few {# záznamy} other {# záznamů}}",
+      "empty": "Zatím žádné akce.",
+      "columns": {
+        "event": "Akce",
+        "actor": "Provedl",
+        "workspace": "Prostor",
+        "details": "Detaily",
+        "at": "Kdy"
+      }
+    },
+    "userDetail": {
+      "eyebrow": "Uživatel",
+      "back": "Zpět na uživatele",
+      "profileTitle": "Profil",
+      "membershipsTitle": "Členství",
+      "membershipsDescription": "Prostory, do kterých tento účet patří.",
+      "noMemberships": "Žádná členství.",
+      "referralsTitle": "Doporučení",
+      "referralsDescription": "Účty, které se registrovaly přes kód tohoto uživatele.",
+      "noReferrals": "Zatím nikoho nedoporučil.",
+      "allUsers": "Všichni uživatelé",
+      "auditTitle": "Bezpečnostní historie",
+      "auditDescription": "Přihlášení, změny přístupů a zásahy admina týkající se tohoto účtu.",
+      "columns": {
+        "workspace": "Prostor",
+        "role": "Role",
+        "joined": "Připojen",
+        "email": "E-mail",
+        "signedUp": "Registrace"
+      }
+    },
+    "workspaceDetail": {
+      "eyebrow": "Pracovní prostor",
+      "back": "Zpět na prostory",
+      "overviewTitle": "Přehled",
+      "tokensTitle": "AI tokeny",
+      "tokensDescription": "Zůstatek prostoru. Darované tokeny se čerpají jako první, takže podpora nenafoukne měsíční limit.",
+      "tokens": {
+        "gifted": "Darované",
+        "monthly": "Měsíční",
+        "purchased": "Zakoupené",
+        "renewsAt": "Obnova",
+        "missing": "Tento prostor zatím nemá záznam o zůstatku. Darování ho založí."
+      },
+      "grant": {
+        "amountLabel": "Počet tokenů",
+        "noteLabel": "Poznámka",
+        "notePlaceholder": "např. kompenzace za výpadek",
+        "hint": "Připočte se k darovanému zůstatku a zapíše do audit logu.",
+        "submit": "Darovat tokeny"
+      },
+      "membersTitle": "Členové",
+      "noMembers": "Žádní členové.",
+      "invitesTitle": "Čekající pozvánky",
+      "invitesDescription": "Pozvánky, které zatím nikdo nepřijal.",
+      "noInvites": "Žádné čekající pozvánky.",
+      "issuersTitle": "Firmy",
+      "noIssuers": "Žádné firmy.",
+      "auditTitle": "Historie prostoru",
+      "auditDescription": "Zásahy admina a bezpečnostní události v tomto prostoru.",
+      "dangerTitle": "Nevratné akce",
+      "dangerDescription": "Zasahují do dat, která patří někomu jinému. Vše se zapisuje do audit logu.",
+      "rename": {
+        "label": "Název prostoru",
+        "submit": "Přejmenovat"
+      },
+      "delete": {
+        "label": "Smazání potvrdíte přepsáním „{slug}“",
+        "hint": "Smaže prostor včetně {count} faktur, firem, klientů a členství. Nelze vzít zpět.",
+        "submit": "Smazat prostor"
+      },
+      "actions": {
+        "removeMember": "Odebrat",
+        "cancelInvite": "Zrušit"
+      },
+      "columns": {
+        "member": "Člen",
+        "role": "Role",
+        "joined": "Připojen",
+        "email": "E-mail",
+        "invitedBy": "Pozval",
+        "expires": "Platí do",
+        "issuer": "Firma",
+        "ico": "IČO"
+      },
+      "plan": {
+        "title": "Tarif",
+        "description": "Ze kterého komerčního balíčku si workspace odvozuje oprávnění.",
+        "current": "Aktuální tarif",
+        "overridden": "Má výjimky",
+        "assigned": "Přiřazeno",
+        "assignedManually": "Ručně administrátorem",
+        "assignedAutomatically": "Automaticky podle domény",
+        "seats": "Místa",
+        "monthlyTokens": "Měsíční tokeny",
+        "unlimited": "Neomezeně",
+        "selectLabel": "Přesunout na tarif",
+        "hint": "Snížení tarifu nikdy nic nemaže. Workspace nad limit zůstane čitelný, jen už nemůže růst.",
+        "submit": "Přiřadit tarif",
+        "missing": "Pro tento workspace se nepodařilo určit tarif."
+      }
+    },
+    "plans": {
+      "eyebrow": "Platforma",
+      "title": "Tarify",
+      "subtitle": "Komerční balíčky a oprávnění, na která se překládá každý workspace.",
+      "hint": "Jeden tarif má mnoho workspaců. Úprava tarifu změní všechny naráz.",
+      "unlimited": "Neomezeně",
+      "badges": {
+        "default": "Výchozí",
+        "custom": "Vlastní",
+        "archived": "Archivovaný"
+      },
+      "clientMode": {
+        "open": "Otevřené",
+        "managed": "Řízené"
+      },
+      "columns": {
+        "name": "Tarif",
+        "workspaces": "Workspacy",
+        "seats": "Místa",
+        "monthlyTokens": "Měsíční tokeny",
+        "clients": "Odběratelé",
+        "domains": "Domény pro přiřazení"
+      }
+    },
+    "planDetail": {
+      "eyebrow": "Tarif",
+      "back": "Zpět na tarify",
+      "overviewTitle": "Přehled",
+      "editTitle": "Oprávnění",
+      "editHint": "Co smí každý workspace na tomto tarifu. Limity se kontrolují při vytváření, nikdy při čtení.",
+      "affects": "{count, plural, one {Na tento tarif se překládá # workspace.} few {Na tento tarif se překládají # workspacy.} other {Na tento tarif se překládá # workspaců.}}",
+      "save": "Uložit oprávnění",
+      "unlimitedPlaceholder": "Neomezeně",
+      "foreverPlaceholder": "Uchovávat trvale",
+      "noGrants": "Žádné",
+      "kind": {
+        "builtin": "Vestavěný",
+        "custom": "Vlastní"
+      },
+      "trigger": {
+        "signup": "Při registraci",
+        "first_invoice_issued": "První faktura"
+      },
+      "clientMode": {
+        "open": "Otevřené — workspace si spravuje odběratele sám",
+        "managed": "Řízené — pouze katalog tarifu"
+      },
+      "permissionsMode": {
+        "off": "Vypnuto",
+        "roles": "Předvolené role",
+        "advanced": "Role + výjimky pro členy"
+      },
+      "facts": {
+        "kind": "Typ",
+        "workspaces": "Workspacy",
+        "grants": "Přidělení tokenů"
+      },
+      "fields": {
+        "seats": "Místa",
+        "issuers": "Dodavatelé",
+        "monthlyTokens": "Měsíční tokeny",
+        "auditRetention": "Uchování auditu (dny)",
+        "clientMode": "Správa odběratelů",
+        "permissions": "Oprávnění",
+        "features": "Funkce",
+        "autoAssignDomains": "Domény pro přiřazení",
+        "allowedDomains": "Povolené domény členů"
+      },
+      "features": {
+        "bankConnections": "Bankovní propojení",
+        "recurring": "Opakované koncepty",
+        "historicalImport": "Import historie",
+        "agents": "Slack / MCP / Invoicey",
+        "topUpEnabled": "Dobití tokenů"
+      },
+      "hints": {
+        "autoAssignDomains": "Nové workspacy založené ověřenou adresou na těchto doménách dostanou tento tarif.",
+        "allowedDomains": "Pozvat lze jen tyto domény. Prázdné znamená libovolnou adresu."
+      },
+      "catalog": {
+        "title": "Řízený katalog odběratelů",
+        "description": "Jediní odběratelé, kterým smí workspacy na tomto tarifu fakturovat.",
+        "inactive": "Tarif má režim odběratelů Otevřený, katalog se tedy neuplatňuje. Přepněte na Řízený.",
+        "empty": "Zatím žádné subjekty.",
+        "columns": {
+          "name": "Název",
+          "ico": "IČO"
+        },
+        "icoLabel": "IČO",
+        "hint": "Načte se z ARES a synchronizuje do všech workspaců na tomto tarifu. Odebrání položky ponechá existující odběratele — jen zabrání novým fakturám.",
+        "add": "Přidat subjekt",
+        "remove": "Odebrat"
+      }
+    }
+  },
+  "Consent": {
+    "banner": {
+      "title": "Vaše soukromí, vaše volba",
+      "description": "Nezbytné cookies drží Invoicey v chodu. Anonymní měření nám můžete povolit zvlášť. Žádné reklamní cookies.",
+      "details": "Podrobnosti",
+      "customize": "Nastavení",
+      "rejectAll": "Pouze nezbytné",
+      "acceptAnalytics": "Povolit analytiku"
+    },
+    "dialog": {
+      "title": "Nastavení soukromí",
+      "description": "Vyberte kategorie, se kterými souhlasíte. Nezbytné nelze vypnout.",
+      "necessary": "Nezbytné",
+      "necessaryDescription": "Technologie nutné ke správnému fungování aplikace a zabezpečení.",
+      "measurement": "Měření",
+      "measurementDescription": "Pomáhají pochopení návštěvnosti a výkonu služby.",
+      "save": "Uložit",
+      "saveChoice": "Uložit volbu",
+      "saving": "Ukládám…",
+      "rejectAll": "Pouze nezbytné",
+      "acceptAll": "Povolit vše",
+      "noAds": "Invoicey aktuálně nepoužívá reklamní cookies. Více informací najdete v zásadách používání cookies a ochrany soukromí.",
+      "footerHint": "Vyberte, co může Invoicey používat. Volbu můžete kdykoliv změnit v patičce webu."
+    }
+  },
+  "Pwa": {
+    "name": "Invoicey",
+    "shortName": "Invoicey",
+    "description": "Automatizace faktur založená na datech"
+  },
+  "Assistant": {
+    "title": "Asistent",
+    "subtitle": "Návrhy, ARES, vystavení, platby.",
+    "close": "Zavřít asistenta",
+    "newConversation": "Nová konverzace",
+    "openingPanel": "Otevírám asistenta…",
+    "thinking": "Přemýšlím…",
+    "placeholder": "Zeptejte se nebo popište fakturu…",
+    "composerLabel": "Zpráva asistentovi",
+    "send": "Odeslat",
+    "stop": "Zastavit",
+    "tokensAvailable": "K dispozici {available} tokenů",
+    "outOfTokens": "Tento workspace nemá žádné AI tokeny.",
+    "viewUsage": "Spotřeba a limity",
+    "history": "Konverzace",
+    "historyEmpty": "Na tomto zařízení zatím žádné dřívější konverzace.",
+    "historyCurrent": "{title} · aktuální",
+    "untitledConversation": "Bez názvu",
+    "deleteConversation": "Smazat konverzaci",
+    "contextUsage": "{used} / {limit} kontextu",
+    "contextFull": "Tahle konverzace je na limitu kontextu. Začněte novou, ať můžeme pokračovat.",
+    "authRequired": "Asistenta se nepodařilo přihlásit. Obnovte stránku a zkuste to znovu.",
+    "composerBold": "Tučně",
+    "composerItalic": "Kurzíva",
+    "composerCode": "Kód",
+    "composerList": "Seznam",
+    "composerMarkdownHint": "Markdown",
+    "empty": {
+      "title": "Co pro vás mohu udělat?",
+      "subtitle": "Umím připravit a vystavit fakturu, najít firmu v ARESu a hlídat platby. Když by šlo o dohad, radši se zeptám.",
+      "mascotAlt": "Invoicey, asistent",
+      "suggestions": {
+        "draftInvoice": "Fakturuj NFCtron a.s. konzultace, 12 500 Kč, splatnost 14 dní",
+        "unpaidInvoices": "Které faktury jsou nezaplacené?",
+        "lookupCompany": "Najdi IČO 08453961 v ARESu"
+      }
+    },
+    "hitl": {
+      "approvalEyebrow": "Potřebuji schválení · {tool}",
+      "answered": "Zodpovězeno.",
+      "freeformPlaceholder": "Nebo napište odpověď…",
+      "send": "Odeslat"
+    },
+    "authorization": {
+      "connected": "{name} připojeno.",
+      "failed": "Autorizace {name}: {outcome}.",
+      "signIn": "Přihlásit se k {name}"
+    },
+    "card": {
+      "actionFailed": "Akce se nezdařila. Zkuste to znovu."
+    }
+  }
 };
 export default messages;
