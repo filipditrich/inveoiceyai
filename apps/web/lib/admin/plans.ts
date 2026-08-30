@@ -5,7 +5,10 @@ import {
   assignWorkspacePlan,
   countWorkspacesByPlan,
   getPlanById,
+  listPlanClients,
   listPlans,
+  syncPlanClientsIntoWorkspace,
+  unmarkManagedClients,
   resolveEntitlements,
   plans,
   type Entitlements,
@@ -86,6 +89,19 @@ export async function adminAssignPlan(input: {
       planId: plan.id,
       assignedBy: input.actorUserId,
     });
+    // Materialize (or clear) the managed catalog immediately, so the workspace
+    // is never on a managed plan with an empty client list, and never keeps
+    // managed marks after moving to an open plan (ADR 0036).
+    const entitlements = resolveEntitlements(plan.entitlements, null);
+    if (entitlements.clients.createMode === "managed") {
+      await syncPlanClientsIntoWorkspace(
+        db,
+        input.workspaceId,
+        await listPlanClients(db, plan.id),
+      );
+    } else {
+      await unmarkManagedClients(db, input.workspaceId);
+    }
   } catch (error) {
     console.error("[admin] plan assignment failed", error);
     return { ok: false, error: "failed" };

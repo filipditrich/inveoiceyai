@@ -2,7 +2,24 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
 import type { InvoiceyDb } from "./create-db";
+import { resolveEntitlements } from "./entitlements";
+import { plans } from "./plans";
 import { clients, invoiceTemplates, invoices } from "./schema";
+import { workspaces } from "./workspaces";
+
+/**
+ * Thrown when a workspace whose plan manages its clients tries to reach a
+ * counterparty outside the catalog (ADR 0036).
+ */
+export class ManagedClientsError extends Error {
+  readonly code = "clients_managed" as const;
+  constructor(
+    message = "Workspace can only use clients from its plan catalog",
+  ) {
+    super(message);
+    this.name = "ManagedClientsError";
+  }
+}
 
 /** Digits-only IČO for matching (empty → undefined). */
 export function normalizeIco(ico: unknown): string | undefined {
@@ -56,6 +73,11 @@ export function clientAddressIdentity(
 }
 
 export type EnsureClientOptions = {
+  /**
+   * Skips the managed-client gate. Only the catalog sync itself sets this —
+   * it is the one writer allowed to create a managed client.
+   */
+  skipManagedCheck?: boolean;
   preferredId?: string;
   /** Defaults to `ares` when IČO present, else `manual`. */
   source?: string;
@@ -170,6 +192,31 @@ export async function ensureClient(
       workspaceId,
       clientSnapshot,
     );
+  }
+
+  // Managed-client enforcement lives here rather than in each caller because
+  // every write path — web form, importer, MCP, Eve/Slack, the AI draft —
+  // funnels through this function. A per-call-site check would be a list to
+  // keep in sync, and the first surface anyone forgot would silently reopen
+  // the hole (ADR 0036).
+  if (!options?.skipManagedCheck) {
+    const managed = await workspaceClientsAreManaged(database, workspaceId);
+    if (managed) {
+      if (!existingId) {
+        throw new ManagedClientsError();
+      }
+      const [row] = await database
+        .select({ planClientId: clients.planClientId })
+        .from(clients)
+        .where(eq(clients.id, existingId))
+        .limit(1);
+      if (!row?.planClientId) {
+        throw new ManagedClientsError();
+      }
+      // The catalog is authoritative for a managed client, so an incoming
+      // snapshot must not overwrite it — return the row untouched.
+      return existingId;
+    }
   }
 
   if (existingId) {
@@ -456,4 +503,29 @@ export async function mergeDuplicateClients(
     invoicesRepointed,
     templatesRepointed,
   };
+}
+
+/**
+ * Reads the workspace's resolved `clients.createMode`. Kept local rather than
+ * imported from `plans-repo` to avoid a module cycle: `plans-repo` already
+ * reaches into this file's normalizers.
+ */
+async function workspaceClientsAreManaged(
+  database: InvoiceyDb,
+  workspaceId: string,
+): Promise<boolean> {
+  const [row] = await database
+    .select({
+      entitlements: plans.entitlements,
+      overrides: workspaces.entitlementOverrides,
+    })
+    .from(workspaces)
+    .innerJoin(plans, eq(plans.id, workspaces.planId))
+    .where(eq(workspaces.id, workspaceId))
+    .limit(1);
+  if (!row) return false;
+  return (
+    resolveEntitlements(row.entitlements, row.overrides).clients.createMode ===
+    "managed"
+  );
 }

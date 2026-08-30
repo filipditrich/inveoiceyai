@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   index,
+  type AnyPgColumn,
   integer,
   jsonb,
   numeric,
@@ -13,6 +14,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { user } from "./auth-schema";
+import { plans } from "./plans";
 import { workspaces } from "./workspaces";
 
 export * from "./ai-usage";
@@ -23,6 +25,32 @@ export * from "./security-schema";
 export * from "./workspaces";
 
 /** Client row — `snapshot` holds validated ClientSnapshot JSON (Plan 4). */
+/**
+ * A plan's managed client catalog (ADR 0036). Entries are materialized into
+ * every workspace on the plan rather than read across workspaces, so tenancy
+ * stays a single `workspace_id` predicate everywhere.
+ */
+export const planClients = pgTable(
+  "plan_clients",
+  {
+    id: uuid("id").primaryKey(),
+    planId: text("plan_id")
+      .notNull()
+      .references(() => plans.id, { onDelete: "cascade" }),
+    /** Normalized to digits — the identity clients are already deduped on. */
+    ico: text("ico").notNull(),
+    /** Same shape as `clients.snapshot`; seeded from ARES. */
+    snapshot: jsonb("snapshot").notNull().$type<Record<string, unknown>>(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [uniqueIndex("plan_clients_plan_ico_uidx").on(t.planId, t.ico)],
+);
+
 export const clients = pgTable(
   "clients",
   {
@@ -31,6 +59,17 @@ export const clients = pgTable(
     /** `"ares"` | `"manual"` | `"import"` */
     source: text("source").notNull(),
     snapshot: jsonb("snapshot").notNull().$type<Record<string, unknown>>(),
+    /**
+     * Non-null marks this row as coming from the plan's managed catalog
+     * (ADR 0036). Under `clients.createMode: "managed"` it is also what makes
+     * the client billable at all. `set null` on delete rather than cascade:
+     * dropping a catalog entry must not delete a counterparty the workspace
+     * has already invoiced.
+     */
+    planClientId: uuid("plan_client_id").references(
+      (): AnyPgColumn => planClients.id,
+      { onDelete: "set null" },
+    ),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -40,6 +79,7 @@ export const clients = pgTable(
   },
   (t) => [
     index("clients_workspace_updated_idx").on(t.workspaceId, t.updatedAt),
+    index("clients_plan_client_idx").on(t.planClientId),
     /**
      * One client per IČO per workspace. Run mergeDuplicateClients (or clean
      * dupes) before applying this index in production.

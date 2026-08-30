@@ -12,7 +12,9 @@ import {
   issuerNumberingSchemes,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
+
+import { clientsAreManaged } from "@/lib/entitlements/managed-clients";
 
 export async function loadIssuerOptions(
   workspaceId: string,
@@ -65,10 +67,21 @@ export async function loadIssuerOptions(
 export async function loadClientOptions(
   workspaceId: string,
 ): Promise<ClientOption[]> {
+  // On a managed workspace the picker offers only the plan catalog (ADR 0036).
+  // Filtering here rather than in each page keeps every invoice surface — new,
+  // edit, duplicate, recurring — consistent by construction.
+  const managed = await clientsAreManaged(workspaceId);
   const rows = await db
     .select()
     .from(clients)
-    .where(eq(clients.workspaceId, workspaceId));
+    .where(
+      managed
+        ? and(
+            eq(clients.workspaceId, workspaceId),
+            isNotNull(clients.planClientId),
+          )
+        : eq(clients.workspaceId, workspaceId),
+    );
   const duplicateIds = new Set<string>();
   for (const group of groupClientsForMerge(
     rows.map((row) => ({

@@ -152,7 +152,13 @@
     "admin_name_required": "Enter a name",
     "admin_last_owner": "Cannot remove the last owner",
     "admin_confirmation_mismatch": "Confirmation does not match",
-    "admin_action_failed": "Action failed"
+    "admin_action_failed": "Action failed",
+    "admin_plan_assigned": "Plan assigned",
+    "admin_plan_updated": "Plan updated",
+    "admin_plan_client_added": "Entity added to catalog",
+    "admin_plan_client_removed": "Entity removed from catalog",
+    "admin_invalid_ico": "Invalid IČO",
+    "admin_ares_failed": "ARES lookup failed"
   },
   "ToastDescriptions": {
     "issuer_saved": "Your business details are ready for future invoices.",
@@ -199,7 +205,13 @@
     "admin_last_owner": "A workspace must always keep at least one owner.",
     "admin_confirmation_mismatch": "Retype the workspace slug exactly.",
     "admin_action_failed": "Try again, or check the logs.",
-    "invoice_issued_rewarded": "You issued your first invoice — {tokens} bonus AI tokens added."
+    "invoice_issued_rewarded": "You issued your first invoice — {tokens} bonus AI tokens added.",
+    "admin_plan_assigned": "Nothing was deleted — over-limit workspaces stay readable.",
+    "admin_plan_updated": "Every workspace on this plan now resolves the new entitlements.",
+    "admin_plan_client_added": "Synced into every workspace on this plan.",
+    "admin_plan_client_removed": "Existing clients were kept, but can no longer be invoiced.",
+    "admin_invalid_ico": "An IČO is 8 digits.",
+    "admin_ares_failed": "The register did not return data for this IČO."
   },
   "Status": {
     "invoice": {
@@ -1607,7 +1619,9 @@
       "source": "Source: {source}",
       "sourceAres": "ARES",
       "sourceManual": "Manual"
-    }
+    },
+    "managedBadge": "Plan",
+    "managedNotice": "Clients on this workspace come from its plan and cannot be edited."
   },
   "Issuers": {
     "title": "My businesses",
@@ -2532,6 +2546,20 @@
       "hints": {
         "autoAssignDomains": "New workspaces created by a verified address on these domains land on this plan.",
         "allowedDomains": "Only these domains may be invited. Empty means any address."
+      },
+      "catalog": {
+        "title": "Managed client catalog",
+        "description": "The only counterparties workspaces on this plan may invoice.",
+        "inactive": "This plan's client mode is Open, so the catalog below is not enforced. Switch to Managed to apply it.",
+        "empty": "No entities yet.",
+        "columns": {
+          "name": "Name",
+          "ico": "IČO"
+        },
+        "icoLabel": "IČO",
+        "hint": "Looked up in ARES and synced into every workspace on this plan. Removing an entry leaves existing clients in place — it only stops new invoices.",
+        "add": "Add entity",
+        "remove": "Remove"
       }
     }
   },

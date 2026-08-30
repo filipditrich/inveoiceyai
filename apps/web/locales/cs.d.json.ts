@@ -156,6 +156,12 @@ declare const messages: {
     admin_last_owner: "Nelze odebrat posledního vlastníka";
     admin_confirmation_mismatch: "Potvrzení nesouhlasí";
     admin_action_failed: "Akce se nezdařila";
+    admin_plan_assigned: "Tarif přiřazen";
+    admin_plan_updated: "Tarif upraven";
+    admin_plan_client_added: "Subjekt přidán do katalogu";
+    admin_plan_client_removed: "Subjekt odebrán z katalogu";
+    admin_invalid_ico: "Neplatné IČO";
+    admin_ares_failed: "Načtení z ARES selhalo";
   };
   ToastDescriptions: {
     issuer_saved: "Údaje firmy jsou připravené pro další faktury.";
@@ -203,6 +209,12 @@ declare const messages: {
     admin_confirmation_mismatch: "Přepište slug prostoru přesně.";
     admin_action_failed: "Zkuste to znovu, nebo se podívejte do logů.";
     invoice_issued_rewarded: "Vystavili jste první fakturu — přidali jsme {tokens} bonusových AI tokenů.";
+    admin_plan_assigned: "Nic se nesmazalo — workspacy nad limit zůstávají čitelné.";
+    admin_plan_updated: "Všechny workspacy na tomto tarifu nyní používají nová oprávnění.";
+    admin_plan_client_added: "Synchronizováno do všech workspaců na tomto tarifu.";
+    admin_plan_client_removed: "Existující odběratelé zůstali, ale už jim nelze fakturovat.";
+    admin_invalid_ico: "IČO má 8 číslic.";
+    admin_ares_failed: "Registr pro toto IČO nevrátil data.";
   };
   Status: {
     invoice: {
@@ -1611,6 +1623,8 @@ declare const messages: {
       sourceAres: "ARES";
       sourceManual: "Ručně";
     };
+    managedBadge: "Tarif";
+    managedNotice: "Odběratelé v tomto workspace pocházejí z tarifu a nelze je upravovat.";
   };
   Issuers: {
     title: "Moje firmy";
@@ -2535,6 +2549,20 @@ declare const messages: {
       hints: {
         autoAssignDomains: "Nové workspacy založené ověřenou adresou na těchto doménách dostanou tento tarif.";
         allowedDomains: "Pozvat lze jen tyto domény. Prázdné znamená libovolnou adresu.";
+      };
+      catalog: {
+        title: "Řízený katalog odběratelů";
+        description: "Jediní odběratelé, kterým smí workspacy na tomto tarifu fakturovat.";
+        inactive: "Tarif má režim odběratelů Otevřený, katalog se tedy neuplatňuje. Přepněte na Řízený.";
+        empty: "Zatím žádné subjekty.";
+        columns: {
+          name: "Název";
+          ico: "IČO";
+        };
+        icoLabel: "IČO";
+        hint: "Načte se z ARES a synchronizuje do všech workspaců na tomto tarifu. Odebrání položky ponechá existující odběratele — jen zabrání novým fakturám.";
+        add: "Přidat subjekt";
+        remove: "Odebrat";
       };
     };
   };

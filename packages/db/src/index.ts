@@ -94,6 +94,16 @@ export {
 } from "./entitlements";
 export { DEFAULT_PLAN_KEY, PLAN_SEEDS, type PlanSeed } from "./plan-presets";
 export {
+  listPlanClients,
+  removePlanClient,
+  syncPlanClients,
+  syncPlanClientsIntoWorkspace,
+  unmarkManagedClients,
+  upsertPlanClient,
+  type PlanClientInput,
+  type PlanClientRow,
+} from "./plan-clients";
+export {
   applyGrantRule,
   applyTriggerGrants,
   grantTokensManually,

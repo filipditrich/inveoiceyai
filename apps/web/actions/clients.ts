@@ -1,6 +1,7 @@
 "use server";
 
 import { requireWorkspace } from "@/lib/auth/session";
+import { assertClientsWritable } from "@/lib/entitlements/managed-clients";
 import { lookupAresByIcoCached } from "@/lib/cached-ares";
 import {
   ClientSnapshotSchema,
@@ -56,6 +57,9 @@ export async function createClientFromAres(
   icoInput: string,
 ): Promise<CreateClientFromAresResult> {
   const { workspaceId } = await requireWorkspace();
+  // A managed workspace bills only its plan catalog (ADR 0036), so an ARES
+  // lookup here could only ever end in a client it may not use.
+  await assertClientsWritable(workspaceId);
   const parsedIco = IcoSchema.safeParse((icoInput ?? "").replaceAll(/\s/g, ""));
   if (!parsedIco.success) {
     return { ok: false, code: "invalid_ico" };
@@ -121,6 +125,7 @@ export async function createClientFromAres(
 /** UPSERT validated `ClientSnapshot` in default workspace. */
 export async function saveClient(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  await assertClientsWritable(workspaceId);
   const rowId = optionalTrim(formData.get("id")) ?? crypto.randomUUID();
   const errBase = `/clients/${rowId}/edit`;
   const createBase = "/clients/new";
@@ -218,6 +223,7 @@ export async function saveClient(formData: FormData): Promise<void> {
 export async function deleteClient(formData: FormData): Promise<void> {
   const id = optionalTrim(formData.get("id"));
   const { workspaceId } = await requireWorkspace();
+  await assertClientsWritable(workspaceId);
   if (!id) {
     redirect(`/clients?invalid=${encodeURIComponent("missing_id")}`);
   }
@@ -254,6 +260,10 @@ export async function deleteClient(formData: FormData): Promise<void> {
 /** Collapse duplicate clients by IČO or normalized legal name + full address. */
 export async function mergeClientsAction(): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  // Merging rewrites and removes client rows, so it is a client mutation like
+  // any other — and on a managed workspace the catalog sync already guarantees
+  // there is nothing to merge.
+  await assertClientsWritable(workspaceId);
   const result = await mergeDuplicateClients(db, workspaceId);
   revalidatePath("/clients");
   revalidatePath("/invoices");

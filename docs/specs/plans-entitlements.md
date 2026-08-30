@@ -240,7 +240,17 @@ the same way.
   and leaves them in place. Deleting historical counterparties would break
   invoice lists; the constraint is on _new_ invoices, not on the past.
 
-`TODO(plan-26): decide whether a managed workspace may still bill a non-catalog client that predates the plan assignment. Current answer: no — issue blocks on non-managed clients when createMode is "managed".`
+**Where the gate lives.** `ensureClient` (`packages/db/src/clients-repo.ts`)
+refuses to create or adopt a non-catalog client on a managed workspace. That is
+deliberate placement: every write path — web form, importer, MCP, Eve/Slack, the
+AI draft — funnels through it, so the rule is structural rather than a list of
+call sites to keep in sync. The web actions add their own early guard for a
+better message, and `loadClientOptions` filters the picker so the UI never
+offers something the server would reject.
+
+Resolved: a managed workspace may **not** bill a non-catalog client that
+predates the assignment. The client row survives, but it is not offered and
+`ensureClient` rejects it.
 
 ## Permissions
 

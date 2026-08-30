@@ -13,6 +13,7 @@ import {
   type DataGridFeatures,
 } from "@/components/reui/data-grid/data-grid";
 import { DataGridColumnHeader } from "@/components/reui/data-grid/data-grid-column-header";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import type { ClientSnapshot } from "@invoicey/invoice-core/schema";
@@ -33,6 +34,8 @@ export type ClientTableItem = {
   rowId: string;
   source: string;
   snapshot: ClientSnapshot;
+  /** Comes from the plan catalog: no edit, no delete (ADR 0036). */
+  managed: boolean;
 };
 
 export function ClientsDataGrid({ items }: { items: ClientTableItem[] }) {
@@ -121,33 +124,41 @@ export function ClientsDataGrid({ items }: { items: ClientTableItem[] }) {
         enableSorting: false,
         enableHiding: false,
         header: () => <span className="sr-only">{tTable("actions")}</span>,
-        cell: ({ row }) => (
-          <div className="flex justify-end gap-2">
-            <Button
-              render={
-                <Link href={`/clients/${row.original.rowId}/edit`} prefetch />
-              }
-              size="sm"
-              variant="outline"
-            >
-              {tTable("edit")}
-            </Button>
-            <form action={deleteClient}>
-              <input name="id" type="hidden" value={row.original.rowId} />
-              <SubmitButton
-                pendingLabel={tTable("deleting")}
+        cell: ({ row }) =>
+          // A managed client is owned by the plan, so there is no edit or
+          // delete to offer. The badge says where it came from; the server
+          // actions refuse either way (ADR 0036).
+          row.original.managed ? (
+            <div className="flex justify-end">
+              <Badge variant="secondary">{t("managedBadge")}</Badge>
+            </div>
+          ) : (
+            <div className="flex justify-end gap-2">
+              <Button
+                render={
+                  <Link href={`/clients/${row.original.rowId}/edit`} prefetch />
+                }
                 size="sm"
-                variant="destructive"
+                variant="outline"
               >
-                {tTable("delete")}
-              </SubmitButton>
-            </form>
-          </div>
-        ),
+                {tTable("edit")}
+              </Button>
+              <form action={deleteClient}>
+                <input name="id" type="hidden" value={row.original.rowId} />
+                <SubmitButton
+                  pendingLabel={tTable("deleting")}
+                  size="sm"
+                  variant="destructive"
+                >
+                  {tTable("delete")}
+                </SubmitButton>
+              </form>
+            </div>
+          ),
         meta: { headerTitle: tTable("actions") },
       },
     ],
-    [tCommon, tTable],
+    [t, tCommon, tTable],
   );
 
   const table = useTable({

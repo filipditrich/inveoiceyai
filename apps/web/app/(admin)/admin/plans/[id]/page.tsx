@@ -4,8 +4,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import {
+  addPlanClientAction,
+  removePlanClientAction,
+} from "@/actions/admin-plan-clients";
 import { updatePlanEntitlementsAction } from "@/actions/admin-plans";
-import { AdminFacts, AdminSection } from "@/components/admin/admin-detail-kit";
+import {
+  AdminEmpty,
+  AdminFacts,
+  AdminMiniTable,
+  AdminSection,
+} from "@/components/admin/admin-detail-kit";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,6 +23,8 @@ import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { formatTokenCount } from "@/lib/ai/format-tokens";
 import { adminGetPlan } from "@/lib/admin/plans";
+import { listPlanClients } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import { requirePlatformAdmin } from "@/lib/auth/session";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -38,6 +49,7 @@ export default async function AdminPlanDetailPage({
   }
 
   const e = plan.entitlements;
+  const catalog = await listPlanClients(db, plan.id);
 
   return (
     <div className="flex flex-1 flex-col gap-6">
@@ -242,6 +254,56 @@ export default async function AdminPlanDetailPage({
           </div>
 
           <SubmitButton size="sm">{t("save")}</SubmitButton>
+        </form>
+      </AdminSection>
+
+      <AdminSection
+        description={t("catalog.description")}
+        title={t("catalog.title")}
+      >
+        {e.clients.createMode === "open" ? (
+          // Deliberately not hidden: a catalog on an open plan is inert, and
+          // saying so is more useful than the section silently vanishing.
+          <p className="text-muted-foreground mb-6 text-sm">
+            {t("catalog.inactive")}
+          </p>
+        ) : null}
+
+        {catalog.length === 0 ? (
+          <AdminEmpty>{t("catalog.empty")}</AdminEmpty>
+        ) : (
+          <AdminMiniTable
+            headers={[t("catalog.columns.name"), t("catalog.columns.ico"), ""]}
+            rows={catalog.map((entry) => [
+              String(entry.snapshot.name ?? "—"),
+              entry.ico,
+              <form key="remove" action={removePlanClientAction}>
+                <input name="planId" type="hidden" value={plan.id} />
+                <input name="planClientId" type="hidden" value={entry.id} />
+                <SubmitButton size="sm" variant="ghost">
+                  {t("catalog.remove")}
+                </SubmitButton>
+              </form>,
+            ])}
+          />
+        )}
+
+        <form action={addPlanClientAction} className="mt-6 space-y-4">
+          <input name="planId" type="hidden" value={plan.id} />
+          <div className="grid gap-4 sm:grid-cols-[12rem_minmax(0,1fr)]">
+            <div className="space-y-2">
+              <Label htmlFor="ico">{t("catalog.icoLabel")}</Label>
+              <Input
+                id="ico"
+                inputMode="numeric"
+                name="ico"
+                placeholder="12345678"
+                required
+              />
+            </div>
+          </div>
+          <p className="text-muted-foreground text-xs">{t("catalog.hint")}</p>
+          <SubmitButton size="sm">{t("catalog.add")}</SubmitButton>
         </form>
       </AdminSection>
     </div>

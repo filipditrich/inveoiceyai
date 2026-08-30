@@ -614,7 +614,7 @@ database tables, and the related environment variables. The payment **ledger**
 
 ### Plan 26 — Plans, entitlements, and workspace permissions
 
-**Status:** In progress — 26a and 26b implemented  
+**Status:** In progress — 26a, 26b, and 26c implemented  
 **ADR:** [0035](./decisions/0035-plans-are-shared-entitlement-rows.md) ·
 [0036](./decisions/0036-managed-client-catalogs.md) ·
 [0037](./decisions/0037-declarative-token-grants.md) ·
@@ -648,9 +648,9 @@ catalog — and lands the permission chokepoint that Pro teams need.
 
 **26c — managed clients:**
 
-- [ ] `plan_clients` catalog seeded from ARES by IČO; `clients.plan_client_id`
-- [ ] Sync on catalog write and on plan assignment; non-destructive revocation
-- [ ] `createMode: "managed"` enforced in web, import, MCP, and Eve/Slack
+- [x] `plan_clients` catalog seeded from ARES by IČO; `clients.plan_client_id`
+- [x] Sync on catalog write and on plan assignment; non-destructive revocation
+- [x] `createMode: "managed"` enforced in web, import, MCP, and Eve/Slack
 
 **26d — permissions:**
 
