@@ -1,5 +1,6 @@
 "use client";
 
+import { AssistantSidebarTrigger } from "@/components/assistant/assistant-trigger";
 import { BrandLogo } from "@/components/brand-logo";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -20,11 +21,16 @@ import {
 import { APP_GIT_SHA, APP_VERSION } from "@/lib/app-build-info";
 import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 import {
+  ArchiveRestoreIcon,
   BookOpenIcon,
   Building2Icon,
   FileTextIcon,
   LandmarkIcon,
   LayoutDashboardIcon,
+  RepeatIcon,
+  SettingsIcon,
+  ShieldIcon,
+  UserRoundIcon,
   UsersIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -33,9 +39,16 @@ import { usePathname } from "next/navigation";
 import * as React from "react";
 
 /**
- * Six destinations, one create button, two settings doors (the workspace
- * switcher and the user menu). Everything that used to sit in the Automation,
- * Tools, and Manage groups now hangs off whichever of those it belongs to.
+ * Five destinations and a create button, as before — the Automation, Tools and
+ * Manage groups are not coming back. What changed is that the places those
+ * groups used to hold are no longer reachable *only* from a dropdown: recurring
+ * invoices, the importer and bank connections now hang off the section that
+ * owns them, expanded when you are already in that section and out of the way
+ * otherwise.
+ *
+ * Settings keep their two doors (the workspace switcher, the user menu) and gain
+ * a third, explicit one. The doors were never the problem — an unlabelled menu
+ * as the *only* route to workspace settings was.
  */
 export function AppSidebar({
   user,
@@ -86,12 +99,40 @@ export function AppSidebar({
       url: "/invoices",
       icon: <FileTextIcon />,
       isActive: invoicesActive,
+      /** Open while anywhere under /invoices, so the siblings are one click away. */
+      defaultOpen: pathname.startsWith("/invoices"),
+      items: [
+        {
+          title: t("nav.invoicesRecurring"),
+          url: "/invoices/recurring",
+          icon: <RepeatIcon />,
+          isActive: pathname.startsWith("/invoices/recurring"),
+        },
+        {
+          title: t("nav.invoicesImport"),
+          url: "/invoices/import",
+          icon: <ArchiveRestoreIcon />,
+          isActive: pathname.startsWith("/invoices/import"),
+        },
+      ],
     },
     {
       title: t("nav.payments"),
       url: "/payments",
       icon: <LandmarkIcon />,
       isActive: pathname === "/payments" || pathname.startsWith("/payments/"),
+      defaultOpen:
+        pathname.startsWith("/payments") ||
+        pathname.startsWith("/settings/workspace/bank-connections"),
+      items: [
+        {
+          /** Lives in workspace settings, but it is the payments feature's plumbing. */
+          title: t("nav.bankConnections"),
+          url: "/settings/workspace/bank-connections",
+          icon: <LandmarkIcon />,
+          isActive: pathname.startsWith("/settings/workspace/bank-connections"),
+        },
+      ],
     },
     {
       title: t("nav.clients"),
@@ -141,6 +182,7 @@ export function AppSidebar({
           workspaces={workspaces}
         />
         <NewInvoiceButton pathname={pathname} />
+        <AssistantSidebarTrigger />
       </SidebarHeader>
       <SidebarContent className="pt-1">
         <NavMain
@@ -149,6 +191,34 @@ export function AppSidebar({
           items={navMain}
         />
         <NavSecondary
+          groupLabel={t("nav.settingsGroup")}
+          items={[
+            {
+              title: t("nav.settingsWorkspace"),
+              url: "/settings/workspace",
+              icon: <SettingsIcon />,
+              isActive: pathname.startsWith("/settings/workspace"),
+            },
+            {
+              title: t("nav.settingsAccount"),
+              url: "/settings/account",
+              icon: <UserRoundIcon />,
+              isActive: pathname.startsWith("/settings/account"),
+            },
+            ...(isPlatformAdmin
+              ? [
+                  {
+                    title: t("nav.admin"),
+                    url: "/admin",
+                    icon: <ShieldIcon />,
+                    isActive: pathname.startsWith("/admin"),
+                  },
+                ]
+              : []),
+          ]}
+        />
+        <NavSecondary
+          className="mt-auto"
           groupLabel={t("nav.resourcesGroup")}
           items={[
             {
