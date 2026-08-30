@@ -95,6 +95,19 @@ UPDATE workspaces
 ALTER TABLE workspaces
   ALTER COLUMN plan_id SET NOT NULL;
 
+-- Default to Free so the *currently deployed* code — which does not know about
+-- plan_id — can still insert a workspace during the window between this
+-- migration running and the new build going live. Without it, NOT NULL breaks
+-- signup in production for as long as that window lasts. The application always
+-- sets plan_id explicitly; this is purely a deploy-ordering safety net, and it
+-- is harmless to keep.
+DO $$
+DECLARE free_id text;
+BEGIN
+  SELECT id INTO free_id FROM plans WHERE key = 'free';
+  EXECUTE format('ALTER TABLE workspaces ALTER COLUMN plan_id SET DEFAULT %L', free_id);
+END $$;
+
 -- RESTRICT, not CASCADE: dropping a plan that still has workspaces must fail
 -- loudly rather than orphan tenants. Archive the plan instead.
 DO $$
