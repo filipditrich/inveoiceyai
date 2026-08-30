@@ -65,14 +65,26 @@ function toSummary(row: typeof aiTokenBalances.$inferSelect): AiTokenSummary {
   };
 }
 
-/** Insert balance if missing (idempotent). */
+/**
+ * Insert balance if missing (idempotent).
+ *
+ * Seeds **zero gifted tokens**: since Plan 26b the grant ledger is the only
+ * source of gifted tokens, so anything seeded here would be an award with no
+ * ledger row behind it — and on a sponsored plan that grants none, tokens the
+ * workspace should never have had (ADR 0037). The monthly allowance is
+ * re-seeded from the plan on assignment.
+ */
 export async function ensureAiTokenBalance(
   db: DbOrTx,
   workspaceId: string,
 ): Promise<void> {
   await db
     .insert(aiTokenBalances)
-    .values(initialAiTokenBalanceValues(workspaceId))
+    .values(
+      initialAiTokenBalanceValues(workspaceId, new Date(), {
+        signupGiftedTokens: 0,
+      }),
+    )
     .onConflictDoNothing({ target: aiTokenBalances.workspaceId });
 }
 

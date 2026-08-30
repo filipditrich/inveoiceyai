@@ -240,6 +240,16 @@ the same way.
   and leaves them in place. Deleting historical counterparties would break
   invoice lists; the constraint is on _new_ invoices, not on the past.
 
+**Two creation paths, not one.** A workspace is born either from the
+first-sign-in hook (which inserts the row itself) or from Better Auth's
+`createOrganization`, which the multi-workspace UI calls. Only the first
+resolved a plan, so every workspace after a user's first silently landed on the
+default with no signup grant — the exact escape hatch the domain rule exists to
+close. Plan assignment therefore runs as an `after` hook on
+`/organization/create` (`apps/web/lib/auth/workspace-plan-bootstrap.ts`), which
+covers every caller. `scripts/backfill-workspace-plans.ts` repairs workspaces
+created before that existed.
+
 **Where the gate lives.** `ensureClient` (`packages/db/src/clients-repo.ts`)
 refuses to create or adopt a non-catalog client on a managed workspace. That is
 deliberate placement: every write path — web form, importer, MCP, Eve/Slack, the

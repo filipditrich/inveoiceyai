@@ -1,3 +1,4 @@
+import { clientsAreManaged } from "@/lib/entitlements/managed-clients";
 import { deleteClient } from "@/actions/clients";
 import { ClientEditorForm } from "@/components/clients/client-editor-form";
 import { PageHeader } from "@/components/layout/page-header";
@@ -10,7 +11,7 @@ import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ContactRoundIcon } from "lucide-react";
 
 type Search = Promise<{ invalid?: string }>;
@@ -24,6 +25,14 @@ export default async function ClientEditPage({
   params: Params;
   searchParams: Search;
 }) {
+  // A managed workspace has no client it may create or edit (ADR 0036). The
+  // server actions refuse anyway, but a refused action only redirects — the
+  // form would sit there doing nothing, which reads as a broken page.
+  const { workspaceId: managedCheckWorkspaceId } = await requireWorkspace();
+  if (await clientsAreManaged(managedCheckWorkspaceId)) {
+    redirect("/clients");
+  }
+
   const { id } = await params;
   const { workspaceId } = await requireWorkspace();
   const sp = await searchParams;

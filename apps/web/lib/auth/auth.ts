@@ -20,6 +20,7 @@ import { onSessionCreated } from "./on-session-created";
 import { takePendingDeviceToken } from "./pending-device-cookie";
 import { assignReferralCodeOnCreate } from "./referral";
 import { checkInvitePolicy } from "./invite-policy";
+import { applyWorkspacePlanBootstrap } from "./workspace-plan-bootstrap";
 import {
   createPersonalWorkspace,
   resolveInitialWorkspaceId,
@@ -173,6 +174,32 @@ export const auth = betterAuth({
       }
     }),
     after: createAuthMiddleware(async (ctx) => {
+      // Better Auth's `createOrganization` inserts the workspace row itself, so
+      // none of our bootstrap runs for it. Without this, every workspace after
+      // a user's first landed on the default plan with no signup grant — the
+      // escape hatch the domain rule exists to close (ADR 0035).
+      if (ctx.path === "/organization/create") {
+        const workspaceId = (
+          ctx.context.returned as { id?: string } | undefined
+        )?.id;
+        const owner = ctx.context.session?.user;
+        if (workspaceId && owner) {
+          try {
+            await applyWorkspacePlanBootstrap({
+              workspaceId,
+              owner: {
+                email: owner.email,
+                emailVerified: owner.emailVerified,
+              },
+            });
+          } catch (error) {
+            // The workspace exists either way; failing the request here would
+            // leave the user with a workspace they were told was not created.
+            console.error("[invoicey] workspace plan bootstrap failed", error);
+          }
+        }
+      }
+
       const created = ctx.context.newSession?.session;
       if (!created?.id) return;
       const pending = takePendingDeviceToken(created.id);
