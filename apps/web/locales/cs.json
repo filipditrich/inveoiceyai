@@ -2612,29 +2612,7 @@
       "signIn": "Přihlásit se k {name}"
     },
     "card": {
-      "assumed": "odhad",
-      "issue": "Vystavit fakturu",
-      "previewPdf": "Náhled PDF",
-      "getPdf": "Stáhnout PDF",
-      "markPaid": "Označit jako zaplacenou",
-      "sendEmail": "Odeslat klientovi",
-      "openInvoice": "Otevřít fakturu",
-      "discard": "Zahodit",
-      "discarded": "Návrh {title} byl zahozen.",
-      "actionFailed": "Akce se nezdařila. Zkuste to znovu.",
-      "checkBeforeIssuing": "Zkontrolujte před vystavením.",
-      "assumedNotice": "Doplněno za vás — neuvedli jste. Změňte níže, nebo mi to napište.",
-      "dueDate": "Splatnost",
-      "currency": "Měna",
-      "vatTreatment": "Režim DPH",
-      "language": "Jazyk dokumentu",
-      "state": {
-        "draft": "Návrh",
-        "issued": "Vystaveno",
-        "paid": "Zaplaceno",
-        "cancelled": "Stornováno",
-        "readonly": "Faktura"
-      }
+      "actionFailed": "Akce se nezdařila. Zkuste to znovu."
     }
   }
 }

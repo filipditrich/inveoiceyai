@@ -19,7 +19,14 @@ export const runtime = "nodejs";
 const BodySchema = z.object({
   action: z.string().refine(isInvoiceCardActionId, "unknown action"),
   invoiceId: z.string().uuid(),
+  /** `change` only: which draft field the chosen option targets. */
+  field: z.enum(["d", "c", "l", "v"]).optional(),
   value: z.string().max(200).nullish(),
+  /**
+   * Carried from the card that was clicked so the rebuilt card keeps flagging
+   * the fields the user has not addressed yet.
+   */
+  assumedPaths: z.array(z.string().max(64)).max(32).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -47,7 +54,9 @@ export async function POST(request: NextRequest) {
   const result = await runInvoiceCardAction({
     action: parsed.data.action,
     invoiceId: parsed.data.invoiceId,
+    field: parsed.data.field,
     value: parsed.data.value,
+    assumedPaths: parsed.data.assumedPaths,
     principal: { workspaceId, userId },
   });
 

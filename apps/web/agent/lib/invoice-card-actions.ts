@@ -11,21 +11,33 @@ import {
 } from "@invoicey/invoice-tools/ops";
 import { runWithInvoiceyContext } from "@invoicey/invoice-tools/workspace-context";
 
+import { copyFor, type CardLocale } from "./invoice-card-i18n";
 import {
   buildInvoiceCardModel,
   cardStateFromSummary,
   type InvoiceCardModel,
 } from "./invoice-card-model";
-import { DUE_DATE_PRESETS } from "./slack-invoice-actions";
+import {
+  DUE_DATE_PRESETS,
+  FIELD_TO_PATH,
+  vatOptionFor,
+  type ChangeField,
+} from "./slack-invoice-actions";
 import { appOrigin } from "./slack-thread";
 
 /**
- * What a review-card control does, with no surface in it.
+ * What a review-card control does for the in-app assistant panel.
  *
- * The Slack thread and the in-app assistant panel show the same card, so a
- * click has to mean the same thing on both. Keeping the effect here — one
- * function, resolved against the clicker's own workspace — is what makes that
- * true by construction instead of by two handlers agreeing for a while.
+ * The vocabulary is Slack's — one `change` menu keyed by {@link ChangeField},
+ * plus the lifecycle buttons — because the card model, its option codes and its
+ * copy are already shared. The panel therefore posts the same field and value a
+ * Slack option carries, and both surfaces mean the same thing by a click.
+ *
+ * `slack-interactions.ts` still owns its own copy of these effects. Collapsing
+ * the two is worth doing, but it has to happen without disturbing the Slack
+ * handler's thread-bound concerns (ephemeral errors, in-place card edits, file
+ * uploads), so it is deliberately left as a follow-up rather than smuggled into
+ * this one.
  *
  * The model is deliberately not in this loop. A click on a card that already
  * shows number, client and total is a more specific act of consent than a
@@ -36,10 +48,7 @@ export const INVOICE_CARD_ACTIONS = [
   "mark_paid",
   "send_email",
   "discard",
-  "set_due",
-  "set_currency",
-  "set_vat",
-  "set_language",
+  "change",
 ] as const;
 
 export type InvoiceCardActionId = (typeof INVOICE_CARD_ACTIONS)[number];
@@ -60,12 +69,37 @@ export type InvoiceCardActionResult =
 export interface InvoiceCardActionInput {
   action: InvoiceCardActionId;
   invoiceId: string;
-  /** Select-menu payload: due-date preset, currency, `mode|suppliesAbroad`, language. */
+  /**
+   * Draft paths still standing on a default, carried from the card that was
+   * clicked. Without it a rebuilt card drops every "assumed" tag, so editing
+   * one field would quietly stop flagging all the others.
+   */
+  assumedPaths?: readonly string[];
+  /** `change` only: which field the option targets. */
+  field?: ChangeField;
   value?: string | null;
   principal: { workspaceId: string; userId: string };
-  /** Names the actor in the note ("Issued by …"), already surface-formatted. */
+  /** Names the actor in the confirmation note, already surface-formatted. */
   actorLabel?: string;
 }
+
+/**
+ * Failure copy.
+ *
+ * Kept in step with the Slack handler, which reports failures in Czech
+ * regardless of the card's own locale — a mismatch worth fixing in one place
+ * later rather than diverging here.
+ */
+const FAILED = {
+  gone: "Tato faktura už není dostupná.",
+  change: "Změnu se nepodařilo použít",
+  issue: "Fakturu se nepodařilo vystavit",
+  markPaid: "Nepodařilo se označit jako zaplacené",
+  send: "Odeslání se nepodařilo",
+  discard: "Návrh se nepodařilo zahodit — možná je už vystavený.",
+  missingRecipient:
+    "klient nemá uvedený e-mail — napište mi „pošli to na jmeno@example.com“",
+} as const;
 
 function webUrlFor(invoiceId: string): string {
   return `${appOrigin()}/invoices/${invoiceId}`;
@@ -74,6 +108,7 @@ function webUrlFor(invoiceId: string): string {
 /** Re-reads the invoice and rebuilds its card from the persisted truth. */
 export async function invoiceCardModelFor(
   invoiceId: string,
+  assumedPaths: readonly string[] = [],
 ): Promise<InvoiceCardModel | null> {
   const loaded = await getInvoice({ id: invoiceId });
   if (!loaded.ok || !loaded.invoice) return null;
@@ -81,27 +116,34 @@ export async function invoiceCardModelFor(
     invoice: loaded.invoice,
     invoiceId,
     state: cardStateFromSummary(loaded.summary),
+    assumedPaths,
     webUrl: webUrlFor(invoiceId),
   });
 }
 
+/** Card locale, for the confirmation lines appended after an action. */
+async function localeFor(invoiceId: string): Promise<CardLocale> {
+  const loaded = await getInvoice({ id: invoiceId });
+  return loaded.ok && loaded.invoice?.meta.language === "en" ? "en" : "cs";
+}
+
 async function refreshed(
   invoiceId: string,
+  assumedPaths: readonly string[],
   note?: string,
 ): Promise<InvoiceCardActionResult> {
-  const card = await invoiceCardModelFor(invoiceId);
-  if (!card) {
-    return { ok: false, message: "That invoice is no longer available." };
-  }
+  const card = await invoiceCardModelFor(invoiceId, assumedPaths);
+  if (!card) return { ok: false, message: FAILED.gone };
   return { ok: true, kind: "card", card, note };
 }
 
-function by(actorLabel: string | undefined): string {
-  return actorLabel ? ` by ${actorLabel}` : "";
+function by(actorLabel: string | undefined, byWord: string): string {
+  return actorLabel ? ` ${byWord} ${actorLabel}` : "";
 }
 
 async function patchDraft(
   invoiceId: string,
+  assumedPaths: readonly string[],
   patch: Record<string, unknown>,
 ): Promise<InvoiceCardActionResult> {
   const result = await updateDraftInvoice({ id: invoiceId, patch });
@@ -112,28 +154,58 @@ async function patchDraft(
         : result.issues
             .map((issue) => `${issue.path}: ${issue.message}`)
             .join(", ");
-    return { ok: false, message: `Could not apply that change — ${reason}` };
+    return { ok: false, message: `${FAILED.change} — ${reason}` };
   }
-  return refreshed(invoiceId);
+  return refreshed(invoiceId, assumedPaths);
 }
 
-async function setDue(
+/**
+ * Applies one option from the change menu.
+ *
+ * The path the option targets drops out of the carried set, so the field the
+ * user just chose stops being flagged while the rest stay flagged.
+ */
+async function applyChange(
   invoiceId: string,
+  carried: readonly string[],
+  field: ChangeField,
   value: string,
 ): Promise<InvoiceCardActionResult> {
-  const preset = DUE_DATE_PRESETS.find((option) => option.value === value);
-  if (!preset) {
-    return { ok: false, message: `Unknown due-date option "${value}".` };
+  const remaining = carried.filter((path) => path !== FIELD_TO_PATH[field]);
+
+  switch (field) {
+    case "d": {
+      const preset = DUE_DATE_PRESETS.find((option) => option.value === value);
+      if (!preset) return { ok: false, message: FAILED.change };
+      const loaded = await getInvoice({ id: invoiceId });
+      if (!loaded.ok || !loaded.invoice) {
+        return { ok: false, message: FAILED.gone };
+      }
+      const dueDate = addCalendarDaysYmd(
+        loaded.invoice.meta.issueDate,
+        preset.days,
+      );
+      return patchDraft(invoiceId, remaining, { meta: { dueDate } });
+    }
+    case "c":
+      return patchDraft(invoiceId, remaining, { meta: { currency: value } });
+    case "l":
+      return patchDraft(invoiceId, remaining, { meta: { language: value } });
+    case "v": {
+      const vat = vatOptionFor(value);
+      if (!vat) return { ok: false, message: FAILED.change };
+      /** `vat.mode` shares the same field, so clear both flags. */
+      return patchDraft(
+        invoiceId,
+        remaining.filter((path) => path !== "vat.mode"),
+        { vat },
+      );
+    }
+    default: {
+      const _exhaustive: never = field;
+      return { ok: false, message: String(_exhaustive) };
+    }
   }
-  const loaded = await getInvoice({ id: invoiceId });
-  if (!loaded.ok || !loaded.invoice) {
-    return { ok: false, message: "That invoice is no longer available." };
-  }
-  const dueDate = addCalendarDaysYmd(
-    loaded.invoice.meta.issueDate,
-    preset.days,
-  );
-  return patchDraft(invoiceId, { meta: { dueDate } });
 }
 
 /**
@@ -146,31 +218,36 @@ export async function runInvoiceCardAction(
   input: InvoiceCardActionInput,
 ): Promise<InvoiceCardActionResult> {
   const { action, invoiceId, value, actorLabel } = input;
+  const assumedPaths = input.assumedPaths ?? [];
 
   return runWithInvoiceyContext(input.principal, async () => {
+    const copy = copyFor(await localeFor(invoiceId));
+
     switch (action) {
       case "issue": {
         const result = await issueInvoiceById({ id: invoiceId });
         if (!result.ok) {
-          return { ok: false, message: `Could not issue — ${result.error}` };
+          return { ok: false, message: `${FAILED.issue} — ${result.error}` };
         }
         return refreshed(
           invoiceId,
+          assumedPaths,
           result.alreadyIssued
-            ? "Already issued."
-            : `Issued as ${result.invoice.meta.number}${by(actorLabel)}.`,
+            ? copy.text.alreadyIssued.replace(/_/gu, "")
+            : `${copy.text.issuedBy} ${result.invoice.meta.number}${by(actorLabel, copy.text.by)}.`,
         );
       }
 
       case "mark_paid": {
         const result = await markInvoicePaidById({ id: invoiceId });
         if (!result.ok) {
-          return {
-            ok: false,
-            message: `Could not mark paid — ${result.error}`,
-          };
+          return { ok: false, message: `${FAILED.markPaid} — ${result.error}` };
         }
-        return refreshed(invoiceId, `Marked paid${by(actorLabel)}.`);
+        return refreshed(
+          invoiceId,
+          assumedPaths,
+          `${copy.text.markedPaidBy}${by(actorLabel, copy.text.by)}.`,
+        );
       }
 
       case "send_email": {
@@ -178,66 +255,41 @@ export async function runInvoiceCardAction(
         if (!result.ok) {
           const hint =
             result.error === "missing_recipient"
-              ? "the client has no e-mail address on file — say “send it to name@example.com” instead"
+              ? FAILED.missingRecipient
               : result.error;
-          return { ok: false, message: `Could not send — ${hint}` };
+          return { ok: false, message: `${FAILED.send} — ${hint}` };
         }
-        return refreshed(invoiceId, `Sent to ${result.to}${by(actorLabel)}.`);
+        return refreshed(
+          invoiceId,
+          assumedPaths,
+          `${copy.text.sentTo} ${result.to}${by(actorLabel, copy.text.by)}.`,
+        );
       }
 
       case "discard": {
-        const model = await invoiceCardModelFor(invoiceId);
+        const model = await invoiceCardModelFor(invoiceId, assumedPaths);
         const result = await bulkDeleteDraftInvoices({ ids: [invoiceId] });
         if (result.ok !== 1) {
-          return {
-            ok: false,
-            message: "Could not discard that draft — it may already be issued.",
-          };
+          return { ok: false, message: FAILED.discard };
         }
         return {
           ok: true,
           kind: "discarded",
           invoiceId,
-          title: model?.title.split(" · ").pop() ?? "Draft",
+          title: model?.title.split(" · ").pop() ?? copy.state.draft,
         };
       }
 
-      case "set_due": {
-        if (!value) return { ok: false, message: "Missing due-date option." };
-        return setDue(invoiceId, value);
-      }
-
-      /**
-       * The select values are not re-checked against the card's option lists:
-       * `updateDraftInvoice` validates the patch and returns a real reason
-       * (`oss requires abroad`), which is more useful to the clicker than this
-       * layer saying the option is unknown.
-       */
-      case "set_currency": {
-        if (!value) return { ok: false, message: "Missing currency." };
-        return patchDraft(invoiceId, { meta: { currency: value } });
-      }
-
-      case "set_language": {
-        if (!value) return { ok: false, message: "Missing language." };
-        return patchDraft(invoiceId, { meta: { language: value } });
-      }
-
-      case "set_vat": {
-        if (!value) return { ok: false, message: "Missing VAT treatment." };
-        const [mode, suppliesAbroad] = value.split("|");
-        if (!mode || !suppliesAbroad) {
-          return { ok: false, message: `Unknown VAT treatment "${value}".` };
+      case "change": {
+        if (!input.field || !value) {
+          return { ok: false, message: FAILED.change };
         }
-        return patchDraft(invoiceId, { vat: { mode, suppliesAbroad } });
+        return applyChange(invoiceId, assumedPaths, input.field, value);
       }
 
       default: {
         const _exhaustive: never = action;
-        return {
-          ok: false,
-          message: `Unknown action "${String(_exhaustive)}".`,
-        };
+        return { ok: false, message: String(_exhaustive) };
       }
     }
   });

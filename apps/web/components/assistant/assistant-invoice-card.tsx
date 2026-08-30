@@ -1,15 +1,17 @@
 "use client";
 
+import { copyFor } from "@/agent/lib/invoice-card-i18n";
+import type {
+  InvoiceCardModel,
+  InvoiceCardState,
+} from "@/agent/lib/invoice-card-model";
 import {
   CURRENCY_OPTIONS,
   DUE_DATE_PRESETS,
   LANGUAGE_OPTIONS,
   VAT_OPTIONS,
+  type ChangeField,
 } from "@/agent/lib/slack-invoice-actions";
-import type {
-  InvoiceCardModel,
-  InvoiceCardState,
-} from "@/agent/lib/invoice-card-model";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
 import {
   AlertTriangleIcon,
   ExternalLinkIcon,
@@ -32,27 +33,19 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
-/** Values the card's inline `assumed` tag is appended with, mirroring Slack. */
-const ASSUMED_SUFFIX = "  ·  _assumed_";
-
-type ActionId =
-  | "issue"
-  | "mark_paid"
-  | "send_email"
-  | "discard"
-  | "set_due"
-  | "set_currency"
-  | "set_vat"
-  | "set_language";
+type ActionId = "issue" | "mark_paid" | "send_email" | "discard" | "change";
 
 /**
  * The review card, rendered for the web.
  *
- * Same model, same fields, same controls as the Slack card — `InvoiceCardModel`
- * is built once server-side and rendered twice. A click here posts to
- * `/api/assistant/card-action`, which runs the same shared action a Slack
- * button runs, so the model stays out of the loop on both surfaces and neither
- * costs a turn.
+ * Same model, same option codes and — via `copyFor` — the same words as the
+ * Slack card. `InvoiceCardModel` is built once server-side and rendered twice,
+ * so a field tagged "doplněno" in a thread is tagged "doplněno" here, in the
+ * invoice's own language rather than the UI's.
+ *
+ * A click posts to `/api/assistant/card-action`, which runs the same effect a
+ * Slack option runs, carrying `assumedPaths` so editing one field does not
+ * silently clear the warnings on the others.
  */
 export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
   const t = useTranslations("Assistant.card");
@@ -62,15 +55,25 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
   const [note, setNote] = useState<string | null>(null);
 
   const invoiceId = model.invoiceId;
+  const copy = copyFor(model.locale);
+  const assumedSuffix = `  ·  _${copy.text.assumedTag}_`;
 
-  async function run(action: ActionId, value?: string) {
+  async function run(
+    action: ActionId,
+    change?: { field: ChangeField; value: string },
+  ) {
     if (!invoiceId || pending) return;
     setPending(action);
     try {
       const res = await fetch("/api/assistant/card-action", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, invoiceId, value: value ?? null }),
+        body: JSON.stringify({
+          action,
+          invoiceId,
+          assumedPaths: model.assumedPaths,
+          ...change,
+        }),
       });
       const data = (await res.json()) as
         | { ok: true; kind: "card"; card: InvoiceCardModel; note?: string }
@@ -98,7 +101,7 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
     return (
       <CardShell>
         <p className="text-muted-foreground text-sm">
-          {t("discarded", { title: discarded })}
+          {copy.text.discarded} · {discarded}
         </p>
       </CardShell>
     );
@@ -115,14 +118,14 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
             {model.subtitle}
           </p>
         </div>
-        <StateBadge state={model.state} />
+        <StateBadge label={copy.state[model.state]} state={model.state} />
       </header>
 
       <dl className="grid grid-cols-2 gap-x-3 gap-y-2">
         {model.fields.map((field) => {
-          const assumed = field.value.endsWith(ASSUMED_SUFFIX);
+          const assumed = field.value.endsWith(assumedSuffix);
           const value = assumed
-            ? field.value.slice(0, -ASSUMED_SUFFIX.length)
+            ? field.value.slice(0, -assumedSuffix.length)
             : field.value;
           return (
             <div className="min-w-0" key={field.label}>
@@ -133,7 +136,7 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
                 {value}
                 {assumed ? (
                   <span className="text-muted-foreground ml-1 text-[0.7rem] italic">
-                    {t("assumed")}
+                    {copy.text.assumedTag}
                   </span>
                 ) : null}
               </dd>
@@ -144,7 +147,7 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
 
       {model.linesText ? <Lines text={model.linesText} /> : null}
 
-      <Assumptions model={model} />
+      <Notices model={model} />
 
       {note ? (
         <p className="text-muted-foreground border-t pt-2 text-xs">{note}</p>
@@ -159,9 +162,9 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
               size="sm"
             >
               {pending === "issue" ? <Spinner /> : null}
-              {t("issue")}
+              {copy.action.issue}
             </Button>
-            <PdfButton invoiceId={invoiceId} label={t("previewPdf")} />
+            <PdfButton invoiceId={invoiceId} label={copy.action.previewPdf} />
           </>
         ) : null}
 
@@ -174,7 +177,7 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
                 size="sm"
               >
                 {pending === "mark_paid" ? <Spinner /> : null}
-                {t("markPaid")}
+                {copy.action.markPaid}
               </Button>
             ) : null}
             <Button
@@ -184,9 +187,9 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
               variant="outline"
             >
               {pending === "send_email" ? <Spinner /> : null}
-              {t("sendEmail")}
+              {copy.action.sendEmail}
             </Button>
-            <PdfButton invoiceId={invoiceId} label={t("getPdf")} />
+            <PdfButton invoiceId={invoiceId} label={copy.action.getPdf} />
           </>
         ) : null}
 
@@ -195,7 +198,7 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
             render={
               <Link href={pathOf(model.webUrl)} prefetch={false}>
                 <ExternalLinkIcon />
-                {t("openInvoice")}
+                {copy.action.openWeb}
               </Link>
             }
             size="sm"
@@ -212,60 +215,17 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
             variant="ghost"
           >
             {pending === "discard" ? <Spinner /> : null}
-            {t("discard")}
+            {copy.action.discard}
           </Button>
         ) : null}
       </div>
 
       {isDraft && invoiceId ? (
-        <div className="grid grid-cols-2 gap-2">
-          <Adjust
-            disabled={pending !== null}
-            label={t("dueDate")}
-            onSelect={(value) => void run("set_due", value)}
-            options={DUE_DATE_PRESETS.map((preset) => ({
-              value: preset.value,
-              label: preset.label,
-            }))}
-          />
-          <Adjust
-            disabled={pending !== null}
-            label={t("currency")}
-            onSelect={(value) => void run("set_currency", value)}
-            options={CURRENCY_OPTIONS.map((code) => ({
-              value: code,
-              label: code,
-            }))}
-            value={currentFieldValue(model, "Currency")}
-          />
-          <Adjust
-            disabled={pending !== null}
-            label={t("vatTreatment")}
-            onSelect={(value) => void run("set_vat", value)}
-            options={VAT_OPTIONS.map((option) => ({
-              value: option.value,
-              label: option.label,
-            }))}
-            value={
-              VAT_OPTIONS.find(
-                (option) =>
-                  option.label === currentFieldValue(model, "VAT treatment"),
-              )?.value
-            }
-          />
-          <Adjust
-            disabled={pending !== null}
-            label={t("language")}
-            onSelect={(value) => void run("set_language", value)}
-            options={LANGUAGE_OPTIONS.map((option) => ({
-              value: option.value,
-              label: option.label,
-            }))}
-            value={
-              currentFieldValue(model, "Language") === "English" ? "en" : "cs"
-            }
-          />
-        </div>
+        <ChangeMenu
+          copy={copy}
+          disabled={pending !== null}
+          onChange={(field, value) => void run("change", { field, value })}
+        />
       ) : null}
     </CardShell>
   );
@@ -279,8 +239,13 @@ function CardShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function StateBadge({ state }: { state: InvoiceCardState }) {
-  const t = useTranslations("Assistant.card");
+function StateBadge({
+  state,
+  label,
+}: {
+  state: InvoiceCardState;
+  label: string;
+}) {
   const variant =
     state === "cancelled"
       ? "destructive"
@@ -288,9 +253,82 @@ function StateBadge({ state }: { state: InvoiceCardState }) {
         ? "default"
         : "secondary";
   return (
-    <Badge className="shrink-0 capitalize" variant={variant}>
-      {t(`state.${state}`)}
+    <Badge className="shrink-0" variant={variant}>
+      {label}
     </Badge>
+  );
+}
+
+/**
+ * One menu for every draft adjustment, matching the Slack card.
+ *
+ * The option labels are built from the same copy and the same codes, so the
+ * two surfaces offer literally the same list.
+ */
+function ChangeMenu({
+  copy,
+  disabled,
+  onChange,
+}: {
+  copy: ReturnType<typeof copyFor>;
+  disabled: boolean;
+  onChange: (field: ChangeField, value: string) => void;
+}) {
+  const options: Array<{ id: string; label: string }> = [
+    ...DUE_DATE_PRESETS.map((preset) => ({
+      id: `d:${preset.value}`,
+      label: `${copy.option.due} ${preset.days} ${copy.option.days}`,
+    })),
+    ...CURRENCY_OPTIONS.map((code) => ({
+      id: `c:${code}`,
+      label: `${copy.option.currency} ${code}`,
+    })),
+    ...VAT_OPTIONS.map((vat) => ({
+      id: `v:${vat.value}`,
+      label: `${copy.option.vat} ${copy.vatMode[vat.mode] ?? vat.mode} · ${
+        copy.suppliesAbroad[vat.suppliesAbroad] ?? vat.suppliesAbroad
+      }`,
+    })),
+    ...LANGUAGE_OPTIONS.map((code) => ({
+      id: `l:${code}`,
+      label: `${copy.option.language} ${copy.language[code]}`,
+    })),
+  ];
+
+  return (
+    <Select
+      disabled={disabled}
+      onValueChange={(next: unknown) => {
+        /** Option ids are `<field>:<value>` — the same pair a Slack option carries. */
+        if (typeof next !== "string") return;
+        const separator = next.indexOf(":");
+        if (separator <= 0) return;
+        onChange(
+          next.slice(0, separator) as ChangeField,
+          next.slice(separator + 1),
+        );
+      }}
+      /** Never holds a selection: picking an option applies it and resets. */
+      value={null}
+    >
+      <SelectTrigger
+        aria-label={copy.action.change}
+        className="w-full"
+        size="sm"
+      >
+        {/* Always the prompt: this is a menu of edits, not a current value. */}
+        <SelectValue placeholder={copy.action.change}>
+          {() => copy.action.change}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option) => (
+          <SelectItem key={option.id} value={option.id}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 
@@ -311,19 +349,19 @@ function Lines({ text }: { text: string }) {
   );
 }
 
-function Assumptions({ model }: { model: InvoiceCardModel }) {
-  const t = useTranslations("Assistant.card");
-  /**
-   * Same filter as the Slack card: routine defaults stay tagged on their field
-   * but out of the notice. A notice that flags seven things flags nothing.
-   */
-  const notable = model.assumptions.filter(
-    (assumption) => assumption.severity !== "routine",
-  );
-  if (notable.length === 0) return null;
+/**
+ * The "we filled this in" / "check this" block.
+ *
+ * Same split as the Slack card: a value that looks invented leads, defaults
+ * follow. Routine defaults never reach `notice` at all — a warning that flags
+ * seven things flags nothing.
+ */
+function Notices({ model }: { model: InvoiceCardModel }) {
+  const copy = copyFor(model.locale);
+  if (model.notice.length === 0) return null;
 
-  const suspects = notable.filter((a) => a.kind === "suspect");
-  const defaults = notable.filter((a) => a.kind !== "suspect");
+  const suspects = model.notice.filter((entry) => entry.kind === "suspect");
+  const defaults = model.notice.filter((entry) => entry.kind !== "suspect");
 
   return (
     <div className="flex flex-col gap-2 border-t pt-2">
@@ -331,13 +369,15 @@ function Assumptions({ model }: { model: InvoiceCardModel }) {
         <div className="text-destructive flex gap-2 text-xs">
           <TriangleAlertIcon className="mt-0.5 size-3.5 shrink-0" />
           <div>
-            <p className="font-medium">{t("checkBeforeIssuing")}</p>
+            <p className="font-medium">
+              {stripMarks(copy.text.suspectHeading)}
+            </p>
             <ul className="mt-1 space-y-0.5">
-              {suspects.map((assumption) => (
-                <li key={assumption.path}>
-                  <span className="font-medium">{assumption.label}</span> →{" "}
-                  {assumption.value}{" "}
-                  <span className="opacity-70">({assumption.reason})</span>
+              {suspects.map((entry) => (
+                <li key={entry.label}>
+                  <span className="font-medium">{entry.label}</span> →{" "}
+                  {entry.value}{" "}
+                  <span className="opacity-70">({entry.reason})</span>
                 </li>
               ))}
             </ul>
@@ -349,12 +389,14 @@ function Assumptions({ model }: { model: InvoiceCardModel }) {
         <div className="text-muted-foreground flex gap-2 text-xs">
           <AlertTriangleIcon className="mt-0.5 size-3.5 shrink-0" />
           <div>
-            <p className="font-medium">{t("assumedNotice")}</p>
+            <p className="font-medium">
+              {stripMarks(copy.text.assumedHeading)}
+            </p>
             <ul className="mt-1 space-y-0.5">
-              {defaults.map((assumption) => (
-                <li key={assumption.path}>
-                  <span className="font-medium">{assumption.label}</span> →{" "}
-                  {assumption.value}
+              {defaults.map((entry) => (
+                <li key={entry.label}>
+                  <span className="font-medium">{entry.label}</span> →{" "}
+                  {entry.value}
                 </li>
               ))}
             </ul>
@@ -362,47 +404,6 @@ function Assumptions({ model }: { model: InvoiceCardModel }) {
         </div>
       ) : null}
     </div>
-  );
-}
-
-function Adjust({
-  label,
-  options,
-  value,
-  disabled,
-  onSelect,
-}: {
-  label: string;
-  options: Array<{ value: string; label: string }>;
-  value?: string;
-  disabled?: boolean;
-  onSelect: (value: string) => void;
-}) {
-  return (
-    <Select
-      disabled={disabled}
-      onValueChange={(next) => {
-        if (typeof next === "string" && next.length > 0) onSelect(next);
-      }}
-      value={value ?? null}
-    >
-      <SelectTrigger aria-label={label} className="w-full" size="sm">
-        {/* Without a formatter the trigger shows the raw option value, so the
-            VAT control would read `regular|none` instead of its label. */}
-        <SelectValue placeholder={label}>
-          {(current: unknown) =>
-            options.find((option) => option.value === current)?.label ?? label
-          }
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   );
 }
 
@@ -425,18 +426,12 @@ function PdfButton({ invoiceId, label }: { invoiceId: string; label: string }) {
   );
 }
 
-/** Strips the `*bold*` / `_italic_` marks the shared model uses for Slack. */
+/** Strips the `*bold*` / `_italic_` marks and `:emoji:` the model uses for Slack. */
 function stripMarks(text: string): string {
-  return text.replace(/[*_]/gu, "").trim();
-}
-
-function currentFieldValue(
-  model: InvoiceCardModel,
-  label: string,
-): string | undefined {
-  const raw = model.fields.find((field) => field.label === label)?.value;
-  if (!raw) return undefined;
-  return raw.split("  ·  ")[0]?.trim();
+  return text
+    .replace(/:[a-z0-9_+-]+:/gu, "")
+    .replace(/[*_]/gu, "")
+    .trim();
 }
 
 /** The model carries an absolute URL for Slack; in-app it should not reload. */

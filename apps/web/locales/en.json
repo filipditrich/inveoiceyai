@@ -2612,29 +2612,7 @@
       "signIn": "Sign in to {name}"
     },
     "card": {
-      "assumed": "assumed",
-      "issue": "Issue invoice",
-      "previewPdf": "Preview PDF",
-      "getPdf": "Get PDF",
-      "markPaid": "Mark paid",
-      "sendEmail": "Send to client",
-      "openInvoice": "Open invoice",
-      "discard": "Discard",
-      "discarded": "Draft {title} discarded.",
-      "actionFailed": "That did not go through. Try again.",
-      "checkBeforeIssuing": "Check this before issuing.",
-      "assumedNotice": "Assumed — you did not say. Change it below, or just tell me.",
-      "dueDate": "Due date",
-      "currency": "Currency",
-      "vatTreatment": "VAT treatment",
-      "language": "Document language",
-      "state": {
-        "draft": "Draft",
-        "issued": "Issued",
-        "paid": "Paid",
-        "cancelled": "Cancelled",
-        "readonly": "Invoice"
-      }
+      "actionFailed": "That did not go through. Try again."
     }
   }
 }
