@@ -11,15 +11,18 @@
   "scripts": {
     "db:push": "drizzle-kit push",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "@invoicey/env": "workspace:*",
     "@invoicey/invoice-core": "workspace:*",
     "@invoicey/payment-core": "workspace:*",
-    "@invoicey/env": "workspace:*",
     "@neondatabase/serverless": "^1.0.1",
     "drizzle-orm": "^0.44.3",
-    "ws": "8.21.3"
+    "ws": "8.21.3",
+    "zod": "4.4.2"
   },
   "devDependencies": {
     "@types/node": "^22.15.21",
@@ -28,6 +31,7 @@
     "drizzle-kit": "^0.31.4",
     "typescript": "6.0.3",
     "@invoicey/eslint-config": "workspace:*",
-    "eslint": "^9"
+    "eslint": "^9",
+    "vitest": "^3.2.4"
   }
 }

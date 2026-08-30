@@ -80,3 +80,30 @@ export {
   type EnsureClientOptions,
   type MergeDuplicateClientsResult,
 } from "./clients-repo";
+export {
+  BASE_ENTITLEMENTS,
+  EntitlementsSchema,
+  TokenGrantRuleSchema,
+  hasQuotaRoom,
+  readBooleanEntitlement,
+  resolveEntitlements,
+  type BooleanEntitlementPath,
+  type EntitlementOverrides,
+  type Entitlements,
+  type TokenGrantRule,
+} from "./entitlements";
+export { DEFAULT_PLAN_KEY, PLAN_SEEDS, type PlanSeed } from "./plan-presets";
+export {
+  PlanNotFoundError,
+  assignWorkspacePlan,
+  countWorkspacesByPlan,
+  emailDomain,
+  getDefaultPlan,
+  getPlanById,
+  getPlanByKey,
+  getWorkspaceEntitlements,
+  listPlans,
+  resolvePlanForNewWorkspace,
+  type AssignPlanInput,
+  type WorkspaceEntitlements,
+} from "./plans-repo";

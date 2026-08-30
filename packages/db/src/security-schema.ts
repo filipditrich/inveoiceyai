@@ -35,6 +35,8 @@ export type SecurityAuditEventType =
   | "platform_workspace_delete"
   | "platform_member_remove"
   | "platform_invite_cancel"
+  | "platform_plan_assign"
+  | "platform_plan_update"
   | "slack_link"
   | "slack_unlink"
   | "slack_rebind";

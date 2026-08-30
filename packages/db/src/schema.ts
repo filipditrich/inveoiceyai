@@ -17,6 +17,7 @@ import { workspaces } from "./workspaces";
 
 export * from "./ai-usage";
 export * from "./auth-schema";
+export * from "./plans";
 export * from "./referral-schema";
 export * from "./security-schema";
 export * from "./workspaces";

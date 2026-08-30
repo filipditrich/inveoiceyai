@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 
 import { ensureAiTokenBalance } from "./ai-tokens";
 import type { InvoiceyDb } from "./create-db";
+import { getDefaultPlan } from "./plans-repo";
 import { workspaces } from "./schema";
 
 /** Seeded default workspace UUID (ADR 0006). */
@@ -35,6 +36,10 @@ export async function ensureDefaultWorkspace(
     return { id };
   }
 
+  // Seeded workspaces have no owner to match a domain rule against, so they
+  // take the default plan (ADR 0035).
+  const plan = await getDefaultPlan(database);
+
   await database.insert(workspaces).values({
     id,
     name: options?.name ?? "Default workspace",
@@ -42,6 +47,7 @@ export async function ensureDefaultWorkspace(
     // inherits the primary key's uniqueness. Whole function goes away in Plan
     // 14 stage 6, once callers resolve the workspace from the session instead.
     slug: `ws-${id}`,
+    planId: plan.id,
   });
   await ensureAiTokenBalance(database, id);
   return { id };

@@ -112,17 +112,27 @@ export function aiTokenPeriodBounds(from: Date = new Date()): {
   return { periodStart, periodEnd };
 }
 
-/** Row values for a newly created workspace balance. */
+/**
+ * Row values for a newly created workspace balance.
+ *
+ * Both amounts come from the workspace's plan (ADR 0035); the module constants
+ * are only the fallback for callers that have no plan in hand, such as the
+ * seeded default workspace. A sponsored plan can legitimately grant zero
+ * gifted tokens, so `0` must survive here — hence the explicit `??` rather than
+ * a truthiness check.
+ */
 export function initialAiTokenBalanceValues(
   workspaceId: string,
   now = new Date(),
+  plan?: { monthlyIncludedTokens?: number; signupGiftedTokens?: number },
 ) {
   const { periodStart, periodEnd } = aiTokenPeriodBounds(now);
+  const monthly = plan?.monthlyIncludedTokens ?? MONTHLY_INCLUDED_TOKENS;
   return {
     workspaceId,
-    giftedRemaining: SIGNUP_GIFTED_TOKENS,
-    monthlyRemaining: MONTHLY_INCLUDED_TOKENS,
-    monthlyLimit: MONTHLY_INCLUDED_TOKENS,
+    giftedRemaining: plan?.signupGiftedTokens ?? SIGNUP_GIFTED_TOKENS,
+    monthlyRemaining: monthly,
+    monthlyLimit: monthly,
     purchasedRemaining: 0,
     periodStart,
     periodEnd,
