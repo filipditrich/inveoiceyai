@@ -807,7 +807,7 @@
             "bankConnections": "Bank connections",
             "recurring": "Recurring drafts",
             "historicalImport": "Historical import",
-            "agents": "Slack, MCP and Eve"
+            "agents": "Slack, MCP and Invoicey"
           }
         }
       },
@@ -1911,7 +1911,7 @@
     },
     "apiKeys": {
       "title": "API Keys",
-      "description": "Personal tokens for remote MCP and Eve HTTP. Env ops key remains as a fallback.",
+      "description": "Personal tokens for remote MCP and Invoicey HTTP. Env ops key remains as a fallback.",
       "namePlaceholder": "Key name",
       "nameLabel": "Key name",
       "create": "Create",
@@ -1961,7 +1961,7 @@
       "whichKeyTitle": "Which key goes where",
       "whichKeyPat": "Remote MCP accepts your PAT or the ops {env}.",
       "whichKeyStdio": "Local stdio MCP (dev) does not use a PAT — see the docs.",
-      "whichKeySlack": "The Slack bot and Eve HTTP do not use this key (Connect / ops keys).",
+      "whichKeySlack": "The Slack bot and Invoicey HTTP do not use this key (Connect / ops keys).",
       "docsMcp": "MCP docs",
       "docsCursor": "Cursor setup",
       "docsKeys": "API keys",
@@ -1971,34 +1971,22 @@
       "title": "Invoicey for Slack",
       "description": "Draft invoices in conversation. Issuing, sending, and marking paid always require confirmation.",
       "howTitle": "How it works",
-      "howInviteTitle": "Invite the bot",
+      "howInviteTitle": "Invite Invoicey",
       "howInviteBody": "Add Invoicey to a channel, or send it a DM.",
       "howLinkTitle": "Confirm your account",
       "howLinkBody": "An unlinked Slack account gets a private message with a link into Invoicey.",
       "howMentionTitle": "Mention @Invoicey",
       "howMentionBody": "A mention or DM starts a session. Further mentions are not needed in the same thread.",
       "howDraftTitle": "Draft with attachments",
-      "howDraftBody": "The bot prepares an invoice, attaches PDF and ISDOC, and links to the web app.",
+      "howDraftBody": "Invoicey prepares an invoice, attaches PDF and ISDOC, and links to the web app.",
       "hitlTitle": "Actions that require confirmation",
       "hitlIntro": "The agent always stops and asks for approval on these steps:",
       "hitlIssue": "Assigns a number and freezes the invoice — irreversible",
       "hitlPaid": "Claims that the money arrived",
       "hitlEmail": "Sends email to a real client",
       "accessTitle": "Access after linking Slack",
-      "accessBody": "Unlinked Slack users get no session — the bot DMs a confirm link in Invoicey. Linking is one Invoicey account and one workspace. Anyone in the channel can click Allow/Deny in the thread; keep the bot in a private channel with people who may invoice.",
-      "operatorTitle": "Deployment setup",
-      "operatorIntro": "This section is for the person who deploys. Connection goes through the Vercel CLI; a personal API key does not authorize Slack.",
-      "copied": "Copied",
-      "copy": "Copy",
-      "docsLink": "Detailed Slack guide",
-      "step1Title": "Deploy with the Eve flag",
-      "step1Body": "Set VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1 and Node 24+. Without that, /eve/v1/* is not generated and Slack fails silently.",
-      "step2Title": "Vercel Connect → /eve/v1/slack",
-      "step2Body": "Connect holds Slack credentials (no manual SLACK_*). The UID must match the agent (slack/invoicey).",
-      "step3Title": "Scopes, events, and reinstall",
-      "step3Body": "message.channels (and message.groups for private channels); scopes include channels:history, groups:history, im:history, im:write, chat:write, app_mentions:read, files:write, files:read. Reinstall the Slack app after changing scopes.",
-      "step4Title": "Env and healthcheck",
-      "step4Body": "DATABASE_URL, AI Gateway / OIDC, NEXT_PUBLIC_APP_URL, UPLOADTHING_TOKEN as needed. Eve HTTP uses EVE_API_KEY or MCP_API_KEY — not a personal PAT from Settings."
+      "accessBody": "Unlinked Slack users get no session — Invoicey DMs a confirm link. Linking is one Invoicey account and one workspace. Anyone in the channel can click Allow/Deny in the thread; keep Invoicey in a private channel with people who may invoice.",
+      "docsLink": "Detailed Slack guide"
     },
     "integrations": {
       "pageTitle": "Integrations and automation",
@@ -2015,7 +2003,7 @@
         "description": "One Slack account maps to one Invoicey user and one workspace. Unlinked mentions are refused.",
         "connected": "Connected",
         "emptyTitle": "No Slack yet",
-        "empty": "DM the Invoicey bot in Slack. It will send a confirm link to open in the browser.",
+        "empty": "DM Invoicey in Slack. It will send a confirm link to open in the browser.",
         "fromSlack": "From Slack",
         "toWorkspace": "To workspace",
         "slackAccount": "Your Slack account",
@@ -2538,7 +2526,7 @@
         "bankConnections": "Bank connections",
         "recurring": "Recurring drafts",
         "historicalImport": "Historical import",
-        "agents": "Slack / MCP / Eve",
+        "agents": "Slack / MCP / Invoicey",
         "topUpEnabled": "Token top-up"
       },
       "hints": {

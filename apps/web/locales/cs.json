@@ -807,7 +807,7 @@
             "bankConnections": "Bankovní propojení",
             "recurring": "Opakované koncepty",
             "historicalImport": "Import historie",
-            "agents": "Slack, MCP a Eve"
+            "agents": "Slack, MCP a Invoicey"
           }
         }
       },
@@ -1911,7 +1911,7 @@
     },
     "apiKeys": {
       "title": "API klíče",
-      "description": "Osobní tokeny pro remote MCP a Eve HTTP. Env ops klíč zůstává jako záloha.",
+      "description": "Osobní tokeny pro remote MCP a Invoicey HTTP. Env ops klíč zůstává jako záloha.",
       "namePlaceholder": "Název klíče",
       "nameLabel": "Název klíče",
       "create": "Vytvořit",
@@ -1961,7 +1961,7 @@
       "whichKeyTitle": "Který klíč kam patří",
       "whichKeyPat": "Remote MCP přijímá váš PAT nebo ops {env}.",
       "whichKeyStdio": "Local stdio MCP (dev) nepoužívá PAT — viz dokumentaci.",
-      "whichKeySlack": "Slack bot a Eve HTTP nejdou přes tento klíč (Connect / ops klíče).",
+      "whichKeySlack": "Slack bot a Invoicey HTTP nejdou přes tento klíč (Connect / ops klíče).",
       "docsMcp": "MCP docs",
       "docsCursor": "Cursor setup",
       "docsKeys": "API keys",
@@ -1971,34 +1971,22 @@
       "title": "Invoicey pro Slack",
       "description": "Připravujte faktury v konverzaci. Vystavení, odeslání a potvrzení platby vždy vyžaduje souhlas.",
       "howTitle": "Jak funguje",
-      "howInviteTitle": "Pozvěte bota",
+      "howInviteTitle": "Pozvěte Invoicey",
       "howInviteBody": "Přidejte Invoicey do kanálu, nebo mu napište DM.",
       "howLinkTitle": "Potvrďte účet",
       "howLinkBody": "Nespárovaný Slack účet dostane soukromou zprávu s odkazem do Invoicey.",
       "howMentionTitle": "Zmiňte @Invoicey",
       "howMentionBody": "Zmínka nebo DM spustí relaci. Ve stejném vlákně už zmínka není potřeba.",
       "howDraftTitle": "Návrh s přílohami",
-      "howDraftBody": "Bot připraví fakturu, připojí PDF a ISDOC a odkaz do webové aplikace.",
+      "howDraftBody": "Invoicey připraví fakturu, připojí PDF a ISDOC a odkaz do webové aplikace.",
       "hitlTitle": "Akce vyžadující potvrzení",
       "hitlIntro": "U těchto kroků se agent vždy zastaví a požádá o schválení:",
       "hitlIssue": "Přidělí číslo a zmrazí fakturu — nevratné",
       "hitlPaid": "Tvrdí, že peníze dorazily",
       "hitlEmail": "Odešle e-mail skutečnému klientovi",
       "accessTitle": "Přístup po propojení Slacku",
-      "accessBody": "Nespárovaní Slack uživatelé nedostanou žádnou relaci — bot jim pošle DM s odkazem na potvrzení v Invoicey. Propojení platí pro jeden Invoicey účet a jeden workspace. Allow/Deny ve vlákně může kliknout kdokoli v kanálu; držte bota v soukromém kanálu s lidmi, kteří smí fakturovat.",
-      "operatorTitle": "Technické nastavení nasazení",
-      "operatorIntro": "Tato část je určená správci nasazení. Připojení probíhá přes Vercel CLI; osobní API klíč Slack neautorizuje.",
-      "copied": "Zkopírováno",
-      "copy": "Kopírovat",
-      "docsLink": "Podrobný návod pro Slack",
-      "step1Title": "Deploy s Eve flagem",
-      "step1Body": "Nastavte VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1 a Node 24+. Bez toho se /eve/v1/* nevygeneruje a Slack tiše nefunguje.",
-      "step2Title": "Vercel Connect → /eve/v1/slack",
-      "step2Body": "Connect drží Slack credentials (žádné ruční SLACK_*). UID musí sedět s agentem (slack/invoicey).",
-      "step3Title": "Scopes a eventy + reinstall",
-      "step3Body": "message.channels (a message.groups pro privátní kanály); scopes mimo jiné channels:history, groups:history, im:history, im:write, chat:write, app_mentions:read, files:write, files:read. Po změně scopes vždy reinstall Slack app.",
-      "step4Title": "Env a healthcheck",
-      "step4Body": "DATABASE_URL, AI Gateway / OIDC, NEXT_PUBLIC_APP_URL, UPLOADTHING_TOKEN dle potřeby. Eve HTTP používá EVE_API_KEY nebo MCP_API_KEY — ne osobní PAT ze Settings."
+      "accessBody": "Nespárovaní Slack uživatelé nedostanou žádnou relaci — Invoicey jim pošle DM s odkazem na potvrzení. Propojení platí pro jeden Invoicey účet a jeden workspace. Allow/Deny ve vlákně může kliknout kdokoli v kanálu; držte Invoicey v soukromém kanálu s lidmi, kteří smí fakturovat.",
+      "docsLink": "Podrobný návod pro Slack"
     },
     "integrations": {
       "pageTitle": "Integrace a automatizace",
@@ -2012,10 +2000,10 @@
       "docsMcp": "Dokumentace MCP",
       "slackIdentity": {
         "title": "Propojený Slack",
-        "description": "Jeden Slack účet patří jednomu Invoicey uživateli a jednomu workspace. Nespárované zmínky bot odmítne.",
+        "description": "Jeden Slack účet patří jednomu Invoicey uživateli a jednomu workspace. Nespárované zmínky Invoicey odmítne.",
         "connected": "Propojeno",
         "emptyTitle": "Zatím žádný Slack",
-        "empty": "Napište Invoicey botovi DM ve Slacku. Pošle vám odkaz k potvrzení v prohlížeči.",
+        "empty": "Napište Invoicey DM ve Slacku. Pošle vám odkaz k potvrzení v prohlížeči.",
         "fromSlack": "Ze Slacku",
         "toWorkspace": "Do workspace",
         "slackAccount": "Váš Slack účet",
@@ -2538,7 +2526,7 @@
         "bankConnections": "Bankovní propojení",
         "recurring": "Opakované koncepty",
         "historicalImport": "Import historie",
-        "agents": "Slack / MCP / Eve",
+        "agents": "Slack / MCP / Invoicey",
         "topUpEnabled": "Dobití tokenů"
       },
       "hints": {

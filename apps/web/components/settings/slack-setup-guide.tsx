@@ -1,13 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 import {
   AtSignIcon,
-  ChevronDownIcon,
-  CopyIcon,
   ExternalLinkIcon,
   FileTextIcon,
   Link2Icon,
@@ -15,8 +11,6 @@ import {
   TriangleAlertIcon,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -24,12 +18,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { cn } from "@/lib/utils";
 
 const HOW_IT_WORKS = [
   {
@@ -60,36 +48,8 @@ const HITL_TOOLS = [
   { name: "send_invoice_email", whyKey: "hitlEmail" },
 ] as const;
 
-const OPERATOR_STEPS = [
-  {
-    titleKey: "step1Title",
-    bodyKey: "step1Body",
-    code: "VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1 vercel deploy --prod",
-  },
-  {
-    titleKey: "step2Title",
-    bodyKey: "step2Body",
-    code: "vercel connect create slack --triggers\nvercel connect attach <uid> --triggers --trigger-path /eve/v1/slack --yes",
-  },
-  {
-    titleKey: "step3Title",
-    bodyKey: "step3Body",
-  },
-  {
-    titleKey: "step4Title",
-    bodyKey: "step4Body",
-    code: "curl -sS https://your-host/eve/v1/health",
-  },
-] as const;
-
 export function SlackSetupGuide() {
   const t = useTranslations("Settings.slack");
-  const [operatorOpen, setOperatorOpen] = useState(false);
-
-  async function copyText(text: string) {
-    await navigator.clipboard.writeText(text);
-    toast.success(t("copied"));
-  }
 
   return (
     <Card>
@@ -97,7 +57,6 @@ export function SlackSetupGuide() {
         <CardTitle className="flex items-center gap-2">
           <MessageSquareIcon className="text-muted-foreground size-4" />
           {t("title")}
-          <Badge variant="secondary">Eve</Badge>
         </CardTitle>
         <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
@@ -160,60 +119,6 @@ export function SlackSetupGuide() {
             <p className="text-muted-foreground text-xs">{t("accessBody")}</p>
           </div>
         </div>
-
-        <Collapsible open={operatorOpen} onOpenChange={setOperatorOpen}>
-          <CollapsibleTrigger
-            className={cn(
-              "hover:bg-muted/50 flex w-full items-center justify-between rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors",
-            )}
-          >
-            <span className="flex items-center gap-2">
-              {t("operatorTitle")}
-              <Badge variant="outline">CLI</Badge>
-            </span>
-            <ChevronDownIcon
-              className={cn(
-                "text-muted-foreground size-4 transition-transform",
-                operatorOpen && "rotate-180",
-              )}
-            />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3 space-y-4">
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              {t("operatorIntro")}
-            </p>
-            <ol className="space-y-4">
-              {OPERATOR_STEPS.map((step, index) => (
-                <li key={step.titleKey} className="flex gap-3 text-sm">
-                  <span className="bg-muted flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium">
-                    {index + 1}
-                  </span>
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <p className="font-medium">{t(step.titleKey)}</p>
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                      {t(step.bodyKey)}
-                    </p>
-                    {"code" in step && step.code ? (
-                      <div className="space-y-2">
-                        <pre className="bg-muted overflow-x-auto rounded-lg p-3 text-xs leading-relaxed">
-                          {step.code}
-                        </pre>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => copyText(step.code)}
-                        >
-                          <CopyIcon data-icon="inline-start" />
-                          {t("copy")}
-                        </Button>
-                      </div>
-                    ) : null}
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </CollapsibleContent>
-        </Collapsible>
 
         <Link
           href="/docs/integrations/slack"
