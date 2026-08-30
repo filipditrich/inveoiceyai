@@ -9,7 +9,7 @@ import { withEveToolWorkspace } from "../lib/tool-workspace";
 
 export default defineTool({
   description:
-    "Assemble a draft invoice, persist it, and post a review card in Slack with every field visible — including anything that had to be assumed. Issuer is locked server-side (do not pass issuer, issuerPresetId, or templatePresetId — those fields do not exist). Nothing is issued or e-mailed here: the user reviews the card and issues it from the button. Call only with draft: meta, client (structured address from ARES), vat, payment.method, and items.",
+    "Assemble a draft invoice, persist it, and post a review card with every field visible — including anything that had to be assumed. Issuer is locked server-side (do not pass issuer, issuerPresetId, or templatePresetId — those fields do not exist). Nothing is issued or e-mailed here: the user reviews the card and issues it from the button. Call only with draft: meta, client (structured address from ARES), vat, payment.method, and items.",
   inputSchema: CreateInvoiceInputSchema,
   async execute({ draft }, ctx) {
     return withEveToolWorkspace(ctx, async () => {

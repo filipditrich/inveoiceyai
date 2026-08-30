@@ -11,7 +11,7 @@ import { uploadInvoiceArtifacts } from "../lib/upload-slack-files";
 
 export default defineTool({
   description:
-    "Issue a draft invoice (atomic numbering, immutable afterwards). Requires Slack Allow/Deny. Pass `confirm` with the client name and total exactly as shown on the draft card — Slack renders the tool input on the approval card, so without it the reviewer is approving a bare id. Files are uploaded by the card's buttons, not here.",
+    "Issue a draft invoice (atomic numbering, immutable afterwards). Requires Allow/Deny approval. Pass `confirm` with the client name and total exactly as shown on the draft card — the approval prompt renders the tool input verbatim, so without it the reviewer is approving a bare id. Files are uploaded by the card's buttons, not here.",
   inputSchema: z.object({
     id: z.string().uuid().describe("Draft invoice id"),
     confirm: z

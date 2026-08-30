@@ -12,10 +12,15 @@ import {
   meteringIdentityFromAuth,
 } from "../lib/metering-identity";
 import { resolveSlackToolPrincipal } from "../lib/slack-identity";
+import { isWebSession } from "../lib/web-identity";
 
 /**
  * Gate Slack/Eve turns when the workspace has no AI tokens, and meter each
- * completed model step against product=slack.
+ * completed model step.
+ *
+ * One agent serves both surfaces, so the product is read off the session's own
+ * principal rather than assumed: the in-app assistant meters as `web`, Slack
+ * and the ops bearer as `slack`. Settings → Usage splits on that field.
  */
 export default defineHook({
   events: {
@@ -52,12 +57,13 @@ export default defineHook({
 
       const model =
         process.env.INVOICEY_AI_MODEL?.trim() || "openai/gpt-4o-mini";
+      const product = isWebSession(ctx.session.auth.current) ? "web" : "slack";
 
       try {
         await recordLlmUsage({
           workspaceId: identity.workspaceId,
           userId: identity.userId,
-          product: "slack",
+          product,
           model,
           promptTokens,
           completionTokens,
@@ -76,7 +82,7 @@ export default defineHook({
           /** remaining was debited; next turn is gated */
           return;
         }
-        console.error("[invoicey-slack] AI token metering failed", err);
+        console.error("[invoicey-agent] AI token metering failed", err);
       }
     },
   },

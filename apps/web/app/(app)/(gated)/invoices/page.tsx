@@ -1,5 +1,6 @@
 import { InvoiceListTable } from "@/components/invoices/invoice-list-table";
 import { InvoiceStatusSummary } from "@/components/invoices/invoice-status-summary";
+import { AssistantOpenButton } from "@/components/assistant/assistant-open-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
@@ -178,9 +179,7 @@ export default async function InvoicesPage({
       <PageHeader
         actions={
           <>
-            <Button render={<Link href="/invoices/ai" prefetch />} size="sm">
-              {t("aiButton")}
-            </Button>
+            <AssistantOpenButton size="sm">{t("aiButton")}</AssistantOpenButton>
             <Button
               render={<Link href="/invoices/new" prefetch />}
               size="sm"

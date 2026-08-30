@@ -1,3 +1,4 @@
+import { AssistantOpenButton } from "@/components/assistant/assistant-open-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckIcon, SparklesIcon } from "lucide-react";
@@ -23,13 +24,10 @@ export async function DashboardGettingStarted() {
         <Button render={<Link href="/invoices/new" prefetch />}>
           {t("create")}
         </Button>
-        <Button
-          render={<Link href="/invoices/ai" prefetch />}
-          variant="outline"
-        >
+        <AssistantOpenButton variant="outline">
           <SparklesIcon data-icon="inline-start" />
           {t("ai")}
-        </Button>
+        </AssistantOpenButton>
       </CardContent>
     </Card>
   );

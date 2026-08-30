@@ -706,7 +706,12 @@
       "collapseToggle": "Expand or collapse {title}",
       "newInvoiceMore": "More ways to create",
       "createGroup": "Create",
-      "invoiceBlank": "Blank invoice"
+      "invoiceBlank": "Blank invoice",
+      "bankConnections": "Bank connections",
+      "settingsGroup": "Settings",
+      "settingsWorkspace": "Workspace",
+      "settingsAccount": "My account",
+      "admin": "Platform admin"
     },
     "breadcrumb": {
       "dashboard": "Dashboard",
@@ -1485,32 +1490,6 @@
       "emptyPreview": "Press “Render PDF” for a preview…",
       "parseError": "Could not parse JSON: fix syntax errors and try again.",
       "validationHelp": "InvoiceSchema validates the structure and highlights errors before creating the PDF."
-    },
-    "ai": {
-      "eyebrow": "AI draft",
-      "title": "Describe an invoice",
-      "subtitle": "Describe the client, lines, and amounts in plain language. We generate a validated draft and PDF preview. Uses workspace AI tokens.",
-      "backToInvoices": "← Back to Invoices",
-      "placeholder": "e.g. Invoice NFCtron a.s. for consulting 12 500 CZK, due in 14 days, VAT 21%",
-      "promptLabel": "Invoice description",
-      "generate": "Generate draft",
-      "generating": "Generating…",
-      "tokensAvailable": "{available} tokens available",
-      "viewUsage": "Usage & limits",
-      "lastUsage": "Last run used {tokens} tokens",
-      "outOfTokens": "This workspace has no AI tokens left.",
-      "errorGeneric": "Something went wrong generating the draft. Try again.",
-      "invalidDraft": "The model returned an invalid draft. Try refining the prompt.",
-      "openDraft": "Open draft",
-      "editInBuilder": "Edit in builder",
-      "previewEmpty": "Generate a draft to preview the PDF…",
-      "bestResults": "For the best result, include:",
-      "hintClient": "client name or IČO",
-      "hintLine": "line item or service",
-      "hintAmount": "amount and whether it includes VAT",
-      "hintDue": "due date",
-      "manageClients": "Add or manage clients",
-      "builderLink": "Use the structured builder"
     },
     "email": {
       "send": "Send by email",
@@ -2597,5 +2576,65 @@
     "name": "Invoicey",
     "shortName": "Invoicey",
     "description": "Schema-first invoice automation"
+  },
+  "Assistant": {
+    "title": "Assistant",
+    "subtitle": "Drafting, ARES lookups, issuing, payments.",
+    "close": "Close assistant",
+    "newConversation": "New conversation",
+    "openingPanel": "Opening the assistant…",
+    "thinking": "Thinking…",
+    "placeholder": "Ask, or describe an invoice…",
+    "composerLabel": "Message the assistant",
+    "send": "Send",
+    "stop": "Stop",
+    "tokensAvailable": "{available} tokens available",
+    "outOfTokens": "This workspace has no AI tokens left.",
+    "viewUsage": "Usage & limits",
+    "empty": {
+      "title": "What can I do for you?",
+      "subtitle": "I can draft and issue invoices, look companies up in ARES, and chase payments. I ask when something would be a guess.",
+      "suggestions": {
+        "draftInvoice": "Invoice NFCtron a.s. for consulting, 12 500 CZK, due in 14 days",
+        "unpaidInvoices": "Which invoices are unpaid?",
+        "lookupCompany": "Look up IČO 08453961 in ARES"
+      }
+    },
+    "hitl": {
+      "approvalEyebrow": "Approval needed · {tool}",
+      "answered": "Answered.",
+      "freeformPlaceholder": "Or type an answer…",
+      "send": "Send"
+    },
+    "authorization": {
+      "connected": "{name} connected.",
+      "failed": "{name} authorization {outcome}.",
+      "signIn": "Sign in to {name}"
+    },
+    "card": {
+      "assumed": "assumed",
+      "issue": "Issue invoice",
+      "previewPdf": "Preview PDF",
+      "getPdf": "Get PDF",
+      "markPaid": "Mark paid",
+      "sendEmail": "Send to client",
+      "openInvoice": "Open invoice",
+      "discard": "Discard",
+      "discarded": "Draft {title} discarded.",
+      "actionFailed": "That did not go through. Try again.",
+      "checkBeforeIssuing": "Check this before issuing.",
+      "assumedNotice": "Assumed — you did not say. Change it below, or just tell me.",
+      "dueDate": "Due date",
+      "currency": "Currency",
+      "vatTreatment": "VAT treatment",
+      "language": "Document language",
+      "state": {
+        "draft": "Draft",
+        "issued": "Issued",
+        "paid": "Paid",
+        "cancelled": "Cancelled",
+        "readonly": "Invoice"
+      }
+    }
   }
 }

@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { useAssistant } from "@/components/assistant/assistant-provider";
 import { NavLinkPending } from "@/components/navigation/nav-link-pending";
 import {
   DropdownMenu,
@@ -48,7 +49,6 @@ interface CreateEntry {
  */
 const CREATE_ENTRIES: CreateEntry[] = [
   { href: "/invoices/new", labelKey: "invoiceBlank", icon: <FileTextIcon /> },
-  { href: "/invoices/ai", labelKey: "invoicesAi", icon: <SparklesIcon /> },
   {
     href: "/invoices/recurring",
     labelKey: "invoicesRecurring",
@@ -72,6 +72,7 @@ const TOOL_ENTRIES: CreateEntry[] = [
 export function NewInvoiceButton({ pathname }: { pathname: string }) {
   const t = useTranslations("App.nav");
   const { isMobile, state } = useSidebar();
+  const { setOpen: setAssistantOpen } = useAssistant();
   const collapsed = state === "collapsed" && !isMobile;
 
   const renderEntries = (entries: CreateEntry[]) =>
@@ -97,6 +98,14 @@ export function NewInvoiceButton({ pathname }: { pathname: string }) {
       <DropdownMenuGroup>
         <DropdownMenuLabel>{t("createGroup")}</DropdownMenuLabel>
         {renderEntries(CREATE_ENTRIES)}
+        {/* Drafting is a conversation now, so this opens the panel in place
+            rather than navigating away from whatever the user is looking at. */}
+        <DropdownMenuItem onClick={() => setAssistantOpen(true)}>
+          <span className="text-muted-foreground [&_svg]:size-4">
+            <SparklesIcon />
+          </span>
+          {t("invoicesAi")}
+        </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>

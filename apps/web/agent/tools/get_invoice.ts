@@ -11,7 +11,7 @@ import { withEveToolWorkspace } from "../lib/tool-workspace";
 
 export default defineTool({
   description:
-    "Get one invoice by id. In Slack this re-posts its card with the actions available for its current state, so use it when the user wants to act on an invoice from earlier in the thread.",
+    "Get one invoice by id. This re-posts its card with the actions available for its current state, so use it when the user wants to act on an invoice from earlier in the conversation.",
   inputSchema: z.object({
     id: z.string().uuid(),
   }),

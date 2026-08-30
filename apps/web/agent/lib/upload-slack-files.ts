@@ -16,9 +16,7 @@ export async function uploadFilesToSlackThread(options: {
   threadTs: string;
   files: SlackFilePayload[];
   initialComment?: string;
-}): Promise<
-  { ok: true; fileIds: string[] } | { ok: false; error: string }
-> {
+}): Promise<{ ok: true; fileIds: string[] } | { ok: false; error: string }> {
   if (options.files.length === 0) {
     return { ok: false, error: "no files to upload" };
   }

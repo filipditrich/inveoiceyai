@@ -706,7 +706,12 @@
       "collapseToggle": "Rozbalit nebo sbalit {title}",
       "newInvoiceMore": "Další způsoby vytvoření",
       "createGroup": "Vytvořit",
-      "invoiceBlank": "Prázdná faktura"
+      "invoiceBlank": "Prázdná faktura",
+      "bankConnections": "Bankovní spojení",
+      "settingsGroup": "Nastavení",
+      "settingsWorkspace": "Pracovní prostor",
+      "settingsAccount": "Můj účet",
+      "admin": "Administrace"
     },
     "breadcrumb": {
       "dashboard": "Přehled",
@@ -1485,32 +1490,6 @@
       "emptyPreview": "Náhled zobrazíte tlačítkem „Vytvořit náhled PDF“.",
       "parseError": "JSON se nepodařilo zpracovat: opravte syntaxi a zkuste znovu.",
       "validationHelp": "InvoiceSchema ověří strukturu a zvýrazní chyby před vytvořením PDF."
-    },
-    "ai": {
-      "eyebrow": "AI koncept",
-      "title": "Popište fakturu",
-      "subtitle": "Popište klienta, položky a částky běžným jazykem. Vytvoříme validovaný koncept a náhled PDF. Spotřebovává AI tokeny pracovního prostoru.",
-      "backToInvoices": "← Zpět na faktury",
-      "placeholder": "např. Faktura pro NFCtron a.s. za konzultace 12 500 Kč, splatnost 14 dní, DPH 21 %",
-      "promptLabel": "Popis faktury",
-      "generate": "Vygenerovat koncept",
-      "generating": "Generuji…",
-      "tokensAvailable": "Dostupných tokenů: {available}",
-      "viewUsage": "Využití a limity",
-      "lastUsage": "Poslední běh spotřeboval {tokens} tokenů",
-      "outOfTokens": "Tento pracovní prostor nemá zbývající AI tokeny.",
-      "errorGeneric": "Generování konceptu se nezdařilo. Zkuste to znovu.",
-      "invalidDraft": "Model vrátil neplatný koncept. Upravte popis a zkuste znovu.",
-      "openDraft": "Otevřít koncept",
-      "editInBuilder": "Upravit ve formuláři",
-      "previewEmpty": "Vygenerujte koncept pro náhled PDF…",
-      "bestResults": "Pro nejlepší výsledek uveďte:",
-      "hintClient": "jméno klienta nebo IČO",
-      "hintLine": "položku nebo službu",
-      "hintAmount": "částku s DPH nebo bez DPH",
-      "hintDue": "datum splatnosti",
-      "manageClients": "Přidat nebo spravovat klienty",
-      "builderLink": "Použít strukturovaný formulář"
     },
     "email": {
       "send": "Odeslat e-mailem",
@@ -2597,5 +2576,65 @@
     "name": "Invoicey",
     "shortName": "Invoicey",
     "description": "Automatizace faktur založená na datech"
+  },
+  "Assistant": {
+    "title": "Asistent",
+    "subtitle": "Návrhy, ARES, vystavení, platby.",
+    "close": "Zavřít asistenta",
+    "newConversation": "Nová konverzace",
+    "openingPanel": "Otevírám asistenta…",
+    "thinking": "Přemýšlím…",
+    "placeholder": "Zeptejte se nebo popište fakturu…",
+    "composerLabel": "Zpráva asistentovi",
+    "send": "Odeslat",
+    "stop": "Zastavit",
+    "tokensAvailable": "K dispozici {available} tokenů",
+    "outOfTokens": "Tento workspace nemá žádné AI tokeny.",
+    "viewUsage": "Spotřeba a limity",
+    "empty": {
+      "title": "Co pro vás mohu udělat?",
+      "subtitle": "Umím připravit a vystavit fakturu, najít firmu v ARESu a hlídat platby. Když by šlo o dohad, radši se zeptám.",
+      "suggestions": {
+        "draftInvoice": "Fakturuj NFCtron a.s. konzultace, 12 500 Kč, splatnost 14 dní",
+        "unpaidInvoices": "Které faktury jsou nezaplacené?",
+        "lookupCompany": "Najdi IČO 08453961 v ARESu"
+      }
+    },
+    "hitl": {
+      "approvalEyebrow": "Potřebuji schválení · {tool}",
+      "answered": "Zodpovězeno.",
+      "freeformPlaceholder": "Nebo napište odpověď…",
+      "send": "Odeslat"
+    },
+    "authorization": {
+      "connected": "{name} připojeno.",
+      "failed": "Autorizace {name}: {outcome}.",
+      "signIn": "Přihlásit se k {name}"
+    },
+    "card": {
+      "assumed": "odhad",
+      "issue": "Vystavit fakturu",
+      "previewPdf": "Náhled PDF",
+      "getPdf": "Stáhnout PDF",
+      "markPaid": "Označit jako zaplacenou",
+      "sendEmail": "Odeslat klientovi",
+      "openInvoice": "Otevřít fakturu",
+      "discard": "Zahodit",
+      "discarded": "Návrh {title} byl zahozen.",
+      "actionFailed": "Akce se nezdařila. Zkuste to znovu.",
+      "checkBeforeIssuing": "Zkontrolujte před vystavením.",
+      "assumedNotice": "Doplněno za vás — neuvedli jste. Změňte níže, nebo mi to napište.",
+      "dueDate": "Splatnost",
+      "currency": "Měna",
+      "vatTreatment": "Režim DPH",
+      "language": "Jazyk dokumentu",
+      "state": {
+        "draft": "Návrh",
+        "issued": "Vystaveno",
+        "paid": "Zaplaceno",
+        "cancelled": "Stornováno",
+        "readonly": "Faktura"
+      }
+    }
   }
 }

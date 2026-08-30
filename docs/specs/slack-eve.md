@@ -2,6 +2,10 @@
 
 Durable Slack invoicing agent on [Vercel Eve](https://eve.dev/docs), mounted in `@invoicey/web` via `withEve()`. Supersedes the Plan 13a hand-rolled AI loop.
 
+The same agent also backs the in-app assistant panel — same tools, instructions
+and HITL loop, different rendering. See [`assistant-panel.md`](./assistant-panel.md)
+for what the two surfaces share and where they intentionally differ.
+
 ## Architecture
 
 ```mermaid
@@ -16,14 +20,14 @@ flowchart TB
   Cursor["Cursor"] -->|"stdio or /api/mcp"| InvoiceTools
 ```
 
-| Piece         | Location                                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------------------------ |
-| Agent root    | [`apps/web/agent/`](../../apps/web/agent/)                                                                   |
-| Mount         | [`apps/web/next.config.ts`](../../apps/web/next.config.ts) — `withEve(nextConfig)` → `/eve/v1/*`             |
-| Slack channel | `agent/channels/slack.ts` — Connect + **live feedback** event overrides (Thinking Steps + invoice Cards)     |
-| HTTP channel  | `agent/channels/eve.ts` — Bearer ops key (`EVE_API_KEY` / `MCP_API_KEY`) **or** user PAT + OIDC + `localDev` |
-| Domain ops    | `@invoicey/invoice-tools/ops` (`issueInvoiceById`, `markInvoicePaidById`, list/get)                          |
-| Create/render | `@invoicey/invoice-tools` (`createAndRenderInvoice`, presets, ARES)                                          |
+| Piece         | Location                                                                                                                                                                                                        |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Agent root    | [`apps/web/agent/`](../../apps/web/agent/)                                                                                                                                                                      |
+| Mount         | [`apps/web/next.config.ts`](../../apps/web/next.config.ts) — `withEve(nextConfig)` → `/eve/v1/*`                                                                                                                |
+| Slack channel | `agent/channels/slack.ts` — Connect + **live feedback** event overrides (Thinking Steps + invoice Cards)                                                                                                        |
+| HTTP channel  | `agent/channels/eve.ts` — browser session cookie (in-app assistant, see [`assistant-panel.md`](./assistant-panel.md)) **or** Bearer ops key (`EVE_API_KEY` / `MCP_API_KEY`) **or** user PAT + OIDC + `localDev` |
+| Domain ops    | `@invoicey/invoice-tools/ops` (`issueInvoiceById`, `markInvoicePaidById`, list/get)                                                                                                                             |
+| Create/render | `@invoicey/invoice-tools` (`createAndRenderInvoice`, presets, ARES)                                                                                                                                             |
 
 ### Slack live feedback
 

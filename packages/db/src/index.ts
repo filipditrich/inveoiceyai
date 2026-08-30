@@ -115,3 +115,8 @@ export {
   type AssignPlanInput,
   type WorkspaceEntitlements,
 } from "./plans-repo";
+export {
+  resolveWebSessionPrincipal,
+  type ResolvedWebSession,
+  type WebSessionPrincipal,
+} from "./web-sessions";

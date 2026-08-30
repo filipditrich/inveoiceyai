@@ -6,7 +6,7 @@ Per-feature implementation specs. Written **just-in-time** before the plan that 
 
 **Plan 3 specs:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md).
 
-**Shipped specs:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md), [`ares.md`](./ares.md), [`uploads.md`](./uploads.md), [`data-grid.md`](./data-grid.md), [`slack-bot.md`](./slack-bot.md), [`mcp.md`](./mcp.md), [`db-schema.md`](./db-schema.md), [`invoice-import.md`](./invoice-import.md), [`email.md`](./email.md), [`public-shell.md`](./public-shell.md), [`recurring.md`](./recurring.md), [`payment-ledger-fio.md`](./payment-ledger-fio.md) (Plan 22 — pilot pending), [`payment-ledger-moneta.md`](./payment-ledger-moneta.md) (Plan 23).
+**Shipped specs:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md), [`ares.md`](./ares.md), [`uploads.md`](./uploads.md), [`data-grid.md`](./data-grid.md), [`slack-bot.md`](./slack-bot.md), [`mcp.md`](./mcp.md), [`db-schema.md`](./db-schema.md), [`invoice-import.md`](./invoice-import.md), [`email.md`](./email.md), [`public-shell.md`](./public-shell.md), [`recurring.md`](./recurring.md), [`payment-ledger-fio.md`](./payment-ledger-fio.md) (Plan 22 — pilot pending), [`payment-ledger-moneta.md`](./payment-ledger-moneta.md) (Plan 23), [`assistant-panel.md`](./assistant-panel.md).
 
 > **Incoming invoices / payables were removed from the product on 2026-08-26.**
 > The feature needed a different shape from the rest of Invoicey — a five-gate
@@ -37,6 +37,7 @@ Just-in-time convention: write the remaining specs before the plan that consumes
 | `payment-ledger-fio.md`    | Plan 22              | Provider-neutral allocations, deterministic matching, encrypted Fio connection, sync, reconciliation UI                              |
 | `payment-ledger-moneta.md` | Plan 23              | MONETA VIP AISP read-only adapter on the same ledger                                                                                 |
 | `plans-entitlements.md`    | Plan 26              | `plans` table, entitlement resolution, managed client catalogs, token grant rules, permission catalog                                |
+| `assistant-panel.md`       | —                    | In-app assistant on the same Eve agent as Slack: browser auth, shared card model and card actions, per-surface metering              |
 
 ## Spec format conventions
 

@@ -8,7 +8,7 @@ import { withEveToolWorkspace } from "../lib/tool-workspace";
 
 export default defineTool({
   description:
-    "Email an issued invoice (PDF + optional ISDOC) to the client. Requires Slack Allow/Deny. Pass `confirm` with the invoice number and the client name — Slack renders the tool input on the approval card, and the reviewer needs to see who is about to receive it. Pass `to` when the client has no contactEmail.",
+    "Email an issued invoice (PDF + optional ISDOC) to the client. Requires Allow/Deny approval. Pass `confirm` with the invoice number and the client name — the approval prompt renders the tool input verbatim, and the reviewer needs to see who is about to receive it. Pass `to` when the client has no contactEmail.",
   inputSchema: z.object({
     id: z.string().uuid(),
     confirm: z

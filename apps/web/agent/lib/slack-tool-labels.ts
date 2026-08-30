@@ -1,40 +1,17 @@
 import { describeActionRequest } from "eve/channels/slack";
 
+import {
+  ASK_QUESTION_TOOL,
+  HITL_TOOL_NAMES,
+  TOOL_LABELS,
+  toolLabel,
+} from "./tool-presentation";
+
+export { ASK_QUESTION_TOOL, HITL_TOOL_NAMES, TOOL_LABELS };
+
 type ActionRequest = Parameters<typeof describeActionRequest>[0];
 
 const SLACK_TYPING_STATUS_MAX_LENGTH = 50;
-
-/** Tools gated by Eve `approval: always()` — park for Slack Allow/Deny. */
-export const HITL_TOOL_NAMES = new Set([
-  "issue_invoice",
-  "mark_invoice_paid",
-  "send_invoice_email",
-]);
-
-/**
- * Eve's built-in question tool. It parks the turn like an approval does, but
- * the two ask the user for different things and must not share wording — being
- * told you are "waiting for approval" when the bot asked you a question is
- * how a thread stalls.
- */
-export const ASK_QUESTION_TOOL = "ask_question";
-
-const TOOL_LABELS: Record<string, string> = {
-  ask_question: "Asking you…",
-  search_business: "Searching ARES…",
-  lookup_business: "Looking up company in ARES…",
-  list_presets: "Loading presets…",
-  get_preset: "Loading preset…",
-  save_preset: "Saving preset…",
-  create_invoice: "Creating invoice draft…",
-  update_invoice_draft: "Updating draft…",
-  upload_invoice_files: "Uploading PDF and ISDOC…",
-  list_invoices: "Listing invoices…",
-  get_invoice: "Loading invoice…",
-  issue_invoice: "Issuing invoice…",
-  mark_invoice_paid: "Marking invoice paid…",
-  send_invoice_email: "Sending invoice email…",
-};
 
 /** Tools whose retries share one Thinking Steps row (last result wins). */
 const COLLAPSE_TOOL_TASKS = new Set([
@@ -47,7 +24,7 @@ const COLLAPSE_TOOL_TASKS = new Set([
 export function invoiceyActionLabel(action: ActionRequest): string {
   switch (action.kind) {
     case "tool-call":
-      return TOOL_LABELS[action.toolName] ?? action.toolName;
+      return toolLabel(action.toolName);
     case "load-skill":
       return "Loading skill…";
     case "subagent-call":

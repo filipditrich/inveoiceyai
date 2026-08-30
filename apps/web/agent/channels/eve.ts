@@ -7,6 +7,8 @@ import {
 } from "eve/channels/auth";
 import { eveChannel } from "eve/channels/eve";
 
+import { browserSession } from "../lib/web-identity";
+
 /**
  * Eve authored-module evaluate treats this file as a client boundary, so it
  * must not import `server-only` (or anything that does). Ops bearer only here;
@@ -39,6 +41,13 @@ function apiKeyAuth(): AuthFn<Request> {
   );
 }
 
+/**
+ * `browserSession()` comes first: the in-app assistant is the only caller that
+ * arrives with a cookie and a same-origin `Origin`, and resolving it here keeps
+ * the web surface on the same agent, tools and HITL loop as Slack. Everything
+ * else still falls through to the bearer/OIDC strategies, and an unknown caller
+ * still gets a 401.
+ */
 export default eveChannel({
-  auth: [apiKeyAuth(), vercelOidc(), localDev()],
+  auth: [browserSession(), apiKeyAuth(), vercelOidc(), localDev()],
 });
