@@ -790,6 +790,23 @@ declare const messages: {
         saved: "Název pracovního prostoru uložen";
         membersLink: "Spravovat členy";
         readOnly: "Název nebo logo může změnit jen vlastník nebo správce.";
+        plan: {
+          title: "Tarif";
+          description: "Co tarif tohoto workspace zahrnuje.";
+          unlimited: "Neomezeně";
+          contact: "Tarify aktivuje Invoicey. Pro změnu se nám ozvěte.";
+          limits: {
+            seats: "Členové";
+            issuers: "Dodavatelé";
+            monthlyTokens: "Měsíční AI tokeny";
+          };
+          features: {
+            bankConnections: "Bankovní propojení";
+            recurring: "Opakované koncepty";
+            historicalImport: "Import historie";
+            agents: "Slack, MCP a Eve";
+          };
+        };
       };
       account: {
         pageTitle: "Účet";
@@ -2210,6 +2227,7 @@ declare const messages: {
       productGroup: "Produkt";
       productDashboard: "Produktový přehled";
       audit: "Audit log";
+      plans: "Tarify";
     };
     breadcrumb: {
       root: "Admin";
@@ -2219,6 +2237,7 @@ declare const messages: {
       issuers: "Dodavatelé";
       audit: "Audit log";
       detail: "Detail";
+      plans: "Tarify";
     };
     table: {
       search: "Hledat";
@@ -2437,6 +2456,102 @@ declare const messages: {
         expires: "Platí do";
         issuer: "Firma";
         ico: "IČO";
+      };
+      plan: {
+        title: "Tarif";
+        description: "Ze kterého komerčního balíčku si workspace odvozuje oprávnění.";
+        current: "Aktuální tarif";
+        overridden: "Má výjimky";
+        assigned: "Přiřazeno";
+        assignedManually: "Ručně administrátorem";
+        assignedAutomatically: "Automaticky podle domény";
+        seats: "Místa";
+        monthlyTokens: "Měsíční tokeny";
+        unlimited: "Neomezeně";
+        selectLabel: "Přesunout na tarif";
+        hint: "Snížení tarifu nikdy nic nemaže. Workspace nad limit zůstane čitelný, jen už nemůže růst.";
+        submit: "Přiřadit tarif";
+        missing: "Pro tento workspace se nepodařilo určit tarif.";
+      };
+    };
+    plans: {
+      eyebrow: "Platforma";
+      title: "Tarify";
+      subtitle: "Komerční balíčky a oprávnění, na která se překládá každý workspace.";
+      hint: "Jeden tarif má mnoho workspaců. Úprava tarifu změní všechny naráz.";
+      unlimited: "Neomezeně";
+      badges: {
+        default: "Výchozí";
+        custom: "Vlastní";
+        archived: "Archivovaný";
+      };
+      clientMode: {
+        open: "Otevřené";
+        managed: "Řízené";
+      };
+      columns: {
+        name: "Tarif";
+        workspaces: "Workspacy";
+        seats: "Místa";
+        monthlyTokens: "Měsíční tokeny";
+        clients: "Odběratelé";
+        domains: "Domény pro přiřazení";
+      };
+    };
+    planDetail: {
+      eyebrow: "Tarif";
+      back: "Zpět na tarify";
+      overviewTitle: "Přehled";
+      editTitle: "Oprávnění";
+      editHint: "Co smí každý workspace na tomto tarifu. Limity se kontrolují při vytváření, nikdy při čtení.";
+      affects: "{count, plural, one {Na tento tarif se překládá # workspace.} few {Na tento tarif se překládají # workspacy.} other {Na tento tarif se překládá # workspaců.}}";
+      save: "Uložit oprávnění";
+      unlimitedPlaceholder: "Neomezeně";
+      foreverPlaceholder: "Uchovávat trvale";
+      noGrants: "Žádné";
+      kind: {
+        builtin: "Vestavěný";
+        custom: "Vlastní";
+      };
+      trigger: {
+        signup: "Při registraci";
+        first_invoice_issued: "První faktura";
+      };
+      clientMode: {
+        open: "Otevřené — workspace si spravuje odběratele sám";
+        managed: "Řízené — pouze katalog tarifu";
+      };
+      permissionsMode: {
+        off: "Vypnuto";
+        roles: "Předvolené role";
+        advanced: "Role + výjimky pro členy";
+      };
+      facts: {
+        kind: "Typ";
+        workspaces: "Workspacy";
+        grants: "Přidělení tokenů";
+      };
+      fields: {
+        seats: "Místa";
+        issuers: "Dodavatelé";
+        monthlyTokens: "Měsíční tokeny";
+        auditRetention: "Uchování auditu (dny)";
+        clientMode: "Správa odběratelů";
+        permissions: "Oprávnění";
+        features: "Funkce";
+        autoAssignDomains: "Domény pro přiřazení";
+        allowedDomains: "Povolené domény členů";
+      };
+      features: {
+        bankConnections: "Bankovní propojení";
+        recurring: "Opakované koncepty";
+        historicalImport: "Import historie";
+        agents: "Slack / MCP / Eve";
+        topUpEnabled: "Dobití tokenů";
+      };
+      hints: {
+        autoAssignDomains: "Nové workspacy založené ověřenou adresou na těchto doménách dostanou tento tarif.";
+        allowedDomains: "Pozvat lze jen tyto domény. Prázdné znamená libovolnou adresu.";
       };
     };
   };

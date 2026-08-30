@@ -19,6 +19,9 @@ export async function createFirstWorkspace(): Promise<void> {
       id: user.id,
       name: user.name,
       email: user.email,
+      // Carried through so this recovery path resolves the same plan the
+      // first-sign-in hook would have (ADR 0035).
+      emailVerified: user.emailVerified,
     }));
 
   await auth.api.setActiveOrganization({

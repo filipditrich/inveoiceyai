@@ -786,7 +786,24 @@
         "saving": "Saving…",
         "saved": "Workspace name saved",
         "membersLink": "Manage members",
-        "readOnly": "Only owners and admins can change the name or logo."
+        "readOnly": "Only owners and admins can change the name or logo.",
+        "plan": {
+          "title": "Plan",
+          "description": "What this workspace's plan includes.",
+          "unlimited": "Unlimited",
+          "contact": "Plans are activated by Invoicey. Get in touch to change yours.",
+          "limits": {
+            "seats": "Members",
+            "issuers": "Issuers",
+            "monthlyTokens": "Monthly AI tokens"
+          },
+          "features": {
+            "bankConnections": "Bank connections",
+            "recurring": "Recurring drafts",
+            "historicalImport": "Historical import",
+            "agents": "Slack, MCP and Eve"
+          }
+        }
       },
       "account": {
         "pageTitle": "Account",
@@ -2206,7 +2223,8 @@
       "backToApp": "Back to app",
       "productGroup": "Product",
       "productDashboard": "Product dashboard",
-      "audit": "Audit log"
+      "audit": "Audit log",
+      "plans": "Plans"
     },
     "breadcrumb": {
       "root": "Admin",
@@ -2215,7 +2233,8 @@
       "invoices": "Invoices",
       "issuers": "Issuers",
       "audit": "Audit log",
-      "detail": "Detail"
+      "detail": "Detail",
+      "plans": "Plans"
     },
     "table": {
       "search": "Search",
@@ -2434,6 +2453,102 @@
         "expires": "Expires",
         "issuer": "Business",
         "ico": "IČO"
+      },
+      "plan": {
+        "title": "Plan",
+        "description": "Which commercial package this workspace resolves its entitlements from.",
+        "current": "Current plan",
+        "overridden": "Has overrides",
+        "assigned": "Assigned",
+        "assignedManually": "Manually by an admin",
+        "assignedAutomatically": "Automatically by domain rule",
+        "seats": "Seats",
+        "monthlyTokens": "Monthly tokens",
+        "unlimited": "Unlimited",
+        "selectLabel": "Move to plan",
+        "hint": "Downgrades never delete anything. An over-limit workspace stays readable and simply cannot grow.",
+        "submit": "Assign plan",
+        "missing": "No plan resolved for this workspace."
+      }
+    },
+    "plans": {
+      "eyebrow": "Platform",
+      "title": "Plans",
+      "subtitle": "Commercial packages and the entitlements every workspace on them resolves to.",
+      "hint": "One plan has many workspaces. Editing a plan moves every workspace on it at once.",
+      "unlimited": "Unlimited",
+      "badges": {
+        "default": "Default",
+        "custom": "Custom",
+        "archived": "Archived"
+      },
+      "clientMode": {
+        "open": "Open",
+        "managed": "Managed"
+      },
+      "columns": {
+        "name": "Plan",
+        "workspaces": "Workspaces",
+        "seats": "Seats",
+        "monthlyTokens": "Monthly tokens",
+        "clients": "Clients",
+        "domains": "Auto-assign domains"
+      }
+    },
+    "planDetail": {
+      "eyebrow": "Plan",
+      "back": "Back to plans",
+      "overviewTitle": "Overview",
+      "editTitle": "Entitlements",
+      "editHint": "What every workspace on this plan may do. Limits are enforced when something is created, never on read.",
+      "affects": "{count, plural, one {# workspace resolves to this plan.} other {# workspaces resolve to this plan.}}",
+      "save": "Save entitlements",
+      "unlimitedPlaceholder": "Unlimited",
+      "foreverPlaceholder": "Keep forever",
+      "noGrants": "None",
+      "kind": {
+        "builtin": "Built-in",
+        "custom": "Custom"
+      },
+      "trigger": {
+        "signup": "On signup",
+        "first_invoice_issued": "First invoice"
+      },
+      "clientMode": {
+        "open": "Open — workspace manages its own clients",
+        "managed": "Managed — plan catalog only"
+      },
+      "permissionsMode": {
+        "off": "Off",
+        "roles": "Role presets",
+        "advanced": "Roles + per-member overrides"
+      },
+      "facts": {
+        "kind": "Kind",
+        "workspaces": "Workspaces",
+        "grants": "Token grants"
+      },
+      "fields": {
+        "seats": "Seats",
+        "issuers": "Issuers",
+        "monthlyTokens": "Monthly tokens",
+        "auditRetention": "Audit retention (days)",
+        "clientMode": "Client management",
+        "permissions": "Permissions",
+        "features": "Features",
+        "autoAssignDomains": "Auto-assign domains",
+        "allowedDomains": "Allowed member domains"
+      },
+      "features": {
+        "bankConnections": "Bank connections",
+        "recurring": "Recurring drafts",
+        "historicalImport": "Historical import",
+        "agents": "Slack / MCP / Eve",
+        "topUpEnabled": "Token top-up"
+      },
+      "hints": {
+        "autoAssignDomains": "New workspaces created by a verified address on these domains land on this plan.",
+        "allowedDomains": "Only these domains may be invited. Empty means any address."
       }
     }
   },

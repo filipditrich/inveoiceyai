@@ -3,6 +3,7 @@ import "server-only";
 import {
   initialAiTokenBalanceValues,
   member,
+  resolvePlanForNewWorkspace,
   user as userTable,
   workspaces,
   aiTokenBalances,
@@ -27,6 +28,7 @@ interface CreatedUser {
   id: string;
   name?: string | null;
   email?: string | null;
+  emailVerified?: boolean;
 }
 
 /** Email local-part, else the name: `ditrich@…` -> `ditrich`. Strips diacritics. */
@@ -67,6 +69,15 @@ export async function createPersonalWorkspace(
   const name = user.name?.trim() || user.email?.split("@")[0] || "Workspace";
   const base = slugBase(user);
 
+  // Plan assignment keys off the *person*, and this function runs for every
+  // workspace they create — not only their first. Keying off the workspace
+  // would leave the obvious escape hatch from a restricted sponsored plan:
+  // create a second workspace, get an unrestricted account (ADR 0035).
+  //
+  // Read outside the retry loop: it does not depend on the slug, and a fresh
+  // transaction per attempt would otherwise re-run it.
+  const plan = await resolvePlanForNewWorkspace(db, user);
+
   // The slug retry wraps the transaction rather than sitting inside it: a
   // failed statement aborts a Postgres transaction, so a second INSERT on the
   // same tx would fail with "current transaction is aborted" regardless of the
@@ -75,7 +86,9 @@ export async function createPersonalWorkspace(
   for (let attempt = 0; ; attempt += 1) {
     try {
       return await withDbTransaction(async (tx) => {
-        await tx.insert(workspaces).values({ id: workspaceId, name, slug });
+        await tx
+          .insert(workspaces)
+          .values({ id: workspaceId, name, slug, planId: plan.id });
 
         await tx.insert(member).values({
           id: crypto.randomUUID(),
@@ -85,9 +98,20 @@ export async function createPersonalWorkspace(
           createdAt: new Date(),
         });
 
-        await tx
-          .insert(aiTokenBalances)
-          .values(initialAiTokenBalanceValues(workspaceId));
+        // Signup grants are declared by the plan, so a sponsored plan that
+        // pays for its own tokens can grant none (ADR 0037). Stage 26b moves
+        // the application onto the idempotent grant ledger; the amount is
+        // already plan-driven here.
+        const signupGiftedTokens = plan.entitlements.ai.grants
+          .filter((grant) => grant.trigger === "signup")
+          .reduce((total, grant) => total + grant.tokens, 0);
+
+        await tx.insert(aiTokenBalances).values(
+          initialAiTokenBalanceValues(workspaceId, new Date(), {
+            monthlyIncludedTokens: plan.entitlements.ai.monthlyIncludedTokens,
+            signupGiftedTokens,
+          }),
+        );
 
         await tx
           .update(userTable)

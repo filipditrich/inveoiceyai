@@ -20,6 +20,8 @@ export interface SessionUser {
   name: string;
   email: string;
   image: string | null;
+  /** Provider-attested (OAuth-only, ADR 0018). Gates plan domain rules. */
+  emailVerified: boolean;
 }
 
 export interface PlatformAdminContext {
@@ -53,12 +55,14 @@ function toSessionUser(user: {
   name: string;
   email: string;
   image?: string | null;
+  emailVerified?: boolean;
 }): SessionUser {
   return {
     id: user.id,
     name: user.name,
     email: user.email,
     image: user.image ?? null,
+    emailVerified: user.emailVerified ?? false,
   };
 }
 

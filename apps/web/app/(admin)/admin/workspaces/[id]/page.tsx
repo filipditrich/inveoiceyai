@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 
+import { assignWorkspacePlanAction } from "@/actions/admin-plans";
 import {
   cancelWorkspaceInviteAction,
   deleteWorkspaceAction,
@@ -26,7 +27,11 @@ import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { WorkspaceMark } from "@/components/workspace-mark";
 import { adminGetWorkspace } from "@/lib/admin/detail";
+import { adminSelectablePlans } from "@/lib/admin/plans";
 import { requirePlatformAdmin } from "@/lib/auth/session";
+import { formatTokenCount } from "@/lib/ai/format-tokens";
+import { getWorkspaceEntitlements } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -47,6 +52,11 @@ export default async function AdminWorkspaceDetailPage({
   if (!detail) {
     notFound();
   }
+
+  const [entitlementState, selectablePlans] = await Promise.all([
+    getWorkspaceEntitlements(db, id),
+    adminSelectablePlans(),
+  ]);
 
   const tokens = detail.tokens;
 
@@ -109,6 +119,77 @@ export default async function AdminWorkspaceDetailPage({
             },
           ]}
         />
+      </AdminSection>
+
+      <AdminSection description={t("plan.description")} title={t("plan.title")}>
+        {entitlementState ? (
+          <>
+            <AdminFacts
+              items={[
+                {
+                  label: t("plan.current"),
+                  value: (
+                    <span className="flex flex-wrap items-center gap-2">
+                      <Link
+                        className="font-medium hover:underline"
+                        href={`/admin/plans/${entitlementState.planId}`}
+                      >
+                        {entitlementState.planName}
+                      </Link>
+                      {entitlementState.overrides ? (
+                        <Badge variant="outline">{t("plan.overridden")}</Badge>
+                      ) : null}
+                    </span>
+                  ),
+                },
+                {
+                  label: t("plan.assigned"),
+                  value: entitlementState.assignedBy
+                    ? t("plan.assignedManually")
+                    : t("plan.assignedAutomatically"),
+                },
+                {
+                  label: t("plan.seats"),
+                  value:
+                    entitlementState.entitlements.seats.max ??
+                    t("plan.unlimited"),
+                },
+                {
+                  label: t("plan.monthlyTokens"),
+                  value: formatTokenCount(
+                    entitlementState.entitlements.ai.monthlyIncludedTokens,
+                  ),
+                },
+              ]}
+            />
+            <form action={assignWorkspacePlanAction} className="mt-6 space-y-4">
+              <input name="workspaceId" type="hidden" value={detail.id} />
+              <div className="grid gap-4 sm:grid-cols-[16rem_minmax(0,1fr)]">
+                <div className="space-y-2">
+                  <Label htmlFor="planId">{t("plan.selectLabel")}</Label>
+                  <select
+                    className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                    defaultValue={entitlementState.planId}
+                    id="planId"
+                    name="planId"
+                  >
+                    {selectablePlans.map((plan) => (
+                      <option key={plan.id} value={plan.id}>
+                        {plan.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {/* Downgrades keep everything: quotas are checked on the write
+                  path, so an over-limit workspace stays readable (ADR 0035). */}
+              <p className="text-muted-foreground text-xs">{t("plan.hint")}</p>
+              <SubmitButton size="sm">{t("plan.submit")}</SubmitButton>
+            </form>
+          </>
+        ) : (
+          <AdminEmpty>{t("plan.missing")}</AdminEmpty>
+        )}
       </AdminSection>
 
       <AdminSection

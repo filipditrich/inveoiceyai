@@ -17,6 +17,7 @@ import {
 import {
   Building2Icon,
   FileTextIcon,
+  LayersIcon,
   LayoutDashboardIcon,
   ShieldIcon,
   ScrollTextIcon,
@@ -55,6 +56,12 @@ export function AdminSidebar({
       url: "/admin/workspaces",
       icon: <WarehouseIcon />,
       isActive: pathname.startsWith("/admin/workspaces"),
+    },
+    {
+      title: t("nav.plans"),
+      url: "/admin/plans",
+      icon: <LayersIcon />,
+      isActive: pathname.startsWith("/admin/plans"),
     },
     {
       title: t("nav.invoices"),

@@ -1,8 +1,8 @@
 import { AiUsagePanels } from "@/components/settings/ai-usage-panels";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
+import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { requireWorkspace } from "@/lib/auth/session";
 import {
-  MONTHLY_INCLUDED_TOKENS,
   aggregateAiUsageByDay,
   getWorkspaceTokenSummary,
   listAiUsageEvents,
@@ -15,10 +15,12 @@ export default async function SettingsUsagePage() {
   const { workspaceId } = await requireWorkspace();
   const t = await getTranslations("App.settings.usage");
 
-  const [summary, chart, history] = await Promise.all([
+  const [summary, chart, history, { entitlements }] = await Promise.all([
     getWorkspaceTokenSummary(db, workspaceId),
     aggregateAiUsageByDay(db, { workspaceId, days: 30 }),
     listAiUsageEvents(db, { workspaceId, limit: 40 }),
+    // The included allowance is the plan's, not a module constant (ADR 0035).
+    requireEntitlements(),
   ]);
 
   return (
@@ -37,7 +39,7 @@ export default async function SettingsUsagePage() {
           totalAvailable: summary.totalAvailable,
           daysUntilRenewal: summary.daysUntilRenewal,
           periodEndIso: summary.periodEnd.toISOString(),
-          monthlyIncluded: MONTHLY_INCLUDED_TOKENS,
+          monthlyIncluded: entitlements.ai.monthlyIncludedTokens,
         }}
         chart={chart}
         history={history.map((row) => ({
