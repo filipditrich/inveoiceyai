@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { SparklesIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 import { useAssistantSession } from "./assistant-provider";
 
@@ -24,14 +24,20 @@ export function AssistantEmptyState() {
   const session = useAssistantSession();
 
   return (
-    <div className="flex h-full flex-col items-start justify-center gap-4 py-6">
-      <div className="flex flex-col gap-1">
-        <SparklesIcon className="text-brand size-5" />
+    <div className="flex h-full flex-col items-center justify-center gap-5 py-6 text-center">
+      <Image
+        alt={t("mascotAlt")}
+        className="size-24 object-contain drop-shadow-sm"
+        height={192}
+        src="/brand/illustrations/invoicey-mascot.webp"
+        width={192}
+      />
+      <div className="flex max-w-sm flex-col gap-1">
         <p className="text-sm font-medium">{t("title")}</p>
         <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
       </div>
 
-      <div className="flex w-full flex-col gap-2">
+      <div className="flex w-full flex-col gap-2 text-left">
         {SUGGESTION_KEYS.map((key) => {
           const prompt = t(`suggestions.${key}`);
           return (

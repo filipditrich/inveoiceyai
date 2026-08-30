@@ -43,7 +43,7 @@ export function AssistantThread() {
           ) : null}
           {session?.agent.error ? (
             <p className="text-destructive text-sm" role="alert">
-              {session.agent.error.message}
+              {friendlyError(session.agent.error.message, t)}
             </p>
           ) : null}
         </div>
@@ -131,4 +131,14 @@ function AssistantPart({ part }: { part: EveMessagePart }) {
 function partKey(part: EveMessagePart, index: number): string {
   if (part.type === "dynamic-tool") return part.toolCallId;
   return `${part.type}:${index}`;
+}
+
+function friendlyError(
+  message: string,
+  t: (key: "authRequired") => string,
+): string {
+  if (message.toLowerCase().includes("authorization is required")) {
+    return t("authRequired");
+  }
+  return message;
 }

@@ -7,12 +7,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { formatTokenCount } from "@/lib/ai/format-tokens";
+import { ASSISTANT_CONTEXT_WARN_RATIO } from "@/lib/assistant-limits";
 import { cn } from "@/lib/utils";
 import { PlusIcon, SparklesIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { AssistantComposer } from "./assistant-composer";
+import { AssistantHistory } from "./assistant-history";
 import { useAssistant, useAssistantSession } from "./assistant-provider";
 import { AssistantThread } from "./assistant-thread";
 
@@ -30,6 +32,10 @@ export function AssistantPanel() {
   const session = useAssistantSession();
 
   const outOfTokens = (session?.balance?.totalAvailable ?? 1) <= 0;
+  const contextTokens = session?.contextTokens ?? 0;
+  const contextLimit = session?.contextLimit ?? 1;
+  const contextRatio = Math.min(1, contextTokens / contextLimit);
+  const contextFull = contextTokens >= contextLimit && contextTokens > 0;
 
   return (
     <aside
@@ -56,8 +62,39 @@ export function AssistantPanel() {
                   available: formatTokenCount(session.balance.totalAvailable),
                 })
               : t("subtitle")}
+            {contextTokens > 0 ? (
+              <>
+                <span className="mx-1.5 opacity-40" aria-hidden>
+                  ·
+                </span>
+                {t("contextUsage", {
+                  used: formatTokenCount(contextTokens),
+                  limit: formatTokenCount(contextLimit),
+                })}
+              </>
+            ) : null}
           </p>
+          {contextTokens > 0 ? (
+            <div
+              aria-hidden
+              className="bg-muted mt-1.5 h-1 overflow-hidden rounded-full"
+            >
+              <div
+                className={cn(
+                  "h-full rounded-full transition-[width]",
+                  contextRatio >= 1
+                    ? "bg-destructive"
+                    : contextRatio >= ASSISTANT_CONTEXT_WARN_RATIO
+                      ? "bg-amber-500"
+                      : "bg-brand",
+                )}
+                style={{ width: `${Math.max(4, contextRatio * 100)}%` }}
+              />
+            </div>
+          ) : null}
         </div>
+
+        <AssistantHistory />
 
         <Tooltip>
           <TooltipTrigger
@@ -96,6 +133,10 @@ export function AssistantPanel() {
           >
             {t("viewUsage")}
           </Link>
+        </div>
+      ) : contextFull ? (
+        <div className="text-muted-foreground border-t px-4 py-3 text-sm">
+          {t("contextFull")}
         </div>
       ) : (
         <AssistantComposer />

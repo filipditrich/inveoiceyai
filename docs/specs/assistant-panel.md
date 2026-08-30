@@ -65,8 +65,7 @@ resolves the Better Auth cookie itself:
 
 1. Require a same-origin `Origin` header. Cookie auth is ambient, so this is
    what stops a cross-site POST from driving the agent as a signed-in user.
-   Requests with no `Origin` fall through to the bearer strategies.
-2. Verify the cookie's HMAC (base64 of `HMAC-SHA256(BETTER_AUTH_SECRET, token)`,
+   Requests with no `Origin` fall through to the bearer strategies. 2. Verify the cookie's HMAC (base64url-nopad of `HMAC-SHA256(BETTER_AUTH_SECRET, token)`,
    the signature Better Auth writes), then look the token up with
    `resolveWebSessionPrincipal` — unexpired session, then a re-checked
    membership in `session.activeOrganizationId`. The signature check is defence
@@ -74,7 +73,7 @@ resolves the Better Auth cookie itself:
    a session, but a tampered cookie is rejected before it reaches the database.
    A runtime with no `BETTER_AUTH_SECRET` skips the check (warning once) rather
    than locking every browser session out over a missing env var.
-3. Return a principal carrying `{ workspaceId, userId, surface: "web" }`.
+2. Return a principal carrying `{ workspaceId, userId, surface: "web" }`.
    `tool-workspace.ts` already reads those attributes for non-Slack sessions, so
    every tool binds to the right workspace with no further wiring.
 
@@ -116,10 +115,27 @@ Slack sessions, so the panel's model never sees a tool it cannot use.
 
 ## Session persistence
 
-One thread per workspace in `localStorage` (`invoicey.assistant.<workspaceId>`),
-holding the Eve event log and the session cursor. The conversation itself is
-durable server-side; the saved log is only so a reload can re-render it without
-replaying the stream. "New conversation" clears the key and remounts the hook.
+Eve stores the conversation durably (session cursor + event stream, 30 days by
+default). The panel keeps a **local index** of those threads so the user can
+reopen them:
+
+- `localStorage` key `invoicey.assistant.threads.v2.<workspaceId>` — list of
+  `{ id, title, updatedAt, events, session }` plus `activeId`.
+- The v1 single-thread key (`invoicey.assistant.<workspaceId>`) is migrated on
+  first read and then removed.
+- History is per device. Eve has no list-sessions HTTP API, so a new browser
+  cannot see older threads even though the server still holds them.
+
+"New conversation" remounts `useEveAgent` without a cursor. The draft is not
+written until the first turn finishes.
+
+## Context budget
+
+`agent/agent.ts` sets `limits.maxInputTokensPerSession` to 64_000 (keep in
+lockstep with `ASSISTANT_CONTEXT_LIMIT_TOKENS`). The panel shows the latest
+`step.completed` / compaction input count against that cap and refuses further
+sends once it is full — start a new conversation instead. Eve also compactes
+at 75% of the model window.
 
 ### Restored cards can lag the database
 

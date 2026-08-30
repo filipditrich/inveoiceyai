@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import {
+  bytesToBase64UrlNoPad,
   cookieSignatureValid,
   isWebSession,
   sessionCookieFrom,
@@ -16,7 +17,7 @@ function requestWithCookie(cookie: string): Request {
   });
 }
 
-/** The signature Better Auth writes: base64 of HMAC-SHA256(secret, token). */
+/** The signature Better Auth writes: base64url-nopad of HMAC-SHA256(secret, token). */
 async function sign(token: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -27,7 +28,7 @@ async function sign(token: string, secret: string): Promise<string> {
     ["sign"],
   );
   const mac = await crypto.subtle.sign("HMAC", key, encoder.encode(token));
-  return btoa(String.fromCharCode(...new Uint8Array(mac)));
+  return bytesToBase64UrlNoPad(new Uint8Array(mac));
 }
 
 describe("sessionCookieFrom", () => {
@@ -92,6 +93,24 @@ describe("cookieSignatureValid", () => {
   it("rejects a cookie with no signature at all", async () => {
     await expect(cookieSignatureValid(TOKEN, null)).resolves.toBe(false);
     await expect(cookieSignatureValid(TOKEN, "sig")).resolves.toBe(false);
+  });
+
+  /** The first deploy used `btoa` and 401'd every signed-in browser. */
+  it("rejects a standard-base64 signature of the same mac", async () => {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(SECRET),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"],
+    );
+    const mac = new Uint8Array(
+      await crypto.subtle.sign("HMAC", key, encoder.encode(TOKEN)),
+    );
+    const standard = btoa(String.fromCharCode(...mac));
+    expect(standard).not.toBe(bytesToBase64UrlNoPad(mac));
+    await expect(cookieSignatureValid(TOKEN, standard)).resolves.toBe(false);
   });
 
   /**

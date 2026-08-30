@@ -2,10 +2,26 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowUpIcon, SquareIcon } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  ArrowUpIcon,
+  BoldIcon,
+  CodeIcon,
+  ItalicIcon,
+  ListIcon,
+  SquareIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
+import {
+  wrapMarkdownSelection,
+  type MarkdownWrapKind,
+} from "./assistant-markdown-wrap";
 import { useAssistant, useAssistantSession } from "./assistant-provider";
 
 export function AssistantComposer() {
@@ -29,50 +45,140 @@ export function AssistantComposer() {
     void session.agent.send(text);
   }
 
+  function applyWrap(kind: MarkdownWrapKind) {
+    const el = inputRef.current;
+    const start = el?.selectionStart ?? value.length;
+    const end = el?.selectionEnd ?? value.length;
+    const next = wrapMarkdownSelection(value, start, end, kind);
+    setValue(next.value);
+    queueMicrotask(() => {
+      el?.focus();
+      el?.setSelectionRange(next.start, next.end);
+    });
+  }
+
   return (
     <form
-      className="flex items-end gap-2 border-t p-3"
+      className="border-t p-3"
       onSubmit={(event) => {
         event.preventDefault();
         submit();
       }}
     >
-      <Textarea
-        aria-label={t("composerLabel")}
-        className="max-h-40 min-h-10 resize-none py-2"
-        onChange={(event) => setValue(event.target.value)}
-        onKeyDown={(event) => {
-          /** Enter sends, Shift+Enter breaks the line — chat convention. */
-          if (event.key === "Enter" && !event.shiftKey) {
-            event.preventDefault();
-            submit();
-          }
-        }}
-        placeholder={t("placeholder")}
-        ref={inputRef}
-        rows={1}
-        value={value}
-      />
-      {busy ? (
-        <Button
-          aria-label={t("stop")}
-          onClick={() => session?.agent.stop()}
-          size="icon"
-          type="button"
-          variant="outline"
-        >
-          <SquareIcon />
-        </Button>
-      ) : (
-        <Button
-          aria-label={t("send")}
-          disabled={!value.trim()}
-          size="icon"
-          type="submit"
-        >
-          <ArrowUpIcon />
-        </Button>
-      )}
+      <div className="border-input bg-background focus-within:border-ring focus-within:ring-ring/50 shadow-xs focus-within:ring-3 rounded-xl border">
+        <div className="flex items-center gap-0.5 px-1.5 pt-1.5">
+          <FormatButton
+            label={t("composerBold")}
+            onClick={() => applyWrap("bold")}
+          >
+            <BoldIcon />
+          </FormatButton>
+          <FormatButton
+            label={t("composerItalic")}
+            onClick={() => applyWrap("italic")}
+          >
+            <ItalicIcon />
+          </FormatButton>
+          <FormatButton
+            label={t("composerCode")}
+            onClick={() => applyWrap("code")}
+          >
+            <CodeIcon />
+          </FormatButton>
+          <FormatButton
+            label={t("composerList")}
+            onClick={() => applyWrap("list")}
+          >
+            <ListIcon />
+          </FormatButton>
+          <span className="text-muted-foreground ml-auto pr-1.5 text-[0.65rem] tracking-wide">
+            {t("composerMarkdownHint")}
+          </span>
+        </div>
+        <div className="flex items-end gap-2 p-1.5 pt-1">
+          <Textarea
+            aria-label={t("composerLabel")}
+            className="max-h-40 min-h-10 flex-1 resize-none border-0 bg-transparent py-2 shadow-none focus-visible:ring-0 dark:bg-transparent"
+            onChange={(event) => setValue(event.target.value)}
+            onKeyDown={(event) => {
+              if ((event.metaKey || event.ctrlKey) && event.key === "b") {
+                event.preventDefault();
+                applyWrap("bold");
+                return;
+              }
+              if ((event.metaKey || event.ctrlKey) && event.key === "i") {
+                event.preventDefault();
+                applyWrap("italic");
+                return;
+              }
+              if ((event.metaKey || event.ctrlKey) && event.key === "e") {
+                event.preventDefault();
+                applyWrap("code");
+                return;
+              }
+              /** Enter sends, Shift+Enter breaks the line — chat convention. */
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                submit();
+              }
+            }}
+            placeholder={t("placeholder")}
+            ref={inputRef}
+            rows={1}
+            value={value}
+          />
+          {busy ? (
+            <Button
+              aria-label={t("stop")}
+              onClick={() => session?.agent.stop()}
+              size="icon"
+              type="button"
+              variant="outline"
+            >
+              <SquareIcon />
+            </Button>
+          ) : (
+            <Button
+              aria-label={t("send")}
+              disabled={!value.trim()}
+              size="icon"
+              type="submit"
+            >
+              <ArrowUpIcon />
+            </Button>
+          )}
+        </div>
+      </div>
     </form>
+  );
+}
+
+function FormatButton({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            aria-label={label}
+            className="text-muted-foreground"
+            onClick={onClick}
+            size="icon-xs"
+            type="button"
+            variant="ghost"
+          />
+        }
+      >
+        {children}
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
   );
 }

@@ -56,7 +56,7 @@ export default defineHook({
       if (!identity.workspaceId) return;
 
       const model =
-        process.env.INVOICEY_AI_MODEL?.trim() || "openai/gpt-4o-mini";
+        process.env.INVOICEY_AI_MODEL?.trim() || "anthropic/claude-haiku-4.5";
       const product = isWebSession(ctx.session.auth.current) ? "web" : "slack";
 
       try {

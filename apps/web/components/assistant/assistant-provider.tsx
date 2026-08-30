@@ -15,7 +15,18 @@ import {
   type ReactNode,
 } from "react";
 
+import { ASSISTANT_CONTEXT_LIMIT_TOKENS } from "@/lib/assistant-limits";
+
 import { AssistantPanel } from "./assistant-panel";
+import { contextTokensFromEvents } from "./assistant-context";
+import {
+  newThreadId,
+  readThreadStore,
+  upsertActiveThread,
+  writeThreadStore,
+  type AssistantThreadRecord,
+  type AssistantThreadStore,
+} from "./assistant-threads";
 
 export interface AssistantBalance {
   giftedRemaining: number;
@@ -26,6 +37,11 @@ export interface AssistantBalance {
   daysUntilRenewal: number;
 }
 
+export type AssistantThreadSummary = Pick<
+  AssistantThreadRecord,
+  "id" | "title" | "updatedAt"
+>;
+
 interface AssistantOpenValue {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -35,8 +51,14 @@ interface AssistantOpenValue {
 interface AssistantSessionValue {
   agent: UseEveAgentHelpers<EveMessageData>;
   balance: AssistantBalance | null;
-  /** Clears the thread and starts a fresh durable session. */
+  /** Starts a fresh durable session without dropping earlier threads. */
   newConversation: () => void;
+  threads: AssistantThreadSummary[];
+  activeThreadId: string | null;
+  openThread: (id: string) => void;
+  deleteThread: (id: string) => void;
+  contextTokens: number;
+  contextLimit: number;
 }
 
 const OpenContext = createContext<AssistantOpenValue | null>(null);
@@ -128,25 +150,6 @@ function subscribeNever(): () => void {
   return () => {};
 }
 
-type SavedChat = {
-  events?: readonly MessageStreamEvent[];
-  session?: ClientSessionState;
-};
-
-/** One saved thread per workspace, so switching workspaces cannot cross them. */
-function storageKey(workspaceId: string): string {
-  return `invoicey.assistant.${workspaceId}`;
-}
-
-function readSaved(workspaceId: string): SavedChat {
-  try {
-    const raw = window.localStorage.getItem(storageKey(workspaceId));
-    return raw ? (JSON.parse(raw) as SavedChat) : {};
-  } catch {
-    return {};
-  }
-}
-
 function AssistantSession({
   workspaceId,
   initialBalance,
@@ -156,45 +159,115 @@ function AssistantSession({
 }) {
   const pathname = usePathname();
   const [balance, setBalance] = useState(initialBalance);
-  /** Bumped by "New conversation" to remount the hook with a clean store. */
-  const [threadKey, setThreadKey] = useState(0);
+  const [store, setStore] = useState<AssistantThreadStore>(() =>
+    readThreadStore(workspaceId),
+  );
+  /** True while composing a thread that has not been persisted yet. */
+  const [drafting, setDrafting] = useState(false);
+  const [draftKey, setDraftKey] = useState(0);
+
+  const persist = useCallback(
+    (updater: (current: AssistantThreadStore) => AssistantThreadStore) => {
+      setStore((current) => {
+        const next = updater(current);
+        writeThreadStore(workspaceId, next);
+        return next;
+      });
+    },
+    [workspaceId],
+  );
 
   const newConversation = useCallback(() => {
-    try {
-      window.localStorage.removeItem(storageKey(workspaceId));
-    } catch {
-      /** a blocked store is not a reason to refuse a new thread */
-    }
-    setThreadKey((key) => key + 1);
-  }, [workspaceId]);
+    setDrafting(true);
+    setDraftKey((key) => key + 1);
+    persist((current) => ({ ...current, activeId: null }));
+  }, [persist]);
+
+  const openThread = useCallback(
+    (id: string) => {
+      setDrafting(false);
+      persist((current) =>
+        current.threads.some((thread) => thread.id === id)
+          ? { ...current, activeId: id }
+          : current,
+      );
+    },
+    [persist],
+  );
+
+  const deleteThread = useCallback(
+    (id: string) => {
+      persist((current) => {
+        const threads = current.threads.filter((thread) => thread.id !== id);
+        const activeId =
+          current.activeId === id ? (threads[0]?.id ?? null) : current.activeId;
+        return { v: current.v, activeId, threads };
+      });
+    },
+    [persist],
+  );
+
+  const saved =
+    store.threads.find((thread) => thread.id === store.activeId) ??
+    store.threads[0] ??
+    null;
+  const active = drafting ? null : saved;
 
   return (
     <AssistantSessionInner
-      key={`${workspaceId}:${threadKey}`}
+      key={`${workspaceId}:${drafting ? `draft:${draftKey}` : (active?.id ?? "empty")}`}
+      active={active}
       balance={balance}
+      contextLimit={ASSISTANT_CONTEXT_LIMIT_TOKENS}
+      deleteThread={deleteThread}
       newConversation={newConversation}
       onBalance={setBalance}
+      onSnapshot={(snapshot) => {
+        const id = active?.id ?? newThreadId();
+        setDrafting(false);
+        persist((current) =>
+          upsertActiveThread(current, {
+            id,
+            events: snapshot.events,
+            session: snapshot.session,
+            fallbackTitle: snapshot.fallbackTitle,
+          }),
+        );
+      }}
+      openThread={openThread}
       pathname={pathname}
-      workspaceId={workspaceId}
+      threads={store.threads.filter((thread) => thread.events.length > 0)}
     />
   );
 }
 
 function AssistantSessionInner({
-  workspaceId,
   pathname,
   balance,
   onBalance,
+  onSnapshot,
   newConversation,
+  threads,
+  active,
+  openThread,
+  deleteThread,
+  contextLimit,
 }: {
-  workspaceId: string;
   pathname: string;
   balance: AssistantBalance | null;
   onBalance: (balance: AssistantBalance) => void;
+  onSnapshot: (snapshot: {
+    events: readonly MessageStreamEvent[];
+    session?: ClientSessionState;
+    fallbackTitle: string;
+  }) => void;
   newConversation: () => void;
+  threads: AssistantThreadRecord[];
+  active: AssistantThreadRecord | null;
+  openThread: (id: string) => void;
+  deleteThread: (id: string) => void;
+  contextLimit: number;
 }) {
-  const [saved] = useState<SavedChat>(() => readSaved(workspaceId));
-
   /**
    * `prepareSend` runs before every turn, so the agent always knows which
    * screen the question was asked from. It is ephemeral context — it never
@@ -203,8 +276,8 @@ function AssistantSessionInner({
    * route.
    */
   const agent = useEveAgent({
-    initialEvents: saved.events ?? [],
-    initialSession: saved.session,
+    initialEvents: active?.events ?? [],
+    initialSession: active?.session,
     prepareSend: (input) => ({
       ...input,
       clientContext: {
@@ -214,24 +287,44 @@ function AssistantSessionInner({
       },
     }),
     onFinish: (snapshot) => {
-      try {
-        window.localStorage.setItem(
-          storageKey(workspaceId),
-          JSON.stringify({
-            events: snapshot.events,
-            session: snapshot.session,
-          }),
-        );
-      } catch {
-        /** quota or a private window — the server session is still durable */
-      }
+      onSnapshot({
+        events: snapshot.events,
+        session: snapshot.session,
+        fallbackTitle: firstUserText(snapshot.data.messages),
+      });
       void refreshBalance(onBalance);
     },
   });
 
+  const contextTokens = contextTokensFromEvents(agent.events);
+
   const value = useMemo<AssistantSessionValue>(
-    () => ({ agent, balance, newConversation }),
-    [agent, balance, newConversation],
+    () => ({
+      agent,
+      balance,
+      newConversation,
+      threads: threads.map(({ id, title, updatedAt }) => ({
+        id,
+        title,
+        updatedAt,
+      })),
+      activeThreadId: active?.id ?? null,
+      openThread,
+      deleteThread,
+      contextTokens,
+      contextLimit,
+    }),
+    [
+      active?.id,
+      agent,
+      balance,
+      contextLimit,
+      contextTokens,
+      deleteThread,
+      newConversation,
+      openThread,
+      threads,
+    ],
   );
 
   return (
@@ -248,6 +341,24 @@ function invoiceIdFromPath(pathname: string): { invoiceId?: string } {
       pathname,
     );
   return match ? { invoiceId: match[1] } : {};
+}
+
+function firstUserText(
+  messages: ReadonlyArray<{
+    role: string;
+    parts: ReadonlyArray<{ type: string; text?: string }>;
+  }>,
+): string {
+  for (const message of messages) {
+    if (message.role !== "user") continue;
+    const text = message.parts
+      .filter((part) => part.type === "text" && part.text)
+      .map((part) => part.text)
+      .join("\n")
+      .trim();
+    if (text) return text;
+  }
+  return "";
 }
 
 async function refreshBalance(

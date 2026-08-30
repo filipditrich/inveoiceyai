@@ -102,11 +102,28 @@ export async function cookieSignatureValid(
       ["sign"],
     );
     const mac = await crypto.subtle.sign("HMAC", key, encoder.encode(token));
-    const expected = btoa(String.fromCharCode(...new Uint8Array(mac)));
-    return timingSafeEqual(expected, signature);
+    /**
+     * Better Auth signs with `createHMAC("SHA-256", "base64urlnopad")` —
+     * URL-safe alphabet, no padding. Standard `btoa` is a different string
+     * and rejected every real browser cookie on the first deploy.
+     */
+    return timingSafeEqual(
+      bytesToBase64UrlNoPad(new Uint8Array(mac)),
+      signature,
+    );
   } catch {
     return false;
   }
+}
+
+/** HMAC digest as Better Auth writes it on `better-auth.session_token`. */
+export function bytesToBase64UrlNoPad(bytes: Uint8Array): string {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/u, "");
 }
 
 function timingSafeEqual(a: string, b: string): boolean {
@@ -124,10 +141,17 @@ function timingSafeEqual(a: string, b: string): boolean {
  * even looked up; requests with no `Origin` at all (curl, server-to-server)
  * fall through to the bearer strategies instead of being trusted here.
  */
+function configuredOrigins(): string[] {
+  const origins = [appOrigin()];
+  const authUrl = process.env.BETTER_AUTH_URL?.replace(/\/$/u, "");
+  if (authUrl && !origins.includes(authUrl)) origins.push(authUrl);
+  return origins;
+}
+
 function isSameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
   if (!origin) return false;
-  if (origin === appOrigin()) return true;
+  if (configuredOrigins().includes(origin)) return true;
   try {
     return new URL(origin).origin === new URL(request.url).origin;
   } catch {
@@ -142,6 +166,9 @@ export function browserSession(): AuthFn<Request> {
     const cookie = sessionCookieFrom(request);
     if (!cookie) return null;
     if (!(await cookieSignatureValid(cookie.token, cookie.signature))) {
+      console.warn(
+        "[invoicey-agent] browser session cookie signature rejected",
+      );
       return null;
     }
 
