@@ -45,6 +45,43 @@ describe("normalizeDraftToInvoice", () => {
     }
   });
 
+  it("keeps a supplied look ref on the draft", () => {
+    const issuer = getDemoIssuer();
+    const r = normalizeDraftToInvoice(
+      {
+        meta: { docType: "invoice" as const },
+        client: {
+          name: "Test s.r.o.",
+          ico: "44444444",
+          address: {
+            street: "Nákupní 1",
+            city: "Ostrava",
+            zip: "709 00",
+            country: "CZ",
+          },
+        },
+        vat: { mode: "regular" as const, suppliesAbroad: "none" as const },
+        payment: { method: "transfer" as const, variableSymbol: "1" },
+        look: { id: "minimal", version: "1.0.0" },
+        items: [
+          {
+            position: 1,
+            description: "Konzultace",
+            quantity: 1,
+            unit: "ks",
+            unitPriceWithoutVat: 10_000,
+            vatRate: 21,
+          },
+        ],
+      },
+      issuer,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.invoice.look).toEqual({ id: "minimal", version: "1.0.0" });
+    }
+  });
+
   it("assigns line position when omitted", () => {
     const issuer = getDemoIssuer();
     const draft = {

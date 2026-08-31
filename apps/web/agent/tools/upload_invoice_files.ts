@@ -1,5 +1,5 @@
 import { renderInvoicePdf, renderIsdoc } from "@invoicey/invoice-core";
-import { getInvoice } from "@invoicey/invoice-tools/ops";
+import { getInvoice, invoiceForPdfRender } from "@invoicey/invoice-tools/ops";
 import { defineDynamic, defineTool } from "eve/tools";
 import { z } from "zod";
 
@@ -59,7 +59,9 @@ const uploadInvoiceFilesTool = () =>
               error: loaded.ok ? "invoice payload missing" : loaded.error,
             };
           }
-          const invoice = loaded.invoice;
+          const invoice = loaded.summary.issuedAt
+            ? loaded.invoice
+            : await invoiceForPdfRender(loaded.invoice);
           const pdfBytes = await renderInvoicePdf(invoice);
           isdocXml = renderIsdoc(invoice);
           pdfBase64 = Buffer.from(pdfBytes).toString("base64");

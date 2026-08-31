@@ -2,6 +2,7 @@ import {
   getWorkspaceEntitlements,
   listPublishedCommunityLookRows,
   listWorkspaceLookRows,
+  tryCreateDbFromEnv,
   workspaces,
   type InvoiceyDb,
 } from "@invoicey/db";
@@ -12,12 +13,15 @@ import {
   lookRefForNewDraft,
   LookDocumentSchema,
   resolveDraftLookRef,
+  withLookSnapshotForRender,
   withoutLookSnapshot,
   type LookDocument,
   type LookRef,
 } from "@invoicey/invoice-core/looks";
 import type { Invoice } from "@invoicey/invoice-core/schema";
 import { eq } from "drizzle-orm";
+
+import { resolveWorkspaceId } from "./workspace-context";
 
 type Db = InvoiceyDb | DbTransaction;
 
@@ -117,4 +121,21 @@ export function lookColumns(invoice: Invoice): {
     lookId: invoice.look?.id ?? null,
     lookVersion: invoice.look?.version ?? null,
   };
+}
+
+/**
+ * Draft PDF only. Issued invoices keep whatever snapshot they stored (or
+ * Classic when none exists); do not resolve those against the live catalog.
+ */
+export async function invoiceForPdfRender(
+  invoice: Invoice,
+  options?: { workspaceId?: string; db?: Db },
+): Promise<Invoice> {
+  const database = options?.db ?? tryCreateDbFromEnv();
+  if (!database) return withLookSnapshotForRender(invoice, []);
+  const context = await loadWorkspaceLookContext(
+    database,
+    resolveWorkspaceId(options?.workspaceId),
+  );
+  return withLookSnapshotForRender(invoice, context.catalog);
 }

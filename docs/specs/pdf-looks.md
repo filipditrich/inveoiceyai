@@ -179,7 +179,7 @@ Then merge `appearance` over `theme` (override wins per present key). Then `vali
 
 `@react-pdf/renderer` interprets bands. Each block is a JSX component. Theme drives colours, type scale, density, logo max height. Stamp/signature/QR/notes honour the merged theme flags **and** available assets / notes / SPAYD.
 
-Public API `renderInvoicePdf(invoice)` does not change.
+Public API `renderInvoicePdf(invoice)` does not change. Draft payloads have no `lookSnapshot`. Callers that render a draft (web preview, MCP, Slack, draft download) copy the catalog document onto a transient snapshot via `withLookSnapshotForRender` so the renderer stays a single-argument API. Do not run that helper on issued invoices: a missing snapshot there means Classic `1.0.0`, not the live catalog.
 
 ## Persistence
 

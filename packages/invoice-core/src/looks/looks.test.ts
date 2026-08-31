@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import creditNoteFixture from "../__fixtures__/invoices/credit-note.json";
 import domesticFixture from "../__fixtures__/invoices/domestic-transfer.json";
 import neplatceFixture from "../__fixtures__/invoices/neplatce-regular.json";
 import proformaFixture from "../__fixtures__/invoices/proforma.json";
@@ -26,6 +27,7 @@ import {
   resolveDraftLookRef,
   resolveLookDocument,
   resolvePresentLookRef,
+  withLookSnapshotForRender,
   validateLookDocument,
   validateLookForInvoice,
   versionBumpForLookChange,
@@ -47,6 +49,20 @@ describe("first-party looks", () => {
     expect(LookDocumentSchema.parse(MINIMAL_LOOK_1_0_0).id).toBe("minimal");
     expect(validateLookDocument(CLASSIC_LOOK_1_0_0)).toEqual([]);
     expect(validateLookDocument(MINIMAL_LOOK_1_0_0)).toEqual([]);
+  });
+
+  it("passes validateLookForInvoice for every first-party fixture shape", () => {
+    for (const raw of [
+      domesticFixture,
+      neplatceFixture,
+      proformaFixture,
+      reverseFixture,
+      creditNoteFixture,
+    ]) {
+      const invoice = parseInvoice(raw);
+      expect(validateLookForInvoice(CLASSIC_LOOK_1_0_0, invoice)).toEqual([]);
+      expect(validateLookForInvoice(MINIMAL_LOOK_1_0_0, invoice)).toEqual([]);
+    }
   });
 
   it("rejects unknown fields so JSON cannot smuggle renderer keys", () => {
@@ -209,6 +225,24 @@ describe("resolveLookDocument", () => {
     });
     expect(resolveLookDocument(invoice).id).toBe(CLASSIC_LOOK_ID);
     expect(resolveLookDocument(invoice, [extra.look]).id).toBe("clean");
+    const prepared = withLookSnapshotForRender(invoice, [extra.look]);
+    expect(prepared.lookSnapshot?.id).toBe("clean");
+    expect(resolveLookDocument(prepared).id).toBe("clean");
+  });
+
+  it("does not overwrite an existing look snapshot for render", () => {
+    const extra = workspaceLookFrom(MINIMAL_LOOK_1_0_0, {
+      id: "clean",
+      name: "Clean",
+    });
+    if (!extra.ok) throw new Error("fixture");
+    const invoice = parseInvoice({
+      ...domesticFixture,
+      look: { id: "clean", version: "1.0.0" },
+      lookSnapshot: { ...extra.look, name: "Frozen" },
+    });
+    const prepared = withLookSnapshotForRender(invoice, [extra.look]);
+    expect(prepared.lookSnapshot?.name).toBe("Frozen");
   });
 
   it("falls back to Classic when the look id is unknown", () => {

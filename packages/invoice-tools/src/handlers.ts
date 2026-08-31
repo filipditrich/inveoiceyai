@@ -5,6 +5,10 @@ import {
 import { persistDraftInvoice, tryCreateDbFromEnv } from "@invoicey/db";
 import { renderInvoicePdf, renderIsdoc } from "@invoicey/invoice-core";
 import {
+  withLookSnapshotForRender,
+  type LookDocument,
+} from "@invoicey/invoice-core/looks";
+import {
   IssuerSnapshotSchema,
   type Invoice,
   type IssuerSnapshot,
@@ -166,6 +170,7 @@ export async function createAndRenderInvoice(options: {
   }
 
   let invoice = normalized.invoice;
+  let catalog: readonly LookDocument[] = [];
 
   let invoiceId: string | undefined;
   const database = tryCreateDbFromEnv();
@@ -175,6 +180,7 @@ export async function createAndRenderInvoice(options: {
         database,
         resolveWorkspaceId(),
       );
+      catalog = lookContext.catalog;
       const withLook = applyLookToDraftWrite(invoice, lookContext);
       if (!withLook.ok) {
         return { ok: false, error: withLook.error };
@@ -199,7 +205,9 @@ export async function createAndRenderInvoice(options: {
     }
   }
 
-  const pdfBytes = await renderInvoicePdf(invoice);
+  const pdfBytes = await renderInvoicePdf(
+    withLookSnapshotForRender(invoice, catalog),
+  );
   const isdocXml = renderIsdoc(invoice);
   const safeName = invoice.meta.number.replace(/[^\w.-]+/g, "_");
 
