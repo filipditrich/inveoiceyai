@@ -49,3 +49,4 @@ When a decision changes:
 | [0036](./0036-managed-client-catalogs.md)                  | Managed client catalogs sync into workspaces               | Accepted                          |
 | [0037](./0037-declarative-token-grants.md)                 | Token grants are declarative rules on one ledger           | Accepted                          |
 | [0038](./0038-permission-catalog-with-role-presets.md)     | Permission catalog with role presets + member overrides    | Accepted                          |
+| [0039](./0039-looks-are-data-react-pdf-interprets.md)      | Invoice PDFs are looks (data, react-pdf interprets)        | Accepted                          |
