@@ -1,4 +1,3 @@
-import { assertCan } from "@/lib/authz/can";
 import { issuerBusinesses } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { asc, eq } from "drizzle-orm";
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import Image from "next/image";
+import Link from "next/link";
 
 import {
   connectFio,
@@ -42,6 +42,7 @@ import { Label } from "@/components/ui/label";
 import type { AppLocale } from "@/i18n/config";
 import { isAppLocale } from "@/i18n/config";
 import { requireWorkspace } from "@/lib/auth/session";
+import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { formatDateTime } from "@/lib/format";
 import { messageLookup } from "@/lib/i18n-lookup";
 import { listFioConnections } from "@/lib/payments/fio-service";
@@ -119,11 +120,39 @@ function BankLogoTile({
 }
 
 export default async function BankConnectionsPage() {
-  await assertCan("bank:manage");
   const { workspaceId, role } = await requireWorkspace();
-  const [t, localeValue, messages, fioConnections, monetaConnections, issuers] =
+  const [t, plan] = await Promise.all([
+    getTranslations("Settings.bankConnections"),
+    requireEntitlements(),
+  ]);
+
+  if (!plan.entitlements.features.bankConnections) {
+    return (
+      <div className="space-y-6">
+        <SettingsPageHeader
+          description={t("pageDescription")}
+          icon={<LandmarkIcon />}
+          title={t("pageTitle")}
+        />
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("planLockedTitle")}</CardTitle>
+            <CardDescription>
+              {t("planLockedDescription", { planName: plan.planName })}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button render={<Link href="/settings/workspace" />} type="button">
+              {t("planLockedCta")}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const [localeValue, messages, fioConnections, monetaConnections, issuers] =
     await Promise.all([
-      getTranslations("Settings.bankConnections"),
       getLocale(),
       getMessages(),
       listFioConnections(workspaceId),
