@@ -6,6 +6,7 @@ import { sql } from "drizzle-orm";
 
 const required = new Map([
   ["issuer_businesses", new Set(["is_default"])],
+  ["workspaces", new Set(["default_look_id", "default_look_version"])],
   [
     "invoices",
     new Set([
@@ -15,6 +16,8 @@ const required = new Map([
       "payment_state",
       "payment_account_iban",
       "payment_variable_symbol",
+      "look_id",
+      "look_version",
     ]),
   ],
   [
@@ -37,6 +40,7 @@ const result = await db.execute<{
   where table_schema = 'public'
     and table_name in (
       'issuer_businesses',
+      'workspaces',
       'invoices',
       'bank_connections',
       'bank_accounts',

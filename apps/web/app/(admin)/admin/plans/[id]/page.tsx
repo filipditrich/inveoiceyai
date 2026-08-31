@@ -196,6 +196,18 @@ export default async function AdminPlanDetailPage({
                 </option>
               </select>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="looksApply">{t("fields.looks")}</Label>
+              <select
+                className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                defaultValue={e.looks.apply}
+                id="looksApply"
+                name="looksApply"
+              >
+                <option value="classic">{t("looksApply.classic")}</option>
+                <option value="catalog">{t("looksApply.catalog")}</option>
+              </select>
+            </div>
           </div>
 
           <fieldset className="space-y-3">

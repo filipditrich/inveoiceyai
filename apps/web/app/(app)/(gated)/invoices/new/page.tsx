@@ -2,8 +2,10 @@ import { InvoiceBuilderForm } from "@/components/invoices/invoice-builder-form";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
+import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
+import { loadWorkspaceDefaultLook } from "@/lib/load-workspace-look";
 import { getTranslations } from "next-intl/server";
 import {
   BookOpenIcon,
@@ -25,9 +27,11 @@ export default async function InvoiceNewPage({
   const { workspaceId } = await requireWorkspace();
   const sp = await searchParams;
   const t = await getTranslations("Invoices.builder");
-  const [issuers, clients] = await Promise.all([
+  const [issuers, clients, plan, defaultLook] = await Promise.all([
     loadIssuerOptions(workspaceId),
     loadClientOptions(workspaceId),
+    requireEntitlements(),
+    loadWorkspaceDefaultLook(workspaceId),
   ]);
   const lastInvoice = await loadLastInvoiceSuggestions(workspaceId, {
     issuerId: issuers[0]?.id,
@@ -95,9 +99,11 @@ export default async function InvoiceNewPage({
       </div>
       <InvoiceBuilderForm
         clients={clients}
+        defaultLook={defaultLook}
         invalidQuery={sp.invalid ?? null}
         issuers={issuers}
         lastInvoice={lastInvoice}
+        looksApply={plan.entitlements.looks.apply}
         mode="create"
         workspaceId={workspaceId}
       />

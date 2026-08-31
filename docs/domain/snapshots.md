@@ -6,7 +6,7 @@ We achieve this by **snapshotting** the issuer and client into the invoice row i
 
 ## Why this matters
 
-Concrete failure modes if we *didn't* snapshot:
+Concrete failure modes if we _didn't_ snapshot:
 
 - Issuer rebrands → all 2024 invoices retroactively show the new name → tax mismatch
 - Client moves → all historical invoices show their new address → ISDOC re-imports break
@@ -38,7 +38,7 @@ Application-level Zod validation runs on every read for `payload_json` (cheap; ~
 
 ## Snapshot timing
 
-Snapshots are taken **at the moment of issue**, not at draft creation. A draft is mutable and points to *live* `issuer_businesses` / `client_businesses` rows by ID. When the user clicks **Issue**, the server action:
+Snapshots are taken **at the moment of issue**, not at draft creation. A draft is mutable and points to _live_ `issuer_businesses` / `client_businesses` rows by ID. When the user clicks **Issue**, the server action:
 
 1. Loads the live issuer + client by ID
 2. Runs `IssuerSnapshotSchema.parse(issuer)` and `ClientSnapshotSchema.parse(client)` to project them down to invoice-relevant fields
@@ -91,13 +91,13 @@ UploadThing's "Replace" action is **disabled** at the app level — we always up
 
 Define explicit "soft-keep" semantics for replaced assets — perhaps an `archived_assets` table that lists URL + reason + created_at, used by an eventual GC cleaner. Not in MVP.
 
-### TODO(plan-3): re-rendering historical PDFs
+### Historical PDF re-render
 
-When we re-render a PDF for a 2024 invoice, do we honor *current* font / template version, or the version that existed at issue time? Default plan: we render with the current template (so a layout improvement applies retroactively to *visual* presentation), but all *content* comes from the snapshot (so the data is preserved). If a regulatory issue forces "byte-stable historical re-render", we add a `template_version` column and a versioned renderer in `invoice-core`.
+Issued invoices store a **look snapshot** (the full look document) on the payload. Regeneration uses that blob, not the live catalog. Issued rows with no snapshot mean Classic `1.0.0`. Stored PDF bytes still win when present; imported `artifacts_immutable` invoices never regenerate. See [pdf-looks](../specs/pdf-looks.md) and [ADR 0039](../decisions/0039-looks-are-data-react-pdf-interprets.md).
 
 ## Edit-after-issue policy
 
-Issued invoices are read-only at the UI level. There is no *Edit* affordance. The UI surfaces these alternatives:
+Issued invoices are read-only at the UI level. There is no _Edit_ affordance. The UI surfaces these alternatives:
 
 - **Cancel and re-issue** — for typos, wrong amounts, wrong client. The original invoice goes to `cancelled` (its number stays consumed) and you create a fresh invoice. Two records exist.
 - **Issue a credit note** — for partial corrections (`docType: 'credit_note'` referencing the original). Three records may exist (original + credit note + corrected new invoice).
@@ -114,7 +114,7 @@ This is intentionally rigid. Any "fix snapshot" backdoor is one query away from 
 
 ### Database migrations
 
-Drizzle migrations may evolve the *shape* of the snapshot JSON over time (add a field, rename a key). The plan:
+Drizzle migrations may evolve the _shape_ of the snapshot JSON over time (add a field, rename a key). The plan:
 
 - Adding optional fields is always safe — historical snapshots simply don't have them
 - Renaming or removing fields requires a backfill migration and a corresponding doc + ADR

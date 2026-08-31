@@ -42,6 +42,15 @@ const RecoveredInvoiceBuilderDraftSchema = z
         }),
       )
       .min(1),
+    lookId: z.string().optional(),
+    lookVersion: z.string().optional(),
+    accentKey: z
+      .enum(["default", "neutral", "blue", "green", "amber", "rose", "violet"])
+      .optional(),
+    showStamp: z.boolean().optional(),
+    showSignature: z.boolean().optional(),
+    showQr: z.boolean().optional(),
+    showNotesBlock: z.boolean().optional(),
   })
   .strict();
 

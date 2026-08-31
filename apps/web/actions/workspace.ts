@@ -1,6 +1,6 @@
 "use server";
 
-import { invitation } from "@invoicey/db";
+import { getWorkspaceEntitlements, invitation, workspaces } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -8,11 +8,20 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { isTrustedInvoiceImageUrl } from "@invoicey/invoice-core";
+import {
+  canApplyLook,
+  getFirstPartyLook,
+  LookRefSchema,
+} from "@invoicey/invoice-core/looks";
 
 import { auth } from "@/lib/auth/auth";
 import { ForbiddenError } from "@/lib/auth/errors";
 import { recordSecurityAuditEvent } from "@/lib/auth/security-audit";
-import { assertWorkspaceMember, requireSession } from "@/lib/auth/session";
+import {
+  assertWorkspaceMember,
+  requireSession,
+  requireWorkspace,
+} from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
 import {
   isOrganizationSlugConflict,
@@ -30,7 +39,9 @@ export type WorkspaceActionErrorCode =
   | "default_failed"
   | "invite_failed"
   | "invite_missing_workspace"
-  | "forbidden";
+  | "forbidden"
+  | "look_not_entitled"
+  | "invalid_look";
 
 export type WorkspaceActionResult =
   { ok: true } | { ok: false; errorCode: WorkspaceActionErrorCode };
@@ -161,6 +172,49 @@ export async function updateWorkspaceAction(input: {
       body: { data },
     });
     revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (error) {
+    return actionError(error, "update_failed");
+  }
+}
+
+/** Pin the workspace default look (owner/admin — same gate as name/logo UI). */
+export async function updateWorkspaceLookAction(input: {
+  lookId: string;
+  lookVersion: string;
+}): Promise<WorkspaceActionResult> {
+  const parsed = LookRefSchema.safeParse({
+    id: input.lookId,
+    version: input.lookVersion,
+  });
+  if (
+    !parsed.success ||
+    !getFirstPartyLook(parsed.data.id, parsed.data.version)
+  ) {
+    return { ok: false, errorCode: "invalid_look" };
+  }
+
+  try {
+    const { workspaceId, role } = await requireWorkspace();
+    if (role !== "owner" && role !== "admin") {
+      return { ok: false, errorCode: "forbidden" };
+    }
+    const entitled = await getWorkspaceEntitlements(db, workspaceId);
+    if (
+      !entitled ||
+      !canApplyLook(entitled.entitlements.looks.apply, parsed.data.id)
+    ) {
+      return { ok: false, errorCode: "look_not_entitled" };
+    }
+    await db
+      .update(workspaces)
+      .set({
+        defaultLookId: parsed.data.id,
+        defaultLookVersion: parsed.data.version,
+      })
+      .where(eq(workspaces.id, workspaceId));
+    revalidatePath("/settings/workspace");
+    revalidatePath("/invoices/new");
     return { ok: true };
   } catch (error) {
     return actionError(error, "update_failed");

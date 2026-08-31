@@ -76,6 +76,17 @@ describe("resolveEntitlements", () => {
 });
 
 describe("plan seeds", () => {
+  it("seeds looks.apply as classic on Free and catalog elsewhere", () => {
+    expect(
+      PLAN_SEEDS.find((plan) => plan.key === "free")!.entitlements.looks.apply,
+    ).toBe("classic");
+    for (const key of ["pro", "enterprise", "nfctron"] as const) {
+      expect(
+        PLAN_SEEDS.find((plan) => plan.key === key)!.entitlements.looks.apply,
+      ).toBe("catalog");
+    }
+  });
+
   it("every seed is a valid entitlement shape", () => {
     for (const seed of PLAN_SEEDS) {
       expect(() => resolveEntitlements(seed.entitlements)).not.toThrow();

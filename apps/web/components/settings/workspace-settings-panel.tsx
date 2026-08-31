@@ -1,6 +1,10 @@
 "use client";
 
-import { updateWorkspaceAction } from "@/actions/workspace";
+import {
+  updateWorkspaceAction,
+  updateWorkspaceLookAction,
+} from "@/actions/workspace";
+import { LookPicker } from "@/components/invoices/look-picker";
 import { WorkspaceLogoField } from "@/components/settings/workspace-logo-field";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +17,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { WorkspaceRole } from "@/lib/auth/workspace-types";
+import {
+  listFirstPartyLooks,
+  type LookRef,
+} from "@invoicey/invoice-core/looks";
 import { LoaderCircleIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -26,12 +34,16 @@ export function WorkspaceSettingsPanel({
   logo,
   role,
   uploadConfigured,
+  looksApply,
+  defaultLook,
 }: {
   name: string;
   slug: string;
   logo: string | null;
   role: WorkspaceRole;
   uploadConfigured: boolean;
+  looksApply: "classic" | "catalog";
+  defaultLook: LookRef;
 }) {
   const t = useTranslations("App.settings.workspace");
   const tErrors = useTranslations("App.workspaceErrors");
@@ -39,6 +51,7 @@ export function WorkspaceSettingsPanel({
   const canEdit = role === "owner" || role === "admin";
   const [value, setValue] = useState(name);
   const [logoUrl, setLogoUrl] = useState(logo ?? "");
+  const [look, setLook] = useState<LookRef>(defaultLook);
   const [pending, startTransition] = useTransition();
 
   const persist = (input: { name?: string; logo?: string | null }) => {
@@ -92,6 +105,39 @@ export function WorkspaceSettingsPanel({
           <Label htmlFor="workspace-settings-slug">{t("slugLabel")}</Label>
           <Input id="workspace-settings-slug" value={slug} disabled readOnly />
           <p className="text-muted-foreground text-xs">{t("slugHint")}</p>
+        </div>
+        <div className="space-y-2">
+          <Label>{t("lookLabel")}</Label>
+          <p className="text-muted-foreground text-xs">{t("lookHint")}</p>
+          <LookPicker
+            allowLockedPreview={false}
+            disabled={!canEdit || pending}
+            looks={listFirstPartyLooks().map((item) => ({
+              id: item.id,
+              version: item.version,
+              name: item.name,
+            }))}
+            looksApply={looksApply}
+            onChange={(next) => {
+              if (!canEdit || pending) return;
+              const previous = look;
+              setLook(next);
+              startTransition(async () => {
+                const result = await updateWorkspaceLookAction({
+                  lookId: next.id,
+                  lookVersion: next.version,
+                });
+                if (!result.ok) {
+                  setLook(previous);
+                  toast.error(tErrors(result.errorCode));
+                  return;
+                }
+                toast.success(t("lookSaved"));
+                router.refresh();
+              });
+            }}
+            value={look}
+          />
         </div>
         {!canEdit ? (
           <p className="text-muted-foreground text-sm">{t("readOnly")}</p>

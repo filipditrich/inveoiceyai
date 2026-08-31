@@ -60,6 +60,13 @@ export const EntitlementsSchema = z.object({
     /** Slack, MCP, and Eve as one switch — they meter against the same tokens. */
     agents: z.boolean(),
   }),
+  looks: z.object({
+    /**
+     * `classic` may apply only Classic. `catalog` may apply every first-party
+     * look (Minimal today; community later).
+     */
+    apply: z.enum(["classic", "catalog"]),
+  }),
   auth: z.object({
     /** Empty = any address. Gates both plan auto-assignment and invitations. */
     allowedEmailDomains: z.array(z.string()),
@@ -94,6 +101,7 @@ export const BASE_ENTITLEMENTS: Entitlements = {
     historicalImport: true,
     agents: true,
   },
+  looks: { apply: "classic" },
   auth: { allowedEmailDomains: [] },
   audit: { retentionDays: 30 },
 };

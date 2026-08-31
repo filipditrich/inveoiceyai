@@ -1,4 +1,5 @@
 export * from "./schema";
+export * from "./looks";
 export * from "./labels";
 export * from "./bank/czech-iban";
 export * from "./totals";

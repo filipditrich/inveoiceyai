@@ -7,9 +7,13 @@ icon: FileText
 The PDF is a Czech-language A4 invoice with the ISDOC XML **embedded inside it as an attachment**.
 One file that a human reads and an accounting system parses.
 
+You pick a **look** (Classic or Minimal). The look is layout plus a default theme — not a template editor. At issue, Invoicey freezes the full look onto the invoice so later catalog edits do not rewrite history.
+
 ## Layout
 
-From top to bottom:
+Block order depends on the look. Classic is today’s face: logo and title, then parties, lines, payment, QR, notes, stamp and signature. Minimal puts the title first and uses a compact type scale. Both always include the legally required blocks.
+
+From the invoice data, every look still prints:
 
 1. **Issuer block** — name, address, IČO, DIČ (when you are a VAT payer), registry note, and your
    logo if you uploaded one.
@@ -67,12 +71,13 @@ identical document because every input is still on the row.
 Drafts render on demand and are not stored — a draft has no number and no frozen snapshot, so there
 is nothing stable to keep.
 
-## Customisation
+## Looks
 
-Deliberately limited: an accent colour, and toggles for the stamp and signature.
+Free workspaces apply **Classic** only. Other looks appear in the picker as locked, with a path to upgrade. Pro (and any plan with catalog looks) can apply Minimal.
 
-There is no template editor. Invoicey keeps one predictable, legally complete layout and focuses
-customisation on identity rather than document structure.
+You can tweak appearance on one invoice — accent colour, stamp, signature, QR, notes — without changing the look’s layout. The workspace default look is set under workspace settings (owner or admin).
+
+There is no canvas or HTML editor. A structured look builder is a later step on the same look document.
 
 ## Known limits
 

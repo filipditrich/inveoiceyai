@@ -4,7 +4,14 @@ import { PageHeader } from "@/components/layout/page-header";
 import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import { requireWorkspace } from "@/lib/auth/session";
+import { requireEntitlements } from "@/lib/entitlements/entitlements";
+import { loadWorkspaceDefaultLook } from "@/lib/load-workspace-look";
 import { InvoiceSchema } from "@invoicey/invoice-core/schema";
+import {
+  ACCENT_COLOR_HEX,
+  getFirstPartyLook,
+  type LegacyAccentColor,
+} from "@invoicey/invoice-core/looks";
 import { invoices } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { and, eq } from "drizzle-orm";
@@ -48,7 +55,7 @@ export default async function InvoiceEditPage({
     notFound();
   }
 
-  const [issuers, clients, lastInvoice] = await Promise.all([
+  const [issuers, clients, lastInvoice, plan, defaultLook] = await Promise.all([
     loadIssuerOptions(workspaceId),
     loadClientOptions(workspaceId),
     loadLastInvoiceSuggestions(workspaceId, {
@@ -56,9 +63,19 @@ export default async function InvoiceEditPage({
       clientId: row.clientId,
       excludeId: id,
     }),
+    requireEntitlements(),
+    loadWorkspaceDefaultLook(workspaceId),
   ]);
 
   const inv = payload.data;
+  const look = inv.look ?? defaultLook;
+  const lookTheme = getFirstPartyLook(look.id, look.version)?.theme;
+  const appearance = inv.appearance;
+  const accentEntry = appearance?.accent
+    ? (Object.entries(ACCENT_COLOR_HEX) as [LegacyAccentColor, string][]).find(
+        ([, hex]) => hex.toLowerCase() === appearance.accent!.toLowerCase(),
+      )
+    : undefined;
 
   return (
     <div className="space-y-6">
@@ -79,10 +96,12 @@ export default async function InvoiceEditPage({
       />
       <InvoiceBuilderForm
         clients={clients}
+        defaultLook={defaultLook}
         invalidQuery={sp.invalid ?? null}
         invoiceId={id}
         issuers={issuers}
         lastInvoice={lastInvoice}
+        looksApply={plan.entitlements.looks.apply}
         mode="edit"
         workspaceId={workspaceId}
         initial={{
@@ -107,6 +126,14 @@ export default async function InvoiceEditPage({
             unitPriceWithoutVat: it.unitPriceWithoutVat,
             vatRate: it.vatRate,
           })),
+          lookId: look.id,
+          lookVersion: look.version,
+          accentKey: accentEntry?.[0] ?? "default",
+          showStamp: appearance?.showStamp ?? lookTheme?.showStamp ?? true,
+          showSignature:
+            appearance?.showSignature ?? lookTheme?.showSignature ?? true,
+          showQr: appearance?.showQr ?? lookTheme?.showQr ?? true,
+          showNotesBlock: appearance?.showNotes ?? lookTheme?.showNotes ?? true,
         }}
       />
     </div>

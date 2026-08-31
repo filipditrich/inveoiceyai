@@ -2,7 +2,7 @@
 
 ## Goal
 
-Produce invoice PDFs from a validated [`Invoice`](../../packages/invoice-core/src/schema.ts): readable layout with optional logo/stamp/signature, line table, VAT recap (when applicable), payment block, and embedded SPAYD QR. Labels and `Intl` formatting follow `meta.language` (`cs` | `en`, [ADR 0028](../decisions/0028-per-invoice-language.md)). Single template; no template editor.
+Produce invoice PDFs from a validated [`Invoice`](../../packages/invoice-core/src/schema.ts): readable layout with optional logo/stamp/signature, line table, VAT recap (when applicable), payment block, and embedded SPAYD QR. Labels and `Intl` formatting follow `meta.language` (`cs` | `en`, [ADR 0028](../decisions/0028-per-invoice-language.md)). Layout is a **look document** interpreted by `@react-pdf/renderer` ([pdf-looks](./pdf-looks.md), [ADR 0039](../decisions/0039-looks-are-data-react-pdf-interprets.md)): Classic `1.0.0` is today’s face as data; Minimal `1.0.0` is a second layout. There is no HTML editor.
 
 ## Inputs / outputs
 
@@ -25,7 +25,9 @@ Produce invoice PDFs from a validated [`Invoice`](../../packages/invoice-core/sr
 - **Rationale:** TTF avoids fontkit/layout issues observed with bundled WOFF from some font NPM packages under `@react-pdf/renderer`. Italic faces enable basic markdown italic in payment instruction free-text.
 - **Registration:** Resolve absolute filesystem paths to those vendored files (module-relative `import.meta.url` + fallbacks); then `Font.register({ family: 'Inter', fonts: [...] })` once per process before `pdf()`.
 
-## Layout (A4, default margins)
+## Layout (A4)
+
+Band order comes from the resolved look ([pdf-looks](./pdf-looks.md)). The list below is what each block prints, not a fixed page order. Classic `1.0.0` still uses this content.
 
 1. **Header row:** issuer block (name, address, IČO, DIČ if `issuer.vatPayer` and `issuer.dic`, `registryNote` if set) + optional **logo** (max height ~48pt, preserve aspect).
 2. **Title band:** document label from `meta.docType` (Faktura / Proforma / Zálohová faktura / Dobropis), **`č.` / `No.`**, **`meta.number`** (e.g. `Faktura č. 20260119`). For a VAT-payer `invoice`, a micro-line **DAŇOVÝ DOKLAD** / **TAX DOCUMENT**. **Omit that line when `issuer.vatPayer === false`** — a non-payer invoice is not a tax document. Issue date, due date, and performance date follow in the customer column (see DUZP rules below).
@@ -37,7 +39,11 @@ Produce invoice PDFs from a validated [`Invoice`](../../packages/invoice-core/sr
 8. **`vat.mode === 'oss'`:** print recap by rate as for regular VAT where amounts exist; prepend/append OSS explanation line (Česky); destination context from `client.address.country` (`TODO(plan-later): explicit per-line OSS country once schema grows).
 9. **Payment block:** for `payment.method === 'transfer'`, show domestic account (`bankAccount.accountNumber`), IBAN, BIC optional, VS/KS/SS if present. For cash/card show method label only (no QR — see SPAYD spec). Optional `payment.instructionsBefore` / `payment.instructionsAfter` render as multi-line text (basic markdown: bold/italic) immediately above / below this block.
 10. **QR:** payment block adjacent or below — raster from `renderSpaydQr` (`width`/`height` per SPAYD spec).
+<<<<<<< HEAD
 11. **Stamp / signature:** if `issuer.stampUrl` and `customization.showStamp`, render stamp at **176×176 pt**. If `issuer.signatureUrl` and `customization.showSignature`, render signature strip. Respect `accentColor` as subtle stripe or heading tint (mapping table minimal: neutral=blue-gray, blue=accent blue, …).
+=======
+11. **Stamp / signature:** theme flags from the resolved look (`showStamp` / `showSignature`), not `customization`. Accent comes from the look theme (and `appearance` overlay).
+>>>>>>> 50a4cfe (feat: ship Classic and Minimal as versioned invoice looks)
 12. **`notes`:** footer section „Poznámka“.
 13. **Brand footer:** fixed page footer „Vystaveno přes Invoicey“ links to `https://invoicey.ditrich.me/`.
 
@@ -72,6 +78,7 @@ At **issue** time (and lazily on first download if missing), Invoicey uploads th
 ## References
 
 - [domain/invoice-schema.md](../domain/invoice-schema.md), [vat-czech.md](../domain/vat-czech.md)
+- [pdf-looks.md](./pdf-looks.md)
 - [0004-pdf-react-pdf-renderer.md](../decisions/0004-pdf-react-pdf-renderer.md)
 
 ## Open questions

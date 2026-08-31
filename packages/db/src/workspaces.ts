@@ -48,6 +48,8 @@ export const workspaces = pgTable(
      * would make the pair circular.
      */
     planAssignedBy: text("plan_assigned_by"),
+    defaultLookId: text("default_look_id").notNull().default("classic"),
+    defaultLookVersion: text("default_look_version").notNull().default("1.0.0"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

@@ -102,7 +102,9 @@
       "payment_token_expired": "The Fio submit token has expired.",
       "fio_throttled_locally": "Fio is rate-limited. Try again in 30 seconds.",
       "sum_mismatch": "Fio accepted a different total than this run.",
-      "run_create_failed": "Could not create the payment run."
+      "run_create_failed": "Could not create the payment run.",
+      "look_not_entitled": "Your plan can only apply the Classic look. Upgrade to apply other looks.",
+      "invalid_look": "That look is not available."
     }
   },
   "Toasts": {
@@ -795,6 +797,9 @@
         "nameLabel": "Name",
         "slugLabel": "Slug",
         "slugHint": "Slug cannot be changed after creation.",
+        "lookLabel": "Default invoice look",
+        "lookHint": "New drafts inherit this look. Issued invoices keep the look frozen at issue.",
+        "lookSaved": "Default look saved",
         "logoLabel": "Logo",
         "logoHint": "Shown in the workspace switcher. Invoice PDFs still use each business’s logo.",
         "logoSaved": "Workspace logo saved",
@@ -804,7 +809,7 @@
         "saving": "Saving…",
         "saved": "Workspace name saved",
         "membersLink": "Manage members",
-        "readOnly": "Only owners and admins can change the name or logo.",
+        "readOnly": "Only owners and admins can change the name, logo, or default look.",
         "plan": {
           "title": "Plan",
           "description": "What this workspace's plan includes.",
@@ -819,7 +824,8 @@
             "bankConnections": "Bank connections",
             "recurring": "Recurring drafts",
             "historicalImport": "Historical import",
-            "agents": "Slack, MCP and Invoicey"
+            "agents": "Slack, MCP and Invoicey",
+            "catalogLooks": "Catalog looks (Minimal)"
           }
         }
       },
@@ -986,7 +992,9 @@
       "default_failed": "Could not set the default workspace",
       "invite_failed": "Could not accept the invitation",
       "invite_missing_workspace": "Invitation is missing a workspace",
-      "forbidden": "You do not have permission for this action"
+      "forbidden": "You do not have permission for this action",
+      "look_not_entitled": "Your plan cannot apply that look",
+      "invalid_look": "That look is not available"
     },
     "palette": {
       "trigger": "Search…",
@@ -1301,6 +1309,23 @@
       "sectionPartiesDescription": "Supplier and client on the document.",
       "sectionDocument": "Document",
       "sectionDocumentDescription": "Type, PDF language, and currency.",
+      "sectionLook": "Look",
+      "sectionLookDescription": "How the PDF is composed. Appearance tweaks do not change the layout.",
+      "appearanceTitle": "Appearance",
+      "appearanceDescription": "Optional colour and block toggles for this invoice only.",
+      "accentDefault": "Look default",
+      "accent": {
+        "neutral": "Neutral",
+        "blue": "Blue",
+        "green": "Green",
+        "amber": "Amber",
+        "rose": "Rose",
+        "violet": "Violet"
+      },
+      "showStamp": "Stamp",
+      "showSignature": "Signature",
+      "showQr": "Payment QR",
+      "showNotes": "Notes",
       "sectionDates": "Dates",
       "sectionDatesDescription": "Issue date, due date, and tax point.",
       "sectionDatesDescriptionNonPayer": "Issue date, due date, and date of supply.",
@@ -2224,6 +2249,18 @@
       "manual": "Added manually"
     }
   },
+  "Looks": {
+    "upgradeHint": "Included with catalog looks.",
+    "lockedSelected": "This look cannot be issued on your plan. <upgrade>Upgrade in workspace settings</upgrade> to apply it.",
+    "catalog": {
+      "classic": {
+        "description": "Invoicey’s current invoice face — logo and title, then parties, lines, and payment."
+      },
+      "minimal": {
+        "description": "Title first, compact type, blue accent. A different layout, not a denser Classic."
+      }
+    }
+  },
   "Admin": {
     "brand": {
       "title": "Invoicey Admin",
@@ -2539,6 +2576,10 @@
         "roles": "Role presets",
         "advanced": "Roles + per-member overrides"
       },
+      "looksApply": {
+        "classic": "Classic only",
+        "catalog": "First-party catalog"
+      },
       "facts": {
         "kind": "Kind",
         "workspaces": "Workspaces",
@@ -2551,6 +2592,7 @@
         "auditRetention": "Audit retention (days)",
         "clientMode": "Client management",
         "permissions": "Permissions",
+        "looks": "Invoice looks",
         "features": "Features",
         "autoAssignDomains": "Auto-assign domains",
         "allowedDomains": "Allowed member domains"

@@ -35,6 +35,11 @@ import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { getDemoIssuer } from "./demo-issuer";
 import { tryPersistInvoiceArtifacts } from "./invoice-artifacts";
+import {
+  loadWorkspaceLookContext,
+  lookColumns,
+  snapshotLookAtIssue,
+} from "./look-context";
 import { variableSymbolFromNumber } from "./recurring";
 import { sendPaymentReceivedEmailIfEnabled } from "./send-invoice-email";
 import { resolveWorkspaceId } from "./workspace-context";
@@ -623,6 +628,12 @@ export async function issueInvoiceById(options: {
         throw new Error("validation");
       }
 
+      const lookContext = await loadWorkspaceLookContext(tx, workspaceId);
+      const snapped = snapshotLookAtIssue(parsed.data, lookContext.apply);
+      if (!snapped.ok) {
+        throw new Error(snapped.error);
+      }
+
       const issuedAt = new Date();
       const now = new Date();
       await tx
@@ -630,24 +641,25 @@ export async function issueInvoiceById(options: {
         .set({
           number,
           issuedAt,
-          issuerSnapshot: parsed.data.issuer as unknown as Record<
+          issuerSnapshot: snapped.invoice.issuer as unknown as Record<
             string,
             unknown
           >,
-          clientSnapshot: parsed.data.client as unknown as Record<
+          clientSnapshot: snapped.invoice.client as unknown as Record<
             string,
             unknown
           >,
-          payloadJson: parsed.data as unknown as Record<string, unknown>,
-          total: String(parsed.data.totals.total),
-          subtotal: String(parsed.data.totals.subtotal),
-          vatTotal: String(parsed.data.totals.vatTotal),
-          clientName: parsed.data.client.name,
+          payloadJson: snapped.invoice as unknown as Record<string, unknown>,
+          ...lookColumns(snapped.invoice),
+          total: String(snapped.invoice.totals.total),
+          subtotal: String(snapped.invoice.totals.subtotal),
+          vatTotal: String(snapped.invoice.totals.vatTotal),
+          clientName: snapped.invoice.client.name,
           paymentAccountIban:
-            parsed.data.payment.bankAccount?.iban
+            snapped.invoice.payment.bankAccount?.iban
               .replace(/\s+/gu, "")
               .toUpperCase() ?? null,
-          paymentVariableSymbol: parsed.data.payment.variableSymbol ?? null,
+          paymentVariableSymbol: snapped.invoice.payment.variableSymbol ?? null,
           updatedAt: now,
         })
         .where(eq(invoices.id, options.id));
@@ -656,7 +668,7 @@ export async function issueInvoiceById(options: {
         .delete(invoiceItems)
         .where(eq(invoiceItems.invoiceId, options.id));
       await tx.insert(invoiceItems).values(
-        parsed.data.items.map((line) => ({
+        snapped.invoice.items.map((line) => ({
           id: crypto.randomUUID(),
           invoiceId: options.id,
           position: line.position,
@@ -700,14 +712,14 @@ export async function issueInvoiceById(options: {
           ...row,
           number,
           issuedAt,
-          payloadJson: parsed.data as unknown as Record<string, unknown>,
-          total: String(parsed.data.totals.total),
-          subtotal: String(parsed.data.totals.subtotal),
-          vatTotal: String(parsed.data.totals.vatTotal),
-          clientName: parsed.data.client.name,
+          payloadJson: snapped.invoice as unknown as Record<string, unknown>,
+          total: String(snapped.invoice.totals.total),
+          subtotal: String(snapped.invoice.totals.subtotal),
+          vatTotal: String(snapped.invoice.totals.vatTotal),
+          clientName: snapped.invoice.client.name,
           updatedAt: now,
         }),
-        invoice: parsed.data,
+        invoice: snapped.invoice,
         alreadyIssued: false as const,
       };
     });
@@ -772,3 +784,10 @@ export {
   variableSymbolFromNumber,
   type RecurringCadence,
 } from "./recurring";
+export {
+  applyLookToDraftWrite,
+  applyLookToNewDraft,
+  loadWorkspaceLookContext,
+  lookColumns,
+  snapshotLookAtIssue,
+} from "./look-context";
