@@ -5,8 +5,11 @@ import {
   renderInvoicePdf,
   renderIsdoc,
 } from "@invoicey/invoice-core";
+import { withLookSnapshotForRender } from "@invoicey/invoice-core/looks";
 import type { invoices } from "@invoicey/db";
 import { NextResponse } from "next/server";
+
+import { loadLookCatalog } from "@/lib/load-workspace-look";
 
 type InvoiceRow = typeof invoices.$inferSelect;
 const MAX_ARTIFACT_BYTES = 25 * 1024 * 1024;
@@ -175,7 +178,14 @@ export async function serveInvoicePdf(
   // Native invoices have a frozen, validated payload at issue time. Local or
   // self-hosted setups may intentionally omit UploadThing; render that frozen
   // payload on demand instead of leaving the preview and download unusable.
-  const pdfBytes = await renderInvoicePdf(parsed.data);
+  // Drafts have no snapshot — resolve the catalog look for this render only.
+  const forRender = row.issuedAt
+    ? parsed.data
+    : withLookSnapshotForRender(
+        parsed.data,
+        await loadLookCatalog(row.workspaceId),
+      );
+  const pdfBytes = await renderInvoicePdf(forRender);
   return new NextResponse(Buffer.from(pdfBytes), {
     status: 200,
     headers: {

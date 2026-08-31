@@ -67,6 +67,9 @@ export function LookDocumentEditor({
   );
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [pendingKind, setPendingKind] = useState<
+    "save" | "publish" | "unpublish"
+  >("save");
   const [isPublished, setIsPublished] = useState(published);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -154,6 +157,7 @@ export function LookDocumentEditor({
   };
 
   const save = () => {
+    setPendingKind("save");
     startTransition(async () => {
       const result = await saveWorkspaceLookAction({ look });
       if (!result.ok) {
@@ -171,6 +175,7 @@ export function LookDocumentEditor({
   };
 
   const publish = () => {
+    setPendingKind("publish");
     startTransition(async () => {
       const result = await publishWorkspaceLookAction({
         lookId: saved.id,
@@ -187,6 +192,7 @@ export function LookDocumentEditor({
   };
 
   const unpublish = () => {
+    setPendingKind("unpublish");
     startTransition(async () => {
       const result = await unpublishWorkspaceLookAction({ lookId: saved.id });
       if (!result.ok) {
@@ -226,7 +232,9 @@ export function LookDocumentEditor({
               type="button"
               variant="outline"
             >
-              {t("unpublish")}
+              {pending && pendingKind === "unpublish"
+                ? t("unpublishing")
+                : t("unpublish")}
             </Button>
           ) : (
             <Button
@@ -235,7 +243,9 @@ export function LookDocumentEditor({
               type="button"
               variant="outline"
             >
-              {t("publish")}
+              {pending && pendingKind === "publish"
+                ? t("publishing")
+                : t("publish")}
             </Button>
           )}
           <Button
@@ -243,7 +253,7 @@ export function LookDocumentEditor({
             onClick={save}
             type="button"
           >
-            {pending ? t("saving") : t("save")}
+            {pending && pendingKind === "save" ? t("saving") : t("save")}
           </Button>
         </div>
       </div>

@@ -9,6 +9,7 @@ import { sendInvoiceEmailById } from "@invoicey/invoice-tools/email";
 import {
   bulkDeleteDraftInvoices,
   getInvoice,
+  invoiceForPdfRender,
   issueInvoiceById,
   markInvoicePaidById,
 } from "@invoicey/invoice-tools/ops";
@@ -157,8 +158,10 @@ async function fail(
 async function uploadArtifacts(
   ctx: SlackInteractionContext,
   invoice: Invoice,
+  issued: boolean,
 ): Promise<void> {
-  const pdfBytes = await renderInvoicePdf(invoice);
+  const prepared = issued ? invoice : await invoiceForPdfRender(invoice);
+  const pdfBytes = await renderInvoicePdf(prepared);
   const isdocXml = renderIsdoc(invoice);
   const safeName = invoice.meta.number.replace(/[^\w.-]+/gu, "_");
   await uploadInvoiceArtifacts({
@@ -277,7 +280,7 @@ async function handleIssue(
       ? copy.text.alreadyIssued
       : `:white_check_mark: ${copy.text.issuedBy} *${result.invoice.meta.number}* ${copy.text.by} <@${action.user.id}>.`,
   );
-  await uploadArtifacts(ctx, result.invoice);
+  await uploadArtifacts(ctx, result.invoice, true);
 }
 
 async function handleMarkPaid(
@@ -370,7 +373,7 @@ async function handlePreviewPdf(
     await fail(ctx, action, "Tato faktura už není dostupná.");
     return;
   }
-  await uploadArtifacts(ctx, loaded.invoice);
+  await uploadArtifacts(ctx, loaded.invoice, Boolean(loaded.summary.issuedAt));
 }
 
 /**

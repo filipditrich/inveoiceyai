@@ -6,6 +6,7 @@ import {
   calcTotals,
   exclusiveUnitPriceFromInclusive,
 } from "@invoicey/invoice-core";
+import { LookRefSchema, type LookRef } from "@invoicey/invoice-core/looks";
 import {
   ClientSnapshotSchema,
   InvoiceCurrencySchema,
@@ -509,6 +510,21 @@ export function normalizeDraftToInvoice(
       ? draft.notes
       : undefined;
 
+  let look: LookRef | undefined;
+  if (draft.look !== undefined) {
+    const lookParsed = LookRefSchema.safeParse(draft.look);
+    if (!lookParsed.success) {
+      return {
+        ok: false,
+        issues: lookParsed.error.issues.map((issue) => ({
+          path: ["look", ...issue.path.map(String)].join(".") || "look",
+          message: issue.message,
+        })),
+      };
+    }
+    look = lookParsed.data;
+  }
+
   const candidate: Invoice = {
     meta: metaParsed.data,
     issuer,
@@ -518,6 +534,7 @@ export function normalizeDraftToInvoice(
     items: builtItems,
     totals,
     notes,
+    ...(look ? { look } : {}),
   };
 
   const invParsed = InvoiceSchema.safeParse(candidate);

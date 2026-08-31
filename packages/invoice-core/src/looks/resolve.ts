@@ -14,6 +14,27 @@ function classicFallback(): LookDocument {
 }
 
 /**
+ * Copy a catalog look onto a draft for `renderInvoicePdf`. Issued payloads
+ * already carry `lookSnapshot`; this must not run on those — a missing
+ * snapshot on an issued invoice means Classic 1.0.0, not the live catalog.
+ */
+export function withLookSnapshotForRender(
+  invoice: Invoice,
+  catalog: readonly LookDocument[] = [],
+): Invoice {
+  const snap = invoice.lookSnapshot
+    ? LookDocumentSchema.safeParse(invoice.lookSnapshot)
+    : undefined;
+  if (snap?.success) return invoice;
+  const ref = invoice.look ?? {
+    id: CLASSIC_LOOK_ID,
+    version: CLASSIC_LOOK_VERSION,
+  };
+  const document = findLookDocument(ref.id, ref.version, catalog);
+  return document ? { ...invoice, lookSnapshot: document } : invoice;
+}
+
+/**
  * Snapshot wins; then catalog id+version (first-party, then extra); otherwise
  * Classic 1.0.0. Appearance is merged onto the resolved theme.
  */

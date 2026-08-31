@@ -39,11 +39,7 @@ Band order comes from the resolved look ([pdf-looks](./pdf-looks.md)). The list 
 8. **`vat.mode === 'oss'`:** print recap by rate as for regular VAT where amounts exist; prepend/append OSS explanation line (Česky); destination context from `client.address.country` (`TODO(plan-later): explicit per-line OSS country once schema grows).
 9. **Payment block:** for `payment.method === 'transfer'`, show domestic account (`bankAccount.accountNumber`), IBAN, BIC optional, VS/KS/SS if present. For cash/card show method label only (no QR — see SPAYD spec). Optional `payment.instructionsBefore` / `payment.instructionsAfter` render as multi-line text (basic markdown: bold/italic) immediately above / below this block.
 10. **QR:** payment block adjacent or below — raster from `renderSpaydQr` (`width`/`height` per SPAYD spec).
-<<<<<<< HEAD
-11. **Stamp / signature:** if `issuer.stampUrl` and `customization.showStamp`, render stamp at **176×176 pt**. If `issuer.signatureUrl` and `customization.showSignature`, render signature strip. Respect `accentColor` as subtle stripe or heading tint (mapping table minimal: neutral=blue-gray, blue=accent blue, …).
-=======
-11. **Stamp / signature:** theme flags from the resolved look (`showStamp` / `showSignature`), not `customization`. Accent comes from the look theme (and `appearance` overlay).
->>>>>>> 50a4cfe (feat: ship Classic and Minimal as versioned invoice looks)
+11. **Stamp / signature:** theme flags from the resolved look (`showStamp` / `showSignature`). Stamp size is `theme.stampMaxHeightPt` (default 88). Accent comes from the look theme (and `appearance` overlay).
 12. **`notes`:** footer section „Poznámka“.
 13. **Brand footer:** fixed page footer „Vystaveno přes Invoicey“ links to `https://invoicey.ditrich.me/`.
 

@@ -23,6 +23,7 @@ vi.mock("@invoicey/invoice-tools/ops", () => ({
   issueInvoiceById: ops.issueInvoiceById,
   markInvoicePaidById: ops.markInvoicePaidById,
   bulkDeleteDraftInvoices: ops.bulkDeleteDraftInvoices,
+  invoiceForPdfRender: async (invoice: unknown) => invoice,
 }));
 
 vi.mock("@invoicey/invoice-tools", () => ({

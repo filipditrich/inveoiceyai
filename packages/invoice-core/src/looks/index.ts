@@ -15,7 +15,7 @@ export {
 export { communityLookFrom } from "./community";
 export { CLASSIC_LOOK_1_0_0 } from "./classic";
 export { MINIMAL_LOOK_1_0_0 } from "./minimal";
-export { resolveLookDocument } from "./resolve";
+export { resolveLookDocument, withLookSnapshotForRender } from "./resolve";
 export {
   attachLookSnapshot,
   defaultLookRef,
