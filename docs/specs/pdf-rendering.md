@@ -28,22 +28,22 @@ Produce invoice PDFs from a validated [`Invoice`](../../packages/invoice-core/sr
 ## Layout (A4, default margins)
 
 1. **Header row:** issuer block (name, address, IČO, DIČ if `issuer.vatPayer` and `issuer.dic`, `registryNote` if set) + optional **logo** (max height ~48pt, preserve aspect).
-2. **Title band:** document label from `meta.docType` (Faktura / Proforma / Zálohová faktura / Dobropis), **`meta.number`**, issue date, due date, DUZP (see rules below).
-3. **Client block:** `client.name`, address, IČO/DIČ if present, `contactEmail` optional.
-4. **Items table:** columns — popis, množství, jed., cena bez DPH, DPH %, DPH, částka (nebo zjednodušený sloupcový rozvrh bez DPH pro neplátce). Sort by `items[].position`.
-5. **Totals:** řádek „Celkem bez DPH“, „DPH celkem“ (hidden or „—„ when irrelevant), „Celkem k úhradě“ = `totals.total`. Currency `Kč`, format with Czech spacing (narrow no-break space as thousands sep where feasible).
+2. **Title band:** document label from `meta.docType` (Faktura / Proforma / Zálohová faktura / Dobropis), **`č.` / `No.`**, **`meta.number`** (e.g. `Faktura č. 20260119`). For a VAT-payer `invoice`, a micro-line **DAŇOVÝ DOKLAD** / **TAX DOCUMENT**. **Omit that line when `issuer.vatPayer === false`** — a non-payer invoice is not a tax document. Issue date, due date, and performance date follow in the customer column (see DUZP rules below).
+3. **Client block:** `client.name`, address, IČO/DIČ if present, `contactEmail` optional. Postal line is `PSČ město` with no comma (`110 00 Praha`).
+4. **Items table:** columns — popis, množství (qty + unit in one column), jedn. cena, DPH % (VAT-payer only), celkem. Sort by `items[].position`.
+5. **Totals:** řádek „Celkem bez DPH“, „DPH celkem“ (hidden or „—„ when irrelevant), „Celkem k úhradě“ = `totals.total`. Amounts use a no-break space plus a language-aware suffix: Czech CZK → `Kč`, English CZK → `CZK`, EUR/USD → ISO code. Number grouping follows `meta.language`.
 6. **VAT recap:** „Rekapitulace DPH“ — one row per `totals.vatBreakdown[]` **only if** issuer is VAT payer **and** `vat.mode === 'regular'` **and** not effectively zero-rated-only display edge case; if `issuer.vatPayer === false`, show prose **„Nejsem plátce DPH.“** instead of recap table.
 7. **`vat.mode === 'reverse_charge'`:** omit standard recap row table; print `vat.legalNote` prominently.
 8. **`vat.mode === 'oss'`:** print recap by rate as for regular VAT where amounts exist; prepend/append OSS explanation line (Česky); destination context from `client.address.country` (`TODO(plan-later): explicit per-line OSS country once schema grows).
 9. **Payment block:** for `payment.method === 'transfer'`, show domestic account (`bankAccount.accountNumber`), IBAN, BIC optional, VS/KS/SS if present. For cash/card show method label only (no QR — see SPAYD spec). Optional `payment.instructionsBefore` / `payment.instructionsAfter` render as multi-line text (basic markdown: bold/italic) immediately above / below this block.
 10. **QR:** payment block adjacent or below — raster from `renderSpaydQr` (`width`/`height` per SPAYD spec).
-11. **Stamp / signature:** if `issuer.stampUrl` and `customization.showStamp`, render stamp (e.g. lower-left). If `issuer.signatureUrl` and `customization.showSignature`, render signature strip. Respect `accentColor` as subtle stripe or heading tint (mapping table minimal: neutral=blue-gray, blue=accent blue, …).
+11. **Stamp / signature:** if `issuer.stampUrl` and `customization.showStamp`, render stamp at **176×176 pt**. If `issuer.signatureUrl` and `customization.showSignature`, render signature strip. Respect `accentColor` as subtle stripe or heading tint (mapping table minimal: neutral=blue-gray, blue=accent blue, …).
 12. **`notes`:** footer section „Poznámka“.
-13. **Brand footer:** fixed page footer „Vystaveno přes Invoicey“ links to `https://ditrich.me/`.
+13. **Brand footer:** fixed page footer „Vystaveno přes Invoicey“ links to `https://invoicey.ditrich.me/`.
 
 ## DUZP and non-tax documents
 
-- **`invoice` / `credit_note`:** always show DUZP = `meta.duzp`.
+- **`invoice` / `credit_note`:** always show `meta.duzp`. Label is **Datum zdan. plnění** / **Tax point date** when `issuer.vatPayer`; otherwise **Datum uskutečnění plnění** / **Date of supply** (keep the date, do not pretend there is a VAT taxable-supply date).
 - **`proforma` / `advance`:** schema still carries `meta.duzp` (often same as issue date); PDF **may omit** DUZP line or label it „DUZP (informativní)“ — Invoicey MVP: **omit** DUZP line for `proforma` and `advance` to reduce confusion (non-daňové / special-doc flows clarified in accountant training). ISDOC carries tax dates per [isdoc](./isdoc.md).
 
 ## Assets: SVG logos

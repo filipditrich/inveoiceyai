@@ -165,10 +165,10 @@ Confirm during Plan 2 that PDF rendering hides DUZP for `proforma`/`advance` (or
 
 `issuer_businesses.vatPayer` is the canonical flag. Effects ripple through every invoice issued from that issuer:
 
-| `issuer.vatPayer` | What happens                                                                                             |
-| ----------------- | -------------------------------------------------------------------------------------------------------- |
-| `true`            | Invoice is a _daňový doklad_. VAT lines, breakdown, DIČ printed, ISDOC includes `<TaxTotal>`             |
-| `false`           | Invoice is _not a tax document_. No DIČ rendered, every line `vatRate = 0`, PDF says "Nejsem plátce DPH" |
+| `issuer.vatPayer` | What happens                                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `true`            | Invoice is a _daňový doklad_. VAT lines, breakdown, DIČ printed, ISDOC includes `<TaxTotal>`                                                |
+| `false`           | Invoice is _not a tax document_. No DIČ, no DPH column, no „DAŇOVÝ DOKLAD“ subtitle, every line `vatRate = 0`, PDF says "Nejsem plátce DPH" |
 
 The UI prevents you from setting `vat.mode != 'regular'` if `vatPayer = false`.
 
@@ -255,7 +255,7 @@ The PDF table has one row per rate.
 - Mode: `regular` (forced by `vatPayer = false`)
 - Supplies abroad: `none`
 
-Per-line: `vatRate = 0`, `lineVat = 0`, `lineTotal = 10 000`. No DIČ on the issuer block. PDF prints "Nejsem plátce DPH" near the totals. ISDOC declares the issuer as a non-VAT-payer.
+Per-line: `vatRate = 0`, `lineVat = 0`, `lineTotal = 10 000`. No DIČ on the issuer block. PDF omits the DPH column and the tax-document subtitle, prints "Nejsem plátce DPH" near the totals, and labels the performance date as "Datum uskutečnění plnění". ISDOC still stores rate 0 internally.
 
 ### Example 5 — Cross-border B2B EU service (reverse charge)
 

@@ -37,6 +37,7 @@ export function IssuerCreateForm(props: {
   const bank = useCzechIbanSuggest();
   const [bic, setBic] = React.useState("");
   const [vatPayer, setVatPayer] = React.useState(true);
+  const [registryNote, setRegistryNote] = React.useState("");
   const [lookupPending, setLookupPending] = React.useState(false);
   const [lookupMsg, setLookupMsg] = React.useState<string | null>(null);
 
@@ -87,6 +88,9 @@ export function IssuerCreateForm(props: {
       fd.set("bic", bic.trim());
     }
     fd.set("vatPayer", vatPayer ? "true" : "false");
+    if (registryNote.trim()) {
+      fd.set("registryNote", registryNote.trim());
+    }
     if (props.next) {
       fd.set("next", props.next);
     }
@@ -197,11 +201,26 @@ export function IssuerCreateForm(props: {
             checked={vatPayer}
             onChange={(ev) => {
               setVatPayer(ev.target.checked);
+              if (!ev.target.checked && registryNote.trim() === "") {
+                setRegistryNote(t("courtRecordPlaceholder"));
+              }
             }}
             type="checkbox"
           />
           {t("vatPayer")}
         </label>
+        <FieldGroup label={t("courtRecord")}>
+          <Input
+            onChange={(ev) => {
+              setRegistryNote(ev.target.value);
+            }}
+            placeholder={t("courtRecordPlaceholder")}
+            value={registryNote}
+          />
+          <p className="text-muted-foreground text-xs">
+            {t("courtRecordHint")}
+          </p>
+        </FieldGroup>
       </section>
 
       <section className="space-y-4">

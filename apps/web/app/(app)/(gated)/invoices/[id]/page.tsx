@@ -46,7 +46,10 @@ import {
   isArchivePayload,
   type InvoiceOriginProvider,
 } from "@invoicey/invoice-core/import";
-import { InvoiceSchema } from "@invoicey/invoice-core/schema";
+import {
+  InvoiceSchema,
+  invoiceDisplayUnit,
+} from "@invoicey/invoice-core/schema";
 import { resolveDisplayStatus } from "@invoicey/invoice-core/status-display";
 import {
   emailSuppressions,
@@ -134,6 +137,7 @@ export default async function InvoiceDetailPage({
       ? payload.data.client.contactEmail
       : "";
   const replyTo = payload?.success ? payload.data.issuer.contactEmail : "";
+  const issuerVatPayer = payload?.success ? payload.data.issuer.vatPayer : true;
   const templateVars = {
     number: row.number ?? "DRAFT",
     issuerName: payload?.success ? payload.data.issuer.name : "Invoicey",
@@ -427,7 +431,9 @@ export default async function InvoiceDetailPage({
           </dd>
         </div>
         <div>
-          <dt className="text-muted-foreground">{t("duzp")}</dt>
+          <dt className="text-muted-foreground">
+            {issuerVatPayer ? t("duzp") : t("duzpNonPayer")}
+          </dt>
           <dd className="tabular-nums">
             {formatInvoiceDate(row.duzp, locale)}
           </dd>
@@ -599,10 +605,13 @@ export default async function InvoiceDetailPage({
                     {t("itemsHeader.quantity")}
                   </dt>
                   <dd className="text-right tabular-nums">
-                    {it.quantity} {it.unit}
+                    {it.quantity}{" "}
+                    {invoiceDisplayUnit(it.unit, payload.data.meta.language)}
                   </dd>
                   <dt className="text-muted-foreground">
-                    {t("itemsHeader.price")}
+                    {issuerVatPayer
+                      ? t("itemsHeader.price")
+                      : t("itemsHeader.priceNonPayer")}
                   </dt>
                   <dd className="text-right tabular-nums">
                     {formatMoney(
@@ -611,11 +620,21 @@ export default async function InvoiceDetailPage({
                       locale,
                     )}
                   </dd>
-                  <dt className="text-muted-foreground">
-                    {t("itemsHeader.vat")}
+                  {issuerVatPayer ? (
+                    <>
+                      <dt className="text-muted-foreground">
+                        {t("itemsHeader.vat")}
+                      </dt>
+                      <dd className="text-right tabular-nums">
+                        {it.vatRate} %
+                      </dd>
+                    </>
+                  ) : null}
+                  <dt className="font-medium">
+                    {issuerVatPayer
+                      ? t("itemsHeader.total")
+                      : t("itemsHeader.totalNonPayer")}
                   </dt>
-                  <dd className="text-right tabular-nums">{it.vatRate} %</dd>
-                  <dt className="font-medium">{t("itemsHeader.total")}</dt>
                   <dd className="text-right font-medium tabular-nums">
                     {formatMoney(it.lineTotal, row.currency || "CZK", locale)}
                   </dd>
@@ -630,9 +649,19 @@ export default async function InvoiceDetailPage({
                   <th className="p-2">{t("itemsHeader.position")}</th>
                   <th className="p-2">{t("itemsHeader.description")}</th>
                   <th className="p-2">{t("itemsHeader.quantity")}</th>
-                  <th className="p-2">{t("itemsHeader.price")}</th>
-                  <th className="p-2">{t("itemsHeader.vat")}</th>
-                  <th className="p-2">{t("itemsHeader.total")}</th>
+                  <th className="p-2">
+                    {issuerVatPayer
+                      ? t("itemsHeader.price")
+                      : t("itemsHeader.priceNonPayer")}
+                  </th>
+                  {issuerVatPayer ? (
+                    <th className="p-2">{t("itemsHeader.vat")}</th>
+                  ) : null}
+                  <th className="p-2">
+                    {issuerVatPayer
+                      ? t("itemsHeader.total")
+                      : t("itemsHeader.totalNonPayer")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -641,7 +670,8 @@ export default async function InvoiceDetailPage({
                     <td className="p-2">{it.position}</td>
                     <td className="p-2">{it.description}</td>
                     <td className="p-2 tabular-nums">
-                      {it.quantity} {it.unit}
+                      {it.quantity}{" "}
+                      {invoiceDisplayUnit(it.unit, payload.data.meta.language)}
                     </td>
                     <td className="p-2 tabular-nums">
                       {formatMoney(
@@ -650,7 +680,9 @@ export default async function InvoiceDetailPage({
                         locale,
                       )}
                     </td>
-                    <td className="p-2 tabular-nums">{it.vatRate} %</td>
+                    {issuerVatPayer ? (
+                      <td className="p-2 tabular-nums">{it.vatRate} %</td>
+                    ) : null}
                     <td className="p-2 tabular-nums">
                       {formatMoney(it.lineTotal, row.currency || "CZK", locale)}
                     </td>

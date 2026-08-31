@@ -1162,6 +1162,7 @@
       "issueDate": "Issue date",
       "dueDate": "Due date",
       "duzp": "Tax point date",
+      "duzpNonPayer": "Date of supply",
       "currency": "Currency",
       "documentLanguage": "Document language",
       "languageCs": "Czech",
@@ -1277,8 +1278,10 @@
         "description": "Description",
         "quantity": "Quantity",
         "price": "Price excl. VAT",
+        "priceNonPayer": "Price",
         "vat": "VAT",
-        "total": "Total incl. VAT"
+        "total": "Total incl. VAT",
+        "totalNonPayer": "Total"
       }
     },
     "builder": {
@@ -1300,6 +1303,7 @@
       "sectionDocumentDescription": "Type, PDF language, and currency.",
       "sectionDates": "Dates",
       "sectionDatesDescription": "Issue date, due date, and tax point.",
+      "sectionDatesDescriptionNonPayer": "Issue date, due date, and date of supply.",
       "sectionVat": "VAT & currency",
       "sectionVatDescription": "How VAT is calculated on this invoice.",
       "sectionNotes": "Note",
@@ -1334,6 +1338,8 @@
       "dueDate": "Due date",
       "duzp": "Tax point date",
       "duzpDescription": "Date of taxable supply",
+      "duzpNonPayer": "Date of supply",
+      "duzpDescriptionNonPayer": "Date the service or delivery took place.",
       "currency": "Currency",
       "currencyDescription": "Invoice currency. Payment QR (SPAYD) is available for CZK only.",
       "language": "Document language",
@@ -1668,7 +1674,9 @@
       "zip": "ZIP",
       "country": "Country (ISO)",
       "contactEmail": "Contact email",
-      "courtRecord": "Commercial register (optional)",
+      "courtRecord": "Register entry (optional)",
+      "courtRecordPlaceholder": "Natural person entered in the Trade Register.",
+      "courtRecordHint": "Required on commercial documents (§ 435 of the Civil Code). Sole traders typically cite the Trade Register; companies cite the Commercial Register.",
       "vatPayer": "VAT payer",
       "accountNumber": "Account number (e.g. 123456789/0100)",
       "iban": "IBAN",

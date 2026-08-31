@@ -1165,6 +1165,7 @@ declare const messages: {
       "issueDate": "Datum vystavení",
       "dueDate": "Splatnost",
       "duzp": "DUZP",
+      "duzpNonPayer": "Datum uskutečnění plnění",
       "currency": "Měna",
       "documentLanguage": "Jazyk dokladu",
       "languageCs": "Čeština",
@@ -1280,8 +1281,10 @@ declare const messages: {
         "description": "Popis",
         "quantity": "Množství",
         "price": "Cena bez DPH",
+        "priceNonPayer": "Cena",
         "vat": "DPH",
-        "total": "Celkem s DPH"
+        "total": "Celkem s DPH",
+        "totalNonPayer": "Celkem"
       }
     },
     "builder": {
@@ -1303,6 +1306,7 @@ declare const messages: {
       "sectionDocumentDescription": "Typ dokladu, jazyk PDF a měna.",
       "sectionDates": "Data",
       "sectionDatesDescription": "Datum vystavení, splatnost a DUZP.",
+      "sectionDatesDescriptionNonPayer": "Datum vystavení, splatnost a datum uskutečnění plnění.",
       "sectionVat": "DPH a měna",
       "sectionVatDescription": "Jak se na dokladu počítá DPH.",
       "sectionNotes": "Poznámka",
@@ -1337,6 +1341,8 @@ declare const messages: {
       "dueDate": "Splatnost",
       "duzp": "DUZP",
       "duzpDescription": "Datum uskutečnění zdanitelného plnění",
+      "duzpNonPayer": "Datum uskutečnění plnění",
+      "duzpDescriptionNonPayer": "Datum, kdy byla služba nebo dodávka uskutečněna.",
       "currency": "Měna",
       "currencyDescription": "Měna faktury. QR platba (SPAYD) je dostupná jen pro CZK.",
       "language": "Jazyk dokladu",
@@ -1671,7 +1677,9 @@ declare const messages: {
       "zip": "PSČ",
       "country": "Stát (ISO)",
       "contactEmail": "Kontaktní e-mail",
-      "courtRecord": "Zápis v OR (volitelné)",
+      "courtRecord": "Zápis v evidenci (volitelné)",
+      "courtRecordPlaceholder": "Fyzická osoba zapsaná v živnostenském rejstříku.",
+      "courtRecordHint": "Povinný údaj na obchodních listinách (§ 435 OZ). Pro OSVČ zápis v živnostenském rejstříku, pro s.r.o. zápis v obchodním rejstříku.",
       "vatPayer": "Plátce DPH",
       "accountNumber": "Číslo účtu (např. 123456789/0100)",
       "iban": "IBAN",

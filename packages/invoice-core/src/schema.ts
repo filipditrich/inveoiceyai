@@ -86,11 +86,14 @@ export type InvoiceCurrency = z.infer<typeof InvoiceCurrencySchema>;
 export const InvoiceLanguageSchema = z.enum(["cs", "en"]);
 export type InvoiceLanguage = z.infer<typeof InvoiceLanguageSchema>;
 
-/** PDF amount suffix (Kč / EUR / USD). */
-export function currencyDisplaySuffix(currency: InvoiceCurrency): string {
+/** PDF amount suffix. Czech CZK stays `Kč`; English CZK and other currencies use the ISO code. */
+export function currencyDisplaySuffix(
+  currency: InvoiceCurrency,
+  language: InvoiceLanguage = "cs",
+): string {
   switch (currency) {
     case "CZK":
-      return "Kč";
+      return language === "en" ? "CZK" : "Kč";
     case "EUR":
       return "EUR";
     case "USD":
@@ -100,6 +103,24 @@ export function currencyDisplaySuffix(currency: InvoiceCurrency): string {
       return _exhaustive;
     }
   }
+}
+
+const EN_DISPLAY_UNITS: Record<string, string> = {
+  ks: "pcs",
+  kus: "pcs",
+  hod: "hrs",
+};
+
+/** Line-item unit on English surfaces (`ks` → `pcs`). Stored value stays Czech. */
+export function invoiceDisplayUnit(
+  unit: string,
+  language: InvoiceLanguage,
+): string {
+  const trimmed = unit.trim();
+  if (trimmed === "" || language !== "en") {
+    return trimmed;
+  }
+  return EN_DISPLAY_UNITS[trimmed.toLowerCase()] ?? trimmed;
 }
 
 export const InvoiceMetaSchema = z

@@ -37,7 +37,8 @@ export function IssuerIdentityForm(props: {
   const [contactEmail, setContactEmail] = React.useState(snapshot.contactEmail);
   const [vatPayer, setVatPayer] = React.useState(snapshot.vatPayer);
   const [registryNote, setRegistryNote] = React.useState(
-    snapshot.registryNote ?? "",
+    snapshot.registryNote ??
+      (snapshot.vatPayer ? "" : t("courtRecordPlaceholder")),
   );
   const [lookupPending, setLookupPending] = React.useState(false);
   const [lookupMsg, setLookupMsg] = React.useState<string | null>(null);
@@ -207,6 +208,9 @@ export function IssuerIdentityForm(props: {
           checked={vatPayer}
           onChange={(ev) => {
             setVatPayer(ev.target.checked);
+            if (!ev.target.checked && registryNote.trim() === "") {
+              setRegistryNote(t("courtRecordPlaceholder"));
+            }
           }}
           type="checkbox"
         />
@@ -218,8 +222,10 @@ export function IssuerIdentityForm(props: {
           onChange={(ev) => {
             setRegistryNote(ev.target.value);
           }}
+          placeholder={t("courtRecordPlaceholder")}
           value={registryNote}
         />
+        <p className="text-muted-foreground text-xs">{t("courtRecordHint")}</p>
       </FieldGroup>
 
       <SubmitRow

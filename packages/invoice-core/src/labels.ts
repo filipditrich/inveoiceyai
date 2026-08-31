@@ -16,6 +16,7 @@ export type InvoiceLabels = {
   issueDate: string;
   dueDate: string;
   taxPointDate: string;
+  taxPointDateNonVat: string;
   colDescription: string;
   colQty: string;
   colUnit: string;
@@ -47,6 +48,7 @@ export type InvoiceLabels = {
   titleCreditNote: string;
   titleProforma: string;
   titleAdvance: string;
+  docNo: string;
   correctsDocument: string;
   correctsDocumentIsdoc: string;
 };
@@ -67,10 +69,11 @@ const CS: InvoiceLabels = {
   issueDate: "Datum vystavení",
   dueDate: "Datum splatnosti",
   taxPointDate: "Datum zdan. plnění",
+  taxPointDateNonVat: "Datum uskutečnění plnění",
   colDescription: "POPIS",
-  colQty: "MN.",
+  colQty: "MNOŽSTVÍ",
   colUnit: "J.",
-  colUnitPrice: "CENA ZA MJ",
+  colUnitPrice: "JEDN. CENA",
   colVat: "DPH",
   colTotal: "CELKEM",
   totalExVat: "Celkem bez DPH",
@@ -99,6 +102,7 @@ const CS: InvoiceLabels = {
   titleCreditNote: "Dobropis",
   titleProforma: "Proforma faktura",
   titleAdvance: "Zálohová faktura",
+  docNo: "č.",
   correctsDocument: "Opravuje doklad č.:",
   correctsDocumentIsdoc: "Opravuje doklad č.",
 };
@@ -119,8 +123,9 @@ const EN: InvoiceLabels = {
   issueDate: "Issue date",
   dueDate: "Due date",
   taxPointDate: "Tax point date",
+  taxPointDateNonVat: "Date of supply",
   colDescription: "DESCRIPTION",
-  colQty: "QTY",
+  colQty: "QUANTITY",
   colUnit: "U.",
   colUnitPrice: "UNIT PRICE",
   colVat: "VAT",
@@ -151,6 +156,7 @@ const EN: InvoiceLabels = {
   titleCreditNote: "Credit note",
   titleProforma: "Proforma invoice",
   titleAdvance: "Advance invoice",
+  docNo: "No.",
   correctsDocument: "Corrects document no.:",
   correctsDocumentIsdoc: "Corrects document no.",
 };

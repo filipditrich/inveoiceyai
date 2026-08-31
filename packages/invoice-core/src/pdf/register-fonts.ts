@@ -41,7 +41,13 @@ function resolveVendoredFontFile(fontFileName: string): string {
 
 let registeredFonts = false;
 
+/** Disable letter-splitting so `EUR` / `USD` / uppercase labels stay intact. */
+export function keepPdfWord(word: string): string[] {
+  return [word];
+}
+
 export function registerInvoiceFonts(): void {
+  Font.registerHyphenationCallback(keepPdfWord);
   if (registeredFonts) {
     return;
   }
@@ -57,7 +63,5 @@ export function registerInvoiceFonts(): void {
       { src: interI, fontWeight: 400, fontStyle: "italic" },
     ],
   });
-  /** default callback splits words into letters (SUPPLIER → S + UPPLIER, EUR → UR) */
-  Font.registerHyphenationCallback((word) => [word]);
   registeredFonts = true;
 }

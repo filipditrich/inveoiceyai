@@ -82,6 +82,7 @@ const CS: CardCopy = {
     includingVat: "včetně DPH",
     lines: "Položky",
     linesNote: "bez DPH",
+    nonVatPayer: "Neplátce DPH",
     moreLines: "další položky",
     assumedTag: "doplněno",
     assumedHeading:
@@ -153,6 +154,7 @@ const EN: CardCopy = {
     includingVat: "including VAT",
     lines: "Lines",
     linesNote: "excl. VAT",
+    nonVatPayer: "Non-VAT payer",
     moreLines: "more line(s)",
     assumedTag: "assumed",
     assumedHeading:

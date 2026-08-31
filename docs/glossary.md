@@ -138,7 +138,7 @@ A confirmed payment fact linking money (manual or bank transaction) to an invoic
 
 ### Daňový doklad
 
-**Tax document** — a document with full VAT particulars (issuer DIČ, recipient DIČ if applicable, DUZP, VAT breakdown). A _faktura_ issued by a _plátce DPH_ is automatically a _daňový doklad_.
+**Tax document** — a document with full VAT particulars (issuer DIČ, recipient DIČ if applicable, DUZP, VAT breakdown). A _faktura_ issued by a _plátce DPH_ is automatically a _daňový doklad_. A _faktura_ issued by a _neplátce_ is not; Invoicey must not print „DAŇOVÝ DOKLAD“ or a 0 % DPH column on it.
 
 ### Číslo faktury
 

@@ -1,4 +1,7 @@
-import type { Invoice } from "@invoicey/invoice-core/schema";
+import {
+  invoiceDisplayUnit,
+  type Invoice,
+} from "@invoicey/invoice-core/schema";
 import type { DraftAssumption } from "@invoicey/invoice-tools";
 
 import {
@@ -83,11 +86,14 @@ function renderLines(invoice: Invoice, locale: CardLocale): string | undefined {
       invoice.meta.currency,
     );
     const lineTotal = formatMoney(item.lineSubtotal, invoice.meta.currency);
-    return `${item.position}. ${item.description} · ${item.quantity} ${item.unit} × ${unitPrice} = ${lineTotal}`;
+    return `${item.position}. ${item.description} · ${item.quantity} ${invoiceDisplayUnit(item.unit, locale)} × ${unitPrice} = ${lineTotal}`;
   });
   const hidden = invoice.items.length - shown.length;
   if (hidden > 0) rows.push(`_+${hidden} ${copy.text.moreLines}_`);
-  return `*${copy.text.lines}* _(${copy.text.linesNote})_\n${rows.join("\n")}`;
+  const heading = invoice.issuer.vatPayer
+    ? `*${copy.text.lines}* _(${copy.text.linesNote})_`
+    : `*${copy.text.lines}*`;
+  return `${heading}\n${rows.join("\n")}`;
 }
 
 const STATE_LABEL_KEYS = {
@@ -205,17 +211,21 @@ export function buildInvoiceCardModel(input: {
       label: copy.field.total,
       value: formatMoney(invoice.totals.total, currency),
     },
-    {
-      label: copy.field.subtotal,
-      value: formatMoney(invoice.totals.subtotal, currency),
-    },
-    {
-      label: copy.field.vat,
-      value:
-        invoice.totals.vatTotal === 0
-          ? "—"
-          : `${formatMoney(invoice.totals.vatTotal, currency)}${vatRates ? ` (${vatRates})` : ""}`,
-    },
+    ...(invoice.issuer.vatPayer
+      ? [
+          {
+            label: copy.field.subtotal,
+            value: formatMoney(invoice.totals.subtotal, currency),
+          },
+          {
+            label: copy.field.vat,
+            value:
+              invoice.totals.vatTotal === 0
+                ? "—"
+                : `${formatMoney(invoice.totals.vatTotal, currency)}${vatRates ? ` (${vatRates})` : ""}`,
+          },
+        ]
+      : []),
     { label: copy.field.currency, value: mark("meta.currency", currency) },
     {
       label: copy.field.issueDate,
@@ -227,10 +237,12 @@ export function buildInvoiceCardModel(input: {
     },
     {
       label: copy.field.vatTreatment,
-      value: mark(
-        assumedPaths.has("vat.mode") ? "vat.mode" : "vat",
-        `${copy.vatMode[invoice.vat.mode] ?? invoice.vat.mode} · ${copy.suppliesAbroad[invoice.vat.suppliesAbroad] ?? invoice.vat.suppliesAbroad}`,
-      ),
+      value: invoice.issuer.vatPayer
+        ? mark(
+            assumedPaths.has("vat.mode") ? "vat.mode" : "vat",
+            `${copy.vatMode[invoice.vat.mode] ?? invoice.vat.mode} · ${copy.suppliesAbroad[invoice.vat.suppliesAbroad] ?? invoice.vat.suppliesAbroad}`,
+          )
+        : copy.text.nonVatPayer,
     },
     {
       label: copy.field.payment,
@@ -240,10 +252,14 @@ export function buildInvoiceCardModel(input: {
       label: copy.field.language,
       value: mark("meta.language", copy.language[locale]),
     },
-    {
-      label: copy.field.priceBasis,
-      value: mark("pricesIncludeVat", copy.text.excludingVat),
-    },
+    ...(invoice.issuer.vatPayer
+      ? [
+          {
+            label: copy.field.priceBasis,
+            value: mark("pricesIncludeVat", copy.text.excludingVat),
+          },
+        ]
+      : []),
   ];
 
   const stateLabel = copy.state[STATE_LABEL_KEYS[state]];

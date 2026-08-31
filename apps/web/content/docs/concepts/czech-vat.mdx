@@ -34,7 +34,7 @@ The standard domestic invoice. VAT is charged per line.
 - The PDF prints a full VAT recap (_Rekapitulace DPH_) grouped by rate.
 - ISDOC emits standard `<TaxTotal>` blocks per rate.
 
-For a non-payer, every line is forced to 0 % and the PDF prints _Nejsem plátce DPH_.
+For a non-payer, every line is forced to 0 %, the PDF **omits** the DPH column and the _daňový doklad_ subtitle, and prints _Nejsem plátce DPH_. ISDOC still records rate 0.
 
 </Tab>
 
@@ -84,15 +84,16 @@ and is separate from the issue date.
 - **Required** on `invoice` and `credit_note`.
 - May be before or after the issue date.
 - On `proforma` and `advance`, it may equal the issue date.
+- For a **non–VAT-payer**, the same date is printed as **Datum uskutečnění plnění** (not a tax-point date).
 
 ## Document types
 
-| Type          | Czech                            | Tax document?                     |
-| ------------- | -------------------------------- | --------------------------------- |
-| `invoice`     | Faktura vystavená                | Yes                               |
-| `proforma`    | Proformová faktura               | No — a request for payment        |
-| `advance`     | Zálohová faktura                 | Yes, for the advance              |
-| `credit_note` | Dobropis (opravný daňový doklad) | Yes — corrects a previous invoice |
+| Type          | Czech                            | Tax document?                                     |
+| ------------- | -------------------------------- | ------------------------------------------------- |
+| `invoice`     | Faktura vystavená                | Yes, if the issuer is a VAT payer                 |
+| `proforma`    | Proformová faktura               | No — a request for payment                        |
+| `advance`     | Zálohová faktura                 | Yes, for the advance (VAT payer)                  |
+| `credit_note` | Dobropis (opravný daňový doklad) | Yes for a VAT payer — corrects a previous invoice |
 
 A `credit_note` must reference the invoice it corrects via `meta.correctedInvoiceNumber`. The
 schema enforces this.
@@ -101,5 +102,5 @@ Each type can have its own [numbering scheme](/docs/concepts/numbering) and coun
 
 ## Not a VAT payer?
 
-Set `vatPayer = false` on the issuer. Invoicey forces every line to 0 %, replaces the VAT recap with
-_Nejsem plátce DPH_, and keeps numbering, QR, ISDOC and automation available.
+Set `vatPayer = false` on the issuer. Invoicey forces every line to 0 %, **does not** label the PDF as a _daňový doklad_, **omits** the DPH column (0 % is not the same as “I am not a VAT payer”), replaces the VAT recap with
+_Nejsem plátce DPH_, and prints the performance date as _Datum uskutečnění plnění_. Numbering, QR, ISDOC and automation stay available. Add a registry line on the issuer (for an OSVČ typically _Fyzická osoba zapsaná v živnostenském rejstříku._).

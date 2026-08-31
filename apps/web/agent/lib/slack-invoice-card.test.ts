@@ -107,6 +107,28 @@ describe("buildInvoiceCardModel", () => {
     expect(byLabel["Režim DPH"]).toBe("Běžný · tuzemsko");
   });
 
+  it("omits DPH fields for a non–VAT-payer issuer", () => {
+    const normalized = normalizeDraftToInvoice(bareDraft(), {
+      ...getDemoIssuer(),
+      vatPayer: false,
+    });
+    if (!normalized.ok) throw new Error("fixture draft failed to normalize");
+    const byLabel = Object.fromEntries(
+      buildInvoiceCardModel({
+        invoice: normalized.invoice,
+        invoiceId: INVOICE_ID,
+        state: "draft",
+        assumptions: normalized.assumptions,
+      }).fields.map((f) => [f.label, f.value]),
+    );
+
+    expect(byLabel["Celkem"]).toBe("10 000,00 CZK");
+    expect(byLabel["DPH"]).toBeUndefined();
+    expect(byLabel["Bez DPH"]).toBeUndefined();
+    expect(byLabel["Ceny položek"]).toBeUndefined();
+    expect(byLabel["Režim DPH"]).toBe("Neplátce DPH");
+  });
+
   it("records which paths are still assumed, for the controls to carry", () => {
     const model = draftModel();
     expect(model.assumedPaths).toContain("meta.dueDate");

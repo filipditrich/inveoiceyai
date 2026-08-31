@@ -1202,7 +1202,11 @@ export function InvoiceBuilderForm({
         </FormSection>
 
         <FormSection
-          description={t("sectionDatesDescription")}
+          description={
+            issuerVatPayer
+              ? t("sectionDatesDescription")
+              : t("sectionDatesDescriptionNonPayer")
+          }
           icon={<CalendarDaysIcon />}
           title={t("sectionDates")}
         >
@@ -1243,9 +1247,13 @@ export function InvoiceBuilderForm({
               />
             </Field>
             <Field
-              description={t("duzpDescription")}
+              description={
+                issuerVatPayer
+                  ? t("duzpDescription")
+                  : t("duzpDescriptionNonPayer")
+              }
               error={fieldError(errors, "duzp")}
-              label={t("duzp")}
+              label={issuerVatPayer ? t("duzp") : t("duzpNonPayer")}
             >
               <Input
                 aria-invalid={Boolean(fieldError(errors, "duzp"))}
