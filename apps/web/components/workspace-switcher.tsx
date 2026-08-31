@@ -168,13 +168,15 @@ export function WorkspaceSwitcher({
               <DropdownMenuGroup>
                 <DropdownMenuLabel>{t("manageLabel")}</DropdownMenuLabel>
                 <DropdownMenuItem
-                  render={<Link href="/settings/workspace" prefetch />}
+                  render={<Link href="/settings/workspace" prefetch={false} />}
                 >
                   <Settings2Icon />
                   {t("settings")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  render={<Link href="/settings/workspace/members" prefetch />}
+                  render={
+                    <Link href="/settings/workspace/members" prefetch={false} />
+                  }
                 >
                   <UsersRoundIcon />
                   {t("members")}

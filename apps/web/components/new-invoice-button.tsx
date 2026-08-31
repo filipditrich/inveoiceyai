@@ -79,7 +79,7 @@ export function NewInvoiceButton({ pathname }: { pathname: string }) {
     entries.map((entry) => (
       <DropdownMenuItem
         key={entry.href}
-        render={<Link href={entry.href} prefetch />}
+        render={<Link href={entry.href} prefetch={false} />}
       >
         <span className="text-muted-foreground [&_svg]:size-4">
           {entry.icon}
@@ -146,7 +146,7 @@ export function NewInvoiceButton({ pathname }: { pathname: string }) {
         <SidebarMenuButton
           className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground shadow-xs flex-1"
           isActive={pathname === "/invoices/new"}
-          render={<Link href="/invoices/new" prefetch />}
+          render={<Link href="/invoices/new" prefetch={false} />}
           tooltip={t("newInvoice")}
         >
           <PlusIcon className="size-4" />

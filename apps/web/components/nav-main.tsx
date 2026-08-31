@@ -26,7 +26,8 @@ import { NavLinkPending } from "@/components/navigation/nav-link-pending";
 function renderNavAnchor(url: string) {
   const isAppPath = url.startsWith("/");
   if (isAppPath) {
-    return <Link prefetch href={url} />;
+    /** full prefetch 404-retries every shell link on Next 16.3 */
+    return <Link href={url} prefetch={false} />;
   }
   return <a href={url} target="_blank" rel="noreferrer" />;
 }

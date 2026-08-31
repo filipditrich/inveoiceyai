@@ -10,13 +10,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { HistoryIcon, Trash2Icon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 
 import { useAssistantSession } from "./assistant-provider";
 
 export function AssistantHistory() {
   const t = useTranslations("Assistant");
   const format = useFormatter();
+  const now = useNow({ updateInterval: 60_000 });
   const session = useAssistantSession();
   const threads = session?.threads ?? [];
 
@@ -51,7 +52,7 @@ export function AssistantHistory() {
                       : thread.title || t("untitledConversation")}
                   </span>
                   <span className="text-muted-foreground text-xs">
-                    {format.relativeTime(new Date(thread.updatedAt))}
+                    {format.relativeTime(new Date(thread.updatedAt), now)}
                   </span>
                 </span>
               </DropdownMenuItem>

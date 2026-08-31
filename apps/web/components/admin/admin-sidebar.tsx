@@ -91,7 +91,7 @@ export function AdminSidebar({
             <SidebarMenuButton
               size="lg"
               className="hover:bg-sidebar-accent/70 data-[slot=sidebar-menu-button]:gap-3"
-              render={<Link href="/admin" prefetch />}
+              render={<Link href="/admin" prefetch={false} />}
             >
               <BrandLogo
                 className="shadow-sm shadow-black/10 dark:shadow-black/40"
@@ -114,7 +114,7 @@ export function AdminSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton
               className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground shadow-xs"
-              render={<Link href="/dashboard" prefetch />}
+              render={<Link href="/dashboard" prefetch={false} />}
               tooltip={t("nav.backToApp")}
             >
               <ShieldIcon className="size-4" />
