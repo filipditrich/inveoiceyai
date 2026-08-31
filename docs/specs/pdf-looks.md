@@ -114,7 +114,7 @@ Refuse render/issue when a required block is missing. Do **not** inject blocks.
 
 `tax` is one block. Interior is selected by the invoice: VAT recap, non-payer sentence, reverse-charge note, or OSS note.
 
-`title` owns doc label, number, and the credit-note reference. Issue date, due date, and DUZP (when `docType` is `invoice` or `credit_note`) live in the `dates` block when that block is placed; otherwise `title` still prints them so Minimal and older looks keep a complete header. Classic `1.0.0` places `dates` under the client, aligned with compact payment under the issuer.
+`title` owns doc label, number, and the credit-note reference. Issue date, due date, and DUZP (when `docType` is `invoice` or `credit_note`) live in the `dates` block when that block is placed; otherwise `title` still prints them so Minimal and older looks keep a complete header. Classic `1.0.0` puts compact payment and `dates` on a sibling row under the parties so a registry note cannot shift one column.
 
 `payment` `compact`: account number, variable symbol, method. `full`: current payment details, including `instructionsBefore` / `instructionsAfter`. QR is a separate block.
 
@@ -127,12 +127,13 @@ Repo data in `@invoicey/invoice-core`, not the database. Slugs `classic` and `mi
 **Classic `1.0.0`** — today’s face encoded as bands:
 
 1. `row` `1/1`: start `[logo]` · end `[title]`
-2. `row` `1/1`: start `[issuer, payment compact]` · end `[client, dates]`
-3. `stack`: `[lines, totals, tax]`
-4. `row` `1/1`: start `[qr]` · end `[payment full]`
-5. `stack`: `[notes]`
-6. `row` `1/1`: start `[signature]` · end `[stamp]`
-7. `footer`
+2. `row` `1/1`: start `[issuer]` · end `[client]`
+3. `row` `1/1`: start `[payment compact]` · end `[dates]`
+4. `stack`: `[lines, totals, tax]`
+5. `row` `1/1`: start `[qr]` · end `[payment full]`
+6. `stack`: `[notes]`
+7. `row` `1/1`: start `[signature]` · end `[stamp]`
+8. `footer`
 
 Theme matches the current hardcoded colours (`paper` `#ffffff`, `ink` `#0a0a0a`, `muted` `#4b5563`, `line` `#e5e7eb`, `accent` `#0a0a0a`), `typeScale: md`, `density: comfortable`, `logoMaxHeightPt: 52`, `stampMaxHeightPt: 154` (1.75× the 88pt default), optional-block flags `true`.
 

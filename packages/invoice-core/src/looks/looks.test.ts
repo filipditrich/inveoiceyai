@@ -62,10 +62,15 @@ describe("first-party looks", () => {
         theme: themeWithoutStamp,
       }).theme.stampMaxHeightPt,
     ).toBe(88);
-    const partyRow = CLASSIC_LOOK_1_0_0.layout.bands[1];
-    expect(partyRow).toMatchObject({
+    expect(CLASSIC_LOOK_1_0_0.layout.bands[1]).toMatchObject({
       type: "row",
-      end: [{ block: "client" }, { block: "dates" }],
+      start: [{ block: "issuer" }],
+      end: [{ block: "client" }],
+    });
+    expect(CLASSIC_LOOK_1_0_0.layout.bands[2]).toMatchObject({
+      type: "row",
+      start: [{ block: "payment", variant: "compact" }],
+      end: [{ block: "dates" }],
     });
     const stampRow = CLASSIC_LOOK_1_0_0.layout.bands.find(
       (band) =>

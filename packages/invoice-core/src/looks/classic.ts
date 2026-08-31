@@ -21,8 +21,14 @@ export const CLASSIC_LOOK_1_0_0: LookDocument = {
       {
         type: "row",
         split: "1/1",
-        start: [{ block: "issuer" }, { block: "payment", variant: "compact" }],
-        end: [{ block: "client" }, { block: "dates" }],
+        start: [{ block: "issuer" }],
+        end: [{ block: "client" }],
+      },
+      {
+        type: "row",
+        split: "1/1",
+        start: [{ block: "payment", variant: "compact" }],
+        end: [{ block: "dates" }],
       },
       {
         type: "stack",

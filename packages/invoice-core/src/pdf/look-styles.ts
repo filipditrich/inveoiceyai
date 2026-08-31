@@ -140,6 +140,15 @@ export function createInvoicePdfStyles(theme: LookTheme) {
     },
     kvBlock: { width: "100%", marginTop: 6 },
     kvBlockGap: { width: "100%", marginTop: 8 },
+    partyMeta: { width: "100%" },
+    registryNote: {
+      fontFamily: F_SANS,
+      fontSize: fs(8, factor),
+      fontWeight: 400,
+      color: muted,
+      lineHeight: 1.3,
+      marginTop: 6,
+    },
     paymentDetailKv: { marginTop: 0, width: "100%", alignSelf: "stretch" },
     tableWrap: { marginTop: 4 },
     tableHeadRow: {
