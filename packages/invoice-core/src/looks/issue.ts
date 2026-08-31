@@ -35,6 +35,24 @@ export function lookRefForNewDraft(
 }
 
 /**
+ * A stored or session look that still exists in the catalog. Missing ids fall
+ * back without applying entitlement — a locked first-party look stays visible.
+ */
+export function resolvePresentLookRef(
+  requested: LookRef | undefined,
+  fallback: LookRef,
+  catalog: readonly LookDocument[] = [],
+): LookRef {
+  if (requested && findLookDocument(requested.id, requested.version, catalog)) {
+    return requested;
+  }
+  if (findLookDocument(fallback.id, fallback.version, catalog)) {
+    return fallback;
+  }
+  return defaultLookRef();
+}
+
+/**
  * Draft writes. A locked look already on the row is kept (downgrade); picking
  * a new unauthorized look is refused. Missing look inherits the workspace
  * default when that default is entitled and present in the catalog.

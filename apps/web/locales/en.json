@@ -750,6 +750,7 @@
       "detail": "Detail",
       "security": "Security",
       "workspace": "Workspace",
+      "looks": "Looks",
       "members": "Members",
       "referrals": "Referrals",
       "api-keys": "API Keys",
@@ -802,12 +803,20 @@
         "lookLabel": "Default invoice look",
         "lookHint": "New drafts inherit this look. Issued invoices keep the look frozen at issue.",
         "lookSaved": "Default look saved",
+        "looksLink": "Manage looks",
         "looks": {
           "pageTitle": "Looks",
           "pageDescription": "Save a workspace look from Classic or Minimal, then edit layout and theme. Issued invoices keep the snapshot from issue time.",
           "defaultLookLink": "Set the default look for new drafts",
           "createTitle": "New workspace look",
           "createHint": "Duplicates a first-party look. You can change bands and theme after that.",
+          "emptyTitle": "No workspace looks yet",
+          "emptyDescription": "Create one from Classic or Minimal, then pick it on an invoice or set it as the workspace default.",
+          "memberHint": "You can apply workspace looks on invoices. Only owners and admins can edit them.",
+          "deleteConfirm": "Remove this look from the workspace? Issued invoices keep their snapshot.",
+          "slugHint": "Lowercase letters, numbers, and hyphens. Filled from the name until you edit it.",
+          "unsaved": "Unsaved changes",
+          "currentVersion": "Saved {version}",
           "name": "Name",
           "slug": "Slug",
           "source": "Start from",
@@ -1073,6 +1082,7 @@
         "fromJson": "JSON invoice",
         "import": "Import past invoices",
         "workspaceSettings": "Workspace settings",
+        "looks": "Looks",
         "accountSettings": "Account settings"
       }
     }
@@ -2305,6 +2315,11 @@
   },
   "Looks": {
     "upgradeHint": "Included with catalog looks.",
+    "manageLooks": "Edit workspace looks",
+    "origin": {
+      "firstParty": "Invoicey",
+      "workspace": "Workspace"
+    },
     "lockedSelected": "This look cannot be issued on your plan. <upgrade>Upgrade in workspace settings</upgrade> to apply it.",
     "catalog": {
       "classic": {

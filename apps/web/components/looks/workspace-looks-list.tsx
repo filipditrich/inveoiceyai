@@ -2,6 +2,7 @@
 
 import {
   latestLooksById,
+  lookSlugFromName,
   type LookDocument,
 } from "@invoicey/invoice-core/looks";
 import Link from "next/link";
@@ -14,6 +15,8 @@ import {
   createWorkspaceLookAction,
   deleteWorkspaceLookAction,
 } from "@/actions/workspace-looks";
+import { selectClassName } from "@/components/invoices/field";
+import { LookLayoutThumb } from "@/components/looks/look-layout-thumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +39,7 @@ export function WorkspaceLooksList({
   const [pending, startTransition] = useTransition();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const [slugTouched, setSlugTouched] = useState(false);
   const [sourceId, setSourceId] = useState<"classic" | "minimal">("classic");
 
   const create = () => {
@@ -52,6 +56,7 @@ export function WorkspaceLooksList({
   };
 
   const remove = (lookId: string) => {
+    if (!window.confirm(t("deleteConfirm"))) return;
     startTransition(async () => {
       const result = await deleteWorkspaceLookAction({ lookId });
       if (!result.ok) {
@@ -75,7 +80,11 @@ export function WorkspaceLooksList({
             <Label htmlFor="new-look-name">{t("name")}</Label>
             <Input
               id="new-look-name"
-              onChange={(event) => setName(event.target.value)}
+              onChange={(event) => {
+                const next = event.target.value;
+                setName(next);
+                if (!slugTouched) setSlug(lookSlugFromName(next));
+              }}
               value={name}
             />
           </div>
@@ -83,14 +92,18 @@ export function WorkspaceLooksList({
             <Label htmlFor="new-look-slug">{t("slug")}</Label>
             <Input
               id="new-look-slug"
-              onChange={(event) => setSlug(event.target.value)}
+              onChange={(event) => {
+                setSlugTouched(true);
+                setSlug(event.target.value);
+              }}
               value={slug}
             />
+            <p className="text-muted-foreground text-xs">{t("slugHint")}</p>
           </div>
           <div className="space-y-1">
             <Label htmlFor="new-look-source">{t("source")}</Label>
             <select
-              className="border-input h-9 w-full rounded-md border bg-transparent px-2 text-sm"
+              className={selectClassName()}
               id="new-look-source"
               onChange={(event) =>
                 setSourceId(event.target.value as "classic" | "minimal")
@@ -105,6 +118,7 @@ export function WorkspaceLooksList({
             <Button
               disabled={pending || !name.trim() || !slug.trim()}
               onClick={create}
+              type="button"
             >
               {pending ? t("creating") : t("create")}
             </Button>
@@ -112,45 +126,62 @@ export function WorkspaceLooksList({
         </div>
       ) : !entitled ? (
         <p className="text-muted-foreground text-sm">{t("lockedHint")}</p>
-      ) : null}
-      <ul className="space-y-2">
-        {latest.map((look) => (
-          <li
-            key={look.id}
-            className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3"
-          >
-            <div>
-              <p className="text-sm font-medium">{look.name}</p>
-              <p className="text-muted-foreground text-xs tabular-nums">
-                {look.id}@{look.version}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              {canEdit && entitled ? (
-                <>
-                  <Button
-                    render={
-                      <Link href={`/settings/workspace/looks/${look.id}`} />
-                    }
-                    size="sm"
-                    variant="outline"
-                  >
-                    {t("edit")}
-                  </Button>
-                  <Button
-                    disabled={pending}
-                    onClick={() => remove(look.id)}
-                    size="sm"
-                    variant="ghost"
-                  >
-                    {t("remove")}
-                  </Button>
-                </>
-              ) : null}
-            </div>
-          </li>
-        ))}
-      </ul>
+      ) : (
+        <p className="text-muted-foreground text-sm">{t("memberHint")}</p>
+      )}
+      {latest.length === 0 ? (
+        <div className="rounded-lg border border-dashed p-6 text-center">
+          <p className="text-sm font-medium">{t("emptyTitle")}</p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            {t("emptyDescription")}
+          </p>
+        </div>
+      ) : (
+        <ul className="space-y-2">
+          {latest.map((look) => (
+            <li
+              key={look.id}
+              className="flex flex-wrap items-center gap-3 rounded-lg border p-3"
+            >
+              <LookLayoutThumb
+                accent={look.theme.accent}
+                layout={look.layout}
+                paper={look.theme.paper}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">{look.name}</p>
+                <p className="text-muted-foreground text-xs tabular-nums">
+                  {look.id} · {look.version}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                {canEdit && entitled ? (
+                  <>
+                    <Button
+                      render={
+                        <Link href={`/settings/workspace/looks/${look.id}`} />
+                      }
+                      size="sm"
+                      variant="outline"
+                    >
+                      {t("edit")}
+                    </Button>
+                    <Button
+                      disabled={pending}
+                      onClick={() => remove(look.id)}
+                      size="sm"
+                      type="button"
+                      variant="ghost"
+                    >
+                      {t("remove")}
+                    </Button>
+                  </>
+                ) : null}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

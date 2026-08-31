@@ -750,6 +750,7 @@
       "detail": "Detail",
       "security": "Zabezpečení",
       "workspace": "Pracovní prostor",
+      "looks": "Vzhledy",
       "members": "Členové",
       "referrals": "Doporučení",
       "api-keys": "API klíče",
@@ -802,12 +803,20 @@
         "lookLabel": "Výchozí vzhled faktury",
         "lookHint": "Nové návrhy zdědí tento vzhled. Vystavené faktury si nechají vzhled zmrazený při vystavení.",
         "lookSaved": "Výchozí vzhled uložen",
+        "looksLink": "Spravovat vzhledy",
         "looks": {
           "pageTitle": "Vzhledy",
           "pageDescription": "Uložte workspace vzhled z Classic nebo Minimal a upravte rozložení i téma. Vystavené faktury drží snapshot z okamžiku vystavení.",
           "defaultLookLink": "Nastavit výchozí vzhled pro nové koncepty",
           "createTitle": "Nový workspace vzhled",
           "createHint": "Zkopíruje first-party vzhled. Pásy a téma změníte potom.",
+          "emptyTitle": "Zatím žádné workspace vzhledy",
+          "emptyDescription": "Vytvořte jeden z Classic nebo Minimal. Pak ho vyberete na faktuře, nebo nastavíte jako výchozí.",
+          "memberHint": "Workspace vzhledy můžete použít na fakturách. Upravovat je smí jen vlastník a admin.",
+          "deleteConfirm": "Odebrat tento vzhled z workspace? Vystavené faktury si nechají snapshot.",
+          "slugHint": "Malá písmena, čísla a pomlčky. Doplní se z názvu, dokud ho neupravíte.",
+          "unsaved": "Neuložené změny",
+          "currentVersion": "Uloženo {version}",
           "name": "Název",
           "slug": "Slug",
           "source": "Začít od",
@@ -1073,6 +1082,7 @@
         "fromJson": "Faktura z JSON",
         "import": "Importovat staré faktury",
         "workspaceSettings": "Nastavení prostoru",
+        "looks": "Vzhledy",
         "accountSettings": "Nastavení účtu"
       }
     }
@@ -2305,6 +2315,11 @@
   },
   "Looks": {
     "upgradeHint": "Součást tarifu s katalogem vzhledů.",
+    "manageLooks": "Upravit workspace vzhledy",
+    "origin": {
+      "firstParty": "Invoicey",
+      "workspace": "Workspace"
+    },
     "lockedSelected": "Tento vzhled na vašem tarifu nelze vystavit. <upgrade>Změňte tarif v nastavení workspace</upgrade>.",
     "catalog": {
       "classic": {

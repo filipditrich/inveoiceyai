@@ -11,6 +11,7 @@ import {
   LoaderCircleIcon,
   PlusIcon,
   RepeatIcon,
+  Rows3Icon,
   SearchIcon,
   Settings2Icon,
   SparklesIcon,
@@ -39,6 +40,7 @@ type CommandKey =
   | "fromJson"
   | "import"
   | "workspaceSettings"
+  | "looks"
   | "accountSettings";
 
 interface StaticCommand {
@@ -93,6 +95,12 @@ const STATIC_COMMANDS: StaticCommand[] = [
     key: "workspaceSettings",
     href: "/settings/workspace",
     icon: <Settings2Icon />,
+    group: "settings",
+  },
+  {
+    key: "looks",
+    href: "/settings/workspace/looks",
+    icon: <Rows3Icon />,
     group: "settings",
   },
   {
