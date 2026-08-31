@@ -309,9 +309,13 @@ export function createInvoicePdfStyles(theme: LookTheme) {
       color: ink,
       textDecoration: "none",
     },
+    stampWrapEnd: {
+      width: "100%",
+      alignItems: "flex-end",
+    },
     stampSig: {
-      width: 88,
-      height: 88,
+      width: theme.stampMaxHeightPt,
+      height: theme.stampMaxHeightPt,
       objectFit: "contain",
       objectPosition: "bottom",
     },

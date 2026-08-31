@@ -22,7 +22,7 @@ export const CLASSIC_LOOK_1_0_0: LookDocument = {
         type: "row",
         split: "1/1",
         start: [{ block: "issuer" }, { block: "payment", variant: "compact" }],
-        end: [{ block: "client" }],
+        end: [{ block: "client" }, { block: "dates" }],
       },
       {
         type: "stack",
@@ -38,8 +38,8 @@ export const CLASSIC_LOOK_1_0_0: LookDocument = {
       {
         type: "row",
         split: "1/1",
-        start: [{ block: "stamp" }],
-        end: [{ block: "signature" }],
+        start: [{ block: "signature" }],
+        end: [{ block: "stamp" }],
       },
       { type: "footer", slots: [{ block: "footer" }] },
     ],
@@ -53,6 +53,7 @@ export const CLASSIC_LOOK_1_0_0: LookDocument = {
     typeScale: "md",
     density: "comfortable",
     logoMaxHeightPt: 52,
+    stampMaxHeightPt: 154,
     showStamp: true,
     showSignature: true,
     showQr: true,

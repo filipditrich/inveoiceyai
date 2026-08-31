@@ -3,7 +3,12 @@ import type { LookBand, LookDocument } from "@invoicey/invoice-core/looks";
 import { cn } from "@/lib/utils";
 
 function slotShade(block: string, accent: string): string {
-  if (block === "title" || block === "lines" || block === "totals") {
+  if (
+    block === "title" ||
+    block === "dates" ||
+    block === "lines" ||
+    block === "totals"
+  ) {
     return accent;
   }
   if (block === "footer") return `${accent}33`;

@@ -430,6 +430,21 @@ function StructureEditor({
             value={look.theme.logoMaxHeightPt}
           />
         </div>
+        <div className="space-y-1">
+          <Label htmlFor="stamp-max">{t("theme.stampMaxHeightPt")}</Label>
+          <Input
+            id="stamp-max"
+            max={200}
+            min={24}
+            onChange={(event) =>
+              updateTheme({
+                stampMaxHeightPt: Number(event.target.value) || 88,
+              })
+            }
+            type="number"
+            value={look.theme.stampMaxHeightPt}
+          />
+        </div>
       </div>
       <div className="grid gap-2 sm:grid-cols-2">
         {(

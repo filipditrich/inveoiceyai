@@ -859,6 +859,7 @@
             "typeScale": "Type scale",
             "density": "Density",
             "logoMaxHeightPt": "Logo max height (pt)",
+            "stampMaxHeightPt": "Stamp max height (pt)",
             "showStamp": "Show stamp",
             "showSignature": "Show signature",
             "showQr": "Show QR",

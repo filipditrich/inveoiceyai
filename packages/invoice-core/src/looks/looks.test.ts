@@ -20,6 +20,7 @@ import {
   communityLookFrom,
   findLookDocument,
   lookContentEquals,
+  lookHasBlock,
   lookIsPublishable,
   lookRefForNewDraft,
   lookSlugFromName,
@@ -49,6 +50,28 @@ describe("first-party looks", () => {
     expect(LookDocumentSchema.parse(MINIMAL_LOOK_1_0_0).id).toBe("minimal");
     expect(validateLookDocument(CLASSIC_LOOK_1_0_0)).toEqual([]);
     expect(validateLookDocument(MINIMAL_LOOK_1_0_0)).toEqual([]);
+    expect(lookHasBlock(CLASSIC_LOOK_1_0_0, "dates")).toBe(true);
+    expect(lookHasBlock(MINIMAL_LOOK_1_0_0, "dates")).toBe(false);
+    expect(CLASSIC_LOOK_1_0_0.theme.stampMaxHeightPt).toBe(154);
+    expect(MINIMAL_LOOK_1_0_0.theme.stampMaxHeightPt).toBe(88);
+    const { stampMaxHeightPt: _stamp, ...themeWithoutStamp } =
+      CLASSIC_LOOK_1_0_0.theme;
+    expect(
+      LookDocumentSchema.parse({
+        ...CLASSIC_LOOK_1_0_0,
+        theme: themeWithoutStamp,
+      }).theme.stampMaxHeightPt,
+    ).toBe(88);
+    const partyRow = CLASSIC_LOOK_1_0_0.layout.bands[1];
+    expect(partyRow).toMatchObject({
+      type: "row",
+      end: [{ block: "client" }, { block: "dates" }],
+    });
+    const stampRow = CLASSIC_LOOK_1_0_0.layout.bands.find(
+      (band) =>
+        band.type === "row" && band.end.some((slot) => slot.block === "stamp"),
+    );
+    expect(stampRow).toBeDefined();
   });
 
   it("passes validateLookForInvoice for every first-party fixture shape", () => {

@@ -10,6 +10,7 @@ import {
   type InvoiceLabels,
 } from "../labels";
 import {
+  lookHasBlock,
   resolveLookDocument,
   validateLookForInvoice,
   type BlockInstance,
@@ -317,10 +318,39 @@ function renderLogo(ctx: PdfCtx): React.ReactElement | null {
   return <Image style={ctx.styles.logoImg} src={ctx.assets.logo} />;
 }
 
-function renderTitle(ctx: PdfCtx): React.ReactElement {
+function renderDateFields(
+  ctx: PdfCtx,
+  boxStyle: InvoicePdfStyles["kvBlock"],
+): React.ReactElement {
   const { inv, labels, intlLocale, styles } = ctx;
   const showDuzp =
     inv.meta.docType !== "proforma" && inv.meta.docType !== "advance";
+  return (
+    <View style={boxStyle}>
+      <PdfKv
+        first
+        k={labels.issueDate}
+        v={fmtDateIsoLocal(inv.meta.issueDate, intlLocale)}
+        styles={styles}
+      />
+      <PdfKv
+        k={labels.dueDate}
+        v={fmtDateIsoLocal(inv.meta.dueDate, intlLocale)}
+        styles={styles}
+      />
+      {showDuzp ? (
+        <PdfKv
+          k={labels.taxPointDate}
+          v={fmtDateIsoLocal(inv.meta.duzp, intlLocale)}
+          styles={styles}
+        />
+      ) : null}
+    </View>
+  );
+}
+
+function renderTitle(ctx: PdfCtx): React.ReactElement {
+  const { inv, labels, styles, look } = ctx;
   return (
     <View>
       <View style={styles.titleColRule} />
@@ -328,26 +358,9 @@ function renderTitle(ctx: PdfCtx): React.ReactElement {
         {invoicePdfMainTitle(inv, labels)}
       </Text>
       <Text style={styles.docKindMicro}>{docKindUpper(inv, labels)}</Text>
-      <View style={styles.kvBlock}>
-        <PdfKv
-          first
-          k={labels.issueDate}
-          v={fmtDateIsoLocal(inv.meta.issueDate, intlLocale)}
-          styles={styles}
-        />
-        <PdfKv
-          k={labels.dueDate}
-          v={fmtDateIsoLocal(inv.meta.dueDate, intlLocale)}
-          styles={styles}
-        />
-        {showDuzp ? (
-          <PdfKv
-            k={labels.taxPointDate}
-            v={fmtDateIsoLocal(inv.meta.duzp, intlLocale)}
-            styles={styles}
-          />
-        ) : null}
-      </View>
+      {lookHasBlock(look, "dates")
+        ? null
+        : renderDateFields(ctx, styles.kvBlock)}
       {inv.meta.docType === "credit_note" && inv.meta.correctedInvoiceNumber ? (
         <Text style={[styles.partyAddr, { marginTop: 8 }]}>
           {labels.correctsDocument}{" "}
@@ -358,6 +371,10 @@ function renderTitle(ctx: PdfCtx): React.ReactElement {
       ) : null}
     </View>
   );
+}
+
+function renderDates(ctx: PdfCtx): React.ReactElement {
+  return renderDateFields(ctx, ctx.styles.kvBlockGap);
 }
 
 function renderIssuer(ctx: PdfCtx): React.ReactElement {
@@ -689,9 +706,14 @@ function renderNotes(ctx: PdfCtx): React.ReactElement | null {
   );
 }
 
-function renderStamp(ctx: PdfCtx): React.ReactElement | null {
+function renderStamp(
+  ctx: PdfCtx,
+  column?: "start" | "end",
+): React.ReactElement | null {
   if (!ctx.look.theme.showStamp || !ctx.assets.stamp) return null;
-  return <Image style={ctx.styles.stampSig} src={ctx.assets.stamp} />;
+  const image = <Image style={ctx.styles.stampSig} src={ctx.assets.stamp} />;
+  if (column !== "end") return image;
+  return <View style={ctx.styles.stampWrapEnd}>{image}</View>;
 }
 
 function renderSignature(ctx: PdfCtx): React.ReactElement | null {
@@ -713,6 +735,7 @@ function renderFooter(ctx: PdfCtx): React.ReactElement {
 function renderBlock(
   ctx: PdfCtx,
   slot: BlockInstance,
+  column?: "start" | "end",
 ): React.ReactElement | null {
   switch (slot.block) {
     case "logo":
@@ -723,6 +746,8 @@ function renderBlock(
       return renderIssuer(ctx);
     case "client":
       return renderClient(ctx);
+    case "dates":
+      return renderDates(ctx);
     case "payment":
       return slot.variant === "compact"
         ? renderPaymentCompact(ctx)
@@ -738,7 +763,7 @@ function renderBlock(
     case "notes":
       return renderNotes(ctx);
     case "stamp":
-      return renderStamp(ctx);
+      return renderStamp(ctx, column);
     case "signature":
       return renderSignature(ctx);
     case "footer":
@@ -753,10 +778,11 @@ function renderBlock(
 function renderSlotColumn(
   ctx: PdfCtx,
   slots: readonly BlockInstance[],
+  column?: "start" | "end",
 ): React.ReactElement | null {
   const children = slots
     .map((slot, index) => {
-      const node = renderBlock(ctx, slot);
+      const node = renderBlock(ctx, slot, column);
       return node ? (
         <View key={`${slot.block}-${String(index)}`}>{node}</View>
       ) : null;
@@ -784,8 +810,8 @@ function renderBand(
       </View>
     );
   }
-  const start = renderSlotColumn(ctx, band.start);
-  const end = renderSlotColumn(ctx, band.end);
+  const start = renderSlotColumn(ctx, band.start, "start");
+  const end = renderSlotColumn(ctx, band.end, "end");
   if (!start && !end) return null;
   if (!start)
     return (

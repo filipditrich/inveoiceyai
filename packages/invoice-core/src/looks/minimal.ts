@@ -48,6 +48,7 @@ export const MINIMAL_LOOK_1_0_0: LookDocument = {
     typeScale: "sm",
     density: "compact",
     logoMaxHeightPt: 40,
+    stampMaxHeightPt: 88,
     showStamp: true,
     showSignature: true,
     showQr: true,
