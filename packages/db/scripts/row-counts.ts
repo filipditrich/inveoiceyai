@@ -22,6 +22,7 @@ const tables = [
   "invoices",
   "invoice_items",
   "invoice_templates",
+  "workspace_looks",
   "recurring_schedules",
   "presets",
   "bank_connections",

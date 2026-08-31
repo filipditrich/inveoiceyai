@@ -5,7 +5,10 @@ import { requireWorkspace } from "@/lib/auth/session";
 import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
-import { loadWorkspaceDefaultLook } from "@/lib/load-workspace-look";
+import {
+  loadWorkspaceDefaultLook,
+  loadWorkspaceLookDocuments,
+} from "@/lib/load-workspace-look";
 import { getTranslations } from "next-intl/server";
 import {
   BookOpenIcon,
@@ -27,12 +30,14 @@ export default async function InvoiceNewPage({
   const { workspaceId } = await requireWorkspace();
   const sp = await searchParams;
   const t = await getTranslations("Invoices.builder");
-  const [issuers, clients, plan, defaultLook] = await Promise.all([
-    loadIssuerOptions(workspaceId),
-    loadClientOptions(workspaceId),
-    requireEntitlements(),
-    loadWorkspaceDefaultLook(workspaceId),
-  ]);
+  const [issuers, clients, plan, defaultLook, workspaceLooks] =
+    await Promise.all([
+      loadIssuerOptions(workspaceId),
+      loadClientOptions(workspaceId),
+      requireEntitlements(),
+      loadWorkspaceDefaultLook(workspaceId),
+      loadWorkspaceLookDocuments(workspaceId),
+    ]);
   const lastInvoice = await loadLastInvoiceSuggestions(workspaceId, {
     issuerId: issuers[0]?.id,
     clientId: clients[0]?.id,
@@ -105,6 +110,7 @@ export default async function InvoiceNewPage({
         lastInvoice={lastInvoice}
         looksApply={plan.entitlements.looks.apply}
         mode="create"
+        workspaceLooks={workspaceLooks}
         workspaceId={workspaceId}
       />
     </div>

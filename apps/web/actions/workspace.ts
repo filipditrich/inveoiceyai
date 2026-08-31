@@ -1,6 +1,6 @@
 "use server";
 
-import { getWorkspaceEntitlements, invitation, workspaces } from "@invoicey/db";
+import { invitation, workspaces } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -10,9 +10,10 @@ import { redirect } from "next/navigation";
 import { isTrustedInvoiceImageUrl } from "@invoicey/invoice-core";
 import {
   canApplyLook,
-  getFirstPartyLook,
+  findLookDocument,
   LookRefSchema,
 } from "@invoicey/invoice-core/looks";
+import { loadWorkspaceLookContext } from "@invoicey/invoice-tools/ops";
 
 import { auth } from "@/lib/auth/auth";
 import { ForbiddenError } from "@/lib/auth/errors";
@@ -187,10 +188,7 @@ export async function updateWorkspaceLookAction(input: {
     id: input.lookId,
     version: input.lookVersion,
   });
-  if (
-    !parsed.success ||
-    !getFirstPartyLook(parsed.data.id, parsed.data.version)
-  ) {
+  if (!parsed.success) {
     return { ok: false, errorCode: "invalid_look" };
   }
 
@@ -199,11 +197,17 @@ export async function updateWorkspaceLookAction(input: {
     if (role !== "owner" && role !== "admin") {
       return { ok: false, errorCode: "forbidden" };
     }
-    const entitled = await getWorkspaceEntitlements(db, workspaceId);
+    const lookContext = await loadWorkspaceLookContext(db, workspaceId);
     if (
-      !entitled ||
-      !canApplyLook(entitled.entitlements.looks.apply, parsed.data.id)
+      !findLookDocument(
+        parsed.data.id,
+        parsed.data.version,
+        lookContext.catalog,
+      )
     ) {
+      return { ok: false, errorCode: "invalid_look" };
+    }
+    if (!canApplyLook(lookContext.apply, parsed.data.id)) {
       return { ok: false, errorCode: "look_not_entitled" };
     }
     await db

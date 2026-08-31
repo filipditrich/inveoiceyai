@@ -223,6 +223,32 @@ export const invoiceTemplates = pgTable(
   ],
 );
 
+/** Versioned workspace look documents (Plan 28). First-party looks stay in repo. */
+export const workspaceLooks = pgTable(
+  "workspace_looks",
+  {
+    id: uuid("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    lookId: text("look_id").notNull(),
+    version: text("version").notNull(),
+    document: jsonb("document").notNull().$type<Record<string, unknown>>(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("workspace_looks_workspace_look_version").on(
+      t.workspaceId,
+      t.lookId,
+      t.version,
+    ),
+    index("workspace_looks_workspace_idx").on(t.workspaceId),
+  ],
+);
+
 /** 1:1 schedule for a template. `last_invoice_id` has no FK (cycle with invoices). */
 export const recurringSchedules = pgTable(
   "recurring_schedules",

@@ -587,7 +587,7 @@ export async function issueInvoice(formData: FormData): Promise<void> {
       }
 
       const lookContext = await loadWorkspaceLookContext(tx, workspaceId);
-      const snapped = snapshotLookAtIssue(parsed.data, lookContext.apply);
+      const snapped = snapshotLookAtIssue(parsed.data, lookContext);
       if (!snapped.ok) {
         throw new Error(snapped.error);
       }

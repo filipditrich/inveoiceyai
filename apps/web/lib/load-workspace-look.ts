@@ -1,6 +1,11 @@
-import { workspaces } from "@invoicey/db";
+import { listWorkspaceLookRows, workspaces } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { defaultLookRef, type LookRef } from "@invoicey/invoice-core/looks";
+import {
+  defaultLookRef,
+  LookDocumentSchema,
+  type LookDocument,
+  type LookRef,
+} from "@invoicey/invoice-core/looks";
 import { eq } from "drizzle-orm";
 
 export async function loadWorkspaceDefaultLook(
@@ -16,4 +21,16 @@ export async function loadWorkspaceDefaultLook(
     .limit(1);
   if (!row) return defaultLookRef();
   return { id: row.defaultLookId, version: row.defaultLookVersion };
+}
+
+export async function loadWorkspaceLookDocuments(
+  workspaceId: string,
+): Promise<LookDocument[]> {
+  const rows = await listWorkspaceLookRows(db, workspaceId);
+  const looks: LookDocument[] = [];
+  for (const row of rows) {
+    const parsed = LookDocumentSchema.safeParse(row.document);
+    if (parsed.success) looks.push(parsed.data);
+  }
+  return looks;
 }

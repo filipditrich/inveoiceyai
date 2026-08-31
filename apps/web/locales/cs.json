@@ -778,7 +778,8 @@
         "referrals": "Doporučení",
         "apiKeys": "API klíče",
         "bankConnections": "Bankovní spojení",
-        "integrations": "Integrace"
+        "integrations": "Integrace",
+        "looks": "Vzhledy"
       },
       "navDescriptions": {
         "account": "Profil, motiv a jazyk",
@@ -789,7 +790,8 @@
         "referrals": "Pozvěte přátele do Invoicey",
         "apiKeys": "Přístup pro automatizaci",
         "bankConnections": "Bankovní přehledy jen pro čtení",
-        "integrations": "Slack, MCP a další nástroje"
+        "integrations": "Slack, MCP a další nástroje",
+        "looks": "Vzhledy faktur tohoto workspace"
       },
       "workspace": {
         "pageTitle": "Pracovní prostor",
@@ -800,6 +802,53 @@
         "lookLabel": "Výchozí vzhled faktury",
         "lookHint": "Nové návrhy zdědí tento vzhled. Vystavené faktury si nechají vzhled zmrazený při vystavení.",
         "lookSaved": "Výchozí vzhled uložen",
+        "looks": {
+          "pageTitle": "Vzhledy",
+          "pageDescription": "Uložte workspace vzhled z Classic nebo Minimal a upravte rozložení i téma. Vystavené faktury drží snapshot z okamžiku vystavení.",
+          "defaultLookLink": "Nastavit výchozí vzhled pro nové koncepty",
+          "createTitle": "Nový workspace vzhled",
+          "createHint": "Zkopíruje first-party vzhled. Pásy a téma změníte potom.",
+          "name": "Název",
+          "slug": "Slug",
+          "source": "Začít od",
+          "create": "Vytvořit vzhled",
+          "creating": "Vytvářím…",
+          "edit": "Upravit",
+          "remove": "Odebrat",
+          "deleted": "Vzhled odebrán",
+          "lockedHint": "Workspace vzhled vyžaduje katalog vzhledů. Upgradujte tarif, nebo požádejte vlastníka.",
+          "editorDescription": "Úprava {id}. Uložení zapíše novou verzi; staré vystavené faktury si nechají snapshot.",
+          "backToList": "Všechny workspace vzhledy",
+          "viewStructure": "Struktura",
+          "viewJson": "JSON",
+          "viewPreview": "Náhled",
+          "save": "Uložit novou verzi",
+          "saving": "Ukládám…",
+          "saved": "Uloženo jako {version}",
+          "applyJson": "Použít JSON",
+          "jsonInvalid": "Tento JSON není platný.",
+          "jsonMustKeepId": "Ponechte stejný slug a platný dokument vzhledu.",
+          "previewInvalid": "Náhled je až když je vzhled platný dokument.",
+          "bands": "Pásy",
+          "addStack": "Přidat stack",
+          "addRow": "Přidat řádek",
+          "addBlock": "Přidat blok",
+          "bandN": "Pás {n}",
+          "theme": {
+            "paper": "Papír",
+            "ink": "Inkoust",
+            "muted": "Tlumená",
+            "line": "Linka",
+            "accent": "Akcent",
+            "typeScale": "Stupnice písma",
+            "density": "Hustota",
+            "logoMaxHeightPt": "Max. výška loga (pt)",
+            "showStamp": "Zobrazit razítko",
+            "showSignature": "Zobrazit podpis",
+            "showQr": "Zobrazit QR",
+            "showNotes": "Zobrazit poznámku"
+          }
+        },
         "logoLabel": "Logo",
         "logoHint": "Zobrazuje se v přepínači pracovního prostoru. Faktury dál používají logo jednotlivých firem.",
         "logoSaved": "Logo pracovního prostoru uloženo",
@@ -825,7 +874,7 @@
             "recurring": "Opakované koncepty",
             "historicalImport": "Import historie",
             "agents": "Slack, MCP a Invoicey",
-            "catalogLooks": "Katalog vzhledů (Minimal)"
+            "catalogLooks": "Katalog vzhledů (Minimal a workspace editor)"
           }
         }
       },
@@ -994,7 +1043,12 @@
       "invite_missing_workspace": "Pozvánka neobsahuje pracovní prostor",
       "forbidden": "Pro tuto akci nemáte oprávnění",
       "look_not_entitled": "Váš tarif tento vzhled nesmí použít",
-      "invalid_look": "Tento vzhled není k dispozici"
+      "invalid_look": "Tento vzhled není k dispozici",
+      "reserved_look_id": "classic a minimal jsou vyhrazené first-party vzhledy",
+      "invalid_look_id": "Použijte slug malými písmeny, například cista-faktura",
+      "slug_taken": "Tento slug vzhledu v workspace už existuje",
+      "look_in_use": "Nejdřív změňte výchozí vzhled workspace, pak tento odeberte",
+      "save_failed": "Vzhled se nepodařilo uložit"
     },
     "palette": {
       "trigger": "Hledat…",
@@ -2258,6 +2312,9 @@
       },
       "minimal": {
         "description": "Titulek nahoře, hutnější sazba, modrý akcent. Jiné rozložení, ne jen zhustěný Classic."
+      },
+      "workspace": {
+        "description": "Vzhled, který tento workspace uložil v editoru."
       }
     }
   },

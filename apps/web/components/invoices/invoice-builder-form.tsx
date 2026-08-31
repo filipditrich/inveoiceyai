@@ -56,9 +56,10 @@ import type { Invoice } from "@invoicey/invoice-core/schema";
 import {
   ACCENT_COLOR_HEX,
   appearanceFromPicker,
-  getFirstPartyLook,
-  listFirstPartyLooks,
+  findLookDocument,
+  looksForPicker,
   type LegacyAccentColor,
+  type LookDocument,
   type LookRef,
 } from "@invoicey/invoice-core/looks";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
@@ -186,8 +187,9 @@ function appearanceFromForm(
     | "showQr"
     | "showNotesBlock"
   >,
+  catalog: readonly LookDocument[],
 ) {
-  const look = getFirstPartyLook(values.lookId, values.lookVersion);
+  const look = findLookDocument(values.lookId, values.lookVersion, catalog);
   if (!look) return undefined;
   return appearanceFromPicker({
     lookTheme: look.theme,
@@ -268,6 +270,7 @@ export interface InvoiceBuilderFormProps {
   initial?: Partial<BuilderFormValues> & { numberPreview?: string };
   looksApply: "classic" | "catalog";
   defaultLook: LookRef;
+  workspaceLooks?: readonly LookDocument[];
 }
 
 function fieldError(
@@ -300,6 +303,7 @@ export function InvoiceBuilderForm({
   initial,
   looksApply,
   defaultLook,
+  workspaceLooks = [],
 }: InvoiceBuilderFormProps) {
   const t = useTranslations("Invoices.builder");
   const tErr = useTranslations("Errors.invalid");
@@ -315,10 +319,11 @@ export function InvoiceBuilderForm({
     issuers.find((i) => i.id === (initial?.issuerId ?? firstIssuer?.id)) ??
     firstIssuer;
   const resolvedLook =
-    getFirstPartyLook(
+    findLookDocument(
       initial?.lookId ?? defaultLook.id,
       initial?.lookVersion ?? defaultLook.version,
-    ) ?? getFirstPartyLook(defaultLook.id, defaultLook.version);
+      workspaceLooks,
+    ) ?? findLookDocument(defaultLook.id, defaultLook.version, workspaceLooks);
   const lookTheme = resolvedLook?.theme;
   const form = useForm<BuilderFormValues>({
     resolver: standardSchemaResolver(schema),
@@ -662,7 +667,12 @@ export function InvoiceBuilderForm({
       notes: watched.notes || undefined,
       pricesIncludeVat: watched.pricesIncludeVat,
       look: { id: watched.lookId, version: watched.lookVersion },
-      appearance: appearanceFromForm(watched),
+      lookSnapshot: findLookDocument(
+        watched.lookId,
+        watched.lookVersion,
+        workspaceLooks,
+      ),
+      appearance: appearanceFromForm(watched, workspaceLooks),
     });
     if (!built.ok) {
       return { invoice: null, error: built.message };
@@ -695,6 +705,7 @@ export function InvoiceBuilderForm({
     watched.showSignature,
     watched.showQr,
     watched.showNotesBlock,
+    workspaceLooks,
   ]);
 
   const previewKey = previewBuild.invoice
@@ -853,7 +864,7 @@ export function InvoiceBuilderForm({
     }
     fd.set("lookId", values.lookId);
     fd.set("lookVersion", values.lookVersion);
-    const appearance = appearanceFromForm(values);
+    const appearance = appearanceFromForm(values, workspaceLooks);
     if (appearance) {
       fd.set("appearanceJson", JSON.stringify(appearance));
     }
@@ -1322,14 +1333,22 @@ export function InvoiceBuilderForm({
         >
           <LookPicker
             allowLockedPreview
-            looks={listFirstPartyLooks().map((item) => ({
+            looks={looksForPicker(workspaceLooks, {
+              id: watched.lookId,
+              version: watched.lookVersion,
+            }).map((item) => ({
               id: item.id,
               version: item.version,
               name: item.name,
+              origin: item.origin,
             }))}
             looksApply={looksApply}
             onChange={(next) => {
-              const document = getFirstPartyLook(next.id, next.version);
+              const document = findLookDocument(
+                next.id,
+                next.version,
+                workspaceLooks,
+              );
               form.setValue("lookId", next.id, { shouldDirty: true });
               form.setValue("lookVersion", next.version, { shouldDirty: true });
               form.setValue("accentKey", "default", { shouldDirty: true });

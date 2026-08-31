@@ -29,6 +29,7 @@ const required = new Map([
   ["payment_match_proposals", new Set(["matcher_version", "status"])],
   ["invoice_payment_allocations", new Set(["amount", "reversed_at"])],
   ["payment_audit_events", new Set(["action", "payload_json"])],
+  ["workspace_looks", new Set(["look_id", "version", "document"])],
 ]);
 
 const result = await db.execute<{
@@ -47,7 +48,8 @@ const result = await db.execute<{
       'bank_transactions',
       'payment_match_proposals',
       'invoice_payment_allocations',
-      'payment_audit_events'
+      'payment_audit_events',
+      'workspace_looks'
     )
 `);
 

@@ -36,6 +36,13 @@ export {
   type PersistDraftInvoiceResult,
 } from "./invoices-repo";
 export {
+  deleteWorkspaceLookRows,
+  getWorkspaceLookRow,
+  insertWorkspaceLookRow,
+  listWorkspaceLookRows,
+  type WorkspaceLookRow,
+} from "./workspace-looks-repo";
+export {
   confirmPaymentMatchProposal,
   createManualPaymentAllocation,
   listInvoicePaymentAllocations,

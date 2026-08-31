@@ -1,6 +1,6 @@
 import type { Invoice } from "../schema";
 import { appearanceFromCustomization, mergeLookTheme } from "./appearance";
-import { getFirstPartyLook } from "./catalog";
+import { findLookDocument, getFirstPartyLook } from "./catalog";
 import { CLASSIC_LOOK_1_0_0 } from "./classic";
 import {
   CLASSIC_LOOK_ID,
@@ -14,17 +14,20 @@ function classicFallback(): LookDocument {
 }
 
 /**
- * Snapshot wins; then catalog id+version; otherwise Classic 1.0.0.
- * Appearance is merged onto the resolved theme.
+ * Snapshot wins; then catalog id+version (first-party, then extra); otherwise
+ * Classic 1.0.0. Appearance is merged onto the resolved theme.
  */
-export function resolveLookDocument(invoice: Invoice): LookDocument {
+export function resolveLookDocument(
+  invoice: Invoice,
+  catalog: readonly LookDocument[] = [],
+): LookDocument {
   const snap = invoice.lookSnapshot
     ? LookDocumentSchema.safeParse(invoice.lookSnapshot)
     : undefined;
   const base = snap?.success
     ? snap.data
     : invoice.look
-      ? (getFirstPartyLook(invoice.look.id, invoice.look.version) ??
+      ? (findLookDocument(invoice.look.id, invoice.look.version, catalog) ??
         classicFallback())
       : (getFirstPartyLook(CLASSIC_LOOK_ID, CLASSIC_LOOK_VERSION) ??
         classicFallback());

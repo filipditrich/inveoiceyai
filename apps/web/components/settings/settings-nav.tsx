@@ -10,6 +10,7 @@ import {
   KeyRoundIcon,
   LandmarkIcon,
   PlugZapIcon,
+  Rows3Icon,
   ShieldCheckIcon,
   UserRoundIcon,
   UsersRoundIcon,
@@ -38,7 +39,8 @@ interface SettingsLink {
     | "usage"
     | "apiKeys"
     | "bankConnections"
-    | "integrations";
+    | "integrations"
+    | "looks";
   exact: boolean;
   icon: LucideIcon;
 }
@@ -76,6 +78,12 @@ const WORKSPACE_LINKS: SettingsLink[] = [
     key: "members",
     exact: false,
     icon: UsersRoundIcon,
+  },
+  {
+    href: "/settings/workspace/looks",
+    key: "looks",
+    exact: false,
+    icon: Rows3Icon,
   },
   {
     href: "/settings/workspace/usage",

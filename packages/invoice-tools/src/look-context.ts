@@ -1,5 +1,6 @@
 import {
   getWorkspaceEntitlements,
+  listWorkspaceLookRows,
   workspaces,
   type InvoiceyDb,
 } from "@invoicey/db";
@@ -8,8 +9,10 @@ import {
   attachLookSnapshot,
   defaultLookRef,
   lookRefForNewDraft,
+  LookDocumentSchema,
   resolveDraftLookRef,
   withoutLookSnapshot,
+  type LookDocument,
   type LookRef,
 } from "@invoicey/invoice-core/looks";
 import type { Invoice } from "@invoicey/invoice-core/schema";
@@ -20,13 +23,25 @@ type Db = InvoiceyDb | DbTransaction;
 export type WorkspaceLookContext = {
   apply: "classic" | "catalog";
   defaultLook: LookRef;
+  catalog: LookDocument[];
 };
+
+function parseWorkspaceLooks(
+  rows: Awaited<ReturnType<typeof listWorkspaceLookRows>>,
+): LookDocument[] {
+  const looks: LookDocument[] = [];
+  for (const row of rows) {
+    const parsed = LookDocumentSchema.safeParse(row.document);
+    if (parsed.success) looks.push(parsed.data);
+  }
+  return looks;
+}
 
 export async function loadWorkspaceLookContext(
   db: Db,
   workspaceId: string,
 ): Promise<WorkspaceLookContext> {
-  const [entitled, [row]] = await Promise.all([
+  const [entitled, [row], lookRows] = await Promise.all([
     getWorkspaceEntitlements(db, workspaceId),
     db
       .select({
@@ -36,6 +51,7 @@ export async function loadWorkspaceLookContext(
       .from(workspaces)
       .where(eq(workspaces.id, workspaceId))
       .limit(1),
+    listWorkspaceLookRows(db, workspaceId),
   ]);
 
   return {
@@ -43,6 +59,7 @@ export async function loadWorkspaceLookContext(
     defaultLook: row
       ? { id: row.defaultLookId, version: row.defaultLookVersion }
       : defaultLookRef(),
+    catalog: parseWorkspaceLooks(lookRows),
   };
 }
 
@@ -54,6 +71,7 @@ export function applyLookToNewDraft(
     context.apply,
     invoice.look,
     context.defaultLook,
+    context.catalog,
   );
   return withoutLookSnapshot({ ...invoice, look });
 }
@@ -68,6 +86,7 @@ export function applyLookToDraftWrite(
   const resolved = resolveDraftLookRef(context.apply, invoice.look, {
     existing,
     workspaceDefault: context.defaultLook,
+    catalog: context.catalog,
   });
   if (!resolved.ok) return resolved;
   return {
@@ -78,11 +97,11 @@ export function applyLookToDraftWrite(
 
 export function snapshotLookAtIssue(
   invoice: Invoice,
-  apply: "classic" | "catalog",
+  context: Pick<WorkspaceLookContext, "apply" | "catalog">,
 ):
   | { ok: true; invoice: Invoice }
   | { ok: false; error: "look_not_entitled" | "invalid_look" } {
-  return attachLookSnapshot(invoice, apply);
+  return attachLookSnapshot(invoice, context.apply, context.catalog);
 }
 
 export function lookColumns(invoice: Invoice): {
