@@ -673,6 +673,9 @@ by area, no marking of permissions the plan does not include, no bulk edit.
 
 ## Plan 27 — PDF looks S0
 
+**Status:** Done
+**Completed:** 2026-08-31
+
 **Goal:** Invoice PDFs are **looks** (ADR 0039): Classic `1.0.0` as data, Minimal `1.0.0` as a second layout, full look snapshot at issue, picker, Free applies Classic only.
 
 **Spec:** [`specs/pdf-looks.md`](./specs/pdf-looks.md)
@@ -687,6 +690,9 @@ by area, no marking of permissions the plan does not include, no bulk edit.
 
 ## Plan 28 — PDF looks S1 (workspace builder)
 
+**Status:** Done
+**Completed:** 2026-08-31
+
 **Goal:** Workspace-origin looks in the database; Pro builder (structured + JSON + preview) edits the same look document.
 
 **Spec:** [`specs/pdf-looks-builder.md`](./specs/pdf-looks-builder.md)
@@ -697,12 +703,26 @@ by area, no marking of permissions the plan does not include, no bulk edit.
 
 **Out of 28:** community publish (S2).
 
+## Plan 29 — PDF looks S2 (community publish)
+
+**Status:** Done
+**Completed:** 2026-08-31
+
+**Goal:** Publish a workspace look to a global community catalog. Any Pro workspace may apply a published community look. No review queue.
+
+**Spec:** [`specs/pdf-looks-community.md`](./specs/pdf-looks-community.md)
+
+- [x] `origin: community`, publish helpers, picker listing
+- [x] `community_looks` table; catalog resolve includes published rows
+- [x] Publish / unpublish from the builder; picker origin badge
+
+**Out of 29:** moderation queue, takedown console, licensing copy.
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:
 
 - Dual-label bilingual invoices (CS + EN on one PDF)
-- PDF look community catalog (Plan 27 S2)
 - Czech OSVČ lifecycle companion (start, obligations, insights, year-end close,
   and guided portal filings) — see
   [`research/osvc-companion.md`](./research/osvc-companion.md)

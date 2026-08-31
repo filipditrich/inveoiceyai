@@ -1,6 +1,6 @@
 # Plan 27 — PDF looks S0
 
-**Status:** implemented  
+**Status:** done  
 **ADR:** [0039](../../docs/decisions/0039-looks-are-data-react-pdf-interprets.md)  
 **Spec:** [pdf-looks.md](../../docs/specs/pdf-looks.md)
 

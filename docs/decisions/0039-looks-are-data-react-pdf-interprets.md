@@ -19,7 +19,7 @@ Options:
 Forces:
 
 - Issued and imported PDF **bytes** stay the document the client already has ([ADR 0021](./0021-immutable-imported-invoice-artifacts.md), stored artifacts).
-- If those bytes are missing we must regenerate the *same face*, not “whatever Classic is this week” (open TODO in [`snapshots.md`](../domain/snapshots.md)).
+- If those bytes are missing we must regenerate the _same face_, not “whatever Classic is this week” (open TODO in [`snapshots.md`](../domain/snapshots.md)).
 - A look that cannot place a legally required block is not an invoice look.
 - Free applies Classic only; Pro applies the rest. Seeing a locked card is not applying.
 - Community publish cannot wait on a human review queue.
@@ -74,7 +74,9 @@ Vocabulary: [`CONTEXT.md`](../../CONTEXT.md).
 
 ## Plans touched
 
-- Not yet numbered — S0 / S1 / S2 on branch `pdf-looks`
+- [Plan 27](../../.cursor/plans/plan-27-pdf-looks-s0.md) S0
+- [Plan 28](../../.cursor/plans/plan-28-pdf-looks-s1.md) S1
+- [Plan 29](../../.cursor/plans/plan-29-pdf-looks-s2.md) S2
 
 ## References
 
