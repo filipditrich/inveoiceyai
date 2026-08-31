@@ -5,10 +5,10 @@ import { renderIsdoc } from "../isdoc/render-isdoc";
 import type { Invoice } from "../schema";
 import { renderSpaydQr } from "../spayd/render-spayd-qr";
 
+import { resolveLookDocument } from "../looks";
 import { embedIsdocInPdf } from "./embed-isdoc-in-pdf";
 import type { InvoicePdfAssets } from "./InvoicePdfDocument";
 import { InvoicePdfDocument } from "./InvoicePdfDocument";
-import { invoiceShowsIssuerAsset } from "./issuer-assets";
 import { loadImageForPdf } from "./load-image";
 import { registerInvoiceFonts } from "./register-fonts";
 
@@ -32,16 +32,17 @@ export async function renderVisualInvoicePdf(
 ): Promise<Uint8Array> {
   registerInvoiceFonts();
 
-  const qrDataUrl = await renderSpaydQr(invoice);
+  const look = resolveLookDocument(invoice);
+  const qrDataUrl = look.theme.showQr
+    ? await renderSpaydQr(invoice)
+    : undefined;
   const logo = await loadImageForPdf(invoice.issuer.logoUrl).catch(
     () => undefined,
   );
-  const stamp = invoiceShowsIssuerAsset(invoice.customization?.showStamp)
+  const stamp = look.theme.showStamp
     ? await loadImageForPdf(invoice.issuer.stampUrl).catch(() => undefined)
     : undefined;
-  const signature = invoiceShowsIssuerAsset(
-    invoice.customization?.showSignature,
-  )
+  const signature = look.theme.showSignature
     ? await loadImageForPdf(invoice.issuer.signatureUrl).catch(() => undefined)
     : undefined;
 

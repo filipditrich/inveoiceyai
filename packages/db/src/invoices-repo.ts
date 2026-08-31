@@ -43,6 +43,7 @@ export interface PersistableInvoice {
   totals: { total: number; subtotal?: number; vatTotal?: number };
   items?: PersistableInvoiceItem[];
   notes?: string;
+  look?: { id: string; version: string };
 }
 
 export interface PersistDraftInvoiceResult {
@@ -254,6 +255,8 @@ export async function persistDraftInvoice(
     issuerSnapshot,
     clientSnapshot,
     payloadJson,
+    lookId: invoice.look?.id ?? null,
+    lookVersion: invoice.look?.version ?? null,
     updatedAt: now,
   };
 

@@ -50,34 +50,35 @@ flowchart TD
 
 Values are seed data for the four launch rows, not constants in code.
 
-|                            | **Free** | **Pro**  | **Enterprise** | **NFCtron** (custom) |
-| -------------------------- | -------- | -------- | -------------- | -------------------- |
-| Seats                      | 1        | 5        | unlimited      | 3                    |
-| Issuers                    | 1        | 5        | unlimited      | 1                    |
-| Signup grant               | 250k     | 500k     | 500k           | —                    |
-| First-issued-invoice grant | 500k     | 500k     | 500k           | —                    |
-| Monthly included tokens    | 100k     | 1.5M     | 5M             | 1M                   |
-| Token top-up               | ✓ (stub) | ✓ (stub) | ✓ (stub)       | ✓ (stub)             |
-| Clients                    | open     | open     | configurable   | **managed**          |
-| Permissions                | off      | advanced | advanced       | roles                |
-| Recurring drafts           | ✓        | ✓        | ✓              | ✓                    |
-| Historical import          | ✓        | ✓        | ✓              | ✓                    |
-| Slack / MCP / Eve          | ✓        | ✓        | ✓              | ✓                    |
-| Bank connections           | —        | ✓        | ✓              | ✓                    |
-| Allowed email domains      | —        | —        | configurable   | `nfctron.com`        |
-| Audit retention            | 30d      | 1y       | unlimited      | 1y                   |
+|                               | **Free**     | **Pro**  | **Enterprise** | **NFCtron** (custom) |
+| ----------------------------- | ------------ | -------- | -------------- | -------------------- |
+| Seats                         | 1            | 5        | unlimited      | 3                    |
+| Issuers                       | 1            | 5        | unlimited      | 1                    |
+| Signup grant                  | 250k         | 500k     | 500k           | —                    |
+| First-issued-invoice grant    | 500k         | 500k     | 500k           | —                    |
+| Monthly included tokens       | 100k         | 1.5M     | 5M             | 1M                   |
+| Token top-up                  | ✓ (stub)     | ✓ (stub) | ✓ (stub)       | ✓ (stub)             |
+| Clients                       | open         | open     | configurable   | **managed**          |
+| Permissions                   | off          | advanced | advanced       | roles                |
+| Recurring drafts              | ✓            | ✓        | ✓              | ✓                    |
+| Historical import             | ✓            | ✓        | ✓              | ✓                    |
+| Slack / MCP / Eve             | ✓            | ✓        | ✓              | ✓                    |
+| Bank connections              | —            | ✓        | ✓              | ✓                    |
+| Invoice looks (`looks.apply`) | Classic only | catalog  | catalog        | catalog              |
+| Allowed email domains         | —            | —        | configurable   | `nfctron.com`        |
+| Audit retention               | 30d          | 1y       | unlimited      | 1y                   |
 
 Positioning: **Free is a complete solo Czech invoicing tool** — ARES, VAT,
 ISDOC, QR, PDF, email, recurring, import, and the agent surfaces — with AI as a
 taste rather than a workhorse, because every agent surface already meters
 against the token balance. **Pro adds people and money** — seats, granular
-permissions, bank reconciliation, and a real monthly allowance. **Enterprise
+permissions, bank reconciliation, catalog invoice looks, and a real monthly allowance. **Enterprise
 adds control** — unlimited scale plus the boundary rules (domains, managed
 clients, retention). **NFCtron is Pro-shaped but locked.**
 
 > **Open risk — thin Pro.** With recurring, import, and the agent surfaces on
 > Free, Pro's differentiators reduce to seats, permissions, bank connections,
-> and the monthly allowance. That is a defensible but narrow wedge, and the
+> catalog looks, and the monthly allowance. That is a defensible but narrow wedge, and the
 > monthly allowance is doing more work than it looks. Revisit once there is real
 > Free-tier usage data; every row above is an `/admin` edit, not a deploy.
 > `TODO(plan-26): re-evaluate the Free/Pro line after 30 days of plan telemetry.`
@@ -139,6 +140,9 @@ const EntitlementsSchema = z.object({
     recurring: z.boolean(),
     historicalImport: z.boolean(),
     agents: z.boolean(), // Slack + MCP + Eve as one switch
+  }),
+  looks: z.object({
+    apply: z.enum(["classic", "catalog"]),
   }),
   auth: z.object({ allowedEmailDomains: z.array(z.string()) }), // [] = any
   audit: z.object({ retentionDays: z.number().int().positive().nullable() }),

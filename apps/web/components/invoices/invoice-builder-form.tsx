@@ -12,6 +12,7 @@ import {
   selectClassName,
 } from "@/components/invoices/field";
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
+import { LookPicker } from "@/components/invoices/look-picker";
 import { LastValueHint } from "@/components/invoices/last-value-hint";
 import { lookupMessageFromInvalid } from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -51,6 +53,14 @@ import {
 import { emitProductEvent } from "@/lib/product-analytics";
 import { nextInvoiceNumber } from "@invoicey/invoice-core/numbering";
 import type { Invoice } from "@invoicey/invoice-core/schema";
+import {
+  ACCENT_COLOR_HEX,
+  appearanceFromPicker,
+  getFirstPartyLook,
+  listFirstPartyLooks,
+  type LegacyAccentColor,
+  type LookRef,
+} from "@invoicey/invoice-core/looks";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import {
   BookOpenIcon,
@@ -59,6 +69,7 @@ import {
   ExternalLinkIcon,
   FileCheck2Icon,
   FileTextIcon,
+  LayoutTemplateIcon,
   ListChecksIcon,
   MessageSquareTextIcon,
   PercentIcon,
@@ -121,6 +132,21 @@ function createBuilderFormSchema(t: (key: string) => string) {
           }),
         )
         .min(1, t("errors.itemsMin")),
+      lookId: z.string().min(1),
+      lookVersion: z.string().min(1),
+      accentKey: z.enum([
+        "default",
+        "neutral",
+        "blue",
+        "green",
+        "amber",
+        "rose",
+        "violet",
+      ]),
+      showStamp: z.boolean(),
+      showSignature: z.boolean(),
+      showQr: z.boolean(),
+      showNotesBlock: z.boolean(),
     })
     .refine((d) => d.dueDate >= d.issueDate, {
       message: t("errors.dueBeforeIssue"),
@@ -129,6 +155,52 @@ function createBuilderFormSchema(t: (key: string) => string) {
 }
 
 type BuilderFormValues = z.infer<ReturnType<typeof createBuilderFormSchema>>;
+
+const ACCENT_KEYS = [
+  "neutral",
+  "blue",
+  "green",
+  "amber",
+  "rose",
+  "violet",
+] as const satisfies readonly LegacyAccentColor[];
+
+function accentKeyFromHex(
+  hex: string | undefined,
+): BuilderFormValues["accentKey"] {
+  if (!hex) return "default";
+  const match = ACCENT_KEYS.find(
+    (key) => ACCENT_COLOR_HEX[key].toLowerCase() === hex.toLowerCase(),
+  );
+  return match ?? "default";
+}
+
+function appearanceFromForm(
+  values: Pick<
+    BuilderFormValues,
+    | "lookId"
+    | "lookVersion"
+    | "accentKey"
+    | "showStamp"
+    | "showSignature"
+    | "showQr"
+    | "showNotesBlock"
+  >,
+) {
+  const look = getFirstPartyLook(values.lookId, values.lookVersion);
+  if (!look) return undefined;
+  return appearanceFromPicker({
+    lookTheme: look.theme,
+    accent:
+      values.accentKey === "default"
+        ? undefined
+        : ACCENT_COLOR_HEX[values.accentKey],
+    showStamp: values.showStamp,
+    showSignature: values.showSignature,
+    showQr: values.showQr,
+    showNotes: values.showNotesBlock,
+  });
+}
 
 function isStandardVatRate(
   rate: number,
@@ -194,6 +266,8 @@ export interface InvoiceBuilderFormProps {
   clients: ClientOption[];
   lastInvoice?: LastInvoiceSuggestions | null;
   initial?: Partial<BuilderFormValues> & { numberPreview?: string };
+  looksApply: "classic" | "catalog";
+  defaultLook: LookRef;
 }
 
 function fieldError(
@@ -224,6 +298,8 @@ export function InvoiceBuilderForm({
   clients,
   lastInvoice: initialLastInvoice = null,
   initial,
+  looksApply,
+  defaultLook,
 }: InvoiceBuilderFormProps) {
   const t = useTranslations("Invoices.builder");
   const tErr = useTranslations("Errors.invalid");
@@ -238,6 +314,12 @@ export function InvoiceBuilderForm({
   const initialIssuer =
     issuers.find((i) => i.id === (initial?.issuerId ?? firstIssuer?.id)) ??
     firstIssuer;
+  const resolvedLook =
+    getFirstPartyLook(
+      initial?.lookId ?? defaultLook.id,
+      initial?.lookVersion ?? defaultLook.version,
+    ) ?? getFirstPartyLook(defaultLook.id, defaultLook.version);
+  const lookTheme = resolvedLook?.theme;
   const form = useForm<BuilderFormValues>({
     resolver: standardSchemaResolver(schema),
     mode: "onBlur",
@@ -266,6 +348,13 @@ export function InvoiceBuilderForm({
           vatRate: defaultLineVatRate(initialIssuer?.snapshot.vatPayer ?? true),
         },
       ],
+      lookId: resolvedLook?.id ?? defaultLook.id,
+      lookVersion: resolvedLook?.version ?? defaultLook.version,
+      accentKey: initial?.accentKey ?? "default",
+      showStamp: initial?.showStamp ?? lookTheme?.showStamp ?? true,
+      showSignature: initial?.showSignature ?? lookTheme?.showSignature ?? true,
+      showQr: initial?.showQr ?? lookTheme?.showQr ?? true,
+      showNotesBlock: initial?.showNotesBlock ?? lookTheme?.showNotes ?? true,
     },
   });
 
@@ -344,7 +433,17 @@ export function InvoiceBuilderForm({
         issuers.map((issuer) => issuer.id),
       )
     ) {
-      form.reset(restored);
+      form.reset({
+        ...restored,
+        lookId: restored.lookId ?? defaultLook.id,
+        lookVersion: restored.lookVersion ?? defaultLook.version,
+        accentKey: restored.accentKey ?? "default",
+        showStamp: restored.showStamp ?? lookTheme?.showStamp ?? true,
+        showSignature:
+          restored.showSignature ?? lookTheme?.showSignature ?? true,
+        showQr: restored.showQr ?? lookTheme?.showQr ?? true,
+        showNotesBlock: restored.showNotesBlock ?? lookTheme?.showNotes ?? true,
+      });
       setRecoveredDraft(true);
       emitProductEvent("invoice_draft_recovered", {
         creationEntry: "structured",
@@ -562,6 +661,8 @@ export function InvoiceBuilderForm({
       items: lines,
       notes: watched.notes || undefined,
       pricesIncludeVat: watched.pricesIncludeVat,
+      look: { id: watched.lookId, version: watched.lookVersion },
+      appearance: appearanceFromForm(watched),
     });
     if (!built.ok) {
       return { invoice: null, error: built.message };
@@ -587,6 +688,13 @@ export function InvoiceBuilderForm({
     watched.correctedInvoiceNumber,
     watched.notes,
     watched.items,
+    watched.lookId,
+    watched.lookVersion,
+    watched.accentKey,
+    watched.showStamp,
+    watched.showSignature,
+    watched.showQr,
+    watched.showNotesBlock,
   ]);
 
   const previewKey = previewBuild.invoice
@@ -742,6 +850,12 @@ export function InvoiceBuilderForm({
     }
     if (values.notes) {
       fd.set("notes", values.notes);
+    }
+    fd.set("lookId", values.lookId);
+    fd.set("lookVersion", values.lookVersion);
+    const appearance = appearanceFromForm(values);
+    if (appearance) {
+      fd.set("appearanceJson", JSON.stringify(appearance));
     }
     fd.set("itemsJson", JSON.stringify(values.items));
     try {
@@ -1198,6 +1312,100 @@ export function InvoiceBuilderForm({
                 />
               </Field>
             ) : null}
+          </div>
+        </FormSection>
+
+        <FormSection
+          description={t("sectionLookDescription")}
+          icon={<LayoutTemplateIcon />}
+          title={t("sectionLook")}
+        >
+          <LookPicker
+            allowLockedPreview
+            looks={listFirstPartyLooks().map((item) => ({
+              id: item.id,
+              version: item.version,
+              name: item.name,
+            }))}
+            looksApply={looksApply}
+            onChange={(next) => {
+              const document = getFirstPartyLook(next.id, next.version);
+              form.setValue("lookId", next.id, { shouldDirty: true });
+              form.setValue("lookVersion", next.version, { shouldDirty: true });
+              form.setValue("accentKey", "default", { shouldDirty: true });
+              if (document) {
+                form.setValue("showStamp", document.theme.showStamp, {
+                  shouldDirty: true,
+                });
+                form.setValue("showSignature", document.theme.showSignature, {
+                  shouldDirty: true,
+                });
+                form.setValue("showQr", document.theme.showQr, {
+                  shouldDirty: true,
+                });
+                form.setValue("showNotesBlock", document.theme.showNotes, {
+                  shouldDirty: true,
+                });
+              }
+            }}
+            value={{ id: watched.lookId, version: watched.lookVersion }}
+          />
+          <div className="space-y-3 pt-2">
+            <p className="text-sm font-medium">{t("appearanceTitle")}</p>
+            <p className="text-muted-foreground text-xs">
+              {t("appearanceDescription")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                className={cn(
+                  "h-8 rounded-md border px-2.5 text-xs",
+                  watched.accentKey === "default"
+                    ? "border-primary bg-primary/5"
+                    : "border-border",
+                )}
+                onClick={() => form.setValue("accentKey", "default")}
+                type="button"
+              >
+                {t("accentDefault")}
+              </button>
+              {ACCENT_KEYS.map((key) => (
+                <button
+                  key={key}
+                  aria-label={t(`accent.${key}`)}
+                  className={cn(
+                    "size-8 rounded-md border",
+                    watched.accentKey === key
+                      ? "border-primary ring-primary/30 ring-2"
+                      : "border-border",
+                  )}
+                  onClick={() => form.setValue("accentKey", key)}
+                  style={{ backgroundColor: ACCENT_COLOR_HEX[key] }}
+                  type="button"
+                />
+              ))}
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {(
+                [
+                  ["showStamp", t("showStamp")],
+                  ["showSignature", t("showSignature")],
+                  ["showQr", t("showQr")],
+                  ["showNotesBlock", t("showNotes")],
+                ] as const
+              ).map(([name, label]) => (
+                <label key={name} className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={watched[name]}
+                    onCheckedChange={(checked) =>
+                      form.setValue(name, checked === true, {
+                        shouldDirty: true,
+                      })
+                    }
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
           </div>
         </FormSection>
 

@@ -184,6 +184,21 @@ it("normalizes incomplete local builder input without accepting malformed drafts
   };
   expect(normalizeRecoveredInvoiceBuilderDraft(incomplete)).toEqual(incomplete);
   expect(
+    normalizeRecoveredInvoiceBuilderDraft({
+      ...incomplete,
+      lookId: "minimal",
+      lookVersion: "1.0.0",
+      accentKey: "blue",
+      showStamp: false,
+    }),
+  ).toEqual({
+    ...incomplete,
+    lookId: "minimal",
+    lookVersion: "1.0.0",
+    accentKey: "blue",
+    showStamp: false,
+  });
+  expect(
     normalizeRecoveredInvoiceBuilderDraft({ ...incomplete, items: "bad" }),
   ).toBeNull();
   const unknownIssuer = normalizeRecoveredInvoiceBuilderDraft({

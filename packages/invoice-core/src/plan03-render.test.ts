@@ -94,6 +94,17 @@ describe("renderInvoicePdf", () => {
     );
     expect(Buffer.from(buf).includes(Buffer.from("/EmbeddedFile"))).toBe(true);
   });
+
+  it("renders Minimal as a PDF", async () => {
+    const invoice = parseInvoice({
+      ...domesticFixture,
+      look: { id: "minimal", version: "1.0.0" },
+    });
+    const buf = await renderInvoicePdf(invoice);
+    expect(String.fromCharCode(buf[0]!, buf[1]!, buf[2]!, buf[3]!)).toBe(
+      "%PDF",
+    );
+  });
 });
 
 describe("SPAYD", () => {

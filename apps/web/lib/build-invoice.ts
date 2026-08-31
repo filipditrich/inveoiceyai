@@ -40,6 +40,8 @@ export type BuilderInvoiceInput = {
   correctedInvoiceNumber?: string;
   paymentMethod?: Invoice["payment"]["method"];
   pricesIncludeVat?: boolean;
+  look?: Invoice["look"];
+  appearance?: Invoice["appearance"];
 };
 
 /** Effective rates + optional inclusive→exclusive before build/persist. */
@@ -136,6 +138,8 @@ export function buildInvoicePayload(input: BuilderInvoiceInput): Invoice {
     items,
     totals,
     ...(input.notes ? { notes: input.notes } : {}),
+    ...(input.look ? { look: input.look } : {}),
+    ...(input.appearance ? { appearance: input.appearance } : {}),
   };
 
   return InvoiceSchema.parse(candidate);

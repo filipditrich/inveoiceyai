@@ -13,6 +13,10 @@ import {
 import { DEMO_ISSUER_ID } from "./demo-issuer";
 import { getInvoice, resolveDefaultIssuer } from "./invoice-ops";
 import {
+  applyLookToDraftWrite,
+  loadWorkspaceLookContext,
+} from "./look-context";
+import {
   normalizeDraftToInvoice,
   type DraftAssumption,
   type NormalizedIssue,
@@ -167,6 +171,15 @@ export async function createAndRenderInvoice(options: {
   const database = tryCreateDbFromEnv();
   if (database && invoice.issuer.id !== DEMO_ISSUER_ID) {
     try {
+      const lookContext = await loadWorkspaceLookContext(
+        database,
+        resolveWorkspaceId(),
+      );
+      const withLook = applyLookToDraftWrite(invoice, lookContext);
+      if (!withLook.ok) {
+        return { ok: false, error: withLook.error };
+      }
+      invoice = withLook.invoice;
       const persisted = await persistDraftInvoice(database, invoice, {
         workspaceId: resolveWorkspaceId(),
       });
@@ -270,6 +283,10 @@ export async function updateDraftInvoice(options: {
       vatRate: item.vatRate,
     })),
     ...(current.notes === undefined ? {} : { notes: current.notes }),
+    ...(current.look === undefined ? {} : { look: current.look }),
+    ...(current.appearance === undefined
+      ? {}
+      : { appearance: current.appearance }),
   };
 
   /** A patched `items` array replaces the list rather than merging by index. */
@@ -286,19 +303,30 @@ export async function updateDraftInvoice(options: {
     return { ok: false, error: "no database configured" };
   }
   try {
-    await persistDraftInvoice(database, normalized.invoice, {
+    const lookContext = await loadWorkspaceLookContext(
+      database,
+      resolveWorkspaceId(options.workspaceId),
+    );
+    const withLook = applyLookToDraftWrite(
+      normalized.invoice,
+      lookContext,
+      current.look,
+    );
+    if (!withLook.ok) {
+      return { ok: false, error: withLook.error };
+    }
+    await persistDraftInvoice(database, withLook.invoice, {
       workspaceId: resolveWorkspaceId(options.workspaceId),
       invoiceId: options.id,
     });
+    return {
+      ok: true,
+      invoice: withLook.invoice,
+      invoiceId: options.id,
+      assumptions: normalized.assumptions,
+    };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return { ok: false, error: `failed to update draft invoice: ${message}` };
   }
-
-  return {
-    ok: true,
-    invoice: normalized.invoice,
-    invoiceId: options.id,
-    assumptions: normalized.assumptions,
-  };
 }

@@ -19,6 +19,12 @@ import {
   type Invoice,
 } from "@invoicey/invoice-core";
 import {
+  AppearanceOverrideSchema,
+  LookRefSchema,
+  type AppearanceOverride,
+  type LookRef,
+} from "@invoicey/invoice-core/looks";
+import {
   bulkCancelInvoices,
   bulkDeleteDraftInvoices,
   bulkIssueInvoices,
@@ -28,6 +34,11 @@ import {
   issueInvoiceById,
   markInvoicePaidById,
   unmarkInvoicePaidById,
+  applyLookToDraftWrite,
+  applyLookToNewDraft,
+  loadWorkspaceLookContext,
+  lookColumns,
+  snapshotLookAtIssue,
 } from "@invoicey/invoice-tools/ops";
 import { tryPersistInvoiceArtifacts } from "@invoicey/invoice-tools/artifacts";
 import {
@@ -157,6 +168,8 @@ function formToBuilderFields(formData: FormData): {
   localReverseChargeCode: string | undefined;
   correctedInvoiceNumber: string | undefined;
   items: BuilderLineInput[];
+  look: LookRef | undefined;
+  appearance: AppearanceOverride | undefined;
 } {
   const issuerId = optionalTrim(formData.get("issuerId"));
   const clientId = optionalTrim(formData.get("clientId"));
@@ -196,6 +209,25 @@ function formToBuilderFields(formData: FormData): {
     formData.get("correctedInvoiceNumber"),
   );
   const items = parseLines(formData);
+  const lookParsed = LookRefSchema.safeParse({
+    id: optionalTrim(formData.get("lookId")),
+    version: optionalTrim(formData.get("lookVersion")),
+  });
+  const look = lookParsed.success ? lookParsed.data : undefined;
+  let appearance: AppearanceOverride | undefined;
+  const appearanceRaw = optionalTrim(formData.get("appearanceJson"));
+  if (appearanceRaw) {
+    try {
+      const parsedAppearance = AppearanceOverrideSchema.safeParse(
+        JSON.parse(appearanceRaw) as unknown,
+      );
+      if (parsedAppearance.success) {
+        appearance = parsedAppearance.data;
+      }
+    } catch {
+      appearance = undefined;
+    }
+  }
   return {
     issuerId,
     clientId,
@@ -213,6 +245,8 @@ function formToBuilderFields(formData: FormData): {
     localReverseChargeCode,
     correctedInvoiceNumber,
     items,
+    look,
+    appearance,
   };
 }
 
@@ -251,6 +285,7 @@ function rowValuesFromInvoice(
     issuerSnapshot: invoice.issuer as unknown as Record<string, unknown>,
     clientSnapshot: invoice.client as unknown as Record<string, unknown>,
     payloadJson: invoice as unknown as Record<string, unknown>,
+    ...lookColumns(invoice),
     updatedAt: new Date(),
   };
 }
@@ -325,6 +360,8 @@ export async function saveInvoiceDraft(formData: FormData): Promise<void> {
       correctedInvoiceNumber: fields.correctedInvoiceNumber,
       items: fields.items,
       notes: fields.notes,
+      look: fields.look,
+      appearance: fields.appearance,
     });
   } catch {
     redirect(`${errBase}?invalid=${encodeURIComponent("validation")}`);
@@ -334,6 +371,7 @@ export async function saveInvoiceDraft(formData: FormData): Promise<void> {
 
   try {
     await withDbTransaction(async (tx) => {
+      let existingLook: LookRef | undefined;
       if (existingId) {
         const existing = await tx
           .select()
@@ -351,6 +389,18 @@ export async function saveInvoiceDraft(formData: FormData): Promise<void> {
         if (existing[0].issuedAt) {
           throw new Error("not_draft");
         }
+        const previous = InvoiceSchema.safeParse(existing[0].payloadJson);
+        existingLook = previous.success ? previous.data.look : undefined;
+        const lookContext = await loadWorkspaceLookContext(tx, workspaceId);
+        const withLook = applyLookToDraftWrite(
+          invoice,
+          lookContext,
+          existingLook,
+        );
+        if (!withLook.ok) {
+          throw new Error(withLook.error);
+        }
+        invoice = withLook.invoice;
         await tx
           .update(invoices)
           .set(
@@ -366,6 +416,12 @@ export async function saveInvoiceDraft(formData: FormData): Promise<void> {
           )
           .where(eq(invoices.id, id));
       } else {
+        const lookContext = await loadWorkspaceLookContext(tx, workspaceId);
+        const withLook = applyLookToDraftWrite(invoice, lookContext);
+        if (!withLook.ok) {
+          throw new Error(withLook.error);
+        }
+        invoice = withLook.invoice;
         await tx.insert(invoices).values({
           ...rowValuesFromInvoice(invoice, {
             id,
@@ -521,6 +577,8 @@ export async function issueInvoice(formData: FormData): Promise<void> {
         correctedInvoiceNumber: fields.correctedInvoiceNumber,
         items: fields.items,
         notes: fields.notes,
+        look: fields.look,
+        appearance: fields.appearance,
       });
 
       const parsed = InvoiceSchema.safeParse(invoice);
@@ -528,8 +586,14 @@ export async function issueInvoice(formData: FormData): Promise<void> {
         throw new Error("validation");
       }
 
+      const lookContext = await loadWorkspaceLookContext(tx, workspaceId);
+      const snapped = snapshotLookAtIssue(parsed.data, lookContext.apply);
+      if (!snapped.ok) {
+        throw new Error(snapped.error);
+      }
+
       const issuedAt = new Date();
-      const values = rowValuesFromInvoice(parsed.data, {
+      const values = rowValuesFromInvoice(snapped.invoice, {
         id: invoiceId,
         workspaceId,
         issuerId: fields.issuerId!,
@@ -549,7 +613,7 @@ export async function issueInvoice(formData: FormData): Promise<void> {
         .delete(invoiceItems)
         .where(eq(invoiceItems.invoiceId, invoiceId));
       await tx.insert(invoiceItems).values(
-        parsed.data.items.map((line) => ({
+        snapped.invoice.items.map((line) => ({
           id: crypto.randomUUID(),
           invoiceId,
           position: line.position,
@@ -573,7 +637,7 @@ export async function issueInvoice(formData: FormData): Promise<void> {
         })
         .where(eq(issuerNumberingSchemes.id, scheme.id));
 
-      return parsed.data;
+      return snapped.invoice;
     });
     if (issuedInvoice) {
       await tryPersistInvoiceArtifacts({
@@ -805,10 +869,12 @@ export async function duplicateInvoice(formData: FormData): Promise<void> {
   if (!payload.success) {
     redirect(`/invoices?invalid=${encodeURIComponent("bad_payload")}`);
   }
-  const draft: Invoice = {
-    ...payload.data,
-    meta: { ...payload.data.meta, number: "DRAFT" },
-  };
+  const { lookSnapshot: _snapshot, ...rest } = payload.data;
+  const lookContext = await loadWorkspaceLookContext(db, workspaceId);
+  const draft = applyLookToNewDraft(
+    { ...rest, meta: { ...rest.meta, number: "DRAFT" } },
+    lookContext,
+  );
   const newId = crypto.randomUUID();
   await withDbTransaction(async (tx) => {
     await tx.insert(invoices).values({

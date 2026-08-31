@@ -4,6 +4,10 @@ import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { requireWorkspace } from "@/lib/auth/session";
 import { listUserWorkspaces } from "@/lib/auth/workspaces";
+import { workspaces } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
+import { eq } from "drizzle-orm";
+import { defaultLookRef } from "@invoicey/invoice-core/looks";
 import { Building2Icon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -11,11 +15,19 @@ import { notFound } from "next/navigation";
 export default async function SettingsWorkspacePage() {
   const t = await getTranslations("App.settings.workspace");
   const ws = await requireWorkspace();
-  const [workspaces, plan] = await Promise.all([
+  const [workspacesList, plan, [workspaceRow]] = await Promise.all([
     listUserWorkspaces(ws.userId),
     requireEntitlements(),
+    db
+      .select({
+        defaultLookId: workspaces.defaultLookId,
+        defaultLookVersion: workspaces.defaultLookVersion,
+      })
+      .from(workspaces)
+      .where(eq(workspaces.id, ws.workspaceId))
+      .limit(1),
   ]);
-  const active = workspaces.find((item) => item.id === ws.workspaceId);
+  const active = workspacesList.find((item) => item.id === ws.workspaceId);
   if (!active) {
     notFound();
   }
@@ -28,6 +40,15 @@ export default async function SettingsWorkspacePage() {
         title={t("pageTitle")}
       />
       <WorkspaceSettingsPanel
+        defaultLook={
+          workspaceRow
+            ? {
+                id: workspaceRow.defaultLookId,
+                version: workspaceRow.defaultLookVersion,
+              }
+            : defaultLookRef()
+        }
+        looksApply={plan.entitlements.looks.apply}
         logo={active.logo}
         name={active.name}
         role={active.role}

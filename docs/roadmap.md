@@ -671,12 +671,26 @@ scoping.
 **Follow-ups:** the per-member permission editor is a first pass — no grouping
 by area, no marking of permissions the plan does not include, no bulk edit.
 
+## Plan 27 — PDF looks S0
+
+**Goal:** Invoice PDFs are **looks** (ADR 0039): Classic `1.0.0` as data, Minimal `1.0.0` as a second layout, full look snapshot at issue, picker, Free applies Classic only.
+
+**Spec:** [`specs/pdf-looks.md`](./specs/pdf-looks.md)
+
+- [x] Look document schema, structural + invoice validators, first-party catalog
+- [x] `@react-pdf/renderer` interprets bands; `renderInvoicePdf` unchanged at the API
+- [x] `look` / `appearance` / `lookSnapshot` on `InvoiceSchema`; `customization` compat
+- [x] `looks.apply` entitlement; workspace default look; issue snapshot; duplicate/entitlement gates
+- [x] Builder + workspace look picker (Minimal locked on Free)
+
+**Out of 27:** builder JSON editor, workspace/community origins, publish (S1/S2).
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:
 
 - Dual-label bilingual invoices (CS + EN on one PDF)
-- Custom PDF templates / template editor
+- PDF look builder and community catalog (Plan 27 S1/S2)
 - Czech OSVČ lifecycle companion (start, obligations, insights, year-end close,
   and guided portal filings) — see
   [`research/osvc-companion.md`](./research/osvc-companion.md)

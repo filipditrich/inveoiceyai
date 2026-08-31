@@ -1,6 +1,11 @@
 import { z } from "zod";
 
 import { czIbanMatchesAccount, isValidCzIban } from "./bank/czech-iban";
+import {
+  AppearanceOverrideSchema,
+  LookDocumentSchema,
+  LookRefSchema,
+} from "./looks/schema";
 
 export {
   czechAccountToBban,
@@ -262,6 +267,9 @@ export const InvoiceSchema = z
     totals: TotalsSchema,
     notes: z.string().max(2000).optional(),
     customization: InvoiceCustomizationSchema.optional(),
+    look: LookRefSchema.optional(),
+    appearance: AppearanceOverrideSchema.optional(),
+    lookSnapshot: LookDocumentSchema.optional(),
   })
   .superRefine((inv, ctx) => {
     const docType = inv.meta.docType;

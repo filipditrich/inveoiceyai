@@ -301,6 +301,8 @@ export const invoices = pgTable(
     payloadJson: jsonb("payload_json")
       .notNull()
       .$type<Record<string, unknown>>(),
+    lookId: text("look_id"),
+    lookVersion: text("look_version"),
     /** Canonical issued PDF (ISDOC.PDF) URL — set at issue / lazy backfill. */
     pdfUrl: text("pdf_url"),
     /** Standalone ISDOC XML URL — set at issue / lazy backfill. */

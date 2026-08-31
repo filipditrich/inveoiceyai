@@ -21,6 +21,7 @@ Plans complement [`docs/roadmap.md`](../../docs/roadmap.md): roadmap owns phase 
 | [`plan-21-ai-usage.md`](./plan-21-ai-usage.md)                       | Plan 21 — In-app AI draft + workspace tokens |
 | [`plan-22-payment-ledger-fio.md`](./plan-22-payment-ledger-fio.md)   | Plan 22 — Payment ledger + Fio integration   |
 | [`plan-23-moneta-adapter.md`](./plan-23-moneta-adapter.md)           | Plan 23 — MONETA read-only adapter           |
+| [`plan-27-pdf-looks-s0.md`](./plan-27-pdf-looks-s0.md)               | Plan 27 — PDF looks S0                       |
 
 **Naming:** `plan-NN-short-slug.md` matching roadmap Plan N. When a roadmap phase splits into sub-phases (e.g. 13a / 13b), the file name keeps the parent number and the slug disambiguates.
 

@@ -107,6 +107,12 @@ export async function updatePlanEntitlementsAction(
             "off" | "roles" | "advanced")
         : ("off" as const),
     },
+    looks: {
+      apply:
+        formData.get("looksApply") === "catalog"
+          ? ("catalog" as const)
+          : ("classic" as const),
+    },
     features: {
       bankConnections: checked(formData, "bankConnections"),
       recurring: checked(formData, "recurring"),

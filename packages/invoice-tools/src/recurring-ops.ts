@@ -31,6 +31,11 @@ import {
   type RecurringCadence,
 } from "./recurring";
 import { resolveWorkspaceId } from "./workspace-context";
+import {
+  applyLookToNewDraft,
+  loadWorkspaceLookContext,
+  lookColumns,
+} from "./look-context";
 
 type Db = InvoiceyDb | DbTransaction;
 
@@ -95,6 +100,7 @@ function rowValuesFromInvoice(
     issuerSnapshot: invoice.issuer as unknown as Record<string, unknown>,
     clientSnapshot: invoice.client as unknown as Record<string, unknown>,
     payloadJson: invoice as unknown as Record<string, unknown>,
+    ...lookColumns(invoice),
     recurringScheduleId: opts.recurringScheduleId,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -220,9 +226,16 @@ async function materializeFromTemplate(
   if (!draft.ok) {
     return draft;
   }
+  const lookContext = await loadWorkspaceLookContext(db, input.workspaceId);
+  const {
+    look: _look,
+    lookSnapshot: _snapshot,
+    ...withoutLook
+  } = draft.invoice;
+  const invoice = applyLookToNewDraft(withoutLook, lookContext);
   const invoiceId = randomUUID();
   await db.insert(invoices).values(
-    rowValuesFromInvoice(draft.invoice, {
+    rowValuesFromInvoice(invoice, {
       id: invoiceId,
       workspaceId: input.workspaceId,
       issuerId: input.issuerId,
@@ -230,7 +243,7 @@ async function materializeFromTemplate(
       recurringScheduleId: input.scheduleId,
     }),
   );
-  await insertDraftItems(db, invoiceId, draft.invoice);
+  await insertDraftItems(db, invoiceId, invoice);
   return { ok: true, invoiceId };
 }
 

@@ -86,6 +86,7 @@ const PRO: PlanSeed = {
     },
     permissions: { mode: "advanced" },
     features: { ...BASE_ENTITLEMENTS.features, bankConnections: true },
+    looks: { apply: "catalog" },
     audit: { retentionDays: 365 },
   },
 };
@@ -108,6 +109,7 @@ const ENTERPRISE: PlanSeed = {
     },
     permissions: { mode: "advanced" },
     features: { ...BASE_ENTITLEMENTS.features, bankConnections: true },
+    looks: { apply: "catalog" },
     audit: { retentionDays: null },
   },
 };
@@ -140,6 +142,7 @@ const NFCTRON: PlanSeed = {
     clients: { createMode: "managed" },
     permissions: { mode: "roles" },
     features: { ...BASE_ENTITLEMENTS.features, bankConnections: true },
+    looks: { apply: "catalog" },
     auth: { allowedEmailDomains: ["nfctron.com"] },
     audit: { retentionDays: 365 },
   },

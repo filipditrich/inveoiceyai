@@ -105,7 +105,9 @@ declare const messages: {
       "payment_token_expired": "Fio token pro odesílání vypršel.",
       "fio_throttled_locally": "Fio je dočasně omezené. Zkuste to za 30 sekund.",
       "sum_mismatch": "Fio přijalo jinou částku, než je v dávce.",
-      "run_create_failed": "Platební dávku se nepodařilo vytvořit."
+      "run_create_failed": "Platební dávku se nepodařilo vytvořit.",
+      "look_not_entitled": "Váš tarif smí použít jen vzhled Classic. Pro ostatní vzhledy přejděte na vyšší tarif.",
+      "invalid_look": "Tento vzhled není k dispozici."
     }
   },
   "Toasts": {
@@ -798,6 +800,9 @@ declare const messages: {
         "nameLabel": "Název",
         "slugLabel": "Slug",
         "slugHint": "Slug nelze po vytvoření změnit.",
+        "lookLabel": "Výchozí vzhled faktury",
+        "lookHint": "Nové návrhy zdědí tento vzhled. Vystavené faktury si nechají vzhled zmrazený při vystavení.",
+        "lookSaved": "Výchozí vzhled uložen",
         "logoLabel": "Logo",
         "logoHint": "Zobrazuje se v přepínači pracovního prostoru. Faktury dál používají logo jednotlivých firem.",
         "logoSaved": "Logo pracovního prostoru uloženo",
@@ -807,7 +812,7 @@ declare const messages: {
         "saving": "Ukládám…",
         "saved": "Název pracovního prostoru uložen",
         "membersLink": "Spravovat členy",
-        "readOnly": "Název nebo logo může změnit jen vlastník nebo správce.",
+        "readOnly": "Název, logo nebo výchozí vzhled může změnit jen vlastník nebo správce.",
         "plan": {
           "title": "Tarif",
           "description": "Co tarif tohoto workspace zahrnuje.",
@@ -822,7 +827,8 @@ declare const messages: {
             "bankConnections": "Bankovní propojení",
             "recurring": "Opakované koncepty",
             "historicalImport": "Import historie",
-            "agents": "Slack, MCP a Invoicey"
+            "agents": "Slack, MCP a Invoicey",
+            "catalogLooks": "Katalog vzhledů (Minimal)"
           }
         }
       },
@@ -989,7 +995,9 @@ declare const messages: {
       "default_failed": "Nepodařilo se nastavit výchozí pracovní prostor",
       "invite_failed": "Přijetí pozvánky selhalo",
       "invite_missing_workspace": "Pozvánka neobsahuje pracovní prostor",
-      "forbidden": "Pro tuto akci nemáte oprávnění"
+      "forbidden": "Pro tuto akci nemáte oprávnění",
+      "look_not_entitled": "Váš tarif tento vzhled nesmí použít",
+      "invalid_look": "Tento vzhled není k dispozici"
     },
     "palette": {
       "trigger": "Hledat…",
@@ -1304,6 +1312,23 @@ declare const messages: {
       "sectionPartiesDescription": "Dodavatel a odběratel na dokladu.",
       "sectionDocument": "Doklad",
       "sectionDocumentDescription": "Typ dokladu, jazyk PDF a měna.",
+      "sectionLook": "Vzhled",
+      "sectionLookDescription": "Jak je PDF složené. Úpravy vzhledu nemění rozložení bloků.",
+      "appearanceTitle": "Vzhled dokumentu",
+      "appearanceDescription": "Volitelná barva a zapnutí bloků jen pro tuto fakturu.",
+      "accentDefault": "Výchozí vzhledu",
+      "accent": {
+        "neutral": "Neutrální",
+        "blue": "Modrá",
+        "green": "Zelená",
+        "amber": "Jantarová",
+        "rose": "Růžová",
+        "violet": "Fialová"
+      },
+      "showStamp": "Razítko",
+      "showSignature": "Podpis",
+      "showQr": "Platební QR",
+      "showNotes": "Poznámka",
       "sectionDates": "Data",
       "sectionDatesDescription": "Datum vystavení, splatnost a DUZP.",
       "sectionDatesDescriptionNonPayer": "Datum vystavení, splatnost a datum uskutečnění plnění.",
@@ -2227,6 +2252,18 @@ declare const messages: {
       "manual": "Přidáno ručně"
     }
   },
+  "Looks": {
+    "upgradeHint": "Součást tarifu s katalogem vzhledů.",
+    "lockedSelected": "Tento vzhled na vašem tarifu nelze vystavit. <upgrade>Změňte tarif v nastavení workspace</upgrade>.",
+    "catalog": {
+      "classic": {
+        "description": "Současná podoba faktury Invoicey — logo a titulek, strany, položky a platba."
+      },
+      "minimal": {
+        "description": "Titulek nahoře, hutnější sazba, modrý akcent. Jiné rozložení, ne jen zhustěný Classic."
+      }
+    }
+  },
   "Admin": {
     "brand": {
       "title": "Invoicey Admin",
@@ -2542,6 +2579,10 @@ declare const messages: {
         "roles": "Předvolené role",
         "advanced": "Role + výjimky pro členy"
       },
+      "looksApply": {
+        "classic": "Jen Classic",
+        "catalog": "Katalog vzhledů"
+      },
       "facts": {
         "kind": "Typ",
         "workspaces": "Workspacy",
@@ -2554,6 +2595,7 @@ declare const messages: {
         "auditRetention": "Uchování auditu (dny)",
         "clientMode": "Správa odběratelů",
         "permissions": "Oprávnění",
+        "looks": "Vzhledy faktur",
         "features": "Funkce",
         "autoAssignDomains": "Domény pro přiřazení",
         "allowedDomains": "Povolené domény členů"

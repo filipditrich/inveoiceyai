@@ -18,7 +18,10 @@ const InvoiceSchema = z.object({
   items: z.array(InvoiceItemSchema).min(1),
   totals: TotalsSchema,
   notes: z.string().max(2000).optional(),
-  customization: InvoiceCustomizationSchema.optional(),
+  look: z.object({ id: z.string(), version: z.string() }).optional(),
+  appearance: AppearanceOverrideSchema.optional(),
+  lookSnapshot: LookDocumentSchema.optional(),
+  customization: InvoiceCustomizationSchema.optional(), // parse-only compat
 });
 
 type Invoice = z.infer<typeof InvoiceSchema>;
@@ -265,19 +268,27 @@ Invariants:
 
 The `vatBreakdown` array is what the PDF renders as the "Rekapitulace DPH" block.
 
-## `customization` — issuer-level rendering tweaks
+## `look` / `appearance` / `lookSnapshot` — PDF composition
+
+The invoice remains data. How the PDF is composed is a **look document** ([pdf-looks](../specs/pdf-looks.md), [ADR 0039](../decisions/0039-looks-are-data-react-pdf-interprets.md)).
+
+- `look` — catalog id + pinned semver on drafts (`classic` / `minimal` at `1.0.0` in S0). Missing `look` resolves as Classic `1.0.0`.
+- `appearance` — optional partial theme (accent, optional-block flags, density, …). Cannot change layout.
+- `lookSnapshot` — full look document written at **issue**. Regeneration uses this blob. Issued invoices with no snapshot mean Classic `1.0.0`.
+
+## `customization` — parse-only compat
 
 ```ts
 const InvoiceCustomizationSchema = z.object({
   accentColor: z
     .enum(["neutral", "blue", "green", "amber", "rose", "violet"])
     .default("neutral"),
-  showStamp: z.boolean().default(false),
-  showSignature: z.boolean().default(false),
+  showStamp: z.boolean().default(true),
+  showSignature: z.boolean().default(true),
 });
 ```
 
-Intentionally narrow. We're shipping one well-designed PDF template, not a template editor. See [decision 0004](../decisions/0004-pdf-react-pdf-renderer.md).
+Kept so old payloads still parse. The renderer maps `accentColor` / stamp flags into `appearance` when `appearance` is absent. New writes use `look` + `appearance`. See [pdf-looks](../specs/pdf-looks.md).
 
 ## End-to-end JSON example: standard domestic invoice
 

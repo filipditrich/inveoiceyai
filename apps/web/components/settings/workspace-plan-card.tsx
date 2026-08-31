@@ -37,6 +37,7 @@ export async function WorkspacePlanCard({
     ["recurring", entitlements.features.recurring],
     ["historicalImport", entitlements.features.historicalImport],
     ["agents", entitlements.features.agents],
+    ["catalogLooks", entitlements.looks.apply === "catalog"],
   ] as const;
 
   return (

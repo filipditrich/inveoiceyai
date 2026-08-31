@@ -1,59 +1,29 @@
 /** @jsxImportSource react */
-import {
-  Document,
-  Image,
-  Link,
-  Page,
-  StyleSheet,
-  Text,
-  View,
-} from "@react-pdf/renderer";
+import { Document, Image, Link, Page, Text, View } from "@react-pdf/renderer";
 import React from "react";
 
-import type {
-  Invoice,
-  InvoiceCurrency,
-  InvoiceItem,
-  InvoiceLanguage,
-} from "../schema";
-import { currencyDisplaySuffix, invoiceDisplayUnit } from "../schema";
+import type { Invoice, InvoiceCurrency, InvoiceItem } from "../schema";
+import { currencyDisplaySuffix } from "../schema";
 import {
   invoiceLabels,
   toInvoiceIntlLocale,
   type InvoiceLabels,
 } from "../labels";
-import { parseInlineMarkdown } from "./inline-markdown";
-import { invoiceShowsIssuerAsset } from "./issuer-assets";
-import { keepPdfWord } from "./register-fonts";
 import {
-  invoicePdfDocKindSubtitle,
-  invoicePdfMainTitle,
-  invoicePdfShowsVatColumn,
-  invoicePdfTaxPointLabel,
-} from "./pdf-presentation";
+  resolveLookDocument,
+  validateLookForInvoice,
+  type BlockInstance,
+  type LookBand,
+  type LookDocument,
+} from "../looks";
+import { parseInlineMarkdown } from "./inline-markdown";
+import {
+  createInvoicePdfStyles,
+  rowColumnStyle,
+  type InvoicePdfStyles,
+} from "./look-styles";
 
-const LINE_COLS_WITH_VAT = {
-  desc: "42%",
-  qty: "15%",
-  unitPx: "18%",
-  vat: "6%",
-  tot: "19%",
-} as const;
-
-const LINE_COLS_NO_VAT = {
-  desc: "46%",
-  qty: "17%",
-  unitPx: "18%",
-  tot: "19%",
-} as const;
-
-const INVOICEY_SITE_URL = "https://invoicey.ditrich.me/";
-
-const F_SANS = "Inter";
-
-const BODY = "#0a0a0a";
-const MUTED = "#4b5563";
-const LINE = "#e5e7eb";
+const INVOICEY_SITE_URL = "https://ditrich.me/";
 
 type InvoiceVatBreakdownRowModel = Invoice["totals"]["vatBreakdown"][number];
 
@@ -64,414 +34,14 @@ export interface InvoicePdfAssets {
   readonly signature?: Buffer;
 }
 
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: "column",
-    fontFamily: F_SANS,
-    fontSize: 8.5,
-    paddingTop: 32,
-    paddingHorizontal: 42,
-    paddingBottom: 52,
-    color: BODY,
-  },
-  mainColumn: {
-    flexDirection: "column",
-    flexGrow: 1,
-    width: "100%",
-  },
-  /** Full header + parties, hairline before table body */
-  upperSheet: {
-    width: "100%",
-    paddingBottom: 14,
-    borderBottomWidth: 0,
-    borderBottomColor: LINE,
-    marginBottom: 10,
-  },
-  upperTopRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  upperTopCol: {
-    width: "48%",
-  },
-  heroMin: {
-    width: "100%",
-    minHeight: 78,
-    justifyContent: "flex-start",
-  },
-  logoImg: {
-    maxHeight: 52,
-    width: 140,
-    objectFit: "contain",
-    objectPosition: "left top",
-  },
-  /** Thin rule over title column (Pokojovky ref) */
-  titleColRule: {
-    width: "100%",
-    borderBottomWidth: 1,
-    borderBottomColor: LINE,
-    marginBottom: 8,
-  },
-  invoiceTitle: {
-    fontFamily: F_SANS,
-    fontSize: 15,
-    fontWeight: 700,
-    color: BODY,
-    lineHeight: 1.08,
-  },
-  docKindMicro: {
-    fontFamily: F_SANS,
-    fontSize: 6.75,
-    fontWeight: 400,
-    color: MUTED,
-    marginTop: 4,
-  },
-  partyPairRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "stretch",
-    width: "100%",
-    marginTop: 10,
-  },
-  partyMetaRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    width: "100%",
-    marginTop: 16,
-  },
-  partyCol: {
-    width: "48%",
-    alignItems: "stretch",
-  },
-  sectionHairShort: {
-    width: 44,
-    borderBottomWidth: 1,
-    borderBottomColor: LINE,
-    marginBottom: 6,
-  },
-  sectionCaps: {
-    fontFamily: F_SANS,
-    fontSize: 6.5,
-    fontWeight: 400,
-    color: MUTED,
-    marginBottom: 4,
-  },
-  partyName: {
-    fontFamily: F_SANS,
-    fontSize: 10,
-    fontWeight: 700,
-    color: BODY,
-    marginBottom: 3,
-  },
-  partyAddr: {
-    fontFamily: F_SANS,
-    fontSize: 8,
-    fontWeight: 400,
-    color: MUTED,
-    lineHeight: 1.3,
-  },
-  partyAddrTight: {
-    fontFamily: F_SANS,
-    fontSize: 8,
-    fontWeight: 400,
-    color: MUTED,
-    lineHeight: 1.3,
-    marginTop: 1,
-  },
-  kvRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginTop: 3,
-    width: "100%",
-  },
-  kvRowFirst: { marginTop: 0 },
-  kvKeyCol: {
-    width: "44%",
-    paddingRight: 6,
-  },
-  kvKey: {
-    fontFamily: F_SANS,
-    fontSize: 7.5,
-    fontWeight: 400,
-    color: MUTED,
-  },
-  kvValCol: {
-    width: "56%",
-  },
-  paymentKvKeyCol: {
-    width: "32%",
-    paddingRight: 8,
-  },
-  paymentKvValCol: {
-    width: "68%",
-  },
-  kvVal: {
-    fontFamily: F_SANS,
-    fontSize: 8,
-    fontWeight: 400,
-    color: BODY,
-    textAlign: "right",
-  },
-  kvBlock: { width: "100%", marginTop: 6 },
-  registryNote: {
-    fontFamily: F_SANS,
-    fontSize: 8,
-    fontWeight: 400,
-    color: MUTED,
-    lineHeight: 1.3,
-    marginTop: 6,
-  },
-  paymentDetailKv: { marginTop: 0, width: "100%", alignSelf: "stretch" },
-  tableWrap: { marginTop: 4 },
-  tableHeadRow: {
-    flexDirection: "row",
-    borderBottomWidth: 0.5,
-    borderBottomColor: LINE,
-    paddingBottom: 4,
-    paddingTop: 2,
-  },
-  th: {
-    fontFamily: F_SANS,
-    fontSize: 6.5,
-    fontWeight: 400,
-    color: MUTED,
-  },
-  thQty: { textAlign: "right", paddingRight: 4 },
-  thUnitPx: { textAlign: "right" },
-  thVat: { textAlign: "right", paddingRight: 2 },
-  thTot: { textAlign: "right" },
-  lineRow: {
-    flexDirection: "row",
-    paddingVertical: 6,
-    alignItems: "flex-start",
-  },
-  tableRowsRule: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: LINE,
-  },
-  descCol: { paddingRight: 8 },
-  lineSub: {
-    fontFamily: F_SANS,
-    fontSize: 7.75,
-    fontWeight: 400,
-    color: MUTED,
-    marginTop: 1,
-    lineHeight: 1.28,
-  },
-  cellRight: { textAlign: "right" as const },
-  cellFig: {
-    fontFamily: F_SANS,
-    fontSize: 8,
-    fontWeight: 400,
-    color: BODY,
-  },
-  cellFigStrong: {
-    fontFamily: F_SANS,
-    fontSize: 8,
-    fontWeight: 700,
-    color: BODY,
-  },
-  totalsPair: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-    marginTop: 10,
-    width: "100%",
-  },
-  totalsLegal: {
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
-    paddingRight: 20,
-    paddingBottom: 2,
-  },
-  totalsBlock: {
-    width: 260,
-    flexShrink: 0,
-  },
-  totalLine: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 3,
-  },
-  totalLbl: {
-    fontFamily: F_SANS,
-    fontSize: 8,
-    fontWeight: 400,
-    color: MUTED,
-  },
-  totalFig: {
-    fontFamily: F_SANS,
-    fontSize: 8,
-    fontWeight: 400,
-    color: BODY,
-    textAlign: "right",
-  },
-  totalGrand: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-    marginTop: 6,
-    paddingTop: 5,
-    borderTopWidth: 0.5,
-    borderTopColor: LINE,
-  },
-  /** Neplátce: no VAT sub-rows — avoid double rule with table bottom */
-  totalGrandNoVatIssuer: {
-    borderTopWidth: 0,
-    paddingTop: 0,
-    marginTop: 8,
-  },
-  totalGrandLbl: {
-    fontFamily: F_SANS,
-    fontSize: 8.5,
-    fontWeight: 700,
-    color: BODY,
-  },
-  totalGrandFig: {
-    fontFamily: F_SANS,
-    fontSize: 15,
-    fontWeight: 700,
-    color: BODY,
-    lineHeight: 1.05,
-  },
-  legalMini: {
-    fontFamily: F_SANS,
-    fontWeight: 400,
-    fontSize: 7.75,
-    lineHeight: 1.33,
-    color: MUTED,
-  },
-  legalMiniBelow: {
-    marginTop: 6,
-  },
-  asideTitle: {
-    fontFamily: F_SANS,
-    fontSize: 8,
-    fontWeight: 700,
-    color: BODY,
-  },
-  paymentOuter: {
-    width: "100%",
-    marginTop: 6,
-    paddingTop: 8,
-    paddingBottom: 4,
-    borderTopWidth: 0,
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  paymentOuterAfterInstructions: {
-    marginTop: 0,
-    borderTopWidth: 0,
-  },
-  /** Fixed column + flex sibling with flexBasis:0 prevents QR/text overlap under Yoga */
-  paymentQrCol: {
-    width: 104,
-    height: 104,
-    flexShrink: 0,
-    flexGrow: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  paymentNoteCol: {
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
-    minWidth: 0,
-    maxWidth: "100%",
-  },
-  paymentNoteColPadQr: {
-    paddingLeft: 6,
-  },
-  paymentHint: {
-    fontFamily: F_SANS,
-    fontSize: 7.5,
-    fontWeight: 400,
-    color: MUTED,
-    marginTop: 8,
-    lineHeight: 1.4,
-  },
-  paymentInstructions: {
-    fontFamily: F_SANS,
-    fontSize: 8,
-    fontWeight: 400,
-    color: BODY,
-    lineHeight: 1.4,
-  },
-  paymentInstructionsBefore: {
-    marginTop: 10,
-    marginBottom: 4,
-  },
-  paymentInstructionsAfter: {
-    marginTop: 10,
-  },
-  paySectionHeading: {
-    fontFamily: F_SANS,
-    fontSize: 8.5,
-    fontWeight: 700,
-    color: BODY,
-    marginBottom: 6,
-  },
-  payMethodTxt: {
-    fontFamily: F_SANS,
-    fontSize: 8,
-    fontWeight: 400,
-    color: MUTED,
-    marginTop: 2,
-  },
-  qr: { width: 96, height: 96, flexShrink: 0 },
-  footerRow: {
-    position: "absolute",
-    bottom: 28,
-    left: 42,
-    right: 42,
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
-    borderTopWidth: 0,
-    borderTopColor: LINE,
-    paddingTop: 7,
-  },
-  footerBrand: {
-    fontFamily: F_SANS,
-    fontSize: 7,
-    color: MUTED,
-    textAlign: "right",
-    textDecoration: "none",
-  },
-  footerBrandStrong: {
-    fontWeight: 700,
-    color: BODY,
-    textDecoration: "none",
-  },
-  stampSigRow: {
-    marginTop: 14,
-    flexDirection: "row",
-    justifyContent: "flex-end",
-  },
-  stampSigBox: { marginLeft: 16 },
-  stampSig: {
-    width: 176,
-    height: 176,
-    objectFit: "contain",
-    objectPosition: "bottom",
-  },
-  signatureImg: {
-    width: 140,
-    height: 52,
-    objectFit: "contain",
-    objectPosition: "bottom",
-  },
-  creditInline: {
-    fontFamily: F_SANS,
-    fontSize: 8,
-    fontWeight: 700,
-    color: BODY,
-  },
-});
+type PdfCtx = {
+  readonly inv: Invoice;
+  readonly assets: InvoicePdfAssets;
+  readonly labels: InvoiceLabels;
+  readonly intlLocale: string;
+  readonly look: LookDocument;
+  readonly styles: InvoicePdfStyles;
+};
 
 function fmtMoneyAmount(n: number, locale: string): string {
   return new Intl.NumberFormat(locale, {
@@ -484,9 +54,8 @@ function fmtMoneyWithCurrency(
   n: number,
   currency: InvoiceCurrency,
   locale: string,
-  language: InvoiceLanguage,
 ): string {
-  return `${fmtMoneyAmount(n, locale)}\u00a0${currencyDisplaySuffix(currency, language)}`;
+  return `${fmtMoneyAmount(n, locale)}\u00a0${currencyDisplaySuffix(currency)}`;
 }
 
 function fmtDateIsoLocal(dateIso: string, locale: string): string {
@@ -540,8 +109,38 @@ function countryHuman(code: string, labels: InvoiceLabels): string {
   return code === "CZ" ? labels.countryCz : code;
 }
 
-function postalCityLine(zip: string, city: string): string {
-  return `${zip} ${city}`;
+function docKindUpper(inv: Invoice, labels: InvoiceLabels): string {
+  switch (inv.meta.docType) {
+    case "invoice":
+      return labels.docKindInvoice;
+    case "credit_note":
+      return labels.docKindCreditNote;
+    case "proforma":
+      return labels.docKindProforma;
+    case "advance":
+      return labels.docKindAdvance;
+    default: {
+      const _never: never = inv.meta.docType;
+      return _never;
+    }
+  }
+}
+
+function invoicePdfMainTitle(inv: Invoice, labels: InvoiceLabels): string {
+  switch (inv.meta.docType) {
+    case "invoice":
+      return `${labels.titleInvoice} ${inv.meta.number}`;
+    case "credit_note":
+      return `${labels.titleCreditNote} ${inv.meta.number}`;
+    case "proforma":
+      return `${labels.titleProforma} ${inv.meta.number}`;
+    case "advance":
+      return `${labels.titleAdvance} ${inv.meta.number}`;
+    default: {
+      const _never: never = inv.meta.docType;
+      return _never;
+    }
+  }
 }
 
 function splitDescription(raw: string): { title: string; detail?: string } {
@@ -558,10 +157,12 @@ function PdfKv({
   k,
   v,
   first,
+  styles,
 }: Readonly<{
   k: string;
   v: string;
   first?: boolean;
+  styles: InvoicePdfStyles;
 }>) {
   const rs = first === true ? [styles.kvRow, styles.kvRowFirst] : styles.kvRow;
   return (
@@ -580,10 +181,12 @@ function PdfPaymentKv({
   k,
   v,
   first,
+  styles,
 }: Readonly<{
   k: string;
   v: string;
   first?: boolean;
+  styles: InvoicePdfStyles;
 }>) {
   const rs = first === true ? [styles.kvRow, styles.kvRowFirst] : styles.kvRow;
   return (
@@ -600,32 +203,37 @@ function PdfPaymentKv({
 
 function PdfMarkdownText({
   source,
+  styles,
 }: Readonly<{
   source: string;
+  styles: InvoicePdfStyles;
 }>) {
-  const lines = source.replace(/\r\n/g, "\n").split("\n");
+  const blocks = source.split(/\n{2,}/u);
   return (
     <View>
-      {lines.map((line, i) => {
-        const spans = parseInlineMarkdown(line);
-        return (
-          <Text key={i} style={styles.paymentInstructions}>
-            {spans.length === 0
-              ? " "
-              : spans.map((span, j) => (
-                  <Text
-                    key={j}
-                    style={{
-                      fontWeight: span.bold ? 700 : 400,
-                      fontStyle: span.italic ? "italic" : "normal",
-                    }}
-                  >
-                    {span.text}
-                  </Text>
-                ))}
-          </Text>
-        );
-      })}
+      {blocks.map((block, i) => (
+        <Text
+          key={`md-${String(i)}`}
+          style={
+            i > 0
+              ? [styles.paymentInstructions, { marginTop: 6 }]
+              : styles.paymentInstructions
+          }
+        >
+          {parseInlineMarkdown(block.replaceAll("\n", " ")).map((span, j) => (
+            <Text
+              key={`s-${String(j)}`}
+              style={{
+                fontFamily: "Inter",
+                fontWeight: span.bold ? 700 : 400,
+                fontStyle: span.italic ? "italic" : "normal",
+              }}
+            >
+              {span.text}
+            </Text>
+          ))}
+        </Text>
+      ))}
     </View>
   );
 }
@@ -633,74 +241,577 @@ function PdfMarkdownText({
 function PdfInvoiceLineRow({
   item,
   currency,
-  language,
   locale,
-  showVat,
+  styles,
 }: Readonly<{
   item: InvoiceItem;
   currency: InvoiceCurrency;
-  language: InvoiceLanguage;
   locale: string;
-  showVat: boolean;
+  styles: InvoicePdfStyles;
 }>) {
-  const { title, detail } = splitDescription(item.description);
-  const cols = showVat ? LINE_COLS_WITH_VAT : LINE_COLS_NO_VAT;
+  const split = splitDescription(item.description);
   return (
-    <View style={styles.lineRow}>
-      <View style={[styles.descCol, { width: cols.desc }]}>
-        <Text style={styles.cellFig}>{title}</Text>
-        {detail ? <Text style={styles.lineSub}>{detail}</Text> : null}
+    <View style={styles.lineRow} wrap={false}>
+      <View style={styles.descCol}>
+        <Text style={styles.cellFig}>{split.title}</Text>
+        {split.detail ? (
+          <Text style={styles.lineSub}>{split.detail}</Text>
+        ) : null}
       </View>
       <Text
         style={[
-          styles.thQty,
           styles.cellFig,
-          styles.cellRight,
-          { width: cols.qty },
+          { width: "8%", textAlign: "right", paddingRight: 4 },
         ]}
       >
         {fmtQty(item.quantity, locale)}
-        {item.unit ? `\u00a0${invoiceDisplayUnit(item.unit, language)}` : ""}
+      </Text>
+      <Text style={[styles.cellFig, { width: "7%" }]}>{item.unit}</Text>
+      <Text style={[styles.cellFig, { width: "16%", textAlign: "right" }]}>
+        {fmtMoneyAmount(item.unitPriceWithoutVat, locale)}
       </Text>
       <Text
-        hyphenationCallback={keepPdfWord}
         style={[
-          styles.thUnitPx,
           styles.cellFig,
-          styles.cellRight,
-          { width: cols.unitPx },
+          { width: "6%", textAlign: "right", paddingRight: 2 },
         ]}
-        wrap={false}
       >
-        {fmtMoneyWithCurrency(
-          item.unitPriceWithoutVat,
-          currency,
-          locale,
-          language,
-        )}
+        {String(item.vatRate)}
       </Text>
-      {showVat ? (
-        <Text
-          style={[
-            styles.thVat,
-            styles.cellFig,
-            styles.cellRight,
-            { width: LINE_COLS_WITH_VAT.vat },
-          ]}
-        >{`${String(item.vatRate)}\u00a0%`}</Text>
-      ) : null}
       <Text
-        hyphenationCallback={keepPdfWord}
-        style={[
-          styles.thTot,
-          styles.cellFigStrong,
-          styles.cellRight,
-          { width: cols.tot },
-        ]}
-        wrap={false}
+        style={[styles.cellFigStrong, { width: "17%", textAlign: "right" }]}
       >
-        {fmtMoneyWithCurrency(item.lineTotal, currency, locale, language)}
+        {fmtMoneyWithCurrency(item.lineTotal, currency, locale)}
       </Text>
+    </View>
+  );
+}
+
+function PdfVatRow({
+  row,
+  currency,
+  labels,
+  locale,
+  styles,
+}: Readonly<{
+  row: InvoiceVatBreakdownRowModel;
+  currency: InvoiceCurrency;
+  labels: InvoiceLabels;
+  locale: string;
+  styles: InvoicePdfStyles;
+}>) {
+  return (
+    <View style={styles.totalLine}>
+      <Text
+        style={styles.totalLbl}
+      >{`${labels.vat} ${String(row.rate)}\u00a0%`}</Text>
+      <Text style={styles.totalFig}>
+        {fmtMoneyWithCurrency(row.vat, currency, locale)}
+      </Text>
+    </View>
+  );
+}
+
+function renderLogo(ctx: PdfCtx): React.ReactElement | null {
+  if (!ctx.assets.logo) return null;
+  return <Image style={ctx.styles.logoImg} src={ctx.assets.logo} />;
+}
+
+function renderTitle(ctx: PdfCtx): React.ReactElement {
+  const { inv, labels, intlLocale, styles } = ctx;
+  const showDuzp =
+    inv.meta.docType !== "proforma" && inv.meta.docType !== "advance";
+  return (
+    <View>
+      <View style={styles.titleColRule} />
+      <Text style={styles.invoiceTitle}>
+        {invoicePdfMainTitle(inv, labels)}
+      </Text>
+      <Text style={styles.docKindMicro}>{docKindUpper(inv, labels)}</Text>
+      <View style={styles.kvBlock}>
+        <PdfKv
+          first
+          k={labels.issueDate}
+          v={fmtDateIsoLocal(inv.meta.issueDate, intlLocale)}
+          styles={styles}
+        />
+        <PdfKv
+          k={labels.dueDate}
+          v={fmtDateIsoLocal(inv.meta.dueDate, intlLocale)}
+          styles={styles}
+        />
+        {showDuzp ? (
+          <PdfKv
+            k={labels.taxPointDate}
+            v={fmtDateIsoLocal(inv.meta.duzp, intlLocale)}
+            styles={styles}
+          />
+        ) : null}
+      </View>
+      {inv.meta.docType === "credit_note" && inv.meta.correctedInvoiceNumber ? (
+        <Text style={[styles.partyAddr, { marginTop: 8 }]}>
+          {labels.correctsDocument}{" "}
+          <Text style={styles.creditInline}>
+            {inv.meta.correctedInvoiceNumber}
+          </Text>
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+function renderIssuer(ctx: PdfCtx): React.ReactElement {
+  const { inv, labels, styles } = ctx;
+  const issuerCountry = countryHuman(inv.issuer.address.country, labels);
+  return (
+    <View>
+      <View style={styles.sectionHairShort} />
+      <Text style={styles.sectionCaps}>{labels.supplier}</Text>
+      <Text style={styles.partyName}>{inv.issuer.name}</Text>
+      <Text style={styles.partyAddr}>{inv.issuer.address.street}</Text>
+      <Text style={styles.partyAddrTight}>
+        {inv.issuer.address.zip}
+        {", "}
+        {inv.issuer.address.city}
+      </Text>
+      <Text style={styles.partyAddrTight}>{issuerCountry}</Text>
+      <View style={styles.kvBlock}>
+        <PdfKv first k={labels.ico} v={inv.issuer.ico} styles={styles} />
+        {inv.issuer.vatPayer && inv.issuer.dic ? (
+          <PdfKv k={labels.dic} v={inv.issuer.dic} styles={styles} />
+        ) : null}
+        {!inv.issuer.vatPayer ? (
+          <PdfKv k={labels.vat} v={labels.nonVatPayer} styles={styles} />
+        ) : null}
+        <PdfKv
+          k={labels.contactEmail}
+          v={inv.issuer.contactEmail}
+          styles={styles}
+        />
+      </View>
+      {inv.issuer.registryNote ? (
+        <Text style={[styles.partyAddrTight, { marginTop: 6 }]}>
+          {inv.issuer.registryNote}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+function renderClient(ctx: PdfCtx): React.ReactElement {
+  const { inv, labels, styles } = ctx;
+  const clientCountry = countryHuman(inv.client.address.country, labels);
+  const showClientIdentifiers =
+    Boolean(inv.client.ico) ||
+    Boolean(inv.client.dic) ||
+    Boolean(inv.client.contactEmail);
+  return (
+    <View>
+      <View style={styles.sectionHairShort} />
+      <Text style={styles.sectionCaps}>{labels.customer}</Text>
+      <Text style={styles.partyName}>{inv.client.name}</Text>
+      <Text style={styles.partyAddr}>{inv.client.address.street}</Text>
+      <Text style={styles.partyAddrTight}>
+        {inv.client.address.zip}
+        {", "}
+        {inv.client.address.city}
+      </Text>
+      <Text style={styles.partyAddrTight}>{clientCountry}</Text>
+      {showClientIdentifiers ? (
+        <View style={styles.kvBlock}>
+          {inv.client.ico ? (
+            <PdfKv first k={labels.ico} v={inv.client.ico} styles={styles} />
+          ) : null}
+          {inv.client.dic ? (
+            <PdfKv
+              first={!inv.client.ico}
+              k={labels.dic}
+              v={inv.client.dic}
+              styles={styles}
+            />
+          ) : null}
+          {inv.client.contactEmail ? (
+            <PdfKv
+              first={!inv.client.ico && !inv.client.dic}
+              k={labels.contactEmail}
+              v={inv.client.contactEmail}
+              styles={styles}
+            />
+          ) : null}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function renderPaymentCompact(ctx: PdfCtx): React.ReactElement | null {
+  const { inv, labels, styles } = ctx;
+  const transfer = inv.payment.method === "transfer" && inv.payment.bankAccount;
+  return (
+    <View style={styles.kvBlockGap}>
+      {transfer ? (
+        <PdfKv
+          first
+          k={labels.bankAccount}
+          v={transfer.accountNumber}
+          styles={styles}
+        />
+      ) : null}
+      {transfer && inv.payment.variableSymbol ? (
+        <PdfKv
+          k={labels.variableSymbol}
+          v={inv.payment.variableSymbol}
+          styles={styles}
+        />
+      ) : null}
+      <PdfKv
+        first={!transfer}
+        k={labels.paymentMethod}
+        v={paymentMethodLabel(inv.payment.method, labels)}
+        styles={styles}
+      />
+    </View>
+  );
+}
+
+function renderPaymentFull(ctx: PdfCtx): React.ReactElement {
+  const { inv, labels, styles } = ctx;
+  const transfer = inv.payment.method === "transfer" && inv.payment.bankAccount;
+  const instructionsBefore = inv.payment.instructionsBefore?.trim() || null;
+  const instructionsAfter = inv.payment.instructionsAfter?.trim() || null;
+  return (
+    <View>
+      {instructionsBefore ? (
+        <View style={styles.paymentInstructionsBefore}>
+          <PdfMarkdownText source={instructionsBefore} styles={styles} />
+        </View>
+      ) : null}
+      <View style={styles.paymentBlock}>
+        <Text style={styles.paySectionHeading}>{labels.paymentDetails}</Text>
+        {transfer ? (
+          <View style={[styles.kvBlock, styles.paymentDetailKv]}>
+            <PdfPaymentKv
+              first
+              k={labels.bankAccount}
+              v={transfer.accountNumber}
+              styles={styles}
+            />
+            <PdfPaymentKv
+              k="IBAN"
+              v={formatIbanDisplay(transfer.iban)}
+              styles={styles}
+            />
+            {transfer.bic ? (
+              <PdfPaymentKv k="SWIFT / BIC" v={transfer.bic} styles={styles} />
+            ) : null}
+            {inv.payment.variableSymbol ? (
+              <PdfPaymentKv
+                k={labels.variableSymbol}
+                v={inv.payment.variableSymbol}
+                styles={styles}
+              />
+            ) : null}
+            {inv.payment.constantSymbol ? (
+              <PdfPaymentKv
+                k={labels.constantSymbol}
+                v={inv.payment.constantSymbol}
+                styles={styles}
+              />
+            ) : null}
+            {inv.payment.specificSymbol ? (
+              <PdfPaymentKv
+                k={labels.specificSymbol}
+                v={inv.payment.specificSymbol}
+                styles={styles}
+              />
+            ) : null}
+            <PdfPaymentKv
+              k={labels.paymentMethod}
+              v={paymentMethodLabel(inv.payment.method, labels)}
+              styles={styles}
+            />
+          </View>
+        ) : inv.payment.method === "cash" ? (
+          <Text style={styles.payMethodTxt}>{labels.payCash}</Text>
+        ) : (
+          <Text style={styles.payMethodTxt}>{labels.payCard}</Text>
+        )}
+      </View>
+      {instructionsAfter ? (
+        <View style={styles.paymentInstructionsAfter}>
+          <PdfMarkdownText source={instructionsAfter} styles={styles} />
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function renderQr(ctx: PdfCtx): React.ReactElement | null {
+  if (!ctx.look.theme.showQr || !ctx.assets.qrDataUrl) return null;
+  return (
+    <View>
+      <Image style={ctx.styles.qr} src={ctx.assets.qrDataUrl} />
+      <Text style={ctx.styles.paymentHint}>{ctx.labels.qrHint}</Text>
+    </View>
+  );
+}
+
+function renderLines(ctx: PdfCtx): React.ReactElement {
+  const { inv, labels, intlLocale, styles } = ctx;
+  const sortedItems = [...inv.items].sort((a, b) => a.position - b.position);
+  return (
+    <View style={styles.tableWrap}>
+      <View style={styles.tableHeadRow}>
+        <Text style={[styles.th, styles.thDesc]}>{labels.colDescription}</Text>
+        <Text style={[styles.th, styles.thQty]}>{labels.colQty}</Text>
+        <Text style={[styles.th, styles.thUnit]}>{labels.colUnit}</Text>
+        <Text style={[styles.th, styles.thUnitPx]}>{labels.colUnitPrice}</Text>
+        <Text style={[styles.th, styles.thVat]}>{labels.colVat}</Text>
+        <Text style={[styles.th, styles.thTot]}>{labels.colTotal}</Text>
+      </View>
+      <View style={styles.tableRowsRule}>
+        {sortedItems.map((it) => (
+          <PdfInvoiceLineRow
+            key={it.position}
+            currency={inv.meta.currency}
+            item={it}
+            locale={intlLocale}
+            styles={styles}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function renderTotals(ctx: PdfCtx): React.ReactElement {
+  const { inv, labels, intlLocale, styles } = ctx;
+  const showRecapDetail =
+    inv.issuer.vatPayer &&
+    inv.vat.mode === "regular" &&
+    inv.totals.vatBreakdown.length > 0 &&
+    inv.totals.vatTotal > 0;
+  return (
+    <View style={styles.totalsBlock}>
+      {inv.issuer.vatPayer ? (
+        <>
+          <View style={styles.totalLine}>
+            <Text style={styles.totalLbl}>{labels.totalExVat}</Text>
+            <Text style={styles.totalFig}>
+              {fmtMoneyWithCurrency(
+                inv.totals.subtotal,
+                inv.meta.currency,
+                intlLocale,
+              )}
+            </Text>
+          </View>
+          {showRecapDetail
+            ? inv.totals.vatBreakdown.map((row) => (
+                <PdfVatRow
+                  key={`${row.rate}`}
+                  currency={inv.meta.currency}
+                  labels={labels}
+                  locale={intlLocale}
+                  row={row}
+                  styles={styles}
+                />
+              ))
+            : null}
+          {!showRecapDetail ? (
+            <View style={styles.totalLine}>
+              <Text style={styles.totalLbl}>{labels.vat}</Text>
+              <Text style={styles.totalFig}>
+                {fmtMoneyWithCurrency(
+                  inv.totals.vatTotal,
+                  inv.meta.currency,
+                  intlLocale,
+                )}
+              </Text>
+            </View>
+          ) : null}
+        </>
+      ) : null}
+      <View
+        style={
+          inv.issuer.vatPayer
+            ? styles.totalGrand
+            : [styles.totalGrand, styles.totalGrandNoVatIssuer]
+        }
+      >
+        <Text style={styles.totalGrandLbl}>{labels.amountDue}</Text>
+        <Text style={styles.totalGrandFig}>
+          {fmtMoneyWithCurrency(
+            inv.totals.total,
+            inv.meta.currency,
+            intlLocale,
+          )}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function renderTax(ctx: PdfCtx): React.ReactElement | null {
+  const { inv, labels, styles } = ctx;
+  if (!inv.issuer.vatPayer) {
+    return <Text style={styles.legalMini}>{labels.notVatPayerLegal}</Text>;
+  }
+  if (inv.vat.mode === "reverse_charge") {
+    return (
+      <View style={{ marginTop: 6 }}>
+        <Text style={styles.asideTitle}>{labels.reverseChargeTitle}</Text>
+        <Text style={styles.legalMini}>
+          {inv.vat.legalNote ?? labels.reverseChargeDefault}
+        </Text>
+      </View>
+    );
+  }
+  if (inv.vat.mode === "oss") {
+    return (
+      <View style={{ marginTop: 6 }}>
+        <Text style={styles.asideTitle}>{labels.ossTitle}</Text>
+        <Text style={styles.legalMini}>
+          {inv.vat.legalNote ?? labels.ossDefault}
+        </Text>
+      </View>
+    );
+  }
+  return null;
+}
+
+function renderNotes(ctx: PdfCtx): React.ReactElement | null {
+  if (!ctx.look.theme.showNotes || !ctx.inv.notes) return null;
+  return (
+    <View style={{ marginTop: 10 }}>
+      <Text style={ctx.styles.asideTitle}>{ctx.labels.notes}</Text>
+      <Text style={ctx.styles.legalMini}>{ctx.inv.notes}</Text>
+    </View>
+  );
+}
+
+function renderStamp(ctx: PdfCtx): React.ReactElement | null {
+  if (!ctx.look.theme.showStamp || !ctx.assets.stamp) return null;
+  return <Image style={ctx.styles.stampSig} src={ctx.assets.stamp} />;
+}
+
+function renderSignature(ctx: PdfCtx): React.ReactElement | null {
+  if (!ctx.look.theme.showSignature || !ctx.assets.signature) return null;
+  return <Image style={ctx.styles.signatureImg} src={ctx.assets.signature} />;
+}
+
+function renderFooter(ctx: PdfCtx): React.ReactElement {
+  return (
+    <View fixed style={ctx.styles.footerRow} wrap={false}>
+      <Link src={INVOICEY_SITE_URL} style={ctx.styles.footerBrand}>
+        {ctx.labels.issuedVia}{" "}
+        <Text style={ctx.styles.footerBrandStrong}>Invoicey</Text>
+      </Link>
+    </View>
+  );
+}
+
+function renderBlock(
+  ctx: PdfCtx,
+  slot: BlockInstance,
+): React.ReactElement | null {
+  switch (slot.block) {
+    case "logo":
+      return renderLogo(ctx);
+    case "title":
+      return renderTitle(ctx);
+    case "issuer":
+      return renderIssuer(ctx);
+    case "client":
+      return renderClient(ctx);
+    case "payment":
+      return slot.variant === "compact"
+        ? renderPaymentCompact(ctx)
+        : renderPaymentFull(ctx);
+    case "qr":
+      return renderQr(ctx);
+    case "lines":
+      return renderLines(ctx);
+    case "totals":
+      return renderTotals(ctx);
+    case "tax":
+      return renderTax(ctx);
+    case "notes":
+      return renderNotes(ctx);
+    case "stamp":
+      return renderStamp(ctx);
+    case "signature":
+      return renderSignature(ctx);
+    case "footer":
+      return renderFooter(ctx);
+    default: {
+      const _never: never = slot.block;
+      return _never;
+    }
+  }
+}
+
+function renderSlotColumn(
+  ctx: PdfCtx,
+  slots: readonly BlockInstance[],
+): React.ReactElement | null {
+  const children = slots
+    .map((slot, index) => {
+      const node = renderBlock(ctx, slot);
+      return node ? (
+        <View key={`${slot.block}-${String(index)}`}>{node}</View>
+      ) : null;
+    })
+    .filter(Boolean);
+  if (children.length === 0) return null;
+  return <View>{children}</View>;
+}
+
+function renderBand(
+  ctx: PdfCtx,
+  band: LookBand,
+  index: number,
+): React.ReactElement | null {
+  if (band.type === "footer") return null;
+  if (band.type === "stack") {
+    const column = renderSlotColumn(ctx, band.slots);
+    if (!column) return null;
+    return (
+      <View
+        key={`band-${String(index)}`}
+        style={index === 0 ? ctx.styles.colFull : ctx.styles.bandStack}
+      >
+        {column}
+      </View>
+    );
+  }
+  const start = renderSlotColumn(ctx, band.start);
+  const end = renderSlotColumn(ctx, band.end);
+  if (!start && !end) return null;
+  if (!start)
+    return (
+      <View key={`band-${String(index)}`} style={ctx.styles.colFull}>
+        {end}
+      </View>
+    );
+  if (!end)
+    return (
+      <View key={`band-${String(index)}`} style={ctx.styles.colFull}>
+        {start}
+      </View>
+    );
+  return (
+    <View
+      key={`band-${String(index)}`}
+      style={
+        index === 0
+          ? [ctx.styles.bandRow, ctx.styles.bandRowFirst]
+          : ctx.styles.bandRow
+      }
+    >
+      <View style={rowColumnStyle(ctx.styles, band.split, "start")}>
+        {start}
+      </View>
+      <View style={rowColumnStyle(ctx.styles, band.split, "end")}>{end}</View>
     </View>
   );
 }
@@ -714,467 +825,25 @@ export function InvoicePdfDocument({
   invoice: inv,
   assets,
 }: InvoicePdfDocumentProps) {
+  const look = resolveLookDocument(inv);
+  const issues = validateLookForInvoice(look, inv);
+  if (issues.length > 0) {
+    throw new Error(`invalid_look: ${issues.map((i) => i.message).join("; ")}`);
+  }
+
   const labels = invoiceLabels(inv.meta.language);
   const intlLocale = toInvoiceIntlLocale(inv.meta.language);
-  const showStamp = invoiceShowsIssuerAsset(inv.customization?.showStamp);
-  const showSignature = invoiceShowsIssuerAsset(
-    inv.customization?.showSignature,
-  );
-
-  const showDuzp =
-    inv.meta.docType !== "proforma" && inv.meta.docType !== "advance";
-  const showVatColumn = invoicePdfShowsVatColumn(inv);
-  const lineCols = showVatColumn ? LINE_COLS_WITH_VAT : LINE_COLS_NO_VAT;
-  const docKindSubtitle = invoicePdfDocKindSubtitle(inv, labels);
-
-  const showRecapDetail =
-    inv.issuer.vatPayer &&
-    inv.vat.mode === "regular" &&
-    inv.totals.vatBreakdown.length > 0 &&
-    inv.totals.vatTotal > 0;
-
-  const sortedItems = [...inv.items].sort((a, b) => a.position - b.position);
-
-  const issuerCountry = countryHuman(inv.issuer.address.country, labels);
-  const clientCountry = countryHuman(inv.client.address.country, labels);
-
-  const transfer = inv.payment.method === "transfer" && inv.payment.bankAccount;
-  const hasQr = Boolean(assets.qrDataUrl);
-  const instructionsBefore = inv.payment.instructionsBefore?.trim() || null;
-  const instructionsAfter = inv.payment.instructionsAfter?.trim() || null;
-  const showClientIdentifiers =
-    Boolean(inv.client.ico) ||
-    Boolean(inv.client.dic) ||
-    Boolean(inv.client.contactEmail);
+  const styles = createInvoicePdfStyles(look.theme);
+  const ctx: PdfCtx = { inv, assets, labels, intlLocale, look, styles };
 
   return (
     <Document title={invoicePdfMainTitle(inv, labels)} creator="Invoicey">
       <Page size="A4" style={styles.page}>
         <View style={styles.mainColumn}>
-          <View style={styles.upperSheet}>
-            <View style={styles.upperTopRow}>
-              <View style={styles.upperTopCol}>
-                <View style={styles.heroMin}>
-                  {assets.logo ? (
-                    <Image style={styles.logoImg} src={assets.logo} />
-                  ) : null}
-                </View>
-              </View>
-              <View style={styles.upperTopCol}>
-                <View style={styles.heroMin}>
-                  <View style={styles.titleColRule} />
-                  <Text style={styles.invoiceTitle}>
-                    {invoicePdfMainTitle(inv, labels)}
-                  </Text>
-                  {docKindSubtitle ? (
-                    <Text style={styles.docKindMicro}>{docKindSubtitle}</Text>
-                  ) : null}
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.partyPairRow}>
-              <View style={styles.partyCol}>
-                <View style={styles.sectionHairShort} />
-                <Text style={styles.sectionCaps}>{labels.supplier}</Text>
-                <Text style={styles.partyName}>{inv.issuer.name}</Text>
-                <Text style={styles.partyAddr}>
-                  {inv.issuer.address.street}
-                </Text>
-                <Text style={styles.partyAddrTight}>
-                  {postalCityLine(
-                    inv.issuer.address.zip,
-                    inv.issuer.address.city,
-                  )}
-                </Text>
-                <Text style={styles.partyAddrTight}>{issuerCountry}</Text>
-                <View style={styles.kvBlock}>
-                  <PdfKv first k={labels.ico} v={inv.issuer.ico} />
-                  {inv.issuer.vatPayer && inv.issuer.dic ? (
-                    <PdfKv k={labels.dic} v={inv.issuer.dic} />
-                  ) : null}
-                  {!inv.issuer.vatPayer ? (
-                    <PdfKv k={labels.vat} v={labels.nonVatPayer} />
-                  ) : null}
-                  <PdfKv k={labels.contactEmail} v={inv.issuer.contactEmail} />
-                </View>
-                {inv.issuer.registryNote ? (
-                  <Text style={styles.registryNote}>
-                    {inv.issuer.registryNote}
-                  </Text>
-                ) : null}
-              </View>
-
-              <View style={styles.partyCol}>
-                <View style={styles.sectionHairShort} />
-                <Text style={styles.sectionCaps}>{labels.customer}</Text>
-                <Text style={styles.partyName}>{inv.client.name}</Text>
-                <Text style={styles.partyAddr}>
-                  {inv.client.address.street}
-                </Text>
-                <Text style={styles.partyAddrTight}>
-                  {postalCityLine(
-                    inv.client.address.zip,
-                    inv.client.address.city,
-                  )}
-                </Text>
-                <Text style={styles.partyAddrTight}>{clientCountry}</Text>
-                {showClientIdentifiers ? (
-                  <View style={styles.kvBlock}>
-                    {inv.client.ico ? (
-                      <PdfKv first k={labels.ico} v={inv.client.ico} />
-                    ) : null}
-                    {inv.client.dic ? (
-                      <PdfKv
-                        first={!inv.client.ico}
-                        k={labels.dic}
-                        v={inv.client.dic}
-                      />
-                    ) : null}
-                    {inv.client.contactEmail ? (
-                      <PdfKv
-                        first={!inv.client.ico && !inv.client.dic}
-                        k={labels.contactEmail}
-                        v={inv.client.contactEmail}
-                      />
-                    ) : null}
-                  </View>
-                ) : null}
-              </View>
-            </View>
-            <View style={styles.partyMetaRow}>
-              <View style={styles.partyCol}>
-                {transfer ? (
-                  <PdfKv
-                    first
-                    k={labels.bankAccount}
-                    v={transfer.accountNumber}
-                  />
-                ) : null}
-                {transfer && inv.payment.variableSymbol ? (
-                  <PdfKv
-                    first={false}
-                    k={labels.variableSymbol}
-                    v={inv.payment.variableSymbol}
-                  />
-                ) : null}
-                <PdfKv
-                  first={!transfer}
-                  k={labels.paymentMethod}
-                  v={paymentMethodLabel(inv.payment.method, labels)}
-                />
-              </View>
-              <View style={styles.partyCol}>
-                <PdfKv
-                  first
-                  k={labels.issueDate}
-                  v={fmtDateIsoLocal(inv.meta.issueDate, intlLocale)}
-                />
-                <PdfKv
-                  k={labels.dueDate}
-                  v={fmtDateIsoLocal(inv.meta.dueDate, intlLocale)}
-                />
-                {showDuzp ? (
-                  <PdfKv
-                    k={invoicePdfTaxPointLabel(inv, labels)}
-                    v={fmtDateIsoLocal(inv.meta.duzp, intlLocale)}
-                  />
-                ) : null}
-              </View>
-            </View>
-          </View>
-
-          {inv.meta.docType === "credit_note" &&
-          inv.meta.correctedInvoiceNumber ? (
-            <Text style={[styles.partyAddr, { marginTop: 8 }]}>
-              {labels.correctsDocument}{" "}
-              <Text style={styles.creditInline}>
-                {inv.meta.correctedInvoiceNumber}
-              </Text>
-            </Text>
-          ) : null}
-
-          <View style={styles.tableWrap}>
-            <View style={styles.tableHeadRow}>
-              <Text style={[styles.th, { width: lineCols.desc }]}>
-                {labels.colDescription}
-              </Text>
-              <Text style={[styles.th, styles.thQty, { width: lineCols.qty }]}>
-                {labels.colQty}
-              </Text>
-              <Text
-                style={[styles.th, styles.thUnitPx, { width: lineCols.unitPx }]}
-              >
-                {labels.colUnitPrice}
-              </Text>
-              {showVatColumn ? (
-                <Text
-                  style={[
-                    styles.th,
-                    styles.thVat,
-                    { width: LINE_COLS_WITH_VAT.vat },
-                  ]}
-                >
-                  {labels.colVat}
-                </Text>
-              ) : null}
-              <Text style={[styles.th, styles.thTot, { width: lineCols.tot }]}>
-                {labels.colTotal}
-              </Text>
-            </View>
-            <View style={styles.tableRowsRule}>
-              {sortedItems.map((it) => (
-                <PdfInvoiceLineRow
-                  key={it.position}
-                  currency={inv.meta.currency}
-                  item={it}
-                  language={inv.meta.language}
-                  locale={intlLocale}
-                  showVat={showVatColumn}
-                />
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.totalsPair}>
-            <View style={styles.totalsLegal}>
-              {!inv.issuer.vatPayer ? (
-                <Text style={styles.legalMini}>{labels.notVatPayerLegal}</Text>
-              ) : null}
-            </View>
-            <View style={styles.totalsBlock}>
-              {inv.issuer.vatPayer ? (
-                <>
-                  <View style={styles.totalLine}>
-                    <Text style={styles.totalLbl}>{labels.totalExVat}</Text>
-                    <Text
-                      hyphenationCallback={keepPdfWord}
-                      style={styles.totalFig}
-                      wrap={false}
-                    >
-                      {fmtMoneyWithCurrency(
-                        inv.totals.subtotal,
-                        inv.meta.currency,
-                        intlLocale,
-                        inv.meta.language,
-                      )}
-                    </Text>
-                  </View>
-                  {showRecapDetail
-                    ? inv.totals.vatBreakdown.map((row) => (
-                        <PdfVatRow
-                          key={`${row.rate}`}
-                          currency={inv.meta.currency}
-                          labels={labels}
-                          language={inv.meta.language}
-                          locale={intlLocale}
-                          row={row}
-                        />
-                      ))
-                    : null}
-                  {!showRecapDetail ? (
-                    <View style={styles.totalLine}>
-                      <Text style={styles.totalLbl}>{labels.vat}</Text>
-                      <Text
-                        hyphenationCallback={keepPdfWord}
-                        style={styles.totalFig}
-                        wrap={false}
-                      >
-                        {fmtMoneyWithCurrency(
-                          inv.totals.vatTotal,
-                          inv.meta.currency,
-                          intlLocale,
-                          inv.meta.language,
-                        )}
-                      </Text>
-                    </View>
-                  ) : null}
-                </>
-              ) : null}
-
-              <View
-                style={
-                  inv.issuer.vatPayer
-                    ? styles.totalGrand
-                    : [styles.totalGrand, styles.totalGrandNoVatIssuer]
-                }
-              >
-                <Text style={styles.totalGrandLbl}>{labels.amountDue}</Text>
-                <Text
-                  hyphenationCallback={keepPdfWord}
-                  style={styles.totalGrandFig}
-                  wrap={false}
-                >
-                  {fmtMoneyWithCurrency(
-                    inv.totals.total,
-                    inv.meta.currency,
-                    intlLocale,
-                    inv.meta.language,
-                  )}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {inv.vat.mode === "reverse_charge" ? (
-            <View style={{ marginTop: 6 }}>
-              <Text style={styles.asideTitle}>{labels.reverseChargeTitle}</Text>
-              <Text style={[styles.legalMini, styles.legalMiniBelow]}>
-                {inv.vat.legalNote ?? labels.reverseChargeDefault}
-              </Text>
-            </View>
-          ) : null}
-
-          {inv.vat.mode === "oss" ? (
-            <View style={{ marginTop: 6 }}>
-              <Text style={styles.asideTitle}>{labels.ossTitle}</Text>
-              <Text style={[styles.legalMini, styles.legalMiniBelow]}>
-                {inv.vat.legalNote ?? labels.ossDefault}
-              </Text>
-            </View>
-          ) : null}
-
-          {instructionsBefore ? (
-            <View style={styles.paymentInstructionsBefore}>
-              <PdfMarkdownText source={instructionsBefore} />
-            </View>
-          ) : null}
-
-          <View
-            style={
-              instructionsBefore
-                ? [styles.paymentOuter, styles.paymentOuterAfterInstructions]
-                : styles.paymentOuter
-            }
-          >
-            {hasQr && assets.qrDataUrl ? (
-              <View style={styles.paymentQrCol}>
-                <Image style={styles.qr} src={assets.qrDataUrl} />
-              </View>
-            ) : null}
-            <View
-              style={
-                hasQr
-                  ? [styles.paymentNoteCol, styles.paymentNoteColPadQr]
-                  : styles.paymentNoteCol
-              }
-            >
-              <Text style={styles.paySectionHeading}>
-                {labels.paymentDetails}
-              </Text>
-              {transfer ? (
-                <View style={[styles.kvBlock, styles.paymentDetailKv]}>
-                  <PdfPaymentKv
-                    first
-                    k={labels.bankAccount}
-                    v={transfer.accountNumber}
-                  />
-                  <PdfPaymentKv k="IBAN" v={formatIbanDisplay(transfer.iban)} />
-                  {transfer.bic ? (
-                    <PdfPaymentKv k="SWIFT / BIC" v={transfer.bic} />
-                  ) : null}
-                  {inv.payment.variableSymbol ? (
-                    <PdfPaymentKv
-                      k={labels.variableSymbol}
-                      v={inv.payment.variableSymbol}
-                    />
-                  ) : null}
-                  {inv.payment.constantSymbol ? (
-                    <PdfPaymentKv
-                      k={labels.constantSymbol}
-                      v={inv.payment.constantSymbol}
-                    />
-                  ) : null}
-                  {inv.payment.specificSymbol ? (
-                    <PdfPaymentKv
-                      k={labels.specificSymbol}
-                      v={inv.payment.specificSymbol}
-                    />
-                  ) : null}
-                  <PdfPaymentKv
-                    k={labels.paymentMethod}
-                    v={paymentMethodLabel(inv.payment.method, labels)}
-                  />
-                  {hasQr ? (
-                    <Text style={styles.paymentHint}>{labels.qrHint}</Text>
-                  ) : null}
-                </View>
-              ) : inv.payment.method === "cash" ? (
-                <Text style={styles.payMethodTxt}>{labels.payCash}</Text>
-              ) : (
-                <Text style={styles.payMethodTxt}>{labels.payCard}</Text>
-              )}
-            </View>
-          </View>
-
-          {instructionsAfter ? (
-            <View style={styles.paymentInstructionsAfter}>
-              <PdfMarkdownText source={instructionsAfter} />
-            </View>
-          ) : null}
-
-          {inv.notes ? (
-            <View style={{ marginTop: 10 }}>
-              <Text style={styles.asideTitle}>{labels.notes}</Text>
-              <Text style={[styles.legalMini, styles.legalMiniBelow]}>
-                {inv.notes}
-              </Text>
-            </View>
-          ) : null}
-
-          {(showStamp && assets.stamp) ||
-          (showSignature && assets.signature) ? (
-            <View style={styles.stampSigRow} wrap={false}>
-              {showStamp && assets.stamp ? (
-                <Image style={styles.stampSig} src={assets.stamp} />
-              ) : (
-                <View />
-              )}
-              {showSignature && assets.signature ? (
-                <View style={styles.stampSigBox}>
-                  <Image style={styles.signatureImg} src={assets.signature} />
-                </View>
-              ) : null}
-            </View>
-          ) : null}
+          {look.layout.bands.map((band, index) => renderBand(ctx, band, index))}
         </View>
-
-        <View fixed style={styles.footerRow} wrap={false}>
-          <Link src={INVOICEY_SITE_URL} style={styles.footerBrand}>
-            {labels.issuedVia}{" "}
-            <Text style={styles.footerBrandStrong}>Invoicey</Text>
-          </Link>
-        </View>
+        {renderFooter(ctx)}
       </Page>
     </Document>
-  );
-}
-
-function PdfVatRow({
-  row,
-  currency,
-  labels,
-  language,
-  locale,
-}: Readonly<{
-  row: InvoiceVatBreakdownRowModel;
-  currency: InvoiceCurrency;
-  labels: InvoiceLabels;
-  language: InvoiceLanguage;
-  locale: string;
-}>) {
-  return (
-    <View style={styles.totalLine}>
-      <Text
-        style={styles.totalLbl}
-      >{`${labels.vat} ${String(row.rate)}\u00a0%`}</Text>
-      <Text
-        hyphenationCallback={keepPdfWord}
-        style={styles.totalFig}
-        wrap={false}
-      >
-        {fmtMoneyWithCurrency(row.vat, currency, locale, language)}
-      </Text>
-    </View>
   );
 }
