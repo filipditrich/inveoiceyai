@@ -169,7 +169,7 @@ export function AppSidebar({
             <SidebarMenuButton
               size="lg"
               className="hover:bg-sidebar-accent/70 data-[slot=sidebar-menu-button]:gap-3"
-              render={<Link href="/dashboard" prefetch />}
+              render={<Link href="/dashboard" prefetch={false} />}
             >
               <BrandLogo
                 className="shadow-sm shadow-black/10 dark:shadow-black/40"

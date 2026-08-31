@@ -60,6 +60,7 @@ const withNextIntl = createNextIntlPlugin({
  * Slack link cards, and bookmarks, so they keep resolving.
  */
 const legacySettingsRedirects = [
+  ["/account", "/settings/account"],
   ["/settings", "/settings/account"],
   ["/settings/security", "/settings/account/security"],
   ["/settings/referrals", "/settings/account/referrals"],
@@ -126,6 +127,7 @@ const nextConfig: NextConfig = {
   ],
   outputFileTracingIncludes: {
     "/api/**": invoiceCoreAssets,
+    "/invoices/**": invoiceCoreAssets,
     "/eve/**": invoiceCoreAssets,
     /** Eve durable tools run here — was missing; caused missing Inter.ttf on create_invoice */
     "/.well-known/workflow/**": invoiceCoreAssets,

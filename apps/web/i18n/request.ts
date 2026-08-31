@@ -34,5 +34,6 @@ export default getRequestConfig(async () => {
     messages,
     timeZone: APP_TIME_ZONE,
     formats: appFormats,
+    now: new Date(),
   };
 });

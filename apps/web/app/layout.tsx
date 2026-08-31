@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import {
   getLocale,
   getMessages,
+  getNow,
   getTranslations,
   getTimeZone,
 } from "next-intl/server";
@@ -67,6 +68,7 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
   const timeZone = await getTimeZone();
+  const now = await getNow();
 
   return (
     <html
@@ -79,10 +81,11 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <NextIntlClientProvider
+          formats={appFormats}
           locale={locale}
           messages={messages}
+          now={now}
           timeZone={timeZone}
-          formats={appFormats}
         >
           <Providers>{children}</Providers>
         </NextIntlClientProvider>

@@ -128,13 +128,15 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
-                render={<Link href="/settings/account" prefetch />}
+                render={<Link href="/settings/account" prefetch={false} />}
               >
                 <SettingsIcon />
                 {t("settings")}
               </DropdownMenuItem>
               {isPlatformAdmin ? (
-                <DropdownMenuItem render={<Link href="/admin" prefetch />}>
+                <DropdownMenuItem
+                  render={<Link href="/admin" prefetch={false} />}
+                >
                   <ShieldIcon />
                   {t("platformAdmin")}
                 </DropdownMenuItem>

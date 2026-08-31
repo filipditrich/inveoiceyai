@@ -278,31 +278,32 @@ export async function sendInvoiceEmailById(
     applyTemplate(settings.displayNameTemplate, vars);
 
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "");
-  const rendered = await renderInvoiceSentEmail({
-    coverText,
-    number,
-    issueDate: row.issueDate,
-    dueDate: row.dueDate,
-    totalLabel: formatTotalLabel(
-      row.total,
-      row.currency,
-      invoice.meta.language,
-    ),
-    clientName: row.clientName,
-    issuerName: invoice.issuer.name,
-    invoiceUrl: appUrl ? `${appUrl}/invoices/${row.id}` : undefined,
-    locale: invoice.meta.language,
-  });
-
-  const attachments = await buildAttachments({
-    invoice,
-    pdfUrl: row.pdfUrl,
-    isdocUrl: row.isdocUrl,
-    attachIsdoc,
-    number,
-  });
 
   try {
+    const rendered = await renderInvoiceSentEmail({
+      coverText,
+      number,
+      issueDate: row.issueDate,
+      dueDate: row.dueDate,
+      totalLabel: formatTotalLabel(
+        row.total,
+        row.currency,
+        invoice.meta.language,
+      ),
+      clientName: row.clientName,
+      issuerName: invoice.issuer.name,
+      invoiceUrl: appUrl ? `${appUrl}/invoices/${row.id}` : undefined,
+      locale: invoice.meta.language,
+    });
+
+    const attachments = await buildAttachments({
+      invoice,
+      pdfUrl: row.pdfUrl,
+      isdocUrl: row.isdocUrl,
+      attachIsdoc,
+      number,
+    });
+
     const message: Parameters<typeof sendTransactionalEmail>[0] = {
       db: database,
       workspaceId,
@@ -339,6 +340,7 @@ export async function sendInvoiceEmailById(
       status: result.status,
     };
   } catch (err) {
+    console.error("[send-invoice-email] send failed", input.id, err);
     return {
       ok: false,
       error: err instanceof Error ? err.message : "send_failed",

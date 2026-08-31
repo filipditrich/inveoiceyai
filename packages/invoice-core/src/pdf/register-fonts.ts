@@ -1,7 +1,7 @@
 import { Font } from "@react-pdf/renderer";
 import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 
+import { localPathFromFileUrl } from "./file-url-path";
 import { resolveInvoiceCoreAsset } from "./resolve-invoice-core-asset";
 
 /**
@@ -31,8 +31,8 @@ function resolveVendoredFontFile(fontFileName: string): string {
   const url =
     VENDORED_FONT_URLS[fontFileName as keyof typeof VENDORED_FONT_URLS];
   if (url) {
-    const fromUrl = fileURLToPath(url);
-    if (existsSync(fromUrl)) {
+    const fromUrl = localPathFromFileUrl(url);
+    if (fromUrl && existsSync(fromUrl)) {
       return fromUrl;
     }
   }
