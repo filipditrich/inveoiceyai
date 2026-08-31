@@ -58,6 +58,7 @@ import {
   appearanceFromPicker,
   findLookDocument,
   looksForPicker,
+  resolvePresentLookRef,
   type LegacyAccentColor,
   type LookDocument,
   type LookRef,
@@ -70,7 +71,7 @@ import {
   ExternalLinkIcon,
   FileCheck2Icon,
   FileTextIcon,
-  LayoutTemplateIcon,
+  Rows3Icon,
   ListChecksIcon,
   MessageSquareTextIcon,
   PercentIcon,
@@ -438,17 +439,34 @@ export function InvoiceBuilderForm({
         issuers.map((issuer) => issuer.id),
       )
     ) {
-      form.reset({
+      const look = resolvePresentLookRef(
+        restored.lookId && restored.lookVersion
+          ? { id: restored.lookId, version: restored.lookVersion }
+          : undefined,
+        defaultLook,
+        workspaceLooks,
+      );
+      const next = {
         ...restored,
-        lookId: restored.lookId ?? defaultLook.id,
-        lookVersion: restored.lookVersion ?? defaultLook.version,
+        lookId: look.id,
+        lookVersion: look.version,
         accentKey: restored.accentKey ?? "default",
         showStamp: restored.showStamp ?? lookTheme?.showStamp ?? true,
         showSignature:
           restored.showSignature ?? lookTheme?.showSignature ?? true,
         showQr: restored.showQr ?? lookTheme?.showQr ?? true,
         showNotesBlock: restored.showNotesBlock ?? lookTheme?.showNotes ?? true,
-      });
+      };
+      form.reset(next);
+      if (
+        look.id !== restored.lookId ||
+        look.version !== restored.lookVersion
+      ) {
+        saveRecoveredInvoiceDraft(window.sessionStorage, {
+          context: { workspaceId, issuerId: firstIssuer.id },
+          value: next,
+        });
+      }
       setRecoveredDraft(true);
       emitProductEvent("invoice_draft_recovered", {
         creationEntry: "structured",
@@ -1328,7 +1346,7 @@ export function InvoiceBuilderForm({
 
         <FormSection
           description={t("sectionLookDescription")}
-          icon={<LayoutTemplateIcon />}
+          icon={<Rows3Icon />}
           title={t("sectionLook")}
         >
           <LookPicker
@@ -1341,8 +1359,12 @@ export function InvoiceBuilderForm({
               version: item.version,
               name: item.name,
               origin: item.origin,
+              layout: item.layout,
+              accent: item.theme.accent,
+              paper: item.theme.paper,
             }))}
             looksApply={looksApply}
+            manageHref="/settings/workspace/looks"
             onChange={(next) => {
               const document = findLookDocument(
                 next.id,

@@ -7,7 +7,12 @@ const enabled = Boolean(process.env.INVOICEY_E2E_AUTH_STORAGE_STATE);
 // Session storage authenticates only; this explicit ID binds the detail test
 // to a deterministic, pre-seeded issued invoice without creating any data.
 const seededInvoiceId = process.env.INVOICEY_E2E_SEEDED_INVOICE_ID;
-const routes = ["/invoices/new", "/payments", "/dashboard"];
+const routes = [
+  "/invoices/new",
+  "/payments",
+  "/dashboard",
+  "/settings/workspace/looks",
+];
 
 async function navigateWithSidebar(
   page: import("@playwright/test").Page,

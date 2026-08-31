@@ -20,6 +20,7 @@ export {
   defaultLookRef,
   lookRefForNewDraft,
   resolveDraftLookRef,
+  resolvePresentLookRef,
   withoutLookSnapshot,
 } from "./issue";
 export {
@@ -27,7 +28,12 @@ export {
   compareLookSemver,
   isReservedLookId,
 } from "./version";
-export { versionBumpForLookChange, workspaceLookFrom } from "./workspace";
+export {
+  lookContentEquals,
+  lookSlugFromName,
+  versionBumpForLookChange,
+  workspaceLookFrom,
+} from "./workspace";
 export {
   ACCENT_COLOR_HEX,
   AppearanceOverrideSchema,

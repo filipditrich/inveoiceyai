@@ -17,10 +17,13 @@ import {
   attachLookSnapshot,
   bumpLookVersion,
   findLookDocument,
+  lookContentEquals,
   lookRefForNewDraft,
+  lookSlugFromName,
   looksForPicker,
   resolveDraftLookRef,
   resolveLookDocument,
+  resolvePresentLookRef,
   validateLookDocument,
   validateLookForInvoice,
   versionBumpForLookChange,
@@ -335,6 +338,47 @@ describe("workspace looks", () => {
     const listed = looksForPicker([clean]);
     expect(listed.some((look) => look.id === "clean")).toBe(true);
     expect(listed.some((look) => look.id === CLASSIC_LOOK_ID)).toBe(true);
+    expect(
+      looksForPicker([], { id: "clean", version: "1.0.0" }).some(
+        (look) => look.id === "clean",
+      ),
+    ).toBe(false);
+  });
+
+  it("keeps a present look and falls back when the catalog row is gone", () => {
+    expect(
+      resolvePresentLookRef(
+        { id: "clean", version: "1.0.0" },
+        { id: CLASSIC_LOOK_ID, version: CLASSIC_LOOK_VERSION },
+        [clean],
+      ),
+    ).toEqual({ id: "clean", version: "1.0.0" });
+    expect(
+      resolvePresentLookRef(
+        { id: "clean", version: "1.0.0" },
+        { id: CLASSIC_LOOK_ID, version: CLASSIC_LOOK_VERSION },
+      ),
+    ).toEqual({ id: CLASSIC_LOOK_ID, version: CLASSIC_LOOK_VERSION });
+    expect(
+      resolvePresentLookRef(undefined, {
+        id: MINIMAL_LOOK_ID,
+        version: "1.0.0",
+      }),
+    ).toEqual({ id: MINIMAL_LOOK_ID, version: "1.0.0" });
+  });
+
+  it("slugs a display name and ignores reserved checks", () => {
+    expect(lookSlugFromName("Clean Invoice")).toBe("clean-invoice");
+    expect(lookSlugFromName("Čistý vzhled")).toBe("cisty-vzhled");
+    expect(lookSlugFromName("2026 look")).toBe("n-2026-look");
+    expect(lookSlugFromName("???")).toBe("");
+  });
+
+  it("treats identical name, layout, and theme as an unchanged look", () => {
+    expect(lookContentEquals(clean, { ...clean, version: "9.9.9" })).toBe(true);
+    expect(
+      lookContentEquals(clean, { ...clean, name: "Other", version: "1.0.0" }),
+    ).toBe(false);
   });
 
   it("bumps patch for theme and minor for layout", () => {

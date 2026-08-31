@@ -13,6 +13,7 @@ import {
   findLookDocument,
   getFirstPartyLook,
   LookDocumentSchema,
+  lookContentEquals,
   lookDocumentIsValid,
   versionBumpForLookChange,
   workspaceLookFrom,
@@ -118,6 +119,9 @@ export async function saveWorkspaceLookAction(input: {
     .sort((a, b) => compareLookSemver(b.version, a.version))[0];
   if (!previous) {
     return { ok: false, errorCode: "invalid_look" };
+  }
+  if (lookContentEquals(previous, parsed.data)) {
+    return { ok: true, look: previous };
   }
   const version = bumpLookVersion(
     previous.version,

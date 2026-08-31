@@ -3,6 +3,7 @@
 import {
   LOOK_BLOCKS,
   LookDocumentSchema,
+  lookContentEquals,
   validateLookDocument,
   type LookBand,
   type LookBlockId,
@@ -16,10 +17,13 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { saveWorkspaceLookAction } from "@/actions/workspace-looks";
+import { selectClassName } from "@/components/invoices/field";
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import sampleInvoice from "@/lib/demo-sample-invoice.json";
 import { cn } from "@/lib/utils";
@@ -44,6 +48,7 @@ export function LookDocumentEditor({ initial }: { initial: LookDocument }) {
   const tErrors = useTranslations("App.workspaceErrors");
   const router = useRouter();
   const [look, setLook] = useState(() => cloneLook(initial));
+  const [saved, setSaved] = useState(() => cloneLook(initial));
   const [view, setView] = useState<"structure" | "json" | "preview">(
     "structure",
   );
@@ -57,6 +62,7 @@ export function LookDocumentEditor({ initial }: { initial: LookDocument }) {
   const previewUrlRef = useRef<string | null>(null);
 
   const issues = useMemo(() => validateLookDocument(look), [look]);
+  const dirty = !lookContentEquals(look, saved);
   const previewable = useMemo(() => previewInvoice(look), [look]);
   const previewError = previewable ? fetchError : t("previewInvalid");
 
@@ -144,40 +150,34 @@ export function LookDocumentEditor({ initial }: { initial: LookDocument }) {
         return;
       }
       commitLook(result.look);
+      setSaved(cloneLook(result.look));
       toast.success(t("saved", { version: result.look.version }));
       router.refresh();
     });
   };
 
+  const preview = (
+    <InvoicePdfPreview
+      className="w-full"
+      error={previewError}
+      url={previewUrl}
+    />
+  );
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        {(
-          [
-            ["structure", t("viewStructure")],
-            ["json", t("viewJson")],
-            ["preview", t("viewPreview")],
-          ] as const
-        ).map(([id, label]) => (
-          <button
-            key={id}
-            aria-pressed={view === id}
-            className={cn(
-              "rounded-md border px-3 py-1.5 text-sm",
-              view === id
-                ? "border-primary bg-primary/5"
-                : "border-border hover:bg-muted/40",
-            )}
-            onClick={() => setView(id)}
-            type="button"
-          >
-            {label}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant="outline">
+          {t("currentVersion", { version: saved.version })}
+        </Badge>
+        {dirty ? (
+          <span className="text-muted-foreground text-xs">{t("unsaved")}</span>
+        ) : null}
         <Button
           className="ml-auto"
-          disabled={pending || issues.length > 0}
+          disabled={pending || issues.length > 0 || !dirty}
           onClick={save}
+          type="button"
         >
           {pending ? t("saving") : t("save")}
         </Button>
@@ -189,31 +189,52 @@ export function LookDocumentEditor({ initial }: { initial: LookDocument }) {
           ))}
         </ul>
       ) : null}
-      {view === "structure" ? (
-        <StructureEditor look={look} onChange={commitLook} />
-      ) : null}
-      {view === "json" ? (
-        <div className="space-y-2">
-          <Textarea
-            className="min-h-96 font-mono text-xs"
-            onChange={(event) => setJsonText(event.target.value)}
-            value={jsonText}
-          />
-          {jsonError ? (
-            <p className="text-destructive text-sm">{jsonError}</p>
-          ) : null}
-          <Button onClick={applyJson} type="button" variant="outline">
-            {t("applyJson")}
-          </Button>
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)] lg:items-start lg:gap-6">
+        <Tabs
+          className="min-w-0"
+          onValueChange={(next) => {
+            if (next === "structure" || next === "json" || next === "preview") {
+              setView(next);
+            }
+          }}
+          value={view}
+        >
+          <TabsList>
+            <TabsTrigger value="structure">{t("viewStructure")}</TabsTrigger>
+            <TabsTrigger value="json">{t("viewJson")}</TabsTrigger>
+            <TabsTrigger className="lg:hidden" value="preview">
+              {t("viewPreview")}
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent className="pt-4" value="structure">
+            <StructureEditor look={look} onChange={commitLook} />
+          </TabsContent>
+          <TabsContent className="pt-4" value="json">
+            <div className="space-y-2">
+              <Textarea
+                className="min-h-96 font-mono text-xs"
+                onChange={(event) => setJsonText(event.target.value)}
+                value={jsonText}
+              />
+              {jsonError ? (
+                <p className="text-destructive text-sm">{jsonError}</p>
+              ) : null}
+              <Button onClick={applyJson} type="button" variant="outline">
+                {t("applyJson")}
+              </Button>
+            </div>
+          </TabsContent>
+          <TabsContent className="pt-4 lg:hidden" value="preview">
+            {preview}
+          </TabsContent>
+        </Tabs>
+        <div className="hidden lg:sticky lg:top-24 lg:block">
+          <p className="text-muted-foreground mb-2 text-xs">
+            {t("viewPreview")}
+          </p>
+          {preview}
         </div>
-      ) : null}
-      {view === "preview" ? (
-        <InvoicePdfPreview
-          className="mx-auto max-w-xl"
-          error={previewError}
-          url={previewUrl}
-        />
-      ) : null}
+      </div>
     </div>
   );
 }
@@ -264,18 +285,34 @@ function StructureEditor({
         ).map(([key, value]) => (
           <div key={key} className="space-y-1">
             <Label htmlFor={`theme-${key}`}>{t(`theme.${key}`)}</Label>
-            <Input
-              id={`theme-${key}`}
-              onChange={(event) => updateTheme({ [key]: event.target.value })}
-              type="color"
-              value={value}
-            />
+            <div className="flex gap-2">
+              <Input
+                aria-label={t(`theme.${key}`)}
+                className="h-9 w-12 shrink-0 cursor-pointer p-1"
+                id={`theme-${key}`}
+                onChange={(event) => updateTheme({ [key]: event.target.value })}
+                type="color"
+                value={value}
+              />
+              <Input
+                className="font-mono"
+                defaultValue={value}
+                key={value}
+                onBlur={(event) => {
+                  const next = event.target.value.trim();
+                  if (/^#[0-9a-fA-F]{6}$/u.test(next)) {
+                    updateTheme({ [key]: next.toLowerCase() });
+                  }
+                }}
+                spellCheck={false}
+              />
+            </div>
           </div>
         ))}
         <div className="space-y-1">
           <Label htmlFor="type-scale">{t("theme.typeScale")}</Label>
           <select
-            className="border-input h-9 w-full rounded-md border bg-transparent px-2 text-sm"
+            className={selectClassName()}
             id="type-scale"
             onChange={(event) =>
               updateTheme({
@@ -292,7 +329,7 @@ function StructureEditor({
         <div className="space-y-1">
           <Label htmlFor="density">{t("theme.density")}</Label>
           <select
-            className="border-input h-9 w-full rounded-md border bg-transparent px-2 text-sm"
+            className={selectClassName()}
             id="density"
             onChange={(event) =>
               updateTheme({
@@ -440,7 +477,7 @@ function BandEditor({
         </p>
         {band.type === "row" ? (
           <select
-            className="border-input h-8 rounded-md border bg-transparent px-2 text-xs"
+            className={cn(selectClassName(), "h-8 text-xs")}
             disabled={locked}
             onChange={(event) =>
               onChange({
@@ -543,7 +580,7 @@ function SlotList({
       {slots.map((slot, index) => (
         <div key={`${slot.block}-${String(index)}`} className="flex gap-2">
           <select
-            className="border-input h-8 flex-1 rounded-md border bg-transparent px-2 text-xs"
+            className={cn(selectClassName(), "h-8 flex-1 text-xs")}
             disabled={disabled}
             onChange={(event) => {
               const next = [...slots];
@@ -563,7 +600,7 @@ function SlotList({
           </select>
           {slot.block === "payment" ? (
             <select
-              className="border-input h-8 rounded-md border bg-transparent px-2 text-xs"
+              className={cn(selectClassName(), "h-8 w-auto text-xs")}
               disabled={disabled}
               onChange={(event) => {
                 const next = [...slots];

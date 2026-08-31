@@ -120,8 +120,12 @@ export function WorkspaceSettingsPanel({
               version: item.version,
               name: item.name,
               origin: item.origin,
+              layout: item.layout,
+              accent: item.theme.accent,
+              paper: item.theme.paper,
             }))}
             looksApply={looksApply}
+            manageHref="/settings/workspace/looks"
             onChange={(next) => {
               if (!canEdit || pending) return;
               const previous = look;
@@ -155,6 +159,12 @@ export function WorkspaceSettingsPanel({
                 <LoaderCircleIcon className="size-4 animate-spin" />
               ) : null}
               {pending ? t("saving") : t("save")}
+            </Button>
+            <Button
+              variant="ghost"
+              render={<Link href="/settings/workspace/looks" />}
+            >
+              {t("looksLink")}
             </Button>
             <Button
               variant="ghost"
