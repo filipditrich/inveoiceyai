@@ -6,8 +6,8 @@ import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import { requireWorkspace } from "@/lib/auth/session";
 import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import {
+  loadLookCatalog,
   loadWorkspaceDefaultLook,
-  loadWorkspaceLookDocuments,
 } from "@/lib/load-workspace-look";
 import { InvoiceSchema } from "@invoicey/invoice-core/schema";
 import {
@@ -69,7 +69,7 @@ export default async function InvoiceEditPage({
       }),
       requireEntitlements(),
       loadWorkspaceDefaultLook(workspaceId),
-      loadWorkspaceLookDocuments(workspaceId),
+      loadLookCatalog(workspaceId),
     ]);
 
   const inv = payload.data;

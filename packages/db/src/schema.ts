@@ -249,6 +249,29 @@ export const workspaceLooks = pgTable(
   ],
 );
 
+/** Published community look documents (Plan 29). Unpublished rows stay for slug ownership. */
+export const communityLooks = pgTable(
+  "community_looks",
+  {
+    id: uuid("id").primaryKey(),
+    lookId: text("look_id").notNull(),
+    version: text("version").notNull(),
+    document: jsonb("document").notNull().$type<Record<string, unknown>>(),
+    publisherWorkspaceId: text("publisher_workspace_id").notNull(),
+    unpublishedAt: timestamp("unpublished_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("community_looks_look_version").on(t.lookId, t.version),
+    index("community_looks_publisher_idx").on(t.publisherWorkspaceId),
+  ],
+);
+
 /** 1:1 schedule for a template. `last_invoice_id` has no FK (cycle with invoices). */
 export const recurringSchedules = pgTable(
   "recurring_schedules",

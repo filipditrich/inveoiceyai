@@ -16,8 +16,10 @@ import {
   MINIMAL_LOOK_ID,
   attachLookSnapshot,
   bumpLookVersion,
+  communityLookFrom,
   findLookDocument,
   lookContentEquals,
+  lookIsPublishable,
   lookRefForNewDraft,
   lookSlugFromName,
   looksForPicker,
@@ -439,6 +441,103 @@ describe("workspace looks", () => {
         }),
         "catalog",
         [clean],
+      ),
+    ).toEqual({ ok: false, error: "invalid_look" });
+  });
+});
+
+describe("community looks", () => {
+  const workspaceLook = workspaceLookFrom(MINIMAL_LOOK_1_0_0, {
+    id: "clean",
+    name: "Clean",
+  });
+  if (!workspaceLook.ok) {
+    throw new Error("fixture");
+  }
+  const clean = workspaceLook.look;
+  const published = communityLookFrom(clean);
+  if (!published.ok) {
+    throw new Error("fixture");
+  }
+  const community = published.look;
+
+  it("copies a workspace look as community origin and refuses first-party", () => {
+    expect(community.origin).toBe("community");
+    expect(community.id).toBe("clean");
+    expect(community.version).toBe("1.0.0");
+    expect(LookDocumentSchema.parse(community).origin).toBe("community");
+    expect(communityLookFrom(CLASSIC_LOOK_1_0_0)).toEqual({
+      ok: false,
+      error: "not_workspace_look",
+    });
+  });
+
+  it("refuses publish when payment is missing and accepts Classic-shaped looks", () => {
+    expect(lookIsPublishable(community)).toEqual([]);
+    const withoutPayment: LookDocument = {
+      ...community,
+      layout: {
+        bands: community.layout.bands
+          .map((band) => {
+            if (band.type === "stack") {
+              return {
+                ...band,
+                slots: band.slots.filter((slot) => slot.block !== "payment"),
+              };
+            }
+            if (band.type === "row") {
+              return {
+                ...band,
+                start: band.start.filter((slot) => slot.block !== "payment"),
+                end: band.end.filter((slot) => slot.block !== "payment"),
+              };
+            }
+            return band;
+          })
+          .filter((band) =>
+            band.type === "footer"
+              ? true
+              : band.type === "stack"
+                ? band.slots.length > 0
+                : band.start.length > 0 && band.end.length > 0,
+          ),
+      },
+    };
+    expect(
+      lookIsPublishable(withoutPayment).some((issue) =>
+        issue.path.includes("payment"),
+      ),
+    ).toBe(true);
+  });
+
+  it("lists a community look unless the workspace already has that id", () => {
+    const listed = looksForPicker([community]);
+    expect(listed.some((look) => look.origin === "community")).toBe(true);
+    const withOwn = looksForPicker([clean, community]);
+    expect(withOwn.filter((look) => look.id === "clean")).toHaveLength(1);
+    expect(withOwn.find((look) => look.id === "clean")?.origin).toBe(
+      "workspace",
+    );
+  });
+
+  it("snapshots a community look at issue and refuses a missing version", () => {
+    const invoice = parseInvoice({
+      ...domesticFixture,
+      look: { id: "clean", version: "1.0.0" },
+    });
+    const attached = attachLookSnapshot(invoice, "catalog", [community]);
+    expect(attached.ok).toBe(true);
+    if (attached.ok) {
+      expect(attached.invoice.lookSnapshot?.origin).toBe("community");
+    }
+    expect(
+      attachLookSnapshot(
+        parseInvoice({
+          ...domesticFixture,
+          look: { id: "clean", version: "1.0.1" },
+        }),
+        "catalog",
+        [community],
       ),
     ).toEqual({ ok: false, error: "invalid_look" });
   });

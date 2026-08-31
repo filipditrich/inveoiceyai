@@ -64,7 +64,11 @@ export function looksForPicker(
   const workspaceLatest = latestLooksById(
     extra.filter((look) => look.origin === "workspace"),
   );
-  const listed = [...firstParty, ...workspaceLatest];
+  const workspaceIds = new Set(workspaceLatest.map((look) => look.id));
+  const communityLatest = latestLooksById(
+    extra.filter((look) => look.origin === "community"),
+  ).filter((look) => !workspaceIds.has(look.id));
+  const listed = [...firstParty, ...workspaceLatest, ...communityLatest];
   if (!selected) return listed;
   const already = listed.some(
     (look) => look.id === selected.id && look.version === selected.version,

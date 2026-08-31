@@ -6,6 +6,7 @@ import {
   type LookDocument,
   type LookRef,
 } from "@invoicey/invoice-core/looks";
+import { loadWorkspaceLookContext } from "@invoicey/invoice-tools/ops";
 import { eq } from "drizzle-orm";
 
 export async function loadWorkspaceDefaultLook(
@@ -33,4 +34,12 @@ export async function loadWorkspaceLookDocuments(
     if (parsed.success) looks.push(parsed.data);
   }
   return looks;
+}
+
+/** Workspace looks plus published community looks — picker and issue resolve. */
+export async function loadLookCatalog(
+  workspaceId: string,
+): Promise<LookDocument[]> {
+  const context = await loadWorkspaceLookContext(db, workspaceId);
+  return context.catalog;
 }

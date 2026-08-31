@@ -830,6 +830,11 @@ declare const messages: {
           "deleted": "Vzhled odebrán",
           "lockedHint": "Workspace vzhled vyžaduje katalog vzhledů. Upgradujte tarif, nebo požádejte vlastníka.",
           "editorDescription": "Úprava {id}. Uložení zapíše novou verzi; staré vystavené faktury si nechají snapshot.",
+          "publish": "Zveřejnit v katalogu",
+          "unpublish": "Zrušit zveřejnění",
+          "published": "Zveřejněno v komunitním katalogu",
+          "unpublished": "Odebráno z komunitního katalogu",
+          "publishedBadge": "Zveřejněno",
           "backToList": "Všechny workspace vzhledy",
           "viewStructure": "Struktura",
           "viewJson": "JSON",
@@ -1060,7 +1065,9 @@ declare const messages: {
       "invalid_look_id": "Použijte slug malými písmeny, například cista-faktura",
       "slug_taken": "Tento slug vzhledu v workspace už existuje",
       "look_in_use": "Nejdřív změňte výchozí vzhled workspace, pak tento odeberte",
-      "save_failed": "Vzhled se nepodařilo uložit"
+      "save_failed": "Vzhled se nepodařilo uložit",
+      "community_slug_taken": "Jiný workspace už tento slug vzhledu zveřejnil",
+      "look_not_publishable": "Tento vzhled nelze zveřejnit, dokud není platný vzhled faktury"
     },
     "palette": {
       "trigger": "Hledat…",
@@ -2321,7 +2328,8 @@ declare const messages: {
     "manageLooks": "Upravit workspace vzhledy",
     "origin": {
       "firstParty": "Invoicey",
-      "workspace": "Workspace"
+      "workspace": "Workspace",
+      "community": "Komunita"
     },
     "lockedSelected": "Tento vzhled na vašem tarifu nelze vystavit. <upgrade>Změňte tarif v nastavení workspace</upgrade>.",
     "catalog": {
@@ -2333,6 +2341,9 @@ declare const messages: {
       },
       "workspace": {
         "description": "Vzhled, který tento workspace uložil v editoru."
+      },
+      "community": {
+        "description": "Vzhled, který jiný workspace zveřejnil v katalogu."
       }
     }
   },
