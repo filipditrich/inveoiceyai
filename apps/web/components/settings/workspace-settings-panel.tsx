@@ -18,7 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { WorkspaceRole } from "@/lib/auth/workspace-types";
 import {
-  listFirstPartyLooks,
+  looksForPicker,
+  type LookDocument,
   type LookRef,
 } from "@invoicey/invoice-core/looks";
 import { LoaderCircleIcon } from "lucide-react";
@@ -36,6 +37,7 @@ export function WorkspaceSettingsPanel({
   uploadConfigured,
   looksApply,
   defaultLook,
+  workspaceLooks = [],
 }: {
   name: string;
   slug: string;
@@ -44,6 +46,7 @@ export function WorkspaceSettingsPanel({
   uploadConfigured: boolean;
   looksApply: "classic" | "catalog";
   defaultLook: LookRef;
+  workspaceLooks?: readonly LookDocument[];
 }) {
   const t = useTranslations("App.settings.workspace");
   const tErrors = useTranslations("App.workspaceErrors");
@@ -112,10 +115,11 @@ export function WorkspaceSettingsPanel({
           <LookPicker
             allowLockedPreview={false}
             disabled={!canEdit || pending}
-            looks={listFirstPartyLooks().map((item) => ({
+            looks={looksForPicker(workspaceLooks, look).map((item) => ({
               id: item.id,
               version: item.version,
               name: item.name,
+              origin: item.origin,
             }))}
             looksApply={looksApply}
             onChange={(next) => {

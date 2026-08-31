@@ -778,7 +778,8 @@
         "referrals": "Referrals",
         "apiKeys": "API Keys",
         "bankConnections": "Bank connections",
-        "integrations": "Integrations"
+        "integrations": "Integrations",
+        "looks": "Looks"
       },
       "navDescriptions": {
         "account": "Profile, theme, and language",
@@ -789,7 +790,8 @@
         "referrals": "Invite friends to Invoicey",
         "apiKeys": "Access for automation",
         "bankConnections": "Read-only payment feeds",
-        "integrations": "Slack, MCP, and other tools"
+        "integrations": "Slack, MCP, and other tools",
+        "looks": "Workspace invoice looks"
       },
       "workspace": {
         "pageTitle": "Workspace",
@@ -800,6 +802,53 @@
         "lookLabel": "Default invoice look",
         "lookHint": "New drafts inherit this look. Issued invoices keep the look frozen at issue.",
         "lookSaved": "Default look saved",
+        "looks": {
+          "pageTitle": "Looks",
+          "pageDescription": "Save a workspace look from Classic or Minimal, then edit layout and theme. Issued invoices keep the snapshot from issue time.",
+          "defaultLookLink": "Set the default look for new drafts",
+          "createTitle": "New workspace look",
+          "createHint": "Duplicates a first-party look. You can change bands and theme after that.",
+          "name": "Name",
+          "slug": "Slug",
+          "source": "Start from",
+          "create": "Create look",
+          "creating": "Creating…",
+          "edit": "Edit",
+          "remove": "Remove",
+          "deleted": "Look removed",
+          "lockedHint": "Catalog looks are required to save a workspace look. Upgrade, or ask an owner.",
+          "editorDescription": "Editing {id}. Save writes a new version; old issued invoices keep their snapshot.",
+          "backToList": "All workspace looks",
+          "viewStructure": "Structure",
+          "viewJson": "JSON",
+          "viewPreview": "Preview",
+          "save": "Save new version",
+          "saving": "Saving…",
+          "saved": "Saved as {version}",
+          "applyJson": "Apply JSON",
+          "jsonInvalid": "That JSON is not valid.",
+          "jsonMustKeepId": "Keep the same slug and a valid look document.",
+          "previewInvalid": "This look cannot preview until it is a valid look document.",
+          "bands": "Bands",
+          "addStack": "Add stack",
+          "addRow": "Add row",
+          "addBlock": "Add block",
+          "bandN": "Band {n}",
+          "theme": {
+            "paper": "Paper",
+            "ink": "Ink",
+            "muted": "Muted",
+            "line": "Line",
+            "accent": "Accent",
+            "typeScale": "Type scale",
+            "density": "Density",
+            "logoMaxHeightPt": "Logo max height (pt)",
+            "showStamp": "Show stamp",
+            "showSignature": "Show signature",
+            "showQr": "Show QR",
+            "showNotes": "Show notes"
+          }
+        },
         "logoLabel": "Logo",
         "logoHint": "Shown in the workspace switcher. Invoice PDFs still use each business’s logo.",
         "logoSaved": "Workspace logo saved",
@@ -825,7 +874,7 @@
             "recurring": "Recurring drafts",
             "historicalImport": "Historical import",
             "agents": "Slack, MCP and Invoicey",
-            "catalogLooks": "Catalog looks (Minimal)"
+            "catalogLooks": "Catalog looks (Minimal and workspace builder)"
           }
         }
       },
@@ -994,7 +1043,12 @@
       "invite_missing_workspace": "Invitation is missing a workspace",
       "forbidden": "You do not have permission for this action",
       "look_not_entitled": "Your plan cannot apply that look",
-      "invalid_look": "That look is not available"
+      "invalid_look": "That look is not available",
+      "reserved_look_id": "classic and minimal are reserved first-party looks",
+      "invalid_look_id": "Use a lowercase slug such as clean-invoice",
+      "slug_taken": "That look slug already exists in this workspace",
+      "look_in_use": "Change the workspace default look before removing this one",
+      "save_failed": "Could not save that look"
     },
     "palette": {
       "trigger": "Search…",
@@ -2258,6 +2312,9 @@
       },
       "minimal": {
         "description": "Title first, compact type, blue accent. A different layout, not a denser Classic."
+      },
+      "workspace": {
+        "description": "A look this workspace saved in the builder."
       }
     }
   },

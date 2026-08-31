@@ -41,6 +41,7 @@ export type BuilderInvoiceInput = {
   paymentMethod?: Invoice["payment"]["method"];
   pricesIncludeVat?: boolean;
   look?: Invoice["look"];
+  lookSnapshot?: Invoice["lookSnapshot"];
   appearance?: Invoice["appearance"];
 };
 
@@ -139,6 +140,7 @@ export function buildInvoicePayload(input: BuilderInvoiceInput): Invoice {
     totals,
     ...(input.notes ? { notes: input.notes } : {}),
     ...(input.look ? { look: input.look } : {}),
+    ...(input.lookSnapshot ? { lookSnapshot: input.lookSnapshot } : {}),
     ...(input.appearance ? { appearance: input.appearance } : {}),
   };
 

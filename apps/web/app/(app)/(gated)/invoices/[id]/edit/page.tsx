@@ -5,11 +5,14 @@ import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions"
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import { requireWorkspace } from "@/lib/auth/session";
 import { requireEntitlements } from "@/lib/entitlements/entitlements";
-import { loadWorkspaceDefaultLook } from "@/lib/load-workspace-look";
+import {
+  loadWorkspaceDefaultLook,
+  loadWorkspaceLookDocuments,
+} from "@/lib/load-workspace-look";
 import { InvoiceSchema } from "@invoicey/invoice-core/schema";
 import {
   ACCENT_COLOR_HEX,
-  getFirstPartyLook,
+  findLookDocument,
   type LegacyAccentColor,
 } from "@invoicey/invoice-core/looks";
 import { invoices } from "@invoicey/db";
@@ -55,21 +58,27 @@ export default async function InvoiceEditPage({
     notFound();
   }
 
-  const [issuers, clients, lastInvoice, plan, defaultLook] = await Promise.all([
-    loadIssuerOptions(workspaceId),
-    loadClientOptions(workspaceId),
-    loadLastInvoiceSuggestions(workspaceId, {
-      issuerId: row.issuerId,
-      clientId: row.clientId,
-      excludeId: id,
-    }),
-    requireEntitlements(),
-    loadWorkspaceDefaultLook(workspaceId),
-  ]);
+  const [issuers, clients, lastInvoice, plan, defaultLook, workspaceLooks] =
+    await Promise.all([
+      loadIssuerOptions(workspaceId),
+      loadClientOptions(workspaceId),
+      loadLastInvoiceSuggestions(workspaceId, {
+        issuerId: row.issuerId,
+        clientId: row.clientId,
+        excludeId: id,
+      }),
+      requireEntitlements(),
+      loadWorkspaceDefaultLook(workspaceId),
+      loadWorkspaceLookDocuments(workspaceId),
+    ]);
 
   const inv = payload.data;
   const look = inv.look ?? defaultLook;
-  const lookTheme = getFirstPartyLook(look.id, look.version)?.theme;
+  const lookTheme = findLookDocument(
+    look.id,
+    look.version,
+    workspaceLooks,
+  )?.theme;
   const appearance = inv.appearance;
   const accentEntry = appearance?.accent
     ? (Object.entries(ACCENT_COLOR_HEX) as [LegacyAccentColor, string][]).find(
@@ -103,6 +112,7 @@ export default async function InvoiceEditPage({
         lastInvoice={lastInvoice}
         looksApply={plan.entitlements.looks.apply}
         mode="edit"
+        workspaceLooks={workspaceLooks}
         workspaceId={workspaceId}
         initial={{
           issuerId: row.issuerId,

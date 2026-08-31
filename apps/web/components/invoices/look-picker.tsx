@@ -11,6 +11,7 @@ export type LookCatalogItem = {
   id: string;
   version: string;
   name: string;
+  origin?: "first_party" | "workspace";
 };
 
 export function LookPicker({
@@ -62,9 +63,11 @@ export function LookPicker({
               </div>
               <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
                 {t(
-                  look.id === "minimal"
-                    ? "catalog.minimal.description"
-                    : "catalog.classic.description",
+                  look.origin === "workspace"
+                    ? "catalog.workspace.description"
+                    : look.id === "minimal"
+                      ? "catalog.minimal.description"
+                      : "catalog.classic.description",
                 )}
               </p>
               {!entitled ? (

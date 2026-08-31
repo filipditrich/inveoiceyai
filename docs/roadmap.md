@@ -685,12 +685,24 @@ by area, no marking of permissions the plan does not include, no bulk edit.
 
 **Out of 27:** builder JSON editor, workspace/community origins, publish (S1/S2).
 
+## Plan 28 — PDF looks S1 (workspace builder)
+
+**Goal:** Workspace-origin looks in the database; Pro builder (structured + JSON + preview) edits the same look document.
+
+**Spec:** [`specs/pdf-looks-builder.md`](./specs/pdf-looks-builder.md)
+
+- [x] `origin: workspace`, catalog lookup, versioned save (patch/minor)
+- [x] `workspace_looks` table; issue/draft/default resolve from workspace catalog
+- [x] Settings list + editor; picker lists latest workspace looks
+
+**Out of 28:** community publish (S2).
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:
 
 - Dual-label bilingual invoices (CS + EN on one PDF)
-- PDF look builder and community catalog (Plan 27 S1/S2)
+- PDF look community catalog (Plan 27 S2)
 - Czech OSVČ lifecycle companion (start, obligations, insights, year-end close,
   and guided portal filings) — see
   [`research/osvc-companion.md`](./research/osvc-companion.md)

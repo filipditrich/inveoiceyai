@@ -15,11 +15,16 @@ import {
   MINIMAL_LOOK_1_0_0,
   MINIMAL_LOOK_ID,
   attachLookSnapshot,
+  bumpLookVersion,
+  findLookDocument,
   lookRefForNewDraft,
+  looksForPicker,
   resolveDraftLookRef,
   resolveLookDocument,
   validateLookDocument,
   validateLookForInvoice,
+  versionBumpForLookChange,
+  workspaceLookFrom,
   type LookDocument,
 } from "./index";
 
@@ -37,6 +42,21 @@ describe("first-party looks", () => {
     expect(LookDocumentSchema.parse(MINIMAL_LOOK_1_0_0).id).toBe("minimal");
     expect(validateLookDocument(CLASSIC_LOOK_1_0_0)).toEqual([]);
     expect(validateLookDocument(MINIMAL_LOOK_1_0_0)).toEqual([]);
+  });
+
+  it("rejects unknown fields so JSON cannot smuggle renderer keys", () => {
+    expect(
+      LookDocumentSchema.safeParse({
+        ...CLASSIC_LOOK_1_0_0,
+        font: "Comic Sans",
+      }).success,
+    ).toBe(false);
+    expect(
+      LookDocumentSchema.safeParse({
+        ...CLASSIC_LOOK_1_0_0,
+        theme: { ...CLASSIC_LOOK_1_0_0.theme, shadow: true },
+      }).success,
+    ).toBe(false);
   });
 
   it("returns a look only for an exact id and version", () => {
@@ -172,6 +192,20 @@ describe("resolveLookDocument", () => {
     expect(resolveLookDocument(invoice).name).toBe("Snapshotted Minimal");
   });
 
+  it("uses an extra catalog look before falling back to Classic", () => {
+    const extra = workspaceLookFrom(MINIMAL_LOOK_1_0_0, {
+      id: "clean",
+      name: "Clean",
+    });
+    if (!extra.ok) throw new Error("fixture");
+    const invoice = parseInvoice({
+      ...domesticFixture,
+      look: { id: "clean", version: "1.0.0" },
+    });
+    expect(resolveLookDocument(invoice).id).toBe(CLASSIC_LOOK_ID);
+    expect(resolveLookDocument(invoice, [extra.look]).id).toBe("clean");
+  });
+
   it("falls back to Classic when the look id is unknown", () => {
     const invoice = parseInvoice({
       ...domesticFixture,
@@ -199,6 +233,8 @@ describe("canApplyLook", () => {
     expect(canApplyLook("classic", "minimal")).toBe(false);
     expect(canApplyLook("catalog", "minimal")).toBe(true);
     expect(canApplyLook("catalog", "classic")).toBe(true);
+    expect(canApplyLook("classic", "clean")).toBe(false);
+    expect(canApplyLook("catalog", "clean")).toBe(true);
   });
 });
 
@@ -268,5 +304,98 @@ describe("lookRefForNewDraft / resolveDraftLookRef / attachLookSnapshot", () => 
       ok: false,
       error: "invalid_look",
     });
+  });
+});
+
+describe("workspace looks", () => {
+  const workspaceLook = workspaceLookFrom(MINIMAL_LOOK_1_0_0, {
+    id: "clean",
+    name: "Clean",
+  });
+  if (!workspaceLook.ok) {
+    throw new Error("fixture");
+  }
+  const clean = workspaceLook.look;
+
+  it("copies a first-party look as workspace origin and refuses reserved ids", () => {
+    expect(clean.origin).toBe("workspace");
+    expect(clean.version).toBe("1.0.0");
+    expect(LookDocumentSchema.parse(clean).id).toBe("clean");
+    expect(
+      workspaceLookFrom(CLASSIC_LOOK_1_0_0, { id: "classic", name: "Nope" }),
+    ).toEqual({ ok: false, error: "reserved_look_id" });
+    expect(
+      workspaceLookFrom(CLASSIC_LOOK_1_0_0, { id: "Clean", name: "Nope" }),
+    ).toEqual({ ok: false, error: "invalid_look_id" });
+  });
+
+  it("finds a workspace look in the extra catalog and lists it in the picker", () => {
+    expect(findLookDocument("clean", "1.0.0")).toBeUndefined();
+    expect(findLookDocument("clean", "1.0.0", [clean])?.name).toBe("Clean");
+    const listed = looksForPicker([clean]);
+    expect(listed.some((look) => look.id === "clean")).toBe(true);
+    expect(listed.some((look) => look.id === CLASSIC_LOOK_ID)).toBe(true);
+  });
+
+  it("bumps patch for theme and minor for layout", () => {
+    expect(bumpLookVersion("1.2.3", "patch")).toBe("1.2.4");
+    expect(bumpLookVersion("1.2.3", "minor")).toBe("1.3.0");
+    expect(
+      versionBumpForLookChange(clean, {
+        ...clean,
+        theme: { ...clean.theme, accent: "#111111" },
+      }),
+    ).toBe("patch");
+    expect(
+      versionBumpForLookChange(clean, {
+        ...clean,
+        layout: {
+          bands: [
+            clean.layout.bands[1]!,
+            clean.layout.bands[0]!,
+            ...clean.layout.bands.slice(2),
+          ],
+        },
+      }),
+    ).toBe("minor");
+  });
+
+  it("inherits a workspace default when the catalog contains it", () => {
+    expect(
+      lookRefForNewDraft(
+        "catalog",
+        undefined,
+        { id: "clean", version: "1.0.0" },
+        [clean],
+      ),
+    ).toEqual({ id: "clean", version: "1.0.0" });
+    expect(
+      lookRefForNewDraft("catalog", undefined, {
+        id: "clean",
+        version: "1.0.0",
+      }),
+    ).toEqual({ id: CLASSIC_LOOK_ID, version: CLASSIC_LOOK_VERSION });
+  });
+
+  it("snapshots a workspace look at issue and refuses a missing version", () => {
+    const invoice = parseInvoice({
+      ...domesticFixture,
+      look: { id: "clean", version: "1.0.0" },
+    });
+    const attached = attachLookSnapshot(invoice, "catalog", [clean]);
+    expect(attached.ok).toBe(true);
+    if (attached.ok) {
+      expect(attached.invoice.lookSnapshot?.origin).toBe("workspace");
+    }
+    expect(
+      attachLookSnapshot(
+        parseInvoice({
+          ...domesticFixture,
+          look: { id: "clean", version: "1.0.1" },
+        }),
+        "catalog",
+        [clean],
+      ),
+    ).toEqual({ ok: false, error: "invalid_look" });
   });
 });
