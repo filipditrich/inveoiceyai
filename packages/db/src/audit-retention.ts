@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, lt, sql } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, lt } from "drizzle-orm";
 
 import type { InvoiceyDb } from "./create-db";
 import { resolveEntitlements } from "./entitlements";
@@ -62,7 +62,9 @@ export async function pruneAuditEvents(
       .where(
         and(
           isNotNull(securityAuditEvents.workspaceId),
-          sql`${securityAuditEvents.workspaceId} = ANY(${workspaceIds})`,
+          // `inArray`, not a raw `= ANY(...)`: drizzle expands a JS array into
+          // a row expression `($1, $2, ...)`, which ANY rejects outright.
+          inArray(securityAuditEvents.workspaceId, workspaceIds),
           lt(securityAuditEvents.createdAt, cutoff),
         ),
       )
