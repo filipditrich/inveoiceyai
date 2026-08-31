@@ -862,6 +862,7 @@ declare const messages: {
             "typeScale": "Stupnice písma",
             "density": "Hustota",
             "logoMaxHeightPt": "Max. výška loga (pt)",
+            "stampMaxHeightPt": "Max. výška razítka (pt)",
             "showStamp": "Zobrazit razítko",
             "showSignature": "Zobrazit podpis",
             "showQr": "Zobrazit QR",

@@ -96,8 +96,8 @@ export function validateLookDocument(
   return issues;
 }
 
-function hasPaymentSlot(look: LookDocument): boolean {
-  return collectSlots(look).some((slot) => slot.block === "payment");
+export function lookHasBlock(look: LookDocument, block: LookBlockId): boolean {
+  return collectSlots(look).some((slot) => slot.block === block);
 }
 
 /** Required blocks for this invoice; optional blocks may be absent. */
@@ -106,7 +106,7 @@ export function validateLookForInvoice(
   invoice: Invoice,
 ): LookValidationIssue[] {
   const issues = validateLookDocument(look);
-  if (invoice.payment.method === "transfer" && !hasPaymentSlot(look)) {
+  if (invoice.payment.method === "transfer" && !lookHasBlock(look, "payment")) {
     issues.push({
       path: "slots.payment",
       message: "transfer invoices require a payment block",
@@ -125,7 +125,7 @@ export function lookDocumentIsValid(look: LookDocument): boolean {
  */
 export function lookIsPublishable(look: LookDocument): LookValidationIssue[] {
   const issues = validateLookDocument(look);
-  if (!hasPaymentSlot(look)) {
+  if (!lookHasBlock(look, "payment")) {
     issues.push({
       path: "slots.payment",
       message: "published looks must include a payment block",

@@ -65,6 +65,7 @@ export {
 } from "./schema";
 export {
   lookDocumentIsValid,
+  lookHasBlock,
   lookIsPublishable,
   validateLookDocument,
   validateLookForInvoice,

@@ -30,6 +30,7 @@ const LOOK_BLOCKS = [
   "title",
   "issuer",
   "client",
+  "dates",
   "lines",
   "totals",
   "tax",
@@ -53,6 +54,7 @@ const LookThemeSchema = z.object({
   typeScale: z.enum(["sm", "md", "lg"]),
   density: z.enum(["comfortable", "compact"]),
   logoMaxHeightPt: z.number().min(24).max(96),
+  stampMaxHeightPt: z.number().min(24).max(200).default(88),
   showStamp: z.boolean(),
   showSignature: z.boolean(),
   showQr: z.boolean(),
@@ -106,13 +108,13 @@ const LookDocumentSchema = z.object({
 | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `title`, `issuer`, `client`, `lines`, `totals`, `tax`, `footer` | always                                                                                                     |
 | `payment` (`full` or `compact`)                                 | `payment.method === "transfer"`; otherwise the full payment block still renders the method label if placed |
-| `logo`, `qr`, `stamp`, `signature`, `notes`                     | optional; omitted or empty if data / theme flags / SPAYD do not apply                                      |
+| `logo`, `qr`, `stamp`, `signature`, `notes`, `dates`            | optional; omitted or empty if data / theme flags / SPAYD do not apply                                      |
 
 Refuse render/issue when a required block is missing. Do **not** inject blocks.
 
 `tax` is one block. Interior is selected by the invoice: VAT recap, non-payer sentence, reverse-charge note, or OSS note.
 
-`title` owns doc label, number, issue date, due date, DUZP when `docType` is `invoice` or `credit_note`, and the credit-note reference. Classic `1.0.0` therefore shows dates in the title column (today they sit under the client). That move is accepted so the block vocabulary stays honest.
+`title` owns doc label, number, and the credit-note reference. Issue date, due date, and DUZP (when `docType` is `invoice` or `credit_note`) live in the `dates` block when that block is placed; otherwise `title` still prints them so Minimal and older looks keep a complete header. Classic `1.0.0` places `dates` under the client, aligned with compact payment under the issuer.
 
 `payment` `compact`: account number, variable symbol, method. `full`: current payment details, including `instructionsBefore` / `instructionsAfter`. QR is a separate block.
 
@@ -125,14 +127,14 @@ Repo data in `@invoicey/invoice-core`, not the database. Slugs `classic` and `mi
 **Classic `1.0.0`** — today’s face encoded as bands:
 
 1. `row` `1/1`: start `[logo]` · end `[title]`
-2. `row` `1/1`: start `[issuer, payment compact]` · end `[client]`
+2. `row` `1/1`: start `[issuer, payment compact]` · end `[client, dates]`
 3. `stack`: `[lines, totals, tax]`
 4. `row` `1/1`: start `[qr]` · end `[payment full]`
 5. `stack`: `[notes]`
-6. `row` `1/1`: start `[stamp]` · end `[signature]`
+6. `row` `1/1`: start `[signature]` · end `[stamp]`
 7. `footer`
 
-Theme matches the current hardcoded colours (`paper` `#ffffff`, `ink` `#0a0a0a`, `muted` `#4b5563`, `line` `#e5e7eb`, `accent` `#0a0a0a`), `typeScale: md`, `density: comfortable`, `logoMaxHeightPt: 52`, optional-block flags `true`.
+Theme matches the current hardcoded colours (`paper` `#ffffff`, `ink` `#0a0a0a`, `muted` `#4b5563`, `line` `#e5e7eb`, `accent` `#0a0a0a`), `typeScale: md`, `density: comfortable`, `logoMaxHeightPt: 52`, `stampMaxHeightPt: 154` (1.75× the 88pt default), optional-block flags `true`.
 
 **Minimal `1.0.0`** — different structure, not a denser Classic:
 
@@ -144,7 +146,7 @@ Theme matches the current hardcoded colours (`paper` `#ffffff`, `ink` `#0a0a0a`,
 6. `row` `1/1`: start `[stamp]` · end `[signature]`
 7. `footer`
 
-Theme: `accent` `#2563eb`, `typeScale: sm`, `density: compact`, `logoMaxHeightPt: 40`. No compact payment.
+Theme: `accent` `#2563eb`, `typeScale: sm`, `density: compact`, `logoMaxHeightPt: 40`, `stampMaxHeightPt: 88`. No compact payment.
 
 `getFirstPartyLook(id, version)` returns the document or `undefined`. Unknown version does not silently float to latest.
 
