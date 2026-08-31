@@ -15,7 +15,7 @@ Per-feature implementation specs. Written **just-in-time** before the plan that 
 > Plan 25 design specs and the mPohoda API analysis, is preserved on the
 > `feat/payables-lifecycle` branch (tag `archive/payables-lifecycle`).
 
-**Planned specs:** [`production-ux-finish.md`](./production-ux-finish.md) is the active cross-feature production UX program. [`plans-entitlements.md`](./plans-entitlements.md) is the active Plan 26 spec (plans, entitlements, managed clients, permissions). [`pdf-looks.md`](./pdf-looks.md) is the Plan 27 S0 spec (look documents, Classic + Minimal, snapshot, picker). [`pdf-looks-builder.md`](./pdf-looks-builder.md) is the Plan 28 S1 spec (workspace looks + builder).
+**Planned specs:** [`production-ux-finish.md`](./production-ux-finish.md) is the active cross-feature production UX program. [`plans-entitlements.md`](./plans-entitlements.md) is the active Plan 26 spec (plans, entitlements, managed clients, permissions). [`pdf-looks.md`](./pdf-looks.md) is the Plan 27 S0 spec (look documents, Classic + Minimal, snapshot, picker). [`pdf-looks-builder.md`](./pdf-looks-builder.md) is the Plan 28 S1 spec (workspace looks + builder). [`pdf-looks-community.md`](./pdf-looks-community.md) is the Plan 29 S2 spec (community publish).
 
 Just-in-time convention: write the remaining specs before the plan that consumes them ([lifecycle](../README.md#lifecycle-conventions)).
 
@@ -39,6 +39,7 @@ Just-in-time convention: write the remaining specs before the plan that consumes
 | `plans-entitlements.md`    | Plan 26              | `plans` table, entitlement resolution, managed client catalogs, token grant rules, permission catalog                                |
 | `pdf-looks.md`             | Plan 27 S0           | Look documents, Classic + Minimal, issue snapshot, Free/Pro apply gate, picker                                                       |
 | `pdf-looks-builder.md`     | Plan 28 S1           | Workspace-origin looks, structured + JSON builder, versioned `workspace_looks` rows                                                  |
+| `pdf-looks-community.md`   | Plan 29 S2           | Publish a workspace look to a global community catalog                                                                               |
 | `assistant-panel.md`       | —                    | In-app assistant on the same Eve agent as Slack: browser auth, shared card model and card actions, per-surface metering              |
 
 ## Spec format conventions
