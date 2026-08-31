@@ -2,8 +2,13 @@
 import { Document, Image, Link, Page, Text, View } from "@react-pdf/renderer";
 import React from "react";
 
-import type { Invoice, InvoiceCurrency, InvoiceItem } from "../schema";
-import { currencyDisplaySuffix } from "../schema";
+import type {
+  Invoice,
+  InvoiceCurrency,
+  InvoiceItem,
+  InvoiceLanguage,
+} from "../schema";
+import { currencyDisplaySuffix, invoiceDisplayUnit } from "../schema";
 import {
   invoiceLabels,
   toInvoiceIntlLocale,
@@ -18,13 +23,35 @@ import {
   type LookDocument,
 } from "../looks";
 import { parseInlineMarkdown } from "./inline-markdown";
+import { keepPdfWord } from "./register-fonts";
+import {
+  invoicePdfDocKindSubtitle,
+  invoicePdfMainTitle,
+  invoicePdfShowsVatColumn,
+  invoicePdfTaxPointLabel,
+} from "./pdf-presentation";
 import {
   createInvoicePdfStyles,
   rowColumnStyle,
   type InvoicePdfStyles,
 } from "./look-styles";
 
-const INVOICEY_SITE_URL = "https://ditrich.me/";
+const LINE_COLS_WITH_VAT = {
+  desc: "42%",
+  qty: "15%",
+  unitPx: "18%",
+  vat: "6%",
+  tot: "19%",
+} as const;
+
+const LINE_COLS_NO_VAT = {
+  desc: "46%",
+  qty: "17%",
+  unitPx: "18%",
+  tot: "19%",
+} as const;
+
+const INVOICEY_SITE_URL = "https://invoicey.ditrich.me/";
 
 type InvoiceVatBreakdownRowModel = Invoice["totals"]["vatBreakdown"][number];
 
@@ -55,8 +82,9 @@ function fmtMoneyWithCurrency(
   n: number,
   currency: InvoiceCurrency,
   locale: string,
+  language: InvoiceLanguage,
 ): string {
-  return `${fmtMoneyAmount(n, locale)}\u00a0${currencyDisplaySuffix(currency)}`;
+  return `${fmtMoneyAmount(n, locale)}\u00a0${currencyDisplaySuffix(currency, language)}`;
 }
 
 function fmtDateIsoLocal(dateIso: string, locale: string): string {
@@ -110,38 +138,8 @@ function countryHuman(code: string, labels: InvoiceLabels): string {
   return code === "CZ" ? labels.countryCz : code;
 }
 
-function docKindUpper(inv: Invoice, labels: InvoiceLabels): string {
-  switch (inv.meta.docType) {
-    case "invoice":
-      return labels.docKindInvoice;
-    case "credit_note":
-      return labels.docKindCreditNote;
-    case "proforma":
-      return labels.docKindProforma;
-    case "advance":
-      return labels.docKindAdvance;
-    default: {
-      const _never: never = inv.meta.docType;
-      return _never;
-    }
-  }
-}
-
-function invoicePdfMainTitle(inv: Invoice, labels: InvoiceLabels): string {
-  switch (inv.meta.docType) {
-    case "invoice":
-      return `${labels.titleInvoice} ${inv.meta.number}`;
-    case "credit_note":
-      return `${labels.titleCreditNote} ${inv.meta.number}`;
-    case "proforma":
-      return `${labels.titleProforma} ${inv.meta.number}`;
-    case "advance":
-      return `${labels.titleAdvance} ${inv.meta.number}`;
-    default: {
-      const _never: never = inv.meta.docType;
-      return _never;
-    }
-  }
+function postalCityLine(zip: string, city: string): string {
+  return `${zip} ${city}`;
 }
 
 function splitDescription(raw: string): { title: string; detail?: string } {
@@ -242,18 +240,23 @@ function PdfMarkdownText({
 function PdfInvoiceLineRow({
   item,
   currency,
+  language,
   locale,
+  showVat,
   styles,
 }: Readonly<{
   item: InvoiceItem;
   currency: InvoiceCurrency;
+  language: InvoiceLanguage;
   locale: string;
+  showVat: boolean;
   styles: InvoicePdfStyles;
 }>) {
   const split = splitDescription(item.description);
+  const cols = showVat ? LINE_COLS_WITH_VAT : LINE_COLS_NO_VAT;
   return (
     <View style={styles.lineRow} wrap={false}>
-      <View style={styles.descCol}>
+      <View style={[styles.descCol, { width: cols.desc }]}>
         <Text style={styles.cellFig}>{split.title}</Text>
         {split.detail ? (
           <Text style={styles.lineSub}>{split.detail}</Text>
@@ -262,27 +265,44 @@ function PdfInvoiceLineRow({
       <Text
         style={[
           styles.cellFig,
-          { width: "8%", textAlign: "right", paddingRight: 4 },
+          { width: cols.qty, textAlign: "right", paddingRight: 4 },
         ]}
       >
         {fmtQty(item.quantity, locale)}
-      </Text>
-      <Text style={[styles.cellFig, { width: "7%" }]}>{item.unit}</Text>
-      <Text style={[styles.cellFig, { width: "16%", textAlign: "right" }]}>
-        {fmtMoneyAmount(item.unitPriceWithoutVat, locale)}
+        {item.unit ? `\u00a0${invoiceDisplayUnit(item.unit, language)}` : ""}
       </Text>
       <Text
-        style={[
-          styles.cellFig,
-          { width: "6%", textAlign: "right", paddingRight: 2 },
-        ]}
+        hyphenationCallback={keepPdfWord}
+        style={[styles.cellFig, { width: cols.unitPx, textAlign: "right" }]}
+        wrap={false}
       >
-        {String(item.vatRate)}
+        {fmtMoneyWithCurrency(
+          item.unitPriceWithoutVat,
+          currency,
+          locale,
+          language,
+        )}
       </Text>
+      {showVat ? (
+        <Text
+          style={[
+            styles.cellFig,
+            {
+              width: LINE_COLS_WITH_VAT.vat,
+              textAlign: "right",
+              paddingRight: 2,
+            },
+          ]}
+        >
+          {`${String(item.vatRate)}\u00a0%`}
+        </Text>
+      ) : null}
       <Text
-        style={[styles.cellFigStrong, { width: "17%", textAlign: "right" }]}
+        hyphenationCallback={keepPdfWord}
+        style={[styles.cellFigStrong, { width: cols.tot, textAlign: "right" }]}
+        wrap={false}
       >
-        {fmtMoneyWithCurrency(item.lineTotal, currency, locale)}
+        {fmtMoneyWithCurrency(item.lineTotal, currency, locale, language)}
       </Text>
     </View>
   );
@@ -292,12 +312,14 @@ function PdfVatRow({
   row,
   currency,
   labels,
+  language,
   locale,
   styles,
 }: Readonly<{
   row: InvoiceVatBreakdownRowModel;
   currency: InvoiceCurrency;
   labels: InvoiceLabels;
+  language: InvoiceLanguage;
   locale: string;
   styles: InvoicePdfStyles;
 }>) {
@@ -307,7 +329,7 @@ function PdfVatRow({
         style={styles.totalLbl}
       >{`${labels.vat} ${String(row.rate)}\u00a0%`}</Text>
       <Text style={styles.totalFig}>
-        {fmtMoneyWithCurrency(row.vat, currency, locale)}
+        {fmtMoneyWithCurrency(row.vat, currency, locale, language)}
       </Text>
     </View>
   );
@@ -320,7 +342,7 @@ function renderLogo(ctx: PdfCtx): React.ReactElement | null {
 
 function renderDateFields(
   ctx: PdfCtx,
-  boxStyle: InvoicePdfStyles["kvBlock"],
+  boxStyle: InvoicePdfStyles["kvBlock"] | InvoicePdfStyles["partyMeta"],
 ): React.ReactElement {
   const { inv, labels, intlLocale, styles } = ctx;
   const showDuzp =
@@ -340,7 +362,7 @@ function renderDateFields(
       />
       {showDuzp ? (
         <PdfKv
-          k={labels.taxPointDate}
+          k={invoicePdfTaxPointLabel(inv, labels)}
           v={fmtDateIsoLocal(inv.meta.duzp, intlLocale)}
           styles={styles}
         />
@@ -351,13 +373,14 @@ function renderDateFields(
 
 function renderTitle(ctx: PdfCtx): React.ReactElement {
   const { inv, labels, styles, look } = ctx;
+  const subtitle = invoicePdfDocKindSubtitle(inv, labels);
   return (
     <View>
       <View style={styles.titleColRule} />
       <Text style={styles.invoiceTitle}>
         {invoicePdfMainTitle(inv, labels)}
       </Text>
-      <Text style={styles.docKindMicro}>{docKindUpper(inv, labels)}</Text>
+      {subtitle ? <Text style={styles.docKindMicro}>{subtitle}</Text> : null}
       {lookHasBlock(look, "dates")
         ? null
         : renderDateFields(ctx, styles.kvBlock)}
@@ -374,7 +397,7 @@ function renderTitle(ctx: PdfCtx): React.ReactElement {
 }
 
 function renderDates(ctx: PdfCtx): React.ReactElement {
-  return renderDateFields(ctx, ctx.styles.kvBlockGap);
+  return renderDateFields(ctx, ctx.styles.partyMeta);
 }
 
 function renderIssuer(ctx: PdfCtx): React.ReactElement {
@@ -387,9 +410,7 @@ function renderIssuer(ctx: PdfCtx): React.ReactElement {
       <Text style={styles.partyName}>{inv.issuer.name}</Text>
       <Text style={styles.partyAddr}>{inv.issuer.address.street}</Text>
       <Text style={styles.partyAddrTight}>
-        {inv.issuer.address.zip}
-        {", "}
-        {inv.issuer.address.city}
+        {postalCityLine(inv.issuer.address.zip, inv.issuer.address.city)}
       </Text>
       <Text style={styles.partyAddrTight}>{issuerCountry}</Text>
       <View style={styles.kvBlock}>
@@ -407,9 +428,7 @@ function renderIssuer(ctx: PdfCtx): React.ReactElement {
         />
       </View>
       {inv.issuer.registryNote ? (
-        <Text style={[styles.partyAddrTight, { marginTop: 6 }]}>
-          {inv.issuer.registryNote}
-        </Text>
+        <Text style={styles.registryNote}>{inv.issuer.registryNote}</Text>
       ) : null}
     </View>
   );
@@ -429,9 +448,7 @@ function renderClient(ctx: PdfCtx): React.ReactElement {
       <Text style={styles.partyName}>{inv.client.name}</Text>
       <Text style={styles.partyAddr}>{inv.client.address.street}</Text>
       <Text style={styles.partyAddrTight}>
-        {inv.client.address.zip}
-        {", "}
-        {inv.client.address.city}
+        {postalCityLine(inv.client.address.zip, inv.client.address.city)}
       </Text>
       <Text style={styles.partyAddrTight}>{clientCountry}</Text>
       {showClientIdentifiers ? (
@@ -465,7 +482,7 @@ function renderPaymentCompact(ctx: PdfCtx): React.ReactElement | null {
   const { inv, labels, styles } = ctx;
   const transfer = inv.payment.method === "transfer" && inv.payment.bankAccount;
   return (
-    <View style={styles.kvBlockGap}>
+    <View style={styles.partyMeta}>
       {transfer ? (
         <PdfKv
           first
@@ -576,15 +593,30 @@ function renderQr(ctx: PdfCtx): React.ReactElement | null {
 function renderLines(ctx: PdfCtx): React.ReactElement {
   const { inv, labels, intlLocale, styles } = ctx;
   const sortedItems = [...inv.items].sort((a, b) => a.position - b.position);
+  const showVat = invoicePdfShowsVatColumn(inv);
+  const cols = showVat ? LINE_COLS_WITH_VAT : LINE_COLS_NO_VAT;
   return (
     <View style={styles.tableWrap}>
       <View style={styles.tableHeadRow}>
-        <Text style={[styles.th, styles.thDesc]}>{labels.colDescription}</Text>
-        <Text style={[styles.th, styles.thQty]}>{labels.colQty}</Text>
-        <Text style={[styles.th, styles.thUnit]}>{labels.colUnit}</Text>
-        <Text style={[styles.th, styles.thUnitPx]}>{labels.colUnitPrice}</Text>
-        <Text style={[styles.th, styles.thVat]}>{labels.colVat}</Text>
-        <Text style={[styles.th, styles.thTot]}>{labels.colTotal}</Text>
+        <Text style={[styles.th, { width: cols.desc }]}>
+          {labels.colDescription}
+        </Text>
+        <Text style={[styles.th, styles.thQty, { width: cols.qty }]}>
+          {labels.colQty}
+        </Text>
+        <Text style={[styles.th, styles.thUnitPx, { width: cols.unitPx }]}>
+          {labels.colUnitPrice}
+        </Text>
+        {showVat ? (
+          <Text
+            style={[styles.th, styles.thVat, { width: LINE_COLS_WITH_VAT.vat }]}
+          >
+            {labels.colVat}
+          </Text>
+        ) : null}
+        <Text style={[styles.th, styles.thTot, { width: cols.tot }]}>
+          {labels.colTotal}
+        </Text>
       </View>
       <View style={styles.tableRowsRule}>
         {sortedItems.map((it) => (
@@ -592,7 +624,9 @@ function renderLines(ctx: PdfCtx): React.ReactElement {
             key={it.position}
             currency={inv.meta.currency}
             item={it}
+            language={inv.meta.language}
             locale={intlLocale}
+            showVat={showVat}
             styles={styles}
           />
         ))}
@@ -619,6 +653,7 @@ function renderTotals(ctx: PdfCtx): React.ReactElement {
                 inv.totals.subtotal,
                 inv.meta.currency,
                 intlLocale,
+                inv.meta.language,
               )}
             </Text>
           </View>
@@ -628,6 +663,7 @@ function renderTotals(ctx: PdfCtx): React.ReactElement {
                   key={`${row.rate}`}
                   currency={inv.meta.currency}
                   labels={labels}
+                  language={inv.meta.language}
                   locale={intlLocale}
                   row={row}
                   styles={styles}
@@ -642,6 +678,7 @@ function renderTotals(ctx: PdfCtx): React.ReactElement {
                   inv.totals.vatTotal,
                   inv.meta.currency,
                   intlLocale,
+                  inv.meta.language,
                 )}
               </Text>
             </View>
@@ -661,6 +698,7 @@ function renderTotals(ctx: PdfCtx): React.ReactElement {
             inv.totals.total,
             inv.meta.currency,
             intlLocale,
+            inv.meta.language,
           )}
         </Text>
       </View>
