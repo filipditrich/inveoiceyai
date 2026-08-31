@@ -77,5 +77,6 @@ two steps (add nullable + backfill, then tighten), as
 | `2026-08-26-unique-constraints-to-indexes.sql`        | Fixed the drizzle-kit drift that made `db:push` offer to truncate populated tables |
 | `2026-08-31-plan27-pdf-looks.sql`                     | Plan 27 S0 — workspace default look, invoice look columns, `looks.apply` backfill  |
 | `2026-08-31-plan28-workspace-looks.sql`               | Plan 28 S1 — `workspace_looks` versioned documents                                 |
+| `2026-08-31-plan29-community-looks.sql`               | Plan 29 S2 — `community_looks` published catalog                                   |
 
 Apply Plan 19 before deploying referral routes (`/r/*`, `/settings/account/referrals`, admin users list).

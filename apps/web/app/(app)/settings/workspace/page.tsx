@@ -7,7 +7,7 @@ import { listUserWorkspaces } from "@/lib/auth/workspaces";
 import { workspaces } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { eq } from "drizzle-orm";
-import { loadWorkspaceLookDocuments } from "@/lib/load-workspace-look";
+import { loadLookCatalog } from "@/lib/load-workspace-look";
 import { defaultLookRef } from "@invoicey/invoice-core/looks";
 import { Building2Icon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -28,7 +28,7 @@ export default async function SettingsWorkspacePage() {
         .from(workspaces)
         .where(eq(workspaces.id, ws.workspaceId))
         .limit(1),
-      loadWorkspaceLookDocuments(ws.workspaceId),
+      loadLookCatalog(ws.workspaceId),
     ]);
   const active = workspacesList.find((item) => item.id === ws.workspaceId);
   if (!active) {

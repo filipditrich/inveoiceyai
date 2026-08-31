@@ -1,6 +1,10 @@
 "use server";
 
 import {
+  getCommunityLookOwnership,
+  listCommunityLookRowsForPublisher,
+  unpublishCommunityLookRows,
+  upsertPublishedCommunityLookRow,
   deleteWorkspaceLookRows,
   insertWorkspaceLookRow,
   listWorkspaceLookRows,
@@ -9,12 +13,14 @@ import { db } from "@invoicey/db/client";
 import {
   bumpLookVersion,
   canApplyLook,
+  communityLookFrom,
   compareLookSemver,
   findLookDocument,
   getFirstPartyLook,
   LookDocumentSchema,
   lookContentEquals,
   lookDocumentIsValid,
+  lookIsPublishable,
   versionBumpForLookChange,
   workspaceLookFrom,
   type LookDocument,
@@ -33,7 +39,9 @@ export type WorkspaceLookActionError =
   | "invalid_look_id"
   | "slug_taken"
   | "look_in_use"
-  | "save_failed";
+  | "save_failed"
+  | "community_slug_taken"
+  | "look_not_publishable";
 
 export type WorkspaceLookActionResult =
   | { ok: true; look: LookDocument }
@@ -83,7 +91,11 @@ export async function createWorkspaceLookAction(input: {
   if (!lookDocumentIsValid(created.look)) {
     return { ok: false, errorCode: "invalid_look" };
   }
-  if (gate.catalog.some((look) => look.id === created.look.id)) {
+  if (
+    gate.catalog.some(
+      (look) => look.origin === "workspace" && look.id === created.look.id,
+    )
+  ) {
     return { ok: false, errorCode: "slug_taken" };
   }
   try {
@@ -115,7 +127,7 @@ export async function saveWorkspaceLookAction(input: {
     return { ok: false, errorCode: "invalid_look" };
   }
   const previous = gate.catalog
-    .filter((look) => look.id === parsed.data.id)
+    .filter((look) => look.origin === "workspace" && look.id === parsed.data.id)
     .sort((a, b) => compareLookSemver(b.version, a.version))[0];
   if (!previous) {
     return { ok: false, errorCode: "invalid_look" };
@@ -170,6 +182,72 @@ export async function deleteWorkspaceLookAction(input: {
   }
   await deleteWorkspaceLookRows(db, gate.workspaceId, input.lookId);
   revalidatePath("/settings/workspace/looks");
+  revalidatePath("/settings/workspace");
+  revalidatePath("/invoices/new");
+  return { ok: true };
+}
+
+export async function publishWorkspaceLookAction(input: {
+  lookId: string;
+  version: string;
+}): Promise<WorkspaceLookActionResult> {
+  const gate = await requireLookEditor();
+  if (!gate.ok) return gate;
+  const source = gate.catalog.find(
+    (look) =>
+      look.origin === "workspace" &&
+      look.id === input.lookId &&
+      look.version === input.version,
+  );
+  if (!source) return { ok: false, errorCode: "invalid_look" };
+  const published = communityLookFrom(source);
+  if (!published.ok) {
+    return {
+      ok: false,
+      errorCode:
+        published.error === "reserved_look_id"
+          ? "reserved_look_id"
+          : "invalid_look",
+    };
+  }
+  if (lookIsPublishable(published.look).length > 0) {
+    return { ok: false, errorCode: "look_not_publishable" };
+  }
+  const owner = await getCommunityLookOwnership(db, published.look.id);
+  if (owner && owner.publisherWorkspaceId !== gate.workspaceId) {
+    return { ok: false, errorCode: "community_slug_taken" };
+  }
+  try {
+    await upsertPublishedCommunityLookRow(db, {
+      lookId: published.look.id,
+      version: published.look.version,
+      document: published.look as Record<string, unknown>,
+      publisherWorkspaceId: gate.workspaceId,
+    });
+  } catch {
+    return { ok: false, errorCode: "save_failed" };
+  }
+  revalidatePath("/settings/workspace/looks");
+  revalidatePath(`/settings/workspace/looks/${published.look.id}`);
+  revalidatePath("/settings/workspace");
+  revalidatePath("/invoices/new");
+  return { ok: true, look: published.look };
+}
+
+export async function unpublishWorkspaceLookAction(input: {
+  lookId: string;
+}): Promise<{ ok: true } | { ok: false; errorCode: WorkspaceLookActionError }> {
+  const gate = await requireLookEditor();
+  if (!gate.ok) return gate;
+  const rows = await listCommunityLookRowsForPublisher(
+    db,
+    gate.workspaceId,
+    input.lookId,
+  );
+  if (rows.length === 0) return { ok: false, errorCode: "invalid_look" };
+  await unpublishCommunityLookRows(db, gate.workspaceId, input.lookId);
+  revalidatePath("/settings/workspace/looks");
+  revalidatePath(`/settings/workspace/looks/${input.lookId}`);
   revalidatePath("/settings/workspace");
   revalidatePath("/invoices/new");
   return { ok: true };

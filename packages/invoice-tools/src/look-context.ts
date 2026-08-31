@@ -1,5 +1,6 @@
 import {
   getWorkspaceEntitlements,
+  listPublishedCommunityLookRows,
   listWorkspaceLookRows,
   workspaces,
   type InvoiceyDb,
@@ -26,8 +27,8 @@ export type WorkspaceLookContext = {
   catalog: LookDocument[];
 };
 
-function parseWorkspaceLooks(
-  rows: Awaited<ReturnType<typeof listWorkspaceLookRows>>,
+function parseLookDocuments(
+  rows: readonly { document: unknown }[],
 ): LookDocument[] {
   const looks: LookDocument[] = [];
   for (const row of rows) {
@@ -41,7 +42,7 @@ export async function loadWorkspaceLookContext(
   db: Db,
   workspaceId: string,
 ): Promise<WorkspaceLookContext> {
-  const [entitled, [row], lookRows] = await Promise.all([
+  const [entitled, [row], lookRows, communityRows] = await Promise.all([
     getWorkspaceEntitlements(db, workspaceId),
     db
       .select({
@@ -52,6 +53,7 @@ export async function loadWorkspaceLookContext(
       .where(eq(workspaces.id, workspaceId))
       .limit(1),
     listWorkspaceLookRows(db, workspaceId),
+    listPublishedCommunityLookRows(db),
   ]);
 
   return {
@@ -59,7 +61,10 @@ export async function loadWorkspaceLookContext(
     defaultLook: row
       ? { id: row.defaultLookId, version: row.defaultLookVersion }
       : defaultLookRef(),
-    catalog: parseWorkspaceLooks(lookRows),
+    catalog: [
+      ...parseLookDocuments(lookRows),
+      ...parseLookDocuments(communityRows),
+    ],
   };
 }
 

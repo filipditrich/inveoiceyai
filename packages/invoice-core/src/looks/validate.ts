@@ -118,3 +118,18 @@ export function validateLookForInvoice(
 export function lookDocumentIsValid(look: LookDocument): boolean {
   return validateLookDocument(look).length === 0;
 }
+
+/**
+ * Publish uses the same structural rules as render, plus payment — today the
+ * only invoice-dependent requirement first-party looks satisfy.
+ */
+export function lookIsPublishable(look: LookDocument): LookValidationIssue[] {
+  const issues = validateLookDocument(look);
+  if (!hasPaymentSlot(look)) {
+    issues.push({
+      path: "slots.payment",
+      message: "published looks must include a payment block",
+    });
+  }
+  return issues;
+}

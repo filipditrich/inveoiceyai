@@ -25,10 +25,12 @@ export function WorkspaceLooksList({
   looks,
   canEdit,
   entitled,
+  publishedLookIds = [],
 }: {
   looks: readonly LookDocument[];
   canEdit: boolean;
   entitled: boolean;
+  publishedLookIds?: readonly string[];
 }) {
   const t = useTranslations("App.settings.workspace.looks");
   const tErrors = useTranslations("App.workspaceErrors");
@@ -152,6 +154,9 @@ export function WorkspaceLooksList({
                 <p className="text-sm font-medium">{look.name}</p>
                 <p className="text-muted-foreground text-xs tabular-nums">
                   {look.id} · {look.version}
+                  {publishedLookIds.includes(look.id)
+                    ? ` · ${t("publishedBadge")}`
+                    : ""}
                 </p>
               </div>
               <div className="flex gap-2">

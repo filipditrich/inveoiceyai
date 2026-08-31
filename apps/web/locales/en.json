@@ -827,6 +827,11 @@
           "deleted": "Look removed",
           "lockedHint": "Catalog looks are required to save a workspace look. Upgrade, or ask an owner.",
           "editorDescription": "Editing {id}. Save writes a new version; old issued invoices keep their snapshot.",
+          "publish": "Publish to catalog",
+          "unpublish": "Unpublish",
+          "published": "Published to the community catalog",
+          "unpublished": "Removed from the community catalog",
+          "publishedBadge": "Published",
           "backToList": "All workspace looks",
           "viewStructure": "Structure",
           "viewJson": "JSON",
@@ -1057,7 +1062,9 @@
       "invalid_look_id": "Use a lowercase slug such as clean-invoice",
       "slug_taken": "That look slug already exists in this workspace",
       "look_in_use": "Change the workspace default look before removing this one",
-      "save_failed": "Could not save that look"
+      "save_failed": "Could not save that look",
+      "community_slug_taken": "Another workspace already published that look slug",
+      "look_not_publishable": "This look cannot be published until it is a valid invoice look"
     },
     "palette": {
       "trigger": "Search…",
@@ -2318,7 +2325,8 @@
     "manageLooks": "Edit workspace looks",
     "origin": {
       "firstParty": "Invoicey",
-      "workspace": "Workspace"
+      "workspace": "Workspace",
+      "community": "Community"
     },
     "lockedSelected": "This look cannot be issued on your plan. <upgrade>Upgrade in workspace settings</upgrade> to apply it.",
     "catalog": {
@@ -2330,6 +2338,9 @@
       },
       "workspace": {
         "description": "A look this workspace saved in the builder."
+      },
+      "community": {
+        "description": "A look another workspace published to the catalog."
       }
     }
   },

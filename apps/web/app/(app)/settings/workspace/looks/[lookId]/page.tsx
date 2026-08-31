@@ -3,6 +3,8 @@ import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { requireWorkspace } from "@/lib/auth/session";
 import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { loadWorkspaceLookDocuments } from "@/lib/load-workspace-look";
+import { listCommunityLookRowsForPublisher } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import { latestLooksById } from "@invoicey/invoice-core/looks";
 import { Rows3Icon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -29,6 +31,14 @@ export default async function WorkspaceLookEditorPage({
   const looks = await loadWorkspaceLookDocuments(workspaceId);
   const current = latestLooksById(looks).find((look) => look.id === lookId);
   if (!current) notFound();
+  const communityRows = await listCommunityLookRowsForPublisher(
+    db,
+    workspaceId,
+    lookId,
+  );
+  const published = communityRows.some(
+    (row) => row.unpublishedAt === null && row.version === current.version,
+  );
 
   return (
     <div className="space-y-6">
@@ -45,7 +55,7 @@ export default async function WorkspaceLookEditorPage({
           {t("backToList")}
         </Link>
       </p>
-      <LookDocumentEditor initial={current} />
+      <LookDocumentEditor initial={current} published={published} />
     </div>
   );
 }

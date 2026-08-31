@@ -100,7 +100,11 @@ export const BandSchema = z.discriminatedUnion("type", [
 
 export type LookBand = z.infer<typeof BandSchema>;
 
-export const LookOriginSchema = z.enum(["first_party", "workspace"]);
+export const LookOriginSchema = z.enum([
+  "first_party",
+  "workspace",
+  "community",
+]);
 export type LookOrigin = z.infer<typeof LookOriginSchema>;
 
 export const LookSlugSchema = z

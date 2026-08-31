@@ -6,8 +6,8 @@ import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import {
+  loadLookCatalog,
   loadWorkspaceDefaultLook,
-  loadWorkspaceLookDocuments,
 } from "@/lib/load-workspace-look";
 import { getTranslations } from "next-intl/server";
 import {
@@ -36,7 +36,7 @@ export default async function InvoiceNewPage({
       loadClientOptions(workspaceId),
       requireEntitlements(),
       loadWorkspaceDefaultLook(workspaceId),
-      loadWorkspaceLookDocuments(workspaceId),
+      loadLookCatalog(workspaceId),
     ]);
   const lastInvoice = await loadLastInvoiceSuggestions(workspaceId, {
     issuerId: issuers[0]?.id,

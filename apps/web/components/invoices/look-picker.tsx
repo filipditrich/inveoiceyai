@@ -17,7 +17,7 @@ export type LookCatalogItem = {
   id: string;
   version: string;
   name: string;
-  origin?: "first_party" | "workspace";
+  origin?: "first_party" | "workspace" | "community";
   layout?: LookDocument["layout"];
   accent?: string;
   paper?: string;
@@ -52,11 +52,13 @@ export function LookPicker({
           const selected =
             value.id === look.id && value.version === look.version;
           const descriptionKey =
-            look.origin === "workspace"
-              ? "catalog.workspace.description"
-              : look.id === "minimal"
-                ? "catalog.minimal.description"
-                : "catalog.classic.description";
+            look.origin === "community"
+              ? "catalog.community.description"
+              : look.origin === "workspace"
+                ? "catalog.workspace.description"
+                : look.id === "minimal"
+                  ? "catalog.minimal.description"
+                  : "catalog.classic.description";
           return (
             <button
               key={`${look.id}@${look.version}`}
@@ -95,9 +97,11 @@ export function LookPicker({
                 <div className="mt-1 flex flex-wrap items-center gap-1.5">
                   <Badge variant="outline">
                     {t(
-                      look.origin === "workspace"
-                        ? "origin.workspace"
-                        : "origin.firstParty",
+                      look.origin === "community"
+                        ? "origin.community"
+                        : look.origin === "workspace"
+                          ? "origin.workspace"
+                          : "origin.firstParty",
                     )}
                   </Badge>
                   <span className="text-muted-foreground text-xs tabular-nums">

@@ -43,6 +43,16 @@ export {
   type WorkspaceLookRow,
 } from "./workspace-looks-repo";
 export {
+  getCommunityLookOwnership,
+  getCommunityLookRow,
+  listCommunityLookRowsForPublisher,
+  listPublishedCommunityLookRows,
+  listPublishedCommunityLookRowsForPublisher,
+  unpublishCommunityLookRows,
+  upsertPublishedCommunityLookRow,
+  type CommunityLookRow,
+} from "./community-looks-repo";
+export {
   confirmPaymentMatchProposal,
   createManualPaymentAllocation,
   listInvoicePaymentAllocations,

@@ -16,7 +16,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { saveWorkspaceLookAction } from "@/actions/workspace-looks";
+import {
+  publishWorkspaceLookAction,
+  saveWorkspaceLookAction,
+  unpublishWorkspaceLookAction,
+} from "@/actions/workspace-looks";
 import { selectClassName } from "@/components/invoices/field";
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +47,13 @@ function previewInvoice(look: LookDocument): Invoice | null {
   return parsed.success ? parsed.data : null;
 }
 
-export function LookDocumentEditor({ initial }: { initial: LookDocument }) {
+export function LookDocumentEditor({
+  initial,
+  published,
+}: {
+  initial: LookDocument;
+  published: boolean;
+}) {
   const t = useTranslations("App.settings.workspace.looks");
   const tErrors = useTranslations("App.workspaceErrors");
   const router = useRouter();
@@ -57,6 +67,7 @@ export function LookDocumentEditor({ initial }: { initial: LookDocument }) {
   );
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [isPublished, setIsPublished] = useState(published);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const previewUrlRef = useRef<string | null>(null);
@@ -151,7 +162,39 @@ export function LookDocumentEditor({ initial }: { initial: LookDocument }) {
       }
       commitLook(result.look);
       setSaved(cloneLook(result.look));
+      if (result.look.version !== saved.version) {
+        setIsPublished(false);
+      }
       toast.success(t("saved", { version: result.look.version }));
+      router.refresh();
+    });
+  };
+
+  const publish = () => {
+    startTransition(async () => {
+      const result = await publishWorkspaceLookAction({
+        lookId: saved.id,
+        version: saved.version,
+      });
+      if (!result.ok) {
+        toast.error(tErrors(result.errorCode));
+        return;
+      }
+      setIsPublished(true);
+      toast.success(t("published"));
+      router.refresh();
+    });
+  };
+
+  const unpublish = () => {
+    startTransition(async () => {
+      const result = await unpublishWorkspaceLookAction({ lookId: saved.id });
+      if (!result.ok) {
+        toast.error(tErrors(result.errorCode));
+        return;
+      }
+      setIsPublished(false);
+      toast.success(t("unpublished"));
       router.refresh();
     });
   };
@@ -172,15 +215,37 @@ export function LookDocumentEditor({ initial }: { initial: LookDocument }) {
         </Badge>
         {dirty ? (
           <span className="text-muted-foreground text-xs">{t("unsaved")}</span>
+        ) : isPublished ? (
+          <Badge variant="outline">{t("publishedBadge")}</Badge>
         ) : null}
-        <Button
-          className="ml-auto"
-          disabled={pending || issues.length > 0 || !dirty}
-          onClick={save}
-          type="button"
-        >
-          {pending ? t("saving") : t("save")}
-        </Button>
+        <div className="ml-auto flex flex-wrap gap-2">
+          {isPublished ? (
+            <Button
+              disabled={pending || dirty}
+              onClick={unpublish}
+              type="button"
+              variant="outline"
+            >
+              {t("unpublish")}
+            </Button>
+          ) : (
+            <Button
+              disabled={pending || dirty || issues.length > 0}
+              onClick={publish}
+              type="button"
+              variant="outline"
+            >
+              {t("publish")}
+            </Button>
+          )}
+          <Button
+            disabled={pending || issues.length > 0 || !dirty}
+            onClick={save}
+            type="button"
+          >
+            {pending ? t("saving") : t("save")}
+          </Button>
+        </div>
       </div>
       {issues.length > 0 ? (
         <ul className="text-destructive list-disc space-y-1 pl-5 text-sm">
