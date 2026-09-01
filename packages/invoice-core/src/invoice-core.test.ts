@@ -5,6 +5,7 @@ import {
   deriveStatus,
   exclusiveUnitPriceFromInclusive,
   normalizeDisplayStatusParam,
+  pragueTodayIso,
   resolveDisplayStatus,
   slugifyIssuerName,
   nextInvoiceNumber,
@@ -833,5 +834,14 @@ describe("resolveDisplayStatus", () => {
     expect(normalizeDisplayStatusParam("issued")).toBe("unpaid");
     expect(normalizeDisplayStatusParam("future")).toBe("future");
     expect(normalizeDisplayStatusParam("nope")).toBeNull();
+  });
+
+  it("pragueTodayIso is YYYY-MM-DD in Europe/Prague", () => {
+    expect(pragueTodayIso(new Date("2026-05-10T22:00:00.000Z"))).toBe(
+      "2026-05-11",
+    );
+    expect(pragueTodayIso(new Date("2026-05-10T12:00:00.000Z"))).toBe(
+      "2026-05-10",
+    );
   });
 });

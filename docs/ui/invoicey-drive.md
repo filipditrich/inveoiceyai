@@ -59,7 +59,7 @@ Invoicey Drive
   Account · Sign out
 ```
 
-No invoice builder. Opening an invoice opens Preview / Finder, not a native editor.
+No invoice builder. Opening an invoice opens Preview / Finder, not a native editor. Mirror files get Finder color labels from `displayStatus` (green paid, orange unpaid/future, red overdue). Status stays out of the filename.
 
 ### Mac first launch
 

@@ -11,6 +11,11 @@ import {
   type DriveLayoutParseError,
 } from "@invoicey/invoice-core/drive-layout";
 import type { InvoiceLanguage } from "@invoicey/invoice-core/schema";
+import {
+  pragueTodayIso,
+  resolveDisplayStatus,
+  type InvoiceDisplayStatus,
+} from "@invoicey/invoice-core/status-display";
 
 export { DEFAULT_DRIVE_LAYOUT_TEMPLATE };
 
@@ -56,6 +61,7 @@ export interface DriveIndexItem {
   includeIsdoc: boolean;
   issuedAt: string;
   docType: string;
+  displayStatus: InvoiceDisplayStatus;
 }
 
 function snapshotName(
@@ -401,6 +407,7 @@ export async function listDriveIndex(
     }
   }
 
+  const todayIso = pragueTodayIso();
   const items: DriveIndexItem[] = [];
   for (const row of rows) {
     const invoice = row.invoice;
@@ -431,6 +438,16 @@ export async function listDriveIndex(
       includeIsdoc: settings.includeIsdoc && Boolean(invoice.isdocUrl),
       issuedAt: invoice.issuedAt.toISOString(),
       docType: invoice.docType,
+      displayStatus: resolveDisplayStatus(
+        {
+          issuedAt: invoice.issuedAt,
+          dueDate: invoice.dueDate,
+          paidAt: invoice.paidAt,
+          cancelledAt: invoice.cancelledAt,
+          issueDate: invoice.issueDate,
+        },
+        todayIso,
+      ),
     });
   }
   return items;

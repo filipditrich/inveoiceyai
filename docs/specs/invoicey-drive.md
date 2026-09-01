@@ -82,7 +82,7 @@ See [ADR 0042](../decisions/0042-drive-device-pairing.md).
 1. Mac polls `GET /api/drive/index` every 60s, on wake, and on Sync now. APNs is out of Plan 30.
 2. Diff against local enumerator by `invoiceId`.
 3. New / hash-changed: mark File Provider item dirty; download on open (dataless until then).
-4. Mirror folder (if set): write the same relative path under the bookmark. Skip when SHA-256 matches. Delete-from-mirror restores on next sync, same as Finder.
+4. Mirror folder (if set): write the same relative path under the bookmark. Skip when SHA-256 matches. After download **and** skip, set the Finder color label from `displayStatus` (paid = green, unpaid/future = orange, overdue = red). Do not put status in the filename. Do not wipe user `tagNames`. Labels are local Finder metadata; they often do not survive Proton/iCloud. Delete-from-mirror restores on next sync, same as Finder.
 5. Removed from index: remove from domain and mirror (Trash locally; do not call Invoicey cancel).
 
 Finder delete is local-only. Next sync **restores** the file. A file dropped into the domain is ignored. Invoicey is the source of truth.
