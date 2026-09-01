@@ -21,6 +21,7 @@ How the pieces fit together. Cross-references the ADRs that justify each choice.
 | Auth                | Better Auth (OAuth Google/GitHub; orgs = workspaces)        | [0018](./decisions/0018-better-auth-oauth-only.md), [0019](./decisions/0019-workspaces-are-better-auth-organizations.md) |
 | Payments            | `@invoicey/payment-core` + Fio / MONETA read-only adapters  | [0029](./decisions/0029-payment-ledger-fio-first.md), [0030](./decisions/0030-moneta-second-adapter.md)                  |
 | Hosting             | Vercel                                                      | inherited from Next.js choice                                                                                            |
+| Invoicey Drive      | macOS File Provider + menu bar (sibling `invoicey-mac`)     | Proposed [0041](./decisions/0041-invoicey-drive-companion.md)                                                            |
 | Tests               | Vitest (unit) + golden-file fixtures (PDF/ISDOC)            | (decided in Plan 2/3)                                                                                                    |
 | Lint / format       | ESLint + Prettier + `commitlint`                            | (decided in Plan 1)                                                                                                      |
 
@@ -33,7 +34,7 @@ inveoiceyai/
 │   │   ├── app/
 │   │   │   ├── (app)/          sidebar shell (dashboard, invoices, clients, issuers, payments, settings)
 │   │   │   ├── (docs)/         Fumadocs product docs (/docs)
-│   │   │   └── api/            ARES, MCP, webhooks, cron (incl. bank-sync), auth
+│   │   │   └── api/            ARES, MCP, Drive, webhooks, cron (incl. bank-sync), auth
 │   │   ├── agent/              Eve Slack + HTTP channels (/eve/v1/*)
 │   │   ├── content/docs/       Public MDX docs
 │   │   ├── lib/payments/       Fio sync + allocation services
@@ -71,6 +72,7 @@ flowchart TD
     CursorRemote["Cursor HTTP"] --> RH_Mcp["/api/mcp"]
     SlackAPI["Slack"] --> Connect["Vercel Connect"]
     Connect --> Eve["/eve/v1/slack"]
+    MacDrive["Invoicey Drive.app"] -->|"device token"| RH_Drive["/api/drive/*"]
 
     SA --> DB[("Neon via @invoicey/db")]
     RSC --> DB
@@ -79,6 +81,8 @@ flowchart TD
     RH_Mcp --> Tools
     McpApp --> Tools
     Eve --> Tools
+    RH_Drive --> Tools
+    RH_Drive --> DB
     Tools --> Core["@invoicey/invoice-core"]
     Tools --> Ares
 ```
@@ -186,6 +190,7 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 - **Plan 12a (MCP):** local stdio via `apps/mcp`; remote Streamable HTTP via `apps/web` `/api/mcp` (`mcp-handler`, Node runtime, `MCP_API_KEY` bearer, fail-closed when unset). Shared tool logic in `@invoicey/invoice-tools` (+ `/ops` for issue/paid).
 - **Plan 14 (auth):** Better Auth OAuth-only; workspaces are organizations.
 - **Plan 22 (payments):** Fio monitoring-token sync via `@invoicey/payment-core`; allocations are the payment source of truth; cron `/api/cron/bank-sync`. Spec: [`specs/payment-ledger-fio.md`](./specs/payment-ledger-fio.md).
+- **Plan 30 (Invoicey Drive):** pairing + `/api/drive/*` live in `apps/web`. The Swift File Provider app is a **sibling repo** (`invoicey-mac`), notarized `.dmg`, macOS 14+. Spec: [`specs/invoicey-drive.md`](./specs/invoicey-drive.md).
 
 ## Tooling
 

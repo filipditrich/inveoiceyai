@@ -718,6 +718,49 @@ by area, no marking of permissions the plan does not include, no bulk edit.
 
 **Out of 29:** moderation queue, takedown console, licensing copy.
 
+## Plan 30 — Invoicey Drive (macOS companion)
+
+**Status:** Proposed (docs + grill)
+
+**ADR:** [0041](./decisions/0041-invoicey-drive-companion.md) ·
+[0042](./decisions/0042-drive-device-pairing.md) ·
+[0043](./decisions/0043-drive-layout-workspace-issuer-template.md) ·
+[spec](./specs/invoicey-drive.md) ·
+[UI](./ui/invoicey-drive.md) ·
+[plan](../.cursor/plans/plan-30-invoicey-drive.md)
+
+**Goal:** Pair a Mac companion so issued invoices appear in Finder as Invoicey
+Drive (`/{workspace}/{issuer}/{layout}`), with an optional mirror folder into
+iCloud / Proton / `_faktury`. The website stays the product. The Mac app is a
+librarian, not a second Invoicey.
+
+**30a — Drive API + pairing (this repo):**
+
+- [ ] Layout template parser + preview
+- [ ] `drive_devices` / `drive_pair_grants` SQL
+- [ ] `/drive/connect` + `POST /api/drive/token`
+- [ ] `GET /api/drive/index` and artifact byte routes
+- [ ] Settings → Invoicey Drive
+- [ ] Audit events
+
+**30b — Web promo + docs (this repo):**
+
+- [ ] Fumadocs `integrations/invoicey-drive`
+- [ ] Marketing companion mention
+- [ ] Post-issue banner when the user has zero devices
+- [ ] Download placeholder (notarized `.dmg`)
+
+**30c — Mac app (sibling `invoicey-mac`):**
+
+- [ ] Menu bar + Keychain + connect session
+- [ ] File Provider domain from the index
+- [ ] On-demand PDF fetch
+- [ ] Optional mirror folder
+- [ ] Notarized build
+
+**Out of 30:** Windows, iOS Files, invoice create/issue, server iCloud/Proton
+APIs, two-way Finder edits that mutate Invoicey, APNs, Mac App Store.
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:
