@@ -22,7 +22,7 @@ Two JSONB columns on the `invoices` row:
 - `issuer_snapshot` — a `IssuerSnapshotSchema`-validated payload (see [`invoice-schema.md`](./invoice-schema.md))
 - `client_snapshot` — a `ClientSnapshotSchema`-validated payload
 
-A third column `payload_json` stores the full `Invoice` (the validated `InvoiceSchema` payload) for round-tripping. The two snapshot columns are technically redundant with `payload_json` — they exist for direct querying without JSON path expressions.
+A third column `payload_json` stores the full `Invoice` (the validated `InvoiceSchema` payload) for round-tripping. The two snapshot columns are technically redundant with `payload_json` — they exist for direct querying without JSON path expressions. Optional `meta.issuedBy` (`name` + grammatical gender) lives only in `payload_json`; the PDF renderer reads that snapshot and never looks up the live user.
 
 The numbering scheme is **not** snapshotted as a JSON blob. Instead, the resolved `meta.number` (and any tokens that were in effect at the time, baked into the resulting string) lives on the row. The scheme can change freely afterward.
 

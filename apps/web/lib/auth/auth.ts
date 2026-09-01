@@ -119,6 +119,13 @@ export const auth = betterAuth({
       },
       referralCode: { type: "string", required: false, input: false },
       referredByUserId: { type: "string", required: false, input: false },
+      /** Czech PDF footer verb; edited from account settings. */
+      gender: {
+        type: "string",
+        required: false,
+        defaultValue: "unspecified",
+        input: true,
+      },
     },
   },
 

@@ -16,6 +16,7 @@ import {
 
 import { DEMO_ISSUER_ID } from "./demo-issuer";
 import { getInvoice, resolveDefaultIssuer } from "./invoice-ops";
+import { loadIssuedByFromRequest, withIssuedBy } from "./issued-by";
 import {
   applyLookToDraftWrite,
   loadWorkspaceLookContext,
@@ -186,6 +187,7 @@ export async function createAndRenderInvoice(options: {
         return { ok: false, error: withLook.error };
       }
       invoice = withLook.invoice;
+      invoice = withIssuedBy(invoice, await loadIssuedByFromRequest(database));
       const persisted = await persistDraftInvoice(database, invoice, {
         workspaceId: resolveWorkspaceId(),
       });
@@ -203,6 +205,8 @@ export async function createAndRenderInvoice(options: {
         error: `failed to persist draft invoice: ${message}`,
       };
     }
+  } else {
+    invoice = withIssuedBy(invoice, await loadIssuedByFromRequest(database));
   }
 
   const pdfBytes = await renderInvoicePdf(
@@ -278,6 +282,7 @@ export async function updateDraftInvoice(options: {
       language: current.meta.language,
       currency: current.meta.currency,
       correctedInvoiceNumber: current.meta.correctedInvoiceNumber,
+      issuedBy: current.meta.issuedBy,
     },
     client: current.client,
     vat: current.vat,
@@ -323,13 +328,17 @@ export async function updateDraftInvoice(options: {
     if (!withLook.ok) {
       return { ok: false, error: withLook.error };
     }
-    await persistDraftInvoice(database, withLook.invoice, {
+    const invoice = withIssuedBy(
+      withLook.invoice,
+      await loadIssuedByFromRequest(database),
+    );
+    await persistDraftInvoice(database, invoice, {
       workspaceId: resolveWorkspaceId(options.workspaceId),
       invoiceId: options.id,
     });
     return {
       ok: true,
-      invoice: withLook.invoice,
+      invoice,
       invoiceId: options.id,
       assumptions: normalized.assumptions,
     };

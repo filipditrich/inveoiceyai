@@ -43,6 +43,13 @@ const InvoiceMetaSchema = z.object({
   currency: z.enum(["CZK", "EUR", "USD"]),
   /** Reference to the original invoice (only for credit_note) */
   correctedInvoiceNumber: z.string().min(1).max(64).optional(),
+  /** Person who drafted/issued; PDF footer left. Omit on old rows and imports. */
+  issuedBy: z
+    .object({
+      name: z.string().min(1).max(200),
+      gender: z.enum(["him", "her", "unspecified"]),
+    })
+    .optional(),
 });
 ```
 
@@ -55,6 +62,7 @@ const InvoiceMetaSchema = z.object({
 - `duzp` may be ≤ or ≥ `issueDate` (DUZP can precede issue date in practice when invoicing for past work)
 - `number` is opaque text — formatting is decided by the issuer's [numbering scheme](./numbering.md), but at the schema level any non-empty string ≤ 64 chars is valid
 - `language` is the document language for PDF/ISDOC/client email labels (`cs` | `en`). It is not the web UI locale.
+- `issuedBy` is a payload-only snapshot of the acting user's OAuth `users.name` plus grammatical gender (`him` | `her` | `unspecified`). The PDF renderer must not look up the live user. Recurring drafts keep the template snapshot; cron jobs do not invent an identity. Imports omit it. Missing `issuedBy` (legacy invoices) omits the left footer line and keeps the Invoicey brand line.
 
 ## `issuer` — the supplier (snapshot at issue time)
 

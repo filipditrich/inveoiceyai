@@ -926,6 +926,13 @@
         "oauthNote": "These fields update when you sign in with your provider. Link or unlink accounts under Security.",
         "nameLabel": "Name",
         "emailLabel": "Email",
+        "genderLabel": "Grammatical gender",
+        "genderHint": "Sets the Czech PDF footer verb (Vystavil / Vystavila / Vystavil(a)). English invoices always say Issued by.",
+        "genderHim": "He (Vystavil)",
+        "genderHer": "She (Vystavila)",
+        "genderUnspecified": "Prefer not to say (Vystavil(a))",
+        "genderSaved": "Saved",
+        "genderError": "Could not save",
         "securityLink": "Security settings"
       },
       "apiKeysDefault": {

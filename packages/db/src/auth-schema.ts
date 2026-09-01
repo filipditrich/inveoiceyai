@@ -17,6 +17,9 @@ import { workspaces } from "./workspaces";
 /** Platform-wide role (ADR 0024); orthogonal to workspace owner/admin/member. */
 export type PlatformRole = "none" | "admin";
 
+/** Grammatical gender for Czech PDF footer verbs. */
+export type UserGender = "him" | "her" | "unspecified";
+
 /**
  * Better Auth tables (Plan 14, ADR 0018) for `better-auth@1.6.26`.
  *
@@ -57,6 +60,8 @@ export const user = pgTable(
       (): AnyPgColumn => user.id,
       { onDelete: "set null" },
     ),
+    /** Czech PDF footer verb. */
+    gender: text("gender").$type<UserGender>().notNull().default("unspecified"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

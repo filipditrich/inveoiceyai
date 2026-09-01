@@ -45,6 +45,49 @@ describe("normalizeDraftToInvoice", () => {
     }
   });
 
+  it("passes meta.issuedBy through", () => {
+    const issuer = getDemoIssuer();
+    const r = normalizeDraftToInvoice(
+      {
+        meta: {
+          docType: "invoice" as const,
+          issuedBy: { name: "Ada Lovelace", gender: "her" as const },
+        },
+        client: {
+          id: "f6666666-6666-6666-6666-666666666666",
+          name: "Test s.r.o.",
+          ico: "44444444",
+          address: {
+            street: "Nákupní 1",
+            city: "Ostrava",
+            zip: "709 00",
+            country: "CZ",
+          },
+        },
+        vat: { mode: "regular" as const, suppliesAbroad: "none" as const },
+        payment: { method: "transfer" as const, variableSymbol: "123456" },
+        items: [
+          {
+            position: 1,
+            description: "Konzultace",
+            quantity: 1,
+            unit: "ks",
+            unitPriceWithoutVat: 10_000,
+            vatRate: 21,
+          },
+        ],
+      },
+      issuer,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.invoice.meta.issuedBy).toEqual({
+        name: "Ada Lovelace",
+        gender: "her",
+      });
+    }
+  });
+
   it("keeps a supplied look ref on the draft", () => {
     const issuer = getDemoIssuer();
     const r = normalizeDraftToInvoice(

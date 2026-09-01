@@ -1,4 +1,5 @@
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { AccountGenderSelect } from "@/components/settings/account-gender-select";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { ThemeModeSwitcher } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -81,6 +82,7 @@ export default async function SettingsAccountPage() {
               <Input id="account-email" value={user.email} disabled readOnly />
             </div>
           </div>
+          <AccountGenderSelect value={user.gender} />
           <Link
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
             href="/settings/account/security"

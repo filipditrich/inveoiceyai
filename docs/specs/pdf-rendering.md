@@ -41,7 +41,7 @@ Band order comes from the resolved look ([pdf-looks](./pdf-looks.md)). The list 
 10. **QR:** payment block adjacent or below — raster from `renderSpaydQr` (`width`/`height` per SPAYD spec).
 11. **Stamp / signature:** theme flags from the resolved look (`showStamp` / `showSignature`). Stamp size is `theme.stampMaxHeightPt` (default 88). Accent comes from the look theme (and `appearance` overlay).
 12. **`notes`:** footer section „Poznámka“.
-13. **Brand footer:** fixed page footer „Vystaveno přes Invoicey“ links to `https://invoicey.ditrich.me/`.
+13. **Brand footer:** renderer-owned fixed page footer (looks `footer` band is skipped). Two columns when `meta.issuedBy` is set: left is muted `Vystavil` / `Vystavila` / `Vystavil(a): {name}` from `issuedBy.gender` (English is always `Issued by`); right is `Vystaveno přes Invoicey` / `Issued with Invoicey` linking to `https://invoicey.ditrich.me/`. When `issuedBy` is missing, keep only the right brand line.
 
 ## DUZP and non-tax documents
 

@@ -1,4 +1,8 @@
-import type { InvoiceLanguage } from "./schema";
+import type {
+  InvoiceLanguage,
+  IssuedByGender,
+  IssuedBySnapshot,
+} from "./schema";
 
 export type InvoiceLabels = {
   supplier: string;
@@ -36,6 +40,9 @@ export type InvoiceLabels = {
   payCard: string;
   notes: string;
   issuedVia: string;
+  issuedByHim: string;
+  issuedByHer: string;
+  issuedByUnspecified: string;
   countryCz: string;
   payTransfer: string;
   payCashShort: string;
@@ -90,6 +97,9 @@ const CS: InvoiceLabels = {
   payCard: "Platba kartou",
   notes: "Poznámka",
   issuedVia: "Vystaveno přes",
+  issuedByHim: "Vystavil",
+  issuedByHer: "Vystavila",
+  issuedByUnspecified: "Vystavil(a)",
   countryCz: "Česká republika",
   payTransfer: "Převodem",
   payCashShort: "Hotově",
@@ -144,6 +154,9 @@ const EN: InvoiceLabels = {
   payCard: "Card payment",
   notes: "Notes",
   issuedVia: "Issued with",
+  issuedByHim: "Issued by",
+  issuedByHer: "Issued by",
+  issuedByUnspecified: "Issued by",
   countryCz: "Czech Republic",
   payTransfer: "Bank transfer",
   payCashShort: "Cash",
@@ -215,4 +228,30 @@ export function isdocCountryName(
 ): string {
   const map = language === "en" ? ISDOC_COUNTRY_EN : ISDOC_COUNTRY_CS;
   return map[alpha2] ?? alpha2;
+}
+
+export function issuedByVerb(
+  language: InvoiceLanguage,
+  gender: IssuedByGender,
+): string {
+  const labels = invoiceLabels(language);
+  switch (gender) {
+    case "him":
+      return labels.issuedByHim;
+    case "her":
+      return labels.issuedByHer;
+    case "unspecified":
+      return labels.issuedByUnspecified;
+    default: {
+      const _exhaustive: never = gender;
+      return _exhaustive;
+    }
+  }
+}
+
+export function issuedByFooterLine(
+  language: InvoiceLanguage,
+  issuedBy: IssuedBySnapshot,
+): string {
+  return `${issuedByVerb(language, issuedBy.gender)}: ${issuedBy.name}`;
 }

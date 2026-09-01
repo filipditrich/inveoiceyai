@@ -286,6 +286,7 @@ export function normalizeDraftToInvoice(
       typeof metaRaw.correctedInvoiceNumber === "string"
         ? metaRaw.correctedInvoiceNumber
         : undefined,
+    issuedBy: metaRaw.issuedBy,
   };
 
   const clientRaw = draft.client;
