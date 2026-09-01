@@ -3,6 +3,7 @@
 import * as React from "react";
 import { AssistantSidebarTrigger } from "@/components/assistant/assistant-trigger";
 import { BrandLogo } from "@/components/brand-logo";
+import { BuildMark } from "@/components/build-mark";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -19,7 +20,6 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
-import { APP_GIT_SHA, APP_VERSION } from "@/lib/app-build-info";
 import {
   ArchiveRestoreIcon,
   BookOpenIcon,
@@ -251,18 +251,7 @@ export function AppSidebar({
           </div>
         ) : null}
         <NavUser isPlatformAdmin={isPlatformAdmin} user={user} />
-        {process.env.NODE_ENV !== "production" ? (
-          <p
-            className="px-2 pb-1 font-mono text-[0.65rem] tracking-wide text-muted-foreground tabular-nums group-data-[collapsible=icon]:hidden"
-            title={`${t("meta.title")} v${APP_VERSION} (${APP_GIT_SHA})`}
-          >
-            v{APP_VERSION}
-            <span className="mx-1.5 opacity-40" aria-hidden>
-              ·
-            </span>
-            {APP_GIT_SHA}
-          </p>
-        ) : null}
+        <BuildMark />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

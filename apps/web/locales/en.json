@@ -703,6 +703,13 @@
     "brand": {
       "tagline": "Invoice automation"
     },
+    "build": {
+      "runningWithSha": "{version} · {sha}",
+      "reloadWithVersion": "Reload  ·  {version}",
+      "upToDate": "Up to date",
+      "copySha": "Copy",
+      "copied": "Copied"
+    },
     "nav": {
       "group": "Workspace",
       "dashboard": "Overview",
