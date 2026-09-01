@@ -1,5 +1,11 @@
 export { getDemoIssuer } from "./demo-issuer";
 export {
+  issuedByFromProfile,
+  loadIssuedByForUser,
+  loadIssuedByFromRequest,
+  withIssuedBy,
+} from "./issued-by";
+export {
   addCalendarDaysYmd,
   formatVatIntent,
   normalizeDraftToInvoice,

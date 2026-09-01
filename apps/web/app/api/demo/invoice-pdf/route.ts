@@ -1,7 +1,9 @@
+import { getOptionalSession } from "@/lib/auth/session";
 import { checkBotId } from "botid/server";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { InvoiceSchema, renderInvoicePdf } from "@invoicey/invoice-core";
+import { issuedByFromProfile, withIssuedBy } from "@invoicey/invoice-tools";
 
 export const runtime = "nodejs";
 
@@ -99,7 +101,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (parsed.data.items.length > MAX_ITEMS) {
+  let invoice = parsed.data;
+  if (!invoice.meta.issuedBy) {
+    const session = await getOptionalSession();
+    invoice = withIssuedBy(
+      invoice,
+      session ? issuedByFromProfile(session) : null,
+    );
+  }
+
+  if (invoice.items.length > MAX_ITEMS) {
     return NextResponse.json(
       { error: `invoice may contain at most ${MAX_ITEMS} items` },
       { status: 422 },
@@ -115,7 +126,7 @@ export async function POST(request: NextRequest) {
   let pdfBytes: Uint8Array;
   concurrentRenders += 1;
   try {
-    pdfBytes = await renderInvoicePdf(parsed.data);
+    pdfBytes = await renderInvoicePdf(invoice);
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
     if (message.startsWith("invalid_look")) {

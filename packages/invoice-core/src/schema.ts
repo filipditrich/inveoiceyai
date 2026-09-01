@@ -91,6 +91,20 @@ export type InvoiceCurrency = z.infer<typeof InvoiceCurrencySchema>;
 export const InvoiceLanguageSchema = z.enum(["cs", "en"]);
 export type InvoiceLanguage = z.infer<typeof InvoiceLanguageSchema>;
 
+export const IssuedByGenderSchema = z.enum(["him", "her", "unspecified"]);
+export type IssuedByGender = z.infer<typeof IssuedByGenderSchema>;
+
+export const IssuedBySnapshotSchema = z.object({
+  name: z.string().min(1).max(200),
+  gender: IssuedByGenderSchema,
+});
+export type IssuedBySnapshot = z.infer<typeof IssuedBySnapshotSchema>;
+
+export function parseIssuedByGender(value: unknown): IssuedByGender {
+  const parsed = IssuedByGenderSchema.safeParse(value);
+  return parsed.success ? parsed.data : "unspecified";
+}
+
 /** PDF amount suffix. Czech CZK stays `Kč`; English CZK and other currencies use the ISO code. */
 export function currencyDisplaySuffix(
   currency: InvoiceCurrency,
@@ -138,6 +152,7 @@ export const InvoiceMetaSchema = z
     language: InvoiceLanguageSchema.default("cs"),
     currency: InvoiceCurrencySchema,
     correctedInvoiceNumber: z.string().min(1).max(64).optional(),
+    issuedBy: IssuedBySnapshotSchema.optional(),
   })
   .superRefine((meta, ctx) => {
     if (meta.docType === "credit_note" && !meta.correctedInvoiceNumber) {

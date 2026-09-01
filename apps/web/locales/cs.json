@@ -926,6 +926,13 @@
         "oauthNote": "Tato pole se aktualizují při přihlášení přes poskytovatele. Účty propojíte nebo odpojíte v Zabezpečení.",
         "nameLabel": "Jméno",
         "emailLabel": "E-mail",
+        "genderLabel": "Oslovení na faktuře",
+        "genderHint": "Určuje sloveso v patičce PDF: Vystavil, Vystavila, nebo Vystavil(a). Anglické faktury vždy použijí Issued by.",
+        "genderHim": "On (Vystavil)",
+        "genderHer": "Ona (Vystavila)",
+        "genderUnspecified": "Nechci uvést (Vystavil(a))",
+        "genderSaved": "Uloženo",
+        "genderError": "Nepodařilo se uložit",
         "securityLink": "Nastavení zabezpečení"
       },
       "apiKeysDefault": {

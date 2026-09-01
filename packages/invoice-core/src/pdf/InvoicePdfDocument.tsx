@@ -3,6 +3,7 @@ import React from "react";
 import { Document, Image, Link, Page, Text, View } from "@react-pdf/renderer";
 
 import {
+  issuedByFooterLine,
   invoiceLabels,
   toInvoiceIntlLocale,
   type InvoiceLabels,
@@ -760,8 +761,23 @@ function renderSignature(ctx: PdfCtx): React.ReactElement | null {
 }
 
 function renderFooter(ctx: PdfCtx): React.ReactElement {
+  const issuedBy = ctx.inv.meta.issuedBy;
+  const issuedByLine = issuedBy
+    ? issuedByFooterLine(ctx.inv.meta.language, issuedBy)
+    : null;
   return (
-    <View fixed style={ctx.styles.footerRow} wrap={false}>
+    <View
+      fixed
+      style={
+        issuedByLine
+          ? [ctx.styles.footerRow, { justifyContent: "space-between" }]
+          : ctx.styles.footerRow
+      }
+      wrap={false}
+    >
+      {issuedByLine ? (
+        <Text style={ctx.styles.footerIssuedBy}>{issuedByLine}</Text>
+      ) : null}
       <Link src={INVOICEY_SITE_URL} style={ctx.styles.footerBrand}>
         {ctx.labels.issuedVia}{" "}
         <Text style={ctx.styles.footerBrandStrong}>Invoicey</Text>

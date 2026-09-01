@@ -43,6 +43,7 @@ export type BuilderInvoiceInput = {
   look?: Invoice["look"];
   lookSnapshot?: Invoice["lookSnapshot"];
   appearance?: Invoice["appearance"];
+  issuedBy?: Invoice["meta"]["issuedBy"];
 };
 
 /** Effective rates + optional inclusive→exclusive before build/persist. */
@@ -124,6 +125,7 @@ export function buildInvoicePayload(input: BuilderInvoiceInput): Invoice {
       ...(input.docType === "credit_note" && input.correctedInvoiceNumber
         ? { correctedInvoiceNumber: input.correctedInvoiceNumber }
         : {}),
+      ...(input.issuedBy ? { issuedBy: input.issuedBy } : {}),
     },
     issuer: input.issuer,
     client: input.client,

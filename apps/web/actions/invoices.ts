@@ -1,7 +1,7 @@
 "use server";
 
 import { notifyTokenRewardByEmail } from "@/lib/ai/token-reward-email";
-import { requireWorkspace } from "@/lib/auth/session";
+import { requireSession, requireWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
 import {
   addDaysIso,
@@ -41,6 +41,7 @@ import {
   type AppearanceOverride,
   type LookRef,
 } from "@invoicey/invoice-core/looks";
+import { issuedByFromProfile } from "@invoicey/invoice-tools";
 import { tryPersistInvoiceArtifacts } from "@invoicey/invoice-tools/artifacts";
 import { sendInvoiceEmailById } from "@invoicey/invoice-tools/email";
 import {
@@ -59,6 +60,7 @@ import {
   lookColumns,
   snapshotLookAtIssue,
 } from "@invoicey/invoice-tools/ops";
+import { runWithInvoiceyContext } from "@invoicey/invoice-tools/workspace-context";
 
 import type { LastInvoiceSuggestions } from "@/lib/last-invoice-suggestions";
 
@@ -321,6 +323,7 @@ async function replaceItems(
 export async function saveInvoiceDraft(formData: FormData): Promise<void> {
   await assertCan("invoices:create");
   const { workspaceId } = await requireWorkspace();
+  const user = await requireSession();
   const existingId = optionalTrim(formData.get("id"));
   const recoveryAttempt = existingId
     ? undefined
@@ -363,6 +366,7 @@ export async function saveInvoiceDraft(formData: FormData): Promise<void> {
       notes: fields.notes,
       look: fields.look,
       appearance: fields.appearance,
+      issuedBy: issuedByFromProfile(user) ?? undefined,
     });
   } catch {
     redirect(`${errBase}?invalid=${encodeURIComponent("validation")}`);
@@ -458,6 +462,7 @@ export async function saveInvoiceDraft(formData: FormData): Promise<void> {
 /** Issue: lock numbering, assign number, freeze snapshots. */
 export async function issueInvoice(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWorkspace();
+  const user = await requireSession();
   await assertCan("invoices:issue");
   const existingId = optionalTrim(formData.get("id"));
   const recoveryAttempt = existingId
@@ -580,6 +585,7 @@ export async function issueInvoice(formData: FormData): Promise<void> {
         notes: fields.notes,
         look: fields.look,
         appearance: fields.appearance,
+        issuedBy: issuedByFromProfile(user) ?? undefined,
       });
 
       const parsed = InvoiceSchema.safeParse(invoice);
@@ -664,12 +670,14 @@ export async function issueInvoice(formData: FormData): Promise<void> {
 /** Issue a saved draft by id (detail / list / bulk). */
 export async function issueSavedInvoice(formData: FormData): Promise<void> {
   await assertCan("invoices:issue");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
   }
-  const result = await issueInvoiceById({ id, workspaceId });
+  const result = await runWithInvoiceyContext({ workspaceId, userId }, () =>
+    issueInvoiceById({ id, workspaceId }),
+  );
   if (!result.ok) {
     redirect(
       `/invoices/${id}?invalid=${encodeURIComponent(result.error || "cannot_issue")}`,
@@ -696,12 +704,16 @@ export async function issueSavedInvoice(formData: FormData): Promise<void> {
 
 export async function bulkIssueInvoice(formData: FormData): Promise<void> {
   await assertCan("invoices:issue");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWorkspace();
   const ids = collectIds(formData);
   if (ids.length === 0) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
   }
-  bulkRedirect(await bulkIssueInvoices({ ids, workspaceId }));
+  bulkRedirect(
+    await runWithInvoiceyContext({ workspaceId, userId }, () =>
+      bulkIssueInvoices({ ids, workspaceId }),
+    ),
+  );
 }
 
 export async function markInvoicePaid(formData: FormData): Promise<void> {

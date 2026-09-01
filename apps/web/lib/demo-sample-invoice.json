@@ -6,7 +6,11 @@
     "dueDate": "2026-05-17",
     "duzp": "2026-05-03",
     "language": "cs",
-    "currency": "CZK"
+    "currency": "CZK",
+    "issuedBy": {
+      "name": "Filip Ditrich",
+      "gender": "him"
+    }
   },
   "issuer": {
     "id": "ca8b8d4e-2e7e-4f6a-9b7d-1f9c1234abcd",

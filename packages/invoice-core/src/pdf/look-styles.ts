@@ -306,6 +306,15 @@ export function createInvoicePdfStyles(theme: LookTheme) {
       alignItems: "flex-end",
       paddingTop: 7,
     },
+    footerIssuedBy: {
+      fontFamily: F_SANS,
+      fontSize: fs(7, factor),
+      color: muted,
+      textAlign: "left",
+      flexGrow: 1,
+      flexShrink: 1,
+      paddingRight: 12,
+    },
     footerBrand: {
       fontFamily: F_SANS,
       fontSize: fs(7, factor),

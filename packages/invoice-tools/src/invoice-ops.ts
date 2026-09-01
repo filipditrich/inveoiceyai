@@ -36,6 +36,7 @@ import {
 
 import { getDemoIssuer } from "./demo-issuer";
 import { tryPersistInvoiceArtifacts } from "./invoice-artifacts";
+import { loadIssuedByFromRequest, withIssuedBy } from "./issued-by";
 import {
   loadWorkspaceLookContext,
   lookColumns,
@@ -612,18 +613,21 @@ export async function issueInvoiceById(options: {
       const variableSymbol =
         draftParsed.data.payment.variableSymbol ??
         variableSymbolFromNumber(number);
-      const invoice: Invoice = {
-        ...draftParsed.data,
-        meta: {
-          ...draftParsed.data.meta,
-          number,
+      const invoice: Invoice = withIssuedBy(
+        {
+          ...draftParsed.data,
+          meta: {
+            ...draftParsed.data.meta,
+            number,
+          },
+          issuer: issuerSnap.data,
+          client: clientSnap.data,
+          payment: variableSymbol
+            ? { ...draftParsed.data.payment, variableSymbol }
+            : draftParsed.data.payment,
         },
-        issuer: issuerSnap.data,
-        client: clientSnap.data,
-        payment: variableSymbol
-          ? { ...draftParsed.data.payment, variableSymbol }
-          : draftParsed.data.payment,
-      };
+        await loadIssuedByFromRequest(tx),
+      );
 
       const parsed = InvoiceSchema.safeParse(invoice);
       if (!parsed.success) {

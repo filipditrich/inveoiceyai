@@ -6,6 +6,10 @@ import { redirect } from "next/navigation";
 
 import { member } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
+import {
+  parseIssuedByGender,
+  type IssuedByGender,
+} from "@invoicey/invoice-core/schema";
 
 import { auth } from "./auth";
 import { ForbiddenError, UnauthorizedError } from "./errors";
@@ -22,6 +26,8 @@ export interface SessionUser {
   image: string | null;
   /** Provider-attested (OAuth-only, ADR 0018). Gates plan domain rules. */
   emailVerified: boolean;
+  /** Czech PDF footer verb. */
+  gender: IssuedByGender;
 }
 
 export interface PlatformAdminContext {
@@ -50,6 +56,7 @@ function toSessionUser(user: {
   email: string;
   image?: string | null;
   emailVerified?: boolean;
+  gender?: unknown;
 }): SessionUser {
   return {
     id: user.id,
@@ -57,6 +64,7 @@ function toSessionUser(user: {
     email: user.email,
     image: user.image ?? null,
     emailVerified: user.emailVerified ?? false,
+    gender: parseIssuedByGender(user.gender),
   };
 }
 
