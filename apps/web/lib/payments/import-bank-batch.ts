@@ -1,4 +1,5 @@
 import "server-only";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import {
   confirmPaymentMatchProposal,
@@ -18,7 +19,6 @@ import {
   type BankProvider,
   type NormalizedTransactionBatch,
 } from "@invoicey/payment-core";
-import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { sendAutoMatchOwnerEmail } from "./send-auto-match-email";
 

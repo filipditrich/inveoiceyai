@@ -1,6 +1,7 @@
-import { registerInvoiceyMcpTools } from "@invoicey/invoice-tools/mcp";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+
+import { registerInvoiceyMcpTools } from "@invoicey/invoice-tools/mcp";
 
 /** Local stdio MCP entry (stdout is the protocol stream). */
 async function main(): Promise<void> {

@@ -1,16 +1,17 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import demoSampleInvoice from "@/lib/demo-sample-invoice.json";
 import { demoInvoiceExamples } from "@/lib/demo-invoice-examples";
-import { InvoiceSchema, type Invoice } from "@invoicey/invoice-core/schema";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
+import demoSampleInvoice from "@/lib/demo-sample-invoice.json";
+import { cn } from "@/lib/utils";
 import { BracesIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+
+import { InvoiceSchema, type Invoice } from "@invoicey/invoice-core/schema";
 
 function formatSampleJson(sample: Invoice): string {
   return JSON.stringify(sample, null, 2);
@@ -121,7 +122,7 @@ export default function InvoiceFromJsonDemoPage() {
             href="/invoices"
             className={cn(
               buttonVariants({ variant: "ghost" }),
-              "text-muted-foreground hover:text-foreground h-auto shrink-0 py-2",
+              "h-auto shrink-0 py-2 text-muted-foreground hover:text-foreground",
             )}
           >
             {t("backToInvoices")}
@@ -129,7 +130,7 @@ export default function InvoiceFromJsonDemoPage() {
         }
         description={t.rich("subtitle", {
           code: (chunks) => (
-            <code className="bg-muted text-foreground rounded-md px-1.5 py-0.5 font-mono text-xs">
+            <code className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
               {chunks}
             </code>
           ),
@@ -140,7 +141,7 @@ export default function InvoiceFromJsonDemoPage() {
       />
 
       <div className="flex flex-col gap-6 xl:flex-row xl:items-stretch">
-        <div className="border-border bg-card text-card-foreground flex w-full shrink-0 flex-col gap-4 rounded-xl border p-5 shadow-sm xl:max-w-md xl:p-6">
+        <div className="flex w-full shrink-0 flex-col gap-4 rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm xl:max-w-md xl:p-6">
           <div>
             <label
               htmlFor="invoice-json"
@@ -153,7 +154,7 @@ export default function InvoiceFromJsonDemoPage() {
               value={text}
               onChange={(event) => setText(event.target.value)}
               spellCheck={false}
-              className="border-input placeholder:text-muted-foreground focus-visible:ring-ring shadow-xs max-h-[40vh] min-h-52 w-full resize-y rounded-lg border bg-transparent px-3 py-2.5 font-mono text-[0.8125rem] leading-relaxed focus-visible:outline-none focus-visible:ring-2 xl:max-h-[min(42vh,28rem)]"
+              className="max-h-[40vh] min-h-52 w-full resize-y rounded-lg border border-input bg-transparent px-3 py-2.5 font-mono text-[0.8125rem] leading-relaxed shadow-xs placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none xl:max-h-[min(42vh,28rem)]"
               placeholder="{}"
               autoComplete="off"
             />
@@ -162,7 +163,7 @@ export default function InvoiceFromJsonDemoPage() {
             <select
               value={selectedExampleId}
               onChange={(event) => setSelectedExampleId(event.target.value)}
-              className="border-input bg-background text-foreground hover:bg-accent/50 ring-offset-background focus-visible:ring-ring inline-flex min-w-[min(17rem,100%)] rounded-lg border px-3 py-2 text-sm outline-none transition-colors focus-visible:ring-2"
+              className="inline-flex min-w-[min(17rem,100%)] rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background transition-colors outline-none hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring"
             >
               {demoInvoiceExamples.map((example) => (
                 <option key={example.id} value={example.id}>
@@ -195,11 +196,11 @@ export default function InvoiceFromJsonDemoPage() {
             </Button>
           </div>
           {error ? (
-            <pre className="border-destructive/30 bg-destructive/10 text-destructive max-h-48 overflow-auto whitespace-pre-wrap rounded-lg border px-3 py-2 text-xs">
+            <pre className="max-h-48 overflow-auto rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs whitespace-pre-wrap text-destructive">
               {error}
             </pre>
           ) : (
-            <p className="text-muted-foreground text-xs leading-relaxed">
+            <p className="text-xs leading-relaxed text-muted-foreground">
               {t("validationHelp")}
             </p>
           )}

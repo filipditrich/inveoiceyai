@@ -1,7 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { useTranslations } from "next-intl";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   AtSignIcon,
   ExternalLinkIcon,
@@ -10,14 +15,8 @@ import {
   MessageSquareIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 const HOW_IT_WORKS = [
   {
@@ -55,7 +54,7 @@ export function SlackSetupGuide() {
     <Card>
       <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2">
-          <MessageSquareIcon className="text-muted-foreground size-4" />
+          <MessageSquareIcon className="size-4 text-muted-foreground" />
           {t("title")}
         </CardTitle>
         <CardDescription>{t("description")}</CardDescription>
@@ -69,17 +68,17 @@ export function SlackSetupGuide() {
               return (
                 <li
                   key={step.titleKey}
-                  className="bg-muted/35 flex gap-3 rounded-xl border px-3 py-3"
+                  className="flex gap-3 rounded-xl border bg-muted/35 px-3 py-3"
                 >
-                  <span className="bg-background text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-lg border text-xs font-medium">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border bg-background text-xs font-medium text-muted-foreground">
                     {index + 1}
                   </span>
                   <div className="min-w-0 space-y-1">
                     <p className="flex items-center gap-1.5 text-sm font-medium">
-                      <Icon className="text-muted-foreground size-3.5" />
+                      <Icon className="size-3.5 text-muted-foreground" />
                       {t(step.titleKey)}
                     </p>
-                    <p className="text-muted-foreground text-xs leading-relaxed">
+                    <p className="text-xs leading-relaxed text-muted-foreground">
                       {t(step.bodyKey)}
                     </p>
                   </div>
@@ -91,7 +90,7 @@ export function SlackSetupGuide() {
 
         <section className="space-y-3">
           <h3 className="text-sm font-medium">{t("hitlTitle")}</h3>
-          <p className="text-muted-foreground text-sm">{t("hitlIntro")}</p>
+          <p className="text-sm text-muted-foreground">{t("hitlIntro")}</p>
           <div className="space-y-2">
             {HITL_TOOLS.map((tool) => (
               <div
@@ -99,7 +98,7 @@ export function SlackSetupGuide() {
                 className="flex flex-wrap items-baseline justify-between gap-2 rounded-lg border px-3 py-2 text-sm"
               >
                 <code className="text-xs font-medium">{tool.name}</code>
-                <span className="text-muted-foreground text-xs">
+                <span className="text-xs text-muted-foreground">
                   {t(tool.whyKey)}
                 </span>
               </div>
@@ -116,13 +115,13 @@ export function SlackSetupGuide() {
             <p className="font-medium text-amber-900 dark:text-amber-200">
               {t("accessTitle")}
             </p>
-            <p className="text-muted-foreground text-xs">{t("accessBody")}</p>
+            <p className="text-xs text-muted-foreground">{t("accessBody")}</p>
           </div>
         </div>
 
         <Link
           href="/docs/integrations/slack"
-          className="text-primary inline-flex items-center gap-1 text-sm hover:underline"
+          className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
         >
           {t("docsLink")}
           <ExternalLinkIcon className="size-3.5" />

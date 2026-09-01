@@ -1,8 +1,7 @@
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-
 import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 
 export default async function InvalidReferralPage() {
   const t = await getTranslations("Referral");
@@ -13,7 +12,7 @@ export default async function InvalidReferralPage() {
         <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em]">
           {t("invalidTitle")}
         </h1>
-        <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           {t("invalidDescription")}
         </p>
         <div className="mt-8">

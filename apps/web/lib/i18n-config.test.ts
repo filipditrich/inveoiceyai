@@ -1,11 +1,10 @@
-import { describe, expect, it } from "vitest";
-
 import {
   isAppLocale,
   negotiateLocale,
   toIntlLocale,
   toOgLocale,
 } from "@/i18n/config";
+import { describe, expect, it } from "vitest";
 
 describe("negotiateLocale", () => {
   it("returns cs for null Accept-Language", () => {

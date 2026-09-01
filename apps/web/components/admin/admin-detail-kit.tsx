@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-
 import {
   Card,
   CardContent,
@@ -49,10 +48,10 @@ export function AdminFacts({
     <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
       {items.map((item, index) => (
         <div key={index} className="min-w-0 space-y-1">
-          <dt className="text-muted-foreground text-xs uppercase tracking-[0.12em]">
+          <dt className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
             {item.label}
           </dt>
-          <dd className="min-w-0 break-words text-sm">{item.value}</dd>
+          <dd className="min-w-0 text-sm break-words">{item.value}</dd>
         </div>
       ))}
     </dl>
@@ -60,7 +59,7 @@ export function AdminFacts({
 }
 
 export function AdminEmpty({ children }: { children: ReactNode }) {
-  return <p className="text-muted-foreground text-sm">{children}</p>;
+  return <p className="text-sm text-muted-foreground">{children}</p>;
 }
 
 /** Compact table for the short, capped lists on a detail page. */
@@ -75,9 +74,9 @@ export function AdminMiniTable({
 }) {
   return (
     <div className={cn("overflow-x-auto", className)}>
-      <table className="min-w-md w-full text-sm">
+      <table className="w-full min-w-md text-sm">
         <thead>
-          <tr className="text-muted-foreground border-b text-left">
+          <tr className="border-b text-left text-muted-foreground">
             {headers.map((header, index) => (
               <th key={index} className="px-2 py-2 font-medium first:pl-0">
                 {header}

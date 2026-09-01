@@ -1,16 +1,33 @@
 "use server";
 
+import { notifyTokenRewardByEmail } from "@/lib/ai/token-reward-email";
+import { requireWorkspace } from "@/lib/auth/session";
+import { assertCan } from "@/lib/authz/can";
 import {
   addDaysIso,
   buildInvoicePayload,
   todayIsoDate,
   type BuilderLineInput,
 } from "@/lib/build-invoice";
-import { requireWorkspace } from "@/lib/auth/session";
-import { assertCan } from "@/lib/authz/can";
+import { isInvoiceDraftRecoveryAttempt } from "@/lib/invoice-draft-recovery";
 import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
-import type { LastInvoiceSuggestions } from "@/lib/last-invoice-suggestions";
 import { invoicePaymentIdentifiers } from "@/lib/payments/invoice-payment-identifiers";
+import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+import {
+  clients,
+  invoiceItems,
+  invoices,
+  issuerBusinesses,
+  issuerNumberingSchemes,
+} from "@invoicey/db";
+import { db } from "@invoicey/db/client";
+import {
+  withDbTransaction,
+  type DbTransaction,
+} from "@invoicey/db/transaction";
 import {
   ClientSnapshotSchema,
   InvoiceSchema,
@@ -24,6 +41,8 @@ import {
   type AppearanceOverride,
   type LookRef,
 } from "@invoicey/invoice-core/looks";
+import { tryPersistInvoiceArtifacts } from "@invoicey/invoice-tools/artifacts";
+import { sendInvoiceEmailById } from "@invoicey/invoice-tools/email";
 import {
   bulkCancelInvoices,
   bulkDeleteDraftInvoices,
@@ -40,26 +59,8 @@ import {
   lookColumns,
   snapshotLookAtIssue,
 } from "@invoicey/invoice-tools/ops";
-import { tryPersistInvoiceArtifacts } from "@invoicey/invoice-tools/artifacts";
-import {
-  clients,
-  invoiceItems,
-  invoices,
-  issuerBusinesses,
-  issuerNumberingSchemes,
-} from "@invoicey/db";
-import {
-  withDbTransaction,
-  type DbTransaction,
-} from "@invoicey/db/transaction";
-import { db } from "@invoicey/db/client";
-import { and, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
-import { sendInvoiceEmailById } from "@invoicey/invoice-tools/email";
-import { isInvoiceDraftRecoveryAttempt } from "@/lib/invoice-draft-recovery";
-import { notifyTokenRewardByEmail } from "@/lib/ai/token-reward-email";
+import type { LastInvoiceSuggestions } from "@/lib/last-invoice-suggestions";
 
 function optionalTrim(value: FormDataEntryValue | null): string | undefined {
   if (typeof value !== "string") {

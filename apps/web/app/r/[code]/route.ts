@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server";
-
 import {
   findUserByReferralCode,
   readReferralCodeFromHeaders,
@@ -7,6 +5,7 @@ import {
   referralCookieOptions,
 } from "@/lib/auth/referral";
 import { appOrigin } from "@/lib/email/security";
+import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 

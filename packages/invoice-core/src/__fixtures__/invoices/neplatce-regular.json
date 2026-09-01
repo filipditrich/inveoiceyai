@@ -1,69 +1,69 @@
 {
-	"meta": {
-		"docType": "invoice",
-		"number": "NP20260002",
-		"issueDate": "2026-05-03",
-		"dueDate": "2026-05-10",
-		"duzp": "2026-05-03",
-		"language": "cs",
-		"currency": "CZK"
-	},
-	"issuer": {
-		"id": "a1ce6c4d-aaaa-4bcd-9876-aaaaaaaaaaaa",
-		"name": "OSVČ Test",
-		"ico": "87654321",
-		"address": {
-			"street": "Hlavní 1",
-			"city": "Plzeň",
-			"zip": "301 00",
-			"country": "CZ"
-		},
-		"bank": {
-			"accountNumber": "19-2000145399/0800",
-			"iban": "CZ6508000000192000145399"
-		},
-		"vatPayer": false,
-		"contactEmail": "faktura@osvc-test.demo"
-	},
-	"client": {
-		"id": "b2222222-2222-2222-2222-222222222222",
-		"name": "Klient jako fyzická osoba",
-		"address": {
-			"street": "Zahradní 2",
-			"city": "Olomouc",
-			"zip": "779 00",
-			"country": "CZ"
-		}
-	},
-	"vat": {
-		"mode": "regular",
-		"suppliesAbroad": "none"
-	},
-	"payment": {
-		"method": "transfer",
-		"bankAccount": {
-			"accountNumber": "19-2000145399/0800",
-			"iban": "CZ6508000000192000145399"
-		},
-		"variableSymbol": "20260002"
-	},
-	"items": [
-		{
-			"position": 1,
-			"description": "Konfigurace",
-			"quantity": 5,
-			"unit": "hod",
-			"unitPriceWithoutVat": 800,
-			"vatRate": 0,
-			"lineSubtotal": 4000,
-			"lineVat": 0,
-			"lineTotal": 4000
-		}
-	],
-	"totals": {
-		"subtotal": 4000,
-		"vatBreakdown": [{ "rate": 0, "base": 4000, "vat": 0 }],
-		"vatTotal": 0,
-		"total": 4000
-	}
+  "meta": {
+    "docType": "invoice",
+    "number": "NP20260002",
+    "issueDate": "2026-05-03",
+    "dueDate": "2026-05-10",
+    "duzp": "2026-05-03",
+    "language": "cs",
+    "currency": "CZK"
+  },
+  "issuer": {
+    "id": "a1ce6c4d-aaaa-4bcd-9876-aaaaaaaaaaaa",
+    "name": "OSVČ Test",
+    "ico": "87654321",
+    "address": {
+      "street": "Hlavní 1",
+      "city": "Plzeň",
+      "zip": "301 00",
+      "country": "CZ"
+    },
+    "bank": {
+      "accountNumber": "19-2000145399/0800",
+      "iban": "CZ6508000000192000145399"
+    },
+    "vatPayer": false,
+    "contactEmail": "faktura@osvc-test.demo"
+  },
+  "client": {
+    "id": "b2222222-2222-2222-2222-222222222222",
+    "name": "Klient jako fyzická osoba",
+    "address": {
+      "street": "Zahradní 2",
+      "city": "Olomouc",
+      "zip": "779 00",
+      "country": "CZ"
+    }
+  },
+  "vat": {
+    "mode": "regular",
+    "suppliesAbroad": "none"
+  },
+  "payment": {
+    "method": "transfer",
+    "bankAccount": {
+      "accountNumber": "19-2000145399/0800",
+      "iban": "CZ6508000000192000145399"
+    },
+    "variableSymbol": "20260002"
+  },
+  "items": [
+    {
+      "position": 1,
+      "description": "Konfigurace",
+      "quantity": 5,
+      "unit": "hod",
+      "unitPriceWithoutVat": 800,
+      "vatRate": 0,
+      "lineSubtotal": 4000,
+      "lineVat": 0,
+      "lineTotal": 4000
+    }
+  ],
+  "totals": {
+    "subtotal": 4000,
+    "vatBreakdown": [{ "rate": 0, "base": 4000, "vat": 0 }],
+    "vatTotal": 0,
+    "total": 4000
+  }
 }

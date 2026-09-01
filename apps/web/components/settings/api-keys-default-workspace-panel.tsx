@@ -1,5 +1,6 @@
 "use client";
 
+import { useTransition } from "react";
 import { setDefaultWorkspaceAction } from "@/actions/workspace";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,12 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 import { CheckIcon, LoaderCircleIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+
+import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 
 export function ApiKeysDefaultWorkspacePanel({
   workspaces,
@@ -64,7 +65,7 @@ export function ApiKeysDefaultWorkspacePanel({
           </p>
         ) : null}
         {defaultDiverges && active ? (
-          <p className="bg-muted/60 text-muted-foreground rounded-lg px-3 py-2 text-sm leading-snug">
+          <p className="rounded-lg bg-muted/60 px-3 py-2 text-sm leading-snug text-muted-foreground">
             {t("activeDiffers", { name: active.name })}
           </p>
         ) : null}
@@ -81,12 +82,12 @@ export function ApiKeysDefaultWorkspacePanel({
                   <p className="truncate text-sm font-medium">
                     {workspace.name}
                     {isActive ? (
-                      <span className="text-muted-foreground ml-2 text-xs font-normal">
+                      <span className="ml-2 text-xs font-normal text-muted-foreground">
                         ({t("browserActive")})
                       </span>
                     ) : null}
                   </p>
-                  <p className="text-muted-foreground truncate text-xs">
+                  <p className="truncate text-xs text-muted-foreground">
                     {workspace.slug}
                   </p>
                 </div>

@@ -2,14 +2,12 @@
 
 import { requireWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
-import { assertClientsWritable } from "@/lib/entitlements/managed-clients";
 import { lookupAresByIcoCached } from "@/lib/cached-ares";
-import {
-  ClientSnapshotSchema,
-  ClientVatIdSchema,
-  IcoSchema,
-  type ClientSnapshot,
-} from "@invoicey/invoice-core/schema";
+import { assertClientsWritable } from "@/lib/entitlements/managed-clients";
+import { and, eq, sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
 import {
   clients,
   ensureClient,
@@ -18,9 +16,12 @@ import {
   mergeDuplicateClients,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { and, eq, sql } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import {
+  ClientSnapshotSchema,
+  ClientVatIdSchema,
+  IcoSchema,
+  type ClientSnapshot,
+} from "@invoicey/invoice-core/schema";
 
 function optionalTrim(value: FormDataEntryValue | null): string | undefined {
   if (typeof value !== "string") {

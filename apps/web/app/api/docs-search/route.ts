@@ -1,6 +1,5 @@
-import { createFromSource } from "fumadocs-core/search/server";
-
 import { source } from "@/lib/docs-source";
+import { createFromSource } from "fumadocs-core/search/server";
 
 /**
  * Search index for `/docs`, consumed by Fumadocs' `RootProvider`.

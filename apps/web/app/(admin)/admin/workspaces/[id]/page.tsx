@@ -1,10 +1,3 @@
-import { ArrowLeftIcon, WarehouseIcon } from "lucide-react";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getFormatter, getTranslations } from "next-intl/server";
-
-import { assignWorkspacePlanAction } from "@/actions/admin-plans";
 import {
   cancelWorkspaceInviteAction,
   deleteWorkspaceAction,
@@ -12,6 +5,7 @@ import {
   removeWorkspaceMemberAction,
   renameWorkspaceAction,
 } from "@/actions/admin";
+import { assignWorkspacePlanAction } from "@/actions/admin-plans";
 import { AdminAuditList } from "@/components/admin/admin-audit-list";
 import { AdminCopyId } from "@/components/admin/admin-copy-id";
 import {
@@ -28,10 +22,17 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { WorkspaceMark } from "@/components/workspace-mark";
 import { adminGetWorkspace } from "@/lib/admin/detail";
 import { adminSelectablePlans } from "@/lib/admin/plans";
-import { requirePlatformAdmin } from "@/lib/auth/session";
 import { formatTokenCount } from "@/lib/ai/format-tokens";
+import { requirePlatformAdmin } from "@/lib/auth/session";
+import { ArrowLeftIcon, WarehouseIcon } from "lucide-react";
+import { getFormatter, getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
 import { getWorkspaceEntitlements } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -63,7 +64,7 @@ export default async function AdminWorkspaceDetailPage({
   return (
     <div className="flex flex-1 flex-col gap-6">
       <Link
-        className="text-muted-foreground hover:text-foreground inline-flex w-fit items-center gap-1.5 text-sm"
+        className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         href="/admin/workspaces"
       >
         <ArrowLeftIcon className="size-4" />
@@ -168,7 +169,7 @@ export default async function AdminWorkspaceDetailPage({
                 <div className="space-y-2">
                   <Label htmlFor="planId">{t("plan.selectLabel")}</Label>
                   <select
-                    className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                     defaultValue={entitlementState.planId}
                     id="planId"
                     name="planId"
@@ -183,7 +184,7 @@ export default async function AdminWorkspaceDetailPage({
               </div>
               {/* Downgrades keep everything: quotas are checked on the write
                   path, so an over-limit workspace stays readable (ADR 0035). */}
-              <p className="text-muted-foreground text-xs">{t("plan.hint")}</p>
+              <p className="text-xs text-muted-foreground">{t("plan.hint")}</p>
               <SubmitButton size="sm">{t("plan.submit")}</SubmitButton>
             </form>
           </>
@@ -247,7 +248,7 @@ export default async function AdminWorkspaceDetailPage({
               />
             </div>
           </div>
-          <p className="text-muted-foreground text-xs">{t("grant.hint")}</p>
+          <p className="text-xs text-muted-foreground">{t("grant.hint")}</p>
           <SubmitButton size="sm">{t("grant.submit")}</SubmitButton>
         </form>
       </AdminSection>
@@ -270,7 +271,7 @@ export default async function AdminWorkspaceDetailPage({
                 href={`/admin/users/${member.userId}`}
               >
                 <span className="block">{member.name || member.email}</span>
-                <span className="text-muted-foreground block text-xs">
+                <span className="block text-xs text-muted-foreground">
                   {member.email}
                 </span>
               </Link>,
@@ -382,7 +383,7 @@ export default async function AdminWorkspaceDetailPage({
               required
             />
           </div>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {t("delete.hint", { count: format.number(detail.invoiceCount) })}
           </p>
           <SubmitButton size="sm" variant="destructive">

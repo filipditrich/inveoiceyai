@@ -1,9 +1,3 @@
-import { ArrowLeftIcon, UserRoundIcon } from "lucide-react";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getFormatter, getTranslations } from "next-intl/server";
-
 import { setPlatformRoleAction } from "@/actions/admin";
 import { AdminAuditList } from "@/components/admin/admin-audit-list";
 import { AdminCopyId } from "@/components/admin/admin-copy-id";
@@ -20,6 +14,12 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { adminGetUser } from "@/lib/admin/detail";
 import { requirePlatformAdmin } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
+import { ArrowLeftIcon, UserRoundIcon } from "lucide-react";
+import { getFormatter, getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -47,7 +47,7 @@ export default async function AdminUserDetailPage({
   return (
     <div className="flex flex-1 flex-col gap-6">
       <Link
-        className="text-muted-foreground hover:text-foreground inline-flex w-fit items-center gap-1.5 text-sm"
+        className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         href="/admin/users"
       >
         <ArrowLeftIcon className="size-4" />

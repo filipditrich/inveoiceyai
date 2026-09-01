@@ -1,9 +1,9 @@
+import { applyEmailDeliveryEvent } from "@/lib/email/webhook";
+import { Webhook } from "svix";
+
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
 import { parseResendDeliveryEvent } from "@invoicey/invoice-tools/email";
-import { Webhook } from "svix";
-
-import { applyEmailDeliveryEvent } from "@/lib/email/webhook";
 
 export const runtime = "nodejs";
 

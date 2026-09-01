@@ -1,30 +1,29 @@
 import "server-only";
-
+import { sendWorkspaceInviteEmail } from "@/lib/email/invite";
 import { apiKey } from "@better-auth/api-key";
-import { authSchema } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
-import { env } from "@invoicey/env/server";
 import { betterAuth } from "better-auth";
-import { APIError, createAuthMiddleware } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { mcp, organization } from "better-auth/plugins";
 
-import { sendWorkspaceInviteEmail } from "@/lib/email/invite";
+import { authSchema } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
+import { env } from "@invoicey/env/server";
 
 import {
   deviceCookieOptions,
   readDeviceTokenFromHeaders,
 } from "./device-trust";
+import { checkAcceptPolicy, checkInvitePolicy } from "./invite-policy";
 import { onSessionCreated } from "./on-session-created";
 import { takePendingDeviceToken } from "./pending-device-cookie";
 import { assignReferralCodeOnCreate } from "./referral";
-import { checkAcceptPolicy, checkInvitePolicy } from "./invite-policy";
-import { applyWorkspacePlanBootstrap } from "./workspace-plan-bootstrap";
 import {
   createPersonalWorkspace,
   resolveInitialWorkspaceId,
 } from "./workspace-bootstrap";
+import { applyWorkspacePlanBootstrap } from "./workspace-plan-bootstrap";
 
 const baseURL = env.BETTER_AUTH_URL ?? env.NEXT_PUBLIC_APP_URL;
 

@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { saveRecurringFromInvoice } from "@/actions/recurring";
 import { selectClassName } from "@/components/invoices/field";
 import { Button } from "@/components/ui/button";
@@ -14,10 +15,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { SubmitButton } from "@/components/ui/submit-button";
-import type { RecurringCadence } from "@invoicey/invoice-tools/ops";
 import { RepeatIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import * as React from "react";
+
+import type { RecurringCadence } from "@invoicey/invoice-tools/ops";
 
 function dayPreset(sourceDay: number): number {
   if (sourceDay >= 29) {

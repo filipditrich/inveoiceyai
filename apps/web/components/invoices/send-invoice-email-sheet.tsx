@@ -1,6 +1,8 @@
 "use client";
 
+import * as React from "react";
 import { sendInvoiceEmail } from "@/actions/invoices";
+import { validateEmailPreflight } from "@/components/invoices/email-preflight";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,10 +15,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { validateEmailPreflight } from "@/components/invoices/email-preflight";
 import { MailIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import * as React from "react";
 
 export type SendInvoiceEmailSheetProps = {
   invoiceId: string;
@@ -59,16 +59,16 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
         </SheetHeader>
 
         {!props.emailConfigured ? (
-          <p className="text-destructive px-4 text-sm">{t("notConfigured")}</p>
+          <p className="px-4 text-sm text-destructive">{t("notConfigured")}</p>
         ) : null}
 
         {preflight.suppressed ? (
-          <p className="text-muted-foreground px-4 text-sm">
+          <p className="px-4 text-sm text-muted-foreground">
             {t("suppressed")}
           </p>
         ) : null}
         {!preflight.suppressed && !preflight.valid ? (
-          <p className="text-destructive px-4 text-sm" role="alert">
+          <p className="px-4 text-sm text-destructive" role="alert">
             {t("invalidRecipient" as never)}
           </p>
         ) : null}
@@ -110,7 +110,7 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
           <div className="space-y-1.5">
             <Label htmlFor="email-cover">{t("coverText")}</Label>
             <textarea
-              className="border-input bg-background min-h-32 w-full rounded-md border px-3 py-2 text-sm"
+              className="min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               defaultValue={props.defaultCoverText}
               id="email-cover"
               name="coverText"
@@ -126,7 +126,7 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
             />
             {t("attachIsdoc")}
           </label>
-          <div className="text-muted-foreground space-y-1 text-xs">
+          <div className="space-y-1 text-xs text-muted-foreground">
             <p>
               <strong>{t("from")}:</strong> {props.fromPreview}
             </p>

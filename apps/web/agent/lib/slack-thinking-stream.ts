@@ -1,4 +1,3 @@
-import type { SlackEventContext } from "eve/channels/slack";
 import { cardToBlocks } from "eve/channels/slack";
 
 import {
@@ -8,6 +7,7 @@ import {
   type PendingInvoiceCard,
 } from "./slack-channel-extras";
 import { buildInvoiceCard } from "./slack-invoice-card";
+import type { SlackEventContext } from "eve/channels/slack";
 
 type TaskStatus = "pending" | "in_progress" | "complete" | "error";
 

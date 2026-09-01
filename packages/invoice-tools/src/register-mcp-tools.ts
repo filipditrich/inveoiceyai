@@ -1,4 +1,3 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
 import {
@@ -22,6 +21,7 @@ import {
   type PresetKind,
 } from "./presets";
 import { sendInvoiceEmailById } from "./send-invoice-email";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const presetKindSchema = z.enum(["issuer", "invoice_template"]);
 const jsonObjectSchema = z.record(z.string(), z.any());

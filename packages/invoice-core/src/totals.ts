@@ -1,10 +1,10 @@
-import type { z } from "zod";
 import {
   InvoiceItemSchema,
   InvoiceVatSchema,
   TotalsSchema,
   VatRateSchema,
 } from "./schema";
+import type { z } from "zod";
 
 type InvoiceVat = z.infer<typeof InvoiceVatSchema>;
 type ItemOut = z.infer<typeof InvoiceItemSchema>;

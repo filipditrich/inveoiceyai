@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-
+import { useMemo, useState } from "react";
 import { AdminCopyId } from "@/components/admin/admin-copy-id";
 import { AppDataGrid } from "@/components/data-grid/app-data-grid";
 import {
@@ -9,13 +8,11 @@ import {
   filtersFromRecord,
   recordFromFilters,
 } from "@/components/data-grid/app-filters";
-import type { Filter, FilterFieldConfig } from "@/components/reui/filters";
 import {
   dataGridFeatures,
   type DataGridFeatures,
 } from "@/components/reui/data-grid/data-grid";
 import { DataGridColumnHeader } from "@/components/reui/data-grid/data-grid-column-header";
-import type { AppLocale } from "@/i18n/config";
 import { formatDateTime } from "@/lib/format";
 import {
   useTable,
@@ -27,7 +24,10 @@ import {
 } from "@tanstack/react-table";
 import { SearchIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import Link from "next/link";
+
+import type { Filter, FilterFieldConfig } from "@/components/reui/filters";
+import type { AppLocale } from "@/i18n/config";
 
 export type AdminWorkspaceGridItem = {
   id: string;
@@ -100,7 +100,7 @@ export function AdminWorkspacesGrid({
             href={`/admin/workspaces/${row.original.id}`}
           >
             <div className="truncate font-medium">{row.original.name}</div>
-            <div className="text-muted-foreground truncate font-mono text-xs">
+            <div className="truncate font-mono text-xs text-muted-foreground">
               {row.original.slug}
             </div>
           </Link>
@@ -161,7 +161,7 @@ export function AdminWorkspacesGrid({
           />
         ),
         cell: ({ row }) => (
-          <span className="text-muted-foreground whitespace-nowrap text-xs tabular-nums">
+          <span className="text-xs whitespace-nowrap text-muted-foreground tabular-nums">
             {formatDateTime(row.original.createdAtIso, locale)}
           </span>
         ),
@@ -232,7 +232,7 @@ export function AdminWorkspacesGrid({
             filters={filters}
             onChange={handleFiltersChange}
           />
-          <p className="text-muted-foreground shrink-0 text-sm tabular-nums">
+          <p className="shrink-0 text-sm text-muted-foreground tabular-nums">
             {t("count", { count: filteredCount })}
           </p>
         </div>

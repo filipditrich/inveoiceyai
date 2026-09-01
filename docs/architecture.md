@@ -47,7 +47,6 @@ inveoiceyai/
 │   ├── db/                     Drizzle schema + Neon client + SQL migrations
 │   ├── ares/                   ARES REST v3 client
 │   ├── env/                    env schema helpers
-│   ├── config-eslint/
 │   └── config-ts/
 ├── docs/                       (this folder)
 ├── .cursor/
@@ -192,8 +191,8 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 
 - **Package manager:** `bun` (no `pnpm-lock.yaml` — see [package-management rule](../.cursor/rules/package-management.mdc) — TODO(plan-1): symlink workspace rules into `.cursor/rules/` if helpful)
 - **Type-check:** `tsc --noEmit` per package via Turborepo
-- **Lint:** ESLint flat config in `packages/config-eslint`
-- **Format:** Prettier + `prettier-plugin-tailwindcss`
+- **Lint:** Oxlint at the repo root (`oxlint.config.ts`, anti-slop + complexity) — see [ADR 0040](./decisions/0040-oxc-toolchain.md)
+- **Format:** oxfmt (`oxfmt.config.mts`) with Hub house style and Tailwind class sorting
 - **Commit hygiene:** `commitlint` + Husky `commit-msg` hook, scope enum derived from package names
 
 ## Package / app dependency map

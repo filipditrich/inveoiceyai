@@ -24,7 +24,7 @@ Forces:
 
 - The schema choices made now propagate everywhere (PDF rendering, ISDOC mapping, future MCP/Slack)
 - Adding `vat.mode` and `vat.suppliesAbroad` later means schema migration and back-filling defaults
-- The MVP needs to be *useful for the personal use case* — not a toy
+- The MVP needs to be _useful for the personal use case_ — not a toy
 
 ## Decision
 
@@ -66,7 +66,7 @@ Identifikovaná osoba is **not** modeled with a dedicated flag in MVP — it's r
   - Margin-scheme VAT for second-hand goods (special regime)
   - Travel-services special scheme
   - Cash-basis VAT registration
-  These are out of scope; users in those regimes need a different tool.
+    These are out of scope; users in those regimes need a different tool.
 
 ## Plans touched
 

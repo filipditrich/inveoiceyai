@@ -1,7 +1,8 @@
-import { sendInvoiceEmailById } from "@invoicey/invoice-tools/email";
 import { defineTool } from "eve/tools";
 import { always } from "eve/tools/approval";
 import { z } from "zod";
+
+import { sendInvoiceEmailById } from "@invoicey/invoice-tools/email";
 
 import { appOrigin } from "../lib/slack-thread";
 import { withEveToolWorkspace } from "../lib/tool-workspace";

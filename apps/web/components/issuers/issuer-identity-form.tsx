@@ -1,5 +1,7 @@
 "use client";
 
+import type { FormEvent } from "react";
+import * as React from "react";
 import { saveIssuerIdentity } from "@/actions/issuers";
 import {
   FieldGroup,
@@ -10,10 +12,9 @@ import {
 } from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { IssuerSnapshot } from "@invoicey/invoice-core/schema";
 import { useTranslations } from "next-intl";
-import type { FormEvent } from "react";
-import * as React from "react";
+
+import type { IssuerSnapshot } from "@invoicey/invoice-core/schema";
 
 export function IssuerIdentityForm(props: {
   snapshot: IssuerSnapshot;
@@ -100,7 +101,7 @@ export function IssuerIdentityForm(props: {
 
   return (
     <form className="max-w-2xl space-y-6" onSubmit={onSubmit}>
-      {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
+      {userMsg ? <p className="text-sm text-destructive">{userMsg}</p> : null}
 
       <div className="space-y-2">
         <FieldGroup label={t("icoAres")}>
@@ -225,7 +226,7 @@ export function IssuerIdentityForm(props: {
           placeholder={t("courtRecordPlaceholder")}
           value={registryNote}
         />
-        <p className="text-muted-foreground text-xs">{t("courtRecordHint")}</p>
+        <p className="text-xs text-muted-foreground">{t("courtRecordHint")}</p>
       </FieldGroup>
 
       <SubmitRow

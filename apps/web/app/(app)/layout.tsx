@@ -7,10 +7,10 @@ import {
   getUserDefaultWorkspaceId,
   listUserWorkspaces,
 } from "@/lib/auth/workspaces";
+import { can } from "@/lib/authz/can";
+
 import { getWorkspaceTokenSummary } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-
-import { can } from "@/lib/authz/can";
 
 import { AppShell } from "./app-shell";
 

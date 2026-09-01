@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (Plan 1, 2026-05-03)
+Accepted (Plan 1, 2026-05-03; formatting clause superseded by [0040](./0040-oxc-toolchain.md))
 
 ## Context
 

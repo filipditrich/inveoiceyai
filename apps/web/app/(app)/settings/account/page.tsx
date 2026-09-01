@@ -1,9 +1,6 @@
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
-
 import { LocaleSwitcher } from "@/components/locale-switcher";
-import { ThemeModeSwitcher } from "@/components/theme-toggle";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
+import { ThemeModeSwitcher } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -23,6 +20,8 @@ import {
   ShieldCheckIcon,
   UserRoundIcon,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 
 function initialsFromName(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -53,7 +52,7 @@ export default async function SettingsAccountPage() {
       <Card>
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2">
-            <UserRoundIcon className="text-muted-foreground size-4" />
+            <UserRoundIcon className="size-4 text-muted-foreground" />
             {t("profileTitle")}
           </CardTitle>
           <CardDescription>{t("profileDescription")}</CardDescription>
@@ -64,11 +63,11 @@ export default async function SettingsAccountPage() {
               {user.image ? (
                 <AvatarImage alt={user.name} src={user.image} />
               ) : null}
-              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+              <AvatarFallback className="bg-primary text-sm font-semibold text-primary-foreground">
                 {initialsFromName(user.name)}
               </AvatarFallback>
             </Avatar>
-            <p className="text-muted-foreground text-sm leading-relaxed">
+            <p className="text-sm leading-relaxed text-muted-foreground">
               {t("oauthNote")}
             </p>
           </div>
@@ -95,7 +94,7 @@ export default async function SettingsAccountPage() {
       <Card>
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2">
-            <MonitorCogIcon className="text-muted-foreground size-4" />
+            <MonitorCogIcon className="size-4 text-muted-foreground" />
             {tAppearance("title")}
           </CardTitle>
           <CardDescription>{tAppearance("description")}</CardDescription>
@@ -107,7 +106,7 @@ export default async function SettingsAccountPage() {
       <Card>
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2">
-            <LanguagesIcon className="text-muted-foreground size-4" />
+            <LanguagesIcon className="size-4 text-muted-foreground" />
             {tLocale("label")}
           </CardTitle>
           <CardDescription>
@@ -118,7 +117,7 @@ export default async function SettingsAccountPage() {
           <LocaleSwitcher />
         </CardContent>
       </Card>
-      <p className="text-muted-foreground text-xs leading-relaxed">
+      <p className="text-xs leading-relaxed text-muted-foreground">
         {tAppearance("deviceNote")}
       </p>
     </div>

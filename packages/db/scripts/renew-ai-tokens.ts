@@ -6,7 +6,6 @@
  * Dry run by default. Without --workspace, renews all due workspaces.
  */
 import "@invoicey/env/load";
-
 import { eq } from "drizzle-orm";
 
 import {

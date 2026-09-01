@@ -1,14 +1,15 @@
 import {
-  resolveLinkedSlackPrincipal,
-  tryCreateDbFromEnv,
-  type InvoiceyDb,
-} from "@invoicey/db";
-import {
   defaultSlackAuth,
   type SlackInboundMessageContext,
   type SlackInboundResult,
   type SlackMessage,
 } from "eve/channels/slack";
+
+import {
+  resolveLinkedSlackPrincipal,
+  tryCreateDbFromEnv,
+  type InvoiceyDb,
+} from "@invoicey/db";
 
 import {
   overlayInvoiceyIdentity,

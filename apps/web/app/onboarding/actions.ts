@@ -1,9 +1,9 @@
 "use server";
 
+import { auth } from "@/lib/auth/auth";
+import { getOptionalWorkspace, requireSession } from "@/lib/auth/session";
 import { createPersonalWorkspace } from "@/lib/auth/workspace-bootstrap";
 import { setUserDefaultWorkspace } from "@/lib/auth/workspaces";
-import { getOptionalWorkspace, requireSession } from "@/lib/auth/session";
-import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 

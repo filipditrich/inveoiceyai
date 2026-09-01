@@ -1,4 +1,3 @@
-import { assertCan } from "@/lib/authz/can";
 import { ApiKeysDefaultWorkspacePanel } from "@/components/settings/api-keys-default-workspace-panel";
 import { ApiKeysPanel } from "@/components/settings/api-keys-panel";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
@@ -7,9 +6,11 @@ import {
   getUserDefaultWorkspaceId,
   listUserWorkspaces,
 } from "@/lib/auth/workspaces";
-import { env } from "@invoicey/env/server";
+import { assertCan } from "@/lib/authz/can";
 import { KeyRoundIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+
+import { env } from "@invoicey/env/server";
 
 export default async function SettingsApiKeysPage() {
   await assertCan("apikeys:manage");

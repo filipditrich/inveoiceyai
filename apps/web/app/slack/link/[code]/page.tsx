@@ -1,11 +1,3 @@
-import { getSlackLinkCode, getWorkspaceName } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
-import { ClockIcon, InfoIcon, TriangleAlertIcon } from "lucide-react";
-import { headers } from "next/headers";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-
 import { BrandLogo } from "@/components/brand-logo";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import {
@@ -25,6 +17,14 @@ import {
 import { auth } from "@/lib/auth/auth";
 import { requireWorkspace } from "@/lib/auth/session";
 import { resolveSlackLinkViewState } from "@/lib/slack/link-view-state";
+import { ClockIcon, InfoIcon, TriangleAlertIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { headers } from "next/headers";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { getSlackLinkCode, getWorkspaceName } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 
 export default async function SlackLinkPage({
   params,
@@ -53,12 +53,12 @@ export default async function SlackLinkPage({
     : undefined;
 
   return (
-    <div className="bg-background relative flex min-h-svh flex-col">
+    <div className="relative flex min-h-svh flex-col bg-background">
       <div className="marketing-grid pointer-events-none absolute inset-0 opacity-[0.28]" />
       <header className="relative flex items-center justify-between gap-3 px-5 py-5 sm:px-8">
         <Link
           href="/"
-          className="focus-visible:ring-3 focus-visible:ring-ring/50 flex items-center gap-2.5 rounded-xl outline-none"
+          className="flex items-center gap-2.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           <BrandLogo size={34} priority />
           <span className="font-semibold tracking-tight">Invoicey</span>
@@ -102,7 +102,7 @@ export default async function SlackLinkPage({
                   <p className="font-medium text-amber-950 dark:text-amber-100">
                     {t("workspaceCalloutTitle")}
                   </p>
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-xs text-muted-foreground">
                     {t("workspaceHint")}
                   </p>
                 </div>
@@ -110,7 +110,7 @@ export default async function SlackLinkPage({
             ) : null}
 
             {canAct ? (
-              <p className="text-muted-foreground flex items-start gap-2 text-xs leading-relaxed">
+              <p className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
                 <ClockIcon className="mt-0.5 size-3.5 shrink-0" />
                 {t("expiresNote")}
               </p>
@@ -136,7 +136,7 @@ export default async function SlackLinkPage({
           </CardFooter>
         </Card>
         {canAct ? (
-          <p className="text-muted-foreground mx-auto mt-4 max-w-md text-center text-xs leading-relaxed">
+          <p className="mx-auto mt-4 max-w-md text-center text-xs leading-relaxed text-muted-foreground">
             {t("noEmailMatch")}
           </p>
         ) : null}
@@ -149,7 +149,7 @@ function LinkError({ message }: { message: string }) {
   return (
     <div
       role="alert"
-      className="border-destructive/25 bg-destructive/5 text-destructive flex items-start gap-2 rounded-lg border px-3 py-2.5 text-sm"
+      className="flex items-start gap-2 rounded-lg border border-destructive/25 bg-destructive/5 px-3 py-2.5 text-sm text-destructive"
     >
       <TriangleAlertIcon className="mt-0.5 size-4 shrink-0" />
       <p>{message}</p>

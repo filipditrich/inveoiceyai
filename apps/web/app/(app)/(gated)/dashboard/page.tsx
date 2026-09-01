@@ -1,17 +1,17 @@
 import { DashboardBalanceRow } from "@/components/dashboard/dashboard-balance";
-import { DashboardIssuerFilter } from "@/components/dashboard/dashboard-issuer-filter";
 import { DashboardGettingStarted } from "@/components/dashboard/dashboard-getting-started";
+import { DashboardIssuerFilter } from "@/components/dashboard/dashboard-issuer-filter";
 import { DashboardMonthlyChart } from "@/components/dashboard/dashboard-monthly-chart";
 import { DashboardRecentInvoices } from "@/components/dashboard/dashboard-recent-invoices";
 import { DashboardStatusCards } from "@/components/dashboard/dashboard-status-cards";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
+import { requireWorkspace } from "@/lib/auth/session";
 import { loadDashboardMetrics } from "@/lib/dashboard-metrics";
 import { loadIssuerOptions } from "@/lib/load-parties";
-import { requireWorkspace } from "@/lib/auth/session";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
 import { ChartNoAxesCombinedIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 
 type Search = Promise<{ issuerId?: string }>;
 

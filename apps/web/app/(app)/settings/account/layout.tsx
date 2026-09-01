@@ -1,9 +1,8 @@
-import { UserRoundIcon } from "lucide-react";
-import { getTranslations } from "next-intl/server";
-
 import { PageHeader } from "@/components/layout/page-header";
 import { SettingsNav } from "@/components/settings/settings-nav";
 import { requireSession } from "@/lib/auth/session";
+import { UserRoundIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 export default async function AccountSettingsLayout({
   children,

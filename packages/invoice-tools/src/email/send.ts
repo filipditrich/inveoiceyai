@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
 import {
@@ -6,7 +7,6 @@ import {
   type InvoiceyDb,
 } from "@invoicey/db";
 import type { EmailTemplateId } from "@invoicey/emails";
-import { eq } from "drizzle-orm";
 
 import { isValidEmailAddress, resolveTransactionalFrom } from "./from";
 import { getEmailTransport, isEmailTransportConfigured } from "./resolve";

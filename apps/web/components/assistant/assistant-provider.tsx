@@ -1,9 +1,5 @@
 "use client";
 
-import { useEveAgent, type UseEveAgentHelpers } from "eve/react";
-import type { EveMessageData } from "eve/react";
-import type { ClientSessionState, MessageStreamEvent } from "eve/client";
-import { usePathname } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -14,11 +10,12 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-
 import { ASSISTANT_CONTEXT_LIMIT_TOKENS } from "@/lib/assistant-limits";
+import { useEveAgent, type UseEveAgentHelpers } from "eve/react";
+import { usePathname } from "next/navigation";
 
-import { AssistantPanel } from "./assistant-panel";
 import { contextTokensFromEvents } from "./assistant-context";
+import { AssistantPanel } from "./assistant-panel";
 import {
   newThreadId,
   readThreadStore,
@@ -27,6 +24,8 @@ import {
   type AssistantThreadRecord,
   type AssistantThreadStore,
 } from "./assistant-threads";
+import type { ClientSessionState, MessageStreamEvent } from "eve/client";
+import type { EveMessageData } from "eve/react";
 
 export interface AssistantBalance {
   giftedRemaining: number;

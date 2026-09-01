@@ -1,14 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
-import {
-  CopyIcon,
-  LinkIcon,
-  MousePointerClickIcon,
-  UserPlusIcon,
-} from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,6 +9,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  CopyIcon,
+  LinkIcon,
+  MousePointerClickIcon,
+  UserPlusIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 export function ReferralsPanel({
   referralUrl,
@@ -41,7 +40,7 @@ export function ReferralsPanel({
       <Card>
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2">
-            <LinkIcon className="text-muted-foreground size-4" />
+            <LinkIcon className="size-4 text-muted-foreground" />
             {t("title")}
           </CardTitle>
           <CardDescription>{t("description")}</CardDescription>
@@ -60,7 +59,7 @@ export function ReferralsPanel({
               </Button>
             </div>
           ) : (
-            <p className="text-muted-foreground text-sm">{t("emptyCode")}</p>
+            <p className="text-sm text-muted-foreground">{t("emptyCode")}</p>
           )}
         </CardContent>
       </Card>
@@ -71,14 +70,14 @@ export function ReferralsPanel({
         </CardHeader>
         <CardContent className="grid gap-4 pt-5 sm:grid-cols-2">
           <div className="rounded-lg border px-4 py-3">
-            <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium uppercase tracking-wide">
+            <div className="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
               <MousePointerClickIcon className="size-3.5" />
               {t("clicks")}
             </div>
             <p className="mt-2 text-2xl font-semibold tabular-nums">{clicks}</p>
           </div>
           <div className="rounded-lg border px-4 py-3">
-            <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium uppercase tracking-wide">
+            <div className="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
               <UserPlusIcon className="size-3.5" />
               {t("signups")}
             </div>

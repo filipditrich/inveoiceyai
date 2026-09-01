@@ -4,14 +4,16 @@ import {
 } from "@/components/invoices/recurring-table";
 import { PageHeader } from "@/components/layout/page-header";
 import { requireWorkspace } from "@/lib/auth/session";
-import type { AppLocale } from "@/i18n/config";
 import { invalidMessage } from "@/lib/invalid-message";
+import { and, eq, sql } from "drizzle-orm";
+import { Repeat2Icon } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
+
 import { invoices } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { listRecurring } from "@invoicey/invoice-tools/ops";
-import { and, eq, sql } from "drizzle-orm";
-import { getLocale, getTranslations } from "next-intl/server";
-import { Repeat2Icon } from "lucide-react";
+
+import type { AppLocale } from "@/i18n/config";
 
 type Search = Promise<{ invalid?: string }>;
 
@@ -40,7 +42,7 @@ export default async function RecurringInvoicesPage({
         icon={<Repeat2Icon />}
         title={t("list.title")}
       />
-      {err ? <p className="text-destructive text-sm">{err}</p> : null}
+      {err ? <p className="text-sm text-destructive">{err}</p> : null}
       {items.length === 0 ? (
         <RecurringEmpty hasInvoices={hasInvoices} />
       ) : (

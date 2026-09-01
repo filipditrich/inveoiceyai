@@ -1,15 +1,13 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import {
   AppFilters,
   filtersFromRecord,
   recordFromFilters,
 } from "@/components/data-grid/app-filters";
-import type { Filter, FilterFieldConfig } from "@/components/reui/filters";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { InvoiceOriginProviderSchema } from "@invoicey/invoice-core/import";
-import { INVOICE_DISPLAY_STATUSES } from "@invoicey/invoice-core/status-display";
 import {
   Building2Icon,
   CalendarIcon,
@@ -17,8 +15,12 @@ import {
   TagIcon,
   UserIcon,
 } from "lucide-react";
-import { useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
+
+import { InvoiceOriginProviderSchema } from "@invoicey/invoice-core/import";
+import { INVOICE_DISPLAY_STATUSES } from "@invoicey/invoice-core/status-display";
+
+import type { Filter, FilterFieldConfig } from "@/components/reui/filters";
 
 export type PartyOption = { id: string; name: string };
 
@@ -152,7 +154,7 @@ export function InvoiceListFilters({
       />
       <div className="flex flex-wrap items-end gap-2">
         <div className="space-y-1">
-          <Label className="text-muted-foreground text-xs" htmlFor="inv-from">
+          <Label className="text-xs text-muted-foreground" htmlFor="inv-from">
             {t("from")}
           </Label>
           <Input
@@ -167,7 +169,7 @@ export function InvoiceListFilters({
           />
         </div>
         <div className="space-y-1">
-          <Label className="text-muted-foreground text-xs" htmlFor="inv-to">
+          <Label className="text-xs text-muted-foreground" htmlFor="inv-to">
             {t("to")}
           </Label>
           <Input

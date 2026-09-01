@@ -1,10 +1,10 @@
 import "server-only";
+import { eq } from "drizzle-orm";
 
 import { user } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
 import { getDefaultWorkspaceId } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
-import { eq } from "drizzle-orm";
 
 import { auth } from "./auth";
 

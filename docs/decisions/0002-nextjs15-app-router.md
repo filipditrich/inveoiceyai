@@ -39,7 +39,7 @@ Patterns inside Next.js 15:
 `apps/web` is a **Next.js 15 App Router app** using:
 
 - **RSC** as the default for every page in `(app)` route group; data is fetched directly inside the server component via `@invoicey/db`
-- **Server Actions** as the *only* mutation surface for app-level changes; each action parses input via the relevant Zod schema before touching the DB; same surface a future MCP tool will reuse
+- **Server Actions** as the _only_ mutation surface for app-level changes; each action parses input via the relevant Zod schema before touching the DB; same surface a future MCP tool will reuse
 - **Route handlers** strictly for streaming binaries and proxying external APIs
 
 `'use client'` is opt-in per component. Client components are kept small and focused (forms, modals, the data grid).

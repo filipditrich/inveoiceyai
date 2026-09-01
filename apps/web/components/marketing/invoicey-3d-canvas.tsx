@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
-import { normalizePointerPosition } from "./pointer-motion";
 import type { Invoicey3DScene } from "./invoicey-3d-scene";
 import styles from "./marketing-motion.module.css";
+import { normalizePointerPosition } from "./pointer-motion";
 
 type Invoicey3DCanvasProps = Readonly<{
   celebrationId: number;

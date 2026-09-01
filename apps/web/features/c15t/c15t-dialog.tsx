@@ -1,10 +1,6 @@
 "use client";
 
-import { useConsentManager, useHeadlessConsentUI } from "@c15t/react";
-import { BarChart3Icon, LockKeyholeIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -15,6 +11,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useConsentManager, useHeadlessConsentUI } from "@c15t/react";
+import { BarChart3Icon, LockKeyholeIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const OPTIONAL_CATEGORIES = ["measurement"] as const;
 
@@ -88,12 +87,12 @@ export function C15tDialog() {
             }
           />
 
-          <p className="text-muted-foreground px-1 pt-2 text-xs leading-relaxed">
+          <p className="px-1 pt-2 text-xs leading-relaxed text-muted-foreground">
             {t("noAds")}
           </p>
         </div>
 
-        <SheetFooter className="bg-muted/25 border-t p-5">
+        <SheetFooter className="border-t bg-muted/25 p-5">
           <Button
             className="h-10 w-full"
             disabled={pending}
@@ -139,13 +138,13 @@ function ConsentCategory({
   title: string;
 }>) {
   return (
-    <label className="bg-card shadow-xs has-disabled:cursor-default flex cursor-pointer items-start gap-3 rounded-2xl border p-4">
-      <span className="bg-brand/12 text-foreground grid size-9 shrink-0 place-items-center rounded-xl [&_svg]:size-4">
+    <label className="flex cursor-pointer items-start gap-3 rounded-2xl border bg-card p-4 shadow-xs has-disabled:cursor-default">
+      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand/12 text-foreground [&_svg]:size-4">
         {icon}
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-medium">{title}</span>
-        <span className="text-muted-foreground mt-1 block text-xs leading-relaxed">
+        <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
           {description}
         </span>
       </span>

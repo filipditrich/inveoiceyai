@@ -2,9 +2,9 @@ import { InvoiceImportForm } from "@/components/invoices/invoice-import-form";
 import { PageHeader } from "@/components/layout/page-header";
 import { requireWorkspace } from "@/lib/auth/session";
 import { loadIssuerOptions } from "@/lib/load-parties";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
 import { FileUpIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 
 export default async function InvoiceImportPage() {
   const t = await getTranslations("Invoices.import");

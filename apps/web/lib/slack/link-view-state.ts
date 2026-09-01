@@ -1,7 +1,10 @@
 import { isSlackLinkCodeOpen, type SlackLinkCodeRecord } from "@invoicey/db";
 
 export type SlackLinkViewState =
-  "not_found" | "expired" | "consumed" | "pending";
+  | "not_found"
+  | "expired"
+  | "consumed"
+  | "pending";
 
 export function resolveSlackLinkViewState(
   row: SlackLinkCodeRecord | null,

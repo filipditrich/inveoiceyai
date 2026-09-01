@@ -7,10 +7,10 @@ import {
   runWithInvoiceyContext,
   resolveWorkspaceId,
 } from "@invoicey/invoice-tools/workspace-context";
-import type { ToolContext } from "eve/tools";
 
 import { isSlackSession } from "./metering-identity";
 import { resolveSlackToolPrincipal } from "./slack-identity";
+import type { ToolContext } from "eve/tools";
 
 export type SlackToolGateError = {
   ok: false;

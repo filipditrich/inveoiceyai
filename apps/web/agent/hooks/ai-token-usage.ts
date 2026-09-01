@@ -1,3 +1,5 @@
+import { defineHook, type HookContext } from "eve/hooks";
+
 import {
   OutOfAiTokensError,
   assertHasTokens,
@@ -5,7 +7,6 @@ import {
   recordLlmUsage,
   tryCreateDbFromEnv,
 } from "@invoicey/db";
-import { defineHook, type HookContext } from "eve/hooks";
 
 import {
   isSlackSession,

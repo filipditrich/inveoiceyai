@@ -1,9 +1,7 @@
-import type { ClientOption, IssuerOption } from "@/lib/invoice-party-types";
+import { clientsAreManaged } from "@/lib/entitlements/managed-clients";
 import { ensureAllIssuerNumberingSchemes } from "@/lib/issuer-numbering";
-import {
-  ClientSnapshotSchema,
-  IssuerSnapshotSchema,
-} from "@invoicey/invoice-core/schema";
+import { and, eq, isNotNull } from "drizzle-orm";
+
 import {
   groupClientsForMerge,
   pickMergeKeepId,
@@ -12,9 +10,12 @@ import {
   issuerNumberingSchemes,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { and, eq, isNotNull } from "drizzle-orm";
+import {
+  ClientSnapshotSchema,
+  IssuerSnapshotSchema,
+} from "@invoicey/invoice-core/schema";
 
-import { clientsAreManaged } from "@/lib/entitlements/managed-clients";
+import type { ClientOption, IssuerOption } from "@/lib/invoice-party-types";
 
 export async function loadIssuerOptions(
   workspaceId: string,

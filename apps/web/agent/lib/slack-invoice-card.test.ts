@@ -1,17 +1,13 @@
+import { cardToBlocks } from "eve/channels/slack";
+import { describe, expect, it } from "vitest";
+
 import {
   getDemoIssuer,
   normalizeDraftToInvoice,
 } from "@invoicey/invoice-tools";
-import { cardToBlocks } from "eve/channels/slack";
-import { describe, expect, it } from "vitest";
 
 import { decodeAssumedMask, encodeAssumedMask } from "./invoice-card-i18n";
 import { buildInvoiceCardModel } from "./invoice-card-model";
-import {
-  buildInvoiceModelCard,
-  formatInvoiceAmount,
-  pendingCardFromToolResult,
-} from "./slack-invoice-card";
 import {
   INVOICEY_ACTIONS,
   decodeButtonValue,
@@ -20,6 +16,11 @@ import {
   encodeChangeValue,
   isInvoiceyAction,
 } from "./slack-invoice-actions";
+import {
+  buildInvoiceModelCard,
+  formatInvoiceAmount,
+  pendingCardFromToolResult,
+} from "./slack-invoice-card";
 import {
   actionRequestsNeedApproval,
   actionRequestsPauseReason,

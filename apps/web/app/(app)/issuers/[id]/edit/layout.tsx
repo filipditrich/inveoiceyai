@@ -3,11 +3,11 @@ import { IssuerEditNav } from "@/components/issuers/issuer-edit-nav";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { loadIssuerForEdit } from "@/lib/load-issuer";
 import { requireWorkspace } from "@/lib/auth/session";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { loadIssuerForEdit } from "@/lib/load-issuer";
 import { BriefcaseBusinessIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 
 type Params = Promise<{ id: string }>;
 
@@ -47,7 +47,7 @@ export default async function IssuerEditLayout({
         description={t("editSectionsHint")}
         eyebrow={
           <Link
-            className="hover:text-foreground underline-offset-4 hover:underline"
+            className="underline-offset-4 hover:text-foreground hover:underline"
             href="/issuers"
           >
             {t("title")}

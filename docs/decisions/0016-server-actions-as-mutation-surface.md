@@ -23,7 +23,7 @@ Forces:
 - Server Actions get RSC's revalidation + cookie/auth/redirect ergonomics for free
 - Route handlers force us to roll our own request validation, error responses, revalidation, redirects
 - Server Actions cannot stream binaries (so PDF/ISDOC must be route handlers)
-- We want the *same* validated payload to be processable by UI, MCP, and Slack — so the validation code must be reusable, not embedded in a route handler
+- We want the _same_ validated payload to be processable by UI, MCP, and Slack — so the validation code must be reusable, not embedded in a route handler
 
 ## Decision
 
@@ -73,7 +73,7 @@ If direct import becomes architecturally awkward (cross-app coupling), we can ex
 ### Neutral
 
 - We do not use tRPC. It would be a third valid choice; Server Actions cover the same ergonomics with less infrastructure. If we ever expose a public API, tRPC is a candidate, not Server Actions.
-- The route-handler vs. server-action split is a *thinking* exercise on every new endpoint: "is this a mutation triggered by a user action? → Server Action. Is this a binary stream or a proxy? → route handler."
+- The route-handler vs. server-action split is a _thinking_ exercise on every new endpoint: "is this a mutation triggered by a user action? → Server Action. Is this a binary stream or a proxy? → route handler."
 
 ## Plans touched
 

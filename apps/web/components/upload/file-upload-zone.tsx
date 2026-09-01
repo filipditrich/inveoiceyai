@@ -1,13 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useFileDrop } from "@/components/upload/use-file-drop";
-import { useTypedUploader } from "@/components/upload/use-typed-uploader";
 import {
   formatBytes,
   type UploadedFile,
 } from "@/components/upload/upload-helpers";
 import { UploadProgress } from "@/components/upload/upload-progress";
+import { useFileDrop } from "@/components/upload/use-file-drop";
+import { useTypedUploader } from "@/components/upload/use-typed-uploader";
 import { cn } from "@/lib/utils";
 import {
   CloudUploadIcon,
@@ -19,16 +19,18 @@ import {
 import { useTranslations } from "next-intl";
 
 type FileEndpoint =
-  "incomingInvoiceDocument" | "importedInvoicePdf" | "importedInvoiceIsdoc";
+  | "incomingInvoiceDocument"
+  | "importedInvoicePdf"
+  | "importedInvoiceIsdoc";
 
 function FileKindIcon({ type }: { type: string }) {
   if (type.startsWith("image/")) {
-    return <ImageIcon className="text-muted-foreground size-4" />;
+    return <ImageIcon className="size-4 text-muted-foreground" />;
   }
   if (type === "application/pdf") {
-    return <FileTextIcon className="text-muted-foreground size-4" />;
+    return <FileTextIcon className="size-4 text-muted-foreground" />;
   }
-  return <FileIcon className="text-muted-foreground size-4" />;
+  return <FileIcon className="size-4 text-muted-foreground" />;
 }
 
 export function FileUploadZone({
@@ -91,7 +93,7 @@ export function FileUploadZone({
         <input {...drop.inputProps} />
         <div
           className={cn(
-            "border-border mx-auto mb-3 flex size-8 items-center justify-center rounded-full border",
+            "mx-auto mb-3 flex size-8 items-center justify-center rounded-full border border-border",
             drop.isDragging && "border-primary/40 bg-primary/10",
           )}
         >
@@ -99,15 +101,15 @@ export function FileUploadZone({
             className={cn("size-4", drop.isDragging && "text-primary")}
           />
         </div>
-        <p className="text-foreground mb-0.5 text-sm font-semibold">
+        <p className="mb-0.5 text-sm font-semibold text-foreground">
           {t("dropTitle")}
         </p>
-        <p className="text-muted-foreground mb-4 text-xs">
+        <p className="mb-4 text-xs text-muted-foreground">
           {hint} · {t("hintMax", { maxSize: formatBytes(maxSize) })}
         </p>
         {isUploading ? (
           <div className="mx-auto max-w-xs space-y-2">
-            <p className="text-muted-foreground text-xs">{t("uploading")}</p>
+            <p className="text-xs text-muted-foreground">{t("uploading")}</p>
             <UploadProgress value={progress} />
           </div>
         ) : (
@@ -128,7 +130,7 @@ export function FileUploadZone({
               key={file.url}
               className="flex items-center gap-3 rounded-lg border px-3 py-2"
             >
-              <div className="border-border flex size-8 shrink-0 items-center justify-center rounded-md border">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border">
                 <FileKindIcon type={file.type} />
               </div>
               <div className="min-w-0 flex-1">

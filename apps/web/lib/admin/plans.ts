@@ -1,4 +1,6 @@
 import "server-only";
+import { recordSecurityAuditEvent } from "@/lib/auth/security-audit";
+import { eq } from "drizzle-orm";
 
 import {
   EntitlementsSchema,
@@ -15,9 +17,7 @@ import {
   type PlanRow,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { eq } from "drizzle-orm";
 
-import { recordSecurityAuditEvent } from "@/lib/auth/security-audit";
 import type { AdminMutationResult } from "@/lib/admin/mutations";
 
 export interface AdminPlanListItem {

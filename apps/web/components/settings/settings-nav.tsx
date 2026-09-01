@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { NavLinkPending } from "@/components/navigation/nav-link-pending";
+import { cn } from "@/lib/utils";
 import {
   ActivityIcon,
   Building2Icon,
@@ -15,10 +14,11 @@ import {
   UserRoundIcon,
   UsersRoundIcon,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import { NavLinkPending } from "@/components/navigation/nav-link-pending";
-import { cn } from "@/lib/utils";
+import type { LucideIcon } from "lucide-react";
 
 /**
  * Settings live behind two doors — the avatar menu opens `/settings/account/*`,
@@ -138,7 +138,7 @@ export function SettingsNav({ scope }: { scope: SettingsScope }) {
             className={cn(
               "group flex shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-colors md:items-start md:gap-3 md:px-3",
               active
-                ? "bg-brand/10 text-foreground ring-brand/15 font-medium ring-1"
+                ? "bg-brand/10 font-medium text-foreground ring-1 ring-brand/15"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
             )}
             aria-current={active ? "page" : undefined}
@@ -153,7 +153,7 @@ export function SettingsNav({ scope }: { scope: SettingsScope }) {
               <span className="block whitespace-nowrap">
                 {t(`nav.${link.key}`)}
               </span>
-              <span className="text-muted-foreground mt-0.5 hidden text-xs font-normal leading-snug md:block">
+              <span className="mt-0.5 hidden text-xs leading-snug font-normal text-muted-foreground md:block">
                 {t(`navDescriptions.${link.key}`)}
               </span>
             </span>

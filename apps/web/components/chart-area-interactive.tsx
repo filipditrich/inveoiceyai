@@ -1,9 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-
-import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Card,
   CardAction,
@@ -26,6 +23,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 export const description = "An interactive area chart";
 
@@ -160,7 +159,7 @@ export function ChartAreaInteractive() {
       <CardHeader>
         <CardTitle>Billing activity</CardTitle>
         <CardDescription>
-          <span className="@[540px]/card:block hidden">
+          <span className="hidden @[540px]/card:block">
             Demo counts — invoices issued vs exported
           </span>
           <span className="@[540px]/card:hidden">Issued vs exported</span>
@@ -173,7 +172,7 @@ export function ChartAreaInteractive() {
               setTimeRange(value[0] ?? "90d");
             }}
             variant="outline"
-            className="*:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex hidden"
+            className="hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex"
           >
             <ToggleGroupItem value="90d">Last 3 months</ToggleGroupItem>
             <ToggleGroupItem value="30d">Last 30 days</ToggleGroupItem>
@@ -188,7 +187,7 @@ export function ChartAreaInteractive() {
             }}
           >
             <SelectTrigger
-              className="**:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden flex w-40"
+              className="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
               size="sm"
               aria-label="Select a value"
             >

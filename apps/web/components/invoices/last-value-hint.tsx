@@ -14,7 +14,7 @@ export function LastValueHint({
   const t = useTranslations("Invoices.builder");
   return (
     <button
-      className="text-muted-foreground hover:text-foreground w-fit text-left text-xs underline-offset-2 hover:underline"
+      className="w-fit text-left text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
       onClick={onApply}
       type="button"
     >

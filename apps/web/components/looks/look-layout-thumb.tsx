@@ -1,6 +1,6 @@
-import type { LookBand, LookDocument } from "@invoicey/invoice-core/looks";
-
 import { cn } from "@/lib/utils";
+
+import type { LookBand, LookDocument } from "@invoicey/invoice-core/looks";
 
 function slotShade(block: string, accent: string): string {
   if (

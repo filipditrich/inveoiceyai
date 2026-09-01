@@ -2,9 +2,10 @@
 
 import { Badge } from "@/components/ui/badge";
 import { DISPLAY_STATUS_BADGE_CLASS } from "@/lib/invoice-status-ui";
-import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+
+import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
 
 export function InvoiceStatusBadge({
   status,

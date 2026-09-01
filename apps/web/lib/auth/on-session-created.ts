@@ -1,5 +1,5 @@
 import "server-only";
-
+import { appOrigin, sendNewSignInEmail } from "../email/security";
 import {
   createTrustToken,
   findTrustedDevice,
@@ -11,13 +11,12 @@ import {
 } from "./device-trust";
 import { stashPendingDeviceToken } from "./pending-device-cookie";
 import { maybePromotePlatformAdminFromAllowlist } from "./platform-admin";
-import { isEligibleForReferralAttribution } from "./referral-eligibility";
 import {
   attributeReferralFromCode,
   readReferralCodeFromHeaders,
 } from "./referral";
+import { isEligibleForReferralAttribution } from "./referral-eligibility";
 import { recordSecurityAuditEvent } from "./security-audit";
-import { appOrigin, sendNewSignInEmail } from "../email/security";
 
 type SessionRow = {
   id: string;

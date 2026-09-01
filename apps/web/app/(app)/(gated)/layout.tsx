@@ -1,5 +1,5 @@
-import { shouldGateIssuerWelcome } from "@/lib/issuer-welcome";
 import { requireWorkspace } from "@/lib/auth/session";
+import { shouldGateIssuerWelcome } from "@/lib/issuer-welcome";
 import { redirect } from "next/navigation";
 
 /**

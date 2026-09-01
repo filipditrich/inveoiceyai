@@ -1,9 +1,9 @@
 import "server-only";
-
-import { emailLocale, renderNewSignInEmail } from "@invoicey/emails";
-import { db } from "@invoicey/db/client";
-import { env } from "@invoicey/env/server";
 import { getLocale } from "next-intl/server";
+
+import { db } from "@invoicey/db/client";
+import { emailLocale, renderNewSignInEmail } from "@invoicey/emails";
+import { env } from "@invoicey/env/server";
 
 import { isEmailConfigured } from "./client";
 import { sendTransactionalEmail } from "./send";

@@ -8,13 +8,15 @@ import { ConfirmForm } from "@/components/confirm-form";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { formatInvoiceDate } from "@/lib/format";
-import type { AppLocale } from "@/i18n/config";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+
 import type {
   RecurringCadence,
   RecurringListItem,
 } from "@invoicey/invoice-tools/ops";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+
+import type { AppLocale } from "@/i18n/config";
 
 export async function RecurringTable({
   items,
@@ -44,7 +46,7 @@ export async function RecurringTable({
             <tr className="border-b align-top" key={row.scheduleId}>
               <td className="p-3">
                 <div className="font-medium">{row.name}</div>
-                <div className="text-muted-foreground text-xs">
+                <div className="text-xs text-muted-foreground">
                   {row.issuerName}
                 </div>
               </td>
@@ -162,7 +164,7 @@ export async function RecurringEmpty({
   const t = await getTranslations("Recurring");
   return (
     <div className="rounded-md border border-dashed p-8 text-center">
-      <p className="text-muted-foreground mb-3 text-sm">{t("list.empty")}</p>
+      <p className="mb-3 text-sm text-muted-foreground">{t("list.empty")}</p>
       {hasInvoices ? (
         <Button render={<Link href="/invoices" prefetch />} size="sm">
           {t("list.emptyCta")}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { AdminCopyId } from "@/components/admin/admin-copy-id";
 import { AppDataGrid } from "@/components/data-grid/app-data-grid";
 import {
@@ -8,19 +9,12 @@ import {
   recordFromFilters,
 } from "@/components/data-grid/app-filters";
 import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
-import type { Filter, FilterFieldConfig } from "@/components/reui/filters";
 import {
   dataGridFeatures,
   type DataGridFeatures,
 } from "@/components/reui/data-grid/data-grid";
 import { DataGridColumnHeader } from "@/components/reui/data-grid/data-grid-column-header";
-import type { AppLocale } from "@/i18n/config";
 import { formatInvoiceDate, formatMoney } from "@/lib/format";
-import {
-  DISPLAY_STATUS_LABELS,
-  INVOICE_DISPLAY_STATUSES,
-  type InvoiceDisplayStatus,
-} from "@invoicey/invoice-core/status-display";
 import {
   useTable,
   type ColumnDef,
@@ -31,7 +25,15 @@ import {
 } from "@tanstack/react-table";
 import { Building2Icon, SearchIcon, WarehouseIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+
+import {
+  DISPLAY_STATUS_LABELS,
+  INVOICE_DISPLAY_STATUSES,
+  type InvoiceDisplayStatus,
+} from "@invoicey/invoice-core/status-display";
+
+import type { Filter, FilterFieldConfig } from "@/components/reui/filters";
+import type { AppLocale } from "@/i18n/config";
 
 export type AdminInvoiceGridItem = {
   id: string;
@@ -349,7 +351,7 @@ export function AdminInvoicesGrid({
             filters={filters}
             onChange={handleFiltersChange}
           />
-          <p className="text-muted-foreground shrink-0 text-sm tabular-nums">
+          <p className="shrink-0 text-sm text-muted-foreground tabular-nums">
             {t("count", { count: filteredCount })}
           </p>
         </div>

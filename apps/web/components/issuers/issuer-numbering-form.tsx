@@ -1,5 +1,7 @@
 "use client";
 
+import type { FormEvent } from "react";
+import * as React from "react";
 import { saveIssuerNumbering } from "@/actions/issuers";
 import {
   FieldGroup,
@@ -12,10 +14,9 @@ import {
   DOC_TYPES,
   type NumberingSchemeDraft,
 } from "@/lib/issuer-types";
-import { nextInvoiceNumber } from "@invoicey/invoice-core/numbering";
-import type { FormEvent } from "react";
-import * as React from "react";
 import { useTranslations } from "next-intl";
+
+import { nextInvoiceNumber } from "@invoicey/invoice-core/numbering";
 
 function numberingDocTypeLabel(
   docType: (typeof DOC_TYPES)[number]["key"],
@@ -82,8 +83,8 @@ export function IssuerNumberingForm(props: {
 
   return (
     <form className="max-w-2xl space-y-6" onSubmit={onSubmit}>
-      {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
-      <p className="text-muted-foreground text-xs">
+      {userMsg ? <p className="text-sm text-destructive">{userMsg}</p> : null}
+      <p className="text-xs text-muted-foreground">
         {t("tokensHint")} {"{YYYY}"} {"{YY}"} {"{MM}"} {"{DD}"} {"{####}"}{" "}
         {"{ISSUER}"} {"{TYPE}"}.
       </p>
@@ -112,7 +113,7 @@ export function IssuerNumberingForm(props: {
           <div className="space-y-2 rounded-md border p-3" key={s.docType}>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <p className="text-sm font-medium">{label}</p>
-              <p className="text-muted-foreground text-xs tabular-nums">
+              <p className="text-xs text-muted-foreground tabular-nums">
                 {t("nextNumber", { preview: nextPreview })}
               </p>
             </div>
@@ -163,7 +164,7 @@ export function IssuerNumberingForm(props: {
               </FieldGroup>
               <FieldGroup label={t("reset")}>
                 <select
-                  className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                   onChange={(ev) => {
                     const v = ev.target.value === "never" ? "never" : "yearly";
                     setSchemeState((prev) => {

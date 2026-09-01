@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { spawnSync } from "node:child_process";
 /**
  * Eve nitro flattens tools into `__server.func/index.mjs` and does not honor
  * Next `outputFileTracingIncludes`. Copy invoice-core PDF/ISDOC assets into
@@ -8,7 +9,6 @@ import { cpSync, existsSync, readdirSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { spawnSync } from "node:child_process";
 
 const require = createRequire(import.meta.url);
 const webRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");

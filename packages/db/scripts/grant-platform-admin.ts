@@ -7,11 +7,10 @@
  * Dry run by default. Sign in once first so the account exists.
  */
 import "@invoicey/env/load";
-
 import { eq } from "drizzle-orm";
 
-import { createDb } from "../src/create-db";
 import { user as userTable, type PlatformRole } from "../src/auth-schema";
+import { createDb } from "../src/create-db";
 
 function arg(name: string): string | undefined {
   const hit = process.argv.find((a) => a.startsWith(`--${name}=`));

@@ -1,14 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
-
 import { recordAccountSecurityEventAction } from "@/actions/security";
 import { acceptWorkspaceInviteAction } from "@/actions/workspace";
-import { authClient } from "@/lib/auth/client";
 import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth/client";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function InviteAcceptClient({
   invitationId,

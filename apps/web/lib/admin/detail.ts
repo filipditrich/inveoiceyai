@@ -1,4 +1,5 @@
 import "server-only";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 
 import {
   aiTokenBalances,
@@ -14,7 +15,6 @@ import {
   type SecurityAuditEventType,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
 
 /** Detail pages read one tenant at a time; lists stay in `lists.ts`. */
 const DETAIL_ROW_CAP = 50;

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -26,7 +27,6 @@ import {
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 function initialsFromName(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -88,13 +88,13 @@ export function NavUser({
               {user.avatar ? (
                 <AvatarImage src={user.avatar} alt={user.name} />
               ) : null}
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+              <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{user.name}</span>
-              <span className="text-muted-foreground truncate text-xs">
+              <span className="truncate text-xs text-muted-foreground">
                 {user.email}
               </span>
             </div>
@@ -112,13 +112,13 @@ export function NavUser({
                     {user.avatar ? (
                       <AvatarImage src={user.avatar} alt={user.name} />
                     ) : null}
-                    <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                    <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">{user.name}</span>
-                    <span className="text-muted-foreground truncate text-xs">
+                    <span className="truncate text-xs text-muted-foreground">
                       {user.email}
                     </span>
                   </div>

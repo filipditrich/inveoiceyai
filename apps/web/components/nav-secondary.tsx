@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-
+import { NavLinkPending } from "@/components/navigation/nav-link-pending";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -11,8 +11,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-
-import { NavLinkPending } from "@/components/navigation/nav-link-pending";
 
 function renderSecondaryAnchor(url: string) {
   if (url.startsWith("/")) {
@@ -37,7 +35,7 @@ export function NavSecondary({
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>
-      <SidebarGroupLabel className="text-[0.65rem] uppercase tracking-[0.14em]">
+      <SidebarGroupLabel className="text-[0.65rem] tracking-[0.14em] uppercase">
         {groupLabel}
       </SidebarGroupLabel>
       <SidebarGroupContent>

@@ -1,3 +1,5 @@
+import { describe, expect, it } from "vitest";
+
 import {
   clientAddressIdentity,
   clientMergeGroupKey,
@@ -7,7 +9,6 @@ import {
   pickMergeKeepId,
   type ClientMergeRow,
 } from "@invoicey/db";
-import { describe, expect, it } from "vitest";
 
 function row(
   id: string,

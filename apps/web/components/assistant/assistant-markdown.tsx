@@ -50,7 +50,7 @@ function inline(text: string): ReactNode[] {
     if (token.startsWith("`")) {
       nodes.push(
         <code
-          className="bg-muted rounded px-1 py-0.5 font-mono text-[0.8em]"
+          className="rounded bg-muted px-1 py-0.5 font-mono text-[0.8em]"
           key={key++}
         >
           {token.slice(1, -1)}

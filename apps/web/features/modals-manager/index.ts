@@ -9,9 +9,7 @@ export type {
   ModalState,
 } from "@/features/modals-manager/modal-types";
 export type { ModalMode } from "@/features/modals-manager/modal-shell";
-export {
-  ModalShell,
-} from "@/features/modals-manager/modal-shell";
+export { ModalShell } from "@/features/modals-manager/modal-shell";
 export {
   ModalsProvider,
   useModalsProviderContext,

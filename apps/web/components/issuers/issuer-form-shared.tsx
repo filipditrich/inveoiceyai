@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,14 +10,14 @@ import {
   DOC_TYPES,
   type NumberingSchemeDraft,
 } from "@/lib/issuer-types";
+import { useTranslations } from "next-intl";
+
 import type { ClientDraft } from "@invoicey/ares";
 import {
   IcoSchema,
   isValidCzIban,
   suggestCzIban,
 } from "@invoicey/invoice-core/schema";
-import { useTranslations } from "next-intl";
-import * as React from "react";
 
 export { DEFAULT_TEMPLATES, DOC_TYPES, type NumberingSchemeDraft };
 
@@ -118,7 +119,7 @@ export function BankAccountFields(props: {
           value={props.accountNumber}
         />
         {props.accountHint ? (
-          <p className="text-muted-foreground text-xs">{props.accountHint}</p>
+          <p className="text-xs text-muted-foreground">{props.accountHint}</p>
         ) : null}
       </FieldGroup>
       <FieldGroup label={t("iban")}>
@@ -130,7 +131,7 @@ export function BankAccountFields(props: {
           value={props.iban}
         />
         {props.ibanHint ? (
-          <p className="text-muted-foreground text-xs">{props.ibanHint}</p>
+          <p className="text-xs text-muted-foreground">{props.ibanHint}</p>
         ) : null}
       </FieldGroup>
       <FieldGroup label={t("bic")}>
@@ -167,7 +168,7 @@ export function AssetField(props: {
           url={props.url}
         />
       ) : (
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {t("uploadUnavailable")}
         </p>
       )}
@@ -213,7 +214,10 @@ export function useInvalidQueryMessage(
 }
 
 export type AresLookupCode =
-  "invalid_ico" | "ares_no_json" | "ares_no_data" | "ares_failed";
+  | "invalid_ico"
+  | "ares_no_json"
+  | "ares_no_data"
+  | "ares_failed";
 
 export type AresLookupResult =
   | { ok: true; draft: ClientDraft }
@@ -283,7 +287,7 @@ export function SubmitRow(props: {
         {props.pending ? t("saving") : (props.label ?? t("save"))}
       </Button>
       {props.sourceLabel ? (
-        <span className="text-muted-foreground flex items-center text-xs">
+        <span className="flex items-center text-xs text-muted-foreground">
           {t("source", { source: props.sourceLabel })}
         </span>
       ) : null}

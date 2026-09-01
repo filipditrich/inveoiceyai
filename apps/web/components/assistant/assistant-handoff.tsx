@@ -1,9 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 import { useAssistant } from "./assistant-provider";
 
@@ -19,7 +19,7 @@ export function AssistantHandoff() {
   }, [router, setOpen]);
 
   return (
-    <div className="text-muted-foreground flex items-center gap-2 py-12 text-sm">
+    <div className="flex items-center gap-2 py-12 text-sm text-muted-foreground">
       <Spinner />
       {t("openingPanel")}
     </div>

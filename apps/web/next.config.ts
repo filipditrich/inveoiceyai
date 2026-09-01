@@ -1,13 +1,14 @@
+import { withBotId } from "botid/next/config";
+import { config as loadDotEnv } from "dotenv";
+import { withEve } from "eve/next";
+import { createMDX } from "fumadocs-mdx/next";
+import createNextIntlPlugin from "next-intl/plugin";
 import { execSync } from "node:child_process";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { config as loadDotEnv } from "dotenv";
-import { withBotId } from "botid/next/config";
-import { withEve } from "eve/next";
-import { createMDX } from "fumadocs-mdx/next";
+
 import type { NextConfig } from "next";
-import createNextIntlPlugin from "next-intl/plugin";
 
 /** Monorepo root — same `.env` as Drizzle (@invoicey/db); Next only reads `apps/web` by default. */
 const repoRoot = path.resolve(

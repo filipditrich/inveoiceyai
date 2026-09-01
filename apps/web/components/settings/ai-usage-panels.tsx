@@ -1,6 +1,5 @@
 "use client";
 
-import { formatTokenCount } from "@/lib/ai/format-tokens";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatTokenCount } from "@/lib/ai/format-tokens";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { AiUsageChart, type UsageDayPoint } from "./ai-usage-chart";
@@ -90,7 +90,7 @@ export function AiUsagePanels({
         </CardHeader>
         <CardContent className="pt-5">
           <p className="text-lg font-medium">{t("plan.freeName")}</p>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="mt-1 text-sm text-muted-foreground">
             {t("plan.freeIncludes", {
               monthly: formatTokenCount(balance.monthlyIncluded),
             })}
@@ -113,8 +113,8 @@ export function AiUsagePanels({
           </div>
         </CardHeader>
         <CardContent className="grid gap-6 pt-5 md:grid-cols-[minmax(0,220px)_1fr]">
-          <div className="bg-foreground text-background flex flex-col justify-between rounded-xl p-5">
-            <p className="text-xs uppercase tracking-wide opacity-70">
+          <div className="flex flex-col justify-between rounded-xl bg-foreground p-5 text-background">
+            <p className="text-xs tracking-wide uppercase opacity-70">
               {t("balance.cardLabel")}
             </p>
             <p className="mt-6 text-3xl font-semibold tracking-tight">
@@ -144,16 +144,16 @@ export function AiUsagePanels({
                 {formatTokenCount(balance.purchasedRemaining)}
               </dd>
             </div>
-            <div className="border-border flex justify-between gap-4 border-t pt-3">
+            <div className="flex justify-between gap-4 border-t border-border pt-3">
               <dt className="font-medium">{t("balance.totalLabel")}</dt>
               <dd className="font-semibold">
                 {formatTokenCount(balance.totalAvailable)}
               </dd>
             </div>
-            <p className="text-muted-foreground text-xs leading-relaxed">
+            <p className="text-xs leading-relaxed text-muted-foreground">
               {t("balance.noRollover")}
             </p>
-            <p className="text-muted-foreground text-xs leading-relaxed">
+            <p className="text-xs leading-relaxed text-muted-foreground">
               {t("balance.expiresOn", {
                 date: format.dateTime(new Date(balance.periodEndIso), {
                   dateStyle: "medium",
@@ -171,7 +171,7 @@ export function AiUsagePanels({
         </CardHeader>
         <CardContent className="pt-5">
           <AiUsageChart data={chart} />
-          <p className="text-muted-foreground mt-3 text-xs">
+          <p className="mt-3 text-xs text-muted-foreground">
             {t("chart.mcpNote")}
           </p>
         </CardContent>
@@ -184,7 +184,7 @@ export function AiUsagePanels({
         </CardHeader>
         <CardContent className="pt-0">
           {history.length === 0 ? (
-            <p className="text-muted-foreground py-6 text-sm">
+            <p className="py-6 text-sm text-muted-foreground">
               {t("history.empty")}
             </p>
           ) : (
@@ -250,7 +250,7 @@ export function AiUsagePanels({
                     <TableCell>
                       {t(`grants.trigger.${grant.trigger}`)}
                       {grant.note ? (
-                        <span className="text-muted-foreground block text-xs">
+                        <span className="block text-xs text-muted-foreground">
                           {grant.note}
                         </span>
                       ) : null}
@@ -288,7 +288,7 @@ export function AiUsagePanels({
             </div>
             {/* Honest about the stub: the buttons are disabled because there
                 is no payment path yet, not because something is broken. */}
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               {t("topup.comingSoon")}
             </p>
           </CardContent>

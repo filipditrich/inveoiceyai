@@ -1,8 +1,3 @@
-import { headers } from "next/headers";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getLocale, getTranslations } from "next-intl/server";
-
 import { InviteAcceptClient } from "@/components/settings/invite-accept-client";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,13 +7,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { AppLocale } from "@/i18n/config";
 import { auth } from "@/lib/auth/auth";
 import {
   loadInvitationDetails,
   resolveInvitationViewState,
 } from "@/lib/auth/invitation-details";
 import { formatDateTime } from "@/lib/format";
+import { getLocale, getTranslations } from "next-intl/server";
+import { headers } from "next/headers";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import type { AppLocale } from "@/i18n/config";
 
 export default async function InvitePage({
   params,
@@ -82,7 +82,7 @@ export default async function InvitePage({
               <dd className="font-medium">
                 {invitation.inviterName || invitation.inviterEmail}
                 {invitation.inviterEmail ? (
-                  <span className="text-muted-foreground block text-xs font-normal">
+                  <span className="block text-xs font-normal text-muted-foreground">
                     {invitation.inviterEmail}
                   </span>
                 ) : null}
@@ -104,18 +104,18 @@ export default async function InvitePage({
             </div>
           </dl>
 
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {t("signedInAs", { email: session.user.email })}
           </p>
 
           {state === "expired" ? (
-            <p className="text-destructive text-sm">{t("expired")}</p>
+            <p className="text-sm text-destructive">{t("expired")}</p>
           ) : null}
           {state === "unavailable" ? (
-            <p className="text-destructive text-sm">{t("unavailable")}</p>
+            <p className="text-sm text-destructive">{t("unavailable")}</p>
           ) : null}
           {state === "email_mismatch" ? (
-            <p className="text-destructive text-sm">
+            <p className="text-sm text-destructive">
               {t("emailMismatch", {
                 signedInEmail: session.user.email,
                 inviteEmail: invitation.email,

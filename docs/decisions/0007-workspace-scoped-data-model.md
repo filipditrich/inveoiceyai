@@ -30,7 +30,7 @@ Tables:
 - `client_businesses` — `workspace_id` + own fields
 - `issuer_numbering_schemes` — `workspace_id` + `issuer_id` + own fields
 - `invoices` — `workspace_id` + `issuer_id` + `client_id` + own fields
-- `invoice_items` — *no* direct `workspace_id` — they FK to `invoices` which carries it (kept normalized)
+- `invoice_items` — _no_ direct `workspace_id` — they FK to `invoices` which carries it (kept normalized)
 
 Conventions:
 
@@ -52,7 +52,7 @@ When auth lands (Plan 14), `users` and `workspace_memberships` are introduced an
 ### Negative
 
 - Boilerplate on every query: `where workspaceId equals X`. Mitigated by a base-query helper.
-- A single missed `WHERE workspace_id = …` is a tenant-leak bug. Mitigated by the helper being the *only* sanctioned way to start a query, and by tests that grep for raw queries
+- A single missed `WHERE workspace_id = …` is a tenant-leak bug. Mitigated by the helper being the _only_ sanctioned way to start a query, and by tests that grep for raw queries
 - Slight over-engineering for the single-workspace MVP; explicit cost we accept
 
 ### Neutral

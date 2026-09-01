@@ -1,6 +1,6 @@
-import demoInvoice from "./demo-sample-invoice.json";
 import { describe, expect, it } from "vitest";
 
+import demoInvoice from "./demo-sample-invoice.json";
 import { serveInvoicePdf } from "./serve-invoice-file";
 
 describe("serveInvoicePdf", () => {

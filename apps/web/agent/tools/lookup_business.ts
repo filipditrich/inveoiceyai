@@ -1,6 +1,7 @@
-import { lookupBusiness } from "@invoicey/invoice-tools";
 import { defineTool } from "eve/tools";
 import { z } from "zod";
+
+import { lookupBusiness } from "@invoicey/invoice-tools";
 
 import { withEveToolWorkspace } from "../lib/tool-workspace";
 

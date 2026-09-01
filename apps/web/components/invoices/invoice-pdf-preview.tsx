@@ -34,15 +34,15 @@ export function InvoicePdfPreview({
       style={{ aspectRatio: "210 / 297" }}
     >
       {updating ? (
-        <span className="bg-background/80 text-muted-foreground absolute right-2 top-2 z-10 rounded px-2 py-1 text-xs backdrop-blur">
+        <span className="absolute top-2 right-2 z-10 rounded bg-background/80 px-2 py-1 text-xs text-muted-foreground backdrop-blur">
           {t("updating")}
         </span>
       ) : null}
       {error ? (
-        <p className="bg-background/90 text-destructive absolute inset-x-2 top-2 z-10 rounded px-2 py-1 text-xs backdrop-blur">
+        <p className="absolute inset-x-2 top-2 z-10 rounded bg-background/90 px-2 py-1 text-xs text-destructive backdrop-blur">
           {error}
           {errorDetail ? (
-            <span className="text-muted-foreground mt-1 block font-mono text-[0.65rem] leading-snug">
+            <span className="mt-1 block font-mono text-[0.65rem] leading-snug text-muted-foreground">
               {errorDetail}
             </span>
           ) : null}
@@ -61,13 +61,13 @@ export function InvoicePdfPreview({
               aria-hidden
               className="pointer-events-none absolute inset-0 z-[5] flex items-center justify-center"
             >
-              <span className="rotate-[-28deg] select-none text-4xl font-semibold uppercase tracking-[0.35em] text-black/20">
+              <span className="rotate-[-28deg] text-4xl font-semibold tracking-[0.35em] text-black/20 uppercase select-none">
                 {t("lockedWatermark")}
               </span>
             </div>
           ) : null}
           <a
-            className="bg-background/80 text-muted-foreground absolute bottom-2 right-2 z-10 rounded px-2 py-1 text-xs underline backdrop-blur"
+            className="absolute right-2 bottom-2 z-10 rounded bg-background/80 px-2 py-1 text-xs text-muted-foreground underline backdrop-blur"
             href={url ?? undefined}
             target="_blank"
             rel="noreferrer"
@@ -77,7 +77,7 @@ export function InvoicePdfPreview({
         </>
       ) : (
         <div
-          className="text-muted-foreground absolute inset-0 flex items-center justify-center text-sm"
+          className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground"
           data-slot="pdf-frame"
         >
           {emptyLabel ?? t("empty")}

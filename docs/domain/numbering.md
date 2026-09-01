@@ -14,14 +14,14 @@ Each issuer business defines, per document type, a **numbering scheme** that pro
 
 ```ts
 const NumberingSchemeSchema = z.object({
-	id: z.string().uuid(),
-	issuerBusinessId: z.string().uuid(),
-	docType: z.enum(['invoice', 'proforma', 'advance', 'credit_note']),
-	template: z.string().min(1).max(64),
-	resetPeriod: z.enum(['yearly', 'never']),
-	counter: z.number().int().nonnegative(),
-	counterYear: z.number().int().min(2000).max(9999).optional(),
-	padding: z.number().int().min(1).max(10).default(4),
+  id: z.string().uuid(),
+  issuerBusinessId: z.string().uuid(),
+  docType: z.enum(["invoice", "proforma", "advance", "credit_note"]),
+  template: z.string().min(1).max(64),
+  resetPeriod: z.enum(["yearly", "never"]),
+  counter: z.number().int().nonnegative(),
+  counterYear: z.number().int().min(2000).max(9999).optional(),
+  padding: z.number().int().min(1).max(10).default(4),
 });
 ```
 
@@ -34,24 +34,24 @@ Persisted in `issuer_numbering_schemes` (see Plan 1 / Drizzle schema). Constrain
 
 The `template` field is a string with `{TOKEN}` placeholders. Supported tokens:
 
-| Token | Substituted with | Example (issue date 2026-05-03, counter = 7, padding = 4) |
-| --- | --- | --- |
-| `{YYYY}` | 4-digit year of issue date | `2026` |
-| `{YY}` | 2-digit year of issue date | `26` |
-| `{MM}` | 2-digit month of issue date | `05` |
-| `{DD}` | 2-digit day of issue date | `03` |
-| `{####}` | counter, zero-padded — `padding` is the number of `#` chars | `0007` |
-| `{ISSUER}` | issuer's `name` slug-cased, max 12 chars | `nfctron` |
-| `{TYPE}` | doc-type abbreviation: `FV`, `PF`, `ZF`, `DOB` | `FV` |
+| Token      | Substituted with                                            | Example (issue date 2026-05-03, counter = 7, padding = 4) |
+| ---------- | ----------------------------------------------------------- | --------------------------------------------------------- |
+| `{YYYY}`   | 4-digit year of issue date                                  | `2026`                                                    |
+| `{YY}`     | 2-digit year of issue date                                  | `26`                                                      |
+| `{MM}`     | 2-digit month of issue date                                 | `05`                                                      |
+| `{DD}`     | 2-digit day of issue date                                   | `03`                                                      |
+| `{####}`   | counter, zero-padded — `padding` is the number of `#` chars | `0007`                                                    |
+| `{ISSUER}` | issuer's `name` slug-cased, max 12 chars                    | `nfctron`                                                 |
+| `{TYPE}`   | doc-type abbreviation: `FV`, `PF`, `ZF`, `DOB`              | `FV`                                                      |
 
 Doc-type abbreviations (in Czech accounting practice):
 
-| `docType` | Abbreviation | Czech name |
-| --- | --- | --- |
-| `invoice` | `FV` | Faktura vystavená |
-| `proforma` | `PF` | Proformová faktura |
-| `advance` | `ZF` | Zálohová faktura |
-| `credit_note` | `DOB` | Dobropis (opravný daňový doklad) |
+| `docType`     | Abbreviation | Czech name                       |
+| ------------- | ------------ | -------------------------------- |
+| `invoice`     | `FV`         | Faktura vystavená                |
+| `proforma`    | `PF`         | Proformová faktura               |
+| `advance`     | `ZF`         | Zálohová faktura                 |
+| `credit_note` | `DOB`        | Dobropis (opravný daňový doklad) |
 
 The `padding` field is metadata; the actual hash count in the template determines digit count. They're kept in sync by the UI (changing `padding` rewrites `{####}` → `{#####}`).
 
@@ -71,45 +71,45 @@ The `template` is stored verbatim. Resolution happens at issue time.
 
 ```ts
 function nextInvoiceNumber(scheme: NumberingScheme, issueDate: Date): string {
-	const year = issueDate.getFullYear();
-	const month = String(issueDate.getMonth() + 1).padStart(2, '0');
-	const day = String(issueDate.getDate()).padStart(2, '0');
+  const year = issueDate.getFullYear();
+  const month = String(issueDate.getMonth() + 1).padStart(2, "0");
+  const day = String(issueDate.getDate()).padStart(2, "0");
 
-	// Determine the counter to use *for this issuance*.
-	// (Persistence + atomic increment happens in the caller; see "Atomicity" below.)
-	let next = scheme.counter + 1;
-	if (scheme.resetPeriod === 'yearly' && scheme.counterYear !== year) {
-		next = 1;
-	}
+  // Determine the counter to use *for this issuance*.
+  // (Persistence + atomic increment happens in the caller; see "Atomicity" below.)
+  let next = scheme.counter + 1;
+  if (scheme.resetPeriod === "yearly" && scheme.counterYear !== year) {
+    next = 1;
+  }
 
-	const tokens: Record<string, string> = {
-		'{YYYY}': String(year),
-		'{YY}': String(year).slice(-2),
-		'{MM}': month,
-		'{DD}': day,
-		'{ISSUER}': slugify(scheme.issuerName).slice(0, 12),
-		'{TYPE}': docTypeAbbr(scheme.docType),
-	};
+  const tokens: Record<string, string> = {
+    "{YYYY}": String(year),
+    "{YY}": String(year).slice(-2),
+    "{MM}": month,
+    "{DD}": day,
+    "{ISSUER}": slugify(scheme.issuerName).slice(0, 12),
+    "{TYPE}": docTypeAbbr(scheme.docType),
+  };
 
-	let result = scheme.template;
-	for (const [k, v] of Object.entries(tokens)) {
-		result = result.replaceAll(k, v);
-	}
+  let result = scheme.template;
+  for (const [k, v] of Object.entries(tokens)) {
+    result = result.replaceAll(k, v);
+  }
 
-	// Counter token is special — it has variable hash count
-	result = result.replace(/\{(#+)\}/g, (_, hashes: string) => {
-		return String(next).padStart(hashes.length, '0');
-	});
+  // Counter token is special — it has variable hash count
+  result = result.replace(/\{(#+)\}/g, (_, hashes: string) => {
+    return String(next).padStart(hashes.length, "0");
+  });
 
-	return result;
+  return result;
 }
 ```
 
-Inputs are pure: `scheme` (the row), `issueDate` (which year drives reset), `slugify` and `docTypeAbbr` are deterministic helpers. The function returns the *would-be* next number. Persistence happens in the server action.
+Inputs are pure: `scheme` (the row), `issueDate` (which year drives reset), `slugify` and `docTypeAbbr` are deterministic helpers. The function returns the _would-be_ next number. Persistence happens in the server action.
 
 ## Atomicity
 
-When a user issues an invoice, two things must happen *atomically*:
+When a user issues an invoice, two things must happen _atomically_:
 
 1. The numbering counter increments (and possibly resets to 1 if the year changed)
 2. The invoice row is inserted with the resolved number
@@ -141,7 +141,7 @@ If the invoice insert fails after the counter update (validation error, constrai
 
 ### Gapless numbering
 
-Czech invoicing practice strongly prefers gapless sequences (`...0006, 0007, 0008...`) without holes. The transactional approach above guarantees this for successful issuances. **Drafts do not consume numbers** — a number is only allocated at the *Issue* action, not at *Save Draft*.
+Czech invoicing practice strongly prefers gapless sequences (`...0006, 0007, 0008...`) without holes. The transactional approach above guarantees this for successful issuances. **Drafts do not consume numbers** — a number is only allocated at the _Issue_ action, not at _Save Draft_.
 
 If an issued invoice is later canceled (Plan 6 introduces `status = 'cancelled'`), the number stays consumed and the canceled invoice remains in records. This matches Czech accounting practice: you don't reuse a number, you cancel and continue.
 
@@ -189,7 +189,7 @@ The template typically omits the year token in this case: `INV-{####}` → `INV-
 
 ## UI implications (Plan 5)
 
-The issuer detail page has a *Numbering* section per doc type. Each row shows:
+The issuer detail page has a _Numbering_ section per doc type. Each row shows:
 
 - Template input (with token autocomplete)
 - Padding input (drives `{####}` width)
@@ -197,7 +197,7 @@ The issuer detail page has a *Numbering* section per doc type. Each row shows:
 - "Next number will be" preview (computed live as the user edits)
 - Current counter (read-only display + a "danger zone" override button)
 
-Changing the template after invoices have been issued is allowed. The previous numbers stay as they were (they're stored verbatim on the invoice rows). The new template applies to the *next* issuance only.
+Changing the template after invoices have been issued is allowed. The previous numbers stay as they were (they're stored verbatim on the invoice rows). The new template applies to the _next_ issuance only.
 
 ## Database
 

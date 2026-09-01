@@ -38,12 +38,12 @@ export function InvoiceLifecycleGuidance({
   return (
     <section
       aria-labelledby="lifecycle-guidance"
-      className="bg-muted/40 rounded-xl border p-4"
+      className="rounded-xl border bg-muted/40 p-4"
     >
       <h2 className="text-sm font-semibold" id="lifecycle-guidance">
         {t("lifecycleTitle" as never)}
       </h2>
-      <p className="text-muted-foreground mt-1 text-sm">
+      <p className="mt-1 text-sm text-muted-foreground">
         {t(`lifecycle.${state}.body` as never)}
       </p>
       <p className="mt-2 text-sm font-medium">

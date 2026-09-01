@@ -4,12 +4,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { getDemoIssuer } from "./demo-issuer";
-import {
-  deletePreset,
-  getPreset,
-  listPresets,
-  savePreset,
-} from "./presets";
+import { deletePreset, getPreset, listPresets, savePreset } from "./presets";
 
 describe("preset store", () => {
   let dir: string;

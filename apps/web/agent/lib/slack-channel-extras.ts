@@ -1,6 +1,5 @@
-import type { SlackChannelState } from "eve/channels/slack";
-
 import type { InvoiceCardModel } from "./invoice-card-model";
+import type { SlackChannelState } from "eve/channels/slack";
 
 /** Serializable card snapshot built from tool results for Slack finals. */
 export interface PendingInvoiceCard {

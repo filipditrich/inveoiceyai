@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import {
   updateWorkspaceAction,
   updateWorkspaceLookAction,
@@ -16,18 +17,19 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { WorkspaceRole } from "@/lib/auth/workspace-types";
+import { LoaderCircleIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
 import {
   looksForPicker,
   type LookDocument,
   type LookRef,
 } from "@invoicey/invoice-core/looks";
-import { LoaderCircleIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
+
+import type { WorkspaceRole } from "@/lib/auth/workspace-types";
 
 export function WorkspaceSettingsPanel({
   name,
@@ -107,11 +109,11 @@ export function WorkspaceSettingsPanel({
         <div className="space-y-2">
           <Label htmlFor="workspace-settings-slug">{t("slugLabel")}</Label>
           <Input id="workspace-settings-slug" value={slug} disabled readOnly />
-          <p className="text-muted-foreground text-xs">{t("slugHint")}</p>
+          <p className="text-xs text-muted-foreground">{t("slugHint")}</p>
         </div>
         <div className="space-y-2">
           <Label>{t("lookLabel")}</Label>
-          <p className="text-muted-foreground text-xs">{t("lookHint")}</p>
+          <p className="text-xs text-muted-foreground">{t("lookHint")}</p>
           <LookPicker
             allowLockedPreview={false}
             disabled={!canEdit || pending}
@@ -148,7 +150,7 @@ export function WorkspaceSettingsPanel({
           />
         </div>
         {!canEdit ? (
-          <p className="text-muted-foreground text-sm">{t("readOnly")}</p>
+          <p className="text-sm text-muted-foreground">{t("readOnly")}</p>
         ) : (
           <div className="flex flex-wrap items-center gap-3">
             <Button

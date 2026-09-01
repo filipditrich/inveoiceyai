@@ -10,6 +10,10 @@ import {
   type InvoiceSentEmailProps,
 } from "./templates/invoice-sent";
 import {
+  NewSignInEmail,
+  type NewSignInEmailProps,
+} from "./templates/new-sign-in";
+import {
   OverdueReminderEmail,
   type OverdueReminderEmailProps,
 } from "./templates/overdue-reminder";
@@ -17,10 +21,6 @@ import {
   PaymentReceivedEmail,
   type PaymentReceivedEmailProps,
 } from "./templates/payment-received";
-import {
-  NewSignInEmail,
-  type NewSignInEmailProps,
-} from "./templates/new-sign-in";
 import {
   TokenRewardEmail,
   type TokenRewardEmailProps,

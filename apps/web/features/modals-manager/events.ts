@@ -1,7 +1,11 @@
 "use client";
 
 import { createUseExternalEvents } from "@/features/modals-manager/utils/create-use-external-events";
-import type { OpenContextModal, OpenCustomModal } from "@/features/modals-manager/modal-types";
+
+import type {
+  OpenContextModal,
+  OpenCustomModal,
+} from "@/features/modals-manager/modal-types";
 
 type ModalsEvents = {
   openModal: (payload: unknown) => void;

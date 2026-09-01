@@ -20,7 +20,7 @@ Forces:
 - Performance matters — generating PDFs at edge / Function speed without 50 MB cold starts
 - Czech-diacritic support requires custom font registration; both `@react-pdf/renderer` and Puppeteer support this
 - We do not need pixel-perfect HTML-to-PDF parity (we're not reproducing a designed web page; we're rendering structured data)
-- The MVP has *one* template — not a template editor — so feature parity with HTML is not critical
+- The MVP has _one_ template — not a template editor — so feature parity with HTML is not critical
 
 ## Decision
 

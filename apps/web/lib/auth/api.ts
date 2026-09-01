@@ -1,5 +1,4 @@
 import "server-only";
-
 import { NextResponse } from "next/server";
 
 import { getOptionalWorkspace, type WorkspaceContext } from "./session";

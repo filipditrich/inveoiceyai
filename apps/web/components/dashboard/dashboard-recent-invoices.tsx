@@ -1,4 +1,3 @@
-import type { RecentInvoice } from "@/lib/dashboard-metrics";
 import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
 import {
   Table,
@@ -8,12 +7,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { AppLocale } from "@/i18n/config";
 import { formatInvoiceDate, formatMoney } from "@/lib/format";
 import { DISPLAY_STATUS_ROW_ACCENT } from "@/lib/invoice-status-ui";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
+import Link from "next/link";
+
+import type { AppLocale } from "@/i18n/config";
+import type { RecentInvoice } from "@/lib/dashboard-metrics";
 
 export async function DashboardRecentInvoices({
   rows,
@@ -25,7 +26,7 @@ export async function DashboardRecentInvoices({
 
   if (rows.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         {t("empty")}{" "}
         <Link
           className="text-primary underline-offset-4 hover:underline"
@@ -42,7 +43,7 @@ export async function DashboardRecentInvoices({
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-lg font-medium">{t("title")}</h2>
         <Link
-          className="text-muted-foreground text-sm underline-offset-4 hover:underline"
+          className="text-sm text-muted-foreground underline-offset-4 hover:underline"
           href="/invoices"
         >
           {t("viewAll")}
@@ -66,14 +67,14 @@ export async function DashboardRecentInvoices({
                   <p className="truncate font-medium tabular-nums">
                     {row.number ?? t("draft")}
                   </p>
-                  <p className="text-muted-foreground truncate text-sm">
+                  <p className="truncate text-sm text-muted-foreground">
                     {row.clientName}
                   </p>
                 </div>
                 <InvoiceStatusBadge status={row.displayStatus} />
               </div>
-              <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm tabular-nums">
-                <span className="text-foreground font-medium">
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground tabular-nums">
+                <span className="font-medium text-foreground">
                   {formatMoney(
                     Number(row.total) || 0,
                     row.currency || "CZK",

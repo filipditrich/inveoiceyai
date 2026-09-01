@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { BASE_ENTITLEMENTS, resolveEntitlements } from "./entitlements";
 import { normalizeIco } from "./clients-repo";
+import { BASE_ENTITLEMENTS, resolveEntitlements } from "./entitlements";
 import { PLAN_SEEDS } from "./plan-presets";
 
 /**

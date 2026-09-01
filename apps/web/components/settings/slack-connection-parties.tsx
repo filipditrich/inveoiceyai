@@ -1,12 +1,11 @@
 "use client";
 
-import { ArrowDownIcon, ArrowRightIcon } from "lucide-react";
 import type { ReactNode } from "react";
-
 import { BrandLogo } from "@/components/brand-logo";
 import { SlackMark } from "@/components/brand/slack-mark";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { ArrowDownIcon, ArrowRightIcon } from "lucide-react";
 
 function initialsFromLabel(value: string): string {
   const parts = value.trim().split(/\s+/).filter(Boolean);
@@ -27,15 +26,15 @@ function PartyTile({
   title: string;
 }) {
   return (
-    <div className="bg-muted/40 flex min-w-0 items-start gap-3 rounded-xl border px-3 py-3">
+    <div className="flex min-w-0 items-start gap-3 rounded-xl border bg-muted/40 px-3 py-3">
       {mark}
       <div className="min-w-0 space-y-0.5">
-        <p className="text-muted-foreground text-[11px] font-medium uppercase tracking-wide">
+        <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
           {eyebrow}
         </p>
-        <p className="wrap-break-word font-medium">{title}</p>
+        <p className="font-medium wrap-break-word">{title}</p>
         {caption ? (
-          <p className="text-muted-foreground wrap-break-word text-xs">
+          <p className="text-xs wrap-break-word text-muted-foreground">
             {caption}
           </p>
         ) : null}
@@ -85,14 +84,14 @@ export function SlackConnectionParties({
       <ArrowDownIcon
         aria-hidden
         className={cn(
-          "text-muted-foreground mx-auto size-4",
+          "mx-auto size-4 text-muted-foreground",
           !stacked && "sm:hidden",
         )}
       />
       {stacked ? null : (
         <ArrowRightIcon
           aria-hidden
-          className="text-muted-foreground hidden size-4 sm:block"
+          className="hidden size-4 text-muted-foreground sm:block"
         />
       )}
       <PartyTile
@@ -124,12 +123,12 @@ export function SignedInUserRow({
         <AvatarFallback>{initialsFromLabel(display)}</AvatarFallback>
       </Avatar>
       <div className="min-w-0">
-        <p className="text-muted-foreground text-[11px] font-medium uppercase tracking-wide">
+        <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
           {label}
         </p>
-        <p className="wrap-break-word text-sm font-medium">{display}</p>
+        <p className="text-sm font-medium wrap-break-word">{display}</p>
         {name?.trim() ? (
-          <p className="text-muted-foreground wrap-break-word text-xs">
+          <p className="text-xs wrap-break-word text-muted-foreground">
             {email}
           </p>
         ) : null}

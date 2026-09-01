@@ -1,20 +1,5 @@
 "use server";
 
-import { invitation, workspaces } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
-import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-
-import { isTrustedInvoiceImageUrl } from "@invoicey/invoice-core";
-import {
-  canApplyLook,
-  findLookDocument,
-  LookRefSchema,
-} from "@invoicey/invoice-core/looks";
-import { loadWorkspaceLookContext } from "@invoicey/invoice-tools/ops";
-
 import { auth } from "@/lib/auth/auth";
 import { ForbiddenError } from "@/lib/auth/errors";
 import { recordSecurityAuditEvent } from "@/lib/auth/security-audit";
@@ -23,13 +8,27 @@ import {
   requireSession,
   requireWorkspace,
 } from "@/lib/auth/session";
-import { assertCan } from "@/lib/authz/can";
 import {
   isOrganizationSlugConflict,
   randomSlugSuffix,
   setUserDefaultWorkspace,
   slugifyWorkspaceName,
 } from "@/lib/auth/workspaces";
+import { assertCan } from "@/lib/authz/can";
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+import { invitation, workspaces } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
+import { isTrustedInvoiceImageUrl } from "@invoicey/invoice-core";
+import {
+  canApplyLook,
+  findLookDocument,
+  LookRefSchema,
+} from "@invoicey/invoice-core/looks";
+import { loadWorkspaceLookContext } from "@invoicey/invoice-tools/ops";
 
 export type WorkspaceActionErrorCode =
   | "name_required"
@@ -45,7 +44,8 @@ export type WorkspaceActionErrorCode =
   | "invalid_look";
 
 export type WorkspaceActionResult =
-  { ok: true } | { ok: false; errorCode: WorkspaceActionErrorCode };
+  | { ok: true }
+  | { ok: false; errorCode: WorkspaceActionErrorCode };
 
 function actionError(
   error: unknown,

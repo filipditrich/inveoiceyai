@@ -1,4 +1,7 @@
 import "server-only";
+import { cache } from "react";
+import { ForbiddenError } from "@/lib/auth/errors";
+import { requireWorkspace } from "@/lib/auth/session";
 
 import {
   getWorkspaceEntitlements,
@@ -9,10 +12,6 @@ import {
   type WorkspaceEntitlements,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { cache } from "react";
-
-import { ForbiddenError } from "@/lib/auth/errors";
-import { requireWorkspace } from "@/lib/auth/session";
 
 export type { BooleanEntitlementPath, Entitlements, WorkspaceEntitlements };
 

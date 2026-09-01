@@ -1,5 +1,3 @@
-import { getTranslations } from "next-intl/server";
-
 import { saveMemberPermissionsAction } from "@/actions/member-permissions";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -12,6 +10,7 @@ import {
   type Permission,
   type PermissionOverrides,
 } from "@/lib/authz/catalog";
+import { getTranslations } from "next-intl/server";
 
 /**
  * Per-member permission overrides (ADR 0038).
@@ -42,13 +41,13 @@ export async function MemberPermissionsEditor({
   return (
     <form
       action={saveMemberPermissionsAction}
-      className="border-border mt-3 space-y-4 rounded-md border p-4"
+      className="mt-3 space-y-4 rounded-md border border-border p-4"
     >
       <input name="memberId" type="hidden" value={memberId} />
 
       <div className="space-y-1">
         <p className="text-sm font-medium">{t("title")}</p>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {changed ? t("descriptionOverridden") : t("description")}
         </p>
       </div>
@@ -70,7 +69,7 @@ export async function MemberPermissionsEditor({
               {/* Marks what the role already implies, so the reader can see
                   which boxes are a deviation rather than the baseline. */}
               {preset.has(permission) ? (
-                <span className="text-muted-foreground ml-1 text-[10px] uppercase">
+                <span className="ml-1 text-[10px] text-muted-foreground uppercase">
                   {t("fromRole")}
                 </span>
               ) : null}

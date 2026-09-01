@@ -1,9 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { openModal } from "@/features/modals-manager/events";
-import type { ModalsProviderContextProps } from "@/features/modals-manager/modal-types";
 import { IS_LOCAL_DEV } from "@/env.config.client";
+import { openModal } from "@/features/modals-manager/events";
+
+import type { ModalsProviderContextProps } from "@/features/modals-manager/modal-types";
 
 /** Dev smoke: CustomEvent openModal → ModalShell. */
 export function ModalSmokeButton() {
@@ -11,7 +12,7 @@ export function ModalSmokeButton() {
 
   return (
     <Button
-      className="text-muted-foreground text-xs"
+      className="text-xs text-muted-foreground"
       onClick={() => {
         openModal({
           mode: "dialog",
@@ -19,10 +20,10 @@ export function ModalSmokeButton() {
             const modalsCtx = ctx as ModalsProviderContextProps;
             return (
               <div className="p-6">
-                <p className="text-foreground font-medium">
+                <p className="font-medium text-foreground">
                   Globální modální systém OK
                 </p>
-                <p className="text-muted-foreground mt-2 text-sm">
+                <p className="mt-2 text-sm text-muted-foreground">
                   Zavřením vrstvy nebo tlačítkem zkontrolujte animaci uzavření.
                 </p>
                 <Button

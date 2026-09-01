@@ -1,10 +1,10 @@
 "use server";
 
-import { clients, invoices } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
+import { requireWorkspace } from "@/lib/auth/session";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 
-import { requireWorkspace } from "@/lib/auth/session";
+import { clients, invoices } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 
 export type QuickSearchResult = {
   invoices: {

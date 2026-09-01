@@ -1,9 +1,9 @@
 "use client";
 
+import { useTransition } from "react";
 import { Building2Icon, Loader2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
 
 import type { IssuerOption } from "@/lib/invoice-party-types";
 
@@ -39,13 +39,13 @@ export function DashboardIssuerFilter({
     <div className="relative">
       <Building2Icon
         aria-hidden
-        className="text-muted-foreground pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2"
+        className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
       />
       <select
         id="dashboard-issuer"
         aria-label={t("label")}
         title={t("description")}
-        className="border-input bg-background shadow-xs focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 h-8 min-w-44 max-w-56 rounded-lg border py-0 pl-8 pr-8 text-sm font-medium outline-none"
+        className="h-8 max-w-56 min-w-44 rounded-lg border border-input bg-background py-0 pr-8 pl-8 text-sm font-medium shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         defaultValue={selectedId ?? ""}
         disabled={pending}
         onChange={(event) => selectIssuer(event.target.value)}
@@ -58,7 +58,7 @@ export function DashboardIssuerFilter({
         ))}
       </select>
       {pending ? (
-        <Loader2Icon className="text-muted-foreground pointer-events-none absolute right-2.5 top-1/2 size-3.5 -translate-y-1/2 animate-spin" />
+        <Loader2Icon className="pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 animate-spin text-muted-foreground" />
       ) : null}
     </div>
   );

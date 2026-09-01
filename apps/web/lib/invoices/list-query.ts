@@ -1,4 +1,3 @@
-import { invoices } from "@invoicey/db";
 import {
   asc,
   desc,
@@ -10,6 +9,8 @@ import {
   or,
   type SQL,
 } from "drizzle-orm";
+
+import { invoices } from "@invoicey/db";
 
 import type { InvoiceSort } from "@/lib/invoices/list-sort";
 

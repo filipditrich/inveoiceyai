@@ -1,23 +1,8 @@
 "use server";
 
-import {
-  confirmPaymentMatchProposal,
-  createManualPaymentAllocation,
-  rejectPaymentMatchProposal,
-  reversePaymentAllocation,
-} from "@invoicey/db";
-import { db } from "@invoicey/db/client";
-import { sendPaymentReceivedEmailIfEnabled } from "@invoicey/invoice-tools/email";
-import {
-  decimalToMinor,
-  isValidFioTokenShape,
-  isValidMonetaTokenShape,
-} from "@invoicey/payment-core";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-
 import { requireWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
+import { normalizeFioError } from "@/lib/payments/fio-error";
 import {
   createFioConnection,
   deleteFioConnection,
@@ -34,7 +19,22 @@ import {
   testMonetaToken,
   type MonetaDiscoveredAccount,
 } from "@/lib/payments/moneta-service";
-import { normalizeFioError } from "@/lib/payments/fio-error";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+import {
+  confirmPaymentMatchProposal,
+  createManualPaymentAllocation,
+  rejectPaymentMatchProposal,
+  reversePaymentAllocation,
+} from "@invoicey/db";
+import { db } from "@invoicey/db/client";
+import { sendPaymentReceivedEmailIfEnabled } from "@invoicey/invoice-tools/email";
+import {
+  decimalToMinor,
+  isValidFioTokenShape,
+  isValidMonetaTokenShape,
+} from "@invoicey/payment-core";
 
 function field(formData: FormData, name: string): string {
   const value = formData.get(name);

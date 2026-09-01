@@ -3,8 +3,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { createAndRenderInvoice } from "./handlers";
 import { getDemoIssuer } from "./demo-issuer";
+import { createAndRenderInvoice } from "./handlers";
 import { savePreset } from "./presets";
 
 describe("createAndRenderInvoice", () => {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { canResendEmail } from "./email-preflight";
 
 describe("email resend availability", () => {

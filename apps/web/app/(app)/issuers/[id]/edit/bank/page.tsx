@@ -1,6 +1,6 @@
 import { IssuerBankForm } from "@/components/issuers/issuer-bank-form";
-import { loadIssuerForEdit } from "@/lib/load-issuer";
 import { requireWorkspace } from "@/lib/auth/session";
+import { loadIssuerForEdit } from "@/lib/load-issuer";
 
 type Params = Promise<{ id: string }>;
 type Search = Promise<{ invalid?: string }>;

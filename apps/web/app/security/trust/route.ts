@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server";
-
 import {
   deviceCookieOptions,
   trustDevice,
@@ -7,6 +5,7 @@ import {
 } from "@/lib/auth/device-trust";
 import { recordSecurityAuditEvent } from "@/lib/auth/security-audit";
 import { appOrigin } from "@/lib/email/security";
+import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState, useTransition } from "react";
 import {
   classifyImportPdfs,
   commitInvoiceImport,
@@ -20,15 +21,15 @@ import {
 } from "@/components/ui/table";
 import { FileUploadZone } from "@/components/upload/file-upload-zone";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 import {
   InvoiceOriginProviderSchema,
   buildExternalKey,
   type InvoiceOriginProvider,
 } from "@invoicey/invoice-core/import";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { useMemo, useState, useTransition } from "react";
 
 type IssuerOption = { id: string; name: string };
 
@@ -290,7 +291,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
 
   if (issuers.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         {t.rich("missingIssuer", {
           issuer: () => (
             <Link className="underline" href="/issuers">
@@ -333,7 +334,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
               }}
               type="button"
             >
-              <span className="text-muted-foreground mr-1.5 tabular-nums">
+              <span className="mr-1.5 text-muted-foreground tabular-nums">
                 {index + 1}.
               </span>
               {s.label}
@@ -348,7 +349,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
             <div className="space-y-2">
               <Label htmlFor="issuerId">{t("issuer")}</Label>
               <select
-                className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                 id="issuerId"
                 onChange={(e) => setIssuerId(e.target.value)}
                 value={issuerId}
@@ -363,7 +364,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
             <div className="space-y-2">
               <Label htmlFor="originProvider">{t("defaultOrigin")}</Label>
               <select
-                className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                 id="originProvider"
                 onChange={(e) => {
                   setOriginTouched(true);
@@ -377,7 +378,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
                   </option>
                 ))}
               </select>
-              <p className="text-muted-foreground text-xs">
+              <p className="text-xs text-muted-foreground">
                 {t("defaultOriginHint")}
               </p>
             </div>
@@ -484,7 +485,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
             </div>
           </div>
           {rows.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {t("emptyFiles")}{" "}
               <button
                 className="underline"
@@ -525,7 +526,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
                       </TableCell>
                       <TableCell>
                         <select
-                          className="border-input bg-background h-8 max-w-[10rem] rounded-md border px-2 text-xs"
+                          className="h-8 max-w-[10rem] rounded-md border border-input bg-background px-2 text-xs"
                           onChange={(e) =>
                             updateRow(index, {
                               originProvider: e.target
@@ -637,7 +638,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
             </div>
           )}
           {rows.some((r) => r.status === "needs_archive_fields") ? (
-            <p className="text-muted-foreground text-xs">{t("archiveHint")}</p>
+            <p className="text-xs text-muted-foreground">{t("archiveHint")}</p>
           ) : null}
           <div className="flex flex-wrap gap-2">
             <Button
@@ -659,10 +660,10 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
       ) : null}
 
       {message ? (
-        <p className="text-muted-foreground text-sm">{message}</p>
+        <p className="text-sm text-muted-foreground">{message}</p>
       ) : null}
       {pending ? (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {busyKey === "commit" ? t("importing") : t("working")}
         </p>
       ) : null}

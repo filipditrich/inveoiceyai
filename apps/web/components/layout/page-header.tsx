@@ -1,6 +1,6 @@
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { PanelsTopLeftIcon } from "lucide-react";
-import type { ReactNode } from "react";
 
 export function PageHeader({
   actions,
@@ -22,30 +22,30 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "from-card via-card to-brand/[0.07] relative overflow-hidden rounded-2xl border bg-gradient-to-br p-5 shadow-sm sm:p-6",
+        "relative overflow-hidden rounded-2xl border bg-gradient-to-br from-card via-card to-brand/[0.07] p-5 shadow-sm sm:p-6",
         className,
       )}
     >
       <div
         aria-hidden
-        className="bg-brand/10 absolute -right-12 -top-20 size-44 rounded-full blur-3xl"
+        className="absolute -top-20 -right-12 size-44 rounded-full bg-brand/10 blur-3xl"
       />
       <div className="relative flex flex-wrap items-start justify-between gap-5">
         <div className="flex min-w-0 items-start gap-4">
-          <div className="bg-brand/10 text-brand ring-brand/15 flex size-11 shrink-0 items-center justify-center rounded-2xl ring-1 [&_svg]:size-5">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand ring-1 ring-brand/15 [&_svg]:size-5">
             {icon ?? <PanelsTopLeftIcon aria-hidden />}
           </div>
           <div className="min-w-0">
             {eyebrow ? (
-              <p className="text-brand mb-1 text-xs font-medium uppercase tracking-[0.14em]">
+              <p className="mb-1 text-xs font-medium tracking-[0.14em] text-brand uppercase">
                 {eyebrow}
               </p>
             ) : null}
-            <h1 className="text-balance text-2xl font-semibold tracking-[-0.025em] sm:text-3xl">
+            <h1 className="text-2xl font-semibold tracking-[-0.025em] text-balance sm:text-3xl">
               {title}
             </h1>
             {description ? (
-              <div className="text-muted-foreground mt-1.5 max-w-2xl text-sm leading-relaxed">
+              <div className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                 {description}
               </div>
             ) : null}

@@ -5,16 +5,17 @@ import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
 import { clientsAreManaged } from "@/lib/entitlements/managed-clients";
 import { invalidMessage } from "@/lib/invalid-message";
+import { desc, eq } from "drizzle-orm";
+import { ContactRoundIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+
+import { clients } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import {
   ClientSnapshotSchema,
   type ClientSnapshot,
 } from "@invoicey/invoice-core/schema";
-import { clients } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
-import { desc, eq } from "drizzle-orm";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { ContactRoundIcon } from "lucide-react";
 
 type Search = Promise<{ invalid?: string }>;
 
@@ -86,16 +87,16 @@ export default async function ClientsPage({
         icon={<ContactRoundIcon />}
         title={t("title")}
       />
-      {err ? <p className="text-destructive text-sm">{err}</p> : null}
+      {err ? <p className="text-sm text-destructive">{err}</p> : null}
       {managed ? (
-        <p className="text-muted-foreground rounded-md border border-dashed px-4 py-3 text-sm">
+        <p className="rounded-md border border-dashed px-4 py-3 text-sm text-muted-foreground">
           {t("managedNotice")}
         </p>
       ) : null}
 
       {items.length === 0 ? (
         <div className="rounded-md border border-dashed p-8 text-center">
-          <p className="text-muted-foreground mb-3 text-sm">{t("empty")}</p>
+          <p className="mb-3 text-sm text-muted-foreground">{t("empty")}</p>
           {managed ? null : (
             <Button render={<Link href="/clients/new" prefetch />} size="sm">
               {t("createFirst")}

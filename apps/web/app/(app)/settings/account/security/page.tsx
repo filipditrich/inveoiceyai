@@ -1,11 +1,3 @@
-import { headers } from "next/headers";
-import { getTranslations } from "next-intl/server";
-import {
-  CheckCircle2Icon,
-  ShieldCheckIcon,
-  TriangleAlertIcon,
-} from "lucide-react";
-
 import {
   LinkedAccountsPanel,
   SecurityAuditPanel,
@@ -14,6 +6,14 @@ import {
 } from "@/components/settings/security-panels";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { auth } from "@/lib/auth/auth";
+import {
+  CheckCircle2Icon,
+  ShieldCheckIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { headers } from "next/headers";
+
 import { env } from "@invoicey/env/server";
 
 export default async function SettingsSecurityPage({
@@ -52,7 +52,7 @@ export default async function SettingsSecurityPage({
       {sp.trust === "invalid" ? (
         <div
           role="alert"
-          className="border-destructive/25 bg-destructive/5 text-destructive flex items-start gap-2 rounded-lg border px-3 py-2.5 text-sm"
+          className="flex items-start gap-2 rounded-lg border border-destructive/25 bg-destructive/5 px-3 py-2.5 text-sm text-destructive"
         >
           <TriangleAlertIcon className="mt-0.5 size-4 shrink-0" />
           <p>{t("trustInvalid")}</p>

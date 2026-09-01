@@ -11,13 +11,12 @@
  * seeded entry is indistinguishable from a hand-added one.
  */
 import "@invoicey/env/load";
-
 import { fetchAresEkonomickySubjekt } from "@invoicey/ares";
 import { ClientSnapshotSchema } from "@invoicey/invoice-core/schema";
 
 import { createDb } from "../src/create-db";
-import { getPlanByKey } from "../src/plans-repo";
 import { listPlanClients, upsertPlanClient } from "../src/plan-clients";
+import { getPlanByKey } from "../src/plans-repo";
 
 function arg(name: string): string | undefined {
   const hit = process.argv.find((a) => a.startsWith(`--${name}=`));

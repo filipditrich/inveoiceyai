@@ -1,6 +1,13 @@
 "use client";
 
 import {
+  type ReactNode,
+  useCallback,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
+import {
   bulkDeleteInvoice,
   bulkIssueInvoice,
   bulkMarkInvoicePaid,
@@ -27,8 +34,8 @@ import {
   DataGridTableRowSelect,
   DataGridTableRowSelectAll,
 } from "@/components/reui/data-grid/data-grid-table";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,17 +45,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { formatDateCs, formatMoney } from "@/lib/format";
-import type { AppLocale } from "@/i18n/config";
+import { DISPLAY_STATUS_ROW_ACCENT } from "@/lib/invoice-status-ui";
 import {
   INVOICE_SORT_KEYS,
   parseInvoiceSort,
   serializeInvoiceSort,
   type InvoiceSortKey,
 } from "@/lib/invoices/list-sort";
-import { DISPLAY_STATUS_ROW_ACCENT } from "@/lib/invoice-status-ui";
 import { cn } from "@/lib/utils";
-import { InvoiceOriginProviderSchema } from "@invoicey/invoice-core/import";
-import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
+import {
+  useTable,
+  type ColumnDef,
+  type ColumnVisibilityState,
+  type PaginationState,
+  type RowSelectionState,
+  type SortingState,
+} from "@tanstack/react-table";
 import {
   CopyIcon,
   EllipsisIcon,
@@ -61,24 +73,14 @@ import {
   WalletCardsIcon,
   XCircleIcon,
 } from "lucide-react";
-import {
-  useTable,
-  type ColumnDef,
-  type ColumnVisibilityState,
-  type PaginationState,
-  type RowSelectionState,
-  type SortingState,
-} from "@tanstack/react-table";
+import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
-import { useTranslations, useLocale } from "next-intl";
-import {
-  type ReactNode,
-  useCallback,
-  useMemo,
-  useState,
-  useTransition,
-} from "react";
+
+import { InvoiceOriginProviderSchema } from "@invoicey/invoice-core/import";
+import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
+
+import type { AppLocale } from "@/i18n/config";
 
 export type InvoiceListRow = {
   id: string;
@@ -211,7 +213,7 @@ export function InvoiceListTable({
               {row.original.number ?? t("draft")}
             </Link>
             {row.original.importCompleteness === "archive" ? (
-              <span className="text-muted-foreground ml-2 text-[0.65rem] uppercase tracking-wide">
+              <span className="ml-2 text-[0.65rem] tracking-wide text-muted-foreground uppercase">
                 {t("archive")}
               </span>
             ) : null}
@@ -231,7 +233,7 @@ export function InvoiceListTable({
           const provider = row.original.originProvider ?? "invoicey";
           const parsed = InvoiceOriginProviderSchema.safeParse(provider);
           const label = parsed.success ? tOrigin(parsed.data) : provider;
-          return <span className="text-muted-foreground text-xs">{label}</span>;
+          return <span className="text-xs text-muted-foreground">{label}</span>;
         },
         meta: { headerTitle: t("source") },
         size: 110,
@@ -429,7 +431,7 @@ export function InvoiceListTable({
         {rows.length > 0 ? (
           rows.map((row) => <InvoiceMobileCard key={row.id} row={row} />)
         ) : (
-          <p className="text-muted-foreground rounded-md border px-4 py-8 text-center text-sm">
+          <p className="rounded-md border px-4 py-8 text-center text-sm text-muted-foreground">
             {t("empty")}{" "}
             <Link className="text-primary underline" href="/invoices/new">
               {t("createFirst")}
@@ -448,7 +450,7 @@ export function InvoiceListTable({
             >
               {t("previous")}
             </Button>
-            <span className="text-muted-foreground text-xs">
+            <span className="text-xs text-muted-foreground">
               {t("pageMobile", {
                 current: String(params.page),
                 total: String(Math.ceil(total / params.pageSize)),
@@ -476,7 +478,7 @@ export function InvoiceListTable({
       </div>
 
       {barVisible ? (
-        <div className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed inset-x-0 bottom-0 z-40 border-t px-4 py-3 shadow-lg backdrop-blur">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 py-3 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3">
             <div className="min-w-0 flex-1 text-sm">
               <span className="font-medium tabular-nums">
@@ -490,7 +492,7 @@ export function InvoiceListTable({
                   : null}
               </span>
               {hasProtectedIssuedSelection ? (
-                <p className="text-muted-foreground mt-0.5 text-xs">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {t("deleteIssuedHint")}
                 </p>
               ) : null}
@@ -566,7 +568,7 @@ function InvoiceMobileCard({ row }: { row: InvoiceListRow }) {
   return (
     <article
       className={cn(
-        "bg-card space-y-3 rounded-lg border border-l-4 p-4",
+        "space-y-3 rounded-lg border border-l-4 bg-card p-4",
         DISPLAY_STATUS_ROW_ACCENT[row.displayStatus],
       )}
     >
@@ -578,7 +580,7 @@ function InvoiceMobileCard({ row }: { row: InvoiceListRow }) {
           >
             {row.number ?? t("untitledDraft")}
           </Link>
-          <p className="text-muted-foreground truncate text-sm">
+          <p className="truncate text-sm text-muted-foreground">
             {row.clientName}
           </p>
         </div>
@@ -595,17 +597,17 @@ function InvoiceMobileCard({ row }: { row: InvoiceListRow }) {
       </div>
       <dl className="grid grid-cols-2 gap-3 text-sm">
         <div>
-          <dt className="text-muted-foreground text-xs">{t("issued")}</dt>
+          <dt className="text-xs text-muted-foreground">{t("issued")}</dt>
           <dd className="tabular-nums">
             {formatDateCs(row.issueDate, locale)}
           </dd>
         </div>
         <div>
-          <dt className="text-muted-foreground text-xs">{t("due")}</dt>
+          <dt className="text-xs text-muted-foreground">{t("due")}</dt>
           <dd className="tabular-nums">{formatDateCs(row.dueDate, locale)}</dd>
         </div>
         <div className="col-span-2">
-          <dt className="text-muted-foreground text-xs">{t("total")}</dt>
+          <dt className="text-xs text-muted-foreground">{t("total")}</dt>
           <dd className="font-medium tabular-nums">
             {formatMoney(Number(row.total) || 0, row.currency || "CZK", locale)}
           </dd>

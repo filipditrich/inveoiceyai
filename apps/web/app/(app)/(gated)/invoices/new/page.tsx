@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { InvoiceBuilderForm } from "@/components/invoices/invoice-builder-form";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,6 @@ import {
   loadLookCatalog,
   loadWorkspaceDefaultLook,
 } from "@/lib/load-workspace-look";
-import { getTranslations } from "next-intl/server";
 import {
   BookOpenIcon,
   ExternalLinkIcon,
@@ -17,8 +17,8 @@ import {
   FilePenLineIcon,
   QrCodeIcon,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 type Search = Promise<{ invalid?: string }>;
 
@@ -127,13 +127,13 @@ function PageExplanation({
   title: string;
 }) {
   return (
-    <div className="bg-card flex items-start gap-3 rounded-lg border p-4">
-      <span className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg [&_svg]:size-4">
+    <div className="flex items-start gap-3 rounded-lg border bg-card p-4">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary [&_svg]:size-4">
         {icon}
       </span>
       <div>
         <p className="text-sm font-medium">{title}</p>
-        <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
           {description}
         </p>
       </div>

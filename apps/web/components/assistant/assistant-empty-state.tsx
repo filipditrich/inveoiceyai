@@ -34,7 +34,7 @@ export function AssistantEmptyState() {
       />
       <div className="flex max-w-sm flex-col gap-1">
         <p className="text-sm font-medium">{t("title")}</p>
-        <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
+        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <div className="flex w-full flex-col gap-2 text-left">
@@ -42,7 +42,7 @@ export function AssistantEmptyState() {
           const prompt = t(`suggestions.${key}`);
           return (
             <Button
-              className="h-auto justify-start whitespace-normal py-2 text-left"
+              className="h-auto justify-start py-2 text-left whitespace-normal"
               disabled={!session || session.agent.status !== "ready"}
               key={key}
               onClick={() => void session?.agent.send(prompt)}

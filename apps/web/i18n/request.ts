@@ -1,9 +1,8 @@
-import { cookies, headers } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
+import { cookies, headers } from "next/headers";
 
 import {
   APP_TIME_ZONE,
-  DEFAULT_LOCALE,
   isAppLocale,
   LOCALE_COOKIE,
   negotiateLocale,

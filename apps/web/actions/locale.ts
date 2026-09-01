@@ -1,9 +1,8 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
-
 import { isAppLocale, LOCALE_COOKIE, type AppLocale } from "@/i18n/config";
+import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 /** Persist UI locale preference (no URL prefix). */
 export async function setLocale(locale: AppLocale): Promise<void> {

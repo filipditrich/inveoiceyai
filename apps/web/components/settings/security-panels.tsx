@@ -1,26 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { toast } from "sonner";
-import {
-  CheckCircle2Icon,
-  HistoryIcon,
-  Link2Icon,
-  LoaderCircleIcon,
-  MonitorSmartphoneIcon,
-  ShieldCheckIcon,
-} from "lucide-react";
-
 import {
   getSecurityAuditAction,
   getTrustedDevicesAction,
   recordAccountSecurityEventAction,
   revokeTrustedDeviceAction,
 } from "@/actions/security";
-import { authClient } from "@/lib/auth/client";
-import type { AppLocale } from "@/i18n/config";
-import { formatDateTime } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +16,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { authClient } from "@/lib/auth/client";
+import { formatDateTime } from "@/lib/format";
+import {
+  CheckCircle2Icon,
+  HistoryIcon,
+  Link2Icon,
+  LoaderCircleIcon,
+  MonitorSmartphoneIcon,
+  ShieldCheckIcon,
+} from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { toast } from "sonner";
+
+import type { AppLocale } from "@/i18n/config";
 
 type AccountRow = {
   id: string;
@@ -203,19 +203,19 @@ export function LinkedAccountsPanel({
     <Card>
       <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2">
-          <Link2Icon className="text-muted-foreground size-4" />
+          <Link2Icon className="size-4 text-muted-foreground" />
           {t("title")}
         </CardTitle>
         <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 pt-5">
         {pending && accounts.length === 0 ? (
-          <div className="text-muted-foreground flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-6 text-sm">
+          <div className="flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-6 text-sm text-muted-foreground">
             <LoaderCircleIcon className="size-4 animate-spin" />
             {t("loading")}
           </div>
         ) : configuredProviders.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("noProviders")}</p>
+          <p className="text-sm text-muted-foreground">{t("noProviders")}</p>
         ) : (
           configuredProviders.map((provider) => {
             const isLinked = linked.has(provider);
@@ -225,7 +225,7 @@ export function LinkedAccountsPanel({
                 className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5"
               >
                 <div className="flex items-center gap-3">
-                  <div className="bg-muted flex size-9 items-center justify-center rounded-md">
+                  <div className="flex size-9 items-center justify-center rounded-md bg-muted">
                     <ProviderIcon provider={provider} />
                   </div>
                   <div className="text-sm">
@@ -370,7 +370,7 @@ export function SessionsPanel({
       <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 border-b">
         <div className="space-y-1.5">
           <CardTitle className="flex items-center gap-2">
-            <MonitorSmartphoneIcon className="text-muted-foreground size-4" />
+            <MonitorSmartphoneIcon className="size-4 text-muted-foreground" />
             {t("title")}
           </CardTitle>
           <CardDescription>{t("description")}</CardDescription>
@@ -387,12 +387,12 @@ export function SessionsPanel({
       </CardHeader>
       <CardContent className="space-y-3 pt-5">
         {pending && sessions.length === 0 ? (
-          <div className="text-muted-foreground flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
+          <div className="flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-5 text-sm text-muted-foreground">
             <LoaderCircleIcon className="size-4 animate-spin" />
             {t("loading")}
           </div>
         ) : sessions.length === 0 ? (
-          <div className="text-muted-foreground flex items-start gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
+          <div className="flex items-start gap-2 rounded-lg border border-dashed px-4 py-5 text-sm text-muted-foreground">
             <MonitorSmartphoneIcon className="mt-0.5 size-4 shrink-0" />
             <p>{t("emptyHint")}</p>
           </div>
@@ -485,19 +485,19 @@ export function TrustedDevicesPanel() {
     <Card>
       <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2">
-          <ShieldCheckIcon className="text-muted-foreground size-4" />
+          <ShieldCheckIcon className="size-4 text-muted-foreground" />
           {t("title")}
         </CardTitle>
         <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 pt-5">
         {pending && devices.length === 0 ? (
-          <div className="text-muted-foreground flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
+          <div className="flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-5 text-sm text-muted-foreground">
             <LoaderCircleIcon className="size-4 animate-spin" />
             {t("loading")}
           </div>
         ) : devices.length === 0 ? (
-          <div className="text-muted-foreground flex items-start gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
+          <div className="flex items-start gap-2 rounded-lg border border-dashed px-4 py-5 text-sm text-muted-foreground">
             <ShieldCheckIcon className="mt-0.5 size-4 shrink-0" />
             <p>{t("emptyHint")}</p>
           </div>
@@ -555,14 +555,14 @@ export function SecurityAuditPanel() {
     <Card>
       <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2">
-          <HistoryIcon className="text-muted-foreground size-4" />
+          <HistoryIcon className="size-4 text-muted-foreground" />
           {t("title")}
         </CardTitle>
         <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2 pt-5">
         {events.length === 0 ? (
-          <div className="text-muted-foreground flex items-start gap-2 rounded-lg border border-dashed px-4 py-5 text-sm">
+          <div className="flex items-start gap-2 rounded-lg border border-dashed px-4 py-5 text-sm text-muted-foreground">
             <CheckCircle2Icon className="mt-0.5 size-4 shrink-0" />
             <p>{t("empty")}</p>
           </div>

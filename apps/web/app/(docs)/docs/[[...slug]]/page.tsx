@@ -1,3 +1,5 @@
+import { getDocsMdxComponents } from "@/components/docs/mdx-components";
+import { source } from "@/lib/docs-source";
 import {
   DocsBody,
   DocsDescription,
@@ -5,11 +7,9 @@ import {
   DocsTitle,
 } from "fumadocs-ui/layouts/docs/page";
 import { createRelativeLink } from "fumadocs-ui/mdx";
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getDocsMdxComponents } from "@/components/docs/mdx-components";
-import { source } from "@/lib/docs-source";
+import type { Metadata } from "next";
 
 type DocsPageProps = {
   readonly params: Promise<{ slug?: string[] }>;

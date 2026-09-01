@@ -1,21 +1,6 @@
 "use client";
 
-import {
-  LOOK_BLOCKS,
-  LookDocumentSchema,
-  lookContentEquals,
-  validateLookDocument,
-  type LookBand,
-  type LookBlockId,
-  type LookDocument,
-  type LookTheme,
-} from "@invoicey/invoice-core/looks";
-import { InvoiceSchema, type Invoice } from "@invoicey/invoice-core/schema";
-import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { toast } from "sonner";
-
 import {
   publishWorkspaceLookAction,
   saveWorkspaceLookAction,
@@ -31,6 +16,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import sampleInvoice from "@/lib/demo-sample-invoice.json";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+import {
+  LOOK_BLOCKS,
+  LookDocumentSchema,
+  lookContentEquals,
+  validateLookDocument,
+  type LookBand,
+  type LookBlockId,
+  type LookDocument,
+  type LookTheme,
+} from "@invoicey/invoice-core/looks";
+import { InvoiceSchema, type Invoice } from "@invoicey/invoice-core/schema";
 
 const BLOCKS = LOOK_BLOCKS.filter((block) => block !== "footer");
 
@@ -259,7 +259,7 @@ export function LookDocumentEditor({
           {t("currentVersion", { version: saved.version })}
         </Badge>
         {dirty ? (
-          <span className="text-muted-foreground text-xs">{t("unsaved")}</span>
+          <span className="text-xs text-muted-foreground">{t("unsaved")}</span>
         ) : isPublished ? (
           <Badge variant="outline">{t("publishedBadge")}</Badge>
         ) : null}
@@ -298,8 +298,8 @@ export function LookDocumentEditor({
       </div>
       {issues.length > 0 ? (
         <div className="space-y-1">
-          <p className="text-destructive text-sm">{t("validationFailed")}</p>
-          <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-xs">
+          <p className="text-sm text-destructive">{t("validationFailed")}</p>
+          <ul className="list-disc space-y-1 pl-5 text-xs text-muted-foreground">
             {issues.map((issue) => (
               <li key={`${issue.path}:${issue.message}`}>{issue.message}</li>
             ))}
@@ -334,7 +334,7 @@ export function LookDocumentEditor({
                 value={jsonText}
               />
               {jsonError ? (
-                <p className="text-destructive text-sm">{jsonError}</p>
+                <p className="text-sm text-destructive">{jsonError}</p>
               ) : null}
               <Button onClick={applyJson} type="button" variant="outline">
                 {t("applyJson")}
@@ -346,7 +346,7 @@ export function LookDocumentEditor({
           </TabsContent>
         </Tabs>
         <div className="hidden lg:sticky lg:top-24 lg:block">
-          <p className="text-muted-foreground mb-2 text-xs">
+          <p className="mb-2 text-xs text-muted-foreground">
             {t("viewPreview")}
           </p>
           {preview}

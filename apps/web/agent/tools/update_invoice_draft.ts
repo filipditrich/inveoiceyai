@@ -1,6 +1,7 @@
-import { updateDraftInvoice } from "@invoicey/invoice-tools";
 import { defineTool } from "eve/tools";
 import { z } from "zod";
+
+import { updateDraftInvoice } from "@invoicey/invoice-tools";
 
 import { buildInvoiceCardModel } from "../lib/invoice-card-model";
 import { appOrigin } from "../lib/slack-thread";

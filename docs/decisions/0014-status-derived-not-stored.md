@@ -16,7 +16,7 @@ Options:
 
 Forces:
 
-- "Overdue" is a function of *time passing*, not of any user action — there's no event when an invoice becomes overdue, just a clock crossing the due date
+- "Overdue" is a function of _time passing_, not of any user action — there's no event when an invoice becomes overdue, just a clock crossing the due date
 - A daily cron is operational overhead with timezone gotchas
 - Status filters in the data grid (Plan 7) need SQL-level support — a derived status must be expressible as SQL, not just as TypeScript
 - Postgres can compute `due_date < (now() AT TIME ZONE 'Europe/Prague')::date` cheaply with the right index

@@ -10,11 +10,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
-
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
+import { usePathname, useSearchParams } from "next/navigation";
 
 const SHOW_DELAY_MS = 100;
 const MIN_VISIBLE_MS = 240;
@@ -59,13 +58,13 @@ export function NavigationPendingOverlay({
       className={cn(
         "pointer-events-none absolute inset-0 z-20 flex items-start justify-center pt-20 transition-opacity duration-150",
         pending
-          ? "bg-background/45 pointer-events-auto opacity-100 backdrop-blur-[1px]"
+          ? "pointer-events-auto bg-background/45 opacity-100 backdrop-blur-[1px]"
           : "opacity-0",
         className,
       )}
     >
       {pending ? (
-        <div className="bg-card text-foreground mt-2 flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm shadow-sm">
+        <div className="mt-2 flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm text-foreground shadow-sm">
           <Spinner className="size-3.5" />
           <span>{t("navigating")}</span>
         </div>
@@ -83,13 +82,13 @@ function NavigationProgressBar() {
       <div
         aria-hidden={!pending}
         className={cn(
-          "z-200 pointer-events-none fixed left-0 right-0 top-0 h-0.5 overflow-hidden transition-opacity duration-150",
+          "pointer-events-none fixed top-0 right-0 left-0 z-200 h-0.5 overflow-hidden transition-opacity duration-150",
           pending ? "opacity-100" : "opacity-0",
         )}
         role="progressbar"
         aria-valuetext={pending ? t("navigating") : undefined}
       >
-        <div className="bg-brand animate-navigation-indeterminate h-full w-1/3 rounded-full" />
+        <div className="h-full w-1/3 animate-navigation-indeterminate rounded-full bg-brand" />
       </div>
       <span aria-live="polite" className="sr-only">
         {pending ? t("navigating") : ""}

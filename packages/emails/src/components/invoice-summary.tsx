@@ -1,5 +1,5 @@
-import { Button, Text } from "@react-email/components";
 import * as React from "react";
+import { Button, Text } from "@react-email/components";
 
 import { invoiceEmailCopy, type EmailLocale } from "../copy";
 

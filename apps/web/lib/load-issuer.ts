@@ -1,7 +1,9 @@
 import "server-only";
-
+import { cache } from "react";
 import { ensureIssuerNumberingSchemes } from "@/lib/issuer-numbering";
-import type { NumberingSchemeDraft } from "@/lib/issuer-types";
+import { and, eq } from "drizzle-orm";
+import { notFound } from "next/navigation";
+
 import type { IssuerEmailSettings } from "@invoicey/db";
 import { issuerBusinesses, issuerNumberingSchemes } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
@@ -9,9 +11,8 @@ import {
   IssuerSnapshotSchema,
   type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
-import { and, eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
-import { cache } from "react";
+
+import type { NumberingSchemeDraft } from "@/lib/issuer-types";
 
 export type LoadedIssuer = {
   id: string;

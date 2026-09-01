@@ -12,7 +12,7 @@ export async function MarketingShell({
     <div className="flex min-h-svh flex-col">
       <a
         href="#main-content"
-        className="bg-foreground text-background fixed left-3 top-3 z-[120] -translate-y-20 rounded-lg px-3 py-2 text-sm font-medium transition-transform focus:translate-y-0"
+        className="fixed top-3 left-3 z-[120] -translate-y-20 rounded-lg bg-foreground px-3 py-2 text-sm font-medium text-background transition-transform focus:translate-y-0"
       >
         {t("skipToContent")}
       </a>

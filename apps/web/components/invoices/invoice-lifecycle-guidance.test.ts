@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { resolveInvoiceLifecycleState } from "./invoice-lifecycle-guidance";
 
 describe("invoice lifecycle guidance", () => {

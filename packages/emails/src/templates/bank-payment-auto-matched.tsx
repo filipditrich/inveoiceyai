@@ -1,8 +1,8 @@
-import { Button, Section, Text } from "@react-email/components";
 import * as React from "react";
+import { Button, Section, Text } from "@react-email/components";
 
-import type { EmailLocale } from "../copy";
 import { EmailShell } from "../components/email-shell";
+import type { EmailLocale } from "../copy";
 
 export type BankPaymentAutoMatchedEmailProps = {
   userName: string;

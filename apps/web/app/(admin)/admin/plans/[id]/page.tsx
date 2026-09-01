@@ -1,9 +1,3 @@
-import { ArrowLeftIcon, LayersIcon } from "lucide-react";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-
 import {
   addPlanClientAction,
   removePlanClientAction,
@@ -21,11 +15,18 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { formatTokenCount } from "@/lib/ai/format-tokens";
 import { adminGetPlan } from "@/lib/admin/plans";
+import { formatTokenCount } from "@/lib/ai/format-tokens";
+import { requirePlatformAdmin } from "@/lib/auth/session";
+import { ArrowLeftIcon, LayersIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
 import { listPlanClients } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { requirePlatformAdmin } from "@/lib/auth/session";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -54,7 +55,7 @@ export default async function AdminPlanDetailPage({
   return (
     <div className="flex flex-1 flex-col gap-6">
       <Link
-        className="text-muted-foreground hover:text-foreground inline-flex w-fit items-center gap-1.5 text-sm"
+        className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         href="/admin/plans"
       >
         <ArrowLeftIcon className="size-4" />
@@ -102,7 +103,7 @@ export default async function AdminPlanDetailPage({
         {/* Every workspace on this plan moves at once — that is the point of
             the shared row, and the count above is the warning. */}
         {plan.workspaceCount > 0 ? (
-          <p className="text-muted-foreground mb-6 text-sm">
+          <p className="mb-6 text-sm text-muted-foreground">
             {t("affects", { count: plan.workspaceCount })}
           </p>
         ) : null}
@@ -172,7 +173,7 @@ export default async function AdminPlanDetailPage({
                 {t("fields.clientMode")}
               </Label>
               <select
-                className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue={e.clients.createMode}
                 id="clientsCreateMode"
                 name="clientsCreateMode"
@@ -184,7 +185,7 @@ export default async function AdminPlanDetailPage({
             <div className="space-y-2">
               <Label htmlFor="permissionsMode">{t("fields.permissions")}</Label>
               <select
-                className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue={e.permissions.mode}
                 id="permissionsMode"
                 name="permissionsMode"
@@ -199,7 +200,7 @@ export default async function AdminPlanDetailPage({
             <div className="space-y-2">
               <Label htmlFor="looksApply">{t("fields.looks")}</Label>
               <select
-                className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue={e.looks.apply}
                 id="looksApply"
                 name="looksApply"
@@ -245,7 +246,7 @@ export default async function AdminPlanDetailPage({
                 name="autoAssignEmailDomains"
                 placeholder="nfctron.com"
               />
-              <p className="text-muted-foreground text-xs">
+              <p className="text-xs text-muted-foreground">
                 {t("hints.autoAssignDomains")}
               </p>
             </div>
@@ -259,7 +260,7 @@ export default async function AdminPlanDetailPage({
                 name="allowedEmailDomains"
                 placeholder="nfctron.com"
               />
-              <p className="text-muted-foreground text-xs">
+              <p className="text-xs text-muted-foreground">
                 {t("hints.allowedDomains")}
               </p>
             </div>
@@ -276,7 +277,7 @@ export default async function AdminPlanDetailPage({
         {e.clients.createMode === "open" ? (
           // Deliberately not hidden: a catalog on an open plan is inert, and
           // saying so is more useful than the section silently vanishing.
-          <p className="text-muted-foreground mb-6 text-sm">
+          <p className="mb-6 text-sm text-muted-foreground">
             {t("catalog.inactive")}
           </p>
         ) : null}
@@ -314,7 +315,7 @@ export default async function AdminPlanDetailPage({
               />
             </div>
           </div>
-          <p className="text-muted-foreground text-xs">{t("catalog.hint")}</p>
+          <p className="text-xs text-muted-foreground">{t("catalog.hint")}</p>
           <SubmitButton size="sm">{t("catalog.add")}</SubmitButton>
         </form>
       </AdminSection>

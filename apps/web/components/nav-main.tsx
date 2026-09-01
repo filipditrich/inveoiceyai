@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-
+import { NavLinkPending } from "@/components/navigation/nav-link-pending";
 import {
   Collapsible,
   CollapsibleContent,
@@ -20,8 +20,6 @@ import {
 } from "@/components/ui/sidebar";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
-
-import { NavLinkPending } from "@/components/navigation/nav-link-pending";
 
 function renderNavAnchor(url: string) {
   const isAppPath = url.startsWith("/");
@@ -56,7 +54,7 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-[0.65rem] uppercase tracking-[0.14em]">
+      <SidebarGroupLabel className="text-[0.65rem] tracking-[0.14em] uppercase">
         {groupLabel}
       </SidebarGroupLabel>
       <SidebarMenu className="gap-1">
@@ -92,7 +90,7 @@ export function NavMain({
                   </span>
                 </SidebarMenuAction>
                 <CollapsibleContent>
-                  <SidebarMenuSub className="border-sidebar-border/80 ml-3.5 border-l border-dashed">
+                  <SidebarMenuSub className="ml-3.5 border-l border-dashed border-sidebar-border/80">
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton

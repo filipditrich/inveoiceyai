@@ -1,10 +1,10 @@
 import "server-only";
+import { cache } from "react";
+import { eq } from "drizzle-orm";
 
 import { user as userTable, type PlatformRole } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
-import { eq } from "drizzle-orm";
-import { cache } from "react";
 
 import { parsePlatformAdminEmails } from "./platform-admin-emails";
 

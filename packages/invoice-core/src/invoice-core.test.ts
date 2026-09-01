@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { z } from "zod";
+
 import {
   calcTotals,
   deriveStatus,
@@ -20,6 +20,7 @@ import {
   type NumberingSchemeInput,
   endOfDueDateInPrague,
 } from "./index";
+import type { z } from "zod";
 
 type InvoiceMeta = z.infer<typeof InvoiceMetaSchema>;
 type Issuer = z.infer<typeof IssuerSnapshotSchema>;

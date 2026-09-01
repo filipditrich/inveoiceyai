@@ -1,14 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import {
-  ArrowRightIcon,
-  CheckCircle2Icon,
-  ExternalLinkIcon,
-  TerminalIcon,
-} from "lucide-react";
-
 import {
   SlackIdentitiesPanel,
   type SlackIdentityView,
@@ -22,6 +13,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  ArrowRightIcon,
+  CheckCircle2Icon,
+  ExternalLinkIcon,
+  TerminalIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 export function IntegrationsPanels({
   slackIdentities,
@@ -50,7 +49,7 @@ export function IntegrationsPanels({
       <Card>
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2">
-            <TerminalIcon className="text-muted-foreground size-4" />
+            <TerminalIcon className="size-4 text-muted-foreground" />
             {t("mcpTitle")}
           </CardTitle>
           <CardDescription>{t("mcpDescription")}</CardDescription>
@@ -59,10 +58,10 @@ export function IntegrationsPanels({
           <div className="grid gap-3 sm:grid-cols-3">
             {features.map((item) => (
               <div
-                className="bg-muted/35 flex items-start gap-2 rounded-lg border px-3 py-3 text-sm"
+                className="flex items-start gap-2 rounded-lg border bg-muted/35 px-3 py-3 text-sm"
                 key={item}
               >
-                <CheckCircle2Icon className="text-brand mt-0.5 size-4 shrink-0" />
+                <CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-brand" />
                 <span>{item}</span>
               </div>
             ))}

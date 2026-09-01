@@ -1,9 +1,10 @@
-import { resolveWebSessionPrincipal, tryCreateDbFromEnv } from "@invoicey/db";
 import {
   UnauthenticatedError,
   withAuthChallenges,
   type AuthFn,
 } from "eve/channels/auth";
+
+import { resolveWebSessionPrincipal, tryCreateDbFromEnv } from "@invoicey/db";
 
 import type { MeteringAuth } from "./metering-identity";
 import { appOrigin } from "./slack-thread";

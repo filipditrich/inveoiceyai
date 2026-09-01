@@ -1,10 +1,10 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   DataGrid,
   DataGridContainer,
 } from "@/components/reui/data-grid/data-grid";
-import type { DataGridTableInstance } from "@/components/reui/data-grid/data-grid";
 import { DataGridColumnVisibility } from "@/components/reui/data-grid/data-grid-column-visibility";
 import { DataGridPagination } from "@/components/reui/data-grid/data-grid-pagination";
 import { DataGridScrollArea } from "@/components/reui/data-grid/data-grid-scroll-area";
@@ -14,7 +14,8 @@ import { cn } from "@/lib/utils";
 import { flexRender } from "@tanstack/react-table";
 import { Columns3Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+
+import type { DataGridTableInstance } from "@/components/reui/data-grid/data-grid";
 
 type AppDataGridProps<TData extends object> = {
   table: DataGridTableInstance<TData>;
@@ -49,7 +50,7 @@ function DataGridMobileCards<TData extends object>({
 
   if (rows.length === 0) {
     return (
-      <p className="text-muted-foreground rounded-md border px-4 py-8 text-center text-sm md:hidden">
+      <p className="rounded-md border px-4 py-8 text-center text-sm text-muted-foreground md:hidden">
         {emptyMessage}
       </p>
     );
@@ -63,7 +64,7 @@ function DataGridMobileCards<TData extends object>({
           .filter((cell) => cell.column.id !== "select");
         const [lead, ...rest] = cells;
         return (
-          <li className="bg-card space-y-2 rounded-md border p-3" key={row.id}>
+          <li className="space-y-2 rounded-md border bg-card p-3" key={row.id}>
             {lead ? (
               <div className="min-w-0 font-medium">
                 {flexRender(lead.column.columnDef.cell, lead.getContext())}
@@ -82,7 +83,7 @@ function DataGridMobileCards<TData extends object>({
                     key={cell.id}
                   >
                     {label && !isActions ? (
-                      <dt className="text-muted-foreground shrink-0">
+                      <dt className="shrink-0 text-muted-foreground">
                         {label}
                       </dt>
                     ) : null}
@@ -138,7 +139,7 @@ export function AppDataGrid<TData extends object>({
         width: "fixed",
       }}
     >
-      <div className={cn("min-w-0 max-w-full space-y-3", className)}>
+      <div className={cn("max-w-full min-w-0 space-y-3", className)}>
         {toolbar || showColumnVisibility ? (
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="min-w-0 flex-1">{toolbar}</div>
@@ -166,7 +167,7 @@ export function AppDataGrid<TData extends object>({
           table={table}
         />
 
-        <DataGridContainer className="hidden min-w-0 max-w-full overflow-hidden rounded-md border md:block">
+        <DataGridContainer className="hidden max-w-full min-w-0 overflow-hidden rounded-md border md:block">
           <DataGridScrollArea className="max-h-[min(70vh,720px)] max-w-full overflow-x-auto">
             <DataGridTable />
           </DataGridScrollArea>

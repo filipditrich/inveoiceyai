@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import type { SessionUser } from "@/lib/auth/session";
 
 export function sessionDisplayName(user: SessionUser): string {
@@ -31,16 +32,16 @@ export function MarketingSignedInChip({
     <span className={className ?? "inline-flex min-w-0 items-center gap-2"}>
       <Avatar size="sm">
         {user.image ? <AvatarImage src={user.image} alt={name} /> : null}
-        <AvatarFallback className="bg-primary text-primary-foreground text-[0.65rem] font-semibold">
+        <AvatarFallback className="bg-primary text-[0.65rem] font-semibold text-primary-foreground">
           {initialsFromName(name)}
         </AvatarFallback>
       </Avatar>
       {caption ? (
         <span className="min-w-0">
-          <span className="text-muted-foreground block truncate text-[0.65rem] leading-none">
+          <span className="block truncate text-[0.65rem] leading-none text-muted-foreground">
             {caption}
           </span>
-          <span className="mt-0.5 block truncate text-sm font-medium leading-tight">
+          <span className="mt-0.5 block truncate text-sm leading-tight font-medium">
             {name}
           </span>
         </span>

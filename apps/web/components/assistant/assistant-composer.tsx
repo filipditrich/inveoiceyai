@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -16,7 +17,6 @@ import {
   SquareIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import {
   wrapMarkdownSelection,
@@ -65,7 +65,7 @@ export function AssistantComposer() {
         submit();
       }}
     >
-      <div className="border-input bg-background focus-within:border-ring focus-within:ring-ring/50 shadow-xs focus-within:ring-3 rounded-xl border">
+      <div className="rounded-xl border border-input bg-background shadow-xs focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
         <div className="flex items-center gap-0.5 px-1.5 pt-1.5">
           <FormatButton
             label={t("composerBold")}
@@ -91,7 +91,7 @@ export function AssistantComposer() {
           >
             <ListIcon />
           </FormatButton>
-          <span className="text-muted-foreground ml-auto pr-1.5 text-[0.65rem] tracking-wide">
+          <span className="ml-auto pr-1.5 text-[0.65rem] tracking-wide text-muted-foreground">
             {t("composerMarkdownHint")}
           </span>
         </div>

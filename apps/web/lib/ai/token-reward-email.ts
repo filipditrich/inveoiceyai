@@ -1,15 +1,15 @@
 import "server-only";
+import { requireSession } from "@/lib/auth/session";
+import { isEmailConfigured } from "@/lib/email/client";
+import { appOrigin } from "@/lib/email/security";
+import { sendTransactionalEmail } from "@/lib/email/send";
+import { eq } from "drizzle-orm";
+import { getLocale } from "next-intl/server";
 
 import { workspaces } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { emailLocale, renderTokenRewardEmail } from "@invoicey/emails";
-import { eq } from "drizzle-orm";
-import { getLocale } from "next-intl/server";
 
-import { requireSession } from "@/lib/auth/session";
-import { isEmailConfigured } from "@/lib/email/client";
-import { sendTransactionalEmail } from "@/lib/email/send";
-import { appOrigin } from "@/lib/email/security";
 import { formatTokenCount } from "./format-tokens";
 
 /**

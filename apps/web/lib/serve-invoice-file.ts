@@ -1,4 +1,7 @@
+import { NextResponse } from "next/server";
 import { createHash } from "node:crypto";
+
+import type { invoices } from "@invoicey/db";
 import {
   InvoiceSchema,
   isArchivePayload,
@@ -6,8 +9,6 @@ import {
   renderIsdoc,
 } from "@invoicey/invoice-core";
 import { withLookSnapshotForRender } from "@invoicey/invoice-core/looks";
-import type { invoices } from "@invoicey/db";
-import { NextResponse } from "next/server";
 
 type InvoiceRow = typeof invoices.$inferSelect;
 const MAX_ARTIFACT_BYTES = 25 * 1024 * 1024;

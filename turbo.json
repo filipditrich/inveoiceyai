@@ -27,7 +27,6 @@
       "cache": false,
       "persistent": true
     },
-    "lint": {},
     "typecheck": {},
     "test": {
       "outputs": []

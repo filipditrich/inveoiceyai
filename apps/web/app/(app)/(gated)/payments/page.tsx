@@ -1,11 +1,28 @@
-import { assertCan } from "@/lib/authz/can";
 import {
-  bankTransactions,
-  invoicePaymentAllocations,
-  invoices,
-  paymentMatchProposals,
-} from "@invoicey/db";
-import { db } from "@invoicey/db/client";
+  addManualPayment,
+  confirmPaymentProposal,
+  rejectPaymentProposal,
+  reversePayment,
+} from "@/actions/payments";
+import { PageHeader } from "@/components/layout/page-header";
+import { paymentMatchFactors } from "@/components/payments/payment-match-explanation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
+import { isAppLocale } from "@/i18n/config";
+import { requireWorkspace } from "@/lib/auth/session";
+import { assertCan } from "@/lib/authz/can";
+import { formatInvoiceDate, formatMoney } from "@/lib/format";
+import { messageLookup } from "@/lib/i18n-lookup";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import {
   ArrowRightIcon,
@@ -22,30 +39,14 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import {
-  addManualPayment,
-  confirmPaymentProposal,
-  rejectPaymentProposal,
-  reversePayment,
-} from "@/actions/payments";
-import { PageHeader } from "@/components/layout/page-header";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+  bankTransactions,
+  invoicePaymentAllocations,
+  invoices,
+  paymentMatchProposals,
+} from "@invoicey/db";
+import { db } from "@invoicey/db/client";
+
 import type { AppLocale } from "@/i18n/config";
-import { isAppLocale } from "@/i18n/config";
-import { requireWorkspace } from "@/lib/auth/session";
-import { formatInvoiceDate, formatMoney } from "@/lib/format";
-import { messageLookup } from "@/lib/i18n-lookup";
-import { paymentMatchFactors } from "@/components/payments/payment-match-explanation";
-import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 
 function todayPrague(): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -217,14 +218,14 @@ export default async function PaymentsPage({
         </CardHeader>
         <CardContent className="space-y-3">
           {proposals.length === 0 ? (
-            <p className="text-muted-foreground py-4 text-sm">
+            <p className="py-4 text-sm text-muted-foreground">
               {t("suggestedEmpty")}
             </p>
           ) : (
             proposals.map((proposal) => (
               <div
                 key={proposal.id}
-                className="from-brand/[0.07] relative overflow-hidden rounded-2xl border bg-gradient-to-br via-transparent to-transparent p-4 sm:p-5"
+                className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-brand/[0.07] via-transparent to-transparent p-4 sm:p-5"
               >
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
                   <div className="min-w-0 flex-1">
@@ -245,21 +246,21 @@ export default async function PaymentsPage({
                       <span className="truncate font-medium">
                         {proposal.counterpartyName ?? t("unknownSender")}
                       </span>
-                      <ArrowRightIcon className="text-muted-foreground size-4 shrink-0" />
+                      <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground" />
                       <Link
                         href={`/invoices/${proposal.invoiceId}`}
-                        className="text-brand truncate font-medium hover:underline"
+                        className="truncate font-medium text-brand hover:underline"
                       >
                         {proposal.invoiceNumber ?? t("draft")} ·{" "}
                         {proposal.clientName}
                       </Link>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <span className="bg-muted/70 text-muted-foreground inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-2.5 py-1 text-xs text-muted-foreground">
                         <CalendarDaysIcon className="size-3.5" />
                         {formatInvoiceDate(proposal.bookedDate, locale)}
                       </span>
-                      <span className="bg-muted/70 text-muted-foreground inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-2.5 py-1 text-xs text-muted-foreground">
                         <HashIcon className="size-3.5" />
                         {t("vsLabel", {
                           value: proposal.variableSymbol ?? t("vsMissing"),
@@ -276,7 +277,7 @@ export default async function PaymentsPage({
                       ))}
                     </div>
                     {proposal.blockers.length > 0 ? (
-                      <p className="text-destructive mt-3 text-xs">
+                      <p className="mt-3 text-xs text-destructive">
                         {t("pleaseReview", {
                           details: proposal.blockers
                             .map((blocker) =>
@@ -333,7 +334,7 @@ export default async function PaymentsPage({
         </CardHeader>
         <CardContent>
           {outstandingInvoices.length === 0 ? (
-            <p className="text-muted-foreground text-sm">{t("manualEmpty")}</p>
+            <p className="text-sm text-muted-foreground">{t("manualEmpty")}</p>
           ) : (
             <form
               action={addManualPayment}
@@ -345,7 +346,7 @@ export default async function PaymentsPage({
                   id="invoiceId"
                   name="invoiceId"
                   required
-                  className="border-input bg-background h-9 w-full rounded-lg border px-3 text-sm"
+                  className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
                 >
                   {outstandingInvoices.map((invoice) => (
                     <option key={invoice.id} value={invoice.id}>
@@ -398,7 +399,7 @@ export default async function PaymentsPage({
           </CardHeader>
           <CardContent className="divide-y">
             {transactions.length === 0 ? (
-              <p className="text-muted-foreground py-4 text-sm">
+              <p className="py-4 text-sm text-muted-foreground">
                 {t("incomingEmpty")}
               </p>
             ) : (
@@ -413,7 +414,7 @@ export default async function PaymentsPage({
                         transaction.message ??
                         t("incomingFallback")}
                     </p>
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-muted-foreground">
                       {t("incomingMeta", {
                         date: formatInvoiceDate(transaction.bookedDate, locale),
                         vs: transaction.variableSymbol ?? "—",
@@ -446,7 +447,7 @@ export default async function PaymentsPage({
           </CardHeader>
           <CardContent className="divide-y">
             {allocations.length === 0 ? (
-              <p className="text-muted-foreground py-4 text-sm">
+              <p className="py-4 text-sm text-muted-foreground">
                 {t("historyEmpty")}
               </p>
             ) : (
@@ -467,7 +468,7 @@ export default async function PaymentsPage({
                       >
                         {allocation.invoiceNumber} · {allocation.clientName}
                       </Link>
-                      <p className="text-muted-foreground text-xs">
+                      <p className="text-xs text-muted-foreground">
                         {allocation.reversedAt
                           ? t("historyMetaReversed", {
                               date: formatInvoiceDate(

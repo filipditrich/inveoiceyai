@@ -1,18 +1,19 @@
-import { clientsAreManaged } from "@/lib/entitlements/managed-clients";
 import { deleteClient } from "@/actions/clients";
 import { ClientEditorForm } from "@/components/clients/client-editor-form";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { requireWorkspace } from "@/lib/auth/session";
-import { ClientSnapshotSchema } from "@invoicey/invoice-core/schema";
+import { clientsAreManaged } from "@/lib/entitlements/managed-clients";
+import { and, eq } from "drizzle-orm";
+import { ContactRoundIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+
 import { clients } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { and, eq } from "drizzle-orm";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { notFound, redirect } from "next/navigation";
-import { ContactRoundIcon } from "lucide-react";
+import { ClientSnapshotSchema } from "@invoicey/invoice-core/schema";
 
 type Search = Promise<{ invalid?: string }>;
 
@@ -77,7 +78,7 @@ export default async function ClientEditPage({
         snapshot={snap.data}
       />
 
-      <div className="border-destructive/40 rounded-md border p-4">
+      <div className="rounded-md border border-destructive/40 p-4">
         <form
           action={deleteClient}
           className="flex flex-wrap items-center gap-3"
@@ -86,7 +87,7 @@ export default async function ClientEditPage({
           <SubmitButton pendingLabel={t("deleting")} variant="destructive">
             {t("deleteClient")}
           </SubmitButton>
-          <span className="text-muted-foreground text-sm">
+          <span className="text-sm text-muted-foreground">
             {t("deleteIrreversible")}
           </span>
         </form>

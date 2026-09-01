@@ -19,13 +19,11 @@
  * close.
  */
 import "@invoicey/env/load";
-
 import { eq, isNull } from "drizzle-orm";
 
-import { applyTriggerGrants } from "../src/token-grants";
-import { createDb } from "../src/create-db";
-import { member, user as userTable } from "../src/auth-schema";
 import { ensureAiTokenBalance } from "../src/ai-tokens";
+import { member, user as userTable } from "../src/auth-schema";
+import { createDb } from "../src/create-db";
 import {
   listPlanClients,
   syncPlanClientsIntoWorkspace,
@@ -35,6 +33,7 @@ import {
   getWorkspaceEntitlements,
   resolvePlanForNewWorkspace,
 } from "../src/plans-repo";
+import { applyTriggerGrants } from "../src/token-grants";
 import { withDbTransaction } from "../src/transaction";
 import { workspaces } from "../src/workspaces";
 

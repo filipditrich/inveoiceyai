@@ -1,11 +1,12 @@
 "use client";
 
-import { toolLabel } from "@/agent/lib/tool-presentation";
 import { toolOutputSnippet } from "@/agent/lib/slack-tool-output";
+import { toolLabel } from "@/agent/lib/tool-presentation";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import type { EveDynamicToolPart } from "eve/react";
 import { CheckIcon, XIcon } from "lucide-react";
+
+import type { EveDynamicToolPart } from "eve/react";
 
 /**
  * One thinking step.
@@ -37,12 +38,12 @@ export function AssistantToolStep({ part }: { part: EveDynamicToolPart }) {
           : undefined;
 
   return (
-    <div className="text-muted-foreground flex items-start gap-2 text-xs">
+    <div className="flex items-start gap-2 text-xs text-muted-foreground">
       <span className="mt-0.5 shrink-0">
         {!done ? (
           <Spinner className="size-3" />
         ) : failed ? (
-          <XIcon className="text-destructive size-3" />
+          <XIcon className="size-3 text-destructive" />
         ) : (
           <CheckIcon className="size-3" />
         )}

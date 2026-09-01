@@ -1,5 +1,9 @@
 "use server";
 
+import { requireWorkspace } from "@/lib/auth/session";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
 import {
   getCommunityLookOwnership,
   listCommunityLookRowsForPublisher,
@@ -26,10 +30,6 @@ import {
   type LookDocument,
 } from "@invoicey/invoice-core/looks";
 import { loadWorkspaceLookContext } from "@invoicey/invoice-tools/ops";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-
-import { requireWorkspace } from "@/lib/auth/session";
 
 export type WorkspaceLookActionError =
   | "forbidden"

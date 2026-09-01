@@ -1,17 +1,18 @@
+import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { WorkspacePlanCard } from "@/components/settings/workspace-plan-card";
 import { WorkspaceSettingsPanel } from "@/components/settings/workspace-settings-panel";
-import { SettingsPageHeader } from "@/components/settings/settings-page-header";
-import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { requireWorkspace } from "@/lib/auth/session";
 import { listUserWorkspaces } from "@/lib/auth/workspaces";
-import { workspaces } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
-import { eq } from "drizzle-orm";
+import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { loadLookCatalog } from "@/lib/load-workspace-look";
-import { defaultLookRef } from "@invoicey/invoice-core/looks";
+import { eq } from "drizzle-orm";
 import { Building2Icon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+
+import { workspaces } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
+import { defaultLookRef } from "@invoicey/invoice-core/looks";
 
 export default async function SettingsWorkspacePage() {
   const t = await getTranslations("App.settings.workspace");

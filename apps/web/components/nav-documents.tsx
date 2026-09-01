@@ -17,9 +17,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { MoreHorizontalIcon, ShareIcon } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+import type { LucideIcon } from "lucide-react";
 
 export function NavDocuments({
   items,

@@ -1,9 +1,9 @@
 import "server-only";
+import { desc, eq } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 
 import { securityAuditEvents, type SecurityAuditEventType } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { desc, eq } from "drizzle-orm";
-import { randomUUID } from "node:crypto";
 
 export async function recordSecurityAuditEvent(input: {
   userId?: string | null;
