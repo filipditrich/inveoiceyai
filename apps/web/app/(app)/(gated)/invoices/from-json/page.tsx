@@ -60,8 +60,12 @@ export default function InvoiceFromJsonDemoPage() {
       try {
         const payload = await res.json();
         const err = typeof payload?.error === "string" ? payload.error : "";
+        const detail =
+          typeof payload?.detail === "string" ? payload.detail : "";
         const flat = payload?.issues;
-        if (err) {
+        if (err === "invalid_look" && detail) {
+          message = detail;
+        } else if (err) {
           message = err;
           if (
             res.status === 422 &&

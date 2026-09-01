@@ -59,9 +59,9 @@ const uploadInvoiceFilesTool = () =>
               error: loaded.ok ? "invoice payload missing" : loaded.error,
             };
           }
-          const invoice = loaded.summary.issuedAt
-            ? loaded.invoice
-            : await invoiceForPdfRender(loaded.invoice);
+          const invoice = await invoiceForPdfRender(loaded.invoice, {
+            issued: Boolean(loaded.summary.issuedAt),
+          });
           const pdfBytes = await renderInvoicePdf(invoice);
           isdocXml = renderIsdoc(invoice);
           pdfBase64 = Buffer.from(pdfBytes).toString("base64");

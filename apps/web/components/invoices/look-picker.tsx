@@ -23,6 +23,35 @@ export type LookCatalogItem = {
   paper?: string;
 };
 
+function lookPickerCopy(look: LookCatalogItem): {
+  originKey: "origin.community" | "origin.workspace" | "origin.firstParty";
+  descriptionKey:
+    | "catalog.community.description"
+    | "catalog.workspace.description"
+    | "catalog.minimal.description"
+    | "catalog.classic.description";
+} {
+  if (look.origin === "community") {
+    return {
+      originKey: "origin.community",
+      descriptionKey: "catalog.community.description",
+    };
+  }
+  if (look.origin === "workspace") {
+    return {
+      originKey: "origin.workspace",
+      descriptionKey: "catalog.workspace.description",
+    };
+  }
+  return {
+    originKey: "origin.firstParty",
+    descriptionKey:
+      look.id === "minimal"
+        ? "catalog.minimal.description"
+        : "catalog.classic.description",
+  };
+}
+
 export function LookPicker({
   looks,
   looksApply,
@@ -51,14 +80,7 @@ export function LookPicker({
           const entitled = canApplyLook(looksApply, look.id);
           const selected =
             value.id === look.id && value.version === look.version;
-          const descriptionKey =
-            look.origin === "community"
-              ? "catalog.community.description"
-              : look.origin === "workspace"
-                ? "catalog.workspace.description"
-                : look.id === "minimal"
-                  ? "catalog.minimal.description"
-                  : "catalog.classic.description";
+          const { originKey, descriptionKey } = lookPickerCopy(look);
           return (
             <button
               key={`${look.id}@${look.version}`}
@@ -95,15 +117,7 @@ export function LookPicker({
                   </span>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                  <Badge variant="outline">
-                    {t(
-                      look.origin === "community"
-                        ? "origin.community"
-                        : look.origin === "workspace"
-                          ? "origin.workspace"
-                          : "origin.firstParty",
-                    )}
-                  </Badge>
+                  <Badge variant="outline">{t(originKey)}</Badge>
                   <span className="text-muted-foreground text-xs tabular-nums">
                     {look.version}
                   </span>

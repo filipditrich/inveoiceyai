@@ -12,8 +12,8 @@ import {
 import { db } from "@invoicey/db/client";
 import {
   bumpLookVersion,
-  canApplyLook,
   communityLookFrom,
+  hasLookCatalogEntitlement,
   compareLookSemver,
   findLookDocument,
   getFirstPartyLook,
@@ -62,7 +62,7 @@ async function requireLookEditor(): Promise<
     return { ok: false, errorCode: "forbidden" };
   }
   const context = await loadWorkspaceLookContext(db, workspaceId);
-  if (!canApplyLook(context.apply, "minimal")) {
+  if (!hasLookCatalogEntitlement(context.apply)) {
     return { ok: false, errorCode: "look_not_entitled" };
   }
   return {

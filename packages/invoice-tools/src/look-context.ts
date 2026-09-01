@@ -129,8 +129,11 @@ export function lookColumns(invoice: Invoice): {
  */
 export async function invoiceForPdfRender(
   invoice: Invoice,
-  options?: { workspaceId?: string; db?: Db },
+  options?: { workspaceId?: string; db?: Db; issued?: boolean },
 ): Promise<Invoice> {
+  if (options?.issued) {
+    return withLookSnapshotForRender(invoice, [], { issued: true });
+  }
   const database = options?.db ?? tryCreateDbFromEnv();
   if (!database) return withLookSnapshotForRender(invoice, []);
   const context = await loadWorkspaceLookContext(

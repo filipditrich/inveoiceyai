@@ -62,7 +62,8 @@ declare const messages: {
     "updating": "Aktualizuji…",
     "empty": "Vyplň položky pro náhled…",
     "title": "Náhled faktury PDF",
-    "open": "Otevřít PDF"
+    "open": "Otevřít PDF",
+    "lockedWatermark": "Náhled"
   },
   "Errors": {
     "invalid": {
@@ -848,6 +849,28 @@ declare const messages: {
           "jsonInvalid": "Tento JSON není platný.",
           "jsonMustKeepId": "Ponechte stejný slug a platný dokument vzhledu.",
           "previewInvalid": "Náhled je až když je vzhled platný dokument.",
+          "previewFailed": "Náhled se nepodařilo vytvořit.",
+          "validationFailed": "Tento vzhled není platný dokument vzhledu faktury.",
+          "blocks": {
+            "logo": "Logo",
+            "title": "Titulek",
+            "issuer": "Dodavatel",
+            "client": "Odběratel",
+            "dates": "Data",
+            "lines": "Položky",
+            "totals": "Součty",
+            "tax": "DPH",
+            "payment": "Platba",
+            "qr": "QR",
+            "stamp": "Razítko",
+            "signature": "Podpis",
+            "notes": "Poznámka",
+            "footer": "Patička"
+          },
+          "variants": {
+            "full": "Plná",
+            "compact": "Kompaktní"
+          },
           "bands": "Pásy",
           "addStack": "Přidat stack",
           "addRow": "Přidat řádek",

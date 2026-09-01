@@ -34,6 +34,21 @@ import { cn } from "@/lib/utils";
 
 const BLOCKS = LOOK_BLOCKS.filter((block) => block !== "footer");
 
+type PreviewFailureBody = {
+  error?: string;
+  detail?: string;
+};
+
+function previewFailureFromResponse(
+  body: PreviewFailureBody | null,
+  fallback: string,
+): { message: string; detail?: string } {
+  if (body?.error === "invalid_look") {
+    return { message: fallback, detail: body.detail };
+  }
+  return { message: fallback };
+}
+
 function cloneLook(look: LookDocument): LookDocument {
   return structuredClone(look);
 }
@@ -73,12 +88,14 @@ export function LookDocumentEditor({
   const [isPublished, setIsPublished] = useState(published);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [fetchErrorDetail, setFetchErrorDetail] = useState<string | null>(null);
   const previewUrlRef = useRef<string | null>(null);
 
   const issues = useMemo(() => validateLookDocument(look), [look]);
   const dirty = !lookContentEquals(look, saved);
   const previewable = useMemo(() => previewInvoice(look), [look]);
   const previewError = previewable ? fetchError : t("previewInvalid");
+  const previewErrorDetail = previewable ? fetchErrorDetail : null;
 
   const commitLook = (next: LookDocument) => {
     setLook(next);
@@ -100,7 +117,16 @@ export function LookDocumentEditor({
             signal: controller.signal,
           });
           if (!res.ok) {
-            throw new Error(`preview ${String(res.status)}`);
+            const body = (await res
+              .json()
+              .catch(() => null)) as PreviewFailureBody | null;
+            const failure = previewFailureFromResponse(
+              body,
+              t("previewFailed"),
+            );
+            throw Object.assign(new Error(failure.message), {
+              detail: failure.detail,
+            });
           }
           const blob = await res.blob();
           const url = URL.createObjectURL(blob);
@@ -108,10 +134,18 @@ export function LookDocumentEditor({
           previewUrlRef.current = url;
           setPreviewUrl(url);
           setFetchError(null);
+          setFetchErrorDetail(null);
         } catch (error) {
           if (controller.signal.aborted) return;
           setFetchError(
-            error instanceof Error ? error.message : t("previewInvalid"),
+            error instanceof Error ? error.message : t("previewFailed"),
+          );
+          setFetchErrorDetail(
+            error instanceof Error &&
+              "detail" in error &&
+              typeof error.detail === "string"
+              ? error.detail
+              : null,
           );
         }
       })();
@@ -147,7 +181,11 @@ export function LookDocumentEditor({
       };
       const nextIssues = validateLookDocument(next);
       if (nextIssues.length > 0) {
-        setJsonError(nextIssues[0]?.message ?? t("jsonInvalid"));
+        setJsonError(
+          nextIssues[0]?.message
+            ? `${t("validationFailed")} (${nextIssues[0].message})`
+            : t("validationFailed"),
+        );
         return;
       }
       commitLook(next);
@@ -209,6 +247,7 @@ export function LookDocumentEditor({
     <InvoicePdfPreview
       className="w-full"
       error={previewError}
+      errorDetail={previewErrorDetail}
       url={previewUrl}
     />
   );
@@ -258,11 +297,14 @@ export function LookDocumentEditor({
         </div>
       </div>
       {issues.length > 0 ? (
-        <ul className="text-destructive list-disc space-y-1 pl-5 text-sm">
-          {issues.map((issue) => (
-            <li key={`${issue.path}:${issue.message}`}>{issue.message}</li>
-          ))}
-        </ul>
+        <div className="space-y-1">
+          <p className="text-destructive text-sm">{t("validationFailed")}</p>
+          <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-xs">
+            {issues.map((issue) => (
+              <li key={`${issue.path}:${issue.message}`}>{issue.message}</li>
+            ))}
+          </ul>
+        </div>
       ) : null}
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)] lg:items-start lg:gap-6">
         <Tabs
@@ -684,7 +726,7 @@ function SlotList({
           >
             {LOOK_BLOCKS.map((block) => (
               <option key={block} value={block}>
-                {block}
+                {t(`blocks.${block}`)}
               </option>
             ))}
           </select>
@@ -703,8 +745,8 @@ function SlotList({
               }}
               value={slot.variant ?? "full"}
             >
-              <option value="full">full</option>
-              <option value="compact">compact</option>
+              <option value="full">{t("variants.full")}</option>
+              <option value="compact">{t("variants.compact")}</option>
             </select>
           ) : null}
           <Button
