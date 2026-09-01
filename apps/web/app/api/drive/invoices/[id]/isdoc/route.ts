@@ -1,10 +1,10 @@
 import { requireDriveDevice } from "@/lib/drive/device-auth";
-import { proxyStoredFile } from "@/lib/serve-invoice-file";
+import { serveInvoiceIsdoc } from "@/lib/serve-invoice-file";
 import { NextResponse } from "next/server";
 
-import { getDriveInvoiceArtifact, getDriveUserSettings } from "@invoicey/db";
+import { getDriveIssuedInvoice, getDriveUserSettings } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { applyDriveLayout } from "@invoicey/invoice-core";
+import { tryPersistInvoiceArtifacts } from "@invoicey/invoice-tools/artifacts";
 
 export const runtime = "nodejs";
 
@@ -15,33 +15,36 @@ export async function GET(request: Request, ctx: { params: Params }) {
   if ("response" in gate) {
     return gate.response;
   }
-  const { id } = await ctx.params;
   const settings = await getDriveUserSettings(db, gate.device.userId);
-  const artifact = await getDriveInvoiceArtifact({
+  if (!settings.includeIsdoc) {
+    return NextResponse.json({ error: "not_found" }, { status: 404 });
+  }
+  const { id } = await ctx.params;
+  let row = await getDriveIssuedInvoice({
     db,
     userId: gate.device.userId,
     invoiceId: id,
   });
-  if (!artifact?.isdocUrl || !settings.includeIsdoc) {
+  if (!row) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
-  const layout = applyDriveLayout({
-    template: settings.layoutTemplate,
-    issueDate: artifact.issueDate,
-    number: artifact.number ?? id,
-    language: artifact.language,
-    docType: artifact.docType,
-    clientName: artifact.clientName,
-  });
+  if (!row.isdocUrl) {
+    await tryPersistInvoiceArtifacts({
+      id: row.id,
+      workspaceId: row.workspaceId,
+    });
+    row =
+      (await getDriveIssuedInvoice({
+        db,
+        userId: gate.device.userId,
+        invoiceId: id,
+      })) ?? row;
+  }
   try {
-    return await proxyStoredFile(
-      artifact.isdocUrl,
-      `${layout.stem}.isdoc`,
-      "application/xml; charset=utf-8",
-      "attachment",
-      artifact.isdocSha256,
-    );
-  } catch {
-    return NextResponse.json({ error: "isdoc_unavailable" }, { status: 502 });
+    return await serveInvoiceIsdoc(row, "attachment");
+  } catch (cause) {
+    const message =
+      cause instanceof Error ? cause.message : "isdoc render failed";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -1,10 +1,10 @@
 import { requireDriveDevice } from "@/lib/drive/device-auth";
-import { proxyStoredFile } from "@/lib/serve-invoice-file";
+import { serveInvoicePdf } from "@/lib/serve-invoice-file";
 import { NextResponse } from "next/server";
 
-import { getDriveInvoiceArtifact, getDriveUserSettings } from "@invoicey/db";
+import { getDriveIssuedInvoice } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { applyDriveLayout } from "@invoicey/invoice-core";
+import { tryPersistInvoiceArtifacts } from "@invoicey/invoice-tools/artifacts";
 
 export const runtime = "nodejs";
 
@@ -16,33 +16,31 @@ export async function GET(request: Request, ctx: { params: Params }) {
     return gate.response;
   }
   const { id } = await ctx.params;
-  const artifact = await getDriveInvoiceArtifact({
+  let row = await getDriveIssuedInvoice({
     db,
     userId: gate.device.userId,
     invoiceId: id,
   });
-  if (!artifact) {
+  if (!row) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
-  const settings = await getDriveUserSettings(db, gate.device.userId);
-  const layout = applyDriveLayout({
-    template: settings.layoutTemplate,
-    issueDate: artifact.issueDate,
-    number: artifact.number ?? id,
-    language: artifact.language,
-    docType: artifact.docType,
-    clientName: artifact.clientName,
-  });
-  const filename = `${layout.stem}.pdf`;
+  if (!row.pdfUrl) {
+    await tryPersistInvoiceArtifacts({
+      id: row.id,
+      workspaceId: row.workspaceId,
+    });
+    row =
+      (await getDriveIssuedInvoice({
+        db,
+        userId: gate.device.userId,
+        invoiceId: id,
+      })) ?? row;
+  }
   try {
-    return await proxyStoredFile(
-      artifact.pdfUrl,
-      filename,
-      "application/pdf",
-      "attachment",
-      artifact.pdfSha256,
-    );
-  } catch {
-    return NextResponse.json({ error: "pdf_unavailable" }, { status: 502 });
+    return await serveInvoicePdf(row, "attachment");
+  } catch (cause) {
+    const message =
+      cause instanceof Error ? cause.message : "pdf render failed";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
