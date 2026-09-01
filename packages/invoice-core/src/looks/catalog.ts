@@ -82,5 +82,12 @@ export function canApplyLook(
   apply: "classic" | "catalog",
   lookId: string,
 ): boolean {
-  return lookId === CLASSIC_LOOK_ID || apply === "catalog";
+  return lookId === CLASSIC_LOOK_ID || hasLookCatalogEntitlement(apply);
+}
+
+/** Workspace may apply catalog looks (Minimal, workspace, community). */
+export function hasLookCatalogEntitlement(
+  apply: "classic" | "catalog",
+): boolean {
+  return apply === "catalog";
 }

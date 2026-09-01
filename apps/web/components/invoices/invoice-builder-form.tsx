@@ -56,6 +56,7 @@ import type { Invoice } from "@invoicey/invoice-core/schema";
 import {
   ACCENT_COLOR_HEX,
   appearanceFromPicker,
+  canApplyLook,
   findLookDocument,
   looksForPicker,
   resolvePresentLookRef,
@@ -375,6 +376,9 @@ export function InvoiceBuilderForm({
   const previewUrlRef = React.useRef<string | null>(null);
   const lastPreviewKeyRef = React.useRef<string | null>(null);
   const [previewError, setPreviewError] = React.useState<string | null>(null);
+  const [previewErrorDetail, setPreviewErrorDetail] = React.useState<
+    string | null
+  >(null);
   const [previewUpdating, setPreviewUpdating] = React.useState(false);
   const [numberPreview, setNumberPreview] = React.useState(
     initial?.numberPreview ?? "—",
@@ -733,6 +737,7 @@ export function InvoiceBuilderForm({
   React.useEffect(() => {
     if (previewBuild.error) {
       setPreviewError(previewBuild.error);
+      setPreviewErrorDetail(null);
       return;
     }
     if (!previewKey || !previewBuild.invoice) {
@@ -758,6 +763,7 @@ export function InvoiceBuilderForm({
           previewUrlRef.current = url;
           setPreviewUrl(url);
           setPreviewError(null);
+          setPreviewErrorDetail(null);
         })
         .catch((e: unknown) => {
           if (controller.signal.aborted) {
@@ -766,7 +772,21 @@ export function InvoiceBuilderForm({
           if (e instanceof Error && e.name === "AbortError") {
             return;
           }
-          setPreviewError(e instanceof Error ? e.message : t("previewError"));
+          const invalidLook =
+            e instanceof Error && e.message === "invalid_look";
+          const technical =
+            invalidLook &&
+            e instanceof Error &&
+            "detail" in e &&
+            typeof e.detail === "string"
+              ? e.detail
+              : !invalidLook && e instanceof Error
+                ? e.message
+                : null;
+          setPreviewError(t("previewError"));
+          setPreviewErrorDetail(
+            technical && technical !== "pdf render failed" ? technical : null,
+          );
         })
         .finally(() => {
           if (!controller.signal.aborted) {
@@ -2149,6 +2169,8 @@ export function InvoiceBuilderForm({
         <InvoicePdfPreview
           className="mx-auto xl:h-[calc(100dvh-var(--header-height)-1.5rem)] xl:w-auto xl:max-w-full"
           error={previewError}
+          errorDetail={previewErrorDetail}
+          lockedPreview={!canApplyLook(looksApply, watched.lookId)}
           updating={previewUpdating}
           url={previewUrl}
         />
@@ -2170,11 +2192,17 @@ async function refreshPreview(
   if (!res.ok) {
     const body = (await res.json().catch(() => null)) as {
       error?: string;
+      detail?: string;
       issues?: {
         formErrors?: string[];
         fieldErrors?: Record<string, string[] | undefined>;
       };
     } | null;
+    if (body?.error === "invalid_look") {
+      throw Object.assign(new Error("invalid_look"), {
+        detail: body.detail,
+      });
+    }
     const parts: string[] = [];
     if (body?.error) {
       parts.push(body.error);
@@ -2189,7 +2217,7 @@ async function refreshPreview(
         }
       }
     }
-    throw new Error(parts.join(" · ") || `preview ${res.status}`);
+    throw new Error(parts.join(" · ") || `preview ${String(res.status)}`);
   }
   const blob = await res.blob();
   return URL.createObjectURL(blob);

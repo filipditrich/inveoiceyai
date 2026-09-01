@@ -59,7 +59,8 @@
     "updating": "Updating…",
     "empty": "Fill in line items for a preview…",
     "title": "Invoice PDF preview",
-    "open": "Open PDF"
+    "open": "Open PDF",
+    "lockedWatermark": "Preview"
   },
   "Errors": {
     "invalid": {
@@ -845,6 +846,28 @@
           "jsonInvalid": "That JSON is not valid.",
           "jsonMustKeepId": "Keep the same slug and a valid look document.",
           "previewInvalid": "This look cannot preview until it is a valid look document.",
+          "previewFailed": "Could not generate the preview.",
+          "validationFailed": "This look is not a valid invoice look.",
+          "blocks": {
+            "logo": "Logo",
+            "title": "Title",
+            "issuer": "Issuer",
+            "client": "Client",
+            "dates": "Dates",
+            "lines": "Lines",
+            "totals": "Totals",
+            "tax": "Tax",
+            "payment": "Payment",
+            "qr": "QR",
+            "stamp": "Stamp",
+            "signature": "Signature",
+            "notes": "Notes",
+            "footer": "Footer"
+          },
+          "variants": {
+            "full": "Full",
+            "compact": "Compact"
+          },
           "bands": "Bands",
           "addStack": "Add stack",
           "addRow": "Add row",

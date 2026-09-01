@@ -114,7 +114,17 @@ export async function POST(request: NextRequest) {
   concurrentRenders += 1;
   try {
     pdfBytes = await renderInvoicePdf(parsed.data);
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message.startsWith("invalid_look")) {
+      return NextResponse.json(
+        {
+          error: "invalid_look",
+          detail: message.replace(/^invalid_look:\s*/u, "") || message,
+        },
+        { status: 422 },
+      );
+    }
     return NextResponse.json({ error: "pdf render failed" }, { status: 500 });
   } finally {
     concurrentRenders -= 1;

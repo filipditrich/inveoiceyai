@@ -8,6 +8,7 @@ import reverseFixture from "../__fixtures__/invoices/reverse-charge.json";
 import { InvoiceSchema, type Invoice } from "../schema";
 import {
   canApplyLook,
+  hasLookCatalogEntitlement,
   CLASSIC_LOOK_1_0_0,
   CLASSIC_LOOK_ID,
   CLASSIC_LOOK_VERSION,
@@ -273,6 +274,23 @@ describe("resolveLookDocument", () => {
     expect(prepared.lookSnapshot?.name).toBe("Frozen");
   });
 
+  it("does not attach a live catalog look when the invoice is issued", () => {
+    const extra = workspaceLookFrom(MINIMAL_LOOK_1_0_0, {
+      id: "clean",
+      name: "Clean",
+    });
+    if (!extra.ok) throw new Error("fixture");
+    const invoice = parseInvoice({
+      ...domesticFixture,
+      look: { id: "clean", version: "1.0.0" },
+    });
+    const prepared = withLookSnapshotForRender(invoice, [extra.look], {
+      issued: true,
+    });
+    expect(prepared.lookSnapshot).toBeUndefined();
+    expect(resolveLookDocument(prepared).id).toBe(CLASSIC_LOOK_ID);
+  });
+
   it("falls back to Classic when the look id is unknown", () => {
     const invoice = parseInvoice({
       ...domesticFixture,
@@ -302,6 +320,13 @@ describe("canApplyLook", () => {
     expect(canApplyLook("catalog", "classic")).toBe(true);
     expect(canApplyLook("classic", "clean")).toBe(false);
     expect(canApplyLook("catalog", "clean")).toBe(true);
+  });
+});
+
+describe("hasLookCatalogEntitlement", () => {
+  it("is true only for catalog apply", () => {
+    expect(hasLookCatalogEntitlement("classic")).toBe(false);
+    expect(hasLookCatalogEntitlement("catalog")).toBe(true);
   });
 });
 

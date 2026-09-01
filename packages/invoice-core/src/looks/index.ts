@@ -8,6 +8,7 @@ export {
   FIRST_PARTY_LOOKS,
   findLookDocument,
   getFirstPartyLook,
+  hasLookCatalogEntitlement,
   latestLooksById,
   listFirstPartyLooks,
   looksForPicker,

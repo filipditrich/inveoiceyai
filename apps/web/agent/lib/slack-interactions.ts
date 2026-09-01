@@ -160,7 +160,7 @@ async function uploadArtifacts(
   invoice: Invoice,
   issued: boolean,
 ): Promise<void> {
-  const prepared = issued ? invoice : await invoiceForPdfRender(invoice);
+  const prepared = await invoiceForPdfRender(invoice, { issued });
   const pdfBytes = await renderInvoicePdf(prepared);
   const isdocXml = renderIsdoc(invoice);
   const safeName = invoice.meta.number.replace(/[^\w.-]+/gu, "_");

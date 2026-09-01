@@ -21,7 +21,10 @@ function classicFallback(): LookDocument {
 export function withLookSnapshotForRender(
   invoice: Invoice,
   catalog: readonly LookDocument[] = [],
+  options?: { issued?: boolean },
 ): Invoice {
+  /** issued rows replay the stored snapshot, or Classic 1.0.0 if none */
+  if (options?.issued) return invoice;
   const snap = invoice.lookSnapshot
     ? LookDocumentSchema.safeParse(invoice.lookSnapshot)
     : undefined;

@@ -25,7 +25,7 @@ A placed block in a band slot: `{ block, variant? }`. The same block type may ap
 _Avoid_: Unique block ids as the whole layout.
 
 **Theme**:
-The variable visual tokens of a look. In the first cut: `paper`, `ink`, `muted`, `line`, `accent`; type scale `sm | md | lg` on Inter only; density `comfortable | compact`; bounded logo height; optional-block defaults (`showStamp`, `showSignature`, `showQr`, `showNotes`).
+The variable visual tokens of a look. In the first cut: `paper`, `ink`, `muted`, `line`, `accent`; type scale `sm | md | lg` on Inter only; density `comfortable | compact`; bounded logo height (`logoMaxHeightPt`); bounded stamp height (`stampMaxHeightPt`); optional-block defaults (`showStamp`, `showSignature`, `showQr`, `showNotes`).
 _Avoid_: Customization, branding, accent (as the whole object), arbitrary CSS, custom fonts.
 
 **Look snapshot**:
@@ -65,13 +65,13 @@ A per-invoice subset of theme tokens and optional-block flags. It cannot change 
 _Avoid_: Custom template, forked look, per-invoice layout.
 
 **Block**:
-A named region the renderer knows how to fill from the invoice. v1: `logo`, `title`, `issuer`, `client`, `lines`, `totals`, `tax`, `payment`, `qr`, `stamp`, `signature`, `notes`, `footer`. `logo` is optional; its bytes still come from `issuer.logoUrl`. `tax` is one block whose interior follows the invoice VAT mode. Required blocks are a function of document type and VAT mode.
+A named region the renderer knows how to fill from the invoice. v1: `logo`, `title`, `issuer`, `client`, `dates`, `lines`, `totals`, `tax`, `payment`, `qr`, `stamp`, `signature`, `notes`, `footer`. `logo` is optional; its bytes still come from `issuer.logoUrl`. `tax` is one block whose interior follows the invoice VAT mode. `dates` is optional: Classic places it under the client; Minimal has no dates band — `title` prints the dates. Required blocks are a function of document type and VAT mode.
 _Avoid_: Widget, component, section (when you mean a typed block).
 
 **Invoice template**:
-A saved invoice *payload* used to materialize recurring drafts. It is not a look.
+A saved invoice _payload_ used to materialize recurring drafts. It is not a look.
 _Avoid_: Using this name for PDF appearance.
 
 **Preset**:
-A saved MCP/Slack *data* blob (`issuer` or `invoice_template`). It is not a look.
+A saved MCP/Slack _data_ blob (`issuer` or `invoice_template`). It is not a look.
 _Avoid_: Using this name for PDF appearance.
