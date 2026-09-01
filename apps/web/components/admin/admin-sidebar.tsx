@@ -2,6 +2,7 @@
 
 import type * as React from "react";
 import { BrandLogo } from "@/components/brand-logo";
+import { BuildMark } from "@/components/build-mark";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -139,6 +140,7 @@ export function AdminSidebar({
       </SidebarContent>
       <SidebarFooter className="gap-3">
         <NavUser isPlatformAdmin user={user} />
+        <BuildMark />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

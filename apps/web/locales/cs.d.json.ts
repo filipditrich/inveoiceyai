@@ -706,6 +706,13 @@ declare const messages: {
     "brand": {
       "tagline": "Automatizace faktur"
     },
+    "build": {
+      "runningWithSha": "{version} · {sha}",
+      "reloadWithVersion": "Načíst znovu  ·  {version}",
+      "upToDate": "Aktuální",
+      "copySha": "Kopírovat",
+      "copied": "Zkopírováno"
+    },
     "nav": {
       "group": "Pracovní prostor",
       "dashboard": "Přehled",
