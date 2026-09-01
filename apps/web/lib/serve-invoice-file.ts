@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import type { invoices } from "@invoicey/db";
 import {
   InvoiceSchema,
+  invoiceArtifactFileNames,
   isArchivePayload,
   renderInvoicePdf,
   renderIsdoc,
@@ -111,6 +112,21 @@ function displayNumber(row: InvoiceRow): string {
   return "invoice";
 }
 
+function artifactFileNames(
+  row: InvoiceRow,
+  filenameTemplate?: string | null,
+): { pdf: string; isdoc: string } {
+  const parsed = InvoiceSchema.safeParse(row.payloadJson);
+  const docType =
+    row.docType || (parsed.success ? parsed.data.meta.docType : "invoice");
+  return invoiceArtifactFileNames({
+    number: displayNumber(row),
+    language: parsed.success ? parsed.data.meta.language : "cs",
+    docType,
+    template: filenameTemplate,
+  });
+}
+
 function isImmutableImport(row: InvoiceRow): boolean {
   return row.artifactsImmutable === 1 || Boolean(row.importCompleteness);
 }
@@ -124,8 +140,9 @@ export function parseFileDisposition(
 export async function serveInvoicePdf(
   row: InvoiceRow,
   disposition: FileDisposition = "attachment",
+  filenameTemplate?: string | null,
 ): Promise<NextResponse> {
-  const filename = `${displayNumber(row)}-isdoc.pdf`;
+  const filename = artifactFileNames(row, filenameTemplate).pdf;
 
   if (isImmutableImport(row)) {
     if (!row.pdfUrl) {
@@ -202,8 +219,9 @@ export async function serveInvoicePdf(
 export async function serveInvoiceIsdoc(
   row: InvoiceRow,
   disposition: FileDisposition = "attachment",
+  filenameTemplate?: string | null,
 ): Promise<NextResponse> {
-  const filename = `${displayNumber(row)}.isdoc`;
+  const filename = artifactFileNames(row, filenameTemplate).isdoc;
 
   if (isImmutableImport(row)) {
     if (!row.isdocUrl) {

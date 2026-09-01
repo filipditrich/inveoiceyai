@@ -119,6 +119,7 @@ export type IssuerEmailSettings = {
   defaultCoverText?: string;
   attachIsdocByDefault?: boolean;
   displayNameTemplate?: string;
+  filenameTemplate?: string;
   overdueRemindersEnabled?: boolean;
   overdueReminderIntervalDays?: number;
   sendPaymentReceivedEmail?: boolean;

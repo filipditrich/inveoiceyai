@@ -21,6 +21,9 @@ describe("serveInvoicePdf", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("application/pdf");
     expect(response.headers.get("content-disposition")).toContain("inline;");
+    expect(response.headers.get("content-disposition")).toContain(
+      "faktura_20260117.pdf",
+    );
     expect(response.headers.get("x-frame-options")).toBe("SAMEORIGIN");
     expect(response.headers.get("content-security-policy")).toContain(
       "frame-ancestors 'self'",

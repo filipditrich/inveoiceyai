@@ -64,8 +64,9 @@ describe("createAndRenderInvoice", () => {
     if (r.ok) {
       expect(r.pdfBase64.length).toBeGreaterThan(100);
       expect(r.isdocXml).toContain("Invoice");
-      expect(r.filenamePdf).toMatch(/-isdoc\.pdf$/);
-      expect(r.filenameIsdoc).toMatch(/\.isdoc$/);
+      expect(r.filenamePdf).toMatch(/^faktura_.+\.pdf$/);
+      expect(r.filenameIsdoc).toMatch(/^faktura_.+\.isdoc$/);
+      expect(r.filenamePdf).not.toMatch(/isdoc\.pdf$/);
     }
   });
 

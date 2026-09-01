@@ -1884,6 +1884,8 @@
       "subject": "Subject template",
       "body": "Message text",
       "displayName": "Sender name template",
+      "filename": "PDF filename template",
+      "filenameHint": "Used for downloads and email attachments. Leave empty for the localized default (faktura_2026001). Tokens:",
       "attachIsdoc": "Attach ISDOC by default",
       "overdueReminders": "Send overdue reminders",
       "reminderInterval": "Reminder interval (days)",

@@ -40,6 +40,9 @@ export function IssuerEmailForm(props: {
   const [emailDisplayName, setEmailDisplayName] = React.useState(
     emailSettings?.displayNameTemplate ?? "{issuerName} via Invoicey",
   );
+  const [emailFilename, setEmailFilename] = React.useState(
+    emailSettings?.filenameTemplate ?? "",
+  );
   const [emailPaymentReceived, setEmailPaymentReceived] = React.useState(
     emailSettings?.sendPaymentReceivedEmail === true,
   );
@@ -52,6 +55,7 @@ export function IssuerEmailForm(props: {
     fd.set("emailDefaultSubject", emailSubject);
     fd.set("emailDefaultCoverText", emailCover);
     fd.set("emailDisplayNameTemplate", emailDisplayName);
+    fd.set("emailFilenameTemplate", emailFilename);
     fd.set("emailAttachIsdocByDefault", emailAttachIsdoc ? "true" : "false");
     fd.set("emailOverdueRemindersEnabled", emailOverdue ? "true" : "false");
     fd.set("emailOverdueReminderIntervalDays", emailReminderDays);
@@ -92,6 +96,18 @@ export function IssuerEmailForm(props: {
           placeholder="{issuerName} via Invoicey"
           value={emailDisplayName}
         />
+      </FieldGroup>
+      <FieldGroup label={t("filename")}>
+        <Input
+          onChange={(ev) => {
+            setEmailFilename(ev.target.value);
+          }}
+          placeholder="{kind}_{number}"
+          value={emailFilename}
+        />
+        <p className="text-muted-foreground text-sm">
+          {t("filenameHint")} {"{kind}"} {"{number}"}.
+        </p>
       </FieldGroup>
       <label className="flex items-center gap-2 text-sm">
         <input

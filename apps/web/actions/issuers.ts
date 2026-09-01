@@ -70,6 +70,7 @@ function parseEmailSettings(formData: FormData): IssuerEmailSettings {
     displayNameTemplate:
       optionalTrim(formData.get("emailDisplayNameTemplate")) ??
       "{issuerName} via Invoicey",
+    filenameTemplate: optionalTrim(formData.get("emailFilenameTemplate")),
     attachIsdocByDefault: formData.get("emailAttachIsdocByDefault") !== "false",
     overdueRemindersEnabled:
       formData.get("emailOverdueRemindersEnabled") === "true",

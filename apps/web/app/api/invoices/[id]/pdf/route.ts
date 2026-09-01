@@ -6,7 +6,7 @@ import {
 import { and, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { invoices } from "@invoicey/db";
+import { invoices, issuerBusinesses } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 
 type Params = Promise<{ id: string }>;
@@ -22,8 +22,18 @@ export async function GET(request: NextRequest, ctx: { params: Params }) {
     request.nextUrl.searchParams.get("disposition"),
   );
   const rows = await db
-    .select()
+    .select({
+      invoice: invoices,
+      emailSettings: issuerBusinesses.emailSettings,
+    })
     .from(invoices)
+    .leftJoin(
+      issuerBusinesses,
+      and(
+        eq(issuerBusinesses.id, invoices.issuerId),
+        eq(issuerBusinesses.workspaceId, invoices.workspaceId),
+      ),
+    )
     .where(and(eq(invoices.id, id), eq(invoices.workspaceId, workspaceId)))
     .limit(1);
   const row = rows[0];
@@ -32,7 +42,11 @@ export async function GET(request: NextRequest, ctx: { params: Params }) {
   }
 
   try {
-    return await serveInvoicePdf(row, disposition);
+    return await serveInvoicePdf(
+      row.invoice,
+      disposition,
+      row.emailSettings?.filenameTemplate,
+    );
   } catch (cause) {
     const message =
       cause instanceof Error ? cause.message : "pdf render failed";

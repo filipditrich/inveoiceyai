@@ -30,6 +30,14 @@ describe("resolveIssuerEmailSettings", () => {
         .attachIsdocByDefault,
     ).toBe(false);
   });
+
+  it("passes through a custom filename template", () => {
+    expect(resolveIssuerEmailSettings({}).filenameTemplate).toBe("");
+    expect(
+      resolveIssuerEmailSettings({ filenameTemplate: " {kind}_{number} " })
+        .filenameTemplate,
+    ).toBe("{kind}_{number}");
+  });
 });
 
 describe("server recipient suppression gate", () => {

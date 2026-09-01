@@ -48,6 +48,7 @@ Client-facing invoice templates (`invoice_sent`, `overdue_reminder`, `payment_re
 ## Attachments
 
 - Invoice sends: **PDF always**; **ISDOC on by default**, toggleable per send / issuer `email_settings.attachIsdocByDefault`.
+- Attachment names use `invoiceArtifactFileNames` (localized `{kind}_{number}`, optional issuer `filenameTemplate`).
 - Prefer stored `pdf_url` / `isdoc_url`; otherwise render via `@invoicey/invoice-core`.
 
 ## Status machine
@@ -83,6 +84,7 @@ Primary delivery statuses: `queued` → `sent` → `delivered` | `delayed` | `bo
   defaultCoverText?: string;
   attachIsdocByDefault?: boolean; // default true
   displayNameTemplate?: string;   // "{issuerName} via Invoicey"
+  filenameTemplate?: string;      // "{kind}_{number}" — downloads + attachments
   overdueRemindersEnabled?: boolean; // default false
   overdueReminderIntervalDays?: number; // default 7
   sendPaymentReceivedEmail?: boolean; // default false
