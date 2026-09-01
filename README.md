@@ -83,6 +83,7 @@ Same tools, same validation, same outputs. AI may draft. It may not invent an I�
 | **MCP**   | Hosted at `https://invoicey.ditrich.me/api/mcp` (workspace API key) or local stdio for Cursor. [Cursor](https://invoicey.ditrich.me/docs/integrations/cursor) · [Claude Code](https://invoicey.ditrich.me/docs/integrations/claude-code) |
 | **Slack** | Eve drafts in-thread, asks when something would be a guess, confirms before it ships.                                                                                                                                                    |
 | **Banks** | Read-only Fio and MONETA feeds → match proposals on the same ledger as manual payments.                                                                                                                                                  |
+| **Mac**   | [Invoicey Drive](https://github.com/filipditrich/invoicey-mac) lists issued PDFs in Finder. Pair from the menu bar. Cancel, pay, and issue stay here.                                                                                    |
 
 ```json
 {
@@ -121,14 +122,15 @@ Free is a complete solo invoicing tool. Pro adds people, banks, and looks. Enter
 
 ## Documentation
 
-| Doc                                                                                | What it covers                                      |
-| ---------------------------------------------------------------------------------- | --------------------------------------------------- |
-| [Product docs](https://invoicey.ditrich.me/docs)                                   | Quickstart, VAT, snapshots, MCP, banks, email       |
-| [Quickstart](https://invoicey.ditrich.me/docs/getting-started/quickstart)          | Sign in → issuer → client → issue → send            |
-| [Invoice as data](https://invoicey.ditrich.me/docs/concepts/invoice-as-data)       | The schema every surface validates against          |
-| [Reconcile payments](https://invoicey.ditrich.me/docs/guides/reconciling-payments) | Ledger, proposals, Fio & MONETA                     |
-| [`docs/`](docs/README.md)                                                          | Internal source of truth — PRD, ADRs, domain, specs |
-| [`CHANGELOG.md`](CHANGELOG.md)                                                     | What shipped                                        |
+| Doc                                                                                | What it covers                                                                                  |
+| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| [Product docs](https://invoicey.ditrich.me/docs)                                   | Quickstart, VAT, snapshots, MCP, banks, email                                                   |
+| [Quickstart](https://invoicey.ditrich.me/docs/getting-started/quickstart)          | Sign in → issuer → client → issue → send                                                        |
+| [Invoice as data](https://invoicey.ditrich.me/docs/concepts/invoice-as-data)       | The schema every surface validates against                                                      |
+| [Reconcile payments](https://invoicey.ditrich.me/docs/guides/reconciling-payments) | Ledger, proposals, Fio & MONETA                                                                 |
+| [Invoicey Drive](https://invoicey.ditrich.me/docs/integrations/invoicey-drive)     | macOS Finder companion · sibling [`invoicey-mac`](https://github.com/filipditrich/invoicey-mac) |
+| [`docs/`](docs/README.md)                                                          | Internal source of truth — PRD, ADRs, domain, specs                                             |
+| [`CHANGELOG.md`](CHANGELOG.md)                                                     | What shipped                                                                                    |
 
 ---
 
@@ -136,7 +138,7 @@ Free is a complete solo invoicing tool. Pro adds people, banks, and looks. Enter
 
 Next.js 16 App Router · Bun · Turborepo · Neon Postgres · Drizzle · Better Auth (Google / GitHub) · Zod · `@react-pdf/renderer` · Resend · Vercel.
 
-Shared domain lives in `@invoicey/invoice-core` (schema, totals, PDF / ISDOC / QR) and `@invoicey/invoice-tools` (normalize, MCP, create/issue). Payments are `@invoicey/payment-core`. The web app hosts the UI, remote MCP, and the Slack agent.
+Shared domain lives in `@invoicey/invoice-core` (schema, totals, PDF / ISDOC / QR) and `@invoicey/invoice-tools` (normalize, MCP, create/issue). Payments are `@invoicey/payment-core`. The web app hosts the UI, remote MCP, and the Slack agent. The macOS companion is a sibling repo: [Invoicey Drive](https://github.com/filipditrich/invoicey-mac).
 
 <details>
 <summary>Repo map</summary>
@@ -151,6 +153,9 @@ packages/ares/            ARES REST client
 packages/db/              Drizzle + checked-in SQL
 packages/emails/          Transactional templates
 docs/                     PRD, architecture, ADRs, specs
+
+sibling (not this monorepo)
+invoicey-mac              Swift — Invoicey Drive Finder librarian
 ```
 
 </details>
