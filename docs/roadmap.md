@@ -761,6 +761,28 @@ librarian, not a second Invoicey.
 **Out of 30:** Windows, iOS Files, invoice create/issue, server iCloud/Proton
 APIs, two-way Finder edits that mutate Invoicey, APNs, Mac App Store.
 
+## Plan 31 — Invoicey CLI (operator companion)
+
+**Status:** In progress
+**Completed:** —
+
+**ADR:** [0044](./decisions/0044-invoicey-cli-companion.md) ·
+[spec](./specs/invoicey-cli.md) ·
+[research](./research/invoicey-cli.md) ·
+[plan](../.cursor/plans/plan-31-invoicey-cli.md)
+
+**Goal:** Interactive terminal CLI for invoice, client, issuer, payment, and
+ARES management against the live workspace. Same PAT as remote MCP. The website
+stays the system of record for looks, members, bank connect, and import.
+
+- [x] Companion ops + `POST /api/companion` + PDF/ISDOC GET
+- [x] `apps/cli` (`invoicey`) — login, status, invoices, clients, issuers,
+      payments, ARES, interactive home
+- [x] Public docs `/docs/integrations/cli`
+
+**Out of 31:** look builder, bulk import, members, bank connect, recurring
+editor, Drive device tokens, local Neon mode.
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:

@@ -39,7 +39,8 @@ inveoiceyai/
 │   │   ├── content/docs/       Public MDX docs
 │   │   ├── lib/payments/       Fio sync + allocation services
 │   │   └── actions/            server actions (mutations)
-│   └── mcp/                    local stdio MCP (@invoicey/mcp)
+│   ├── mcp/                    local stdio MCP (@invoicey/mcp)
+│   └── cli/                    Invoicey CLI — operator companion (@invoicey/cli)
 ├── packages/
 │   ├── invoice-core/           Zod schema, totals, numbering, status, PDF, QR, ISDOC
 │   ├── invoice-tools/          normalize, presets, create/render, MCP registration
@@ -73,6 +74,7 @@ flowchart TD
     SlackAPI["Slack"] --> Connect["Vercel Connect"]
     Connect --> Eve["/eve/v1/slack"]
     MacDrive["Invoicey Drive.app"] -->|"device token"| RH_Drive["/api/drive/*"]
+    Cli["invoicey CLI"] -->|"PAT"| RH_Companion["/api/companion"]
 
     SA --> DB[("Neon via @invoicey/db")]
     RSC --> DB
@@ -83,6 +85,7 @@ flowchart TD
     Eve --> Tools
     RH_Drive --> Tools
     RH_Drive --> DB
+    RH_Companion --> Tools
     Tools --> Core["@invoicey/invoice-core"]
     Tools --> Ares
 ```
@@ -91,9 +94,10 @@ flowchart TD
 
 - **React Server Components** — read-only fetches via `@invoicey/db`. Default for app pages.
 - **Server Actions** — DB mutations; each parses input through Zod first. See [ADR 0016](./decisions/0016-server-actions-as-mutation-surface.md).
-- **Route handlers** — binaries (PDF/ISDOC), ARES proxy, demo PDF, Slack receivers, MCP HTTP (`mcp-handler`). Node runtime required for PDF (`Buffer` / fonts).
-- **`@invoicey/invoice-tools`** — framework-agnostic create/render, ARES lookup, file presets; consumed by MCP and Slack (and demo paths).
+- **Route handlers** — binaries (PDF/ISDOC), ARES proxy, demo PDF, Slack receivers, MCP HTTP (`mcp-handler`), companion JSON (`/api/companion`). Node runtime required for PDF (`Buffer` / fonts).
+- **`@invoicey/invoice-tools`** — framework-agnostic create/render, ARES lookup, file presets, companion ops; consumed by MCP, Slack, CLI, and demo paths.
 - **`apps/mcp`** — stdio MCP for local Cursor / Claude Desktop.
+- **`apps/cli`** — interactive operator CLI; remote client of `/api/companion`.
 - **Client components** — forms and interactive UI only where needed (`'use client'`).
 
 ## Data flow: creating an invoice
