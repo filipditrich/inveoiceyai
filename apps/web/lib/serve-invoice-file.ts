@@ -9,8 +9,6 @@ import { withLookSnapshotForRender } from "@invoicey/invoice-core/looks";
 import type { invoices } from "@invoicey/db";
 import { NextResponse } from "next/server";
 
-import { loadLookCatalog } from "@/lib/load-workspace-look";
-
 type InvoiceRow = typeof invoices.$inferSelect;
 const MAX_ARTIFACT_BYTES = 25 * 1024 * 1024;
 
@@ -179,12 +177,15 @@ export async function serveInvoicePdf(
   // self-hosted setups may intentionally omit UploadThing; render that frozen
   // payload on demand instead of leaving the preview and download unusable.
   // Drafts have no snapshot — resolve the catalog look for this render only.
-  const forRender = row.issuedAt
-    ? parsed.data
-    : withLookSnapshotForRender(
-        parsed.data,
-        await loadLookCatalog(row.workspaceId),
-      );
+  /** issued rows replay the stored snapshot; do not load the live catalog */
+  let forRender = parsed.data;
+  if (!row.issuedAt) {
+    const { loadLookCatalog } = await import("@/lib/load-workspace-look");
+    forRender = withLookSnapshotForRender(
+      parsed.data,
+      await loadLookCatalog(row.workspaceId),
+    );
+  }
   const pdfBytes = await renderInvoicePdf(forRender);
   return new NextResponse(Buffer.from(pdfBytes), {
     status: 200,
