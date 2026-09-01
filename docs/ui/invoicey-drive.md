@@ -88,6 +88,6 @@ No invoice builder. Opening an invoice opens Preview / Finder, not a native edit
 
 Settings: template field announced with live preview. Connect page: primary button is Connect this Mac. Mac menu: VoiceOver labels on Sync now and Open Invoicey Drive.
 
-## Open questions / TODOs
+## Parked on Apple Developer enrollment
 
-- `TODO(plan-30):` Czech + English copy for Drive (catalog keys)
+cs/en Drive catalog keys shipped. Settings download stays a placeholder until `INVOICEY_DRIVE_DMG_URL` points at a notarized `.dmg`. Finder Locations needs the signed File Provider `.appex`.
