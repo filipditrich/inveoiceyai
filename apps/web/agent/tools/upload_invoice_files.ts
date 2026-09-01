@@ -1,7 +1,11 @@
 import { defineDynamic, defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { renderInvoicePdf, renderIsdoc } from "@invoicey/invoice-core";
+import {
+  invoiceArtifactFileNamesFromInvoice,
+  renderInvoicePdf,
+  renderIsdoc,
+} from "@invoicey/invoice-core";
 import { getInvoice, invoiceForPdfRender } from "@invoicey/invoice-tools/ops";
 
 import { isSlackSession } from "../lib/metering-identity";
@@ -66,9 +70,9 @@ const uploadInvoiceFilesTool = () =>
           const pdfBytes = await renderInvoicePdf(invoice);
           isdocXml = renderIsdoc(invoice);
           pdfBase64 = Buffer.from(pdfBytes).toString("base64");
-          const safeName = invoice.meta.number.replace(/[^\w.-]+/g, "_");
-          filenamePdf ??= `faktura-${safeName}-isdoc.pdf`;
-          filenameIsdoc ??= `faktura-${safeName}.isdoc`;
+          const names = invoiceArtifactFileNamesFromInvoice(invoice);
+          filenamePdf ??= names.pdf;
+          filenameIsdoc ??= names.isdoc;
         }
 
         if (!pdfBase64 || !isdocXml) {
@@ -82,8 +86,8 @@ const uploadInvoiceFilesTool = () =>
           channelId: thread.channelId,
           threadTs: thread.threadTs,
           initialComment: input.initialComment,
-          filenamePdf: filenamePdf ?? "faktura.pdf",
-          filenameIsdoc: filenameIsdoc ?? "faktura.isdoc",
+          filenamePdf: filenamePdf ?? "invoice.pdf",
+          filenameIsdoc: filenameIsdoc ?? "invoice.isdoc",
           pdfBase64,
           isdocXml,
         });

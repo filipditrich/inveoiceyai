@@ -123,7 +123,7 @@ For each `items[]` (sorted by `position`):
 2. Serialize with `renderIsdoc`.
 3. `pdf-lib` `attach()` as **`invoice.isdoc`** (`application/xml`) → Catalog `/AF` + `/Names/EmbeddedFiles`.
 
-Recommended download suffix: `-isdoc.pdf`. Standalone `.isdoc` via `renderIsdoc` remains available.
+Download names use `invoiceArtifactFileNames` (default `{kind}_{number}.pdf` / `.isdoc`, localized). The embedded attachment inside the PDF stays `invoice.isdoc`. Standalone `.isdoc` via `renderIsdoc` remains available.
 
 ## Import (parse)
 

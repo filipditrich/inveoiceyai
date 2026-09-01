@@ -3,7 +3,7 @@ import { serveInvoiceIsdoc } from "@/lib/serve-invoice-file";
 import { and, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { invoices } from "@invoicey/db";
+import { invoices, issuerBusinesses } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 
 type Params = Promise<{ id: string }>;
@@ -16,8 +16,18 @@ export async function GET(request: NextRequest, ctx: { params: Params }) {
   }
   const { workspaceId } = gate.context;
   const rows = await db
-    .select()
+    .select({
+      invoice: invoices,
+      emailSettings: issuerBusinesses.emailSettings,
+    })
     .from(invoices)
+    .leftJoin(
+      issuerBusinesses,
+      and(
+        eq(issuerBusinesses.id, invoices.issuerId),
+        eq(issuerBusinesses.workspaceId, invoices.workspaceId),
+      ),
+    )
     .where(and(eq(invoices.id, id), eq(invoices.workspaceId, workspaceId)))
     .limit(1);
   const row = rows[0];
@@ -26,7 +36,11 @@ export async function GET(request: NextRequest, ctx: { params: Params }) {
   }
 
   try {
-    return await serveInvoiceIsdoc(row);
+    return await serveInvoiceIsdoc(
+      row.invoice,
+      "attachment",
+      row.emailSettings?.filenameTemplate,
+    );
   } catch (cause) {
     const message =
       cause instanceof Error ? cause.message : "isdoc render failed";

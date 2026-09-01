@@ -8,6 +8,7 @@ describe("resolveIssuerEmailSettings", () => {
     expect(s.attachIsdocByDefault).toBe(true);
     expect(s.overdueRemindersEnabled).toBe(false);
     expect(s.sendPaymentReceivedEmail).toBe(false);
+    expect(s.filenameTemplate).toBe("");
     expect(s.defaultSubject).toContain("{number}");
   });
 

@@ -3,7 +3,11 @@ import {
   searchAresByObchodniJmeno,
 } from "@invoicey/ares";
 import { persistDraftInvoice, tryCreateDbFromEnv } from "@invoicey/db";
-import { renderInvoicePdf, renderIsdoc } from "@invoicey/invoice-core";
+import {
+  invoiceArtifactFileNamesFromInvoice,
+  renderInvoicePdf,
+  renderIsdoc,
+} from "@invoicey/invoice-core";
 import {
   withLookSnapshotForRender,
   type LookDocument,
@@ -213,15 +217,15 @@ export async function createAndRenderInvoice(options: {
     withLookSnapshotForRender(invoice, catalog),
   );
   const isdocXml = renderIsdoc(invoice);
-  const safeName = invoice.meta.number.replace(/[^\w.-]+/g, "_");
+  const names = invoiceArtifactFileNamesFromInvoice(invoice);
 
   return {
     ok: true,
     invoice,
     pdfBase64: Buffer.from(pdfBytes).toString("base64"),
     isdocXml,
-    filenamePdf: `faktura-${safeName}-isdoc.pdf`,
-    filenameIsdoc: `faktura-${safeName}.isdoc`,
+    filenamePdf: names.pdf,
+    filenameIsdoc: names.isdoc,
     invoiceId,
     assumptions: normalized.assumptions,
   };

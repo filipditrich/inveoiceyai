@@ -15,6 +15,7 @@ import {
 import { renderOverdueReminderEmail } from "@invoicey/emails";
 import {
   InvoiceSchema,
+  invoiceArtifactFileNamesFromInvoice,
   renderInvoicePdf,
   renderIsdoc,
   toInvoiceIntlLocale,
@@ -60,10 +61,14 @@ async function buildInvoiceAttachments(opts: {
   pdfUrl: string | null;
   isdocUrl: string | null;
   attachIsdoc: boolean;
-  number: string;
+  filenameTemplate?: string | null;
 }): Promise<EmailAttachment[]> {
   const attachments: EmailAttachment[] = [];
-  const pdfName = `faktura-${opts.number}.pdf`;
+  const names = invoiceArtifactFileNamesFromInvoice(
+    opts.invoice,
+    opts.filenameTemplate,
+  );
+  const pdfName = names.pdf;
   if (opts.pdfUrl) {
     attachments.push({
       filename: pdfName,
@@ -80,7 +85,7 @@ async function buildInvoiceAttachments(opts: {
   }
 
   if (opts.attachIsdoc) {
-    const isdocName = `faktura-${opts.number}.isdoc`;
+    const isdocName = names.isdoc;
     if (opts.isdocUrl) {
       attachments.push({
         filename: isdocName,
@@ -191,7 +196,7 @@ export async function sendOverdueReminderForInvoice(opts: {
     pdfUrl: row.pdfUrl,
     isdocUrl: row.isdocUrl,
     attachIsdoc: settings.attachIsdocByDefault,
-    number,
+    filenameTemplate: settings.filenameTemplate,
   });
 
   try {

@@ -9,7 +9,11 @@ import {
 } from "eve/channels/slack";
 
 import { resolveLinkedSlackPrincipal, tryCreateDbFromEnv } from "@invoicey/db";
-import { renderInvoicePdf, renderIsdoc } from "@invoicey/invoice-core";
+import {
+  invoiceArtifactFileNamesFromInvoice,
+  renderInvoicePdf,
+  renderIsdoc,
+} from "@invoicey/invoice-core";
 import type { Invoice } from "@invoicey/invoice-core/schema";
 import {
   addCalendarDaysYmd,
@@ -164,12 +168,12 @@ async function uploadArtifacts(
   const prepared = await invoiceForPdfRender(invoice, { issued });
   const pdfBytes = await renderInvoicePdf(prepared);
   const isdocXml = renderIsdoc(invoice);
-  const safeName = invoice.meta.number.replace(/[^\w.-]+/gu, "_");
+  const names = invoiceArtifactFileNamesFromInvoice(invoice);
   await uploadInvoiceArtifacts({
     channelId: ctx.slack.channelId,
     threadTs: ctx.slack.threadTs,
-    filenamePdf: `faktura-${safeName}-isdoc.pdf`,
-    filenameIsdoc: `faktura-${safeName}.isdoc`,
+    filenamePdf: names.pdf,
+    filenameIsdoc: names.isdoc,
     pdfBase64: Buffer.from(pdfBytes).toString("base64"),
     isdocXml,
   });

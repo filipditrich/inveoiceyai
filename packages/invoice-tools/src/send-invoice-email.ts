@@ -19,6 +19,7 @@ import {
 } from "@invoicey/emails";
 import {
   InvoiceSchema,
+  invoiceArtifactFileNamesFromInvoice,
   renderInvoicePdf,
   renderIsdoc,
   toInvoiceIntlLocale,
@@ -58,6 +59,7 @@ export function resolveIssuerEmailSettings(
     | "defaultCoverText"
     | "attachIsdocByDefault"
     | "displayNameTemplate"
+    | "filenameTemplate"
     | "overdueRemindersEnabled"
     | "overdueReminderIntervalDays"
     | "sendPaymentReceivedEmail"
@@ -72,6 +74,7 @@ export function resolveIssuerEmailSettings(
     attachIsdocByDefault: raw?.attachIsdocByDefault !== false,
     displayNameTemplate:
       raw?.displayNameTemplate?.trim() || "{issuerName} via Invoicey",
+    filenameTemplate: raw?.filenameTemplate?.trim() || "",
     overdueRemindersEnabled: raw?.overdueRemindersEnabled === true,
     overdueReminderIntervalDays: raw?.overdueReminderIntervalDays ?? 7,
     sendPaymentReceivedEmail: raw?.sendPaymentReceivedEmail === true,
@@ -89,10 +92,14 @@ async function buildAttachments(opts: {
   pdfUrl: string | null;
   isdocUrl: string | null;
   attachIsdoc: boolean;
-  number: string;
+  filenameTemplate?: string | null;
 }): Promise<{ filename: string; content: Buffer; contentType?: string }[]> {
   const out: { filename: string; content: Buffer; contentType?: string }[] = [];
-  const pdfName = `faktura-${opts.number}.pdf`;
+  const names = invoiceArtifactFileNamesFromInvoice(
+    opts.invoice,
+    opts.filenameTemplate,
+  );
+  const pdfName = names.pdf;
   if (opts.pdfUrl) {
     out.push({
       filename: pdfName,
@@ -108,7 +115,7 @@ async function buildAttachments(opts: {
     });
   }
   if (opts.attachIsdoc) {
-    const isdocName = `faktura-${opts.number}.isdoc`;
+    const isdocName = names.isdoc;
     if (opts.isdocUrl) {
       out.push({
         filename: isdocName,
@@ -302,7 +309,7 @@ export async function sendInvoiceEmailById(
       pdfUrl: row.pdfUrl,
       isdocUrl: row.isdocUrl,
       attachIsdoc,
-      number,
+      filenameTemplate: settings.filenameTemplate,
     });
 
     const message: Parameters<typeof sendTransactionalEmail>[0] = {

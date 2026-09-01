@@ -54,7 +54,7 @@ MVP renderer supports **PNG and JPEG** from URLs reliably. **SVG:** optional pos
 
 ## ISDOC attachment
 
-`renderInvoicePdf` renders the page with `@react-pdf/renderer`, then `pdf-lib` `attach()` embeds `invoice.isdoc` (`application/xml`). Download names should end with `-isdoc.pdf`. Standalone `renderIsdoc` remains available for raw XML.
+`renderInvoicePdf` renders the page with `@react-pdf/renderer`, then `pdf-lib` `attach()` embeds `invoice.isdoc` (`application/xml`). User-facing download names come from `invoiceArtifactFileNames` (`faktura_{number}.pdf` in Czech, `invoice_{number}.pdf` in English; optional issuer `filenameTemplate`). Standalone `renderIsdoc` remains available for raw XML.
 
 ## Issued artifact persistence
 

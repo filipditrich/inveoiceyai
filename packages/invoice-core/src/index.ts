@@ -1,6 +1,7 @@
 export * from "./schema";
 export * from "./looks";
 export * from "./labels";
+export * from "./artifact-filenames";
 export * from "./bank/czech-iban";
 export * from "./totals";
 export * from "./numbering";

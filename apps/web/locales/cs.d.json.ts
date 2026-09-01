@@ -1894,6 +1894,8 @@ declare const messages: {
       "subject": "Šablona předmětu",
       "body": "Text e-mailu",
       "displayName": "Šablona jména odesílatele",
+      "filename": "Šablona názvu PDF",
+      "filenameHint": "Použije se ke stažení a v příloze e-mailu. Prázdné pole = lokalizovaný výchozí název (faktura_2026001). Zástupné:",
       "attachIsdoc": "Přikládat ISDOC ve výchozím stavu",
       "overdueReminders": "Posílat připomínky po splatnosti",
       "reminderInterval": "Počet dní mezi připomínkami",

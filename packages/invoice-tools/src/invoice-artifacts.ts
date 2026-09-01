@@ -5,6 +5,7 @@ import { UTApi, UTFile } from "uploadthing/server";
 import { invoices, tryCreateDbFromEnv } from "@invoicey/db";
 import {
   InvoiceSchema,
+  invoiceArtifactFileNamesFromInvoice,
   renderInvoicePdf,
   renderIsdoc,
   type Invoice,
@@ -105,7 +106,7 @@ export async function ensureInvoiceArtifacts(options: {
     throw new Error("invalid_payload");
   }
 
-  const number = parsed.data.meta.number || row.number || options.id;
+  const names = invoiceArtifactFileNamesFromInvoice(parsed.data);
   let pdfUrl = row.pdfUrl;
   let isdocUrl = row.isdocUrl;
   let pdfSha256 = row.pdfSha256 ?? undefined;
@@ -114,16 +115,12 @@ export async function ensureInvoiceArtifacts(options: {
   if (!pdfUrl) {
     const pdfBytes = await renderInvoicePdf(parsed.data);
     pdfSha256 = sha256(pdfBytes);
-    pdfUrl = await uploadBytes(
-      pdfBytes,
-      `${number}-isdoc.pdf`,
-      "application/pdf",
-    );
+    pdfUrl = await uploadBytes(pdfBytes, names.pdf, "application/pdf");
   }
   if (!isdocUrl) {
     const xml = renderIsdoc(parsed.data);
     isdocSha256 = sha256(xml);
-    isdocUrl = await uploadBytes(xml, `${number}.isdoc`, "application/xml");
+    isdocUrl = await uploadBytes(xml, names.isdoc, "application/xml");
   }
 
   const pdfGeneratedAt = new Date();

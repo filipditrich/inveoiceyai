@@ -2,7 +2,11 @@ import { defineTool } from "eve/tools";
 import { always } from "eve/tools/approval";
 import { z } from "zod";
 
-import { renderInvoicePdf, renderIsdoc } from "@invoicey/invoice-core";
+import {
+  invoiceArtifactFileNamesFromInvoice,
+  renderInvoicePdf,
+  renderIsdoc,
+} from "@invoicey/invoice-core";
 import { issueInvoiceById } from "@invoicey/invoice-tools/ops";
 
 import { buildInvoiceCardModel } from "../lib/invoice-card-model";
@@ -47,9 +51,9 @@ export default defineTool({
         confirm.clientName.trim().toLowerCase();
 
       /** Issuing freezes the document, so this PDF is the one worth keeping. */
-      const safeName = result.invoice.meta.number.replace(/[^\w.-]+/gu, "_");
-      const filenamePdf = `faktura-${safeName}-isdoc.pdf`;
-      const filenameIsdoc = `faktura-${safeName}.isdoc`;
+      const names = invoiceArtifactFileNamesFromInvoice(result.invoice);
+      const filenamePdf = names.pdf;
+      const filenameIsdoc = names.isdoc;
       const thread = slackThreadFromCtx(ctx);
       const upload = thread
         ? await uploadInvoiceArtifacts({
