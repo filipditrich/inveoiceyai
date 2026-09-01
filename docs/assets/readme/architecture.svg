@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+  <title id="title">Invoicey product architecture</title>
+  <desc id="desc">Web, MCP, and Slack all produce one InvoiceSchema. That data renders to PDF, ISDOC, and a payment QR, then bank matching proposes paid.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF8F2"/>
+      <stop offset="100%" stop-color="#F4E6D8"/>
+    </linearGradient>
+    <linearGradient id="copper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#D4925A"/>
+      <stop offset="100%" stop-color="#914522"/>
+    </linearGradient>
+    <filter id="shadow" x="-8%" y="-8%" width="116%" height="124%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#2A1810" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="560" rx="28" fill="url(#bg)"/>
+  <rect x="1.5" y="1.5" width="1197" height="557" rx="26.5" fill="none" stroke="#E6D5C5" stroke-width="1.5"/>
+
+  <g fill="#C4784A" opacity="0.08">
+    <circle cx="80" cy="48" r="2"/><circle cx="160" cy="48" r="2"/><circle cx="240" cy="48" r="2"/>
+    <circle cx="960" cy="48" r="2"/><circle cx="1040" cy="48" r="2"/><circle cx="1120" cy="48" r="2"/>
+    <circle cx="80" cy="512" r="2"/><circle cx="1120" cy="512" r="2"/>
+  </g>
+
+  <text x="600" y="46" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" font-weight="600" letter-spacing="2.4" fill="#914522">ONE SCHEMA, EVERY SURFACE</text>
+
+  <g filter="url(#shadow)" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif">
+    <rect x="72" y="72" width="320" height="108" rx="18" fill="#fff"/>
+    <rect x="72" y="72" width="8" height="108" rx="4" fill="url(#copper)"/>
+    <text x="104" y="116" font-size="20" font-weight="700" fill="#2A1810">Web app</text>
+    <text x="104" y="142" font-size="14" fill="#6B5344">Builder, AI draft, dashboard</text>
+
+    <rect x="440" y="72" width="320" height="108" rx="18" fill="#fff"/>
+    <rect x="440" y="72" width="8" height="108" rx="4" fill="url(#copper)"/>
+    <text x="472" y="116" font-size="20" font-weight="700" fill="#2A1810">MCP</text>
+    <text x="472" y="142" font-size="14" fill="#6B5344">Cursor, Claude Code, HTTP</text>
+
+    <rect x="808" y="72" width="320" height="108" rx="18" fill="#fff"/>
+    <rect x="808" y="72" width="8" height="108" rx="4" fill="url(#copper)"/>
+    <text x="840" y="116" font-size="20" font-weight="700" fill="#2A1810">Slack</text>
+    <text x="840" y="142" font-size="14" fill="#6B5344">Eve agent, confirm in-thread</text>
+  </g>
+
+  <g stroke="#C4784A" stroke-width="2" fill="none" opacity="0.55">
+    <path d="M232 180 v36"/>
+    <path d="M600 180 v36"/>
+    <path d="M968 180 v36"/>
+    <path d="M232 216 H968"/>
+    <path d="M600 216 v28"/>
+  </g>
+
+  <g filter="url(#shadow)" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif">
+    <rect x="360" y="244" width="480" height="88" rx="20" fill="#2A1810"/>
+    <text x="600" y="282" text-anchor="middle" font-size="12" font-weight="600" letter-spacing="1.8" fill="#D4925A">VALIDATED PAYLOAD</text>
+    <text x="600" y="308" text-anchor="middle" font-size="22" font-weight="700" fill="#FFF8F2">InvoiceSchema</text>
+  </g>
+
+  <g stroke="#C4784A" stroke-width="2" fill="none" opacity="0.55">
+    <path d="M600 332 v28"/>
+    <path d="M232 360 H968"/>
+    <path d="M232 360 v28"/>
+    <path d="M600 360 v28"/>
+    <path d="M968 360 v28"/>
+  </g>
+
+  <g filter="url(#shadow)" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif">
+    <rect x="72" y="388" width="320" height="100" rx="18" fill="#fff"/>
+    <text x="232" y="430" text-anchor="middle" font-size="18" font-weight="700" fill="#2A1810">PDF + look</text>
+    <text x="232" y="456" text-anchor="middle" font-size="13" fill="#6B5344">Classic, Minimal, or yours</text>
+
+    <rect x="440" y="388" width="320" height="100" rx="18" fill="#fff"/>
+    <text x="600" y="430" text-anchor="middle" font-size="18" font-weight="700" fill="#2A1810">ISDOC 6.0.2</text>
+    <text x="600" y="456" text-anchor="middle" font-size="13" fill="#6B5344">Embedded in the PDF, too</text>
+
+    <rect x="808" y="388" width="320" height="100" rx="18" fill="#fff"/>
+    <text x="968" y="430" text-anchor="middle" font-size="18" font-weight="700" fill="#2A1810">SPAYD QR</text>
+    <text x="968" y="456" text-anchor="middle" font-size="13" fill="#6B5344">Czech bank apps pre-fill</text>
+  </g>
+
+  <text x="600" y="528" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="14" fill="#6B5344">Then Fio or MONETA proposes a match. You confirm. Status becomes paid.</text>
+</svg>

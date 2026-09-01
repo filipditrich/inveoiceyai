@@ -1,206 +1,197 @@
+<p align="center">
+  <a href="https://invoicey.ditrich.me">
+    <img src="docs/assets/readme/logo.png" width="88" height="88" alt="Invoicey"/>
+  </a>
+</p>
+
 <h1 align="center">Invoicey</h1>
 
-<h4 align="center">Czech-first invoicing — schema-first data, PDF + ISDOC + SPAYD QR, payment ledger</h4>
-
 <p align="center">
-  <img src="https://img.shields.io/badge/status-Plan%2022%20Fio%20pilot-0ea5e9?style=for-the-badge" alt="Plan 22 Fio pilot" />
-  <img src="https://img.shields.io/badge/auth-Better%20Auth-111111?style=for-the-badge" alt="Better Auth" />
-  <img src="https://img.shields.io/badge/MCP-local%20%2B%20hosted-brightgreen?style=for-the-badge" alt="MCP local + hosted" />
-  <img src="https://img.shields.io/badge/commits-conventional%20Commits-ff69b4?style=for-the-badge&logo=conventionalcommits&logoColor=white" alt="Conventional Commits" />
-  <img src="https://img.shields.io/badge/stack-Next.js%2016%20%7C%20Bun%20%7C%20Neon-111111?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 16 | Bun | Neon" />
+  <strong>Invoice automation.</strong> Data first, documents second.
 </p>
 
 <p align="center">
-  <a href="#overview">Overview</a> ·
-  <a href="#whats-working-now">What's working</a> ·
-  <a href="#why-this-project">Why</a> ·
-  <a href="#architecture-at-a-glance">Architecture</a> ·
-  <a href="#tech-stack">Tech stack</a> ·
-  <a href="#getting-started">Getting started</a> ·
-  <a href="#mcp-local-cursor">MCP (Cursor)</a> ·
-  <a href="#project-structure">Project structure</a> ·
-  <a href="#documentation">Documentation</a> ·
-  <a href="#roadmap">Roadmap</a> ·
+  Issue from the web, JSON, or an agent. Invoicey validates once and renders the same PDF, ISDOC, and payment QR — then proposes a match when the money lands.
+</p>
+
+<p align="center">
+  <a href="https://invoicey.ditrich.me"><img src="https://img.shields.io/badge/product-invoicey.ditrich.me-914522?style=for-the-badge" alt="Open Invoicey"/></a>
+  <a href="https://invoicey.ditrich.me/docs"><img src="https://img.shields.io/badge/docs-guides-2A1810?style=for-the-badge" alt="Docs"/></a>
+  <img src="https://img.shields.io/badge/status-private%20beta-C4784A?style=for-the-badge" alt="Private beta"/>
+  <a href="https://github.com/filipditrich/inveoiceyai/releases"><img src="https://img.shields.io/github/v/release/filipditrich/inveoiceyai?style=for-the-badge&color=2A1810" alt="Latest release"/></a>
+</p>
+
+<p align="center">
+  <a href="#how-it-works">How it works</a> ·
+  <a href="#what-you-get">What you get</a> ·
+  <a href="#create-from-anywhere">Create from anywhere</a> ·
+  <a href="#plans">Plans</a> ·
+  <a href="#documentation">Docs</a> ·
   <a href="#contributing">Contributing</a>
 </p>
 
-## Overview
+<p align="center">
+  <img src="docs/assets/readme/banner.png" alt="Invoicey — invoicing that starts with data" width="720"/>
+</p>
 
-Invoicey is a modern invoicing tool for Czech freelancers and small teams. It treats each invoice as **structured data first** (one Zod `InvoiceSchema`, validated everywhere) and **rendered documents second** (PDF via `@react-pdf/renderer`, ISDOC XML, SPAYD QR for bank apps).
+---
 
-The same payload flows through the web app, **MCP tools** (Cursor / Claude), and the **Slack** agent — without duplicate types.
+## How it works
 
-**Current focus:** Plan 22 payment ledger with **Fio banka** as the first read-only bank feed (human-confirmed matches; live pilot pending). Product docs: [`/docs`](https://invoicey.ditrich.me/docs) · living ledger: [`docs/roadmap.md`](docs/roadmap.md).
+An invoice in Invoicey is a validated JSON payload — parties, lines, VAT, payment, totals. The PDF, the ISDOC XML, and the SPAYD payment QR are **outputs of that payload**, never the source of truth.
 
-## What's working now
+The web app, [MCP](https://invoicey.ditrich.me/docs/integrations/mcp), and [Slack](https://invoicey.ditrich.me/docs/integrations/slack) all assemble the same schema. If it does not validate, it does not ship.
 
-| Surface                                                        | Status               |
-| -------------------------------------------------------------- | -------------------- |
-| Domain + PDF / SPAYD / ISDOC (`@invoicey/invoice-core`)        | Done                 |
-| Issuers, clients, builder, list, dashboard                     | Done                 |
-| Better Auth (Google / GitHub) + workspaces                     | Done                 |
-| Email (Resend) + recurring drafts + overdue reminders          | Done                 |
-| Payment ledger + manual allocations (`@invoicey/payment-core`) | Done                 |
-| Fio read-only sync + match proposals + Payments queue          | Done (pilot pending) |
-| Local MCP stdio (`apps/mcp`) + hosted `/api/mcp`               | Done                 |
-| Slack Eve agent (DB-backed drafts / HITL)                      | In progress          |
-| Platform admin, invites, referrals, multi-workspace UX         | Done                 |
+<p align="center">
+  <img src="docs/assets/readme/architecture.svg" alt="Web, MCP, and Slack feed InvoiceSchema, which renders PDF, ISDOC, and SPAYD QR"/>
+</p>
 
-## Why this project
+Issuing freezes issuer and client **snapshots**, so a later registry edit cannot rewrite history. Status is **derived** from the ledger — unpaid, partial, paid, overpaid — not a checkbox you maintain by hand.
 
-1. UX that feels like a 2026 finance product, not a legacy admin panel.
-2. Czech VAT baked in: rates, reverse charge, OSS, DUZP, supplies abroad.
-3. **ARES** lookup by IČO for issuer and client parties.
-4. **SPAYD** QR so Czech banking apps pre-fill payment fields.
-5. **ISDOC** export so accounting tools can import without retyping.
-6. Multi–issuer-business support (separate numbering and banks).
-7. **AI-first create path** — prompt + validated JSON beats a control-heavy builder for day-to-day use.
-8. **Payment ledger** — bank evidence → match proposals → confirmed allocations (Fio first).
+<p align="center">
+  <img src="docs/assets/readme/lifecycle.svg" alt="Draft, issue, send, match, paid"/>
+</p>
 
-Inspired by [Midday.ai](https://midday.ai) and [fakturaonline.cz](https://fakturaonline.cz). Differentiators: schema-first design, MCP/Slack as first-class surfaces, snapshots so historical invoices stay stable after registry edits, provider-neutral reconciliation.
+---
 
-## Architecture at a glance
+## What you get
 
-```mermaid
-flowchart LR
-    subgraph Surfaces [Input surfaces]
-        UI["Web UI<br/>RHF + Zod"]
-        MCP["MCP<br/>apps/mcp + /api/mcp"]
-        Slack["Slack Eve<br/>/eve/v1/*"]
-    end
+| Capability                            | Detail                                                                                                                                                              |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Czech VAT, for real**               | 21 / 12 / 0 %, reverse charge, OSS, exempt supplies, DUZP as a first-class field. Non-payers print _Nejsem plátce DPH_ instead of a fake recap.                     |
+| **ARES by IČO**                       | Type an identification number, confirm the legal name, address, and DIČ. Issuers and clients both look up this way.                                                 |
+| **PDF that accountants can ingest**   | A look (Classic, Minimal, or a workspace look) plus ISDOC 6.0.2 **embedded in the PDF**. One file a human reads and software imports.                               |
+| **SPAYD payment QR**                  | Czech banking apps pre-fill amount, account, and variable symbol from a scan.                                                                                       |
+| **Several businesses, one workspace** | Živnost and s.r.o. side by side. Each issuer keeps its own bank, numbering, VAT mode, logo, stamp, and signature. Clients stay shared.                              |
+| **Looks, not templates**              | Pick a look. Optionally override theme tokens on one invoice. At issue, the full look is snapshotted so regeneration stays stable.                                  |
+| **One payment ledger**                | Connect **Fio** or **MONETA** with a token your bank issues in your name. Invoicey proposes matches by variable symbol, amount, currency, and account. You confirm. |
+| **Recurring without auto-issue**      | A cadence produces a reviewable draft with live issuer and client details. You issue and send.                                                                      |
+| **History that stays history**        | Bulk-import older PDFs and ISDOCs. Provenance is kept; issued artifacts are immutable.                                                                              |
+| **Currencies and language**           | Invoice in CZK or another currency, with or without VAT. Document language (`cs` / `en`) is independent of the app UI.                                              |
 
-    Surfaces --> Tools["@invoicey/invoice-tools"]
-    Tools --> Core["@invoicey/invoice-core<br/>InvoiceSchema + render"]
-    Tools --> Ares["@invoicey/ares"]
-    UI --> SA["Server actions + @invoicey/db"]
-    Fio["Fio periods API"] --> Pay["@invoicey/payment-core"]
-    Pay --> SA
-    Core --> PDF["PDF / SPAYD / ISDOC"]
+Czech standards (ARES, DPH, ISDOC, SPAYD) are capabilities, not a slogan. The product is invoice automation; those are how a Czech invoice actually works.
+
+---
+
+## Create from anywhere
+
+Same tools, same validation, same outputs. AI may draft. It may not invent an IČO, a UUID, or a required field — and issuing, sending, or marking paid always waits for a person.
+
+| Surface   | What it does                                                                                                                                                                                                                             |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Web**   | Structured draft, AI prompt → schema, PDF preview, issue, email, payments.                                                                                                                                                               |
+| **MCP**   | Hosted at `https://invoicey.ditrich.me/api/mcp` (workspace API key) or local stdio for Cursor. [Cursor](https://invoicey.ditrich.me/docs/integrations/cursor) · [Claude Code](https://invoicey.ditrich.me/docs/integrations/claude-code) |
+| **Slack** | Eve drafts in-thread, asks when something would be a guess, confirms before it ships.                                                                                                                                                    |
+| **Banks** | Read-only Fio and MONETA feeds → match proposals on the same ledger as manual payments.                                                                                                                                                  |
+
+```json
+{
+  "mcpServers": {
+    "invoicey": {
+      "url": "https://invoicey.ditrich.me/api/mcp",
+      "headers": { "Authorization": "Bearer <workspace-api-key>" }
+    }
+  }
+}
 ```
 
-ADRs: [`docs/decisions/README.md`](docs/decisions/README.md). Runtime detail: [`docs/architecture.md`](docs/architecture.md). Payments: [`docs/specs/payment-ledger-fio.md`](docs/specs/payment-ledger-fio.md).
+---
 
-## Tech stack
+## Plans
 
-| Layer            | Choice                                                                               |
-| ---------------- | ------------------------------------------------------------------------------------ |
-| Repo             | Turborepo + [Bun](https://bun.sh) workspaces                                         |
-| Web              | Next.js 16 App Router (RSC + Server Actions)                                         |
-| UI               | shadcn/ui + [ReUI](https://reui.io/docs/get-started), Tailwind v4                    |
-| Auth             | Better Auth (OAuth Google/GitHub; workspaces = organizations)                        |
-| Domain           | TypeScript + Zod (`@invoicey/invoice-core`)                                          |
-| Payments         | `@invoicey/payment-core` (Fio adapter, matcher, money helpers)                       |
-| Tools            | `@invoicey/invoice-tools` (normalize, presets, MCP registration)                     |
-| MCP              | `@modelcontextprotocol/sdk` + [`mcp-handler`](https://github.com/vercel/mcp-handler) |
-| DB               | Neon Postgres + Drizzle ORM                                                          |
-| Email            | Resend + `@invoicey/emails`                                                          |
-| PDF / QR / ISDOC | `@react-pdf/renderer`, `qrcode`, `xmlbuilder2`                                       |
-| Hosting          | Vercel (`apps/web`)                                                                  |
+Private beta. Plans are assigned by platform admin — there is no self-serve checkout yet.
 
-## Prerequisites
+<p align="center">
+  <img src="docs/assets/readme/plans.svg" alt="Free, Pro, and Enterprise compared"/>
+</p>
 
-| Tool                        | Role                                                              |
-| --------------------------- | ----------------------------------------------------------------- |
-| Git                         | Clone                                                             |
-| [Bun](https://bun.sh) ≥ 1.x | Install + scripts                                                 |
-| Node.js ≥ 24                | Next.js / ESLint engines                                          |
-| Neon (or Postgres URL)      | Before schema apply — copy `.env.example` → `.env` / `.env.local` |
+|                               | **Free** | **Pro**                         | **Enterprise**                  |
+| ----------------------------- | -------- | ------------------------------- | ------------------------------- |
+| Seats / issuers               | 1 / 1    | 5 / 5                           | Unlimited                       |
+| Invoice looks                 | Classic  | Catalog + workspace + community | Catalog + workspace + community |
+| Bank connections              | —        | Fio & MONETA                    | Fio & MONETA                    |
+| Recurring, import, MCP, Slack | Yes      | Yes                             | Yes                             |
+| Permissions                   | Off      | Advanced                        | Advanced                        |
+| Clients                       | Open     | Open                            | Configurable / managed          |
+| Monthly AI tokens             | 100k     | 1.5M                            | 5M                              |
 
-## Getting started
+Free is a complete solo invoicing tool. Pro adds people, banks, and looks. Enterprise adds boundary rules (domains, managed catalogs, retention).
+
+---
+
+## Documentation
+
+| Doc                                                                                | What it covers                                      |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [Product docs](https://invoicey.ditrich.me/docs)                                   | Quickstart, VAT, snapshots, MCP, banks, email       |
+| [Quickstart](https://invoicey.ditrich.me/docs/getting-started/quickstart)          | Sign in → issuer → client → issue → send            |
+| [Invoice as data](https://invoicey.ditrich.me/docs/concepts/invoice-as-data)       | The schema every surface validates against          |
+| [Reconcile payments](https://invoicey.ditrich.me/docs/guides/reconciling-payments) | Ledger, proposals, Fio & MONETA                     |
+| [`docs/`](docs/README.md)                                                          | Internal source of truth — PRD, ADRs, domain, specs |
+| [`CHANGELOG.md`](CHANGELOG.md)                                                     | What shipped                                        |
+
+---
+
+## Stack
+
+Next.js 16 App Router · Bun · Turborepo · Neon Postgres · Drizzle · Better Auth (Google / GitHub) · Zod · `@react-pdf/renderer` · Resend · Vercel.
+
+Shared domain lives in `@invoicey/invoice-core` (schema, totals, PDF / ISDOC / QR) and `@invoicey/invoice-tools` (normalize, MCP, create/issue). Payments are `@invoicey/payment-core`. The web app hosts the UI, remote MCP, and the Slack agent.
+
+<details>
+<summary>Repo map</summary>
+
+```text
+apps/web/                 Next.js — product, docs, /api/mcp, Eve
+apps/mcp/                 Local stdio MCP server
+packages/invoice-core/    Schema, numbering, status, PDF / ISDOC / QR
+packages/invoice-tools/   Shared handlers + MCP registration
+packages/payment-core/    Bank adapters + matcher
+packages/ares/            ARES REST client
+packages/db/              Drizzle + checked-in SQL
+packages/emails/          Transactional templates
+docs/                     PRD, architecture, ADRs, specs
+```
+
+</details>
+
+<details>
+<summary>Local development</summary>
+
+Contributor workflow, not a self-host guide. Production lives at [invoicey.ditrich.me](https://invoicey.ditrich.me).
 
 ```bash
 git clone https://github.com/filipditrich/inveoiceyai.git
 cd inveoiceyai
-cp .env.example .env.local   # fill DATABASE_URL, BETTER_AUTH_SECRET, OAuth, …
+cp .env.example .env.local
 bun install
-bun dev                      # Next.js @invoicey/web
+bun dev
 ```
 
-Useful scripts:
+`bun run typecheck` · `bun lint` · `bun test` · `bun run gates`. Domain contracts and ADRs live under [`docs/`](docs/README.md). Day-to-day agent notes: [`AGENTS.md`](AGENTS.md).
 
-| Script                                          | What it does                                                         |
-| ----------------------------------------------- | -------------------------------------------------------------------- |
-| `bun dev`                                       | Web app (Turbo filter `@invoicey/web`)                               |
-| `bun run typecheck` / `lint` / `test` / `build` | Monorepo checks                                                      |
-| `bun db:push`                                   | Drizzle push (`@invoicey/db`) — local only; prod uses checked-in SQL |
-| `bun run --cwd apps/mcp src/stdio.ts`           | Local MCP server (stdio)                                             |
+</details>
 
-Web env loading: repo-root `.env` then `.env.local` (see `apps/web/next.config.ts` and `AGENTS.md`). Bank token encryption needs `BANK_TOKEN_ENCRYPTION_KEY_V1` for Fio connections.
-
-## MCP (local Cursor)
-
-1. Copy [`.cursor/mcp.json.example`](.cursor/mcp.json.example) → `.cursor/mcp.json` and set absolute paths.
-2. Optional: `cp apps/mcp/presets.example.json ~/.invoicey/presets.json` (or set `INVOICEY_PRESETS_PATH`).
-3. Reload MCP in Cursor — tools: create/issue/paid ops, ARES, presets (see product docs).
-4. Prompt example: _lookup NFCtron IČO, use issuer preset X, create invoice with these lines, return PDF_.
-
-Full guide: [`docs/specs/mcp.md`](docs/specs/mcp.md) · product: [`/docs/integrations/mcp`](https://invoicey.ditrich.me/docs/integrations/mcp). Remote go-live (Vercel `/api/mcp` + API key) is documented there.
-
-## Project structure
-
-```text
-├── apps/
-│   ├── web/                 # Next.js 16 — UI, auth, email, Fio, Slack Eve, /api/mcp
-│   └── mcp/                 # Local stdio MCP server (@invoicey/mcp)
-├── packages/
-│   ├── invoice-core/        # Zod schema, totals, numbering, status, PDF/QR/ISDOC
-│   ├── invoice-tools/       # Shared handlers + presets + MCP tool registration
-│   ├── payment-core/        # Fio adapter, matcher, money helpers
-│   ├── emails/              # Resend templates
-│   ├── ares/                # ARES REST client
-│   ├── db/                  # Drizzle + Neon (+ checked-in SQL migrations)
-│   ├── env/                 # Env schema helpers
-│   └── config-ts/
-├── docs/                    # PRD, architecture, domain, ADRs, specs (internal)
-├── apps/web/content/docs/   # Public product docs (Fumadocs → /docs)
-├── .cursor/
-│   ├── plans/               # Per-phase plans
-│   └── mcp.json.example     # Cursor MCP snippet
-├── turbo.json
-├── package.json
-├── commitlint.config.mjs
-├── .env.example
-└── bun.lock
-```
-
-## Documentation
-
-| Doc                                                                    | Purpose                               |
-| ---------------------------------------------------------------------- | ------------------------------------- |
-| [`docs/README.md`](docs/README.md)                                     | Internal docs hub                     |
-| Product `/docs` (`apps/web/content/docs`)                              | User-facing guides (Fumadocs)         |
-| [`docs/PRD.md`](docs/PRD.md)                                           | Requirements, scope, success criteria |
-| [`docs/roadmap.md`](docs/roadmap.md)                                   | Plans 0–22 + exit criteria            |
-| [`docs/architecture.md`](docs/architecture.md)                         | Runtime, env vars, diagrams           |
-| [`docs/specs/payment-ledger-fio.md`](docs/specs/payment-ledger-fio.md) | Payment ledger + Fio                  |
-| [`docs/specs/mcp.md`](docs/specs/mcp.md)                               | MCP tools, Cursor + Vercel            |
-| [`docs/domain/invoice-schema.md`](docs/domain/invoice-schema.md)       | Central Zod contract                  |
-| [`docs/decisions/`](docs/decisions/README.md)                          | ADRs                                  |
-
-## Roadmap
-
-| Phase           | Goal                                                               | Status                                  |
-| --------------- | ------------------------------------------------------------------ | --------------------------------------- |
-| Plans 0–9       | Docs → polish (**MVP UI**)                                         | Done                                    |
-| Plans 10–11     | Recurring drafts + email lifecycle                                 | Done                                    |
-| Plans 12–13     | MCP (+ DB) + Slack Eve                                             | MCP done; Eve in progress               |
-| Plan 14 + 16–21 | Auth, security, public shell, admin, invites, workspaces, AI usage | Done                                    |
-| **Plan 22**     | Payment ledger + Fio bank integration                              | **Implemented; real Fio pilot pending** |
-
-```mermaid
-flowchart LR
-    MVP["Plans 0–9<br/>done"] --> Post["Post-MVP"]
-    Post --> P22["Plan 22<br/>payments + Fio"]
-    MVP -.parallel.-> Auto["MCP + Eve"]
-```
+---
 
 ## Contributing
 
-1. **Docs-first:** Contracts live under [`docs/`](docs/). Behavior changes update the doc and/or an ADR. User-facing copy also lives under `apps/web/content/docs/`.
-2. **Commits:** Conventional commits via `commitlint` — see [`commitlint.config.mjs`](commitlint.config.mjs).
-3. **Plans:** Trace work to [`.cursor/plans/`](.cursor/plans/) and roadmap exit criteria.
-4. **Secrets:** Never commit `.env`, `.cursor/mcp.json` (local paths), Fio tokens, or API keys. Prefer `.env.example` + gitignored locals.
+This is a private-beta product with a public repo. Useful PRs are welcome; scope and sequencing live in [`docs/roadmap.md`](docs/roadmap.md).
+
+1. Change the contract in `docs/` (or add an ADR) when behavior changes.
+2. Conventional commits (`commitlint`) — `bun run commit` if you want the wizard.
+3. Do not commit `.env`, API keys, bank tokens, or `.cursor/mcp.json`.
+
+<p align="center">
+  <img src="docs/assets/readme/mascot.webp" width="160" alt="Invoicey mascot"/>
+</p>
+
+<p align="center">
+  <em>I watch the required fields. You watch the business.</em>
+</p>
+
+---
 
 ## License
 
-TBD — likely permissive OSS once the product is generally available.
+Source-available during private beta. A public license lands when the product is generally available.

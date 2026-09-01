@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">Invoicey plans</title>
+  <desc id="desc">Free is a complete solo invoicing tool. Pro adds people, banks, and catalog looks. Enterprise adds control at scale.</desc>
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF8F2"/>
+      <stop offset="100%" stop-color="#F4E6D8"/>
+    </linearGradient>
+    <linearGradient id="copper3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#D4925A"/>
+      <stop offset="100%" stop-color="#914522"/>
+    </linearGradient>
+    <filter id="shadow3" x="-6%" y="-6%" width="112%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#2A1810" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="420" rx="28" fill="url(#bg3)"/>
+  <rect x="1.5" y="1.5" width="1197" height="417" rx="26.5" fill="none" stroke="#E6D5C5" stroke-width="1.5"/>
+
+  <text x="600" y="42" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" font-weight="600" letter-spacing="2.4" fill="#914522">WHAT EACH PLAN UNLOCKS</text>
+
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" filter="url(#shadow3)">
+    <rect x="48" y="72" width="352" height="300" rx="22" fill="#fff"/>
+    <text x="224" y="114" text-anchor="middle" font-size="13" font-weight="600" letter-spacing="1.6" fill="#914522">SOLO</text>
+    <text x="224" y="148" text-anchor="middle" font-size="28" font-weight="700" fill="#2A1810">Free</text>
+    <text x="224" y="178" text-anchor="middle" font-size="14" fill="#6B5344">A complete Czech invoicing tool</text>
+    <g fill="#C4784A">
+      <circle cx="72" cy="219" r="3.5"/>
+      <circle cx="72" cy="247" r="3.5"/>
+      <circle cx="72" cy="275" r="3.5"/>
+      <circle cx="72" cy="303" r="3.5"/>
+    </g>
+    <g fill="#2A1810" font-size="14">
+      <text x="88" y="224">1 issuer  /  1 seat</text>
+      <text x="88" y="252">Classic look</text>
+      <text x="88" y="280">ARES, VAT, ISDOC, QR, email</text>
+      <text x="88" y="308">MCP, Slack, recurring drafts</text>
+    </g>
+
+    <rect x="424" y="72" width="352" height="300" rx="22" fill="#2A1810"/>
+    <rect x="424" y="72" width="352" height="8" rx="4" fill="url(#copper3)"/>
+    <text x="600" y="114" text-anchor="middle" font-size="13" font-weight="600" letter-spacing="1.6" fill="#D4925A">TEAMS + MONEY</text>
+    <text x="600" y="148" text-anchor="middle" font-size="28" font-weight="700" fill="#FFF8F2">Pro</text>
+    <text x="600" y="178" text-anchor="middle" font-size="14" fill="#E6D5C5">People, banks, and catalog looks</text>
+    <g fill="#D4925A">
+      <circle cx="448" cy="219" r="3.5"/>
+      <circle cx="448" cy="247" r="3.5"/>
+      <circle cx="448" cy="275" r="3.5"/>
+      <circle cx="448" cy="303" r="3.5"/>
+    </g>
+    <g fill="#FFF8F2" font-size="14">
+      <text x="464" y="224">5 issuers  /  5 seats</text>
+      <text x="464" y="252">Catalog + workspace looks</text>
+      <text x="464" y="280">Fio and MONETA reconciliation</text>
+      <text x="464" y="308">Advanced member permissions</text>
+    </g>
+
+    <rect x="800" y="72" width="352" height="300" rx="22" fill="#fff"/>
+    <text x="976" y="114" text-anchor="middle" font-size="13" font-weight="600" letter-spacing="1.6" fill="#914522">CONTROL</text>
+    <text x="976" y="148" text-anchor="middle" font-size="28" font-weight="700" fill="#2A1810">Enterprise</text>
+    <text x="976" y="178" text-anchor="middle" font-size="14" fill="#6B5344">Scale plus boundary rules</text>
+    <g fill="#C4784A">
+      <circle cx="824" cy="219" r="3.5"/>
+      <circle cx="824" cy="247" r="3.5"/>
+      <circle cx="824" cy="275" r="3.5"/>
+      <circle cx="824" cy="303" r="3.5"/>
+    </g>
+    <g fill="#2A1810" font-size="14">
+      <text x="840" y="224">Unlimited issuers and seats</text>
+      <text x="840" y="252">Managed client catalogs</text>
+      <text x="840" y="280">Allowed email domains</text>
+      <text x="840" y="308">Unlimited audit retention</text>
+    </g>
+  </g>
+</svg>

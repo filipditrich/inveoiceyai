@@ -63,7 +63,7 @@ Each plan in `.cursor/plans/` cites the docs it implements. Each ADR cites the p
 
 ## Reading order for newcomers
 
-1. [`../README.md`](../README.md) — repo overview + getting started
+1. [`../README.md`](../README.md) — product overview
 2. [`PRD.md`](./PRD.md) — what we're building and why
 3. [`glossary.md`](./glossary.md) — vocabulary
 4. [`architecture.md`](./architecture.md) — how the system fits together
