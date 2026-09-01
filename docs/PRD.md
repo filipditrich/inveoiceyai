@@ -98,6 +98,7 @@ These are explicitly deferred. They are _not_ prohibited future work — they're
 | Client-side payment portal (pay-by-link)             | Out of scope for this product                                                                          | Possibly never        |
 | Advanced templates (custom PDF layouts)              | One good template is better than ten mediocre ones                                                     | Post-MVP              |
 | Tax reporting / kontrolní hlášení / DPH přiznání     | Adjacent product; ISDOC export covers the upstream piece                                               | Possibly never        |
+| Invoicey Drive (Finder replica of issued PDFs)       | Vercel cannot write iCloud/Proton; needs a Mac File Provider companion                                 | Plan 30               |
 
 ## Success criteria (MVP)
 

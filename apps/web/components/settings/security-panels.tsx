@@ -72,6 +72,8 @@ const AUDIT_TYPE_KEYS = [
   "slack_link",
   "slack_unlink",
   "slack_rebind",
+  "drive_device_create",
+  "drive_device_revoke",
 ] as const;
 
 function summarizeUa(

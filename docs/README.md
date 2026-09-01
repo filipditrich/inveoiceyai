@@ -40,6 +40,10 @@ If a doc disagrees with the code, the doc is right and the code is a bug — or 
   for supplier invoices.
 - [Czech OSVČ companion](./research/osvc-companion.md) — exploratory and not
   scheduled.
+- [Personal invoice archive](./research/personal-invoice-archive.md) — selected
+  as Invoicey Drive (Plan 30). Server cannot write iCloud or Proton Drive.
+- [macOS archive app sketches](./research/macos-archive-app.md) — promoted into
+  the Drive spec.
 
 ## Conventions
 

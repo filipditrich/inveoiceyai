@@ -557,6 +557,8 @@
       "emailDescription": "Odeslání PDF a ISDOC pod vaším jménem se sledováním doručení.",
       "apiTitle": "JSON a API klíče",
       "apiDescription": "Validovaný InvoiceSchema JSON a klíče pro vlastní automatizaci.",
+      "driveTitle": "Invoicey Drive",
+      "driveDescription": "Vystavená PDF ve Finderu na Macu. Propojení z lišty nabídek.",
       "docsCta": "Dokumentace napojení"
     }
   },
@@ -664,6 +666,20 @@
     "expired": "Odkaz vypršel (15 minut). Napište botovi znovu.",
     "consumed": "Tento odkaz už byl použit. Napište botovi, pokud potřebujete nový.",
     "stealRefused": "Tento Slack účet je už propojený s jiným Invoicey uživatelem. Nechte ho odpojit v Nastavení → Integrace."
+  },
+  "DriveConnect": {
+    "title": "Připojit Invoicey Drive",
+    "description": "Tento Mac vypíše vystavené faktury ze všech workspace, kde jste členem, kromě těch, které skryjete v nastavení.",
+    "confirm": "Připojit tento Mac",
+    "confirming": "Připojuji…",
+    "confirmed": "Připojeno",
+    "cancel": "Zrušit",
+    "invoiceyAccount": "Účet Invoicey",
+    "deviceName": "Zařízení: {name}",
+    "workspacesTitle": "Workspaces ve Finderu",
+    "invalid": "Odkaz na připojení je neplatný nebo neúplný. Začněte znovu z Invoicey Drive na Macu.",
+    "unavailable": "Párování Drive na tomto serveru není nastavené.",
+    "backToSettings": "Nastavení Invoicey Drive"
   },
   "Referral": {
     "title": "{name} vás zve do Invoicey",
@@ -782,6 +798,7 @@
         "account": "Účet",
         "workspace": "Pracovní prostor",
         "security": "Zabezpečení",
+        "drive": "Invoicey Drive",
         "members": "Členové",
         "usage": "Využití",
         "referrals": "Doporučení",
@@ -794,6 +811,7 @@
         "account": "Profil, motiv a jazyk",
         "workspace": "Název a logo tohoto prostoru",
         "security": "Přihlášení, relace a zařízení",
+        "drive": "Kopie vystavených faktur ve Finderu",
         "members": "Lidé a oprávnění",
         "usage": "AI tokeny, grafy a historie",
         "referrals": "Pozvěte přátele do Invoicey",
@@ -1339,6 +1357,10 @@
       "archiveNote": "Archivní import — položky nejsou k dispozici. Stáhněte originální PDF.",
       "invalidPayload": "Uložená data faktury jsou neplatná.",
       "backToList": "← Zpět na seznam",
+      "driveBannerTitle": "Kopii ve Finderu na Macu",
+      "driveBannerBody": "Invoicey Drive ukáže vystavená PDF ve Finderu. Nainstalujte aplikaci a v liště nabídek zvolte Connect Invoicey.",
+      "driveBannerCta": "Nastavení Invoicey Drive",
+      "driveBannerDismiss": "Skrýt",
       "archive": "Archiv",
       "import": "Import",
       "issueButton": "Vystavit",
@@ -2005,8 +2027,53 @@
           "platform_admin_revoke": "Platformní admin odebrán",
           "slack_link": "Propojení Slacku",
           "slack_unlink": "Odpojení Slacku",
-          "slack_rebind": "Změna Slack workspace"
+          "slack_rebind": "Změna Slack workspace",
+          "drive_device_create": "Invoicey Drive připojen",
+          "drive_device_revoke": "Invoicey Drive odvolán"
         }
+      }
+    },
+    "drive": {
+      "pageTitle": "Invoicey Drive",
+      "pageDescription": "Nainstalujte Mac aplikaci, zvolte vnoření souborů ve Finderu a odvolejte ztracený Mac. Párování vždy začíná v aplikaci.",
+      "downloadTitle": "Aplikace pro Mac",
+      "downloadDescription": "Notarizovaný disk image pro macOS 14 a novější.",
+      "downloadButton": "Stáhnout pro Mac",
+      "downloadSoon": "Notarizované stažení se tu objeví po prvním podepsaném buildu. Do té doby spusťte sourozenecké repo invoicey-mac lokálně.",
+      "connectHint": "Nainstalujte aplikaci a v liště nabídek zvolte Connect Invoicey. Tato stránka párování nespouští.",
+      "layoutTitle": "Rozložení",
+      "layoutDescription": "Cesta pod složkou dodavatele. Tokeny: '{year}', '{month}', '{kind}', '{number}', '{client}', '{name}'.",
+      "templateLabel": "Šablona",
+      "previewInvalid": "Opravte šablonu, aby se ukázal náhled.",
+      "includeIsdoc": "Ukládat i .isdoc",
+      "presets": {
+        "yearFolder": "Složka podle roku",
+        "flatYear": "Rok v názvu souboru",
+        "nameOnly": "Jen název"
+      },
+      "workspacesTitle": "Workspaces ve Finderu",
+      "workspacesDescription": "Nezaškrtnuté workspaces zůstanou v Invoicey a zmizí ze stromu Drive.",
+      "workspacesEmpty": "Zatím nejste členem žádného workspace.",
+      "workspacesAllHidden": "Finder bude prázdný, dokud nezobrazíte aspoň jeden workspace.",
+      "devicesTitle": "Zařízení",
+      "devicesDescription": "Každý připojený Mac. Odvolání ho ihned odpojí.",
+      "devicesEmpty": "Žádný Mac zatím není připojený. Otevřete Invoicey Drive a zvolte Connect Invoicey.",
+      "lastSeen": "naposledy {when}",
+      "revoked": "odvoláno",
+      "revoke": "Odvolat",
+      "revokeFailed": "Tento Mac se nepodařilo odvolat",
+      "revokeSuccess": "Mac odvolán",
+      "save": "Uložit nastavení Drive",
+      "saved": "Nastavení Drive uloženo",
+      "sampleWorkspace": "Workspace",
+      "sampleIssuer": "Dodavatel",
+      "errors": {
+        "empty": "Šablona nesmí být prázdná.",
+        "too_long": "Šablona je příliš dlouhá.",
+        "invalid_chars": "Povolená jsou písmena, čísla, lomítko, podtržítko, pomlčka a tečky.",
+        "unknown_token": "Neznámý token v šabloně.",
+        "missing_number": "Šablona musí obsahovat '{number}' nebo '{name}'.",
+        "dotdot": "Šablona nesmí obsahovat .."
       }
     },
     "members": {

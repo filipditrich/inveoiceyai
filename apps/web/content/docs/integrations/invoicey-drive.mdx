@@ -1,0 +1,64 @@
+---
+title: Invoicey Drive
+description: Issued invoices as files in Finder on your Mac.
+icon: HardDrive
+---
+
+Invoicey Drive is a macOS companion. The website remains where you create, issue, and cancel invoices. The Mac app is a librarian: it lists issued PDFs in Finder and can keep an optional mirror folder in sync.
+
+<Callout title="macOS 14+">
+  Invoicey Drive targets macOS 14 Sonoma and newer. It is distributed as a
+  notarized `.dmg`, not through the Mac App Store.
+</Callout>
+
+## What you get
+
+```text
+Invoicey Drive/
+  {workspace}/
+    {issuer}/
+      2026/faktura_2026001.pdf
+```
+
+The default layout is `{year}/{kind}_{number}`. You can flatten it to `{year}_{name}` or `{name}` under **Settings → Invoicey Drive**.
+
+Drafts never appear. Cancelled invoices leave the tree. Rows without a stored PDF are omitted.
+
+## Install and connect
+
+1. Download Invoicey Drive from **Settings → Invoicey Drive** (or run the sibling `invoicey-mac` repo locally).
+2. Open the app. A menu bar extra appears. Login item is on by default.
+3. Choose **Connect Invoicey**. Sign in on the website if needed, then **Connect this Mac**.
+4. Invoicey Drive shows up in Finder Locations once File Provider is entitled. Until then, set a **mirror folder** (iCloud, Proton Drive, or a local `_faktury` folder) and use **Sync now**.
+
+Pairing always starts in the Mac app. Settings lists devices and can revoke them. It does not start a new connect session.
+
+## Tokens
+
+| Token                | Meaning                                  |
+| -------------------- | ---------------------------------------- |
+| `{year}` / `{month}` | From the invoice issue date              |
+| `{kind}`             | Localized stem (`faktura`, `invoice`, …) |
+| `{number}`           | Invoice number                           |
+| `{client}`           | Client name                              |
+| `{name}`             | `{kind}_{number}`                        |
+
+The template must include `{number}` or `{name}`. A slash becomes a folder.
+
+## iCloud vs Invoicey Drive
+
+Invoicey Drive is a Finder domain owned by Invoicey. iCloud Drive (or Proton Drive) is a folder you may choose as the **optional mirror**. They are not the same. Deleting a file in Finder or in the mirror only removes the local copy; the next sync restores it. Cancel an invoice on the website to remove it from the index.
+
+## Revoke
+
+**Settings → Invoicey Drive → Revoke**, or **Sign out** in the menu bar. That device token stops immediately. Connect again to pair a replacement Mac.
+
+## Local development
+
+```bash
+cd invoicey-mac
+INVOICEY_DRIVE_API_URL=http://localhost:3000 swift run invoicey-drive pair
+swift run invoicey-drive sync
+```
+
+The CLI uses a loopback callback (`http://127.0.0.1:<port>/oauth`). Production pairing uses Associated Domains on `invoicey.ditrich.me`.

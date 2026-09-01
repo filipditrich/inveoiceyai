@@ -166,6 +166,50 @@ ISDOC packaged together with attachments (typically the PDF rendering of the sam
 
 **Česká národní banka** — Czech National Bank. Source of official daily exchange rates. Not used in CZK-only MVP; future multi-currency work will hit `https://www.cnb.cz/cs/financni-trhy/devizovy-trh/kurzy-devizoveho-trhu/`.
 
+## Product entities
+
+### Workspace
+
+A Better Auth **organization** (ADR 0019). The tenancy boundary for invoices, issuers, and members. In Invoicey Drive the workspace display name is the first folder under the Drive root. Identity is `workspace_id`, not the folder title.
+
+_Avoid:_ account, tenant, org (in user-facing copy)
+
+### Issuer
+
+**Issuer business** — a legal entity the workspace invoices _from_ (`issuer_businesses`). Has its own name, IČO, bank, numbering, and VAT settings. In Invoicey Drive the live issuer name is the second folder. Identity is `issuer_id`.
+
+_Avoid:_ company (when you mean this row), account
+
+### Filename template
+
+Issuer email/download setting (`filenameTemplate`). Tokens such as `{kind}` and `{number}` produce a **single file stem** for PDF/ISDOC attachments. Slashes are stripped. Not the Drive layout.
+
+### Drive layout template
+
+User-owned path under `/{workspace}/{issuer}/`. Stored on `drive_user_settings` with `include_isdoc` and hidden workspace ids. Slashes create folders. Default `{year}/{kind}_{number}`. Must contain `{number}` or `{name}`. `{name}` is an alias of `{kind}_{number}`. `{year}` is the issue-date year in Europe/Prague. Distinct from the issuer filename template.
+
+## Invoicey Drive
+
+### Invoicey Drive
+
+macOS companion: a Finder **Locations** domain (File Provider) plus a menu-bar librarian. It shows issued invoice files. It is a **replica** of UploadThing artifacts, not a second Invoicey and not Proton Drive.
+
+See [`specs/invoicey-drive.md`](./specs/invoicey-drive.md), [ADR 0041](./decisions/0041-invoicey-drive-companion.md).
+
+_Avoid:_ Invoicey.app, Mac Invoicey, Proton Drive (the analogue, not the product)
+
+### Drive device
+
+One paired Mac install owned by a **user**. Listed and revocable in Settings → Invoicey Drive. Identity is `drive_devices.id`.
+
+### Drive device token
+
+Long-lived secret for `/api/drive/*` only. Stored in the Mac Keychain. Not a Settings PAT, not the env ops key, not a browser session cookie.
+
+### Mirror folder
+
+Optional security-scoped folder on the Mac (iCloud Drive, Proton Drive, `_faktury`, …) that receives the same relative tree as Invoicey Drive. The File Provider domain is Invoicey Drive; this folder is an extra copy.
+
 ## Automation surfaces
 
 ### MCP

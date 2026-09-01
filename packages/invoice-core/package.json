@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./schema": "./src/schema.ts",
+    "./drive-layout": "./src/drive-layout.ts",
     "./looks": "./src/looks/index.ts",
     "./numbering": "./src/numbering.ts",
     "./status": "./src/status.ts",

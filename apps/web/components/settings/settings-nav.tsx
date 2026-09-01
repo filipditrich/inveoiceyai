@@ -6,6 +6,7 @@ import {
   ActivityIcon,
   Building2Icon,
   GiftIcon,
+  HardDriveIcon,
   KeyRoundIcon,
   LandmarkIcon,
   PlugZapIcon,
@@ -33,6 +34,7 @@ interface SettingsLink {
   key:
     | "account"
     | "security"
+    | "drive"
     | "referrals"
     | "workspace"
     | "members"
@@ -57,6 +59,12 @@ const ACCOUNT_LINKS: SettingsLink[] = [
     key: "security",
     exact: false,
     icon: ShieldCheckIcon,
+  },
+  {
+    href: "/settings/account/drive",
+    key: "drive",
+    exact: false,
+    icon: HardDriveIcon,
   },
   {
     href: "/settings/account/referrals",

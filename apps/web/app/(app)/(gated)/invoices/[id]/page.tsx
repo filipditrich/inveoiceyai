@@ -6,6 +6,7 @@ import {
   unmarkInvoicePaid,
 } from "@/actions/invoices";
 import { reversePayment } from "@/actions/payments";
+import { DrivePromoBanner } from "@/components/drive/drive-promo-banner";
 import { InvoiceCancelSheet } from "@/components/invoices/invoice-cancel-sheet";
 import { InvoiceEmailTimeline } from "@/components/invoices/invoice-email-timeline";
 import { InvoiceLifecycleGuidance } from "@/components/invoices/invoice-lifecycle-guidance";
@@ -61,6 +62,7 @@ import {
   invoices,
   issuerBusinesses,
   listInvoicePaymentAllocations,
+  countActiveDriveDevices,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
@@ -92,7 +94,7 @@ export default async function InvoiceDetailPage({
   const tOrigin = await getTranslations("Invoices.origin");
   const tErrors = await getTranslations("Errors.invalid");
   const locale = (await getLocale()) as AppLocale;
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWorkspace();
   const rows = await db
     .select()
     .from(invoices)
@@ -119,6 +121,8 @@ export default async function InvoiceDetailPage({
     (row.issuedAt ? "invoicey" : null)) as InvoiceOriginProvider | null;
   const originLabel =
     originProvider != null ? tOrigin(originProvider) : row.originLabel;
+  const showDriveBanner =
+    Boolean(row.issuedAt) && (await countActiveDriveDevices(db, userId)) === 0;
 
   const [issuerRow] = await db
     .select()
@@ -272,6 +276,7 @@ export default async function InvoiceDetailPage({
       >
         {t("backToList")}
       </Link>
+      {showDriveBanner ? <DrivePromoBanner /> : null}
       <PageHeader
         actions={
           <>

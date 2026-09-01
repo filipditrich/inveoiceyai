@@ -34,6 +34,9 @@ const required = new Map([
     "community_looks",
     new Set(["look_id", "version", "document", "publisher_workspace_id"]),
   ],
+  ["drive_user_settings", new Set(["layout_template", "include_isdoc"])],
+  ["drive_devices", new Set(["token_hash", "token_fingerprint"])],
+  ["drive_pair_grants", new Set(["code_hash", "code_challenge"])],
 ]);
 
 const result = await db.execute<{
@@ -54,7 +57,10 @@ const result = await db.execute<{
       'invoice_payment_allocations',
       'payment_audit_events',
       'workspace_looks',
-      'community_looks'
+      'community_looks',
+      'drive_user_settings',
+      'drive_devices',
+      'drive_pair_grants'
     )
 `);
 

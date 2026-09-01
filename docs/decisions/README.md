@@ -51,3 +51,6 @@ When a decision changes:
 | [0038](./0038-permission-catalog-with-role-presets.md)     | Permission catalog with role presets + member overrides    | Accepted                                 |
 | [0039](./0039-looks-are-data-react-pdf-interprets.md)      | Invoice PDFs are looks (data, react-pdf interprets)        | Accepted                                 |
 | [0040](./0040-oxc-toolchain.md)                            | oxlint + oxfmt (anti-slop, complexity)                     | Accepted                                 |
+| [0041](./0041-invoicey-drive-companion.md)                 | Invoicey Drive is a macOS companion replica                | Accepted                                 |
+| [0042](./0042-drive-device-pairing.md)                     | Drive pairing is web sign-in + one-time callback code      | Accepted                                 |
+| [0043](./0043-drive-layout-workspace-issuer-template.md)   | Drive tree is workspace / issuer / layout template         | Accepted                                 |

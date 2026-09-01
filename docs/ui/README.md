@@ -15,6 +15,7 @@ Shipped: [`invoice-builder-flow.md`](./invoice-builder-flow.md) (Plan 6), [`data
 | `data-grid-ux.md`             | Plan 7               | Filter/sort/search interactions, row-action menu, empty/loading states                                          |
 | `dashboard-layout.md`         | Plan 8               | Cards, chart, recent invoices arrangement; issuer-filter behavior                                               |
 | `onboarding.md`               | Plan 9               | First-run experience, "Create your first issuer" guided flow                                                    |
+| `invoicey-drive.md`           | Plan 30              | Companion promo, `/drive/connect`, Settings Drive, Mac menu bar, first-run                                      |
 
 ## Format conventions
 
