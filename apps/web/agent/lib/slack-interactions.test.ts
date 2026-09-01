@@ -72,6 +72,7 @@ function fakeInvoice() {
       currency: "CZK",
       language: "cs",
     },
+    issuer: { name: "Test Issuer", vatPayer: true },
     client: { name: "NFCtron a.s.", ico: "08453961" },
     vat: { mode: "regular", suppliesAbroad: "none" },
     payment: { method: "transfer" },
