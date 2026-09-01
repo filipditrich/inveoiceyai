@@ -76,13 +76,13 @@ No invoice builder. Opening an invoice opens Preview / Finder, not a native edit
 
 ## Empty / loading / error
 
-| State | Web | Mac |
-| --- | --- | --- |
-| No devices | Download + “connect from the menu bar” | Connect Invoicey |
-| Connecting | Confirm page | Menu: Connecting… |
-| Empty issued set | Preview still shows sample path | Finder domain exists, folders empty |
-| Sync error | Device row: last error | Menu: last error, Sync now |
-| Revoked | Device disappears | Menu: Connect again; domain removed |
+| State            | Web                                    | Mac                                 |
+| ---------------- | -------------------------------------- | ----------------------------------- |
+| No devices       | Download + “connect from the menu bar” | Connect Invoicey                    |
+| Connecting       | Confirm page                           | Menu: Connecting…                   |
+| Empty issued set | Preview still shows sample path        | Finder domain exists, folders empty |
+| Sync error       | Device row: last error                 | Menu: last error, Sync now          |
+| Revoked          | Device disappears                      | Menu: Connect again; domain removed |
 
 ## Keyboard / accessibility
 

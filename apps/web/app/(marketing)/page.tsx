@@ -22,6 +22,7 @@ import {
   DatabaseIcon,
   FileArchiveIcon,
   FileCheck2Icon,
+  HardDriveIcon,
   KeyRoundIcon,
   LandmarkIcon,
   MailCheckIcon,
@@ -159,6 +160,12 @@ export default async function HomePage() {
       title: t("integrations.apiTitle"),
       description: t("integrations.apiDescription"),
       href: "/docs/integrations/api-keys",
+    },
+    {
+      icon: HardDriveIcon,
+      title: t("integrations.driveTitle"),
+      description: t("integrations.driveDescription"),
+      href: "/docs/integrations/invoicey-drive",
     },
   ];
   const faq = [

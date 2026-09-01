@@ -79,5 +79,6 @@ two steps (add nullable + backfill, then tighten), as
 | `2026-08-31-plan28-workspace-looks.sql`               | Plan 28 S1 — `workspace_looks` versioned documents                                 |
 | `2026-08-31-plan29-community-looks.sql`               | Plan 29 S2 — `community_looks` published catalog                                   |
 | `2026-09-01-user-gender.sql`                          | `users.gender` (`him` / `her` / `unspecified`) for PDF issued-by verbs             |
+| `2026-09-01-plan30-invoicey-drive.sql`                | Plan 30 Invoicey Drive settings, devices, pair grants                              |
 
 Apply Plan 19 before deploying referral routes (`/r/*`, `/settings/account/referrals`, admin users list).

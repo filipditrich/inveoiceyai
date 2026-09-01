@@ -47,7 +47,7 @@ function contentDisposition(
   return `${disposition}; filename="${asciiName}"; filename*=UTF-8''${encodedName}`;
 }
 
-async function proxyStoredFile(
+export async function proxyStoredFile(
   url: string,
   filename: string,
   contentType: string,

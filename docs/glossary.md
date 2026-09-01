@@ -176,7 +176,7 @@ _Avoid:_ account, tenant, org (in user-facing copy)
 
 ### Issuer
 
-**Issuer business** — a legal entity the workspace invoices *from* (`issuer_businesses`). Has its own name, IČO, bank, numbering, and VAT settings. In Invoicey Drive the live issuer name is the second folder. Identity is `issuer_id`.
+**Issuer business** — a legal entity the workspace invoices _from_ (`issuer_businesses`). Has its own name, IČO, bank, numbering, and VAT settings. In Invoicey Drive the live issuer name is the second folder. Identity is `issuer_id`.
 
 _Avoid:_ company (when you mean this row), account
 

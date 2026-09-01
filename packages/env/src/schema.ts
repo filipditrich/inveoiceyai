@@ -159,6 +159,11 @@ export const privateEnvSchema = z.object({
     emptyEnvToUndefined,
     z.string().min(16).optional(),
   ),
+  /**
+   * Public URL of the notarized Invoicey Drive `.dmg`. Unset = Settings
+   * shows a placeholder instead of a download button.
+   */
+  INVOICEY_DRIVE_DMG_URL: z.preprocess(emptyEnvToUndefined, z.url().optional()),
 });
 
 /** Vercel-only system vars (subset). @see https://vercel.com/docs/environment-variables/system-environment-variables */

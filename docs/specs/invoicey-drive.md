@@ -6,15 +6,15 @@ A macOS companion that shows issued invoices as files in Finder (Invoicey Drive)
 
 ## Inputs / outputs
 
-| Name | Type | Notes |
-| --- | --- | --- |
-| `DriveLayoutTemplate` | string | Path under issuer. Tokens + `/`. Default `{year}/{kind}_{number}` |
-| `DriveDevice` | row | User-owned Mac install: name, public id, token hash, last seen, revoked |
-| `DriveIndexItem` | JSON | `invoiceId`, `workspaceId`, `issuerId`, display names, `layoutRelPath`, `pdfSha256`, `issuedAt`, `displayStatus` |
-| `GET /api/drive/index` | list | Issued, non-cancelled invoices the device may see |
-| `GET /api/drive/invoices/:id/pdf` | bytes | Canonical PDF; device token |
-| `GET /api/drive/invoices/:id/isdoc` | bytes | Optional sibling |
-| File Provider domain | Finder | Root = Invoicey Drive |
+| Name                                | Type   | Notes                                                                                                            |
+| ----------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------- |
+| `DriveLayoutTemplate`               | string | Path under issuer. Tokens + `/`. Default `{year}/{kind}_{number}`                                                |
+| `DriveDevice`                       | row    | User-owned Mac install: name, public id, token hash, last seen, revoked                                          |
+| `DriveIndexItem`                    | JSON   | `invoiceId`, `workspaceId`, `issuerId`, display names, `layoutRelPath`, `pdfSha256`, `issuedAt`, `displayStatus` |
+| `GET /api/drive/index`              | list   | Issued, non-cancelled invoices the device may see                                                                |
+| `GET /api/drive/invoices/:id/pdf`   | bytes  | Canonical PDF; device token                                                                                      |
+| `GET /api/drive/invoices/:id/isdoc` | bytes  | Optional sibling                                                                                                 |
+| File Provider domain                | Finder | Root = Invoicey Drive                                                                                            |
 
 Drafts never appear. Cancelled invoices leave the tree. Every issued `docType` (invoice, credit note, proforma, advance) appears, including historical imports that have a canonical PDF. Rows without `pdf_url` are omitted (replica of stored artifacts, not a live renderer). Lose workspace membership → those invoices leave the index.
 
@@ -31,13 +31,13 @@ flowchart LR
 
 ### Surfaces
 
-| Surface | Role |
-| --- | --- |
-| File Provider | Invoicey Drive in Finder Locations. Dataless until open. |
-| Menu bar | Connect, sync now, last error, Open Invoicey Drive, optional mirror path |
-| Web `/drive/connect` | Pairing (Better Auth + confirm) |
-| Web `/settings/account/drive` | Devices, layout template, hide workspaces, download Mac app |
-| Marketing + `/docs/integrations/invoicey-drive` | What it is, install, first connect |
+| Surface                                         | Role                                                                     |
+| ----------------------------------------------- | ------------------------------------------------------------------------ |
+| File Provider                                   | Invoicey Drive in Finder Locations. Dataless until open.                 |
+| Menu bar                                        | Connect, sync now, last error, Open Invoicey Drive, optional mirror path |
+| Web `/drive/connect`                            | Pairing (Better Auth + confirm)                                          |
+| Web `/settings/account/drive`                   | Devices, layout template, hide workspaces, download Mac app              |
+| Marketing + `/docs/integrations/invoicey-drive` | What it is, install, first connect                                       |
 
 ### Tree
 
@@ -51,14 +51,14 @@ Invoicey Drive/
 
 Layout tokens (v1):
 
-| Token | Value |
-| --- | --- |
-| `{year}` | `meta.issueDate` year, Europe/Prague |
-| `{month}` | `01`–`12` from issue date |
-| `{kind}` | Localized stem (`faktura` / `invoice` / …) same map as `invoiceArtifactFileNames` |
-| `{number}` | `meta.number` |
-| `{client}` | Client snapshot name |
-| `{name}` | Alias of `{kind}_{number}` (same stem as issuer filename default) |
+| Token      | Value                                                                             |
+| ---------- | --------------------------------------------------------------------------------- |
+| `{year}`   | `meta.issueDate` year, Europe/Prague                                              |
+| `{month}`  | `01`–`12` from issue date                                                         |
+| `{kind}`   | Localized stem (`faktura` / `invoice` / …) same map as `invoiceArtifactFileNames` |
+| `{number}` | `meta.number`                                                                     |
+| `{client}` | Client snapshot name                                                              |
+| `{name}`   | Alias of `{kind}_{number}` (same stem as issuer filename default)                 |
 
 `/` in the template is a folder. `{year}_{name}` is one file, no year folder.
 

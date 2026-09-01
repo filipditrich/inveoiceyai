@@ -22,11 +22,11 @@ Invoicey already stores a canonical copy on UploadThing (`tryPersistInvoiceArtif
 
 Issue runs on Vercel (web, Slack, hosted MCP). It can HTTP-upload. It cannot open `/Users/...` or File Provider mounts.
 
-| Kind | Who writes | Web / Slack issue? | iCloud / Proton? |
-| --- | --- | --- | --- |
-| Invoicey Drive (selected) | Mac app | Yes, if the Mac is on and polling | Mirror folder, or the Drive domain itself |
-| Local MCP / launchd | Mac process | Only if that process runs | Write into a sync root |
-| Server destination | Vercel | Yes | No |
+| Kind                      | Who writes  | Web / Slack issue?                | iCloud / Proton?                          |
+| ------------------------- | ----------- | --------------------------------- | ----------------------------------------- |
+| Invoicey Drive (selected) | Mac app     | Yes, if the Mac is on and polling | Mirror folder, or the Drive domain itself |
+| Local MCP / launchd       | Mac process | Only if that process runs         | Write into a sync root                    |
+| Server destination        | Vercel      | Yes                               | No                                        |
 
 ## Provider facts (unchanged)
 

@@ -557,6 +557,8 @@
       "emailDescription": "Send PDF and ISDOC under your own name with delivery tracking.",
       "apiTitle": "JSON & API keys",
       "apiDescription": "Validated InvoiceSchema JSON and keys for your own automation.",
+      "driveTitle": "Invoicey Drive",
+      "driveDescription": "Issued PDFs in Finder on your Mac. Pair from the menu bar.",
       "docsCta": "Integration docs"
     }
   },
@@ -664,6 +666,20 @@
     "expired": "This link expired (15 minutes). Message the bot again.",
     "consumed": "This link was already used. Message the bot if you need a new one.",
     "stealRefused": "This Slack account is already linked to another Invoicey user. Ask them to unlink it in Settings → Integrations."
+  },
+  "DriveConnect": {
+    "title": "Connect Invoicey Drive",
+    "description": "This Mac will list issued invoices for every workspace you belong to, minus any you hide in Settings.",
+    "confirm": "Connect this Mac",
+    "confirming": "Connecting…",
+    "confirmed": "Connected",
+    "cancel": "Cancel",
+    "invoiceyAccount": "Invoicey account",
+    "deviceName": "Device: {name}",
+    "workspacesTitle": "Workspaces in Finder",
+    "invalid": "This connect link is invalid or incomplete. Start again from Invoicey Drive on your Mac.",
+    "unavailable": "Drive pairing is not configured on this server.",
+    "backToSettings": "Invoicey Drive settings"
   },
   "Referral": {
     "title": "{name} invited you to Invoicey",
@@ -782,6 +798,7 @@
         "account": "Account",
         "workspace": "Workspace",
         "security": "Security",
+        "drive": "Invoicey Drive",
         "members": "Members",
         "usage": "Usage",
         "referrals": "Referrals",
@@ -794,6 +811,7 @@
         "account": "Profile, theme, and language",
         "workspace": "Name and logo of this workspace",
         "security": "Sign-in, sessions, and devices",
+        "drive": "Finder copies of issued invoices",
         "members": "People and permissions",
         "usage": "AI tokens, charts, and history",
         "referrals": "Invite friends to Invoicey",
@@ -1339,6 +1357,10 @@
       "archiveNote": "Archive import — line items are not available. Download the original PDF.",
       "invalidPayload": "Invalid payload in DB.",
       "backToList": "← Back to list",
+      "driveBannerTitle": "Keep a Finder copy on your Mac",
+      "driveBannerBody": "Invoicey Drive lists issued PDFs in Finder. Install the Mac app, then Connect Invoicey from the menu bar.",
+      "driveBannerCta": "Invoicey Drive settings",
+      "driveBannerDismiss": "Dismiss",
       "archive": "Archive",
       "import": "Import",
       "issueButton": "Issue",
@@ -2005,8 +2027,53 @@
           "platform_admin_revoke": "Platform admin revoked",
           "slack_link": "Slack linked",
           "slack_unlink": "Slack unlinked",
-          "slack_rebind": "Slack workspace rebound"
+          "slack_rebind": "Slack workspace rebound",
+          "drive_device_create": "Invoicey Drive connected",
+          "drive_device_revoke": "Invoicey Drive revoked"
         }
+      }
+    },
+    "drive": {
+      "pageTitle": "Invoicey Drive",
+      "pageDescription": "Install the Mac companion, choose how files nest in Finder, and revoke a lost Mac. Pairing always starts in the app.",
+      "downloadTitle": "Mac app",
+      "downloadDescription": "Notarized disk image for macOS 14 and newer.",
+      "downloadButton": "Download for Mac",
+      "downloadSoon": "The notarized download will appear here after the first signed build. Until then, run the sibling invoicey-mac repo locally.",
+      "connectHint": "Install the app, then choose Connect Invoicey from the menu bar. This page does not start pairing.",
+      "layoutTitle": "Layout",
+      "layoutDescription": "Path under each issuer folder. Tokens: '{year}', '{month}', '{kind}', '{number}', '{client}', '{name}'.",
+      "templateLabel": "Template",
+      "previewInvalid": "Fix the template to see a preview.",
+      "includeIsdoc": "Also save .isdoc",
+      "presets": {
+        "yearFolder": "Year folder",
+        "flatYear": "Flat year prefix",
+        "nameOnly": "Name only"
+      },
+      "workspacesTitle": "Workspaces in Finder",
+      "workspacesDescription": "Unchecked workspaces stay in Invoicey and leave the Drive tree.",
+      "workspacesEmpty": "You are not a member of any workspace yet.",
+      "workspacesAllHidden": "Finder will be empty until you show at least one workspace.",
+      "devicesTitle": "Devices",
+      "devicesDescription": "Each connected Mac. Revoke stops that install immediately.",
+      "devicesEmpty": "No Mac connected yet. Open Invoicey Drive and choose Connect Invoicey.",
+      "lastSeen": "last seen {when}",
+      "revoked": "revoked",
+      "revoke": "Revoke",
+      "revokeFailed": "Could not revoke this Mac",
+      "revokeSuccess": "Mac revoked",
+      "save": "Save Drive settings",
+      "saved": "Drive settings saved",
+      "sampleWorkspace": "Workspace",
+      "sampleIssuer": "Issuer",
+      "errors": {
+        "empty": "Template cannot be empty.",
+        "too_long": "Template is too long.",
+        "invalid_chars": "Only letters, numbers, slash, underscore, hyphen, and dots.",
+        "unknown_token": "Unknown token in the template.",
+        "missing_number": "Template must include '{number}' or '{name}'.",
+        "dotdot": "Template cannot contain .."
       }
     },
     "members": {
