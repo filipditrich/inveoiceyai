@@ -1,3 +1,13 @@
+import {
+  Card,
+  CardText,
+  cardToBlocks,
+  cardToFallbackText,
+  type CardElement,
+  type SlackInteractionAction,
+  type SlackInteractionContext,
+} from "eve/channels/slack";
+
 import { resolveLinkedSlackPrincipal, tryCreateDbFromEnv } from "@invoicey/db";
 import { renderInvoicePdf, renderIsdoc } from "@invoicey/invoice-core";
 import type { Invoice } from "@invoicey/invoice-core/schema";
@@ -14,23 +24,13 @@ import {
   markInvoicePaidById,
 } from "@invoicey/invoice-tools/ops";
 import { runWithInvoiceyContext } from "@invoicey/invoice-tools/workspace-context";
-import {
-  Card,
-  CardText,
-  cardToBlocks,
-  cardToFallbackText,
-  type CardElement,
-  type SlackInteractionAction,
-  type SlackInteractionContext,
-} from "eve/channels/slack";
 
+import { copyFor, type CardLocale } from "./invoice-card-i18n";
 import {
   buildInvoiceCardModel,
   cardStateFromSummary,
   type InvoiceCardModel,
 } from "./invoice-card-model";
-import { buildInvoiceModelCard } from "./slack-invoice-card";
-import { copyFor, type CardLocale } from "./invoice-card-i18n";
 import {
   DUE_DATE_PRESETS,
   FIELD_TO_PATH,
@@ -41,6 +41,7 @@ import {
   vatOptionFor,
   type ChangeField,
 } from "./slack-invoice-actions";
+import { buildInvoiceModelCard } from "./slack-invoice-card";
 import { appOrigin } from "./slack-thread";
 import { uploadInvoiceArtifacts } from "./upload-slack-files";
 

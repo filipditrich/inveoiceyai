@@ -1,8 +1,3 @@
-import { member, user as userTable } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
-import { asc, eq } from "drizzle-orm";
-import { getTranslations } from "next-intl/server";
-
 import {
   Card,
   CardContent,
@@ -10,8 +5,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { PermissionOverrides } from "@/lib/authz/catalog";
+import { asc, eq } from "drizzle-orm";
+import { getTranslations } from "next-intl/server";
+
+import { member, user as userTable } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
+
 import { MemberPermissionsEditor } from "./member-permissions-editor";
+import type { PermissionOverrides } from "@/lib/authz/catalog";
 
 /**
  * Per-member permission overrides for the whole workspace (ADR 0038).
@@ -54,13 +55,13 @@ export async function MemberPermissionsSection({
       </CardHeader>
       <CardContent className="space-y-6 pt-5">
         {editable.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("noMembers")}</p>
+          <p className="text-sm text-muted-foreground">{t("noMembers")}</p>
         ) : (
           editable.map((row) => (
             <div key={row.id}>
               <div className="text-sm">
                 <span className="font-medium">{row.name || row.email}</span>
-                <span className="text-muted-foreground ml-2">{row.email}</span>
+                <span className="ml-2 text-muted-foreground">{row.email}</span>
               </div>
               <MemberPermissionsEditor
                 memberId={row.id}

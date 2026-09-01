@@ -1,5 +1,7 @@
 "use client";
 
+import type { FormEvent } from "react";
+import * as React from "react";
 import { createIssuer } from "@/actions/issuers";
 import {
   BankAccountFields,
@@ -13,8 +15,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
-import type { FormEvent } from "react";
-import * as React from "react";
 
 /** Minimal create: identity (ARES) + bank + contact email; numbering/email defaults. */
 export function IssuerCreateForm(props: {
@@ -104,7 +104,7 @@ export function IssuerCreateForm(props: {
 
   return (
     <form className="mx-auto max-w-2xl space-y-8" onSubmit={onSubmit}>
-      {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
+      {userMsg ? <p className="text-sm text-destructive">{userMsg}</p> : null}
 
       <section className="space-y-4">
         <h2 className="text-lg font-medium">{t("identitySection")}</h2>
@@ -217,7 +217,7 @@ export function IssuerCreateForm(props: {
             placeholder={t("courtRecordPlaceholder")}
             value={registryNote}
           />
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {t("courtRecordHint")}
           </p>
         </FieldGroup>
@@ -238,7 +238,7 @@ export function IssuerCreateForm(props: {
         />
       </section>
 
-      <p className="text-muted-foreground text-xs">{t("defaultsHint")}</p>
+      <p className="text-xs text-muted-foreground">{t("defaultsHint")}</p>
 
       <SubmitRow
         label={t("create")}

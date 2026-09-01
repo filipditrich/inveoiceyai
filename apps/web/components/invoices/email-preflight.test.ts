@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { validateEmailPreflight } from "./email-preflight";
 
 describe("email preflight", () => {

@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-
 import { Skeleton } from "@/components/ui/skeleton";
 import { useModalsEvents } from "@/features/modals-manager/events";
 import { ModalShell } from "@/features/modals-manager/modal-shell";
+
 import type {
   ContextModalProps,
   ModalState,
@@ -18,8 +18,9 @@ import type {
 
 export type { ContextModalProps, RegisteredModals };
 
-const ModalsProviderContext =
-  React.createContext<ModalsProviderContextProps | undefined>(undefined);
+const ModalsProviderContext = React.createContext<
+  ModalsProviderContextProps | undefined
+>(undefined);
 
 export function useModalsProviderContext(): ModalsProviderContextProps {
   const ctx = React.useContext(ModalsProviderContext);
@@ -48,7 +49,9 @@ export function ModalsProvider(props: ModalsProviderProps) {
     closingRef.current = closingIds;
   }, [closingIds]);
 
-  const timeouts = React.useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const timeouts = React.useRef(
+    new Map<string, ReturnType<typeof setTimeout>>(),
+  );
 
   function makeId(existing?: string): string {
     return (
@@ -139,7 +142,11 @@ export function ModalsProvider(props: ModalsProviderProps) {
       const nextPayload = { ...payload, modalId };
       setModalSlots((prev) => [
         ...prev,
-        { id: modalId, type: "custom", props: nextPayload } satisfies ModalStateCustom,
+        {
+          id: modalId,
+          type: "custom",
+          props: nextPayload,
+        } satisfies ModalStateCustom,
       ]);
       return modalId;
     },
@@ -147,7 +154,10 @@ export function ModalsProvider(props: ModalsProviderProps) {
   );
 
   const enqueueContextModal = React.useCallback(
-    (modalKey: string, params: Omit<OpenContextModal, "modalId"> & { modalId?: string }) => {
+    (
+      modalKey: string,
+      params: Omit<OpenContextModal, "modalId"> & { modalId?: string },
+    ) => {
       const modalId = makeId(params.modalId);
       const preventDuplicate =
         params.preventDuplicate ?? modalDefaults?.preventDuplicate ?? true;
@@ -179,9 +189,7 @@ export function ModalsProvider(props: ModalsProviderProps) {
 
       return modalId;
     },
-    [
-      modalDefaults?.preventDuplicate,
-    ],
+    [modalDefaults?.preventDuplicate],
   );
 
   const isAnyModalOpen = React.useCallback(
@@ -192,8 +200,7 @@ export function ModalsProvider(props: ModalsProviderProps) {
   const ctxValue = React.useMemo<ModalsProviderContextProps>(
     () => ({
       modals: modalSlots,
-      openContextModal: (key, incoming) =>
-        enqueueContextModal(key, incoming),
+      openContextModal: (key, incoming) => enqueueContextModal(key, incoming),
       closeContextModal: scheduleCloseModal,
       closeAll,
       closeModal: scheduleCloseModal,
@@ -213,17 +220,13 @@ export function ModalsProvider(props: ModalsProviderProps) {
   useModalsEvents({
     openModal: React.useCallback(
       (incoming: unknown) => {
-        enqueueCustomModal(
-          incoming as OpenCustomModal & { modalId: string },
-        );
+        enqueueCustomModal(incoming as OpenCustomModal & { modalId: string });
       },
       [enqueueCustomModal],
     ),
     openConfirmModal: React.useCallback(
       (incoming: unknown) => {
-        enqueueCustomModal(
-          incoming as OpenCustomModal & { modalId: string },
-        );
+        enqueueCustomModal(incoming as OpenCustomModal & { modalId: string });
       },
       [enqueueCustomModal],
     ),
@@ -253,9 +256,7 @@ export function ModalsProvider(props: ModalsProviderProps) {
     }, [closeAll]),
     openCustomModal: React.useCallback(
       (incoming: unknown) => {
-        enqueueCustomModal(
-          incoming as OpenCustomModal & { modalId: string },
-        );
+        enqueueCustomModal(incoming as OpenCustomModal & { modalId: string });
       },
       [enqueueCustomModal],
     ),

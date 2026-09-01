@@ -1,9 +1,9 @@
 import "server-only";
+import { cache } from "react";
+import { asc, eq } from "drizzle-orm";
 
 import { member, user as userTable, workspaces } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { asc, eq } from "drizzle-orm";
-import { cache } from "react";
 
 import type { WorkspaceListItem, WorkspaceRole } from "./workspace-types";
 

@@ -1,5 +1,7 @@
 "use client";
 
+import type { FormEvent } from "react";
+import * as React from "react";
 import { saveIssuerBank } from "@/actions/issuers";
 import {
   BankAccountFields,
@@ -9,10 +11,9 @@ import {
   useInvalidQueryMessage,
 } from "@/components/issuers/issuer-form-shared";
 import { Input } from "@/components/ui/input";
-import type { IssuerSnapshot } from "@invoicey/invoice-core/schema";
 import { useTranslations } from "next-intl";
-import type { FormEvent } from "react";
-import * as React from "react";
+
+import type { IssuerSnapshot } from "@invoicey/invoice-core/schema";
 
 export function IssuerBankForm(props: {
   snapshot: IssuerSnapshot;
@@ -55,7 +56,7 @@ export function IssuerBankForm(props: {
 
   return (
     <form className="max-w-2xl space-y-6" onSubmit={onSubmit}>
-      {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
+      {userMsg ? <p className="text-sm text-destructive">{userMsg}</p> : null}
       <BankAccountFields
         accountHint={bank.accountHint}
         accountNumber={bank.accountNumber}
@@ -70,7 +71,7 @@ export function IssuerBankForm(props: {
       <section className="space-y-4 rounded-xl border p-4">
         <div className="space-y-1">
           <h2 className="font-medium">{t("qrMessagesTitle")}</h2>
-          <p className="text-muted-foreground text-sm">{t("qrMessagesHint")}</p>
+          <p className="text-sm text-muted-foreground">{t("qrMessagesHint")}</p>
         </div>
         <FieldGroup label={t("qrBeneficiaryMessage")}>
           <Input
@@ -84,7 +85,7 @@ export function IssuerBankForm(props: {
             })}
             value={beneficiaryMessageTemplate}
           />
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {t("qrBeneficiaryHint")}
           </p>
         </FieldGroup>
@@ -100,9 +101,9 @@ export function IssuerBankForm(props: {
             })}
             value={payerNoteTemplate}
           />
-          <p className="text-muted-foreground text-xs">{t("qrPayerHint")}</p>
+          <p className="text-xs text-muted-foreground">{t("qrPayerHint")}</p>
         </FieldGroup>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {t("qrTemplateVariables", {
             number: "{number}",
             issuer: "{issuer}",

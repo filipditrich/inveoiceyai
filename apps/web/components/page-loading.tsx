@@ -5,7 +5,7 @@ export function PageLoading() {
     <div className="flex flex-1 flex-col gap-4">
       <Skeleton className="h-8 w-48" />
       <Skeleton className="h-4 w-72" />
-      <div className="@xl/main:grid-cols-2 @5xl/main:grid-cols-4 grid gap-4">
+      <div className="grid gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
         <Skeleton className="h-28" />
         <Skeleton className="h-28" />
         <Skeleton className="h-28" />

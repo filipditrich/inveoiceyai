@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Breadcrumb,
@@ -14,7 +15,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Fragment } from "react";
 
 export function AdminSiteHeader() {
   const pathname = usePathname();
@@ -48,7 +48,7 @@ export function AdminSiteHeader() {
   const lastIndex = crumbs.length - 1;
 
   return (
-    <header className="h-(--header-height) flex shrink-0 items-center gap-2 border-b px-4 md:px-6">
+    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b px-4 md:px-6">
       <SidebarTrigger className="-ml-1" />
       <Separator className="mr-2 h-4" orientation="vertical" />
       <Breadcrumb className="min-w-0 flex-1">

@@ -1,15 +1,16 @@
 "use client";
 
+import type { FormEvent } from "react";
+import * as React from "react";
 import { saveIssuerAssets } from "@/actions/issuers";
 import {
   AssetField,
   SubmitRow,
   useInvalidQueryMessage,
 } from "@/components/issuers/issuer-form-shared";
-import type { IssuerSnapshot } from "@invoicey/invoice-core/schema";
 import { useTranslations } from "next-intl";
-import type { FormEvent } from "react";
-import * as React from "react";
+
+import type { IssuerSnapshot } from "@invoicey/invoice-core/schema";
 
 export function IssuerAssetsForm(props: {
   snapshot: IssuerSnapshot;
@@ -46,9 +47,9 @@ export function IssuerAssetsForm(props: {
 
   return (
     <form className="max-w-2xl space-y-6" onSubmit={onSubmit}>
-      {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
+      {userMsg ? <p className="text-sm text-destructive">{userMsg}</p> : null}
       {!uploadConfigured ? (
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {t("uploadTokenMissing")}
         </p>
       ) : null}

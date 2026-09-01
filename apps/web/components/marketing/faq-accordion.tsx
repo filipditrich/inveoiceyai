@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronRightIcon } from "lucide-react";
 import { useId, useState } from "react";
+import { ChevronRightIcon } from "lucide-react";
 
 type FaqItem = {
   readonly answer: string;
@@ -29,13 +29,13 @@ export function FaqAccordion({
                 type="button"
                 aria-controls={panelId}
                 aria-expanded={isOpen}
-                className="focus-visible:ring-ring/50 hover:text-primary focus-visible:ring-3 flex w-full cursor-pointer items-center justify-between gap-5 rounded-md py-5 text-left text-base font-medium outline-none transition-colors"
+                className="flex w-full cursor-pointer items-center justify-between gap-5 rounded-md py-5 text-left text-base font-medium transition-colors outline-none hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50"
                 onClick={() => setOpenIndex(isOpen ? null : index)}
               >
                 {item.question}
                 <ChevronRightIcon
                   aria-hidden="true"
-                  className={`text-muted-foreground size-4 shrink-0 transition-transform duration-300 ease-out motion-reduce:transition-none ${isOpen ? "rotate-90" : "rotate-0"}`}
+                  className={`size-4 shrink-0 text-muted-foreground transition-transform duration-300 ease-out motion-reduce:transition-none ${isOpen ? "rotate-90" : "rotate-0"}`}
                 />
               </button>
             </h3>
@@ -47,7 +47,7 @@ export function FaqAccordion({
               className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none ${isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
             >
               <div className="overflow-hidden">
-                <p className="text-muted-foreground max-w-2xl pb-5 text-sm leading-relaxed">
+                <p className="max-w-2xl pb-5 text-sm leading-relaxed text-muted-foreground">
                   {item.answer}
                 </p>
               </div>

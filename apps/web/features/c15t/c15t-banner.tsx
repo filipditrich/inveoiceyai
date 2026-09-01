@@ -1,12 +1,11 @@
 "use client";
 
-import { ConsentBanner } from "@c15t/react";
-import { CookieIcon } from "lucide-react";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ConsentBanner } from "@c15t/react";
+import { CookieIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 /**
  * Compact, first-party consent surface. c15t still owns state, persistence,
@@ -21,20 +20,20 @@ export function C15tBanner() {
       trapFocus={false}
       className="pointer-events-none fixed inset-x-0 bottom-0 z-[100] p-3 sm:p-4"
     >
-      <ConsentBanner.Card className="bg-popover/95 text-popover-foreground pointer-events-auto mx-auto flex w-full max-w-5xl flex-col gap-4 rounded-2xl border p-4 shadow-2xl shadow-black/10 backdrop-blur-xl sm:flex-row sm:items-center sm:gap-6 sm:p-5 dark:shadow-black/35">
+      <ConsentBanner.Card className="pointer-events-auto mx-auto flex w-full max-w-5xl flex-col gap-4 rounded-2xl border bg-popover/95 p-4 text-popover-foreground shadow-2xl shadow-black/10 backdrop-blur-xl sm:flex-row sm:items-center sm:gap-6 sm:p-5 dark:shadow-black/35">
         <ConsentBanner.Header className="flex min-w-0 flex-1 items-start gap-3">
-          <span className="bg-brand/15 text-foreground mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl">
+          <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl bg-brand/15 text-foreground">
             <CookieIcon className="size-4.5" aria-hidden />
           </span>
           <div className="min-w-0">
             <ConsentBanner.Title className="text-sm font-semibold tracking-tight">
               {t("title")}
             </ConsentBanner.Title>
-            <ConsentBanner.Description className="text-muted-foreground mt-1 max-w-2xl text-sm leading-relaxed">
+            <ConsentBanner.Description className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
               {t("description")}{" "}
               <Link
                 href="/cookies"
-                className="text-foreground decoration-border underline-offset-3 hover:decoration-foreground underline"
+                className="text-foreground underline decoration-border underline-offset-3 hover:decoration-foreground"
               >
                 {t("details")}
               </Link>

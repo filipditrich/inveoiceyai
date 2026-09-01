@@ -22,7 +22,8 @@ export function enterInvoiceyContext(ctx: InvoiceyRequestContext): void {
 }
 
 export function getInvoiceyRequestContext():
-  InvoiceyRequestContext | undefined {
+  | InvoiceyRequestContext
+  | undefined {
   return als.getStore();
 }
 

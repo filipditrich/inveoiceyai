@@ -52,7 +52,11 @@ export interface CardNotice {
 }
 
 export type InvoiceCardState =
-  "draft" | "issued" | "paid" | "cancelled" | "readonly";
+  | "draft"
+  | "issued"
+  | "paid"
+  | "cancelled"
+  | "readonly";
 
 /** Czech-style money: `12 100,00 CZK`. */
 export function formatMoney(amount: number, currency: string): string {

@@ -14,7 +14,6 @@
     "./import": "./src/import/index.ts"
   },
   "scripts": {
-    "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -38,8 +37,6 @@
     "@types/react-dom": "19.2.3",
     "typescript": "6.0.3",
     "vitest": "^3.2.4",
-    "xmllint-wasm": "5.2.0",
-    "@invoicey/eslint-config": "workspace:*",
-    "eslint": "^9"
+    "xmllint-wasm": "5.2.0"
   }
 }

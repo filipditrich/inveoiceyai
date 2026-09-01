@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { AssistantSidebarTrigger } from "@/components/assistant/assistant-trigger";
 import { BrandLogo } from "@/components/brand-logo";
 import { NavMain } from "@/components/nav-main";
@@ -7,7 +8,6 @@ import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import { NewInvoiceButton } from "@/components/new-invoice-button";
 import { TokenBalanceChip } from "@/components/settings/token-balance-chip";
-import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -18,8 +18,8 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 import { APP_GIT_SHA, APP_VERSION } from "@/lib/app-build-info";
-import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 import {
   ArchiveRestoreIcon,
   BookOpenIcon,
@@ -36,7 +36,8 @@ import {
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import * as React from "react";
+
+import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 
 /**
  * Five destinations and a create button, as before — the Automation, Tools and
@@ -180,14 +181,14 @@ export function AppSidebar({
                 <span className="truncate text-sm font-semibold tracking-tight">
                   {t("meta.title")}
                 </span>
-                <span className="text-muted-foreground truncate text-[0.7rem]">
+                <span className="truncate text-[0.7rem] text-muted-foreground">
                   {t("brand.tagline")}
                 </span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <div className="from-brand/25 via-brand/10 bg-linear-to-r mx-2 hidden h-px to-transparent group-data-[collapsible=icon]:hidden sm:block" />
+        <div className="mx-2 hidden h-px bg-linear-to-r from-brand/25 via-brand/10 to-transparent group-data-[collapsible=icon]:hidden sm:block" />
         <WorkspaceSwitcher
           activeWorkspaceId={activeWorkspaceId}
           defaultWorkspaceId={defaultWorkspaceId}
@@ -252,7 +253,7 @@ export function AppSidebar({
         <NavUser isPlatformAdmin={isPlatformAdmin} user={user} />
         {process.env.NODE_ENV !== "production" ? (
           <p
-            className="text-muted-foreground px-2 pb-1 font-mono text-[0.65rem] tabular-nums tracking-wide group-data-[collapsible=icon]:hidden"
+            className="px-2 pb-1 font-mono text-[0.65rem] tracking-wide text-muted-foreground tabular-nums group-data-[collapsible=icon]:hidden"
             title={`${t("meta.title")} v${APP_VERSION} (${APP_GIT_SHA})`}
           >
             v{APP_VERSION}

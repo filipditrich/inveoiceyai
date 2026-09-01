@@ -5,7 +5,10 @@ export type InvitationViewDetails = {
 };
 
 export type InvitationViewState =
-  "pending" | "expired" | "unavailable" | "email_mismatch";
+  | "pending"
+  | "expired"
+  | "unavailable"
+  | "email_mismatch";
 
 export function resolveInvitationViewState(opts: {
   invitation: InvitationViewDetails;

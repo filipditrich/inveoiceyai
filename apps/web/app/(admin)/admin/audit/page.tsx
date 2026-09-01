@@ -1,12 +1,12 @@
-import { ScrollTextIcon } from "lucide-react";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-
 import { AdminAuditList } from "@/components/admin/admin-audit-list";
 import { AdminSection } from "@/components/admin/admin-detail-kit";
 import { PageHeader } from "@/components/layout/page-header";
 import { adminListPlatformAuditEvents } from "@/lib/admin/detail";
 import { requirePlatformAdmin } from "@/lib/auth/session";
+import { ScrollTextIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -8,22 +7,7 @@ import {
   useState,
   useTransition,
 } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { toast } from "sonner";
-import {
-  CheckCircle2Icon,
-  CopyIcon,
-  ExternalLinkIcon,
-  KeyRoundIcon,
-  LoaderCircleIcon,
-  ShieldAlertIcon,
-  SquareTerminalIcon,
-} from "lucide-react";
-
 import { recordAccountSecurityEventAction } from "@/actions/security";
-import { authClient } from "@/lib/auth/client";
-import type { AppLocale } from "@/i18n/config";
-import { formatDateTime } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +18,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth/client";
+import { formatDateTime } from "@/lib/format";
+import {
+  CheckCircle2Icon,
+  CopyIcon,
+  ExternalLinkIcon,
+  KeyRoundIcon,
+  LoaderCircleIcon,
+  ShieldAlertIcon,
+  SquareTerminalIcon,
+} from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
+import { toast } from "sonner";
+
+import type { AppLocale } from "@/i18n/config";
 
 type KeyRow = {
   id: string;
@@ -176,7 +176,7 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
       <Card>
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2">
-            <KeyRoundIcon className="text-muted-foreground size-4" />
+            <KeyRoundIcon className="size-4 text-muted-foreground" />
             {t("yourKeys")}
           </CardTitle>
           <CardDescription>{t("yourKeysDescription")}</CardDescription>
@@ -188,7 +188,7 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
                 <span>{t("newKeyTitle")}</span>
                 <Badge variant="outline">{t("once")}</Badge>
               </div>
-              <code className="block break-all text-xs">{createdRaw}</code>
+              <code className="block text-xs break-all">{createdRaw}</code>
               <div className="mt-2 flex flex-wrap gap-2">
                 <Button
                   size="sm"
@@ -230,14 +230,14 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
 
           <div className="space-y-3 border-t pt-4">
             {pending && keys.length === 0 ? (
-              <div className="text-muted-foreground flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-7 text-sm">
+              <div className="flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-7 text-sm text-muted-foreground">
                 <LoaderCircleIcon className="size-4 animate-spin" />
                 {t("loading")}
               </div>
             ) : keys.length === 0 ? (
-              <div className="text-muted-foreground flex flex-col items-center rounded-lg border border-dashed px-4 py-7 text-center text-sm">
+              <div className="flex flex-col items-center rounded-lg border border-dashed px-4 py-7 text-center text-sm text-muted-foreground">
                 <KeyRoundIcon className="mb-2 size-5 opacity-60" />
-                <p className="text-foreground font-medium">{t("emptyTitle")}</p>
+                <p className="font-medium text-foreground">{t("emptyTitle")}</p>
                 <p className="mt-1 max-w-sm">{t("emptyHint")}</p>
               </div>
             ) : (
@@ -278,7 +278,7 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
       <Card id="mcp">
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2">
-            <SquareTerminalIcon className="text-muted-foreground size-4" />
+            <SquareTerminalIcon className="size-4 text-muted-foreground" />
             {t("mcpTitle")}
           </CardTitle>
           <CardDescription>{t("mcpDescription")}</CardDescription>
@@ -286,7 +286,7 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
         <CardContent className="space-y-5">
           <ol className="space-y-4 text-sm">
             <li className="flex gap-3">
-              <span className="bg-muted flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
                 1
               </span>
               <div className="space-y-1">
@@ -301,7 +301,7 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
               </div>
             </li>
             <li className="flex gap-3">
-              <span className="bg-muted flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
                 2
               </span>
               <div className="min-w-0 flex-1 space-y-2">
@@ -312,7 +312,7 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
                     project: ".cursor/mcp.json",
                   })}
                 </p>
-                <pre className="bg-muted overflow-x-auto rounded-lg p-3 text-xs leading-relaxed">
+                <pre className="overflow-x-auto rounded-lg bg-muted p-3 text-xs leading-relaxed">
                   {configSnippet}
                 </pre>
                 <div className="flex flex-wrap gap-2">
@@ -333,7 +333,7 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
                   </Button>
                 </div>
                 {!createdRaw ? (
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-xs text-muted-foreground">
                     {t("placeholderHint", { placeholder: "YOUR_API_KEY" })}
                   </p>
                 ) : (
@@ -345,7 +345,7 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
               </div>
             </li>
             <li className="flex gap-3">
-              <span className="bg-muted flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
                 3
               </span>
               <div className="space-y-1">
@@ -357,11 +357,11 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
             </li>
           </ol>
 
-          <div className="bg-muted/50 flex items-start gap-3 rounded-lg border px-3 py-3 text-sm">
-            <ShieldAlertIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+          <div className="flex items-start gap-3 rounded-lg border bg-muted/50 px-3 py-3 text-sm">
+            <ShieldAlertIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
             <div className="space-y-2">
               <p className="font-medium">{t("whichKeyTitle")}</p>
-              <ul className="text-muted-foreground list-inside list-disc space-y-1 text-xs leading-relaxed">
+              <ul className="list-inside list-disc space-y-1 text-xs leading-relaxed text-muted-foreground">
                 <li>{t("whichKeyPat", { env: "MCP_API_KEY" })}</li>
                 <li>{t("whichKeyStdio")}</li>
                 <li>{t("whichKeySlack")}</li>
@@ -372,28 +372,28 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
           <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
             <Link
               href="/docs/integrations/mcp"
-              className="text-primary inline-flex items-center gap-1 hover:underline"
+              className="inline-flex items-center gap-1 text-primary hover:underline"
             >
               {t("docsMcp")}
               <ExternalLinkIcon className="size-3.5" />
             </Link>
             <Link
               href="/docs/integrations/cursor"
-              className="text-primary inline-flex items-center gap-1 hover:underline"
+              className="inline-flex items-center gap-1 text-primary hover:underline"
             >
               {t("docsCursor")}
               <ExternalLinkIcon className="size-3.5" />
             </Link>
             <Link
               href="/docs/integrations/api-keys"
-              className="text-primary inline-flex items-center gap-1 hover:underline"
+              className="inline-flex items-center gap-1 text-primary hover:underline"
             >
               {t("docsKeys")}
               <ExternalLinkIcon className="size-3.5" />
             </Link>
             <Link
               href="/settings/workspace/integrations"
-              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 hover:underline"
+              className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground hover:underline"
             >
               {t("integrationsLink")}
             </Link>

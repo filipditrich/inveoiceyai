@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { env } from "@/env.config.server";
+import { toOgLocale } from "@/i18n/config";
+import { appFormats } from "@/i18n/formats";
 import { NextIntlClientProvider } from "next-intl";
 import {
   getLocale,
@@ -8,13 +9,11 @@ import {
   getTranslations,
   getTimeZone,
 } from "next-intl/server";
-
-import { env } from "@/env.config.server";
-import type { AppLocale } from "@/i18n/config";
-import { toOgLocale } from "@/i18n/config";
-import { appFormats } from "@/i18n/formats";
+import { Geist, Geist_Mono } from "next/font/google";
 
 import Providers from "./providers";
+import type { AppLocale } from "@/i18n/config";
+import type { Metadata } from "next";
 
 import "./globals.css";
 
@@ -77,7 +76,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body
-        className="bg-background text-foreground font-sans antialiased"
+        className="bg-background font-sans text-foreground antialiased"
         suppressHydrationWarning
       >
         <NextIntlClientProvider

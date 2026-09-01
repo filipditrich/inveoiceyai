@@ -19,7 +19,12 @@ export type ProductAnalyticsProperties = Partial<{
   documentType: "invoice" | "proforma" | "advance" | "credit_note";
   currency: "CZK" | "EUR" | "USD";
   lifecycleStatus:
-    "draft" | "unpaid" | "overdue" | "future" | "paid" | "cancelled";
+    | "draft"
+    | "unpaid"
+    | "overdue"
+    | "future"
+    | "paid"
+    | "cancelled";
   hasIsdoc: boolean;
 }>;
 
@@ -31,7 +36,10 @@ export type ProductAnalyticsAdapter = {
 };
 
 export type ProductToastTransition =
-  "invoice_issued" | "invoice_saved" | "invoice_emailed" | "payment_confirmed";
+  | "invoice_issued"
+  | "invoice_saved"
+  | "invoice_emailed"
+  | "payment_confirmed";
 
 export function isProductEventName(value: unknown): value is ProductEventName {
   return (

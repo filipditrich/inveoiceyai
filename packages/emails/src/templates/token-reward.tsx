@@ -1,8 +1,8 @@
-import { Button, Text } from "@react-email/components";
 import * as React from "react";
+import { Button, Text } from "@react-email/components";
 
-import { systemEmailCopy, type EmailLocale } from "../copy";
 import { EmailShell } from "../components/email-shell";
+import { systemEmailCopy, type EmailLocale } from "../copy";
 
 export type TokenRewardEmailProps = {
   userName: string;

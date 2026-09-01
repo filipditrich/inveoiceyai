@@ -3,11 +3,12 @@
  * xmbuilder chains are loosely typed (`Xm`).
  */
 
-import type { Invoice } from "../schema";
+import { v5 as uuidv5 } from "uuid";
+import { create } from "xmlbuilder2";
+
 import { invoiceLabels, isdocCountryName } from "../labels";
 import { stripInlineMarkdown } from "../pdf/inline-markdown";
-import { create } from "xmlbuilder2";
-import { v5 as uuidv5 } from "uuid";
+import type { Invoice } from "../schema";
 
 export const ISDOC_XML_NAMESPACE = "http://isdoc.cz/namespace/2013" as const;
 

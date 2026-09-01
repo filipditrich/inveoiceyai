@@ -1,11 +1,10 @@
-import { headers } from "next/headers";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-
 import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth/auth";
 import { findUserByReferralCode } from "@/lib/auth/referral";
+import { getTranslations } from "next-intl/server";
+import { headers } from "next/headers";
+import Link from "next/link";
 
 export default async function ReferralLandingPage({
   params,
@@ -24,7 +23,7 @@ export default async function ReferralLandingPage({
           <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em]">
             {t("invalidTitle")}
           </h1>
-          <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             {t("invalidDescription")}
           </p>
           <div className="mt-8">
@@ -44,19 +43,19 @@ export default async function ReferralLandingPage({
   return (
     <AuthShell>
       <div>
-        <p className="text-primary text-sm font-semibold uppercase tracking-wide">
+        <p className="text-sm font-semibold tracking-wide text-primary uppercase">
           Invoicey
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em]">
           {title}
         </h1>
-        <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           {t("description")}
         </p>
         <div className="mt-8 space-y-3">
           {session ? (
             <>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 {t("alreadySignedIn")}
               </p>
               <Button className="w-full" render={<Link href="/dashboard" />}>

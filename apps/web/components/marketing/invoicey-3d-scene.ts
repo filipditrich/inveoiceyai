@@ -1,11 +1,11 @@
 import * as THREE from "three";
 
+import { disposeInvoiceyModel, loadInvoiceyModel } from "./invoicey-3d-asset";
 import {
   calculateInvoiceyPose,
   resolveCelebrationProgress,
   type InvoiceyPointer,
 } from "./invoicey-3d-motion";
-import { disposeInvoiceyModel, loadInvoiceyModel } from "./invoicey-3d-asset";
 
 export type Invoicey3DScene = Readonly<{
   celebrate: () => void;

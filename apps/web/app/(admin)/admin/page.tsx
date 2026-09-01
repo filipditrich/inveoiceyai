@@ -1,16 +1,17 @@
-import { loadPlatformDashboardMetrics } from "@/lib/admin/metrics";
 import { PageHeader } from "@/components/layout/page-header";
-import { requirePlatformAdmin } from "@/lib/auth/session";
-import { formatMoney } from "@/lib/format";
-import type { AppLocale } from "@/i18n/config";
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { loadPlatformDashboardMetrics } from "@/lib/admin/metrics";
+import { requirePlatformAdmin } from "@/lib/auth/session";
+import { formatMoney } from "@/lib/format";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
+
+import type { AppLocale } from "@/i18n/config";
 
 export default async function AdminDashboardPage() {
   await requirePlatformAdmin();
@@ -53,7 +54,7 @@ export default async function AdminDashboardPage() {
     <div className="flex flex-1 flex-col gap-6">
       <PageHeader description={t("subtitle")} title={t("title")} />
 
-      <div className="@xl/main:grid-cols-2 @5xl/main:grid-cols-4 grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
         {summaryCards.map((card) => (
           <Link
             className="block transition-opacity hover:opacity-90"
@@ -68,7 +69,7 @@ export default async function AdminDashboardPage() {
                   {card.value}
                 </CardTitle>
                 {"hint" in card && card.hint ? (
-                  <p className="text-muted-foreground text-xs">{card.hint}</p>
+                  <p className="text-xs text-muted-foreground">{card.hint}</p>
                 ) : null}
               </CardHeader>
             </Card>
@@ -86,7 +87,7 @@ export default async function AdminDashboardPage() {
                 <CardTitle className="text-xl tabular-nums">
                   {b.count}
                 </CardTitle>
-                <p className="text-muted-foreground text-xs tabular-nums">
+                <p className="text-xs text-muted-foreground tabular-nums">
                   {formatMoney(b.total, "CZK", locale)}
                 </p>
               </CardHeader>
@@ -98,7 +99,7 @@ export default async function AdminDashboardPage() {
       <div>
         <h2 className="mb-3 text-lg font-medium">{t("recentTitle")}</h2>
         {metrics.recent.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("recentEmpty")}</p>
+          <p className="text-sm text-muted-foreground">{t("recentEmpty")}</p>
         ) : (
           <div className="overflow-x-auto rounded-md border">
             <table className="w-full text-sm">

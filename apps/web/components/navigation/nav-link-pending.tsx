@@ -1,9 +1,8 @@
 "use client";
 
-import { useLinkStatus } from "next/link";
-
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { useLinkStatus } from "next/link";
 
 /** Must render as a descendant of `next/link` `Link`. */
 export function NavLinkPending({ className }: { className?: string }) {
@@ -13,7 +12,7 @@ export function NavLinkPending({ className }: { className?: string }) {
   }
   return (
     <Spinner
-      className={cn("text-brand ml-auto size-3.5 shrink-0", className)}
+      className={cn("ml-auto size-3.5 shrink-0 text-brand", className)}
     />
   );
 }

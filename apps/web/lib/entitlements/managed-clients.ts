@@ -1,10 +1,10 @@
 import "server-only";
+import { ForbiddenError } from "@/lib/auth/errors";
+import { and, eq, isNotNull } from "drizzle-orm";
 
 import { clients } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { and, eq, isNotNull } from "drizzle-orm";
 
-import { ForbiddenError } from "@/lib/auth/errors";
 import { loadEntitlements } from "./entitlements";
 
 /**

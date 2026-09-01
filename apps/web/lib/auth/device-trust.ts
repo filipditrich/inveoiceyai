@@ -1,11 +1,10 @@
 import "server-only";
-
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 
 import { trustedDevices, user } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
-import { and, desc, eq, isNull } from "drizzle-orm";
 
 import {
   createTrustTokenWithSecret,

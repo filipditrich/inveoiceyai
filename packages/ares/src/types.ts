@@ -1,7 +1,7 @@
 import { ClientSnapshotSchema } from "@invoicey/invoice-core/schema";
-import type { z } from "zod";
 
 import type { ClientAddressParts } from "./format-address";
+import type { z } from "zod";
 
 /** Fields required to assemble a persisted client snapshot (caller supplies `id`). */
 export type ClientDraft = Omit<z.infer<typeof ClientSnapshotSchema>, "id">;

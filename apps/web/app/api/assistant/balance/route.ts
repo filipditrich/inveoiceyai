@@ -1,7 +1,8 @@
 import { requireWorkspaceForRoute } from "@/lib/auth/api";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { getWorkspaceTokenSummary } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { type NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,7 +15,6 @@ import { cn } from "@/lib/utils";
 import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
-import { useSyncExternalStore } from "react";
 
 const THEME_OPTIONS = [
   { value: "light", key: "light" as const, icon: SunIcon },
@@ -112,7 +112,7 @@ export function ThemeModeSwitcher({ className }: ThemeModeSwitcherProps) {
   return (
     <div
       className={cn(
-        "bg-sidebar-accent/50 ring-sidebar-border/80 flex items-center gap-0.5 rounded-xl p-1 ring-1",
+        "flex items-center gap-0.5 rounded-xl bg-sidebar-accent/50 p-1 ring-1 ring-sidebar-border/80",
         className,
       )}
       role="group"
@@ -129,9 +129,9 @@ export function ThemeModeSwitcher({ className }: ThemeModeSwitcherProps) {
             aria-pressed={selected}
             title={label}
             className={cn(
-              "text-muted-foreground hover:text-sidebar-foreground flex flex-1 items-center justify-center rounded-lg px-2 py-1.5 transition-colors",
+              "flex flex-1 items-center justify-center rounded-lg px-2 py-1.5 text-muted-foreground transition-colors hover:text-sidebar-foreground",
               selected &&
-                "bg-background text-sidebar-foreground ring-sidebar-border shadow-sm ring-1",
+                "bg-background text-sidebar-foreground shadow-sm ring-1 ring-sidebar-border",
             )}
             onClick={() => setTheme(option.value)}
           >

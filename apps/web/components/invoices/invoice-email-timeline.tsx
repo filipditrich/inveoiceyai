@@ -1,10 +1,10 @@
 "use client";
 
-import type { EmailMessageStatus } from "@invoicey/db";
-
-import { Badge } from "@/components/ui/badge";
 import { canResendEmail } from "@/components/invoices/email-preflight";
+import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
+
+import type { EmailMessageStatus } from "@invoicey/db";
 
 export type EmailTimelineEvent = {
   type: string;
@@ -88,10 +88,10 @@ export function InvoiceEmailTimeline({
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0 space-y-1">
                 <p className="truncate font-medium">{item.subject}</p>
-                <p className="text-muted-foreground truncate">
+                <p className="truncate text-muted-foreground">
                   {item.toEmail} · {item.template}
                 </p>
-                <p className="text-muted-foreground text-xs tabular-nums">
+                <p className="text-xs text-muted-foreground tabular-nums">
                   {item.createdAt.toISOString()}
                 </p>
               </div>
@@ -100,7 +100,7 @@ export function InvoiceEmailTimeline({
               </Badge>
             </div>
             {item.events.length > 0 ? (
-              <ol className="text-muted-foreground border-t pt-2 text-xs">
+              <ol className="border-t pt-2 text-xs text-muted-foreground">
                 {item.events.map((ev, i) => {
                   const key = emailEventKey(ev.type);
                   return (
@@ -116,7 +116,7 @@ export function InvoiceEmailTimeline({
               </ol>
             ) : null}
             {canResendEmail(item.status) ? (
-              <p className="text-muted-foreground border-t pt-2 text-xs">
+              <p className="border-t pt-2 text-xs text-muted-foreground">
                 {t("emailResendHint" as never)}
               </p>
             ) : null}

@@ -1,5 +1,6 @@
-import { jsonToolResult } from "@invoicey/invoice-tools";
 import { describe, expect, it } from "vitest";
+
+import { jsonToolResult } from "@invoicey/invoice-tools";
 
 describe("jsonToolResult", () => {
   it("stringifies payload", () => {

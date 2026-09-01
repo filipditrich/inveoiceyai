@@ -1,14 +1,6 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
-import creditNoteFixture from "./__fixtures__/invoices/credit-note.json";
-import domesticFixture from "./__fixtures__/invoices/domestic-transfer.json";
-import enDomesticFixture from "./__fixtures__/invoices/domestic-transfer-en.json";
-import neplatceFixture from "./__fixtures__/invoices/neplatce-regular.json";
-import proformaFixture from "./__fixtures__/invoices/proforma.json";
-import reverseFixture from "./__fixtures__/invoices/reverse-charge.json";
-import { createHash } from "node:crypto";
-
-import type { Invoice } from "./schema";
 import {
   renderInvoicePdf,
   renderIsdoc,
@@ -19,6 +11,13 @@ import {
   parseCzAccountNumber,
   InvoiceSchema,
 } from ".";
+import creditNoteFixture from "./__fixtures__/invoices/credit-note.json";
+import enDomesticFixture from "./__fixtures__/invoices/domestic-transfer-en.json";
+import domesticFixture from "./__fixtures__/invoices/domestic-transfer.json";
+import neplatceFixture from "./__fixtures__/invoices/neplatce-regular.json";
+import proformaFixture from "./__fixtures__/invoices/proforma.json";
+import reverseFixture from "./__fixtures__/invoices/reverse-charge.json";
+import type { Invoice } from "./schema";
 
 function parseInvoice(raw: unknown): Invoice {
   const r = InvoiceSchema.safeParse(raw);

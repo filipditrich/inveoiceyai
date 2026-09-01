@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { cancelInvoice } from "@/actions/invoices";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +14,6 @@ import {
 import { SubmitButton } from "@/components/ui/submit-button";
 import { BanIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import * as React from "react";
 
 export function InvoiceCancelSheet({
   invoiceId,
@@ -43,7 +43,7 @@ export function InvoiceCancelSheet({
         <div className="space-y-4 px-4 pb-6 text-sm">
           <p className="text-muted-foreground">{t("permanent")}</p>
           {blockedByPayment ? (
-            <div className="border-destructive/30 bg-destructive/5 space-y-3 rounded-lg border p-3">
+            <div className="space-y-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
               <p>{t("blocked")}</p>
               <Button
                 onClick={() => setOpen(false)}

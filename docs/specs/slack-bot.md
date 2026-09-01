@@ -57,10 +57,10 @@ flowchart LR
 
 ### Entry points
 
-| Entry | Route | Ack | User feedback |
-| ----- | ----- | --- | ------------- |
-| Slash `/invoice` | [`apps/web/app/api/slack/commands/route.ts`](../../apps/web/app/api/slack/commands/route.ts) | JSON ephemeral in HTTP response | `response_url` + channel summary message |
-| `@bot` mention | [`apps/web/app/api/slack/events/route.ts`](../../apps/web/app/api/slack/events/route.ts) | `200` with empty body | `chat.postEphemeral` + in-thread `chat.postMessage` + uploads |
+| Entry            | Route                                                                                        | Ack                             | User feedback                                                 |
+| ---------------- | -------------------------------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------- |
+| Slash `/invoice` | [`apps/web/app/api/slack/commands/route.ts`](../../apps/web/app/api/slack/commands/route.ts) | JSON ephemeral in HTTP response | `response_url` + channel summary message                      |
+| `@bot` mention   | [`apps/web/app/api/slack/events/route.ts`](../../apps/web/app/api/slack/events/route.ts)     | `200` with empty body           | `chat.postEphemeral` + in-thread `chat.postMessage` + uploads |
 
 ### Where it lives
 
@@ -191,14 +191,14 @@ All failure paths log structured JSON `{ event, traceId, slackTeamId, slackChann
 
 Add these to [`docs/architecture.md`](../architecture.md) env table when 13a ships and to repo `.env.example`.
 
-| Var                          | Required | Default                  | Purpose                                                             |
-| ---------------------------- | -------- | ------------------------ | ------------------------------------------------------------------- |
+| Var                          | Required | Default                  | Purpose                                                                          |
+| ---------------------------- | -------- | ------------------------ | -------------------------------------------------------------------------------- |
 | `SLACK_BOT_TOKEN`            | yes      | —                        | `xoxb-…` bot OAuth: `commands`, `app_mentions:read`, `chat:write`, `files:write` |
-| `SLACK_SIGNING_SECRET`       | yes      | —                        | HMAC verification                                                   |
-| `AI_GATEWAY_API_KEY`         | yes      | —                        | Vercel AI Gateway key                                               |
-| `INVOICEY_AI_MODEL`          | no       | `openai/gpt-4o-mini`     | Primary model                                                       |
-| `INVOICEY_AI_FALLBACK_MODEL` | no       | `anthropic/claude-haiku` | Fallback model                                                      |
-| `INVOICEY_DEMO_ISSUER_JSON`  | no       | hard-coded sample        | `IssuerSnapshot` JSON override                                      |
+| `SLACK_SIGNING_SECRET`       | yes      | —                        | HMAC verification                                                                |
+| `AI_GATEWAY_API_KEY`         | yes      | —                        | Vercel AI Gateway key                                                            |
+| `INVOICEY_AI_MODEL`          | no       | `openai/gpt-4o-mini`     | Primary model                                                                    |
+| `INVOICEY_AI_FALLBACK_MODEL` | no       | `anthropic/claude-haiku` | Fallback model                                                                   |
+| `INVOICEY_DEMO_ISSUER_JSON`  | no       | hard-coded sample        | `IssuerSnapshot` JSON override                                                   |
 
 ## Slack app manifest (sketch)
 
@@ -240,7 +240,7 @@ Interactivity stays disabled for 13a — no buttons, no modals. 13b adds `intera
 | Tool unit tests        | Each tool wrapper (`lookup_business`, `compute_totals`, `assemble_and_validate`, `render_pdf`, `render_isdoc`) | Vitest, mirroring [`packages/invoice-core/src/plan03-render.test.ts`](../../packages/invoice-core/src/plan03-render.test.ts). Network-dependent ARES test uses recorded fixture.                                                                                                            |
 | Worker integration     | Replay a fake LLM transcript that exercises one happy path + one validation-retry path                         | Stub `generateText` with a deterministic step list; assert it ends with valid `Invoice` + non-empty PDF + ISDOC validating against the vendored XSD ([`packages/invoice-core/assets/schemas/isdoc-invoice-6.0.2.xsd`](../../packages/invoice-core/assets/schemas/isdoc-invoice-6.0.2.xsd)). |
 | Signature verification | Reject stale timestamp / bad signature                                                                         | Vitest in [`apps/web/lib/slack/parse-verify.test.ts`](../../apps/web/lib/slack/parse-verify.test.ts)                                                                                                                                                                                        |
-| Smoke                  | `/invoice …` and `@Invoicey …` in a workspace                        | Manual                                                                                                                                                                                                                                   |
+| Smoke                  | `/invoice …` and `@Invoicey …` in a workspace                                                                  | Manual                                                                                                                                                                                                                                                                                      |
 
 ## Open questions / TODOs
 

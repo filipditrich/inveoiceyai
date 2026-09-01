@@ -1,6 +1,6 @@
 import { IssuerEmailForm } from "@/components/issuers/issuer-email-form";
-import { loadIssuerForEdit } from "@/lib/load-issuer";
 import { requireWorkspace } from "@/lib/auth/session";
+import { loadIssuerForEdit } from "@/lib/load-issuer";
 
 type Params = Promise<{ id: string }>;
 type Search = Promise<{ invalid?: string }>;

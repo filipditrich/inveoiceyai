@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import { loader, type Source } from "fumadocs-core/source";
 import { defineDocs } from "fumadocs-mdx/macro";
 import {
@@ -33,7 +34,6 @@ import {
   WrenchIcon,
   type LucideIcon,
 } from "lucide-react";
-import { createElement } from "react";
 
 /**
  * Public product documentation served at `/docs` (`content/docs/**`).

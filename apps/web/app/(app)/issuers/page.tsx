@@ -3,16 +3,17 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
 import { invalidMessage } from "@/lib/invalid-message";
+import { desc, eq } from "drizzle-orm";
+import { BriefcaseBusinessIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+
+import { issuerBusinesses } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import {
   IssuerSnapshotSchema,
   type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
-import { issuerBusinesses } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
-import { desc, eq } from "drizzle-orm";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { BriefcaseBusinessIcon } from "lucide-react";
 
 type IssuerTableItem = {
   rowId: string;
@@ -69,11 +70,11 @@ export default async function IssuersPage({
         title={t("title")}
       />
 
-      {err ? <p className="text-destructive text-sm">{err}</p> : null}
+      {err ? <p className="text-sm text-destructive">{err}</p> : null}
 
       {items.length === 0 ? (
         <div className="rounded-md border border-dashed p-8 text-center">
-          <p className="text-muted-foreground mb-3 text-sm">{t("empty")}</p>
+          <p className="mb-3 text-sm text-muted-foreground">{t("empty")}</p>
           <Button render={<Link href="/welcome" prefetch />} size="sm">
             {t("createFirst")}
           </Button>

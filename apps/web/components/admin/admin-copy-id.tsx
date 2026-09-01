@@ -1,9 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 export function AdminCopyId({ value }: { value: string }) {
   const t = useTranslations("Admin.table");
@@ -24,7 +24,7 @@ export function AdminCopyId({ value }: { value: string }) {
 
   return (
     <Button
-      className="text-muted-foreground hover:text-foreground h-auto gap-1 px-1.5 py-0.5 font-mono text-xs"
+      className="h-auto gap-1 px-1.5 py-0.5 font-mono text-xs text-muted-foreground hover:text-foreground"
       onClick={() => void copy()}
       size="sm"
       title={value}

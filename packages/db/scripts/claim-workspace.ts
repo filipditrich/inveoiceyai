@@ -15,11 +15,10 @@
  * re-running with --apply is a no-op.
  */
 import "@invoicey/env/load";
-
 import { eq } from "drizzle-orm";
 
-import { createDb } from "../src/create-db";
 import { member, user as userTable } from "../src/auth-schema";
+import { createDb } from "../src/create-db";
 import { clients, invoices, issuerBusinesses, presets } from "../src/schema";
 import { workspaces } from "../src/workspaces";
 

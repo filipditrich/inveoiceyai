@@ -1,9 +1,9 @@
+import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import path from "node:path";
-import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { IssuerSnapshotSchema } from "@invoicey/invoice-core/schema";
+
 import {
   deletePresetDb,
   getPresetDb,
@@ -11,6 +11,7 @@ import {
   savePresetDb,
   tryCreateDbFromEnv,
 } from "@invoicey/db";
+import { IssuerSnapshotSchema } from "@invoicey/invoice-core/schema";
 
 import { resolveWorkspaceId } from "./workspace-context";
 
@@ -54,7 +55,7 @@ export function resolvePresetsPath(override?: string): string {
   return defaultPresetsPath();
 }
 
-function useDbStore(pathOverride?: string): boolean {
+function prefersDbStore(pathOverride?: string): boolean {
   if (pathOverride != null && pathOverride.trim() !== "") {
     return false;
   }
@@ -112,7 +113,7 @@ export async function listPresets(options?: {
   path?: string;
   kind?: PresetKind;
 }): Promise<{ ok: true; presets: PresetRecord[] }> {
-  if (useDbStore(options?.path)) {
+  if (prefersDbStore(options?.path)) {
     const database = tryCreateDbFromEnv();
     if (database) {
       const presets = await listPresetsDb(database, {
@@ -136,7 +137,7 @@ export async function getPreset(options: {
   id: string;
   path?: string;
 }): Promise<{ ok: true; preset: PresetRecord } | { ok: false; error: string }> {
-  if (useDbStore(options.path)) {
+  if (prefersDbStore(options.path)) {
     const database = tryCreateDbFromEnv();
     if (database) {
       const preset = await getPresetDb(database, {
@@ -178,7 +179,7 @@ export async function savePreset(options: {
     return { ok: false, error: "invalid preset name" };
   }
 
-  if (useDbStore(options.path)) {
+  if (prefersDbStore(options.path)) {
     const database = tryCreateDbFromEnv();
     if (database) {
       const preset = await savePresetDb(database, {
@@ -216,7 +217,7 @@ export async function deletePreset(options: {
   id: string;
   path?: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (useDbStore(options.path)) {
+  if (prefersDbStore(options.path)) {
     const database = tryCreateDbFromEnv();
     if (database) {
       const ok = await deletePresetDb(database, {

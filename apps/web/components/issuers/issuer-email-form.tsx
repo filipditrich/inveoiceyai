@@ -1,5 +1,7 @@
 "use client";
 
+import type { FormEvent } from "react";
+import * as React from "react";
 import { saveIssuerEmail } from "@/actions/issuers";
 import {
   FieldGroup,
@@ -7,10 +9,9 @@ import {
   useInvalidQueryMessage,
 } from "@/components/issuers/issuer-form-shared";
 import { Input } from "@/components/ui/input";
-import type { IssuerEmailSettings } from "@invoicey/db";
-import type { FormEvent } from "react";
-import * as React from "react";
 import { useTranslations } from "next-intl";
+
+import type { IssuerEmailSettings } from "@invoicey/db";
 
 export function IssuerEmailForm(props: {
   issuerId: string;
@@ -65,7 +66,7 @@ export function IssuerEmailForm(props: {
 
   return (
     <form className="max-w-2xl space-y-6" onSubmit={onSubmit}>
-      {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
+      {userMsg ? <p className="text-sm text-destructive">{userMsg}</p> : null}
       <FieldGroup label={t("subject")}>
         <Input
           onChange={(ev) => {
@@ -76,7 +77,7 @@ export function IssuerEmailForm(props: {
       </FieldGroup>
       <FieldGroup label={t("body")}>
         <textarea
-          className="border-input bg-background min-h-28 w-full rounded-md border px-3 py-2 text-sm"
+          className="min-h-28 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           onChange={(ev) => {
             setEmailCover(ev.target.value);
           }}

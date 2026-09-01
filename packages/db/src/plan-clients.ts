@@ -1,7 +1,7 @@
 import { and, eq, isNotNull, notInArray, sql } from "drizzle-orm";
 
-import type { InvoiceyDb } from "./create-db";
 import { normalizeIco } from "./clients-repo";
+import type { InvoiceyDb } from "./create-db";
 import { planClients, clients } from "./schema";
 import type { DbTransaction } from "./transaction";
 import { workspaces } from "./workspaces";

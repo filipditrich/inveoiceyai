@@ -1,6 +1,3 @@
-import { CheckIcon, MinusIcon } from "lucide-react";
-import { getTranslations } from "next-intl/server";
-
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -10,6 +7,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatTokenCount } from "@/lib/ai/format-tokens";
+import { CheckIcon, MinusIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+
 import type { Entitlements } from "@/lib/entitlements/entitlements";
 
 /**
@@ -62,7 +62,7 @@ export async function WorkspacePlanCard({
             ] as const
           ).map(([key, value]) => (
             <div key={key} className="space-y-1">
-              <dt className="text-muted-foreground text-xs uppercase tracking-[0.12em]">
+              <dt className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
                 {t(`limits.${key}`)}
               </dt>
               <dd className="text-sm">{value}</dd>
@@ -74,9 +74,9 @@ export async function WorkspacePlanCard({
           {features.map(([key, enabled]) => (
             <li key={key} className="flex items-center gap-2 text-sm">
               {enabled ? (
-                <CheckIcon className="text-primary size-4 shrink-0" />
+                <CheckIcon className="size-4 shrink-0 text-primary" />
               ) : (
-                <MinusIcon className="text-muted-foreground size-4 shrink-0" />
+                <MinusIcon className="size-4 shrink-0 text-muted-foreground" />
               )}
               <span className={enabled ? undefined : "text-muted-foreground"}>
                 {t(`features.${key}`)}
@@ -85,7 +85,7 @@ export async function WorkspacePlanCard({
           ))}
         </ul>
 
-        <p className="text-muted-foreground text-xs">{t("contact")}</p>
+        <p className="text-xs text-muted-foreground">{t("contact")}</p>
       </CardContent>
     </Card>
   );

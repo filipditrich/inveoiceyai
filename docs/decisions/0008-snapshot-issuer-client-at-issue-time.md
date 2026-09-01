@@ -10,7 +10,7 @@ Issued invoices are immutable historical records. The names, addresses, IBANs, V
 
 Storage approaches:
 
-1. **Live FK only** — `invoices.issuer_id` references `issuer_businesses(id)`; reads always fetch the *current* state. Simplest, but breaks on every rebrand / address change.
+1. **Live FK only** — `invoices.issuer_id` references `issuer_businesses(id)`; reads always fetch the _current_ state. Simplest, but breaks on every rebrand / address change.
 2. **Snapshot at issue time + live FK alongside** — capture the relevant fields onto `invoices` at issue, keep the FK for history aggregation. Standard pattern in invoicing systems.
 3. **Bi-temporal table for issuers** — model the issuer as a series of versions, link the invoice to the version active on the issue date. Theoretically clean but expensive in complexity (schema, migrations, queries).
 4. **Append-only event log + projection** — full event sourcing; massively over-engineered for our scale and reads.
@@ -48,7 +48,7 @@ See [`snapshots.md`](../domain/snapshots.md) for the full operational policy, sc
 
 ### Negative
 
-- The same name/address may appear in many snapshots; updating an issuer's address does not auto-update historical invoices (this is the *correct* behavior, but users may be surprised)
+- The same name/address may appear in many snapshots; updating an issuer's address does not auto-update historical invoices (this is the _correct_ behavior, but users may be surprised)
 - Schema evolution of snapshots requires care — adding fields is safe, renaming/removing requires a migration with backfill
 - A small amount of data duplication; trivial at our scale
 

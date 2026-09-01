@@ -13,11 +13,11 @@ import { TrendingUpIcon, TrendingDownIcon } from "lucide-react";
 
 export function SectionCards() {
   return (
-    <div className="*:data-[slot=card]:to-card *:data-[slot=card]:from-primary/5 *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t lg:px-6">
+    <div className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Outstanding (issued)</CardDescription>
-          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             428 690&nbsp;Kč
           </CardTitle>
           <CardAction>
@@ -39,7 +39,7 @@ export function SectionCards() {
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Issued MTD</CardDescription>
-          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             42
           </CardTitle>
           <CardAction>
@@ -61,7 +61,7 @@ export function SectionCards() {
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Exports (PDF / ISDOC)</CardDescription>
-          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             318
           </CardTitle>
           <CardAction>
@@ -83,7 +83,7 @@ export function SectionCards() {
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Days sales outstanding</CardDescription>
-          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             34
           </CardTitle>
           <CardAction>

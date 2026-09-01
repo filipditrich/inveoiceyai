@@ -33,7 +33,7 @@ export function AssistantHistory() {
       <DropdownMenuContent align="end" className="w-72">
         <DropdownMenuLabel>{t("history")}</DropdownMenuLabel>
         {threads.length === 0 ? (
-          <p className="text-muted-foreground px-1.5 py-2 text-sm">
+          <p className="px-1.5 py-2 text-sm text-muted-foreground">
             {t("historyEmpty")}
           </p>
         ) : (
@@ -51,14 +51,14 @@ export function AssistantHistory() {
                         })
                       : thread.title || t("untitledConversation")}
                   </span>
-                  <span className="text-muted-foreground text-xs">
+                  <span className="text-xs text-muted-foreground">
                     {format.relativeTime(new Date(thread.updatedAt), now)}
                   </span>
                 </span>
               </DropdownMenuItem>
               <Button
                 aria-label={t("deleteConversation")}
-                className="text-muted-foreground hover:text-destructive size-7 shrink-0"
+                className="size-7 shrink-0 text-muted-foreground hover:text-destructive"
                 onClick={() => session?.deleteThread(thread.id)}
                 size="icon-xs"
                 variant="ghost"

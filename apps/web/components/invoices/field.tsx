@@ -1,5 +1,3 @@
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 import {
   Children,
   cloneElement,
@@ -8,6 +6,8 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export function Field({
   label,
@@ -29,7 +29,8 @@ export function Field({
   const childArray = Children.toArray(children);
   const controlIndex = childArray.findIndex(isValidElement);
   const control = childArray[controlIndex] as
-    ReactElement<{ id?: string; "aria-describedby"?: string }> | undefined;
+    | ReactElement<{ id?: string; "aria-describedby"?: string }>
+    | undefined;
   const controlId = control?.props.id ?? generatedControlId;
   const showDescription = Boolean(description) && !suggestion;
   const descriptionId = showDescription
@@ -58,12 +59,12 @@ export function Field({
       {labelledChildren}
       {suggestion}
       {showDescription ? (
-        <p className="text-muted-foreground text-xs" id={descriptionId}>
+        <p className="text-xs text-muted-foreground" id={descriptionId}>
           {description}
         </p>
       ) : null}
       {error ? (
-        <p className="text-destructive text-xs" id={errorId}>
+        <p className="text-xs text-destructive" id={errorId}>
           {error}
         </p>
       ) : null}
@@ -73,7 +74,7 @@ export function Field({
 
 export function selectClassName(invalid?: boolean): string {
   return cn(
-    "border-input bg-background h-9 w-full rounded-md border px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+    "h-9 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
     invalid &&
       "border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
   );

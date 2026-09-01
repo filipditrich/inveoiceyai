@@ -1,3 +1,5 @@
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+
 import {
   applyTriggerGrants,
   createManualPaymentAllocation,
@@ -31,7 +33,6 @@ import {
   resolveDisplayStatus,
   type InvoiceDisplayStatus,
 } from "@invoicey/invoice-core/status-display";
-import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { getDemoIssuer } from "./demo-issuer";
 import { tryPersistInvoiceArtifacts } from "./invoice-artifacts";
@@ -267,7 +268,8 @@ export async function markInvoicePaidById(options: {
 }
 
 type CancelInvoiceResult =
-  { ok: true; summary: InvoiceSummary } | { ok: false; error: string };
+  | { ok: true; summary: InvoiceSummary }
+  | { ok: false; error: string };
 
 async function cancelLockedInvoice(
   tx: DbTransaction,

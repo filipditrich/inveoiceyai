@@ -13,7 +13,6 @@
  * production without checking what an admin has changed.
  */
 import "@invoicey/env/load";
-
 import { eq } from "drizzle-orm";
 
 import { createDb } from "../src/create-db";

@@ -143,7 +143,8 @@ export function resolveEntitlements(
 
 /** Dot-path into resolved entitlements, for `requireEntitlement()` call sites. */
 export type BooleanEntitlementPath =
-  `features.${keyof Entitlements["features"]}` | "ai.topUpEnabled";
+  | `features.${keyof Entitlements["features"]}`
+  | "ai.topUpEnabled";
 
 export function readBooleanEntitlement(
   entitlements: Entitlements,

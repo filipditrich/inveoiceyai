@@ -1,13 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
-import { Link2Icon } from "lucide-react";
-
 import { confirmSlackLinkAction } from "@/actions/slack-link";
 import { Button } from "@/components/ui/button";
+import { Link2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function SlackLinkConfirmClient({
   code,

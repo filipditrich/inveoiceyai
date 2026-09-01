@@ -1,5 +1,3 @@
-import type { StatusBucket } from "@/lib/dashboard-metrics";
-import { DISPLAY_STATUS_CARD_ACCENT } from "@/lib/invoice-status-ui";
 import {
   Card,
   CardDescription,
@@ -7,11 +5,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { AppLocale } from "@/i18n/config";
 import { formatMoneyByCurrency } from "@/lib/format";
+import { DISPLAY_STATUS_CARD_ACCENT } from "@/lib/invoice-status-ui";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
+import Link from "next/link";
+
+import type { AppLocale } from "@/i18n/config";
+import type { StatusBucket } from "@/lib/dashboard-metrics";
 
 function hrefFor(status: StatusBucket["status"], issuerId?: string): string {
   const params = new URLSearchParams({ status });
@@ -33,7 +34,7 @@ export async function DashboardStatusCards({
   const locale = (await getLocale()) as AppLocale;
 
   return (
-    <div className="@5xl/main:grid-cols-5 grid grid-cols-2 gap-3 sm:gap-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 @5xl/main:grid-cols-5">
       {buckets.map((b) => (
         <Link
           className="block transition-opacity hover:opacity-90"
@@ -47,11 +48,11 @@ export async function DashboardStatusCards({
               >
                 {tStatus(b.status)}
               </CardDescription>
-              <CardTitle className="@[180px]/card:text-2xl @[250px]/card:text-3xl text-xl font-semibold tabular-nums">
+              <CardTitle className="text-xl font-semibold tabular-nums @[180px]/card:text-2xl @[250px]/card:text-3xl">
                 {formatMoneyByCurrency(b.totalsByCurrency, locale)}
               </CardTitle>
             </CardHeader>
-            <CardFooter className="text-muted-foreground text-sm tabular-nums">
+            <CardFooter className="text-sm text-muted-foreground tabular-nums">
               {tCount("label", { count: b.count })}
             </CardFooter>
           </Card>

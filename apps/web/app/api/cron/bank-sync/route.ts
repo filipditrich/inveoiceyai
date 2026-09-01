@@ -1,10 +1,10 @@
+import { syncFioConnection } from "@/lib/payments/fio-service";
+import { syncMonetaConnection } from "@/lib/payments/moneta-service";
+import { and, asc, eq, inArray, isNull, lte, or } from "drizzle-orm";
+
 import { bankConnections } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
-import { and, asc, eq, inArray, isNull, lte, or } from "drizzle-orm";
-
-import { syncFioConnection } from "@/lib/payments/fio-service";
-import { syncMonetaConnection } from "@/lib/payments/moneta-service";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;

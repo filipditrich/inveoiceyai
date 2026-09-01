@@ -1,76 +1,76 @@
 {
-	"meta": {
-		"docType": "invoice",
-		"number": "20260001",
-		"issueDate": "2026-05-03",
-		"dueDate": "2026-05-17",
-		"duzp": "2026-05-03",
-		"language": "cs",
-		"currency": "CZK"
-	},
-	"issuer": {
-		"id": "ca8b8d4e-2e7e-4f6a-9b7d-1f9c1234abcd",
-		"name": "Filip Ditrich",
-		"ico": "09870113",
-		"address": {
-			"street": "Hrabalová 1092, Liberec XIV-Ruprechtice",
-			"city": "Liberec",
-			"zip": "460 14",
-			"country": "CZ"
-		},
-		"bank": {
-			"accountNumber": "115-3743440297/0100",
-			"iban": "CZ2501000001153743440297",
-			"bic": "KOMBCZPP"
-		},
-		"vatPayer": false,
-		"contactEmail": "faktura@invoicey.demo"
-	},
-	"client": {
-		"id": "5bc1d5a7-0c58-4cda-a1f6-4ad9876543ff",
-		"name": "NFCtron a.s.",
-		"ico": "07283539",
-		"dic": "CZ07283539",
-		"address": {
-			"street": "Opletalova 1525/39, Nové Město",
-			"city": "Praha",
-			"zip": "110 00",
-			"country": "CZ"
-		},
-		"contactEmail": "billing@nfctron.com"
-	},
-	"vat": {
-		"mode": "regular",
-		"suppliesAbroad": "none"
-	},
-	"payment": {
-		"method": "transfer",
-		"bankAccount": {
-			"accountNumber": "115-3743440297/0100",
-			"iban": "CZ2501000001153743440297",
-			"bic": "KOMBCZPP"
-		},
-		"variableSymbol": "20260001",
-		"instructionsBefore": "Děkuji za spolupráci.\nÚhradu prosím proveďte **převodem** na účet níže.",
-		"instructionsAfter": "Při platbě uveďte variabilní symbol.\nDotazy: _faktura@invoicey.demo_."
-	},
-	"items": [
-		{
-			"position": 1,
-			"description": "Služba",
-			"quantity": 1,
-			"unit": "ks",
-			"unitPriceWithoutVat": 4000,
-			"vatRate": 0,
-			"lineSubtotal": 4000,
-			"lineVat": 0,
-			"lineTotal": 4000
-		}
-	],
-	"totals": {
-		"subtotal": 4000,
-		"vatBreakdown": [{ "rate": 0, "base": 4000, "vat": 0 }],
-		"vatTotal": 0,
-		"total": 4000
-	}
+  "meta": {
+    "docType": "invoice",
+    "number": "20260001",
+    "issueDate": "2026-05-03",
+    "dueDate": "2026-05-17",
+    "duzp": "2026-05-03",
+    "language": "cs",
+    "currency": "CZK"
+  },
+  "issuer": {
+    "id": "ca8b8d4e-2e7e-4f6a-9b7d-1f9c1234abcd",
+    "name": "Filip Ditrich",
+    "ico": "09870113",
+    "address": {
+      "street": "Hrabalová 1092, Liberec XIV-Ruprechtice",
+      "city": "Liberec",
+      "zip": "460 14",
+      "country": "CZ"
+    },
+    "bank": {
+      "accountNumber": "115-3743440297/0100",
+      "iban": "CZ2501000001153743440297",
+      "bic": "KOMBCZPP"
+    },
+    "vatPayer": false,
+    "contactEmail": "faktura@invoicey.demo"
+  },
+  "client": {
+    "id": "5bc1d5a7-0c58-4cda-a1f6-4ad9876543ff",
+    "name": "NFCtron a.s.",
+    "ico": "07283539",
+    "dic": "CZ07283539",
+    "address": {
+      "street": "Opletalova 1525/39, Nové Město",
+      "city": "Praha",
+      "zip": "110 00",
+      "country": "CZ"
+    },
+    "contactEmail": "billing@nfctron.com"
+  },
+  "vat": {
+    "mode": "regular",
+    "suppliesAbroad": "none"
+  },
+  "payment": {
+    "method": "transfer",
+    "bankAccount": {
+      "accountNumber": "115-3743440297/0100",
+      "iban": "CZ2501000001153743440297",
+      "bic": "KOMBCZPP"
+    },
+    "variableSymbol": "20260001",
+    "instructionsBefore": "Děkuji za spolupráci.\nÚhradu prosím proveďte **převodem** na účet níže.",
+    "instructionsAfter": "Při platbě uveďte variabilní symbol.\nDotazy: _faktura@invoicey.demo_."
+  },
+  "items": [
+    {
+      "position": 1,
+      "description": "Služba",
+      "quantity": 1,
+      "unit": "ks",
+      "unitPriceWithoutVat": 4000,
+      "vatRate": 0,
+      "lineSubtotal": 4000,
+      "lineVat": 0,
+      "lineTotal": 4000
+    }
+  ],
+  "totals": {
+    "subtotal": 4000,
+    "vatBreakdown": [{ "rate": 0, "base": 4000, "vat": 0 }],
+    "vatTotal": 0,
+    "total": 4000
+  }
 }

@@ -1,15 +1,9 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { toast } from "sonner";
-
 import { recordAccountSecurityEventAction } from "@/actions/security";
-import { authClient } from "@/lib/auth/client";
-import type { AppLocale } from "@/i18n/config";
-import { formatDateTime } from "@/lib/format";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -18,6 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth/client";
+import { formatDateTime } from "@/lib/format";
 import {
   CopyIcon,
   LoaderCircleIcon,
@@ -28,6 +24,10 @@ import {
   UsersRoundIcon,
   XIcon,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { toast } from "sonner";
+
+import type { AppLocale } from "@/i18n/config";
 
 type MemberRow = {
   id: string;
@@ -249,19 +249,19 @@ export function MembersPanel({
       <Card>
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2">
-            <UsersRoundIcon className="text-muted-foreground size-4" />
+            <UsersRoundIcon className="size-4 text-muted-foreground" />
             {t("title")}
           </CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent className="divide-y p-0">
           {pending && members.length === 0 ? (
-            <div className="text-muted-foreground flex items-center justify-center gap-2 px-5 py-8 text-sm">
+            <div className="flex items-center justify-center gap-2 px-5 py-8 text-sm text-muted-foreground">
               <LoaderCircleIcon className="size-4 animate-spin" />
               {t("loading")}
             </div>
           ) : members.length === 0 ? (
-            <p className="text-muted-foreground px-5 py-8 text-center text-sm">
+            <p className="px-5 py-8 text-center text-sm text-muted-foreground">
               {t("empty")}
             </p>
           ) : (
@@ -273,7 +273,7 @@ export function MembersPanel({
                   className="flex flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-6"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold uppercase">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground uppercase">
                       {displayName.slice(0, 1)}
                     </div>
                     <div className="min-w-0 text-sm">
@@ -283,7 +283,7 @@ export function MembersPanel({
                         </span>
                         <Badge variant="secondary">{roleLabel(m.role)}</Badge>
                       </div>
-                      <div className="text-muted-foreground truncate">
+                      <div className="truncate text-muted-foreground">
                         {m.user?.email || t("emailUnavailable")}
                       </div>
                     </div>
@@ -292,7 +292,7 @@ export function MembersPanel({
                     <div className="flex items-center gap-2">
                       <select
                         aria-label={t("roleAria", { name: displayName })}
-                        className="border-input bg-background h-8 rounded-md border px-2 text-sm"
+                        className="h-8 rounded-md border border-input bg-background px-2 text-sm"
                         value={m.role}
                         disabled={pending}
                         onChange={(e) => updateRole(m.id, e.target.value)}
@@ -330,7 +330,7 @@ export function MembersPanel({
         <Card>
           <CardHeader className="border-b">
             <CardTitle className="flex items-center gap-2">
-              <MailPlusIcon className="text-muted-foreground size-4" />
+              <MailPlusIcon className="size-4 text-muted-foreground" />
               {t("invite.title")}
             </CardTitle>
             <CardDescription>
@@ -353,7 +353,7 @@ export function MembersPanel({
               <label className="space-y-1.5 text-sm font-medium">
                 {t("invite.role")}
                 <select
-                  className="border-input bg-background h-9 w-full rounded-md border px-2 text-sm"
+                  className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
                 >
@@ -374,11 +374,11 @@ export function MembersPanel({
             </div>
             <div className="space-y-3 border-t pt-4">
               <div className="flex items-center gap-2 text-sm font-medium">
-                <ShieldCheckIcon className="text-muted-foreground size-4" />
+                <ShieldCheckIcon className="size-4 text-muted-foreground" />
                 {t("invite.pendingTitle")}
               </div>
               {pendingInvites.length === 0 ? (
-                <p className="text-muted-foreground rounded-lg border border-dashed px-4 py-5 text-center text-sm">
+                <p className="rounded-lg border border-dashed px-4 py-5 text-center text-sm text-muted-foreground">
                   {t("invite.pendingEmpty")}
                 </p>
               ) : (
@@ -391,7 +391,7 @@ export function MembersPanel({
                     >
                       <div className="min-w-0">
                         <div className="font-medium">{i.email}</div>
-                        <div className="text-muted-foreground text-xs">
+                        <div className="text-xs text-muted-foreground">
                           {roleLabel(i.role)}
                           {expiry
                             ? ` · ${

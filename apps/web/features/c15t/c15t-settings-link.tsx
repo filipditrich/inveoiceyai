@@ -1,10 +1,9 @@
 "use client";
 
+import type { ComponentProps } from "react";
+import { cn } from "@/lib/utils";
 import { useHeadlessConsentUI } from "@c15t/react";
 import { useTranslations } from "next-intl";
-import type { ComponentProps } from "react";
-
-import { cn } from "@/lib/utils";
 
 export function C15tSettingsLink({
   className,

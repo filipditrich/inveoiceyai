@@ -1,10 +1,10 @@
 import "server-only";
+import { cache } from "react";
+import { eq, sql } from "drizzle-orm";
 
 import { workspaces } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
 import { issuerBusinesses } from "@invoicey/db";
-import { eq, sql } from "drizzle-orm";
-import { cache } from "react";
+import { db } from "@invoicey/db/client";
 
 export type WorkspaceMetadata = {
   issuerWelcomeDismissedAt?: string;

@@ -1,7 +1,7 @@
 "use client";
 
-import { ImageUploadField } from "@/components/upload/image-upload-field";
 import { Label } from "@/components/ui/label";
+import { ImageUploadField } from "@/components/upload/image-upload-field";
 import { useTranslations } from "next-intl";
 
 export function WorkspaceLogoField({
@@ -24,7 +24,7 @@ export function WorkspaceLogoField({
     <div className="space-y-3">
       <div className="space-y-1">
         <Label>{t("logoLabel")}</Label>
-        <p className="text-muted-foreground text-xs">{t("logoHint")}</p>
+        <p className="text-xs text-muted-foreground">{t("logoHint")}</p>
       </div>
       {canEdit && uploadConfigured ? (
         <ImageUploadField
@@ -36,12 +36,12 @@ export function WorkspaceLogoField({
         />
       ) : null}
       {canEdit && !uploadConfigured ? (
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {t("uploadUnavailable")}
         </p>
       ) : null}
       {!canEdit && hasUrl ? (
-        <div className="bg-muted/40 overflow-hidden rounded-xl border">
+        <div className="overflow-hidden rounded-xl border bg-muted/40">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             alt={t("logoLabel")}

@@ -1,10 +1,12 @@
-import { DISPLAY_STATUS_CARD_ACCENT } from "@/lib/invoice-status-ui";
 import { formatMoneyByCurrency } from "@/lib/format";
-import type { AppLocale } from "@/i18n/config";
-import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
+import { DISPLAY_STATUS_CARD_ACCENT } from "@/lib/invoice-status-ui";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
+import Link from "next/link";
+
+import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
+
+import type { AppLocale } from "@/i18n/config";
 
 export type StatusSummaryBucket = {
   status: InvoiceDisplayStatus;
@@ -41,14 +43,14 @@ export async function InvoiceStatusSummary({
   const tCount = await getTranslations("Status.invoiceCount");
 
   return (
-    <div className="@xl/main:grid-cols-3 @5xl/main:grid-cols-6 grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-2 gap-3 @xl/main:grid-cols-3 @5xl/main:grid-cols-6">
       {buckets.map((b) => {
         const active = activeStatus === b.status;
         return (
           <Link
             className={cn(
-              "hover:bg-muted/40 rounded-md border px-3 py-3 transition-colors",
-              active && "ring-ring ring-2",
+              "rounded-md border px-3 py-3 transition-colors hover:bg-muted/40",
+              active && "ring-2 ring-ring",
               b.status === "cancelled" && "opacity-80",
             )}
             href={hrefFor(b.status, filterBase)}
@@ -65,7 +67,7 @@ export async function InvoiceStatusSummary({
             <div className="mt-1 text-xl font-semibold tabular-nums">
               {formatMoneyByCurrency(b.totalsByCurrency, locale)}
             </div>
-            <div className="text-muted-foreground text-xs tabular-nums">
+            <div className="text-xs text-muted-foreground tabular-nums">
               {tCount("label", { count: b.count })}
             </div>
           </Link>

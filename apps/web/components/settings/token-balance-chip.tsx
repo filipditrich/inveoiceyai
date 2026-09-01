@@ -1,6 +1,5 @@
 "use client";
 
-import { formatTokenCount } from "@/lib/ai/format-tokens";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Popover,
@@ -8,6 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useSidebar } from "@/components/ui/sidebar";
+import { formatTokenCount } from "@/lib/ai/format-tokens";
 import { cn } from "@/lib/utils";
 import { SparklesIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -43,28 +43,28 @@ export function TokenBalanceChip({
     <Popover>
       <PopoverTrigger
         className={cn(
-          "text-muted-foreground hover:text-foreground inline-flex items-center transition-colors",
+          "inline-flex items-center text-muted-foreground transition-colors hover:text-foreground",
           collapsed
-            ? "hover:bg-sidebar-accent size-8 justify-center rounded-md"
-            : "bg-brand/5 hover:bg-brand/10 w-full gap-2 rounded-lg px-2.5 py-2 text-left",
+            ? "size-8 justify-center rounded-md hover:bg-sidebar-accent"
+            : "w-full gap-2 rounded-lg bg-brand/5 px-2.5 py-2 text-left hover:bg-brand/10",
         )}
         aria-label={t("title")}
       >
-        <SparklesIcon className="text-brand size-3.5 shrink-0" />
+        <SparklesIcon className="size-3.5 shrink-0 text-brand" />
         {collapsed ? null : (
           <span className="min-w-0 flex-1">
             <span className="flex items-center justify-between gap-2 text-xs tabular-nums">
               <span className="truncate">{t("title")}</span>
-              <span className="text-foreground font-medium">
+              <span className="font-medium text-foreground">
                 {t("remaining", { count: formatTokenCount(totalAvailable) })}
               </span>
             </span>
             <span
-              className="bg-foreground/10 mt-1.5 block h-1 overflow-hidden rounded-full"
+              className="mt-1.5 block h-1 overflow-hidden rounded-full bg-foreground/10"
               title={t("monthlyUsed")}
             >
               <span
-                className="bg-brand/70 block h-full rounded-full"
+                className="block h-full rounded-full bg-brand/70"
                 style={{ width: `${Math.round(usedRatio * 100)}%` }}
               />
             </span>

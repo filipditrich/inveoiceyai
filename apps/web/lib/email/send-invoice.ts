@@ -1,4 +1,9 @@
 import "server-only";
+import {
+  applyDisplayNameTemplate,
+  isValidEmailAddress,
+} from "@/lib/email/from";
+import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 
 import {
   emailEvents,
@@ -21,12 +26,7 @@ import {
   sendTransactionalEmail,
   wasRecentlyReminded,
 } from "@invoicey/invoice-tools/email";
-import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 
-import {
-  applyDisplayNameTemplate,
-  isValidEmailAddress,
-} from "@/lib/email/from";
 import type { EmailAttachment } from "@/lib/email/send";
 
 export {
@@ -100,7 +100,8 @@ async function buildInvoiceAttachments(opts: {
 }
 
 export type SendOverdueResult =
-  { ok: true; messageId: string; to: string } | { ok: false; error: string };
+  | { ok: true; messageId: string; to: string }
+  | { ok: false; error: string };
 
 export async function sendOverdueReminderForInvoice(opts: {
   db: InvoiceyDb;

@@ -1,8 +1,8 @@
 import "server-only";
-
-import { emailLocale, renderWorkspaceInviteEmail } from "@invoicey/emails";
-import { db } from "@invoicey/db/client";
 import { getLocale } from "next-intl/server";
+
+import { db } from "@invoicey/db/client";
+import { emailLocale, renderWorkspaceInviteEmail } from "@invoicey/emails";
 
 import { isEmailConfigured } from "./client";
 import { buildViaInvoiceyDisplayName } from "./from";

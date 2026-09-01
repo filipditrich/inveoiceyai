@@ -1,5 +1,6 @@
-import type { AppLocale } from "@/i18n/config";
 import { toIntlLocale } from "@/i18n/config";
+
+import type { AppLocale } from "@/i18n/config";
 
 /** Format one or more currency totals (never mix into a single CZK figure). */
 export function formatMoneyByCurrency(

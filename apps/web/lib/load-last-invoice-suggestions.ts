@@ -2,10 +2,11 @@ import {
   suggestionsFromInvoice,
   type LastInvoiceSuggestions,
 } from "@/lib/last-invoice-suggestions";
+import { and, desc, eq, isNotNull, isNull, ne, type SQL } from "drizzle-orm";
+
 import { invoices } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { InvoiceSchema } from "@invoicey/invoice-core/schema";
-import { and, desc, eq, isNotNull, isNull, ne, type SQL } from "drizzle-orm";
 
 type LoadLastInvoiceOpts = {
   issuerId?: string;

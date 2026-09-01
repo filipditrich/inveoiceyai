@@ -1,8 +1,6 @@
 import "server-only";
-
-import { randomUUID } from "node:crypto";
-
 import { and, eq } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 
 import {
   emailEvents,

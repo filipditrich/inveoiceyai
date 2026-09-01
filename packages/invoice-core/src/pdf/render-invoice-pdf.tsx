@@ -2,10 +2,9 @@
 import { pdf } from "@react-pdf/renderer";
 
 import { renderIsdoc } from "../isdoc/render-isdoc";
+import { resolveLookDocument } from "../looks";
 import type { Invoice } from "../schema";
 import { renderSpaydQr } from "../spayd/render-spayd-qr";
-
-import { resolveLookDocument } from "../looks";
 import { embedIsdocInPdf } from "./embed-isdoc-in-pdf";
 import type { InvoicePdfAssets } from "./InvoicePdfDocument";
 import { InvoicePdfDocument } from "./InvoicePdfDocument";

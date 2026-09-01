@@ -2,9 +2,9 @@
 
 import { NavLinkPending } from "@/components/navigation/nav-link-pending";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
 
 const LINKS = ["identity", "bank", "assets", "numbering", "email"] as const;
 
@@ -26,7 +26,7 @@ export function IssuerEditNav({ issuerId }: { issuerId: string }) {
             className={cn(
               "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors",
               active
-                ? "bg-muted text-foreground font-medium"
+                ? "bg-muted font-medium text-foreground"
                 : "text-muted-foreground hover:text-foreground",
             )}
             aria-current={active ? "page" : undefined}

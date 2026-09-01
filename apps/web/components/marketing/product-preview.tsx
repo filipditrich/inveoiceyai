@@ -1,5 +1,7 @@
 "use client";
 
+import type { FormEvent, KeyboardEvent } from "react";
+import { useRef, useState } from "react";
 import {
   CheckIcon,
   CornerDownLeftIcon,
@@ -7,8 +9,6 @@ import {
   ReceiptTextIcon,
   SparklesIcon,
 } from "lucide-react";
-import type { FormEvent, KeyboardEvent } from "react";
-import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import styles from "./marketing-motion.module.css";
@@ -133,20 +133,20 @@ export function ProductPreview() {
     <div
       className={`${styles.heroDemo} relative mx-auto w-full max-w-2xl lg:max-w-none`}
     >
-      <div className="from-brand/25 bg-radial absolute -inset-8 -z-10 rounded-[3rem] to-transparent blur-2xl" />
+      <div className="absolute -inset-8 -z-10 rounded-[3rem] bg-radial from-brand/25 to-transparent blur-2xl" />
       <div
         className={`${styles.productStage} relative min-h-[42rem] overflow-hidden rounded-[1.75rem] border p-3 shadow-2xl sm:min-h-[36rem] sm:p-5`}
       >
         <form
           onSubmit={updatePreview}
-          className={`${styles.promptCard} bg-background/92 relative z-20 rounded-2xl border p-4 shadow-xl backdrop-blur-xl`}
+          className={`${styles.promptCard} relative z-20 rounded-2xl border bg-background/92 p-4 shadow-xl backdrop-blur-xl`}
         >
           <div className="flex items-center justify-between gap-3">
-            <div className="text-primary flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.15em]">
+            <div className="flex items-center gap-2 text-[0.65rem] font-semibold tracking-[0.15em] text-primary uppercase">
               <SparklesIcon className="size-3.5" />
               {t("inputLabel")}
             </div>
-            <span className="text-muted-foreground hidden text-[0.6rem] sm:block">
+            <span className="hidden text-[0.6rem] text-muted-foreground sm:block">
               {t("enterHint")}
             </span>
           </div>
@@ -156,7 +156,7 @@ export function ProductPreview() {
             onChange={(event) => setPrompt(event.target.value)}
             onKeyDown={submitOnEnter}
             rows={2}
-            className="placeholder:text-muted-foreground/60 mt-3 w-full resize-none bg-transparent text-sm leading-6 outline-none"
+            className="mt-3 w-full resize-none bg-transparent text-sm leading-6 outline-none placeholder:text-muted-foreground/60"
             aria-label={t("ariaLabel")}
           />
           <div className="mt-3 flex flex-col gap-3 border-t pt-3 sm:flex-row sm:items-center sm:justify-between">
@@ -166,7 +166,7 @@ export function ProductPreview() {
                   key={example.label}
                   type="button"
                   onClick={() => chooseExample(example)}
-                  className="bg-muted/65 hover:border-primary/35 hover:text-primary rounded-full border border-transparent px-2.5 py-1 text-[0.62rem] font-medium transition-[color,border-color,background-color,transform] duration-200 hover:-translate-y-0.5"
+                  className="rounded-full border border-transparent bg-muted/65 px-2.5 py-1 text-[0.62rem] font-medium transition-[color,border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/35 hover:text-primary"
                 >
                   {example.label}
                 </button>
@@ -174,7 +174,7 @@ export function ProductPreview() {
             </div>
             <button
               type="submit"
-              className="bg-foreground text-background hover:bg-primary hover:text-primary-foreground group inline-flex shrink-0 items-center justify-center gap-2 rounded-full px-3.5 py-2 text-[0.68rem] font-medium transition-colors"
+              className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-foreground px-3.5 py-2 text-[0.68rem] font-medium text-background transition-colors hover:bg-primary hover:text-primary-foreground"
             >
               {t("updateButton")}
               <CornerDownLeftIcon className="size-3.5 transition-transform duration-200 group-hover:translate-y-0.5" />
@@ -190,21 +190,21 @@ export function ProductPreview() {
 
         <div
           key={revision}
-          className={`${styles.invoicePaper} ${styles.invoiceRefresh} bg-card absolute inset-x-5 bottom-[-3rem] top-[16.25rem] rounded-t-[1.4rem] border p-5 shadow-2xl sm:inset-x-10 sm:top-[15rem] sm:p-6`}
+          className={`${styles.invoicePaper} ${styles.invoiceRefresh} absolute inset-x-5 top-[16.25rem] bottom-[-3rem] rounded-t-[1.4rem] border bg-card p-5 shadow-2xl sm:inset-x-10 sm:top-[15rem] sm:p-6`}
         >
           <div className="flex items-start justify-between border-b pb-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="bg-foreground text-background grid size-8 place-items-center rounded-lg">
+                <span className="grid size-8 place-items-center rounded-lg bg-foreground text-background">
                   <ReceiptTextIcon className="size-4" strokeWidth={1.7} />
                 </span>
                 <span className="text-sm font-semibold">Invoicey</span>
               </div>
-              <p className="text-muted-foreground mt-4 text-[0.55rem] font-medium uppercase tracking-[0.18em]">
+              <p className="mt-4 text-[0.55rem] font-medium tracking-[0.18em] text-muted-foreground uppercase">
                 {t("issuer")}
               </p>
               <p className="mt-1 text-xs font-medium">Ditrich Labs</p>
-              <p className="text-muted-foreground mt-0.5 text-[0.62rem]">
+              <p className="mt-0.5 text-[0.62rem] text-muted-foreground">
                 {t("issuerCompanyId")}
               </p>
             </div>
@@ -212,7 +212,7 @@ export function ProductPreview() {
               <p className="text-xl font-semibold tracking-tight">
                 {t("invoice")}
               </p>
-              <p className="text-muted-foreground mt-1 font-mono text-[0.62rem]">
+              <p className="mt-1 font-mono text-[0.62rem] text-muted-foreground">
                 2026-0048
               </p>
               <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-1 text-[0.58rem] font-medium text-emerald-700 dark:text-emerald-300">
@@ -224,22 +224,22 @@ export function ProductPreview() {
 
           <div className="grid grid-cols-2 gap-5 border-b py-4">
             <div>
-              <p className="text-muted-foreground text-[0.55rem] font-medium uppercase tracking-[0.16em]">
+              <p className="text-[0.55rem] font-medium tracking-[0.16em] text-muted-foreground uppercase">
                 {t("customer")}
               </p>
               <p className="mt-1 text-xs font-medium">{invoice.customer}</p>
-              <p className="text-muted-foreground mt-0.5 text-[0.6rem]">
+              <p className="mt-0.5 text-[0.6rem] text-muted-foreground">
                 {t("aresVerified", { companyId: invoice.companyId })}
               </p>
             </div>
             <div>
-              <p className="text-muted-foreground text-[0.55rem] font-medium uppercase tracking-[0.16em]">
+              <p className="text-[0.55rem] font-medium tracking-[0.16em] text-muted-foreground uppercase">
                 {t("due")}
               </p>
               <p className="mt-1 text-xs font-medium">
                 {t("days", { count: invoice.dueDays })}
               </p>
-              <p className="text-muted-foreground mt-0.5 text-[0.6rem]">
+              <p className="mt-0.5 text-[0.6rem] text-muted-foreground">
                 {invoice.vatRate > 0
                   ? t("vat", { rate: String(invoice.vatRate) })
                   : t("withoutVat")}
@@ -248,7 +248,7 @@ export function ProductPreview() {
           </div>
 
           <div className="py-4">
-            <div className="text-muted-foreground grid grid-cols-[1fr_auto] gap-4 text-[0.55rem] font-medium uppercase tracking-[0.14em]">
+            <div className="grid grid-cols-[1fr_auto] gap-4 text-[0.55rem] font-medium tracking-[0.14em] text-muted-foreground uppercase">
               <span>{t("item")}</span>
               <span>{t("amount")}</span>
             </div>
@@ -262,18 +262,18 @@ export function ProductPreview() {
 
           <div className="flex items-end justify-between border-t pt-4">
             <div className="flex items-center gap-2.5">
-              <span className="bg-background grid size-11 place-items-center rounded-lg border">
+              <span className="grid size-11 place-items-center rounded-lg border bg-background">
                 <QrCodeIcon className="size-8" strokeWidth={1.5} />
               </span>
               <div className="hidden sm:block">
-                <p className="text-muted-foreground text-[0.55rem] font-medium uppercase tracking-[0.14em]">
+                <p className="text-[0.55rem] font-medium tracking-[0.14em] text-muted-foreground uppercase">
                   SPAYD
                 </p>
                 <p className="mt-0.5 text-[0.6rem]">{t("mobilePayment")}</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-muted-foreground text-[0.55rem] font-medium uppercase tracking-[0.16em]">
+              <p className="text-[0.55rem] font-medium tracking-[0.16em] text-muted-foreground uppercase">
                 {t("total")}
               </p>
               <p className="mt-0.5 text-xl font-semibold tracking-tight">
@@ -283,11 +283,11 @@ export function ProductPreview() {
           </div>
         </div>
 
-        <div className="absolute bottom-4 right-4 z-20 flex gap-2 sm:right-7">
+        <div className="absolute right-4 bottom-4 z-20 flex gap-2 sm:right-7">
           {["PDF", "ISDOC"].map((format) => (
             <span
               key={format}
-              className="bg-background/92 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[0.58rem] font-medium shadow-lg backdrop-blur"
+              className="inline-flex items-center gap-1.5 rounded-full border bg-background/92 px-3 py-1.5 font-mono text-[0.58rem] font-medium shadow-lg backdrop-blur"
             >
               {format} <CheckIcon className="size-3 text-emerald-600" />
             </span>

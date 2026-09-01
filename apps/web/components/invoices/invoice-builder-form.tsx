@@ -1,19 +1,26 @@
 "use client";
 
+import * as React from "react";
+import {
+  useFieldArray,
+  useForm,
+  type FieldErrors,
+  type FieldPath,
+} from "react-hook-form";
+import { createClientFromAres } from "@/actions/clients";
 import {
   getLastInvoiceSuggestionsAction,
   issueInvoice,
   saveInvoiceDraft,
 } from "@/actions/invoices";
-import { createClientFromAres } from "@/actions/clients";
 import {
   collectFormErrorMessages,
   Field,
   selectClassName,
 } from "@/components/invoices/field";
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
-import { LookPicker } from "@/components/invoices/look-picker";
 import { LastValueHint } from "@/components/invoices/last-value-hint";
+import { LookPicker } from "@/components/invoices/look-picker";
 import { lookupMessageFromInvalid } from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,13 +42,6 @@ import {
   type BuilderLineInput,
 } from "@/lib/build-invoice";
 import { formatMoney } from "@/lib/format";
-import type { ClientOption, IssuerOption } from "@/lib/invoice-party-types";
-import {
-  truncateHint,
-  type LastInvoiceSuggestions,
-} from "@/lib/last-invoice-suggestions";
-import type { AppLocale } from "@/i18n/config";
-import { cn } from "@/lib/utils";
 import {
   clearRecoveredInvoiceDraft,
   loadRecoveredInvoiceDraft,
@@ -50,20 +50,12 @@ import {
   recoveredInvoiceBuilderIssuerIsAvailable,
   saveRecoveredInvoiceDraft,
 } from "@/lib/invoice-draft-recovery";
-import { emitProductEvent } from "@/lib/product-analytics";
-import { nextInvoiceNumber } from "@invoicey/invoice-core/numbering";
-import type { Invoice } from "@invoicey/invoice-core/schema";
 import {
-  ACCENT_COLOR_HEX,
-  appearanceFromPicker,
-  canApplyLook,
-  findLookDocument,
-  looksForPicker,
-  resolvePresentLookRef,
-  type LegacyAccentColor,
-  type LookDocument,
-  type LookRef,
-} from "@invoicey/invoice-core/looks";
+  truncateHint,
+  type LastInvoiceSuggestions,
+} from "@/lib/last-invoice-suggestions";
+import { emitProductEvent } from "@/lib/product-analytics";
+import { cn } from "@/lib/utils";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import {
   BookOpenIcon,
@@ -83,16 +75,26 @@ import {
   Trash2Icon,
   UserPlusIcon,
 } from "lucide-react";
-import Link from "next/link";
-import * as React from "react";
-import {
-  useFieldArray,
-  useForm,
-  type FieldErrors,
-  type FieldPath,
-} from "react-hook-form";
-import { z } from "zod";
 import { useTranslations, useLocale } from "next-intl";
+import Link from "next/link";
+import { z } from "zod";
+
+import {
+  ACCENT_COLOR_HEX,
+  appearanceFromPicker,
+  canApplyLook,
+  findLookDocument,
+  looksForPicker,
+  resolvePresentLookRef,
+  type LegacyAccentColor,
+  type LookDocument,
+  type LookRef,
+} from "@invoicey/invoice-core/looks";
+import { nextInvoiceNumber } from "@invoicey/invoice-core/numbering";
+import type { Invoice } from "@invoicey/invoice-core/schema";
+
+import type { AppLocale } from "@/i18n/config";
+import type { ClientOption, IssuerOption } from "@/lib/invoice-party-types";
 
 const STANDARD_VAT_RATES = [0, 12, 21] as const;
 
@@ -168,16 +170,6 @@ const ACCENT_KEYS = [
   "violet",
 ] as const satisfies readonly LegacyAccentColor[];
 
-function accentKeyFromHex(
-  hex: string | undefined,
-): BuilderFormValues["accentKey"] {
-  if (!hex) return "default";
-  const match = ACCENT_KEYS.find(
-    (key) => ACCENT_COLOR_HEX[key].toLowerCase() === hex.toLowerCase(),
-  );
-  return match ?? "default";
-}
-
 function appearanceFromForm(
   values: Pick<
     BuilderFormValues,
@@ -237,7 +229,7 @@ function FormSection({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
             {icon ? (
-              <span className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg [&_svg]:size-4">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary [&_svg]:size-4">
                 {icon}
               </span>
             ) : null}
@@ -652,6 +644,7 @@ export function InvoiceBuilderForm({
     [issuerVatPayer, replace],
   );
 
+  /* oxlint-disable react-hooks/exhaustive-deps -- field-level deps; `watched` is a new object every render */
   const previewBuild = React.useMemo(() => {
     const issuer = issuers.find((i) => i.id === watched.issuerId)?.snapshot;
     const client = clientOptions.find(
@@ -729,6 +722,7 @@ export function InvoiceBuilderForm({
     watched.showNotesBlock,
     workspaceLooks,
   ]);
+  /* oxlint-enable react-hooks/exhaustive-deps */
 
   const previewKey = previewBuild.invoice
     ? JSON.stringify(previewBuild.invoice)
@@ -857,9 +851,10 @@ export function InvoiceBuilderForm({
       }
       setFormErrorList(msgs.length > 0 ? msgs : [t("formFallback")]);
       const firstKey = Object.keys(form.formState.errors)[0] as
-        FieldPath<BuilderFormValues> | undefined;
+        | FieldPath<BuilderFormValues>
+        | undefined;
       if (firstKey) {
-        void form.setFocus(firstKey);
+        form.setFocus(firstKey);
       }
       return;
     }
@@ -957,7 +952,7 @@ export function InvoiceBuilderForm({
 
   if (issuers.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         {t.rich("missingParties", {
           entities: () => (
             <a className="underline" href="/issuers/new">
@@ -1022,7 +1017,7 @@ export function InvoiceBuilderForm({
       >
         {alertMessages.length > 0 ? (
           <div
-            className="border-destructive/40 bg-destructive/10 text-destructive space-y-1 rounded-md border px-3 py-2 text-sm"
+            className="space-y-1 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
             role="alert"
           >
             <p className="font-medium">{t("formErrors")}</p>
@@ -1035,7 +1030,7 @@ export function InvoiceBuilderForm({
         ) : null}
         {mode === "create" && recoveredDraft ? (
           <div
-            className="bg-muted/50 flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm"
+            className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm"
             role="status"
           >
             <span>{t("recoveredDraft" as never)}</span>
@@ -1058,7 +1053,7 @@ export function InvoiceBuilderForm({
         {mode === "create" &&
         localDraftSaved &&
         savedLocalSnapshot === watchedSnapshot ? (
-          <p className="text-muted-foreground text-xs" role="status">
+          <p className="text-xs text-muted-foreground" role="status">
             {t("savedLocally" as never)}
           </p>
         ) : null}
@@ -1103,9 +1098,9 @@ export function InvoiceBuilderForm({
                 </select>
               </Field>
               {selectedIssuer ? (
-                <div className="bg-muted/30 rounded-md border px-3 py-2 text-xs">
+                <div className="rounded-md border bg-muted/30 px-3 py-2 text-xs">
                   <p className="font-medium">{selectedIssuer.snapshot.name}</p>
-                  <p className="text-muted-foreground mt-0.5">
+                  <p className="mt-0.5 text-muted-foreground">
                     {t("partyIdentifiers", {
                       ico: selectedIssuer.snapshot.ico ?? t("notSet"),
                       dic: selectedIssuer.snapshot.dic ?? t("notSet"),
@@ -1167,9 +1162,9 @@ export function InvoiceBuilderForm({
                 </select>
               </Field>
               {selectedClient ? (
-                <div className="bg-muted/30 rounded-md border px-3 py-2 text-xs">
+                <div className="rounded-md border bg-muted/30 px-3 py-2 text-xs">
                   <p className="font-medium">{selectedClient.snapshot.name}</p>
-                  <p className="text-muted-foreground mt-0.5">
+                  <p className="mt-0.5 text-muted-foreground">
                     {t("partyIdentifiers", {
                       ico: selectedClient.snapshot.ico ?? t("notSet"),
                       dic: selectedClient.snapshot.dic ?? t("notSet"),
@@ -1187,17 +1182,17 @@ export function InvoiceBuilderForm({
               </Button>
             </div>
 
-            <div className="bg-muted/20 space-y-3 rounded-lg border p-4 sm:col-span-2">
+            <div className="space-y-3 rounded-lg border bg-muted/20 p-4 sm:col-span-2">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
-                  <span className="bg-background flex size-8 shrink-0 items-center justify-center rounded-md border">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-background">
                     <SearchIcon className="size-4" />
                   </span>
                   <div>
                     <p className="text-sm font-medium">
                       {t("quickClientTitle")}
                     </p>
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-muted-foreground">
                       {t("quickClientDescription")}
                     </p>
                   </div>
@@ -1287,7 +1282,7 @@ export function InvoiceBuilderForm({
               description={t("numberPreviewDescription")}
               label={t("numberPreview")}
             >
-              <div className="border-input bg-muted/40 flex h-9 items-center rounded-md border px-3">
+              <div className="flex h-9 items-center rounded-md border border-input bg-muted/40 px-3">
                 <p className="text-sm font-medium tabular-nums">
                   {numberPreview}
                 </p>
@@ -1413,7 +1408,7 @@ export function InvoiceBuilderForm({
           />
           <div className="space-y-3 pt-2">
             <p className="text-sm font-medium">{t("appearanceTitle")}</p>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               {t("appearanceDescription")}
             </p>
             <div className="flex flex-wrap gap-2">
@@ -1436,7 +1431,7 @@ export function InvoiceBuilderForm({
                   className={cn(
                     "size-8 rounded-md border",
                     watched.accentKey === key
-                      ? "border-primary ring-primary/30 ring-2"
+                      ? "border-primary ring-2 ring-primary/30"
                       : "border-border",
                   )}
                   onClick={() => form.setValue("accentKey", key)}
@@ -1588,7 +1583,7 @@ export function InvoiceBuilderForm({
                   ) : null}
                 </select>
                 {issuerVatPayer ? (
-                  <label className="text-muted-foreground flex items-center gap-2 text-xs">
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
                     <input
                       checked={showAdvancedVat}
                       onChange={(ev) => {
@@ -1686,13 +1681,13 @@ export function InvoiceBuilderForm({
               ) : null}
             </div>
           ) : (
-            <div className="bg-muted/30 flex items-start gap-3 rounded-lg border p-4">
-              <span className="bg-background flex size-8 shrink-0 items-center justify-center rounded-md border">
+            <div className="flex items-start gap-3 rounded-lg border bg-muted/30 p-4">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-background">
                 <PercentIcon className="size-4" />
               </span>
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("nonVatPayerTitle")}</p>
-                <p className="text-muted-foreground text-xs">
+                <p className="text-xs text-muted-foreground">
                   {t("nonVatPayerDescription")}
                 </p>
               </div>
@@ -1790,7 +1785,7 @@ export function InvoiceBuilderForm({
           title={t("itemsTitle")}
         >
           {fieldError(errors, "items") ? (
-            <p className="text-destructive mb-3 text-xs">
+            <p className="mb-3 text-xs text-destructive">
               {fieldError(errors, "items")}
             </p>
           ) : null}
@@ -1822,7 +1817,7 @@ export function InvoiceBuilderForm({
               return (
                 <div
                   className={cn(
-                    "bg-muted/20 space-y-4 rounded-lg border p-4",
+                    "space-y-4 rounded-lg border bg-muted/20 p-4",
                     (descErr || qtyErr) && "border-destructive/50",
                   )}
                   key={field.id}
@@ -2101,7 +2096,7 @@ export function InvoiceBuilderForm({
                       </Field>
                     ) : null}
                   </div>
-                  <p className="text-muted-foreground text-right text-sm tabular-nums">
+                  <p className="text-right text-sm text-muted-foreground tabular-nums">
                     {t("itemLineTotal")}:{" "}
                     {formatMoney(lineTotal, watched.currency, locale)}
                   </p>
@@ -2139,7 +2134,7 @@ export function InvoiceBuilderForm({
           </Field>
         </FormSection>
 
-        <div className="bg-background/95 sticky bottom-0 z-20 -mx-4 flex flex-wrap gap-2 border-t px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
+        <div className="sticky bottom-0 z-20 -mx-4 flex flex-wrap gap-2 border-t bg-background/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
           <Button
             disabled={submitting !== null}
             loading={submitting === "draft"}
@@ -2159,7 +2154,7 @@ export function InvoiceBuilderForm({
             <FileCheck2Icon />
             {submitting === "issue" ? t("issuing") : t("issue")}
           </Button>
-          <span className="text-muted-foreground self-center text-xs">
+          <span className="self-center text-xs text-muted-foreground">
             {mode === "edit" ? t("modeEdit") : t("modeCreate")}
           </span>
         </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import type { MonthPoint } from "@/lib/dashboard-metrics";
 import {
   Card,
   CardContent,
@@ -16,6 +15,8 @@ import {
 } from "@/components/ui/chart";
 import { useFormatter, useTranslations } from "next-intl";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+
+import type { MonthPoint } from "@/lib/dashboard-metrics";
 
 export function DashboardMonthlyChart({ data }: { data: MonthPoint[] }) {
   const t = useTranslations("Dashboard.chart");

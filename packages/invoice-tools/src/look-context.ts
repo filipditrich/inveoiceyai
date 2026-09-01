@@ -1,3 +1,5 @@
+import { eq } from "drizzle-orm";
+
 import {
   getWorkspaceEntitlements,
   listPublishedCommunityLookRows,
@@ -19,7 +21,6 @@ import {
   type LookRef,
 } from "@invoicey/invoice-core/looks";
 import type { Invoice } from "@invoicey/invoice-core/schema";
-import { eq } from "drizzle-orm";
 
 import { resolveWorkspaceId } from "./workspace-context";
 

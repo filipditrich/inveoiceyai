@@ -1,8 +1,8 @@
 import { IssuerCreateForm } from "@/components/issuers/issuer-create-form";
 import { PageHeader } from "@/components/layout/page-header";
 import { requireWorkspace } from "@/lib/auth/session";
-import { getTranslations } from "next-intl/server";
 import { BriefcaseBusinessIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 type Search = Promise<{ invalid?: string }>;
 

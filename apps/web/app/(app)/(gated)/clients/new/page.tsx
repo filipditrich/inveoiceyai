@@ -1,10 +1,10 @@
-import { redirect } from "next/navigation";
-import { clientsAreManaged } from "@/lib/entitlements/managed-clients";
-import { requireWorkspace } from "@/lib/auth/session";
 import { ClientEditorForm } from "@/components/clients/client-editor-form";
 import { PageHeader } from "@/components/layout/page-header";
-import { getTranslations } from "next-intl/server";
+import { requireWorkspace } from "@/lib/auth/session";
+import { clientsAreManaged } from "@/lib/entitlements/managed-clients";
 import { ContactRoundIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
 type Search = Promise<{ invalid?: string }>;
 

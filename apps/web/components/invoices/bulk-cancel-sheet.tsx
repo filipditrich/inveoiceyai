@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { bulkCancelInvoice } from "@/actions/invoices";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +14,6 @@ import {
 import { SubmitButton } from "@/components/ui/submit-button";
 import { XCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import * as React from "react";
 
 export function BulkCancelSheet({
   ids,
@@ -48,7 +48,7 @@ export function BulkCancelSheet({
           {ids.map((id) => (
             <input key={id} name="ids" type="hidden" value={id} />
           ))}
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {t("bulkCancelPermanent")}
           </p>
           <SubmitButton

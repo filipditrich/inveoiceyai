@@ -1,10 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useFileDrop } from "@/components/upload/use-file-drop";
-import { useTypedUploader } from "@/components/upload/use-typed-uploader";
 import { formatBytes } from "@/components/upload/upload-helpers";
 import { UploadProgress } from "@/components/upload/upload-progress";
+import { useFileDrop } from "@/components/upload/use-file-drop";
+import { useTypedUploader } from "@/components/upload/use-typed-uploader";
 import { cn } from "@/lib/utils";
 import { CloudUploadIcon, ImageIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -13,7 +13,10 @@ const IMAGE_ACCEPT = "image/png,image/jpeg,.png,.jpg,.jpeg";
 const IMAGE_MAX_SIZE = 1024 * 1024;
 
 type ImageEndpoint =
-  "issuerLogo" | "issuerStamp" | "issuerSignature" | "workspaceLogo";
+  | "issuerLogo"
+  | "issuerStamp"
+  | "issuerSignature"
+  | "workspaceLogo";
 
 export function ImageUploadField({
   endpoint,
@@ -53,7 +56,7 @@ export function ImageUploadField({
     return (
       <div
         className={cn(
-          "group/preview bg-muted/30 relative overflow-hidden rounded-xl border transition-colors",
+          "group/preview relative overflow-hidden rounded-xl border bg-muted/30 transition-colors",
           drop.isDragging && "border-primary bg-primary/5",
           busy && "pointer-events-none",
         )}
@@ -80,7 +83,7 @@ export function ImageUploadField({
         >
           <XIcon />
         </Button>
-        <div className="bg-linear-to-t absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 from-black/50 to-transparent p-3 opacity-0 transition-opacity group-focus-within/preview:opacity-100 group-hover/preview:opacity-100">
+        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-linear-to-t from-black/50 to-transparent p-3 opacity-0 transition-opacity group-focus-within/preview:opacity-100 group-hover/preview:opacity-100">
           <Button
             onClick={drop.open}
             size="sm"
@@ -92,7 +95,7 @@ export function ImageUploadField({
           <p className="text-xs text-white/80">{t("replaceHint")}</p>
         </div>
         {isUploading ? (
-          <div className="bg-background/70 absolute inset-0 flex flex-col items-center justify-center gap-2 px-8">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/70 px-8">
             <p className="text-sm font-medium">{t("uploading")}</p>
             <UploadProgress value={progress} />
           </div>
@@ -124,25 +127,25 @@ export function ImageUploadField({
       <input {...drop.inputProps} />
       <div
         className={cn(
-          "border-border mx-auto mb-3 flex size-8 items-center justify-center rounded-full border",
+          "mx-auto mb-3 flex size-8 items-center justify-center rounded-full border border-border",
           drop.isDragging && "border-primary/40 bg-primary/10",
         )}
       >
         {drop.isDragging ? (
-          <ImageIcon className="text-primary size-4" />
+          <ImageIcon className="size-4 text-primary" />
         ) : (
           <CloudUploadIcon className="size-4" />
         )}
       </div>
-      <p className="text-foreground mb-0.5 text-sm font-semibold">
+      <p className="mb-0.5 text-sm font-semibold text-foreground">
         {t("dropTitle")}
       </p>
-      <p className="text-muted-foreground mb-4 text-xs">
+      <p className="mb-4 text-xs text-muted-foreground">
         {t("hintImage", { maxSize: formatBytes(IMAGE_MAX_SIZE) })}
       </p>
       {isUploading ? (
         <div className="mx-auto max-w-xs space-y-2">
-          <p className="text-muted-foreground text-xs">{t("uploading")}</p>
+          <p className="text-xs text-muted-foreground">{t("uploading")}</p>
           <UploadProgress value={progress} />
         </div>
       ) : (

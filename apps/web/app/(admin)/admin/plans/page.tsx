@@ -1,8 +1,3 @@
-import { LayersIcon } from "lucide-react";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-
 import {
   AdminMiniTable,
   AdminSection,
@@ -10,8 +5,13 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { adminListPlans } from "@/lib/admin/plans";
-import { requirePlatformAdmin } from "@/lib/auth/session";
 import { formatTokenCount } from "@/lib/ai/format-tokens";
+import { requirePlatformAdmin } from "@/lib/auth/session";
+import { LayersIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 

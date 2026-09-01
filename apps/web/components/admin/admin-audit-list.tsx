@@ -1,11 +1,11 @@
-import Link from "next/link";
-import { getFormatter, getTranslations } from "next-intl/server";
-
 import {
   AdminEmpty,
   AdminMiniTable,
 } from "@/components/admin/admin-detail-kit";
 import { Badge } from "@/components/ui/badge";
+import { getFormatter, getTranslations } from "next-intl/server";
+import Link from "next/link";
+
 import type { AdminAuditRow } from "@/lib/admin/detail";
 
 /** Metadata is free-form jsonb; render the few fields worth reading inline. */
@@ -76,7 +76,7 @@ export async function AdminAuditList({
           );
         }
         cells.push(
-          <span key="meta" className="text-muted-foreground text-xs">
+          <span key="meta" className="text-xs text-muted-foreground">
             {summarise(event.metadata) || "—"}
           </span>,
           <span key="at" className="whitespace-nowrap tabular-nums">

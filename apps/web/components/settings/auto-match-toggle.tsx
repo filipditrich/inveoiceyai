@@ -1,10 +1,9 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useTransition } from "react";
-
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 type AutoMatchToggleProps = {
   connectionId: string;
@@ -46,7 +45,7 @@ export function AutoMatchToggle({
           });
         }}
       />
-      <span className="text-muted-foreground w-7 text-sm font-medium tabular-nums">
+      <span className="w-7 text-sm font-medium text-muted-foreground tabular-nums">
         {checked ? t("on") : t("off")}
       </span>
     </label>

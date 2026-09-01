@@ -15,7 +15,7 @@ export function WorkspaceMark({
       <img
         alt=""
         className={cn(
-          "bg-background size-8 shrink-0 rounded-md object-cover",
+          "size-8 shrink-0 rounded-md bg-background object-cover",
           className,
         )}
         src={logo}
@@ -26,7 +26,7 @@ export function WorkspaceMark({
   return (
     <div
       className={cn(
-        "bg-brand/15 text-brand flex size-8 shrink-0 items-center justify-center rounded-md text-xs font-semibold uppercase",
+        "flex size-8 shrink-0 items-center justify-center rounded-md bg-brand/15 text-xs font-semibold text-brand uppercase",
         className,
       )}
     >

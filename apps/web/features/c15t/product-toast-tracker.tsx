@@ -1,16 +1,16 @@
 "use client";
 
+import { useEffect } from "react";
+import {
+  clearRecoveredInvoiceDraft,
+  consumeNewInvoiceRecoverySubmission,
+} from "@/lib/invoice-draft-recovery";
 import {
   emitProductEvent,
   productEventProperties,
   productToastTransitionFromUrl,
   type ProductAnalyticsProperties,
 } from "@/lib/product-analytics";
-import {
-  clearRecoveredInvoiceDraft,
-  consumeNewInvoiceRecoverySubmission,
-} from "@/lib/invoice-draft-recovery";
-import { useEffect } from "react";
 
 /** Tracks a server-confirmed redirect outcome once while it remains in the URL. */
 export function ProductToastTracker({

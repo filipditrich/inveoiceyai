@@ -3,13 +3,14 @@ import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { requireWorkspace } from "@/lib/auth/session";
 import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { loadWorkspaceLookDocuments } from "@/lib/load-workspace-look";
-import { listCommunityLookRowsForPublisher } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
-import { latestLooksById } from "@invoicey/invoice-core/looks";
 import { Rows3Icon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+
+import { listCommunityLookRowsForPublisher } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
+import { latestLooksById } from "@invoicey/invoice-core/looks";
 
 type Params = Promise<{ lookId: string }>;
 
@@ -47,7 +48,7 @@ export default async function WorkspaceLookEditorPage({
         icon={<Rows3Icon />}
         title={current.name}
       />
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         <Link
           className="underline-offset-4 hover:underline"
           href="/settings/workspace/looks"

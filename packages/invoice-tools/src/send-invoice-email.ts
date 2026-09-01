@@ -1,3 +1,5 @@
+import { and, desc, eq } from "drizzle-orm";
+
 import {
   emailMessages,
   emailSuppressions,
@@ -22,7 +24,6 @@ import {
   toInvoiceIntlLocale,
   type Invoice,
 } from "@invoicey/invoice-core";
-import { and, desc, eq } from "drizzle-orm";
 
 import { isValidEmailAddress, sendTransactionalEmail } from "./email-transport";
 import {

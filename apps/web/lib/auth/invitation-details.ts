@@ -1,8 +1,8 @@
 import "server-only";
+import { eq } from "drizzle-orm";
 
 import { invitation, user, workspaces } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { eq } from "drizzle-orm";
 
 import {
   resolveInvitationViewState,

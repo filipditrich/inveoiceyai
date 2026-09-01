@@ -1,4 +1,6 @@
 import "server-only";
+import { recordSecurityAuditEvent } from "@/lib/auth/security-audit";
+import { and, eq } from "drizzle-orm";
 
 import {
   ensureAiTokenBalance,
@@ -9,12 +11,10 @@ import {
   workspaces,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { and, eq, sql } from "drizzle-orm";
-
-import { recordSecurityAuditEvent } from "@/lib/auth/security-audit";
 
 export type AdminMutationResult =
-  { ok: true } | { ok: false; error: AdminMutationError };
+  | { ok: true }
+  | { ok: false; error: AdminMutationError };
 
 export type AdminMutationError =
   | "not_found"

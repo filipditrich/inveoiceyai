@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { deleteClient } from "@/actions/clients";
 import { AppDataGrid } from "@/components/data-grid/app-data-grid";
 import {
@@ -7,7 +8,6 @@ import {
   filtersFromRecord,
   recordFromFilters,
 } from "@/components/data-grid/app-filters";
-import type { Filter, FilterFieldConfig } from "@/components/reui/filters";
 import {
   dataGridFeatures,
   type DataGridFeatures,
@@ -16,7 +16,6 @@ import { DataGridColumnHeader } from "@/components/reui/data-grid/data-grid-colu
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
-import type { ClientSnapshot } from "@invoicey/invoice-core/schema";
 import {
   useTable,
   type ColumnDef,
@@ -26,9 +25,12 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import { SearchIcon } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import Link from "next/link";
+
+import type { ClientSnapshot } from "@invoicey/invoice-core/schema";
+
+import type { Filter, FilterFieldConfig } from "@/components/reui/filters";
 
 export type ClientTableItem = {
   rowId: string;

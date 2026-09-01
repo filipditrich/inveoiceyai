@@ -1,15 +1,15 @@
 "use client";
 
-import { track } from "@vercel/analytics";
-import { Analytics } from "@vercel/analytics/next";
-import { useConsentManager } from "@c15t/react";
+import { useEffect } from "react";
 import {
   productAnalyticsBrowserEventName,
   trackProductEvent,
   type ProductEventName,
   type ProductAnalyticsProperties,
 } from "@/lib/product-analytics";
-import { useEffect } from "react";
+import { useConsentManager } from "@c15t/react";
+import { track } from "@vercel/analytics";
+import { Analytics } from "@vercel/analytics/next";
 
 /** Do not request the analytics script until measurement consent is active. */
 export function ConsentAwareAnalytics() {

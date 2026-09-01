@@ -1,26 +1,27 @@
 import { InvoiceBuilderForm } from "@/components/invoices/invoice-builder-form";
-import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 import { PageHeader } from "@/components/layout/page-header";
-import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
-import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
+import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 import { requireWorkspace } from "@/lib/auth/session";
 import { requireEntitlements } from "@/lib/entitlements/entitlements";
+import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
+import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import {
   loadLookCatalog,
   loadWorkspaceDefaultLook,
 } from "@/lib/load-workspace-look";
-import { InvoiceSchema } from "@invoicey/invoice-core/schema";
+import { and, eq } from "drizzle-orm";
+import { FilePenLineIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { notFound, redirect } from "next/navigation";
+
+import { invoices } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import {
   ACCENT_COLOR_HEX,
   findLookDocument,
   type LegacyAccentColor,
 } from "@invoicey/invoice-core/looks";
-import { invoices } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
-import { and, eq } from "drizzle-orm";
-import { getTranslations } from "next-intl/server";
-import { notFound, redirect } from "next/navigation";
-import { FilePenLineIcon } from "lucide-react";
+import { InvoiceSchema } from "@invoicey/invoice-core/schema";
 
 type Params = Promise<{ id: string }>;
 type Search = Promise<{

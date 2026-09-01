@@ -1,12 +1,12 @@
 "use client";
 
-import { ConsentManagerProvider } from "@c15t/react";
-import { useLocale, useTranslations } from "next-intl";
 import type { PropsWithChildren } from "react";
-import { serialize } from "cookie";
-
 import { C15T_CONSENT_STORAGE_KEY } from "@/features/c15t/constants";
 import { invoiceyC15tMessages } from "@/features/c15t/messages";
+import { ConsentManagerProvider } from "@c15t/react";
+import { serialize } from "cookie";
+import { useLocale, useTranslations } from "next-intl";
+
 import type { AppLocale } from "@/i18n/config";
 
 function persistConsentCookie(consents: Record<string, boolean>) {

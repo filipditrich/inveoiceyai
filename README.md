@@ -150,7 +150,6 @@ Full guide: [`docs/specs/mcp.md`](docs/specs/mcp.md) · product: [`/docs/integra
 │   ├── ares/                # ARES REST client
 │   ├── db/                  # Drizzle + Neon (+ checked-in SQL migrations)
 │   ├── env/                 # Env schema helpers
-│   ├── config-eslint/
 │   └── config-ts/
 ├── docs/                    # PRD, architecture, domain, ADRs, specs (internal)
 ├── apps/web/content/docs/   # Public product docs (Fumadocs → /docs)

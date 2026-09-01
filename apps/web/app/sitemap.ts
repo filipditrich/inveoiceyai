@@ -1,7 +1,7 @@
-import type { MetadataRoute } from "next";
-
 import { env } from "@/env.config.server";
 import { source } from "@/lib/docs-source";
+
+import type { MetadataRoute } from "next";
 
 const PUBLIC_ROUTES = ["", "/privacy", "/terms", "/cookies"] as const;
 

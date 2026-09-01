@@ -1,10 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth/client";
 import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 type Provider = "google" | "github";
 
@@ -69,7 +69,7 @@ export function SignInForm({
         </Button>
       )}
       {error && (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-sm text-destructive">
           {t("failed")} ({error})
         </p>
       )}

@@ -1,9 +1,6 @@
 "use client";
 
-import { ExternalLinkIcon, Loader2Icon } from "lucide-react";
-import { useMessages, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
-
 import {
   connectMoneta,
   discoverMonetaAccountsAction,
@@ -12,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { messageLookup } from "@/lib/i18n-lookup";
+import { ExternalLinkIcon, Loader2Icon } from "lucide-react";
+import { useMessages, useTranslations } from "next-intl";
 
 type IssuerOption = {
   id: string;
@@ -48,14 +47,14 @@ export function MonetaConnectForm({
 
   if (!encryptionReady) {
     return (
-      <p className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-3 text-sm">
+      <p className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
         {t("encryptionMissing")}
       </p>
     );
   }
 
   if (issuers.length === 0) {
-    return <p className="text-muted-foreground text-sm">{t("needIssuer")}</p>;
+    return <p className="text-sm text-muted-foreground">{t("needIssuer")}</p>;
   }
 
   return (
@@ -66,7 +65,7 @@ export function MonetaConnectForm({
           id="moneta-issuerId"
           name="issuerId"
           required
-          className="border-input bg-background h-9 w-full rounded-lg border px-3 text-sm"
+          className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
           value={issuerId}
           onChange={(event) => setIssuerId(event.target.value)}
           disabled={!canManage || pending}
@@ -98,9 +97,9 @@ export function MonetaConnectForm({
           }}
           disabled={!canManage || pending}
         />
-        <p className="text-muted-foreground text-xs">{t("moneta.tokenHelp")}</p>
+        <p className="text-xs text-muted-foreground">{t("moneta.tokenHelp")}</p>
         <a
-          className="text-brand inline-flex items-center gap-1 text-xs font-medium hover:underline"
+          className="inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
           href="https://www.moneta.cz/zivnostnici-a-firmy/api"
           rel="noreferrer"
           target="_blank"
@@ -115,7 +114,7 @@ export function MonetaConnectForm({
           <Label htmlFor="moneta-account">{t("moneta.accountLabel")}</Label>
           <select
             id="moneta-account"
-            className="border-input bg-background h-9 w-full rounded-lg border px-3 text-sm"
+            className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
             value={providerAccountId}
             onChange={(event) => setProviderAccountId(event.target.value)}
             disabled={!canManage || pending}
@@ -136,7 +135,7 @@ export function MonetaConnectForm({
       ) : null}
 
       {error ? (
-        <p className="text-destructive text-sm">
+        <p className="text-sm text-destructive">
           {messageLookup(
             messages.Settings.bankConnections.errors,
             error,
@@ -195,9 +194,9 @@ export function MonetaConnectForm({
         </form>
       </div>
       {!canManage ? (
-        <p className="text-muted-foreground text-xs">{t("adminOnly")}</p>
+        <p className="text-xs text-muted-foreground">{t("adminOnly")}</p>
       ) : (
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {t("moneta.discoverHint")}
         </p>
       )}

@@ -1,12 +1,13 @@
-import type { OurFileRouter } from "@/app/api/uploadthing/core";
+import { useState } from "react";
 import {
   mapUploadedFiles,
   type UploadedFile,
 } from "@/components/upload/upload-helpers";
 import { useUploadThing } from "@/lib/uploadthing";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 import { toast } from "sonner";
+
+import type { OurFileRouter } from "@/app/api/uploadthing/core";
 
 export function useTypedUploader<TEndpoint extends keyof OurFileRouter>(
   endpoint: TEndpoint,

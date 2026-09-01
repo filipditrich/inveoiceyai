@@ -1,9 +1,9 @@
-import { Text } from "@react-email/components";
 import * as React from "react";
+import { Text } from "@react-email/components";
 
-import { invoiceEmailCopy, type EmailLocale } from "../copy";
 import { EmailShell } from "../components/email-shell";
 import { InvoiceSummary } from "../components/invoice-summary";
+import { invoiceEmailCopy, type EmailLocale } from "../copy";
 
 export type PaymentReceivedEmailProps = {
   number: string;

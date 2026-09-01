@@ -1,9 +1,10 @@
+import { randomUUID } from "node:crypto";
 /**
  * ISDOC 6.0.2 → InvoiceSchema mapper (inverse of render-isdoc).
  */
 import { convert } from "xmlbuilder2";
-import { randomUUID } from "node:crypto";
 
+import { czechAccountToIban } from "../bank/czech-iban";
 import type {
   Invoice,
   InvoiceCurrency,
@@ -15,7 +16,6 @@ import {
   InvoiceLanguageSchema,
   InvoiceSchema,
 } from "../schema";
-import { czechAccountToIban } from "../bank/czech-iban";
 import { ISDOC_XML_NAMESPACE } from "./render-isdoc";
 
 export type ParseIsdocOptions = {
@@ -580,7 +580,10 @@ export function parseIssuerFromIsdoc(xml: string): ParsedIssuerFromIsdoc {
 }
 
 export type IncomingDocType =
-  "invoice" | "credit_note" | "proforma" | "advance";
+  | "invoice"
+  | "credit_note"
+  | "proforma"
+  | "advance";
 
 export type IncomingInvoiceLine = {
   position: number;

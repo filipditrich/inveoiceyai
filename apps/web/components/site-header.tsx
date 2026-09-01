@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import { CommandPalette } from "@/components/command-palette";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
@@ -15,7 +16,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Fragment } from "react";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -90,15 +90,15 @@ export function SiteHeader() {
   const lastIndex = crumbs.length - 1;
 
   return (
-    <header className="bg-background/80 sticky top-0 z-50 flex w-full shrink-0 border-b backdrop-blur-md">
-      <div className="h-(--header-height) group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex w-full items-center gap-2 px-4 transition-[height] duration-200 ease-linear">
+    <header className="sticky top-0 z-50 flex w-full shrink-0 border-b bg-background/80 backdrop-blur-md">
+      <div className="flex h-(--header-height) w-full items-center gap-2 px-4 transition-[height] duration-200 ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <SidebarTrigger
           aria-label={t("a11y.toggleSidebar")}
           className="-ml-1 size-10 sm:size-7"
           title="⌘ / Ctrl+B"
         />
         <Separator
-          className="data-vertical:h-4 data-vertical:self-center mr-2"
+          className="mr-2 data-vertical:h-4 data-vertical:self-center"
           orientation="vertical"
         />
         {/* Breadcrumbs do not fit a phone; the current page label keeps the

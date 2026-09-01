@@ -1,7 +1,6 @@
 "use client";
 
 import type { PropsWithChildren } from "react";
-
 import { NavigationProgressProvider } from "@/components/navigation/navigation-progress";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";

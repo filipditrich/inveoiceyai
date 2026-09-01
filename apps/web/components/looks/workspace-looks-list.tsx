@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  latestLooksById,
-  lookSlugFromName,
-  type LookDocument,
-} from "@invoicey/invoice-core/looks";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
-
 import {
   createWorkspaceLookAction,
   deleteWorkspaceLookAction,
@@ -20,6 +10,16 @@ import { LookLayoutThumb } from "@/components/looks/look-layout-thumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+import {
+  latestLooksById,
+  lookSlugFromName,
+  type LookDocument,
+} from "@invoicey/invoice-core/looks";
 
 export function WorkspaceLooksList({
   looks,
@@ -76,7 +76,7 @@ export function WorkspaceLooksList({
         <div className="grid gap-3 rounded-lg border p-4 sm:grid-cols-2">
           <div className="space-y-1 sm:col-span-2">
             <p className="text-sm font-medium">{t("createTitle")}</p>
-            <p className="text-muted-foreground text-xs">{t("createHint")}</p>
+            <p className="text-xs text-muted-foreground">{t("createHint")}</p>
           </div>
           <div className="space-y-1">
             <Label htmlFor="new-look-name">{t("name")}</Label>
@@ -100,7 +100,7 @@ export function WorkspaceLooksList({
               }}
               value={slug}
             />
-            <p className="text-muted-foreground text-xs">{t("slugHint")}</p>
+            <p className="text-xs text-muted-foreground">{t("slugHint")}</p>
           </div>
           <div className="space-y-1">
             <Label htmlFor="new-look-source">{t("source")}</Label>
@@ -127,14 +127,14 @@ export function WorkspaceLooksList({
           </div>
         </div>
       ) : !entitled ? (
-        <p className="text-muted-foreground text-sm">{t("lockedHint")}</p>
+        <p className="text-sm text-muted-foreground">{t("lockedHint")}</p>
       ) : (
-        <p className="text-muted-foreground text-sm">{t("memberHint")}</p>
+        <p className="text-sm text-muted-foreground">{t("memberHint")}</p>
       )}
       {latest.length === 0 ? (
         <div className="rounded-lg border border-dashed p-6 text-center">
           <p className="text-sm font-medium">{t("emptyTitle")}</p>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="mt-1 text-sm text-muted-foreground">
             {t("emptyDescription")}
           </p>
         </div>
@@ -152,7 +152,7 @@ export function WorkspaceLooksList({
               />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium">{look.name}</p>
-                <p className="text-muted-foreground text-xs tabular-nums">
+                <p className="text-xs text-muted-foreground tabular-nums">
                   {look.id} · {look.version}
                   {publishedLookIds.includes(look.id)
                     ? ` · ${t("publishedBadge")}`

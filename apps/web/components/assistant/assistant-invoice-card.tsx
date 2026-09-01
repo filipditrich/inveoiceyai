@@ -1,10 +1,7 @@
 "use client";
 
+import { useState } from "react";
 import { copyFor } from "@/agent/lib/invoice-card-i18n";
-import type {
-  InvoiceCardModel,
-  InvoiceCardState,
-} from "@/agent/lib/invoice-card-model";
 import {
   CURRENCY_OPTIONS,
   DUE_DATE_PRESETS,
@@ -30,8 +27,12 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useState } from "react";
 import { toast } from "sonner";
+
+import type {
+  InvoiceCardModel,
+  InvoiceCardState,
+} from "@/agent/lib/invoice-card-model";
 
 type ActionId = "issue" | "mark_paid" | "send_email" | "discard" | "change";
 
@@ -100,7 +101,7 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
   if (discarded) {
     return (
       <CardShell>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {copy.text.discarded} · {discarded}
         </p>
       </CardShell>
@@ -114,7 +115,7 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
       <header className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{model.title}</p>
-          <p className="text-muted-foreground truncate text-xs">
+          <p className="truncate text-xs text-muted-foreground">
             {model.subtitle}
           </p>
         </div>
@@ -129,13 +130,13 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
             : field.value;
           return (
             <div className="min-w-0" key={field.label}>
-              <dt className="text-muted-foreground text-[0.7rem] uppercase tracking-wide">
+              <dt className="text-[0.7rem] tracking-wide text-muted-foreground uppercase">
                 {field.label}
               </dt>
               <dd className="truncate text-sm" title={value}>
                 {value}
                 {assumed ? (
-                  <span className="text-muted-foreground ml-1 text-[0.7rem] italic">
+                  <span className="ml-1 text-[0.7rem] text-muted-foreground italic">
                     {copy.text.assumedTag}
                   </span>
                 ) : null}
@@ -150,7 +151,7 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
       <Notices model={model} />
 
       {note ? (
-        <p className="text-muted-foreground border-t pt-2 text-xs">{note}</p>
+        <p className="border-t pt-2 text-xs text-muted-foreground">{note}</p>
       ) : null}
 
       <div className="flex flex-wrap gap-2 border-t pt-3">
@@ -208,7 +209,7 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
 
         {isDraft && invoiceId ? (
           <Button
-            className="text-destructive hover:text-destructive ml-auto"
+            className="ml-auto text-destructive hover:text-destructive"
             disabled={pending !== null}
             onClick={() => void run("discard")}
             size="sm"
@@ -233,7 +234,7 @@ export function AssistantInvoiceCard({ card }: { card: InvoiceCardModel }) {
 
 function CardShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-card shadow-xs flex flex-col gap-3 rounded-xl border p-3">
+    <div className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-xs">
       {children}
     </div>
   );
@@ -336,8 +337,8 @@ function ChangeMenu({
 function Lines({ text }: { text: string }) {
   const [heading, ...rows] = text.split("\n");
   return (
-    <div className="bg-muted/40 rounded-lg p-2">
-      <p className="text-muted-foreground mb-1 text-[0.7rem] uppercase tracking-wide">
+    <div className="rounded-lg bg-muted/40 p-2">
+      <p className="mb-1 text-[0.7rem] tracking-wide text-muted-foreground uppercase">
         {stripMarks(heading ?? "")}
       </p>
       <ul className="space-y-0.5 text-xs">
@@ -366,7 +367,7 @@ function Notices({ model }: { model: InvoiceCardModel }) {
   return (
     <div className="flex flex-col gap-2 border-t pt-2">
       {suspects.length > 0 ? (
-        <div className="text-destructive flex gap-2 text-xs">
+        <div className="flex gap-2 text-xs text-destructive">
           <TriangleAlertIcon className="mt-0.5 size-3.5 shrink-0" />
           <div>
             <p className="font-medium">
@@ -386,7 +387,7 @@ function Notices({ model }: { model: InvoiceCardModel }) {
       ) : null}
 
       {defaults.length > 0 ? (
-        <div className="text-muted-foreground flex gap-2 text-xs">
+        <div className="flex gap-2 text-xs text-muted-foreground">
           <AlertTriangleIcon className="mt-0.5 size-3.5 shrink-0" />
           <div>
             <p className="font-medium">

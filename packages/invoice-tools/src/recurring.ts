@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { calcTotals } from "@invoicey/invoice-core";
 import {
   InvoiceSchema,
@@ -5,7 +7,6 @@ import {
   type Invoice,
   type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
-import { z } from "zod";
 
 export const RecurringCadenceSchema = z.enum([
   "weekly",

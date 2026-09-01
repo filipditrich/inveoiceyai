@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { setLocale } from "@/actions/locale";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,12 +11,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { AppLocale } from "@/i18n/config";
 import { SUPPORTED_LOCALES } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon, LanguagesIcon, LoaderCircleIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+
+import type { AppLocale } from "@/i18n/config";
 
 type LocaleSwitcherProps = {
   readonly align?: "start" | "center" | "end";
@@ -70,12 +71,12 @@ export function LocaleSwitcher({
         {compact ? null : (
           <>
             <span className="truncate">{currentLabel}</span>
-            <ChevronDownIcon className="text-muted-foreground ml-auto size-3.5" />
+            <ChevronDownIcon className="ml-auto size-3.5 text-muted-foreground" />
           </>
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} className="w-44" sideOffset={6}>
-        <div className="text-muted-foreground px-1.5 py-1 text-xs font-medium">
+        <div className="px-1.5 py-1 text-xs font-medium text-muted-foreground">
           {t("label")}
         </div>
         <DropdownMenuSeparator />
@@ -84,7 +85,7 @@ export function LocaleSwitcher({
             <DropdownMenuRadioItem key={code} value={code}>
               <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
                 <span>{t(code)}</span>
-                <span className="text-muted-foreground text-[0.65rem] font-medium uppercase tracking-wider">
+                <span className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
                   {code}
                 </span>
               </span>

@@ -1,14 +1,7 @@
+import React from "react";
 /** @jsxImportSource react */
 import { Document, Image, Link, Page, Text, View } from "@react-pdf/renderer";
-import React from "react";
 
-import type {
-  Invoice,
-  InvoiceCurrency,
-  InvoiceItem,
-  InvoiceLanguage,
-} from "../schema";
-import { currencyDisplaySuffix, invoiceDisplayUnit } from "../schema";
 import {
   invoiceLabels,
   toInvoiceIntlLocale,
@@ -22,19 +15,26 @@ import {
   type LookBand,
   type LookDocument,
 } from "../looks";
+import type {
+  Invoice,
+  InvoiceCurrency,
+  InvoiceItem,
+  InvoiceLanguage,
+} from "../schema";
+import { currencyDisplaySuffix, invoiceDisplayUnit } from "../schema";
 import { parseInlineMarkdown } from "./inline-markdown";
-import { keepPdfWord } from "./register-fonts";
+import {
+  createInvoicePdfStyles,
+  rowColumnStyle,
+  type InvoicePdfStyles,
+} from "./look-styles";
 import {
   invoicePdfDocKindSubtitle,
   invoicePdfMainTitle,
   invoicePdfShowsVatColumn,
   invoicePdfTaxPointLabel,
 } from "./pdf-presentation";
-import {
-  createInvoicePdfStyles,
-  rowColumnStyle,
-  type InvoicePdfStyles,
-} from "./look-styles";
+import { keepPdfWord } from "./register-fonts";
 
 const LINE_COLS_WITH_VAT = {
   desc: "42%",

@@ -38,10 +38,10 @@ Specifically:
 
   ```json
   {
-  	"style": "base-nova",
-  	"registries": {
-  		"@reui": "https://reui.io/r/{style}/{name}.json"
-  	}
+    "style": "base-nova",
+    "registries": {
+      "@reui": "https://reui.io/r/{style}/{name}.json"
+    }
   }
   ```
 

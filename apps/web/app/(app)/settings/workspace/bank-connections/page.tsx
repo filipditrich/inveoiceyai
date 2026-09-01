@@ -1,21 +1,3 @@
-import { issuerBusinesses } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
-import { asc, eq } from "drizzle-orm";
-import {
-  Building2Icon,
-  CircleDotDashedIcon,
-  ExternalLinkIcon,
-  LandmarkIcon,
-  LockKeyholeIcon,
-  RefreshCwIcon,
-  ShieldCheckIcon,
-  Trash2Icon,
-  ZapIcon,
-} from "lucide-react";
-import { getLocale, getMessages, getTranslations } from "next-intl/server";
-import Image from "next/image";
-import Link from "next/link";
-
 import {
   connectFio,
   disconnectFio,
@@ -39,7 +21,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { AppLocale } from "@/i18n/config";
 import { isAppLocale } from "@/i18n/config";
 import { requireWorkspace } from "@/lib/auth/session";
 import { requireEntitlements } from "@/lib/entitlements/entitlements";
@@ -48,6 +29,26 @@ import { messageLookup } from "@/lib/i18n-lookup";
 import { listFioConnections } from "@/lib/payments/fio-service";
 import { listMonetaConnections } from "@/lib/payments/moneta-service";
 import { isBankTokenEncryptionConfigured } from "@/lib/payments/token-crypto";
+import { asc, eq } from "drizzle-orm";
+import {
+  Building2Icon,
+  CircleDotDashedIcon,
+  ExternalLinkIcon,
+  LandmarkIcon,
+  LockKeyholeIcon,
+  RefreshCwIcon,
+  ShieldCheckIcon,
+  Trash2Icon,
+  ZapIcon,
+} from "lucide-react";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import Image from "next/image";
+import Link from "next/link";
+
+import { issuerBusinesses } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
+
+import type { AppLocale } from "@/i18n/config";
 
 const PLANNED_BANKS = [
   { id: "kb", logo: "/banks/kb.svg", note: "deferred" },
@@ -104,7 +105,7 @@ function BankLogoTile({
 }) {
   return (
     <div
-      className={`shadow-xs flex shrink-0 items-center justify-center overflow-hidden rounded-xl border bg-white p-2 ${
+      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-xl border bg-white p-2 shadow-xs ${
         size === "sm" ? "size-12" : "size-14"
       } ${inactive ? "opacity-40 grayscale" : ""}`}
     >
@@ -204,7 +205,7 @@ export default async function BankConnectionsPage() {
           : toggleFioAutoMatch;
         return (
           <Card key={connection.id} className="overflow-hidden">
-            <CardHeader className="bg-muted/20 border-b">
+            <CardHeader className="border-b bg-muted/20">
               {/* Grid items default to min-width:auto, which lets the
                   unbreakable IBAN push past the card instead of truncating. */}
               <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
@@ -234,14 +235,14 @@ export default async function BankConnectionsPage() {
             </CardHeader>
             <CardContent className="space-y-5 pt-5">
               <dl className="grid gap-3 text-sm sm:grid-cols-3">
-                <div className="bg-muted/35 rounded-xl p-3">
-                  <dt className="text-muted-foreground text-xs">
+                <div className="rounded-xl bg-muted/35 p-3">
+                  <dt className="text-xs text-muted-foreground">
                     {t("importedCurrency")}
                   </dt>
                   <dd className="mt-1 font-medium">{connection.currency}</dd>
                 </div>
-                <div className="bg-muted/35 rounded-xl p-3 sm:col-span-2">
-                  <dt className="text-muted-foreground text-xs">
+                <div className="rounded-xl bg-muted/35 p-3 sm:col-span-2">
+                  <dt className="text-xs text-muted-foreground">
                     {t("lastSuccessfulSync")}
                   </dt>
                   <dd className="mt-1 font-medium">
@@ -252,7 +253,7 @@ export default async function BankConnectionsPage() {
                 </div>
               </dl>
               {connection.lastSyncErrorCode ? (
-                <p className="text-destructive text-sm">
+                <p className="text-sm text-destructive">
                   {t("lastError", {
                     code: messageLookup(
                       errorLabels,
@@ -261,14 +262,14 @@ export default async function BankConnectionsPage() {
                   })}
                 </p>
               ) : null}
-              <div className="border-brand/15 bg-brand/[0.05] flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-4 rounded-2xl border border-brand/15 bg-brand/[0.05] p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 gap-3">
-                  <span className="bg-brand/10 text-brand flex size-10 shrink-0 items-center justify-center rounded-xl">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
                     <ZapIcon className="size-5" />
                   </span>
                   <div>
                     <p className="font-medium">{t("autoMatchTitle")}</p>
-                    <p className="text-muted-foreground mt-0.5 max-w-2xl text-sm leading-relaxed">
+                    <p className="mt-0.5 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                       {t("autoMatchDescription")}
                     </p>
                   </div>
@@ -318,11 +319,11 @@ export default async function BankConnectionsPage() {
           </CardHeader>
           <CardContent>
             {!encryptionReady ? (
-              <p className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-3 text-sm">
+              <p className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
                 {t("encryptionMissing")}
               </p>
             ) : issuers.length === 0 ? (
-              <p className="text-muted-foreground text-sm">{t("needIssuer")}</p>
+              <p className="text-sm text-muted-foreground">{t("needIssuer")}</p>
             ) : (
               <form action={connectFio} className="space-y-4">
                 <div className="space-y-2">
@@ -331,7 +332,7 @@ export default async function BankConnectionsPage() {
                     id="issuerId"
                     name="issuerId"
                     required
-                    className="border-input bg-background h-9 w-full rounded-lg border px-3 text-sm"
+                    className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
                     defaultValue={issuers[0]?.id}
                   >
                     {issuers.map((issuer) => (
@@ -353,11 +354,11 @@ export default async function BankConnectionsPage() {
                     spellCheck={false}
                     placeholder={t("fio.tokenPlaceholder")}
                   />
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-xs text-muted-foreground">
                     {t("fio.tokenHelp")}
                   </p>
                   <a
-                    className="text-brand inline-flex items-center gap-1 text-xs font-medium hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
                     href="https://www.fio.cz/bankovni-sluzby/api-bankovnictvi"
                     rel="noreferrer"
                     target="_blank"
@@ -370,7 +371,7 @@ export default async function BankConnectionsPage() {
                   {t("connectAndVerify")}
                 </Button>
                 {!canManage ? (
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-xs text-muted-foreground">
                     {t("adminOnly")}
                   </p>
                 ) : null}
@@ -401,10 +402,10 @@ export default async function BankConnectionsPage() {
         <div className="flex items-end justify-between gap-4">
           <div>
             <h2 className="flex items-center gap-2 text-lg font-semibold">
-              <CircleDotDashedIcon className="text-muted-foreground size-5" />
+              <CircleDotDashedIcon className="size-5 text-muted-foreground" />
               {t("moreTitle")}
             </h2>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="mt-1 text-sm text-muted-foreground">
               {t("moreDescription")}
             </p>
           </div>
@@ -423,7 +424,7 @@ export default async function BankConnectionsPage() {
                   <BankLogoTile alt={name} src={bank.logo} size="sm" inactive />
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">{name}</p>
-                    <p className="text-muted-foreground flex items-center gap-1 text-xs">
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Building2Icon className="size-3" />{" "}
                       {bank.note === "deferred"
                         ? t("noteDeferred")
@@ -437,9 +438,9 @@ export default async function BankConnectionsPage() {
         </div>
       </section>
 
-      <div className="border-border/70 bg-muted/25 flex gap-3 rounded-2xl border p-4 text-sm">
-        <ShieldCheckIcon className="text-brand mt-0.5 size-5 shrink-0" />
-        <p className="text-muted-foreground leading-relaxed">{t("footer")}</p>
+      <div className="flex gap-3 rounded-2xl border border-border/70 bg-muted/25 p-4 text-sm">
+        <ShieldCheckIcon className="mt-0.5 size-5 shrink-0 text-brand" />
+        <p className="leading-relaxed text-muted-foreground">{t("footer")}</p>
       </div>
     </div>
   );

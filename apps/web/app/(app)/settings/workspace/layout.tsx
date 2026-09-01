@@ -1,10 +1,9 @@
-import { getTranslations } from "next-intl/server";
-
 import { PageHeader } from "@/components/layout/page-header";
 import { SettingsNav } from "@/components/settings/settings-nav";
 import { WorkspaceMark } from "@/components/workspace-mark";
 import { requireWorkspace } from "@/lib/auth/session";
 import { listUserWorkspaces } from "@/lib/auth/workspaces";
+import { getTranslations } from "next-intl/server";
 
 export default async function WorkspaceSettingsLayout({
   children,

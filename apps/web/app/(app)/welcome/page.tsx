@@ -2,10 +2,11 @@ import { IssuerWelcomeWizard } from "@/components/issuers/issuer-welcome-wizard"
 import { requireWorkspace } from "@/lib/auth/session";
 import { listUserWorkspaces } from "@/lib/auth/workspaces";
 import { welcomeDoneIssuerId } from "@/lib/issuer-welcome-query";
-import { issuerBusinesses } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
 import { and, eq, sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
+
+import { issuerBusinesses } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 
 type Search = Promise<{ invalid?: string; done?: string }>;
 

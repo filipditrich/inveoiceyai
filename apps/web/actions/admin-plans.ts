@@ -1,14 +1,14 @@
 "use server";
 
-import { EntitlementsSchema } from "@invoicey/db";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-
 import {
   adminAssignPlan,
   adminUpdatePlanEntitlements,
 } from "@/lib/admin/plans";
 import { assertPlatformAdmin } from "@/lib/auth/session";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+import { EntitlementsSchema } from "@invoicey/db";
 
 /** `""` and `"unlimited"` both mean no ceiling; anything else must parse. */
 function nullableLimit(raw: FormDataEntryValue | null): number | null {
@@ -104,7 +104,9 @@ export async function updatePlanEntitlementsAction(
         formData.get("permissionsMode") as never,
       )
         ? (String(formData.get("permissionsMode")) as
-            "off" | "roles" | "advanced")
+            | "off"
+            | "roles"
+            | "advanced")
         : ("off" as const),
     },
     looks: {

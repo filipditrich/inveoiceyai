@@ -17,7 +17,7 @@ export function Mermaid({ chart }: { chart: string }) {
     return (
       <div
         aria-hidden
-        className="bg-fd-muted my-4 h-32 animate-pulse rounded-lg"
+        className="my-4 h-32 animate-pulse rounded-lg bg-fd-muted"
       />
     );
   }
@@ -27,7 +27,7 @@ export function Mermaid({ chart }: { chart: string }) {
       fallback={
         <div
           aria-hidden
-          className="bg-fd-muted my-4 h-32 animate-pulse rounded-lg"
+          className="my-4 h-32 animate-pulse rounded-lg bg-fd-muted"
         />
       }
     >

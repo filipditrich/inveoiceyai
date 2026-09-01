@@ -1,5 +1,6 @@
 "use client";
 
+import type * as React from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -27,7 +28,6 @@ import {
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type * as React from "react";
 
 export function AdminSidebar({
   user,
@@ -102,18 +102,18 @@ export function AdminSidebar({
                 <span className="truncate text-sm font-semibold tracking-tight">
                   {t("brand.title")}
                 </span>
-                <span className="text-muted-foreground truncate text-[0.7rem]">
+                <span className="truncate text-[0.7rem] text-muted-foreground">
                   {t("brand.tagline")}
                 </span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <div className="from-brand/25 via-brand/10 bg-linear-to-r mx-2 hidden h-px to-transparent group-data-[collapsible=icon]:hidden sm:block" />
+        <div className="mx-2 hidden h-px bg-linear-to-r from-brand/25 via-brand/10 to-transparent group-data-[collapsible=icon]:hidden sm:block" />
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground shadow-xs"
+              className="bg-sidebar-primary text-sidebar-primary-foreground shadow-xs hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground"
               render={<Link href="/dashboard" prefetch={false} />}
               tooltip={t("nav.backToApp")}
             >

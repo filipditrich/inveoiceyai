@@ -1,8 +1,8 @@
 /** Fail a deployment when additive columns required by the running app are absent. */
 import "@invoicey/env/load";
+import { sql } from "drizzle-orm";
 
 import { db } from "@invoicey/db/client";
-import { sql } from "drizzle-orm";
 
 const required = new Map([
   ["issuer_businesses", new Set(["is_default"])],

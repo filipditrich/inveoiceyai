@@ -1,11 +1,11 @@
-import { env } from "@invoicey/env/server";
-import { GiftIcon } from "lucide-react";
-import { getTranslations } from "next-intl/server";
-
 import { ReferralsPanel } from "@/components/settings/referrals-panel";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { ensureUserReferralCode, getReferralStats } from "@/lib/auth/referral";
 import { requireSession } from "@/lib/auth/session";
+import { GiftIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+
+import { env } from "@invoicey/env/server";
 
 export default async function SettingsReferralsPage() {
   const session = await requireSession();

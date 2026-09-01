@@ -1,6 +1,7 @@
-import { loadRepoEnv } from "@invoicey/env/load";
 import { defineConfig } from "drizzle-kit";
 import { resolve } from "path";
+
+import { loadRepoEnv } from "@invoicey/env/load";
 
 /** drizzle-kit runs with cwd `packages/db`, so root `.env` is not automatic. */
 const repoRoot = loadRepoEnv();

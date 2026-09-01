@@ -1,3 +1,5 @@
+import { eq } from "drizzle-orm";
+
 import { listWorkspaceLookRows, workspaces } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import {
@@ -7,7 +9,6 @@ import {
   type LookRef,
 } from "@invoicey/invoice-core/looks";
 import { loadWorkspaceLookContext } from "@invoicey/invoice-tools/ops";
-import { eq } from "drizzle-orm";
 
 export async function loadWorkspaceDefaultLook(
   workspaceId: string,

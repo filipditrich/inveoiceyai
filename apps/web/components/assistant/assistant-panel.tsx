@@ -48,15 +48,15 @@ export function AssistantPanel() {
          * (selects, tooltips), which mount at the end of `body`, still land on
          * top of the panel. Raising it further would bury its own dropdowns.
          */
-        "bg-popover fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l shadow-lg transition-transform duration-200 ease-out sm:w-[30rem]",
+        "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l bg-popover shadow-lg transition-transform duration-200 ease-out sm:w-[30rem]",
         open ? "translate-x-0" : "pointer-events-none translate-x-full",
       )}
     >
       <header className="flex items-center gap-2 border-b px-4 py-3">
-        <SparklesIcon className="text-brand size-4 shrink-0" />
+        <SparklesIcon className="size-4 shrink-0 text-brand" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">{t("title")}</p>
-          <p className="text-muted-foreground truncate text-xs">
+          <p className="truncate text-xs text-muted-foreground">
             {session?.balance
               ? t("tokensAvailable", {
                   available: formatTokenCount(session.balance.totalAvailable),
@@ -77,7 +77,7 @@ export function AssistantPanel() {
           {contextTokens > 0 ? (
             <div
               aria-hidden
-              className="bg-muted mt-1.5 h-1 overflow-hidden rounded-full"
+              className="mt-1.5 h-1 overflow-hidden rounded-full bg-muted"
             >
               <div
                 className={cn(
@@ -125,7 +125,7 @@ export function AssistantPanel() {
       <AssistantThread />
 
       {outOfTokens ? (
-        <div className="text-muted-foreground border-t px-4 py-3 text-sm">
+        <div className="border-t px-4 py-3 text-sm text-muted-foreground">
           {t("outOfTokens")}{" "}
           <Link
             className="text-foreground underline underline-offset-4"
@@ -135,7 +135,7 @@ export function AssistantPanel() {
           </Link>
         </div>
       ) : contextFull ? (
-        <div className="text-muted-foreground border-t px-4 py-3 text-sm">
+        <div className="border-t px-4 py-3 text-sm text-muted-foreground">
           {t("contextFull")}
         </div>
       ) : (

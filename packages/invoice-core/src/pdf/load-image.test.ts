@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { loadImageForPdf } from "./load-image";
 
 const PNG = Buffer.from([

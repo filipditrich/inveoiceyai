@@ -1,13 +1,13 @@
-import { env } from "@invoicey/env/server";
-import { getTranslations } from "next-intl/server";
-import { UsersRoundIcon } from "lucide-react";
-
 import { MemberPermissionsSection } from "@/components/settings/member-permissions-section";
 import { MembersPanel } from "@/components/settings/members-panel";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { requireWorkspace } from "@/lib/auth/session";
 import { can } from "@/lib/authz/can";
 import { requireEntitlements } from "@/lib/entitlements/entitlements";
+import { UsersRoundIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+
+import { env } from "@invoicey/env/server";
 
 export default async function SettingsMembersPage() {
   const ws = await requireWorkspace();

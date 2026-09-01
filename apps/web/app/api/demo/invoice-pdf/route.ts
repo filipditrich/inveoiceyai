@@ -1,6 +1,7 @@
-import { InvoiceSchema, renderInvoicePdf } from "@invoicey/invoice-core";
 import { checkBotId } from "botid/server";
 import { type NextRequest, NextResponse } from "next/server";
+
+import { InvoiceSchema, renderInvoicePdf } from "@invoicey/invoice-core";
 
 export const runtime = "nodejs";
 
@@ -28,7 +29,8 @@ function consumeRequest(key: string): { allowed: boolean; retryAfter: number } {
     }
     if (requestWindows.size >= 10_000) {
       const oldestKey = requestWindows.keys().next().value as
-        string | undefined;
+        | string
+        | undefined;
       if (oldestKey) requestWindows.delete(oldestKey);
     }
   }

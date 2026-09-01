@@ -1,9 +1,10 @@
+import { AssistantOpenButton } from "@/components/assistant/assistant-open-button";
 import { InvoiceListTable } from "@/components/invoices/invoice-list-table";
 import { InvoiceStatusSummary } from "@/components/invoices/invoice-status-summary";
-import { AssistantOpenButton } from "@/components/assistant/assistant-open-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
+import { displayStatusWhere, pragueTodayIso } from "@/lib/invoice-status-sql";
 import {
   buildInvoiceBaseConditions,
   invoiceOrderBy,
@@ -14,20 +15,20 @@ import {
   parseInvoiceSort,
   serializeInvoiceSort,
 } from "@/lib/invoices/list-sort";
-import { displayStatusWhere, pragueTodayIso } from "@/lib/invoice-status-sql";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
+import { and, count } from "drizzle-orm";
+import { FilesIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+
+import { invoices } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
 import {
   INVOICE_DISPLAY_STATUSES,
   normalizeDisplayStatusParam,
   resolveDisplayStatus,
   type InvoiceDisplayStatus,
 } from "@invoicey/invoice-core/status-display";
-import { invoices } from "@invoicey/db";
-import { db } from "@invoicey/db/client";
-import { and, count } from "drizzle-orm";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { FilesIcon } from "lucide-react";
 
 type Search = Promise<{
   invalid?: string;
@@ -209,12 +210,12 @@ export default async function InvoicesPage({
       />
 
       {sp.invalid ? (
-        <p className="text-destructive text-sm">
+        <p className="text-sm text-destructive">
           {tErrors("generic", { code: sp.invalid })}
         </p>
       ) : null}
       {sp.toast?.startsWith("bulk_") ? (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {tToasts("bulk_summary", {
             ok: String(Number(sp.ok) || 0),
             skipped: String(Number(sp.skipped) || 0),

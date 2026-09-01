@@ -1,17 +1,17 @@
 "use client";
 
+import { LookLayoutThumb } from "@/components/looks/look-layout-thumb";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { CheckIcon, LockIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+
 import {
   canApplyLook,
   type LookDocument,
   type LookRef,
 } from "@invoicey/invoice-core/looks";
-import { CheckIcon, LockIcon } from "lucide-react";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-
-import { LookLayoutThumb } from "@/components/looks/look-layout-thumb";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 
 export type LookCatalogItem = {
   id: string;
@@ -88,7 +88,7 @@ export function LookPicker({
               className={cn(
                 "flex gap-3 rounded-lg border p-3 text-left transition-colors",
                 selected
-                  ? "border-primary bg-primary/5 ring-primary/20 ring-1"
+                  ? "border-primary bg-primary/5 ring-1 ring-primary/20"
                   : "border-border hover:bg-muted/40",
                 !entitled && "opacity-80",
               )}
@@ -109,24 +109,24 @@ export function LookPicker({
                   <p className="text-sm font-medium">{look.name}</p>
                   <span className="flex shrink-0 items-center gap-1">
                     {selected ? (
-                      <CheckIcon className="text-primary size-3.5" />
+                      <CheckIcon className="size-3.5 text-primary" />
                     ) : null}
                     {!entitled ? (
-                      <LockIcon className="text-muted-foreground size-3.5" />
+                      <LockIcon className="size-3.5 text-muted-foreground" />
                     ) : null}
                   </span>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-1.5">
                   <Badge variant="outline">{t(originKey)}</Badge>
-                  <span className="text-muted-foreground text-xs tabular-nums">
+                  <span className="text-xs text-muted-foreground tabular-nums">
                     {look.version}
                   </span>
                 </div>
-                <p className="text-muted-foreground mt-1.5 text-xs leading-relaxed">
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
                   {t(descriptionKey)}
                 </p>
                 {!entitled ? (
-                  <p className="text-muted-foreground mt-1.5 text-xs">
+                  <p className="mt-1.5 text-xs text-muted-foreground">
                     {t("upgradeHint")}
                   </p>
                 ) : null}
@@ -136,7 +136,7 @@ export function LookPicker({
         })}
       </div>
       {manageHref && looksApply === "catalog" ? (
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           <Link
             className="text-primary underline-offset-4 hover:underline"
             href={manageHref}
@@ -146,7 +146,7 @@ export function LookPicker({
         </p>
       ) : null}
       {lockedSelected ? (
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {t.rich("lockedSelected", {
             upgrade: (chunks) => (
               <Link

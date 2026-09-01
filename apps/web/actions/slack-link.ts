@@ -1,5 +1,9 @@
 "use server";
 
+import { recordSecurityAuditEvent } from "@/lib/auth/security-audit";
+import { requireWorkspace } from "@/lib/auth/session";
+import { revalidatePath } from "next/cache";
+
 import {
   consumeSlackLinkCode,
   deleteSlackIdentityForUser,
@@ -11,10 +15,6 @@ import {
   upsertSlackIdentity,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { revalidatePath } from "next/cache";
-
-import { recordSecurityAuditEvent } from "@/lib/auth/security-audit";
-import { requireWorkspace } from "@/lib/auth/session";
 
 export type ConfirmSlackLinkError = "not_found" | "expired" | "steal_refused";
 

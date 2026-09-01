@@ -1,9 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import type { EveMessage, EveMessagePart } from "eve/react";
-import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 import { AssistantAuthorization } from "./assistant-authorization";
 import { AssistantEmptyState } from "./assistant-empty-state";
@@ -13,6 +12,7 @@ import { AssistantMarkdown } from "./assistant-markdown";
 import { useAssistantSession } from "./assistant-provider";
 import { AssistantToolStep } from "./assistant-tool-step";
 import { invoiceCardFromToolPart } from "./invoice-card-from-tool";
+import type { EveMessage, EveMessagePart } from "eve/react";
 
 export function AssistantThread() {
   const t = useTranslations("Assistant");
@@ -25,6 +25,7 @@ export function AssistantThread() {
   /** Follow the tail while a turn streams, the way a chat is expected to. */
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- messages is a new array every render
   }, [messages, status]);
 
   return (
@@ -37,12 +38,12 @@ export function AssistantThread() {
             <AssistantMessage key={message.id} message={message} />
           ))}
           {status === "submitted" ? (
-            <p className="text-muted-foreground animate-pulse text-sm">
+            <p className="animate-pulse text-sm text-muted-foreground">
               {t("thinking")}
             </p>
           ) : null}
           {session?.agent.error ? (
-            <p className="text-destructive text-sm" role="alert">
+            <p className="text-sm text-destructive" role="alert">
               {friendlyError(session.agent.error.message, t)}
             </p>
           ) : null}
@@ -82,7 +83,7 @@ function UserMessage({ message }: { message: EveMessage }) {
     <div className="flex justify-end">
       <div
         className={cn(
-          "bg-muted max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-sm px-3 py-2 text-sm",
+          "max-w-[85%] rounded-2xl rounded-br-sm bg-muted px-3 py-2 text-sm whitespace-pre-wrap",
           message.metadata?.status === "failed" && "text-destructive",
         )}
       >

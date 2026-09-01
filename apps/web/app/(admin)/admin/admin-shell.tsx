@@ -1,11 +1,11 @@
 "use client";
 
+import type { CSSProperties, ReactNode } from "react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminSiteHeader } from "@/components/admin/admin-site-header";
 import { NavigationPendingOverlay } from "@/components/navigation/navigation-progress";
 import { ToastFromSearchParams } from "@/components/toast-from-search-params";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import type { CSSProperties, ReactNode } from "react";
 
 export interface AdminShellUser {
   name: string;
@@ -27,7 +27,7 @@ export function AdminShell({
       }
     >
       <AdminSidebar user={user} />
-      <SidebarInset className="bg-background flex min-h-0 flex-1 flex-col overflow-hidden">
+      <SidebarInset className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
         <AdminSiteHeader />
         <ToastFromSearchParams />
         <div className="@container/main relative flex min-h-0 flex-1 flex-col gap-2 overflow-auto">

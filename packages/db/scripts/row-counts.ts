@@ -6,7 +6,6 @@
  *   bun run --cwd packages/db scripts/row-counts.ts
  */
 import "@invoicey/env/load";
-
 import { neon } from "@neondatabase/serverless";
 
 const url = process.env.DATABASE_URL?.trim();

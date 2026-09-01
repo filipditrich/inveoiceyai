@@ -13,16 +13,16 @@ Call the public ARES **ekonomické subjekty** REST endpoint by IČO, parse the J
 
 ## Inputs / outputs
 
-| Input | Constraints |
-| --- | --- |
+| Input      | Constraints                                                |
+| ---------- | ---------------------------------------------------------- |
 | IČO string | Must match `IcoSchema` (`^\d{8}$`) before any HTTP request |
 
-| Output | Meaning |
-| --- | --- |
-| `ok: true`, `draft` | Parsed subject; **still missing `id`** (generated on save in `apps/web`). |
-| `ok: false`, `kind: "not_found"` | HTTP 404 or ARES payload `kod: NENALEZENO`. |
-| `ok: false`, `kind: "invalid_response"` | Unexpected body / Zod failure after HTTP 200. |
-| `ok: false`, `kind: "http_error"` | Other non-OK status. |
+| Output                                  | Meaning                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------- |
+| `ok: true`, `draft`                     | Parsed subject; **still missing `id`** (generated on save in `apps/web`). |
+| `ok: false`, `kind: "not_found"`        | HTTP 404 or ARES payload `kod: NENALEZENO`.                               |
+| `ok: false`, `kind: "invalid_response"` | Unexpected body / Zod failure after HTTP 200.                             |
+| `ok: false`, `kind: "http_error"`       | Other non-OK status.                                                      |
 
 `draft` fields align with data needed to build a **`ClientSnapshotSchema`** instance:
 

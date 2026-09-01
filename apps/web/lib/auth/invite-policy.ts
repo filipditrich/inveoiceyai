@@ -1,8 +1,8 @@
 import "server-only";
+import { eq } from "drizzle-orm";
 
 import { getWorkspaceEntitlements, invitation, member } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { eq } from "drizzle-orm";
 
 /**
  * Seat and domain policy for workspace invitations (ADR 0035, ADR 0038).

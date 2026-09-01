@@ -2,11 +2,11 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { getOptionalWorkspace, requireSession } from "@/lib/auth/session";
 import { Building2Icon, CheckCircle2Icon } from "lucide-react";
-import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { createFirstWorkspace } from "./actions";
+import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Onboarding.meta");
@@ -31,19 +31,19 @@ export default async function OnboardingPage() {
   return (
     <AuthShell>
       <div>
-        <span className="bg-brand/15 grid size-12 place-items-center rounded-2xl">
+        <span className="grid size-12 place-items-center rounded-2xl bg-brand/15">
           <Building2Icon className="size-5" />
         </span>
         <h1 className="mt-6 text-3xl font-semibold tracking-[-0.035em]">
           {t("title")}
         </h1>
-        <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           {t("subtitle", { email: user.email })}
         </p>
-        <div className="bg-muted/30 mt-6 space-y-2 rounded-2xl border p-4 text-sm">
+        <div className="mt-6 space-y-2 rounded-2xl border bg-muted/30 p-4 text-sm">
           {[t("benefit1"), t("benefit2"), t("benefit3")].map((item) => (
             <p key={item} className="flex items-center gap-2">
-              <CheckCircle2Icon className="text-primary size-4" />
+              <CheckCircle2Icon className="size-4 text-primary" />
               {item}
             </p>
           ))}

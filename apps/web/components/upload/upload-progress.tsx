@@ -10,12 +10,12 @@ export function UploadProgress({
   return (
     <div
       className={cn(
-        "bg-muted h-1 w-full overflow-hidden rounded-full",
+        "h-1 w-full overflow-hidden rounded-full bg-muted",
         className,
       )}
     >
       <div
-        className="bg-foreground h-full transition-[width] duration-200"
+        className="h-full bg-foreground transition-[width] duration-200"
         style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
       />
     </div>

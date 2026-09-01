@@ -1,18 +1,6 @@
 "use client";
 
-import {
-  ArchiveRestoreIcon,
-  BracesIcon,
-  ChevronDownIcon,
-  FileTextIcon,
-  PlusIcon,
-  RepeatIcon,
-  SparklesIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
 import type { ReactNode } from "react";
-
 import { useAssistant } from "@/components/assistant/assistant-provider";
 import { NavLinkPending } from "@/components/navigation/nav-link-pending";
 import {
@@ -30,6 +18,17 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  ArchiveRestoreIcon,
+  BracesIcon,
+  ChevronDownIcon,
+  FileTextIcon,
+  PlusIcon,
+  RepeatIcon,
+  SparklesIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 interface CreateEntry {
   href: string;
@@ -125,7 +124,7 @@ export function NewInvoiceButton({ pathname }: { pathname: string }) {
             <DropdownMenuTrigger
               render={
                 <SidebarMenuButton
-                  className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground shadow-xs"
+                  className="bg-sidebar-primary text-sidebar-primary-foreground shadow-xs hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground"
                   tooltip={t("newInvoice")}
                 />
               }
@@ -144,7 +143,7 @@ export function NewInvoiceButton({ pathname }: { pathname: string }) {
     <SidebarMenu>
       <SidebarMenuItem className="flex items-stretch gap-1">
         <SidebarMenuButton
-          className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground shadow-xs flex-1"
+          className="flex-1 bg-sidebar-primary text-sidebar-primary-foreground shadow-xs hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground"
           isActive={pathname === "/invoices/new"}
           render={<Link href="/invoices/new" prefetch={false} />}
           tooltip={t("newInvoice")}
@@ -156,7 +155,7 @@ export function NewInvoiceButton({ pathname }: { pathname: string }) {
         <DropdownMenu>
           <DropdownMenuTrigger
             aria-label={t("newInvoiceMore")}
-            className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 focus-visible:ring-sidebar-ring data-[popup-open]:bg-sidebar-primary/90 shadow-xs flex w-8 shrink-0 items-center justify-center rounded-md outline-none focus-visible:ring-2"
+            className="flex w-8 shrink-0 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground shadow-xs outline-none hover:bg-sidebar-primary/90 focus-visible:ring-2 focus-visible:ring-sidebar-ring data-[popup-open]:bg-sidebar-primary/90"
           >
             <ChevronDownIcon className="size-4" />
           </DropdownMenuTrigger>

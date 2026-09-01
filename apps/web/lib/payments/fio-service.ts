@@ -1,4 +1,5 @@
 import "server-only";
+import { and, eq, isNull, lt, or } from "drizzle-orm";
 
 import {
   bankAccountIssuers,
@@ -13,15 +14,14 @@ import {
   fetchFioTransactions,
   type NormalizedTransactionBatch,
 } from "@invoicey/payment-core";
-import { and, eq, isNull, lt, or } from "drizzle-orm";
 
+import { normalizeFioError } from "./fio-error";
 import {
   importBankTransactionBatch,
   markBankSyncFailed,
   markBankSyncSucceeded,
 } from "./import-bank-batch";
 import { decryptBankToken, encryptBankToken } from "./token-crypto";
-import { normalizeFioError } from "./fio-error";
 
 const MATCHER_VERSION = "fio-v1";
 const MIN_REQUEST_INTERVAL_MS = 31_000;

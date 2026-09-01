@@ -1,10 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { toolLabel } from "@/agent/lib/tool-presentation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import type { EveDynamicToolPart, EveMessageInputRequest } from "eve/react";
 import {
   CheckIcon,
   HelpCircleIcon,
@@ -12,9 +12,9 @@ import {
   XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 import { useAssistantSession } from "./assistant-provider";
+import type { EveDynamicToolPart, EveMessageInputRequest } from "eve/react";
 
 /**
  * A parked turn, rendered inline.
@@ -67,11 +67,11 @@ export function AssistantInputRequest({
         {isApproval ? (
           <ShieldQuestionIcon className="mt-0.5 size-4 shrink-0 text-amber-600" />
         ) : (
-          <HelpCircleIcon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+          <HelpCircleIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
         )}
         <div className="min-w-0 flex-1">
           {isApproval ? (
-            <p className="text-muted-foreground text-[0.7rem] uppercase tracking-wide">
+            <p className="text-[0.7rem] tracking-wide text-muted-foreground uppercase">
               {t("approvalEyebrow", { tool: toolLabel(part.toolName) })}
             </p>
           ) : null}
@@ -81,7 +81,7 @@ export function AssistantInputRequest({
       </div>
 
       {answered ? (
-        <p className="text-muted-foreground text-xs">{t("answered")}</p>
+        <p className="text-xs text-muted-foreground">{t("answered")}</p>
       ) : (
         <>
           {request.options && request.options.length > 0 ? (
@@ -164,7 +164,7 @@ function ApprovalInput({ input }: { input: unknown }) {
     <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
       {entries.map(([key, value]) => (
         <div key={key}>
-          <dt className="text-muted-foreground text-[0.7rem] uppercase tracking-wide">
+          <dt className="text-[0.7rem] tracking-wide text-muted-foreground uppercase">
             {key}
           </dt>
           <dd className="text-sm font-medium">{String(value)}</dd>

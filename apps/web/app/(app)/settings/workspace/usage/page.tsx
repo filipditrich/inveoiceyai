@@ -1,7 +1,10 @@
 import { AiUsagePanels } from "@/components/settings/ai-usage-panels";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
-import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { requireWorkspace } from "@/lib/auth/session";
+import { requireEntitlements } from "@/lib/entitlements/entitlements";
+import { ActivityIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+
 import {
   aggregateAiUsageByDay,
   getWorkspaceTokenSummary,
@@ -9,8 +12,6 @@ import {
   listWorkspaceTokenGrants,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
-import { ActivityIcon } from "lucide-react";
-import { getTranslations } from "next-intl/server";
 
 export default async function SettingsUsagePage() {
   const { workspaceId } = await requireWorkspace();

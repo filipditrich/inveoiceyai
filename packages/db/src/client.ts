@@ -1,6 +1,7 @@
-import { env } from "@invoicey/env/server";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
+
+import { env } from "@invoicey/env/server";
 
 import * as schema from "./schema";
 

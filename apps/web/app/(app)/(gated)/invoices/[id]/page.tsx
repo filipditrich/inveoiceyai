@@ -7,12 +7,11 @@ import {
 } from "@/actions/invoices";
 import { reversePayment } from "@/actions/payments";
 import { InvoiceCancelSheet } from "@/components/invoices/invoice-cancel-sheet";
-import { SaveRecurringSheet } from "@/components/invoices/save-recurring-sheet";
 import { InvoiceEmailTimeline } from "@/components/invoices/invoice-email-timeline";
 import { InvoiceLifecycleGuidance } from "@/components/invoices/invoice-lifecycle-guidance";
-import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
 import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
+import { SaveRecurringSheet } from "@/components/invoices/save-recurring-sheet";
 import { SendInvoiceEmailSheet } from "@/components/invoices/send-invoice-email-sheet";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -25,39 +24,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { formatInvoiceDate, formatDateTime, formatMoney } from "@/lib/format";
-import type { AppLocale } from "@/i18n/config";
-import { invalidMessage } from "@/lib/invalid-message";
-import { pragueTodayIso } from "@/lib/invoice-status-sql";
+import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 import { requireWorkspace } from "@/lib/auth/session";
-import { isEmailConfigured } from "@/lib/email/invite";
 import {
   applyDisplayNameTemplate,
   buildViaInvoiceyDisplayName,
   parseEmailFrom,
 } from "@/lib/email/from";
+import { isEmailConfigured } from "@/lib/email/invite";
 import {
   listEmailEventsForMessages,
   listInvoiceEmailMessages,
   resolveIssuerEmailSettings,
 } from "@/lib/email/send-invoice";
-import { env } from "@invoicey/env/server";
-import {
-  isArchivePayload,
-  type InvoiceOriginProvider,
-} from "@invoicey/invoice-core/import";
-import {
-  InvoiceSchema,
-  invoiceDisplayUnit,
-} from "@invoicey/invoice-core/schema";
-import { resolveDisplayStatus } from "@invoicey/invoice-core/status-display";
-import {
-  emailSuppressions,
-  invoices,
-  issuerBusinesses,
-  listInvoicePaymentAllocations,
-} from "@invoicey/db";
-import { db } from "@invoicey/db/client";
+import { formatInvoiceDate, formatDateTime, formatMoney } from "@/lib/format";
+import { invalidMessage } from "@/lib/invalid-message";
+import { pragueTodayIso } from "@/lib/invoice-status-sql";
 import { and, eq } from "drizzle-orm";
 import {
   CopyIcon,
@@ -70,9 +52,29 @@ import {
   Trash2Icon,
   WalletCardsIcon,
 } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getLocale, getTranslations } from "next-intl/server";
+
+import {
+  emailSuppressions,
+  invoices,
+  issuerBusinesses,
+  listInvoicePaymentAllocations,
+} from "@invoicey/db";
+import { db } from "@invoicey/db/client";
+import { env } from "@invoicey/env/server";
+import {
+  isArchivePayload,
+  type InvoiceOriginProvider,
+} from "@invoicey/invoice-core/import";
+import {
+  InvoiceSchema,
+  invoiceDisplayUnit,
+} from "@invoicey/invoice-core/schema";
+import { resolveDisplayStatus } from "@invoicey/invoice-core/status-display";
+
+import type { AppLocale } from "@/i18n/config";
 
 type Params = Promise<{ id: string }>;
 type Search = Promise<{ invalid?: string; toast?: string }>;
@@ -215,12 +217,12 @@ export default async function InvoiceDetailPage({
       <span>{row.clientName}</span>
       <InvoiceStatusBadge status={displayStatus} />
       {row.importCompleteness === "archive" ? (
-        <span className="rounded border px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide">
+        <span className="rounded border px-1.5 py-0.5 text-[0.65rem] tracking-wide uppercase">
           {t("archive")}
         </span>
       ) : null}
       {row.importCompleteness === "full" ? (
-        <span className="rounded border px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide">
+        <span className="rounded border px-1.5 py-0.5 text-[0.65rem] tracking-wide uppercase">
           {t("import")}
         </span>
       ) : null}
@@ -250,7 +252,10 @@ export default async function InvoiceDetailPage({
             "credit_note",
           ].includes(row.docType)
             ? (row.docType as
-                "invoice" | "proforma" | "advance" | "credit_note")
+                | "invoice"
+                | "proforma"
+                | "advance"
+                | "credit_note")
             : undefined,
           currency: ["CZK", "EUR", "USD"].includes(row.currency)
             ? (row.currency as "CZK" | "EUR" | "USD")
@@ -261,7 +266,7 @@ export default async function InvoiceDetailPage({
         toast={sp.toast ?? null}
       />
       <Link
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         href="/invoices"
         prefetch
       >
@@ -410,14 +415,14 @@ export default async function InvoiceDetailPage({
       />
 
       {sp.invalid ? (
-        <p className="text-destructive text-sm">
+        <p className="text-sm text-destructive">
           {sp.invalid === "cannot_cancel"
             ? t("cannotCancelError")
             : invalidMessage(tErrors, sp.invalid)}
         </p>
       ) : null}
 
-      <dl className="bg-card grid gap-x-8 gap-y-3 rounded-xl border p-4 text-sm shadow-sm sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="grid gap-x-8 gap-y-3 rounded-xl border bg-card p-4 text-sm shadow-sm sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <dt className="text-muted-foreground">{t("issueDate")}</dt>
           <dd className="tabular-nums">
@@ -515,7 +520,7 @@ export default async function InvoiceDetailPage({
               </div>
             </dl>
             {allocationRows.length === 0 ? (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 {t("payments.empty")}
               </p>
             ) : (
@@ -533,7 +538,7 @@ export default async function InvoiceDetailPage({
                           locale,
                         )}
                       </p>
-                      <p className="text-muted-foreground text-xs">
+                      <p className="text-xs text-muted-foreground">
                         {formatInvoiceDate(allocation.effectiveDate, locale)} ·{" "}
                         {paymentSource(allocation.source)}
                         {allocation.reversedAt
@@ -582,7 +587,7 @@ export default async function InvoiceDetailPage({
       />
 
       {archive ? (
-        <p className="text-muted-foreground rounded-md border p-3 text-sm">
+        <p className="rounded-md border p-3 text-sm text-muted-foreground">
           {t("archiveNote")}
         </p>
       ) : null}
@@ -595,7 +600,7 @@ export default async function InvoiceDetailPage({
             {payload.data.items.map((it) => (
               <li className="rounded-md border p-3 text-sm" key={it.position}>
                 <p className="font-medium">
-                  <span className="text-muted-foreground mr-2 tabular-nums">
+                  <span className="mr-2 text-muted-foreground tabular-nums">
                     {it.position}.
                   </span>
                   {it.description}
@@ -695,7 +700,7 @@ export default async function InvoiceDetailPage({
       ) : null}
 
       {!archive && payload && !payload.success ? (
-        <p className="text-destructive text-sm">{t("invalidPayload")}</p>
+        <p className="text-sm text-destructive">{t("invalidPayload")}</p>
       ) : null}
 
       {showPdfPreview ? (

@@ -1,5 +1,7 @@
 "use client";
 
+import type { FormEvent } from "react";
+import * as React from "react";
 import { saveClient } from "@/actions/clients";
 import {
   formatAresLookupError,
@@ -9,10 +11,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { ClientSnapshot } from "@invoicey/invoice-core/schema";
 import { useTranslations } from "next-intl";
-import type { FormEvent } from "react";
-import * as React from "react";
+
+import type { ClientSnapshot } from "@invoicey/invoice-core/schema";
 
 export interface ClientEditorFormProps {
   mode: "create" | "edit";
@@ -116,7 +117,7 @@ export function ClientEditorForm({
 
   return (
     <form className="mx-auto max-w-xl space-y-6" onSubmit={onSubmit}>
-      {userMsg ? <p className="text-destructive text-sm">{userMsg}</p> : null}
+      {userMsg ? <p className="text-sm text-destructive">{userMsg}</p> : null}
 
       <div className="space-y-2">
         <Label htmlFor="client-ico">{t("ico")}</Label>
@@ -143,7 +144,7 @@ export function ClientEditorForm({
             {lookingUp ? t("lookingUp") : t("lookup")}
           </Button>
         </div>
-        <p className="text-muted-foreground text-xs">{t("icoHint")}</p>
+        <p className="text-xs text-muted-foreground">{t("icoHint")}</p>
       </div>
 
       <FieldGroup label={t("name")}>
@@ -222,7 +223,7 @@ export function ClientEditorForm({
         <Button disabled={lookingUp} loading={saving} type="submit">
           {saving ? t("saving") : t("save")}
         </Button>
-        <span className="text-muted-foreground flex items-center text-xs">
+        <span className="flex items-center text-xs text-muted-foreground">
           {t("source", {
             source: source === "ares" ? t("sourceAres") : t("sourceManual"),
           })}
@@ -238,7 +239,8 @@ function FieldGroup(props: { label: string; children: React.ReactNode }) {
   const childArray = React.Children.toArray(props.children);
   const controlIndex = childArray.findIndex(React.isValidElement);
   const control = childArray[controlIndex] as
-    React.ReactElement<{ id?: string }> | undefined;
+    | React.ReactElement<{ id?: string }>
+    | undefined;
   const controlId = control?.props.id ?? generatedControlId;
   const children = childArray.map((child, index) => {
     if (index !== controlIndex || !React.isValidElement(child)) {

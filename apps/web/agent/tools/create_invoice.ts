@@ -1,6 +1,7 @@
+import { defineTool } from "eve/tools";
+
 import { createAndRenderInvoice } from "@invoicey/invoice-tools";
 import { resolveDefaultIssuer } from "@invoicey/invoice-tools/ops";
-import { defineTool } from "eve/tools";
 
 import { CreateInvoiceInputSchema } from "../lib/create-invoice-input";
 import { buildInvoiceCardModel } from "../lib/invoice-card-model";

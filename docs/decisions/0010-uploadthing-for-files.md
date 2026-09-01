@@ -28,7 +28,7 @@ Storage options:
 Forces:
 
 - The user explicitly asked for UploadThing
-- We need a *URL* (snapshots store URLs — see [ADR 0008](./0008-snapshot-issuer-client-at-issue-time.md))
+- We need a _URL_ (snapshots store URLs — see [ADR 0008](./0008-snapshot-issuer-client-at-issue-time.md))
 - Old asset URLs must remain valid forever for historical PDF re-renders
 - Drag-and-drop, progress, type/size validation are table-stakes UX
 

@@ -1,13 +1,14 @@
 "use client";
 
+import type { CSSProperties, ReactNode } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AssistantProvider } from "@/components/assistant/assistant-provider";
 import { NavigationPendingOverlay } from "@/components/navigation/navigation-progress";
 import { SiteHeader } from "@/components/site-header";
 import { ToastFromSearchParams } from "@/components/toast-from-search-params";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+
 import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
-import type { CSSProperties, ReactNode } from "react";
 
 export interface AppShellUser {
   name: string;
@@ -68,7 +69,7 @@ export function AppShell({
           user={user}
           workspaces={workspaces}
         />
-        <SidebarInset className="bg-background flex min-h-0 flex-1 flex-col overflow-hidden">
+        <SidebarInset className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
           <SiteHeader />
           <ToastFromSearchParams />
           <div className="@container/main relative flex min-h-0 flex-1 flex-col gap-2 overflow-auto">

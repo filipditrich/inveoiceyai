@@ -1,5 +1,7 @@
 "use client";
 
+import type { FormEvent } from "react";
+import * as React from "react";
 import {
   createIssuer,
   dismissIssuerWelcome,
@@ -25,10 +27,8 @@ import {
   saveWelcomeRecovery,
 } from "@/lib/issuer-welcome-recovery";
 import { emitProductEvent } from "@/lib/product-analytics";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
-import type { FormEvent } from "react";
-import * as React from "react";
+import Link from "next/link";
 
 type Step = "workspace" | "identity" | "bank" | "done";
 
@@ -320,11 +320,11 @@ export function IssuerWelcomeWizard(props: {
           current={steps.length}
           labels={steps.map((key) => t(`steps.${key}`))}
         />
-        <div className="bg-card space-y-2 rounded-xl border p-6 shadow-sm">
+        <div className="space-y-2 rounded-xl border bg-card p-6 shadow-sm">
           <h1 className="text-2xl font-semibold tracking-tight">
             {t("doneTitle")}
           </h1>
-          <p className="text-muted-foreground text-sm">{t("doneBody")}</p>
+          <p className="text-sm text-muted-foreground">{t("doneBody")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button render={<Link href="/invoices/new" prefetch />} size="sm">
@@ -360,13 +360,13 @@ export function IssuerWelcomeWizard(props: {
         current={currentStep}
         labels={steps.map((key) => t(`steps.${key}`))}
       />
-      <div className="bg-card space-y-6 rounded-xl border p-6 shadow-sm">
+      <div className="space-y-6 rounded-xl border bg-card p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight">
               {t("title")}
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {step === "workspace"
                 ? t("workspaceHint")
                 : step === "identity"
@@ -390,9 +390,9 @@ export function IssuerWelcomeWizard(props: {
           </Button>
         </div>
 
-        <p className="text-muted-foreground text-xs">{t("skipHint")}</p>
+        <p className="text-xs text-muted-foreground">{t("skipHint")}</p>
         {visibleMessage ? (
-          <p className="text-destructive text-sm" role="alert">
+          <p className="text-sm text-destructive" role="alert">
             {visibleMessage}
           </p>
         ) : null}
@@ -401,7 +401,7 @@ export function IssuerWelcomeWizard(props: {
           <form className="space-y-6" onSubmit={onWorkspaceNext}>
             <fieldset className="space-y-4">
               <legend className="font-medium">{t("workspaceTitle")}</legend>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 {t("workspaceBody")}
               </p>
               <div className="flex items-center gap-3">
@@ -425,7 +425,7 @@ export function IssuerWelcomeWizard(props: {
               <div className="space-y-2">
                 <div className="space-y-1">
                   <Label>{t("workspaceLogoLabel")}</Label>
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-xs text-muted-foreground">
                     {t("workspaceLogoHint")}
                   </p>
                 </div>
@@ -452,7 +452,7 @@ export function IssuerWelcomeWizard(props: {
           <form className="space-y-6" onSubmit={onIdentityNext}>
             <fieldset className="space-y-4">
               <legend className="font-medium">{t("aresTitle")}</legend>
-              <p className="text-muted-foreground text-sm">{t("aresHint")}</p>
+              <p className="text-sm text-muted-foreground">{t("aresHint")}</p>
               <FieldGroup label={tForm("ico")}>
                 <div className="flex flex-wrap gap-2">
                   <Input
@@ -480,7 +480,7 @@ export function IssuerWelcomeWizard(props: {
             </fieldset>
             <fieldset className="space-y-4">
               <legend className="font-medium">{t("businessDetails")}</legend>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 {t("contactEmailHint")}
               </p>
               <FieldGroup label={tForm("name")}>
@@ -544,7 +544,7 @@ export function IssuerWelcomeWizard(props: {
               </label>
             </fieldset>
             <fieldset className="border-t pt-4">
-              <legend className="text-muted-foreground px-1 text-sm">
+              <legend className="px-1 text-sm text-muted-foreground">
                 {t("isdocAlternative")}
               </legend>
               <FieldGroup label={t("uploadLabel")}>
@@ -557,7 +557,7 @@ export function IssuerWelcomeWizard(props: {
                   }}
                   type="file"
                 />
-                <p className="text-muted-foreground text-xs">
+                <p className="text-xs text-muted-foreground">
                   {uploadPending ? t("uploadPending") : t("uploadHint")}
                 </p>
               </FieldGroup>
@@ -568,7 +568,7 @@ export function IssuerWelcomeWizard(props: {
           </form>
         ) : (
           <form className="space-y-4" onSubmit={onCreate}>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {t("bankForBusiness", { business: name })}
             </p>
             <BankAccountFields
@@ -622,8 +622,8 @@ function WelcomeProgress({
             <span
               className={
                 position <= current
-                  ? "bg-primary text-primary-foreground flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium"
-                  : "bg-muted text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium"
+                  ? "flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground"
+                  : "flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground"
               }
             >
               {position}

@@ -1,7 +1,6 @@
-import { checkBotId } from "botid/server";
-import { toNextJsHandler } from "better-auth/next-js";
-
 import { auth } from "@/lib/auth/auth";
+import { toNextJsHandler } from "better-auth/next-js";
+import { checkBotId } from "botid/server";
 
 export const runtime = "nodejs";
 

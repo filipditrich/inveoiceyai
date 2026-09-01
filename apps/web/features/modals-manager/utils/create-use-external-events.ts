@@ -2,7 +2,7 @@ import { useIsomorphicEffect } from "@/features/modals-manager/utils/use-isomorp
 
 /** CustomEvent bus shaped like Mantine `createUseExternalEvents`. */
 export function createUseExternalEvents<
-	THandlers extends Record<string, (...args: unknown[]) => void>,
+  THandlers extends Record<string, (...args: unknown[]) => void>,
 >(prefix: string) {
   function dispatchEvent(type: string, detail?: unknown) {
     if (typeof window === "undefined") return;
@@ -10,12 +10,14 @@ export function createUseExternalEvents<
   }
 
   function useExternalEvents(events: THandlers) {
-    const handlers = (
-      Object.keys(events) as (keyof THandlers)[]
-    ).reduce<Record<string, (evt: CustomEvent<unknown>) => void>>((acc, eventKey) => {
+    const handlers = (Object.keys(events) as (keyof THandlers)[]).reduce<
+      Record<string, (evt: CustomEvent<unknown>) => void>
+    >((acc, eventKey) => {
       const handler = events[eventKey];
       if (handler !== undefined && handler !== null) {
-        acc[`${prefix}:${String(eventKey)}`] = (event: CustomEvent<unknown>) => {
+        acc[`${prefix}:${String(eventKey)}`] = (
+          event: CustomEvent<unknown>,
+        ) => {
           handler(event.detail);
         };
       }

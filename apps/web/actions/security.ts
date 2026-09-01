@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import {
   listTrustedDevicesForUser,
   revokeTrustedDevice,
@@ -11,6 +9,8 @@ import {
   recordSecurityAuditEvent,
 } from "@/lib/auth/security-audit";
 import { getOptionalWorkspace, requireSession } from "@/lib/auth/session";
+import { revalidatePath } from "next/cache";
+
 import type { SecurityAuditEventType } from "@invoicey/db";
 
 export async function getTrustedDevicesAction() {

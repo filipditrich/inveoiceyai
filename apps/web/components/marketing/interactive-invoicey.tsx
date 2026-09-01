@@ -1,15 +1,15 @@
 "use client";
 
-import Image from "next/image";
 import type { RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 import { Invoicey3DCanvas } from "./invoicey-3d-canvas";
+import styles from "./marketing-motion.module.css";
 import {
   normalizePointerPosition,
   shouldShowFloatingGuide,
 } from "./pointer-motion";
-import styles from "./marketing-motion.module.css";
 
 type InteractiveInvoiceyProps = Readonly<{
   ariaLabel: string;

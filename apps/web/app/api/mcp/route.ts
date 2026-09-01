@@ -1,3 +1,6 @@
+import { resolveMachineBearer } from "@/lib/auth/machine-bearer";
+import { createMcpHandler, withMcpAuth } from "mcp-handler";
+
 import { recordToolActivity, tryCreateDbFromEnv } from "@invoicey/db";
 import { env } from "@invoicey/env/server";
 import { registerInvoiceyMcpTools } from "@invoicey/invoice-tools/mcp";
@@ -5,10 +8,8 @@ import {
   enterInvoiceyContext,
   getInvoiceyRequestContext,
 } from "@invoicey/invoice-tools/workspace-context";
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
-import { createMcpHandler, withMcpAuth } from "mcp-handler";
 
-import { resolveMachineBearer } from "@/lib/auth/machine-bearer";
+import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;

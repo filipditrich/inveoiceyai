@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import {
   createWorkspaceAction,
   switchWorkspaceAction,
@@ -15,7 +16,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ImageUploadField } from "@/components/upload/image-upload-field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -32,8 +32,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { ImageUploadField } from "@/components/upload/image-upload-field";
 import { WorkspaceMark } from "@/components/workspace-mark";
-import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 import {
   CheckIcon,
   ChevronsUpDownIcon,
@@ -45,8 +45,9 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useState, useTransition } from "react";
 import { toast } from "sonner";
+
+import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 
 const ROLE_KEYS = {
   owner: "roles.owner",
@@ -145,7 +146,7 @@ export function WorkspaceSwitcher({
               <WorkspaceMark logo={active.logo} name={active.name} />
               <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{active.name}</span>
-                <span className="text-muted-foreground truncate text-xs">
+                <span className="truncate text-xs text-muted-foreground">
                   {defaultDiverges
                     ? t("defaultDivergesShort", {
                         name: defaultWorkspace?.name ?? "…",
@@ -185,7 +186,7 @@ export function WorkspaceSwitcher({
               <DropdownMenuSeparator />
               <DropdownMenuLabel>{t("label")}</DropdownMenuLabel>
               {defaultDiverges ? (
-                <div className="text-muted-foreground px-1.5 pb-1.5 text-xs leading-snug">
+                <div className="px-1.5 pb-1.5 text-xs leading-snug text-muted-foreground">
                   <span className="inline-flex items-start gap-1.5">
                     <KeyRoundIcon className="mt-0.5 size-3.5 shrink-0" />
                     {t("defaultDivergesHint", {
@@ -212,7 +213,7 @@ export function WorkspaceSwitcher({
                       <span className="truncate font-medium">
                         {workspace.name}
                       </span>
-                      <span className="text-muted-foreground truncate text-xs">
+                      <span className="truncate text-xs text-muted-foreground">
                         {t(ROLE_KEYS[workspace.role])}
                         {isDefault ? ` · ${t("apiKeysDefaultBadge")}` : ""}
                       </span>
@@ -273,7 +274,7 @@ export function WorkspaceSwitcher({
             <div className="space-y-2">
               <div className="space-y-1">
                 <Label>{t("logoLabel")}</Label>
-                <p className="text-muted-foreground text-xs">{t("logoHint")}</p>
+                <p className="text-xs text-muted-foreground">{t("logoHint")}</p>
               </div>
               {uploadConfigured ? (
                 <ImageUploadField
@@ -284,11 +285,11 @@ export function WorkspaceSwitcher({
                   url={newLogo}
                 />
               ) : (
-                <p className="text-muted-foreground text-xs">
+                <p className="text-xs text-muted-foreground">
                   {t("uploadUnavailable")}
                 </p>
               )}
-              <p className="text-muted-foreground text-xs">
+              <p className="text-xs text-muted-foreground">
                 {t("logoOptional")}
               </p>
             </div>

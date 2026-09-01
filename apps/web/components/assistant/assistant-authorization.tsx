@@ -1,8 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import type { EveAuthorizationPart } from "eve/react";
 import { useTranslations } from "next-intl";
+
+import type { EveAuthorizationPart } from "eve/react";
 
 /**
  * A connection asking to be authorized mid-turn.
@@ -20,7 +21,7 @@ export function AssistantAuthorization({
 
   if (part.state === "completed") {
     return (
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         {part.outcome === "authorized"
           ? t("connected", { name: part.displayName })
           : t("failed", { name: part.displayName, outcome: part.outcome })}
@@ -29,10 +30,10 @@ export function AssistantAuthorization({
   }
 
   return (
-    <div className="bg-card flex flex-col gap-2 rounded-xl border p-3">
+    <div className="flex flex-col gap-2 rounded-xl border bg-card p-3">
       <p className="text-sm">{part.description}</p>
       {part.authorization?.userCode ? (
-        <code className="bg-muted rounded px-2 py-1 text-center font-mono text-sm">
+        <code className="rounded bg-muted px-2 py-1 text-center font-mono text-sm">
           {part.authorization.userCode}
         </code>
       ) : null}

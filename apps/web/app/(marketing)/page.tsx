@@ -1,7 +1,15 @@
-import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { BrandLogo } from "@/components/brand-logo";
+import { FaqAccordion } from "@/components/marketing/faq-accordion";
+import {
+  FloatingInvoiceyGuide,
+  InteractiveInvoicey,
+} from "@/components/marketing/interactive-invoicey";
+import motionStyles from "@/components/marketing/marketing-motion.module.css";
+import { MarketingSignedInChip } from "@/components/marketing/marketing-signed-in";
+import { ProductPreview } from "@/components/marketing/product-preview";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { getOptionalSession } from "@/lib/auth/session";
 import {
   ArrowDownIcon,
   ArrowRightIcon,
@@ -25,19 +33,11 @@ import {
   SparklesIcon,
   WalletIcon,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import Image from "next/image";
+import Link from "next/link";
 
-import { ProductPreview } from "@/components/marketing/product-preview";
-import { FaqAccordion } from "@/components/marketing/faq-accordion";
-import {
-  FloatingInvoiceyGuide,
-  InteractiveInvoicey,
-} from "@/components/marketing/interactive-invoicey";
-import motionStyles from "@/components/marketing/marketing-motion.module.css";
-import { MarketingSignedInChip } from "@/components/marketing/marketing-signed-in";
-import { BrandLogo } from "@/components/brand-logo";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { getOptionalSession } from "@/lib/auth/session";
+import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Marketing.meta");
@@ -185,29 +185,29 @@ export default async function HomePage() {
     <>
       <section className="relative overflow-hidden">
         <div className="marketing-grid absolute inset-0 -z-20 opacity-55" />
-        <div className="bg-brand/20 absolute -top-48 left-1/2 -z-10 size-[38rem] -translate-x-1/2 rounded-full blur-3xl" />
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 pb-16 pt-12 sm:px-6 sm:pb-20 sm:pt-20 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-12 lg:px-8 lg:py-16">
+        <div className="absolute -top-48 left-1/2 -z-10 size-[38rem] -translate-x-1/2 rounded-full bg-brand/20 blur-3xl" />
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 pt-12 pb-16 sm:px-6 sm:pt-20 sm:pb-20 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-12 lg:px-8 lg:py-16">
           <div className={`${motionStyles.heroCopy} max-w-2xl`}>
             <Badge
               variant="outline"
-              className="bg-background/70 h-7 gap-1.5 px-3 backdrop-blur"
+              className="h-7 gap-1.5 bg-background/70 px-3 backdrop-blur"
             >
               <SparklesIcon data-icon="inline-start" />
               {t("hero.badge")}
             </Badge>
-            <h1 className="mt-7 text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-[4.5rem]">
+            <h1 className="mt-7 text-5xl leading-[0.98] font-semibold tracking-[-0.055em] text-balance sm:text-6xl lg:text-[4.5rem]">
               {t("hero.titleLine1")}
-              <span className="dark:text-primary block text-[#914522]">
+              <span className="block text-[#914522] dark:text-primary">
                 {t("hero.titleLine2")}
               </span>
             </h1>
-            <p className="text-muted-foreground mt-7 max-w-xl text-pretty text-lg leading-relaxed sm:text-xl">
+            <p className="mt-7 max-w-xl text-lg leading-relaxed text-pretty text-muted-foreground sm:text-xl">
               {t("hero.subtitle")}
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Button
                 size="lg"
-                className="shadow-primary/15 h-11 px-5 text-[0.95rem] shadow-lg"
+                className="h-11 px-5 text-[0.95rem] shadow-lg shadow-primary/15"
                 render={<Link href="/dashboard" prefetch={false} />}
               >
                 {user ? t("hero.ctaPrimarySignedIn") : t("hero.ctaPrimary")}
@@ -230,21 +230,21 @@ export default async function HomePage() {
                 />
               </p>
             ) : null}
-            <div className="text-muted-foreground mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs">
+            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2Icon className="text-primary size-3.5" />
+                <CheckCircle2Icon className="size-3.5 text-primary" />
                 {t("hero.noPassword")}
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2Icon className="text-primary size-3.5" />
+                <CheckCircle2Icon className="size-3.5 text-primary" />
                 {t("hero.czechUi")}
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2Icon className="text-primary size-3.5" />
+                <CheckCircle2Icon className="size-3.5 text-primary" />
                 {t("hero.bankMatching")}
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2Icon className="text-primary size-3.5" />
+                <CheckCircle2Icon className="size-3.5 text-primary" />
                 {t("hero.betaAccess")}
               </span>
             </div>
@@ -260,15 +260,15 @@ export default async function HomePage() {
 
       <section
         aria-label={t("trust.ariaLabel")}
-        className="bg-muted/25 border-y"
+        className="border-y bg-muted/25"
       >
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-4 sm:px-6 md:grid-cols-3 lg:grid-cols-6 lg:px-8">
           {trustItems.map((item) => (
             <div
               key={item.label}
-              className={`${motionStyles.trustItem} md:border-border/60 flex items-center justify-center gap-2.5 border-x border-transparent px-3 py-5 text-center text-sm font-medium`}
+              className={`${motionStyles.trustItem} flex items-center justify-center gap-2.5 border-x border-transparent px-3 py-5 text-center text-sm font-medium md:border-border/60`}
             >
-              <item.icon className="text-primary size-4 shrink-0" />
+              <item.icon className="size-4 shrink-0 text-primary" />
               {item.label}
             </div>
           ))}
@@ -325,7 +325,7 @@ export default async function HomePage() {
 
       <section
         id="prehled"
-        className="bg-muted/25 scroll-mt-24 border-y px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto max-w-7xl">
           <SectionIntro
@@ -334,20 +334,20 @@ export default async function HomePage() {
             description={t("capabilities.description")}
           />
           <div
-            className={`${motionStyles.scrollReveal} bg-border mt-14 grid gap-px overflow-hidden rounded-3xl border md:grid-cols-2 lg:grid-cols-3`}
+            className={`${motionStyles.scrollReveal} mt-14 grid gap-px overflow-hidden rounded-3xl border bg-border md:grid-cols-2 lg:grid-cols-3`}
           >
             {capabilities.map((capability) => (
               <div
                 key={capability.title}
                 className={`${motionStyles.liftCard} bg-background p-6 sm:p-8`}
               >
-                <span className="bg-brand/12 grid size-10 place-items-center rounded-xl">
+                <span className="grid size-10 place-items-center rounded-xl bg-brand/12">
                   <capability.icon className="size-4.5" />
                 </span>
                 <h3 className="mt-6 text-lg font-semibold tracking-tight">
                   {capability.title}
                 </h3>
-                <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                   {capability.description}
                 </p>
               </div>
@@ -367,19 +367,19 @@ export default async function HomePage() {
             <Badge variant="secondary" className="h-7 gap-1.5 px-3">
               <LandmarkIcon data-icon="inline-start" /> {t("payments.badge")}
             </Badge>
-            <p className="dark:text-primary mt-6 text-sm font-semibold uppercase tracking-wide text-[#914522]">
+            <p className="mt-6 text-sm font-semibold tracking-wide text-[#914522] uppercase dark:text-primary">
               {t("payments.eyebrow")}
             </p>
-            <h2 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
+            <h2 className="mt-3 text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-5xl">
               {t("payments.title")}
             </h2>
-            <p className="text-muted-foreground mt-6 text-lg leading-relaxed">
+            <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
               {t("payments.description")}
             </p>
             <ul className="mt-8 space-y-3 text-sm">
               {paymentItems.map((item) => (
                 <li key={item} className="flex items-start gap-3">
-                  <CheckCircle2Icon className="text-primary mt-0.5 size-4 shrink-0" />
+                  <CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />
                   {item}
                 </li>
               ))}
@@ -390,23 +390,23 @@ export default async function HomePage() {
 
       <section
         id="automatizace"
-        className="bg-muted/25 scroll-mt-24 overflow-hidden border-y px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 overflow-hidden border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2 lg:gap-20">
           <div className={motionStyles.scrollReveal}>
             <Badge variant="secondary" className="h-7 gap-1.5 px-3">
               <BotIcon data-icon="inline-start" /> {t("automation.badge")}
             </Badge>
-            <h2 className="mt-6 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
+            <h2 className="mt-6 text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-5xl">
               {t("automation.title")}
             </h2>
-            <p className="text-muted-foreground mt-6 text-lg leading-relaxed">
+            <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
               {t("automation.description")}
             </p>
             <ul className="mt-8 space-y-3 text-sm">
               {automationItems.map((item) => (
                 <li key={item} className="flex items-start gap-3">
-                  <CheckCircle2Icon className="text-primary mt-0.5 size-4 shrink-0" />
+                  <CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />
                   {item}
                 </li>
               ))}
@@ -414,30 +414,30 @@ export default async function HomePage() {
           </div>
 
           <div
-            className={`${motionStyles.scrollReveal} ${motionStyles.chatStage} bg-foreground text-background dark:bg-card dark:text-card-foreground relative overflow-hidden rounded-[2rem] p-4 shadow-2xl sm:p-6`}
+            className={`${motionStyles.scrollReveal} ${motionStyles.chatStage} relative overflow-hidden rounded-[2rem] bg-foreground p-4 text-background shadow-2xl sm:p-6 dark:bg-card dark:text-card-foreground`}
           >
-            <div className="bg-brand/20 absolute -right-20 -top-20 size-64 rounded-full blur-3xl" />
-            <div className="dark:border-border dark:bg-background/50 relative rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-              <div className="dark:border-border flex items-center gap-3 border-b border-white/10 pb-4">
+            <div className="absolute -top-20 -right-20 size-64 rounded-full bg-brand/20 blur-3xl" />
+            <div className="relative rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm dark:border-border dark:bg-background/50">
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4 dark:border-border">
                 <BrandLogo size={36} className="rounded-xl" />
                 <div>
                   <p className="text-sm font-medium">
                     {t("automation.chatTitle")}
                   </p>
-                  <p className="text-background/55 dark:text-muted-foreground text-xs">
+                  <p className="text-xs text-background/55 dark:text-muted-foreground">
                     {t("automation.chatSubtitle")}
                   </p>
                 </div>
               </div>
               <div className="space-y-4 py-5">
-                <div className="dark:bg-muted ml-auto max-w-[88%] rounded-2xl rounded-br-md bg-white/10 px-4 py-3 text-sm leading-relaxed">
+                <div className="ml-auto max-w-[88%] rounded-2xl rounded-br-md bg-white/10 px-4 py-3 text-sm leading-relaxed dark:bg-muted">
                   {t("automation.chatUserMessage")}
                 </div>
-                <div className="bg-brand text-brand-foreground max-w-[92%] rounded-2xl rounded-bl-md px-4 py-3 text-sm shadow-lg">
+                <div className="max-w-[92%] rounded-2xl rounded-bl-md bg-brand px-4 py-3 text-sm text-brand-foreground shadow-lg">
                   <p className="font-medium">
                     {t("automation.chatReplyTitle")}
                   </p>
-                  <div className="bg-black/8 mt-3 space-y-2 rounded-xl p-3 text-xs">
+                  <div className="mt-3 space-y-2 rounded-xl bg-black/8 p-3 text-xs">
                     <ChatRow
                       label={t("automation.chatClientLabel")}
                       value={t("automation.chatClient")}
@@ -451,12 +451,12 @@ export default async function HomePage() {
                       value={t("automation.chatOutput")}
                     />
                   </div>
-                  <div className="bg-foreground text-background mt-3 inline-flex rounded-lg px-3 py-2 text-xs font-semibold">
+                  <div className="mt-3 inline-flex rounded-lg bg-foreground px-3 py-2 text-xs font-semibold text-background">
                     {t("automation.chatAction")}
                   </div>
                 </div>
               </div>
-              <div className="text-background/75 dark:border-border dark:text-muted-foreground flex items-center gap-2 border-t border-white/10 pt-4 text-[0.65rem]">
+              <div className="flex items-center gap-2 border-t border-white/10 pt-4 text-[0.65rem] text-background/75 dark:border-border dark:text-muted-foreground">
                 <LandmarkIcon className="size-3.5" />
                 {t("automation.chatDisclaimer")}
               </div>
@@ -482,18 +482,18 @@ export default async function HomePage() {
               <Link
                 key={integration.title}
                 href={integration.href}
-                className={`${motionStyles.liftCard} bg-card shadow-xs hover:border-primary/40 focus-visible:ring-3 focus-visible:ring-ring/50 group rounded-2xl border p-6 outline-none transition-colors`}
+                className={`${motionStyles.liftCard} group rounded-2xl border bg-card p-6 shadow-xs transition-colors outline-none hover:border-primary/40 focus-visible:ring-3 focus-visible:ring-ring/50`}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <span className="bg-brand/12 grid size-10 place-items-center rounded-xl">
+                  <span className="grid size-10 place-items-center rounded-xl bg-brand/12">
                     <integration.icon className="size-4.5" />
                   </span>
-                  <ArrowUpRightIcon className="text-muted-foreground group-hover:text-foreground size-4 transition-colors" />
+                  <ArrowUpRightIcon className="size-4 text-muted-foreground transition-colors group-hover:text-foreground" />
                 </div>
                 <h3 className="mt-5 text-base font-semibold tracking-tight">
                   {integration.title}
                 </h3>
-                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {integration.description}
                 </p>
               </Link>
@@ -508,7 +508,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="bg-muted/25 border-y px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+      <section className="border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
         <div
           className={`${motionStyles.scrollReveal} mx-auto grid max-w-7xl gap-5 md:grid-cols-2 lg:grid-cols-3`}
         >
@@ -567,25 +567,25 @@ export default async function HomePage() {
 
       <section className="px-4 pb-20 sm:px-6 sm:pb-28 lg:px-8">
         <div
-          className={`${motionStyles.scrollReveal} from-brand/35 via-brand/15 bg-linear-to-br to-background relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] border p-8 sm:p-12 lg:p-16`}
+          className={`${motionStyles.scrollReveal} relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] border bg-linear-to-br from-brand/35 via-brand/15 to-background p-8 sm:p-12 lg:p-16`}
         >
           <Image
             alt=""
             aria-hidden="true"
-            className={`${motionStyles.ctaMascot} absolute -bottom-16 -right-12 hidden h-auto w-[25rem] select-none lg:block`}
+            className={`${motionStyles.ctaMascot} absolute -right-12 -bottom-16 hidden h-auto w-[25rem] select-none lg:block`}
             height={900}
             sizes="400px"
             src="/brand/illustrations/invoicey-mascot-branded.webp"
             width={900}
           />
           <div className="relative max-w-2xl lg:max-w-[58%]">
-            <p className="dark:text-primary text-sm font-semibold uppercase tracking-wide text-[#914522]">
+            <p className="text-sm font-semibold tracking-wide text-[#914522] uppercase dark:text-primary">
               {t("cta.eyebrow")}
             </p>
-            <h2 className="mt-4 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
+            <h2 className="mt-4 text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-5xl">
               {t("cta.title")}
             </h2>
-            <p className="text-muted-foreground mt-5 text-base leading-relaxed sm:text-lg">
+            <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
               {user ? t("cta.descriptionSignedIn") : t("cta.description")}
             </p>
             {user ? (
@@ -621,18 +621,18 @@ async function PaymentLedgerCard() {
 
   return (
     <div
-      className={`${motionStyles.scrollReveal} ${motionStyles.chatStage} bg-card relative overflow-hidden rounded-[2rem] border p-4 shadow-2xl sm:p-6`}
+      className={`${motionStyles.scrollReveal} ${motionStyles.chatStage} relative overflow-hidden rounded-[2rem] border bg-card p-4 shadow-2xl sm:p-6`}
     >
-      <div className="bg-brand/15 absolute -left-24 -top-24 size-64 rounded-full blur-3xl" />
+      <div className="absolute -top-24 -left-24 size-64 rounded-full bg-brand/15 blur-3xl" />
 
-      <div className="bg-background relative rounded-2xl border p-5">
+      <div className="relative rounded-2xl border bg-background p-5">
         <div className="flex items-center gap-3 border-b pb-4">
-          <span className="bg-muted grid size-9 place-items-center rounded-xl">
+          <span className="grid size-9 place-items-center rounded-xl bg-muted">
             <LandmarkIcon className="size-4" />
           </span>
           <div>
             <p className="text-sm font-medium">{t("cardTitle")}</p>
-            <p className="text-muted-foreground text-xs">{t("cardSubtitle")}</p>
+            <p className="text-xs text-muted-foreground">{t("cardSubtitle")}</p>
           </div>
         </div>
         <div className="mt-4 space-y-2.5 text-sm">
@@ -643,26 +643,26 @@ async function PaymentLedgerCard() {
       </div>
 
       <div className="relative flex justify-center py-3">
-        <span className="bg-brand text-brand-foreground grid size-8 place-items-center rounded-full shadow-lg">
+        <span className="grid size-8 place-items-center rounded-full bg-brand text-brand-foreground shadow-lg">
           <ArrowDownIcon className="size-4" />
         </span>
       </div>
 
-      <div className="border-primary/30 bg-brand/10 relative rounded-2xl border p-5">
+      <div className="relative rounded-2xl border border-primary/30 bg-brand/10 p-5">
         <p className="flex items-center gap-2 text-sm font-medium">
-          <SparklesIcon className="text-primary size-4" />
+          <SparklesIcon className="size-4 text-primary" />
           {t("matchTitle")}
         </p>
         <div className="mt-4 space-y-2.5 text-sm">
           <LedgerRow label={t("matchInvoiceLabel")} value={t("matchInvoice")} />
           <LedgerRow label={t("matchStateLabel")} value={t("matchState")} />
         </div>
-        <div className="bg-foreground text-background mt-4 inline-flex rounded-lg px-3 py-2 text-xs font-semibold">
+        <div className="mt-4 inline-flex rounded-lg bg-foreground px-3 py-2 text-xs font-semibold text-background">
           {t("matchAction")}
         </div>
       </div>
 
-      <p className="text-muted-foreground relative mt-4 flex items-center gap-2 text-[0.65rem]">
+      <p className="relative mt-4 flex items-center gap-2 text-[0.65rem] text-muted-foreground">
         <ShieldCheckIcon className="size-3.5" />
         {t("disclaimer")}
       </p>
@@ -677,7 +677,7 @@ function LedgerRow({
 }: Readonly<{ label: string; mono?: boolean; value: string }>) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <span className="text-muted-foreground text-xs">{label}</span>
+      <span className="text-xs text-muted-foreground">{label}</span>
       <span
         className={`text-right text-sm font-medium ${mono ? "font-mono" : ""}`}
       >
@@ -704,13 +704,13 @@ function SectionIntro({
         align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-xl"
       }`}
     >
-      <p className="dark:text-primary text-sm font-semibold uppercase tracking-wide text-[#914522]">
+      <p className="text-sm font-semibold tracking-wide text-[#914522] uppercase dark:text-primary">
         {eyebrow}
       </p>
-      <h2 className="mt-4 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
+      <h2 className="mt-4 text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-5xl">
         {title}
       </h2>
-      <p className="text-muted-foreground mt-5 text-base leading-relaxed sm:text-lg">
+      <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
         {description}
       </p>
     </div>
@@ -730,16 +730,16 @@ function WorkflowStep({
 }>) {
   return (
     <div
-      className={`${motionStyles.liftCard} bg-card shadow-xs relative rounded-3xl border p-6 sm:p-8`}
+      className={`${motionStyles.liftCard} relative rounded-3xl border bg-card p-6 shadow-xs sm:p-8`}
     >
-      <span className="text-muted-foreground/75 absolute right-7 top-6 font-mono text-4xl font-semibold tracking-tighter">
+      <span className="absolute top-6 right-7 font-mono text-4xl font-semibold tracking-tighter text-muted-foreground/75">
         {number}
       </span>
-      <span className="bg-brand/12 grid size-11 place-items-center rounded-2xl [&_svg]:size-5">
+      <span className="grid size-11 place-items-center rounded-2xl bg-brand/12 [&_svg]:size-5">
         {icon}
       </span>
       <h3 className="mt-8 text-xl font-semibold tracking-tight">{title}</h3>
-      <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
         {description}
       </p>
     </div>
@@ -770,27 +770,27 @@ function FeaturePanel({
 }>) {
   return (
     <div
-      className={`${motionStyles.liftCard} bg-background rounded-[2rem] border p-7 sm:p-10`}
+      className={`${motionStyles.liftCard} rounded-[2rem] border bg-background p-7 sm:p-10`}
     >
-      <span className="bg-brand/12 grid size-11 place-items-center rounded-2xl [&_svg]:size-5">
+      <span className="grid size-11 place-items-center rounded-2xl bg-brand/12 [&_svg]:size-5">
         {icon}
       </span>
-      <p className="dark:text-primary mt-8 text-xs font-semibold uppercase tracking-wide text-[#914522]">
+      <p className="mt-8 text-xs font-semibold tracking-wide text-[#914522] uppercase dark:text-primary">
         {eyebrow}
       </p>
-      <h2 className="mt-3 text-balance text-2xl font-semibold tracking-[-0.035em]">
+      <h2 className="mt-3 text-2xl font-semibold tracking-[-0.035em] text-balance">
         {title}
       </h2>
-      <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
+      <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
         {description}
       </p>
       <div className="mt-7 flex flex-wrap gap-2">
         {items.map((item) => (
           <span
             key={item}
-            className="bg-muted inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"
+            className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-medium"
           >
-            <CheckCircle2Icon className="text-primary size-3" />
+            <CheckCircle2Icon className="size-3 text-primary" />
             {item}
           </span>
         ))}

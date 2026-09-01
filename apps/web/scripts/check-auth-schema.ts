@@ -14,9 +14,9 @@
  */
 // Side effect: repo-root .env, before anything reads process.env at import.
 import "@invoicey/env/load";
+import { getAuthTables } from "better-auth/db";
 
 import { authSchema } from "@invoicey/db";
-import { getAuthTables } from "better-auth/db";
 
 import { auth } from "../lib/auth/auth";
 

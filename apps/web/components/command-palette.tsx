@@ -1,5 +1,10 @@
 "use client";
 
+import * as React from "react";
+import { quickSearchAction, type QuickSearchResult } from "@/actions/search";
+import { Kbd } from "@/components/ui/kbd";
+import { formatMoney } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import { Dialog } from "@base-ui/react/dialog";
 import {
   ArchiveRestoreIcon,
@@ -20,13 +25,8 @@ import {
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import * as React from "react";
 
-import { quickSearchAction, type QuickSearchResult } from "@/actions/search";
-import { Kbd } from "@/components/ui/kbd";
 import type { AppLocale } from "@/i18n/config";
-import { formatMoney } from "@/lib/format";
-import { cn } from "@/lib/utils";
 
 type CommandKey =
   | "dashboard"
@@ -115,7 +115,10 @@ const EMPTY_RESULTS: QuickSearchResult = { invoices: [], clients: [] };
 
 /** Strips diacritics so "faktura" matches "Faktúra" and "ucet" matches "účet". */
 function fold(value: string): string {
-  return value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
 }
 
 interface Row {
@@ -265,7 +268,7 @@ export function CommandPalette() {
     <>
       <button
         aria-keyshortcuts="Meta+K Control+K"
-        className="text-muted-foreground hover:bg-muted/60 hover:text-foreground focus-visible:ring-ring flex h-8 items-center gap-2 rounded-md border px-2.5 text-sm outline-none transition-colors focus-visible:ring-2 max-sm:size-10 max-sm:justify-center max-sm:border-0 max-sm:px-0"
+        className="flex h-8 items-center gap-2 rounded-md border px-2.5 text-sm text-muted-foreground transition-colors outline-none hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring max-sm:size-10 max-sm:justify-center max-sm:border-0 max-sm:px-0"
         onClick={() => setOpenState(true)}
         type="button"
       >
@@ -278,32 +281,32 @@ export function CommandPalette() {
       <Dialog.Root open={open} onOpenChange={setOpenState}>
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
-          <Dialog.Popup className="bg-popover fixed left-1/2 top-[12vh] z-50 w-[min(36rem,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-xl border shadow-2xl outline-none transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0">
+          <Dialog.Popup className="fixed top-[12vh] left-1/2 z-50 w-[min(36rem,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-xl border bg-popover shadow-2xl transition-opacity outline-none data-[ending-style]:opacity-0 data-[starting-style]:opacity-0">
             <Dialog.Title className="sr-only">{t("title")}</Dialog.Title>
             <Dialog.Description className="sr-only">
               {t("description")}
             </Dialog.Description>
             <div className="flex items-center gap-2 border-b px-3">
               <SearchIcon
-                className="text-muted-foreground size-4 shrink-0"
+                className="size-4 shrink-0 text-muted-foreground"
                 aria-hidden
               />
               <input
                 aria-label={t("title")}
                 autoFocus
-                className="placeholder:text-muted-foreground h-12 w-full bg-transparent text-sm outline-none"
+                className="h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                 onChange={(event) => setQuery(event.target.value)}
                 onKeyDown={onInputKeyDown}
                 placeholder={t("placeholder")}
                 value={query}
               />
               {searching ? (
-                <LoaderCircleIcon className="text-muted-foreground size-4 shrink-0 animate-spin" />
+                <LoaderCircleIcon className="size-4 shrink-0 animate-spin text-muted-foreground" />
               ) : null}
             </div>
             <div className="max-h-[min(24rem,60vh)] overflow-y-auto p-1.5">
               {rows.length === 0 ? (
-                <p className="text-muted-foreground px-3 py-6 text-center text-sm">
+                <p className="px-3 py-6 text-center text-sm text-muted-foreground">
                   {t("empty")}
                 </p>
               ) : (
@@ -326,11 +329,11 @@ export function CommandPalette() {
                         <span className="text-muted-foreground [&_svg]:size-4">
                           {row.icon}
                         </span>
-                        <span className="text-foreground min-w-0 flex-1 truncate">
+                        <span className="min-w-0 flex-1 truncate text-foreground">
                           {row.label}
                         </span>
                         {row.hint ? (
-                          <span className="text-muted-foreground max-w-[45%] truncate text-xs">
+                          <span className="max-w-[45%] truncate text-xs text-muted-foreground">
                             {row.hint}
                           </span>
                         ) : null}

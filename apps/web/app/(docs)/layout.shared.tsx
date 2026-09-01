@@ -1,7 +1,7 @@
-import type { DocsLayoutProps } from "fumadocs-ui/layouts/docs";
+import { BrandLogo } from "@/components/brand-logo";
 import { ArrowUpRightIcon } from "lucide-react";
 
-import { BrandLogo } from "@/components/brand-logo";
+import type { DocsLayoutProps } from "fumadocs-ui/layouts/docs";
 
 const GITHUB_URL = "https://github.com/filipditrich/inveoiceyai";
 
