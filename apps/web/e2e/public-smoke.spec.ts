@@ -153,6 +153,21 @@ test.describe("public platform", () => {
     await expect(page.locator('main[lang="en"]')).toHaveCount(1);
   });
 
+  test("docs chrome links to the marketing homepage and the CLI and Drive guides", async ({
+    page,
+  }) => {
+    await page.goto("/docs");
+    await expect(
+      page.getByRole("link", { name: "Home", exact: true }),
+    ).toHaveAttribute("href", "/");
+    await page.goto("/docs/integrations/cli");
+    await expect(page.getByRole("heading", { name: "CLI" })).toBeVisible();
+    await page.goto("/docs/integrations/invoicey-drive");
+    await expect(
+      page.getByRole("heading", { name: "Invoicey Drive" }),
+    ).toBeVisible();
+  });
+
   test("auth shell pages expose one level-one heading", async ({ page }) => {
     await page.goto("/r/invalid");
     await expect(page.locator("h1")).toHaveCount(1);

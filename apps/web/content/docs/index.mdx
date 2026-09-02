@@ -12,8 +12,10 @@ Invoicey is invoice automation for freelancers and small teams — Czech-first b
   truth.
 </Callout>
 
-The web app, [MCP](/docs/integrations/mcp), the [CLI](/docs/integrations/cli) and [Slack agent](/docs/integrations/slack) all use that
-same validated payload.
+The web app, [MCP](/docs/integrations/mcp), the [CLI](/docs/integrations/cli),
+[Invoicey Drive](/docs/integrations/invoicey-drive) and the
+[Slack agent](/docs/integrations/slack) all share that same validated payload. Drive is the
+exception that only _reads_ issued invoices — it never drafts or issues.
 
 ## What you get
 
@@ -26,7 +28,8 @@ same validated payload.
 | **SPAYD QR**         | Czech banking apps pre-fill amount, account, VS from a scan        |
 | **Multiple issuers** | Separate businesses, each with its own numbering and bank account  |
 | **Payment ledger**   | Manual payments + Fio bank feed; other banks deferred for now      |
-| **Automation**       | Create and issue invoices from Cursor, Claude Code or Slack        |
+| **Automation**       | Create and issue from Cursor, Claude Code, Slack or the CLI        |
+| **Invoicey Drive**   | Issued PDFs as files in Finder on your Mac                         |
 
 ## How the pieces fit
 
@@ -35,10 +38,12 @@ same validated payload.
 flowchart LR
   WebUI[Web UI] --> Tools[Shared tool layer]
   MCP[MCP] --> Tools
+  CLI[CLI] --> Tools
   Slack[Slack] --> Tools
   Tools --> Schema[InvoiceSchema]
   Schema --> Outputs[PDF / ISDOC / SPAYD QR]
   Schema --> Workspace[Your workspace]
+  Workspace --> Drive[Invoicey Drive]
 "
 />
 
@@ -56,6 +61,16 @@ Every surface must satisfy the same schema before Invoicey renders or stores an 
     title="Core concepts"
     href="/docs/concepts/invoice-as-data"
     description="The schema, VAT, numbering, statuses and snapshots."
+  />
+  <Card
+    title="CLI"
+    href="/docs/integrations/cli"
+    description="Login, list unpaid, issue and send from a terminal."
+  />
+  <Card
+    title="Invoicey Drive"
+    href="/docs/integrations/invoicey-drive"
+    description="Issued invoices as files in Finder on your Mac."
   />
   <Card
     title="Integrations"
@@ -86,6 +101,6 @@ Invoicey is pre-1.0. Today that means:
 - **Czech koruna only.** Multi-currency is not implemented. The Fio pilot is CZK-only.
 - **Czech and English UI.** Issued PDF and ISDOC labels remain Czech.
 - **API keys have no scopes.** A key is full access to one workspace — see [API keys](/docs/integrations/api-keys).
-- **No public REST API.** Automation goes through MCP or the Slack agent.
+- **No public REST API.** Automation goes through MCP, the CLI, or the Slack agent.
 - **Recurring invoices are drafts only.** A daily cron creates a reviewable draft; you issue and send it. Auto-issue and auto-email are not in v1.
 - **Bank matching is confirm-first.** Fio imports proposals; a person confirms allocations — see [Reconcile payments](/docs/guides/reconciling-payments). Why only Fio: [Bank connections](/docs/integrations/bank-connections).

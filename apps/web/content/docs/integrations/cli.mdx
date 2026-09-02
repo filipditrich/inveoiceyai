@@ -4,15 +4,23 @@ description: Manage invoices, clients, and payments from an interactive terminal
 icon: SquareTerminal
 ---
 
-Invoicey CLI is an operator cockpit for the same workspace the web app, MCP, and
-Slack already share. It is not a second Invoicey — looks, members, bank connect,
-and bulk import stay on the website.
+Invoicey CLI is an operator cockpit for the same workspace the web app, [MCP](/docs/integrations/mcp),
+and [Slack](/docs/integrations/slack) already share. It is not a second Invoicey — looks, members,
+bank connect, and bulk import stay on the website.
+
+<Callout title="Same validation as every other surface">
+  Drafts still go through `InvoiceSchema`. The CLI cannot invent an issuer —
+  create injects the workspace default, the same way MCP does.
+</Callout>
 
 ## Install
 
-The public installer detects macOS or Linux and the current architecture,
-downloads the matching standalone binary, verifies it against the published
-SHA-256 checksum, and puts it in `~/.invoicey/bin`:
+<Tabs items={["macOS / Linux", "From the repository"]}>
+
+<Tab value="macOS / Linux">
+
+The public installer detects the current architecture, downloads the matching standalone binary,
+verifies it against the published SHA-256 checksum, and puts it in `~/.invoicey/bin`:
 
 ```bash
 curl -fsSL https://invoicey.ditrich.me/install | bash
@@ -26,10 +34,12 @@ invoicey --version
 invoicey login
 ```
 
-Set `INVOICEY_INSTALL_DIR` to choose another destination. Set
-`INVOICEY_VERSION` to install a specific release instead of the latest one.
+Set `INVOICEY_INSTALL_DIR` to choose another destination. Set `INVOICEY_VERSION` to install a
+specific release instead of the latest one.
 
-### Build from the repository
+</Tab>
+
+<Tab value="From the repository">
 
 Contributors can compile and install the current checkout with Bun:
 
@@ -42,8 +52,8 @@ The installer:
 
 1. Builds `apps/cli/src/bin.ts` → `apps/cli/dist/invoicey`
 2. Copies that file to `~/.invoicey/bin/invoicey`
-3. Appends `export PATH="$HOME/.invoicey/bin:$PATH"` to your shell rc
-   (`.zshrc`, `.bashrc`, or fish `config.fish`) if that PATH is not already there
+3. Appends `export PATH="$HOME/.invoicey/bin:$PATH"` to your shell rc (`.zshrc`, `.bashrc`, or
+   fish `config.fish`) if that PATH is not already there
 
 Re-run `bun run invoicey:install` after pulling CLI source changes.
 
@@ -53,23 +63,52 @@ To run from source without compiling:
 bun run --filter=@invoicey/cli start
 ```
 
+</Tab>
+
+</Tabs>
+
 ## Login
 
-Create a personal key under **Settings → API keys** — see [API keys](/docs/integrations/api-keys).
+<Steps>
+
+<Step>
+
+### Create a personal key
+
+Under **Settings → API keys**, create a key and copy it once. See [API keys](/docs/integrations/api-keys).
+
+</Step>
+
+<Step>
+
+### Save it on this machine
 
 ```bash
 invoicey login
 ```
 
-Paste the key, keep the default API URL (`https://invoicey.ditrich.me`) unless
-you are hitting a local `bun dev`. The key is stored in `~/.invoicey/cli.json`
-(mode `0600`). You can also set `INVOICEY_API_KEY` and optional
-`INVOICEY_API_URL`.
+Paste the key, keep the default API URL (`https://invoicey.ditrich.me`) unless you are hitting a
+local `bun dev`. The key is stored in `~/.invoicey/cli.json` (mode `0600`). You can also set
+`INVOICEY_API_KEY` and optional `INVOICEY_API_URL`.
 
-`login` calls `POST /api/companion` with `{ "op": "me" }`. A bad key is `401`.
-If something in front of the API returns HTML (a redirect to sign-in, a
-challenge page), the CLI prints the content-type and a body snippet — it does
-not swallow that as a generic “unexpected response (200)”.
+</Step>
+
+<Step>
+
+### Confirm the workspace
+
+```bash
+invoicey whoami
+invoicey status
+```
+
+`login` calls `POST /api/companion` with `{ "op": "me" }`. A bad key is `401`. If something in front
+of the API returns HTML (a redirect to sign-in, a challenge page), the CLI prints the content-type
+and a body snippet — it does not swallow that as a generic “unexpected response (200)”.
+
+</Step>
+
+</Steps>
 
 ## Daily use
 
@@ -86,21 +125,100 @@ invoicey payments
 invoicey ares NFCtron
 ```
 
-Invoice refs are an issued **number** or a UUID. Irreversible actions confirm
-in a TTY unless you pass `--yes`. `--json` prints the companion payload.
+Invoice refs are an issued **number** or a UUID. Irreversible actions confirm in a TTY unless you
+pass `--yes`. `--json` prints the companion payload.
 
-<Callout title="Same validation as every other surface">
-  Drafts still go through `InvoiceSchema`. The CLI cannot invent an issuer —
-  create injects the workspace default, the same way MCP does.
-</Callout>
+## Commands
+
+| Command                                        | What it does                                 |
+| ---------------------------------------------- | -------------------------------------------- |
+| `invoicey`                                     | Interactive home when stdin is a TTY         |
+| `invoicey login` / `logout` / `whoami`         | Save, drop, or inspect the stored key        |
+| `invoicey status`                              | Display-status counts and outstanding totals |
+| `invoicey invoices [ls]`                       | List (`--unpaid`, `--limit`, `--q`)          |
+| `invoicey invoices show <ref>`                 | One invoice by number or UUID                |
+| `invoicey invoices new`                        | Draft (`--ico`, `--client`, line flags)      |
+| `invoicey invoices issue <ref>`                | Issue a draft                                |
+| `invoicey invoices send <ref>`                 | Email PDF + ISDOC (`--to`)                   |
+| `invoicey invoices paid` / `unpaid` / `cancel` | Payment state and cancel                     |
+| `invoicey invoices pdf` / `isdoc`              | Download artifacts (`-o`)                    |
+| `invoicey clients` / `clients add <ico>`       | List, or add from ARES                       |
+| `invoicey issuers`                             | List issuers (default flagged)               |
+| `invoicey payments`                            | Pending bank-match proposals                 |
+| `invoicey payments confirm` / `reject`         | Confirm or reject a proposal                 |
+| `invoicey ares <ico-or-name>`                  | ARES lookup or name search                   |
+
+Global flags: `--api`, `--token`, `--json`, `-y` / `--yes`.
+
+<Mermaid
+  chart="
+flowchart LR
+  Tty[invoicey] -->|Bearer PAT| Api[Companion API]
+  Tty -->|GET| Files[PDF download]
+  Api --> Tools[Shared tool layer]
+  Tools --> Schema[InvoiceSchema]
+  Web[Web MCP Slack] --> Tools
+"
+/>
 
 ## Files on disk
+
+<Files>
+  <Folder name="~/.invoicey" defaultOpen>
+    <Folder name="bin" defaultOpen>
+      <File name="invoicey" />
+    </Folder>
+    <File name="cli.json" />
+  </Folder>
+</Files>
 
 | Path                       | What                   |
 | -------------------------- | ---------------------- |
 | `~/.invoicey/bin/invoicey` | Compiled command       |
 | `~/.invoicey/cli.json`     | API URL + PAT (`0600`) |
 
-Logout removes `cli.json`. It does not uninstall the binary. Delete
-`~/.invoicey/bin/invoicey` and the PATH line in your shell rc if you want it
-gone.
+Logout removes `cli.json`. It does not uninstall the binary. Delete `~/.invoicey/bin/invoicey` and
+the PATH line in your shell rc if you want it gone.
+
+## Troubleshooting
+
+<Accordions>
+
+<Accordion title="command not found: invoicey">
+  The installer wrote to `~/.invoicey/bin`. Open a new terminal, or `export
+  PATH="$HOME/.invoicey/bin:$PATH"` in the current one.
+</Accordion>
+
+<Accordion title="401 unauthorized">
+  The key was revoked, mistyped, or truncated. Create a fresh one under
+  **Settings → API keys** and run `invoicey login` again.
+</Accordion>
+
+<Accordion title="Unexpected HTML instead of JSON">
+  Something in front of `/api/companion` returned a sign-in page or challenge.
+  The CLI prints the content-type and a body snippet. Confirm
+  `https://invoicey.ditrich.me/api/companion` is reachable and that you did not
+  point `--api` at the marketing site without the `/api` path.
+</Accordion>
+
+</Accordions>
+
+## Related
+
+<Cards>
+  <Card
+    title="API keys"
+    href="/docs/integrations/api-keys"
+    description="Create the personal key login asks for."
+  />
+  <Card
+    title="Remote MCP"
+    href="/docs/integrations/mcp"
+    description="The same workspace, from an assistant."
+  />
+  <Card
+    title="Invoicey Drive"
+    href="/docs/integrations/invoicey-drive"
+    description="Issued PDFs as files in Finder."
+  />
+</Cards>
