@@ -17,18 +17,18 @@ describe("from helpers", () => {
   });
 
   it("parses EMAIL_FROM", () => {
-    const parsed = parseEmailFrom("Invoicey <invoices@invoicey.ditrich.me>");
-    expect(parsed.address).toBe("invoices@invoicey.ditrich.me");
+    const parsed = parseEmailFrom("Invoicey <invoices@invoicey.app>");
+    expect(parsed.address).toBe("invoices@invoicey.app");
     expect(parsed.display).toBe("Invoicey");
   });
 
   it("parses EMAIL_SYSTEM_FROM with noreply default", () => {
     expect(parseEmailSystemFrom(undefined).address).toBe(
-      "noreply@invoicey.ditrich.me",
+      "noreply@invoicey.app",
     );
     expect(
-      parseEmailSystemFrom("Invoicey <noreply@invoicey.ditrich.me>").address,
-    ).toBe("noreply@invoicey.ditrich.me");
+      parseEmailSystemFrom("Invoicey <noreply@invoicey.app>").address,
+    ).toBe("noreply@invoicey.app");
   });
 
   it("applies display name templates", () => {

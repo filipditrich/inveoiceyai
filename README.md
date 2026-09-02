@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://invoicey.ditrich.me">
+  <a href="https://invoicey.app">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="apps/web/public/brand/invoicey-lockup.svg">
       <source media="(prefers-color-scheme: light)" srcset="apps/web/public/brand/invoicey-lockup-on-light.svg">
@@ -17,8 +17,8 @@
 </p>
 
 <p align="center">
-  <a href="https://invoicey.ditrich.me"><img src="https://img.shields.io/badge/product-invoicey.ditrich.me-f97316?style=for-the-badge" alt="Open Invoicey"/></a>
-  <a href="https://invoicey.ditrich.me/docs"><img src="https://img.shields.io/badge/docs-guides-18181b?style=for-the-badge" alt="Docs"/></a>
+  <a href="https://invoicey.app"><img src="https://img.shields.io/badge/product-invoicey.app-f97316?style=for-the-badge" alt="Open Invoicey"/></a>
+  <a href="https://invoicey.app/docs"><img src="https://img.shields.io/badge/docs-guides-18181b?style=for-the-badge" alt="Docs"/></a>
   <img src="https://img.shields.io/badge/status-private%20beta-f97316?style=for-the-badge" alt="Private beta"/>
   <a href="https://github.com/filipditrich/inveoiceyai/releases"><img src="https://img.shields.io/github/v/release/filipditrich/inveoiceyai?style=for-the-badge&color=18181b" alt="Latest release"/></a>
 </p>
@@ -29,7 +29,7 @@
   <a href="#create-from-anywhere">Create from anywhere</a> ·
   <a href="#plans">Plans</a> ·
   <a href="#documentation">Docs</a> ·
-  <a href="https://invoicey.ditrich.me/brand">Brand</a> ·
+  <a href="https://invoicey.app/brand">Brand</a> ·
   <a href="#contributing">Contributing</a>
 </p>
 
@@ -43,7 +43,7 @@
 
 An invoice in Invoicey is a validated JSON payload — parties, lines, VAT, payment, totals. The PDF, the ISDOC XML, and the SPAYD payment QR are **outputs of that payload**, never the source of truth.
 
-The web app, [MCP](https://invoicey.ditrich.me/docs/integrations/mcp), and [Slack](https://invoicey.ditrich.me/docs/integrations/slack) all assemble the same schema. If it does not validate, it does not ship.
+The web app, [MCP](https://invoicey.app/docs/integrations/mcp), and [Slack](https://invoicey.app/docs/integrations/slack) all assemble the same schema. If it does not validate, it does not ship.
 
 Issuing freezes issuer and client **snapshots**, so a later registry edit cannot rewrite history. Status is **derived** from the ledger — unpaid, partial, paid, overpaid — not a checkbox you maintain by hand.
 
@@ -72,31 +72,31 @@ Czech standards (ARES, DPH, ISDOC, SPAYD) are capabilities, not a slogan. The pr
 
 Same tools, same validation, same outputs. AI may draft. It may not invent an IČO, a UUID, or a required field — and issuing, sending, or marking paid always waits for a person.
 
-| Surface   | What it does                                                                                                                                                                                                                             |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Web**   | Structured draft, AI prompt → schema, PDF preview, issue, email, payments.                                                                                                                                                               |
-| **MCP**   | Hosted at `https://invoicey.ditrich.me/api/mcp` (workspace API key) or local stdio for Cursor. [Cursor](https://invoicey.ditrich.me/docs/integrations/cursor) · [Claude Code](https://invoicey.ditrich.me/docs/integrations/claude-code) |
-| **Slack** | Eve drafts in-thread, asks when something would be a guess, confirms before it ships.                                                                                                                                                    |
-| **CLI**   | Interactive terminal for list / draft / issue / send / payments. Same PAT as MCP. [CLI](https://invoicey.ditrich.me/docs/integrations/cli)                                                                                               |
-| **Banks** | Read-only Fio and MONETA feeds → match proposals on the same ledger as manual payments.                                                                                                                                                  |
-| **Mac**   | [Invoicey Drive](https://github.com/filipditrich/invoicey-mac) lists issued PDFs in Finder. Pair from the menu bar. Cancel, pay, and issue stay here.                                                                                    |
+| Surface   | What it does                                                                                                                                                                                                        |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Web**   | Structured draft, AI prompt → schema, PDF preview, issue, email, payments.                                                                                                                                          |
+| **MCP**   | Hosted at `https://invoicey.app/api/mcp` (workspace API key) or local stdio for Cursor. [Cursor](https://invoicey.app/docs/integrations/cursor) · [Claude Code](https://invoicey.app/docs/integrations/claude-code) |
+| **Slack** | Eve drafts in-thread, asks when something would be a guess, confirms before it ships.                                                                                                                               |
+| **CLI**   | Interactive terminal for list / draft / issue / send / payments. Same PAT as MCP. [CLI](https://invoicey.app/docs/integrations/cli)                                                                                 |
+| **Banks** | Read-only Fio and MONETA feeds → match proposals on the same ledger as manual payments.                                                                                                                             |
+| **Mac**   | [Invoicey Drive](https://github.com/filipditrich/invoicey-mac) lists issued PDFs in Finder. Pair from the menu bar. Cancel, pay, and issue stay here.                                                               |
 
 Install the terminal companion:
 
 ```bash
-curl -fsSL https://invoicey.ditrich.me/install | bash
+curl -fsSL https://invoicey.app/install | bash
 invoicey login
 ```
 
 The installer verifies the release checksum and puts a standalone binary in
-`~/.invoicey/bin`. See the [CLI quickstart](https://invoicey.ditrich.me/docs/integrations/cli)
-or [download Invoicey for Mac](https://invoicey.ditrich.me/#apps).
+`~/.invoicey/bin`. See the [CLI quickstart](https://invoicey.app/docs/integrations/cli)
+or [download Invoicey for Mac](https://invoicey.app/#apps).
 
 ```json
 {
   "mcpServers": {
     "invoicey": {
-      "url": "https://invoicey.ditrich.me/api/mcp",
+      "url": "https://invoicey.app/api/mcp",
       "headers": { "Authorization": "Bearer <workspace-api-key>" }
     }
   }
@@ -125,16 +125,16 @@ Free is a complete solo invoicing tool. Pro adds people, banks, and looks. Enter
 
 ## Documentation
 
-| Doc                                                                                | What it covers                                                                                  |
-| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| [Product docs](https://invoicey.ditrich.me/docs)                                   | Quickstart, VAT, snapshots, MCP, banks, email                                                   |
-| [Quickstart](https://invoicey.ditrich.me/docs/getting-started/quickstart)          | Sign in → issuer → client → issue → send                                                        |
-| [Invoice as data](https://invoicey.ditrich.me/docs/concepts/invoice-as-data)       | The schema every surface validates against                                                      |
-| [Reconcile payments](https://invoicey.ditrich.me/docs/guides/reconciling-payments) | Ledger, proposals, Fio & MONETA                                                                 |
-| [Invoicey Drive](https://invoicey.ditrich.me/docs/integrations/invoicey-drive)     | macOS Finder companion · sibling [`invoicey-mac`](https://github.com/filipditrich/invoicey-mac) |
-| [Brand assets](https://invoicey.ditrich.me/brand)                                  | Official wordmarks, app icons, provider files, and usage guide                                  |
-| [`docs/`](docs/README.md)                                                          | Internal source of truth — PRD, ADRs, domain, specs                                             |
-| [`CHANGELOG.md`](CHANGELOG.md)                                                     | What shipped                                                                                    |
+| Doc                                                                         | What it covers                                                                                  |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| [Product docs](https://invoicey.app/docs)                                   | Quickstart, VAT, snapshots, MCP, banks, email                                                   |
+| [Quickstart](https://invoicey.app/docs/getting-started/quickstart)          | Sign in → issuer → client → issue → send                                                        |
+| [Invoice as data](https://invoicey.app/docs/concepts/invoice-as-data)       | The schema every surface validates against                                                      |
+| [Reconcile payments](https://invoicey.app/docs/guides/reconciling-payments) | Ledger, proposals, Fio & MONETA                                                                 |
+| [Invoicey Drive](https://invoicey.app/docs/integrations/invoicey-drive)     | macOS Finder companion · sibling [`invoicey-mac`](https://github.com/filipditrich/invoicey-mac) |
+| [Brand assets](https://invoicey.app/brand)                                  | Official wordmarks, app icons, provider files, and usage guide                                  |
+| [`docs/`](docs/README.md)                                                   | Internal source of truth — PRD, ADRs, domain, specs                                             |
+| [`CHANGELOG.md`](CHANGELOG.md)                                              | What shipped                                                                                    |
 
 ---
 
@@ -168,7 +168,7 @@ invoicey-mac              Swift — Invoicey Drive Finder librarian
 <details>
 <summary>Local development</summary>
 
-Contributor workflow, not a self-host guide. Production lives at [invoicey.ditrich.me](https://invoicey.ditrich.me).
+Contributor workflow, not a self-host guide. Production lives at [invoicey.app](https://invoicey.app).
 
 ```bash
 git clone https://github.com/filipditrich/inveoiceyai.git

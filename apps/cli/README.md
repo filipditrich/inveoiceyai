@@ -7,7 +7,7 @@ Interactive terminal cockpit for an Invoicey workspace.
 Install the standalone release binary with one command:
 
 ```bash
-curl -fsSL https://invoicey.ditrich.me/install | bash
+curl -fsSL https://invoicey.app/install | bash
 ```
 
 The installer detects macOS or Linux and the current architecture, downloads

@@ -52,7 +52,7 @@ const LINE_COLS_NO_VAT = {
   tot: "19%",
 } as const;
 
-const INVOICEY_SITE_URL = "https://invoicey.ditrich.me/";
+const INVOICEY_SITE_URL = "https://invoicey.app/";
 
 type InvoiceVatBreakdownRowModel = Invoice["totals"]["vatBreakdown"][number];
 

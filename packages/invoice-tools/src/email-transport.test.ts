@@ -18,10 +18,8 @@ describe("email From resolution", () => {
     });
     expect(from.family).toBe("invoice");
     expect(from.display).toBe("ACME via Invoicey");
-    expect(from.address).toBe("invoices@invoicey.ditrich.me");
-    expect(from.header).toBe(
-      "ACME via Invoicey <invoices@invoicey.ditrich.me>",
-    );
+    expect(from.address).toBe("invoices@invoicey.app");
+    expect(from.header).toBe("ACME via Invoicey <invoices@invoicey.app>");
   });
 
   it("resolves system From without via append and noreply@", () => {
@@ -31,33 +29,33 @@ describe("email From resolution", () => {
     });
     expect(from.family).toBe("system");
     expect(from.display).toBe("Invoicey");
-    expect(from.address).toBe("noreply@invoicey.ditrich.me");
-    expect(from.header).toBe("Invoicey <noreply@invoicey.ditrich.me>");
+    expect(from.address).toBe("noreply@invoicey.app");
+    expect(from.header).toBe("Invoicey <noreply@invoicey.app>");
   });
 
   it("keeps explicit via display on system invites", () => {
     const from = resolveTransactionalFrom({
       template: "workspace_invite",
       displayName: "Filip via Invoicey",
-      emailSystemFrom: "Invoicey <noreply@invoicey.ditrich.me>",
+      emailSystemFrom: "Invoicey <noreply@invoicey.app>",
     });
     expect(from.display).toBe("Filip via Invoicey");
-    expect(from.address).toBe("noreply@invoicey.ditrich.me");
+    expect(from.address).toBe("noreply@invoicey.app");
   });
 
   it("honors EMAIL_FROM and EMAIL_SYSTEM_FROM overrides", () => {
     const invoice = resolveTransactionalFrom({
       template: "invoice_sent",
       displayName: "ACME via Invoicey",
-      emailFrom: "Custom <billing@invoicey.ditrich.me>",
+      emailFrom: "Custom <billing@invoicey.app>",
     });
-    expect(invoice.address).toBe("billing@invoicey.ditrich.me");
+    expect(invoice.address).toBe("billing@invoicey.app");
 
     const system = resolveTransactionalFrom({
       template: "new_sign_in",
       displayName: "Invoicey",
-      emailSystemFrom: "Alerts <security@invoicey.ditrich.me>",
+      emailSystemFrom: "Alerts <security@invoicey.app>",
     });
-    expect(system.address).toBe("security@invoicey.ditrich.me");
+    expect(system.address).toBe("security@invoicey.app");
   });
 });

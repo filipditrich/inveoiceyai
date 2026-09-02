@@ -785,6 +785,39 @@ stays the system of record for looks, members, bank connect, and import.
 **Out of 31:** look builder, bulk import, members, bank connect, recurring
 editor, Drive device tokens, local Neon mode.
 
+## Plan 32 — Standalone domain (`invoicey.app`)
+
+**Goal:** Canonical public origin `https://invoicey.app` (apex), email From on
+`@invoicey.app`, old host kept as a dual-serve / 308 for a deprecation window.
+
+**Spec:** [`specs/standalone-domain.md`](./specs/standalone-domain.md)
+
+**Why it is a plan:** the host is hardcoded in CLI defaults, PDF footer, email
+From, Drive allowlist, OAuth consoles, and Resend DNS — not just
+`NEXT_PUBLIC_APP_URL`. The CLI refuses redirects ([ADR 0044](./decisions/0044-invoicey-cli-companion.md)),
+so a naive 308 of the old hostname would break MCP and `invoicey` until
+clients update.
+
+### Exit criteria
+
+- [x] ADR 0045 accepted with apex-canonical, dual-serve machine routes, and
+      From-domain decisions
+- [x] `invoicey.app` + `www` attached on Vercel `inveoiceyai-web` with valid
+      certs (`.app` is HSTS-preloaded)
+- [x] Google + GitHub OAuth callbacks exist on the new origin **before**
+      `BETTER_AUTH_URL` flips
+- [x] Resend domain `invoicey.app` verified (SPF/DKIM/DMARC); webhook observed
+      on a real send
+- [x] Runtime defaults + public docs no longer advertise `invoicey.ditrich.me`
+- [x] Smoke table in the spec is green (OAuth, invite, send, Eve health, MCP
+      on **both** hosts, CLI old `apiUrl` still works)
+- [ ] CLI release with `DEFAULT_API_URL=https://invoicey.app` published
+- [x] Old-host HTML 308s to apex; `/api/mcp`, `/api/companion`, `/eve/v1/*`,
+      `/install` still serve on the old host until the deprecation window ends
+
+**Out of 32:** repo/Vercel rename, Neon/Resend account move, Drive bundle-id
+change, inbound `inbox.` revival, legal-entity copy.
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:

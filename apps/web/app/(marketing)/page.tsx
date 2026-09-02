@@ -599,7 +599,7 @@ export default async function HomePage() {
                 </p>
                 <div className="mt-8">
                   <InstallCommand
-                    command="curl -fsSL https://invoicey.ditrich.me/install | bash"
+                    command="curl -fsSL https://invoicey.app/install | bash"
                     copiedLabel={t("companions.copied")}
                     copyLabel={t("companions.copy")}
                   />

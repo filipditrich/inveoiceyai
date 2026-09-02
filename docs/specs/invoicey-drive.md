@@ -72,7 +72,7 @@ See [ADR 0042](../decisions/0042-drive-device-pairing.md).
 
 1. Menu bar: Connect Invoicey (Settings never starts PKCE).
 2. `ASWebAuthenticationSession` → `/drive/connect?challenge=&redirect=`.
-3. Prod callback: Associated Domains on `invoicey.ditrich.me`. Local: `invoicey-drive://oauth`.
+3. Prod callback: Associated Domains on `invoicey.app` (legacy `invoicey.ditrich.me` stays allowed during cutover). Local: `invoicey-drive://oauth`.
 4. Sign-in if needed. Confirm Connect this Mac.
 5. Callback `code`. `POST /api/drive/token` + PKCE verifier.
 6. Keychain stores the device token until revoke. File Provider domain is added. Sign out revokes this device. No cap.
@@ -130,7 +130,7 @@ Out of v1: Windows, iOS Files, create/issue/pay, two-way PDF edit, Proton/iCloud
 
 Czech + English Drive catalog copy shipped in [PR 28](https://github.com/filipditrich/inveoiceyai/pull/28). Remaining:
 
-- Associated Domains `apple-app-site-association` on `invoicey.ditrich.me` once the Team ID exists
+- Associated Domains `apple-app-site-association` on `invoicey.app` once the Team ID exists
 - `.dmg` hosting URL (`INVOICEY_DRIVE_DMG_URL`; Settings shows a placeholder until the first notarized build)
 - File Provider `.appex` in Finder Locations (same paid team)
 

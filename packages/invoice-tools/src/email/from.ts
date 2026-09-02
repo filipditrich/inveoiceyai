@@ -1,9 +1,9 @@
 import type { EmailTemplateId } from "@invoicey/emails";
 
-const DEFAULT_INVOICE_FROM = "Invoicey <invoices@invoicey.ditrich.me>";
-const DEFAULT_SYSTEM_FROM = "Invoicey <noreply@invoicey.ditrich.me>";
-const DEFAULT_INVOICE_ADDRESS = "invoices@invoicey.ditrich.me";
-const DEFAULT_SYSTEM_ADDRESS = "noreply@invoicey.ditrich.me";
+const DEFAULT_INVOICE_FROM = "Invoicey <invoices@invoicey.app>";
+const DEFAULT_SYSTEM_FROM = "Invoicey <noreply@invoicey.app>";
+const DEFAULT_INVOICE_ADDRESS = "invoices@invoicey.app";
+const DEFAULT_SYSTEM_ADDRESS = "noreply@invoicey.app";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const SYSTEM_TEMPLATES = new Set<EmailTemplateId>([

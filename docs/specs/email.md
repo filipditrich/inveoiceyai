@@ -30,12 +30,12 @@ Client-facing invoice templates (`invoice_sent`, `overdue_reminder`, `payment_re
 
 ## From / Reply-To
 
-- **Invoice From address:** `invoices@invoicey.ditrich.me` (override via `EMAIL_FROM`).
-- **System From address:** `noreply@invoicey.ditrich.me` (override via `EMAIL_SYSTEM_FROM`) for `new_sign_in` and `workspace_invite`.
+- **Invoice From address:** `invoices@invoicey.app` (override via `EMAIL_FROM`).
+- **System From address:** `noreply@invoicey.app` (override via `EMAIL_SYSTEM_FROM`) for `new_sign_in` and `workspace_invite`.
 - **Invoice From display:** `"{Name} via Invoicey"` — issuer name or send-time override (transport appends `via Invoicey` when missing).
 - **System From display:** as provided (no auto `via` append). Security alerts use plain `Invoicey`; invites pass `{inviterName} via Invoicey` at the call site.
 - **Reply-To:** issuer `contactEmail` (invoice sends) or inviter email (invites).
-- Never arbitrary From domains — only addresses on the verified `invoicey.ditrich.me` domain.
+- Never arbitrary From domains — only addresses on the verified `invoicey.app` domain.
 
 ## UI / MCP contracts
 
@@ -104,15 +104,15 @@ Table `email_suppressions`: `(workspace_id, email)` + `reason` (`bounce` | `comp
 | `EMAIL_PROVIDER`        | Transport selector (`resend` today; fail closed on unknown)        |
 | `RESEND_API_KEY`        | Resend send API (optional in schema; send fails closed when unset) |
 | `RESEND_WEBHOOK_SECRET` | Svix webhook secret (optional; webhook fails closed when unset)    |
-| `EMAIL_FROM`            | Invoice From (`Invoicey <invoices@invoicey.ditrich.me>`)           |
-| `EMAIL_SYSTEM_FROM`     | System From (`Invoicey <noreply@invoicey.ditrich.me>`)             |
+| `EMAIL_FROM`            | Invoice From (`Invoicey <invoices@invoicey.app>`)                  |
+| `EMAIL_SYSTEM_FROM`     | System From (`Invoicey <noreply@invoicey.app>`)                    |
 | `CRON_SECRET`           | Bearer for `/api/cron/overdue-reminders` (11d)                     |
 
 ## Go-live checklist (operator)
 
-1. Add and verify domain `invoicey.ditrich.me` in Resend (DNS on ditrich.me).
+1. Add and verify domain `invoicey.app` in Resend (DNS on Vercel for `invoicey.app`). Keep `invoicey.ditrich.me` verified during the cutover.
 2. Set `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET`, `EMAIL_FROM`, and optionally `EMAIL_SYSTEM_FROM` on Vercel. `noreply@` needs no separate mailbox once the domain is verified.
-3. Point Resend webhook to `https://invoicey.ditrich.me/api/webhooks/resend` with the subscribed events.
+3. Point Resend webhook to `https://invoicey.app/api/webhooks/resend` with the subscribed events (the old host still serves the same route).
 4. Set `CRON_SECRET` and schedule daily hit to `/api/cron/overdue-reminders`.
 
 ## References

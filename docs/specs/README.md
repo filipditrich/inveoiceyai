@@ -15,7 +15,7 @@ Per-feature implementation specs. Written **just-in-time** before the plan that 
 > Plan 25 design specs and the mPohoda API analysis, is preserved on the
 > `feat/payables-lifecycle` branch (tag `archive/payables-lifecycle`).
 
-**Planned specs:** [`production-ux-finish.md`](./production-ux-finish.md) is the active cross-feature production UX program. [`plans-entitlements.md`](./plans-entitlements.md) is the active Plan 26 spec (plans, entitlements, managed clients, permissions). [`pdf-looks.md`](./pdf-looks.md) is the Plan 27 S0 spec (look documents, Classic + Minimal, snapshot, picker). [`pdf-looks-builder.md`](./pdf-looks-builder.md) is the Plan 28 S1 spec (workspace looks + builder). [`pdf-looks-community.md`](./pdf-looks-community.md) is the Plan 29 S2 spec (community publish). [`invoicey-drive.md`](./invoicey-drive.md) is the Plan 30 spec (macOS companion File Provider + pairing API). [`invoicey-cli.md`](./invoicey-cli.md) is the Plan 31 spec (operator CLI + companion JSON API).
+**Planned specs:** [`production-ux-finish.md`](./production-ux-finish.md) is the active cross-feature production UX program. [`plans-entitlements.md`](./plans-entitlements.md) is the active Plan 26 spec (plans, entitlements, managed clients, permissions). [`pdf-looks.md`](./pdf-looks.md) is the Plan 27 S0 spec (look documents, Classic + Minimal, snapshot, picker). [`pdf-looks-builder.md`](./pdf-looks-builder.md) is the Plan 28 S1 spec (workspace looks + builder). [`pdf-looks-community.md`](./pdf-looks-community.md) is the Plan 29 S2 spec (community publish). [`invoicey-drive.md`](./invoicey-drive.md) is the Plan 30 spec (macOS companion File Provider + pairing API). [`invoicey-cli.md`](./invoicey-cli.md) is the Plan 31 spec (operator CLI + companion JSON API). [`standalone-domain.md`](./standalone-domain.md) is the Plan 32 spec (cutover from `invoicey.ditrich.me` to `invoicey.app`).
 
 Just-in-time convention: write the remaining specs before the plan that consumes them ([lifecycle](../README.md#lifecycle-conventions)).
 
@@ -43,6 +43,7 @@ Just-in-time convention: write the remaining specs before the plan that consumes
 | `assistant-panel.md`       | —                    | In-app assistant on the same Eve agent as Slack: browser auth, shared card model and card actions, per-surface metering              |
 | `invoicey-drive.md`        | Plan 30              | macOS companion: File Provider domain, Drive device pairing, layout template, `/api/drive/*`                                         |
 | `invoicey-cli.md`          | Plan 31              | Operator CLI + PAT companion JSON API (`/api/companion`)                                                                             |
+| `standalone-domain.md`     | Plan 32              | Cutover canonical host + email From to `invoicey.app`                                                                                |
 
 ## Spec format conventions
 

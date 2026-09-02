@@ -79,6 +79,12 @@ export const auth = betterAuth({
   appName: "Invoicey",
   baseURL,
   secret: env.BETTER_AUTH_SECRET,
+  /** dual-serve during the invoicey.app cutover (ADR 0045) */
+  trustedOrigins: [
+    "https://invoicey.app",
+    "https://www.invoicey.app",
+    "https://invoicey.ditrich.me",
+  ],
   database: drizzleAdapter(db, { provider: "pg", schema: authSchema }),
 
   // OAuth only — no email+password (ADR 0018).

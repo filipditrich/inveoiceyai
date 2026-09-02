@@ -41,6 +41,9 @@ npm-debug.log*
 # local agent settings and generated worktrees
 .claude/
 
+# ephemeral cutover wizard state
+scripts/.cutover-invoicey-app.state
+
 # local MCP presets (Plan 12a)
 .invoicey/
 .env*

@@ -17,7 +17,7 @@ const invoiceFixture = {
   totalLabel: "12 100,00 Kč",
   clientName: "Klient s.r.o.",
   issuerName: "Dodavatel s.r.o.",
-  invoiceUrl: "https://invoicey.ditrich.me/invoices/abc",
+  invoiceUrl: "https://invoicey.app/invoices/abc",
 };
 
 describe("email renders", () => {
@@ -29,8 +29,8 @@ describe("email renders", () => {
       amountLabel: "1 210,00 Kč",
       bookedDate: "15. 8. 2026",
       variableSymbol: "20260018",
-      invoiceUrl: "https://invoicey.ditrich.me/invoices/abc",
-      paymentsUrl: "https://invoicey.ditrich.me/payments",
+      invoiceUrl: "https://invoicey.app/invoices/abc",
+      paymentsUrl: "https://invoicey.app/payments",
     });
     expect(out.subject).toContain("2026-0018");
     expect(out.html).toContain("automaticky");
@@ -62,7 +62,7 @@ describe("email renders", () => {
     const out = await renderWorkspaceInviteEmail({
       workspaceName: "Invoicey",
       inviterName: "Filip",
-      inviteUrl: "https://invoicey.ditrich.me/invite/xyz",
+      inviteUrl: "https://invoicey.app/invite/xyz",
       role: "member",
       expiresAtLabel: "13. 8. 2026 20:47",
     });
@@ -94,9 +94,8 @@ describe("email renders", () => {
       ipAddress: "1.2.3.4",
       userAgent: "Chrome",
       signedInAt: "11. 8. 2026 13:00",
-      trustUrl: "https://invoicey.ditrich.me/security/trust?token=abc",
-      securitySettingsUrl:
-        "https://invoicey.ditrich.me/settings/account/security",
+      trustUrl: "https://invoicey.app/security/trust?token=abc",
+      securitySettingsUrl: "https://invoicey.app/settings/account/security",
     });
     expect(out.subject).toContain("přihlášení");
     expect(out.html).toContain("Důvěřovat tomuto zařízení");

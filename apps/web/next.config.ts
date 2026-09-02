@@ -60,6 +60,30 @@ const withNextIntl = createNextIntlPlugin({
  * `/settings/workspace/*` (this workspace). The old paths are in sent emails,
  * Slack link cards, and bookmarks, so they keep resolving.
  */
+const LEGACY_PUBLIC_HOST = "invoicey.ditrich.me";
+const CANONICAL_ORIGIN = "https://invoicey.app";
+
+/**
+ * Browser routes on the old host 308 to the apex. Machine and pairing paths
+ * stay on ditrich.me because the CLI refuses redirects (ADR 0044 / 0045).
+ */
+const LEGACY_HOST_KEEP = "api/|eve/|install|_next/|\\.well-known/|drive/oauth";
+
+const legacyHostHtmlRedirects = [
+  {
+    source: "/",
+    has: [{ type: "host" as const, value: LEGACY_PUBLIC_HOST }],
+    destination: `${CANONICAL_ORIGIN}/`,
+    permanent: true,
+  },
+  {
+    source: `/:path((?!${LEGACY_HOST_KEEP}).*)`,
+    has: [{ type: "host" as const, value: LEGACY_PUBLIC_HOST }],
+    destination: `${CANONICAL_ORIGIN}/:path`,
+    permanent: true,
+  },
+] as const;
+
 const legacySettingsRedirects = [
   ["/account", "/settings/account"],
   ["/settings", "/settings/account"],
@@ -75,11 +99,14 @@ const legacySettingsRedirects = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   async redirects() {
-    return legacySettingsRedirects.map(([source, destination]) => ({
-      source,
-      destination,
-      permanent: true,
-    }));
+    return [
+      ...legacyHostHtmlRedirects,
+      ...legacySettingsRedirects.map(([source, destination]) => ({
+        source,
+        destination,
+        permanent: true,
+      })),
+    ];
   },
   async headers() {
     return [

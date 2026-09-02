@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (2026-09-01; distribution amended 2026-09-02)
+Accepted (2026-09-01; distribution amended 2026-09-02; default host superseded by [0045](./0045-canonical-host-invoicey-app.md))
 
 ## Context
 

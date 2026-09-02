@@ -103,7 +103,7 @@ It appends `export PATH="$HOME/.invoicey/bin:$PATH"` to the user's shell rc
 
 The CLI process never imports `@invoicey/db`. Recompile after pulling CLI
 source changes. Public CLI tags publish standalone macOS/Linux binaries plus a
-SHA-256 manifest. `https://invoicey.ditrich.me/install` detects platform and
+SHA-256 manifest. `https://invoicey.app/install` detects platform and
 architecture, verifies the downloaded release, and installs it to
 `~/.invoicey/bin/invoicey`.
 

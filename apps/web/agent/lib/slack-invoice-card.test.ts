@@ -78,7 +78,7 @@ function draftModel(overrides?: {
     invoiceId: INVOICE_ID,
     state: overrides?.state ?? "draft",
     assumptions: normalized.assumptions,
-    webUrl: `https://invoicey.ditrich.me/invoices/${INVOICE_ID}`,
+    webUrl: `https://invoicey.app/invoices/${INVOICE_ID}`,
   });
 }
 
@@ -359,7 +359,7 @@ describe("pendingCardFromToolResult", () => {
         currency: "CZK",
         displayStatus: "Issued",
       },
-      webUrl: `https://invoicey.ditrich.me/invoices/${INVOICE_ID}`,
+      webUrl: `https://invoicey.app/invoices/${INVOICE_ID}`,
     });
     expect(card?.model).toBeUndefined();
     expect(card?.fields).toEqual(

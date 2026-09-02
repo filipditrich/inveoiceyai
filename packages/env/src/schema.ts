@@ -127,7 +127,7 @@ export const privateEnvSchema = z.object({
     z.string().min(1).optional(),
   ),
   EMAIL_FROM: z.preprocess(emptyEnvToUndefined, z.string().min(1).optional()),
-  /** Invites + security; default `Invoicey <noreply@invoicey.ditrich.me>`. */
+  /** Invites + security; default `Invoicey <noreply@invoicey.app>`. */
   EMAIL_SYSTEM_FROM: z.preprocess(
     emptyEnvToUndefined,
     z.string().min(1).optional(),
@@ -147,7 +147,7 @@ export const privateEnvSchema = z.object({
     z.coerce.number().int().positive().default(1),
   ),
   /**
-   * Resend Inbound receiving domain (Plan 24b), e.g. inbox.invoicey.ditrich.me.
+   * Resend Inbound receiving domain (Plan 24b), e.g. inbox.invoicey.app.
    */
   /** Svix secret for the email.received webhook. Distinct from delivery events. */
   /** Document-capable AI Gateway model for incoming-invoice extraction (Plan 24c). */
