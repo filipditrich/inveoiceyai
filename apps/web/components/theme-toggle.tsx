@@ -49,8 +49,8 @@ export function ThemeToggle({ className, align = "end" }: ThemeToggleProps) {
   const mounted = useIsClient();
   const t = useTranslations("App.theme");
 
-  const current = (theme ?? "system") as ThemeValue;
-  const resolvedIsDark = resolvedTheme === "dark";
+  const current = (theme ?? "dark") as ThemeValue;
+  const resolvedIsDark = !mounted || resolvedTheme !== "light";
 
   return (
     <DropdownMenu>
@@ -66,7 +66,7 @@ export function ThemeToggle({ className, align = "end" }: ThemeToggleProps) {
         }
       >
         {!mounted ? (
-          <SunIcon className="size-4 opacity-50" />
+          <MoonIcon className="size-4 opacity-50" />
         ) : resolvedIsDark ? (
           <MoonIcon className="size-4" />
         ) : (
@@ -107,7 +107,7 @@ export function ThemeModeSwitcher({ className }: ThemeModeSwitcherProps) {
   const { theme, setTheme } = useTheme();
   const mounted = useIsClient();
   const t = useTranslations("App.theme");
-  const current = mounted ? (theme ?? "system") : "system";
+  const current = mounted ? (theme ?? "dark") : "dark";
 
   return (
     <div

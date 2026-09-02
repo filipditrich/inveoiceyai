@@ -1,5 +1,6 @@
 import { BrandLogo } from "@/components/brand-logo";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { getOptionalSession } from "@/lib/auth/session";
 import { ArrowRightIcon, MenuIcon } from "lucide-react";
@@ -58,6 +59,7 @@ export async function MarketingHeader() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2 xl:ml-2">
+          <ThemeToggle className="hidden sm:inline-flex" />
           <LocaleSwitcher compact className="hidden sm:inline-flex" />
           {user ? (
             <Link
@@ -123,11 +125,14 @@ export async function MarketingHeader() {
                   {t("signIn")}
                 </Link>
               )}
-              <LocaleSwitcher
-                align="start"
-                size="sm"
-                className="mt-1 w-full justify-start"
-              />
+              <div className="mt-1 flex items-center gap-1">
+                <ThemeToggle align="start" />
+                <LocaleSwitcher
+                  align="start"
+                  size="sm"
+                  className="min-w-0 flex-1 justify-start"
+                />
+              </div>
             </nav>
           </details>
         </div>

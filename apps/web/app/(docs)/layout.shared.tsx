@@ -1,4 +1,5 @@
 import { BrandLogo } from "@/components/brand-logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { docsChromeLinks } from "@/lib/public-nav";
 import { ArrowUpRightIcon, HouseIcon } from "lucide-react";
 
@@ -26,8 +27,13 @@ export function docsBaseOptions(): Omit<DocsLayoutProps, "tree"> {
         </>
       ),
       url: "/docs",
+      children: <ThemeToggle />,
     },
     githubUrl: GITHUB_URL,
+    themeSwitch: {
+      enabled: true,
+      component: <ThemeToggle />,
+    },
     links: docsChromeLinks().map((link) =>
       link.kind === "button"
         ? {
