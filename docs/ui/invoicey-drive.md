@@ -50,7 +50,8 @@ If the user has zero Drive devices: calm banner on the invoice detail — “Kee
 
 ```text
 Invoicey Drive
-  Synced just now
+  2 overdue
+  Unpaid · 5
   Open Invoicey Drive
   Sync now
   ─────────
@@ -59,7 +60,7 @@ Invoicey Drive
   Account · Sign out
 ```
 
-No invoice builder. Opening an invoice opens Preview / Finder, not a native editor.
+No invoice builder. Opening an invoice opens Preview / Finder, not a native editor. Mirror files get Finder color tags from `displayStatus` (green paid, orange unpaid/future, red overdue). Status stays out of the filename. Proton/iCloud often strip Finder tags; a local folder keeps them.
 
 ### Mac first launch
 

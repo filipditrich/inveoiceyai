@@ -1,5 +1,15 @@
 /** Display/filter buckets — orthogonal to domain `deriveStatus` (ADR 0014). */
 
+/** Prague calendar date as YYYY-MM-DD for due/issue compares. */
+export function pragueTodayIso(now = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Prague",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+}
+
 export type InvoiceDisplayStatus =
   | "draft"
   | "unpaid"

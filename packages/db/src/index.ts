@@ -155,6 +155,7 @@ export {
   countActiveDriveDevices,
   findActiveDriveDeviceByTokenHash,
   getDriveInvoiceArtifact,
+  getDriveIssuedInvoice,
   getDriveUserSettings,
   insertDriveDevice,
   insertDrivePairGrant,

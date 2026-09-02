@@ -16,7 +16,7 @@ A macOS companion that shows issued invoices as files in Finder (Invoicey Drive)
 | `GET /api/drive/invoices/:id/isdoc` | bytes  | Optional sibling                                                                                                 |
 | File Provider domain                | Finder | Root = Invoicey Drive                                                                                            |
 
-Drafts never appear. Cancelled invoices leave the tree. Every issued `docType` (invoice, credit note, proforma, advance) appears, including historical imports that have a canonical PDF. Rows without `pdf_url` are omitted (replica of stored artifacts, not a live renderer). Lose workspace membership → those invoices leave the index.
+Drafts never appear. Cancelled invoices leave the tree. Every issued `docType` (invoice, credit note, proforma, advance) appears, including historical imports that have a canonical PDF. Native issued invoices appear even when `pdf_url` is missing: the PDF route persists if UploadThing is configured, otherwise it renders the frozen payload (same as the website). Imports without a stored PDF stay omitted. Lose workspace membership → those invoices leave the index.
 
 ## Approach
 
@@ -82,14 +82,14 @@ See [ADR 0042](../decisions/0042-drive-device-pairing.md).
 1. Mac polls `GET /api/drive/index` every 60s, on wake, and on Sync now. APNs is out of Plan 30.
 2. Diff against local enumerator by `invoiceId`.
 3. New / hash-changed: mark File Provider item dirty; download on open (dataless until then).
-4. Mirror folder (if set): write the same relative path under the bookmark. Skip when SHA-256 matches. Delete-from-mirror restores on next sync, same as Finder.
+4. Mirror folder (if set): write the same relative path under the bookmark. Skip when SHA-256 matches. After download **and** skip, set the Finder color label from `displayStatus` (paid = green, unpaid/future = orange, overdue = red). Do not put status in the filename. Do not wipe user `tagNames`. Labels are local Finder metadata; they often do not survive Proton/iCloud. Delete-from-mirror restores on next sync, same as Finder.
 5. Removed from index: remove from domain and mirror (Trash locally; do not call Invoicey cancel).
 
 Finder delete is local-only. Next sync **restores** the file. A file dropped into the domain is ignored. Invoicey is the source of truth.
 
 ### Auth and tenancy
 
-Device token → user id. No plan entitlement. Index = issued invoices with `pdf_url` in workspaces where that user is still a member, minus hidden workspace ids. File Provider extension uses the same Keychain item via App Group.
+Device token → user id. No plan entitlement. Index = issued, non-cancelled invoices in workspaces where that user is still a member, minus hidden workspace ids. Native rows without `pdf_url` stay in the index; imports without a stored PDF do not. File Provider extension uses the same Keychain item via App Group.
 
 Settings live under **account** (`/settings/account/drive`), not workspace. Account vs workspace settings are already two doors; Drive is user-owned like sessions.
 

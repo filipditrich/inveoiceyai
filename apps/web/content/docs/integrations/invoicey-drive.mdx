@@ -22,7 +22,9 @@ Invoicey Drive/
 
 The default layout is `{year}/{kind}_{number}`. You can flatten it to `{year}_{name}` or `{name}` under **Settings → Invoicey Drive**.
 
-Drafts never appear. Cancelled invoices leave the tree. Rows without a stored PDF are omitted.
+Drafts never appear. Cancelled invoices leave the tree. Native issued invoices appear even without a stored `pdf_url` (Drive renders or persists on download). Imports without a stored PDF are omitted.
+
+Finder color labels follow the same status as the website: green when paid, orange when unpaid or not yet due, red when overdue. Status is not in the filename.
 
 ## Install and connect
 

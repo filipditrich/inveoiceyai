@@ -11,6 +11,11 @@ import {
   type DriveLayoutParseError,
 } from "@invoicey/invoice-core/drive-layout";
 import type { InvoiceLanguage } from "@invoicey/invoice-core/schema";
+import {
+  pragueTodayIso,
+  resolveDisplayStatus,
+  type InvoiceDisplayStatus,
+} from "@invoicey/invoice-core/status-display";
 
 export { DEFAULT_DRIVE_LAYOUT_TEMPLATE };
 
@@ -56,6 +61,7 @@ export interface DriveIndexItem {
   includeIsdoc: boolean;
   issuedAt: string;
   docType: string;
+  displayStatus: InvoiceDisplayStatus;
 }
 
 function snapshotName(
@@ -80,6 +86,15 @@ function invoiceLanguage(
     }
   }
   return "cs";
+}
+
+function isDriveImportWithoutPdf(invoice: {
+  artifactsImmutable: number;
+  importCompleteness: string | null;
+}): boolean {
+  return (
+    invoice.artifactsImmutable === 1 || Boolean(invoice.importCompleteness)
+  );
 }
 
 export async function getDriveUserSettings(
@@ -380,7 +395,6 @@ export async function listDriveIndex(
         inArray(invoices.workspaceId, workspaceIds),
         isNotNull(invoices.issuedAt),
         isNull(invoices.cancelledAt),
-        isNotNull(invoices.pdfUrl),
       ),
     );
 
@@ -401,10 +415,15 @@ export async function listDriveIndex(
     }
   }
 
+  const todayIso = pragueTodayIso();
   const items: DriveIndexItem[] = [];
   for (const row of rows) {
     const invoice = row.invoice;
     if (!invoice.issuedAt) {
+      continue;
+    }
+    /** imports without a stored PDF cannot be rendered */
+    if (!invoice.pdfUrl && isDriveImportWithoutPdf(invoice)) {
       continue;
     }
     const layout = applyDriveLayout({
@@ -431,26 +450,26 @@ export async function listDriveIndex(
       includeIsdoc: settings.includeIsdoc && Boolean(invoice.isdocUrl),
       issuedAt: invoice.issuedAt.toISOString(),
       docType: invoice.docType,
+      displayStatus: resolveDisplayStatus(
+        {
+          issuedAt: invoice.issuedAt,
+          dueDate: invoice.dueDate,
+          paidAt: invoice.paidAt,
+          cancelledAt: invoice.cancelledAt,
+          issueDate: invoice.issueDate,
+        },
+        todayIso,
+      ),
     });
   }
   return items;
 }
 
-export async function getDriveInvoiceArtifact(input: {
+export async function getDriveIssuedInvoice(input: {
   db: InvoiceyDb;
   userId: string;
   invoiceId: string;
-}): Promise<{
-  pdfUrl: string;
-  isdocUrl: string | null;
-  pdfSha256: string | null;
-  isdocSha256: string | null;
-  number: string | null;
-  issueDate: string;
-  clientName: string;
-  docType: string;
-  language: InvoiceLanguage;
-} | null> {
+}): Promise<(typeof invoices)["$inferSelect"] | null> {
   const settings = await getDriveUserSettings(input.db, input.userId);
   const memberships = await listMemberWorkspaces(input.db, input.userId);
   const hidden = new Set(settings.hiddenWorkspaceIds);
@@ -469,11 +488,36 @@ export async function getDriveInvoiceArtifact(input: {
         inArray(invoices.workspaceId, workspaceIds),
         isNotNull(invoices.issuedAt),
         isNull(invoices.cancelledAt),
-        isNotNull(invoices.pdfUrl),
       ),
     )
     .limit(1);
-  if (!row?.pdfUrl) {
+  if (!row) {
+    return null;
+  }
+  if (!row.pdfUrl && isDriveImportWithoutPdf(row)) {
+    return null;
+  }
+  return row;
+}
+
+export async function getDriveInvoiceArtifact(input: {
+  db: InvoiceyDb;
+  userId: string;
+  invoiceId: string;
+}): Promise<{
+  pdfUrl: string | null;
+  isdocUrl: string | null;
+  pdfSha256: string | null;
+  isdocSha256: string | null;
+  number: string | null;
+  issueDate: string;
+  clientName: string;
+  docType: string;
+  language: InvoiceLanguage;
+  workspaceId: string;
+} | null> {
+  const row = await getDriveIssuedInvoice(input);
+  if (!row) {
     return null;
   }
   return {
@@ -486,5 +530,6 @@ export async function getDriveInvoiceArtifact(input: {
     clientName: row.clientName,
     docType: row.docType,
     language: invoiceLanguage(row.payloadJson),
+    workspaceId: row.workspaceId,
   };
 }
