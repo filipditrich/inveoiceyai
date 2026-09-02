@@ -1,10 +1,12 @@
 <p align="center">
   <a href="https://invoicey.ditrich.me">
-    <img src="apps/web/public/brand/invoicey-mark.svg" width="88" height="88" alt="Invoicey"/>
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="apps/web/public/brand/invoicey-lockup.svg">
+      <source media="(prefers-color-scheme: light)" srcset="apps/web/public/brand/invoicey-lockup-on-light.svg">
+      <img src="apps/web/public/brand/invoicey-lockup-on-light.svg" width="300" alt="Invoicey">
+    </picture>
   </a>
 </p>
-
-<h1 align="center">Invoicey</h1>
 
 <p align="center">
   <strong>Automatizace faktur.</strong> Data first, documents second.
@@ -78,6 +80,17 @@ Same tools, same validation, same outputs. AI may draft. It may not invent an I�
 | **Banks** | Read-only Fio and MONETA feeds → match proposals on the same ledger as manual payments.                                                                                                                                                  |
 | **Mac**   | [Invoicey Drive](https://github.com/filipditrich/invoicey-mac) lists issued PDFs in Finder. Pair from the menu bar. Cancel, pay, and issue stay here.                                                                                    |
 
+Install the terminal companion:
+
+```bash
+curl -fsSL https://invoicey.ditrich.me/install | bash
+invoicey login
+```
+
+The installer verifies the release checksum and puts a standalone binary in
+`~/.invoicey/bin`. See the [CLI quickstart](https://invoicey.ditrich.me/docs/integrations/cli)
+or [download Invoicey for Mac](https://invoicey.ditrich.me/#apps).
+
 ```json
 {
   "mcpServers": {
@@ -118,6 +131,7 @@ Free is a complete solo invoicing tool. Pro adds people, banks, and looks. Enter
 | [Invoice as data](https://invoicey.ditrich.me/docs/concepts/invoice-as-data)       | The schema every surface validates against                                                      |
 | [Reconcile payments](https://invoicey.ditrich.me/docs/guides/reconciling-payments) | Ledger, proposals, Fio & MONETA                                                                 |
 | [Invoicey Drive](https://invoicey.ditrich.me/docs/integrations/invoicey-drive)     | macOS Finder companion · sibling [`invoicey-mac`](https://github.com/filipditrich/invoicey-mac) |
+| [Brand assets](https://invoicey.ditrich.me/brand)                                  | Official wordmarks, app icons, provider files, and usage guide                                  |
 | [`docs/`](docs/README.md)                                                          | Internal source of truth — PRD, ADRs, domain, specs                                             |
 | [`CHANGELOG.md`](CHANGELOG.md)                                                     | What shipped                                                                                    |
 

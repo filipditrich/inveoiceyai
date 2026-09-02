@@ -780,9 +780,10 @@ stays the system of record for looks, members, bank connect, and import.
       payments, ARES, interactive home
 - [x] Public docs `/docs/integrations/cli`
 - [x] Bun-compiled binary + `bun run invoicey:install` → `~/.invoicey/bin`
+- [x] Public checksum-verified `curl | bash` installer + release binaries
 
 **Out of 31:** look builder, bulk import, members, bank connect, recurring
-editor, Drive device tokens, local Neon mode, public `curl | bash` installer.
+editor, Drive device tokens, local Neon mode.
 
 ## Plans not yet promised
 

@@ -95,14 +95,17 @@ export function AdminSidebar({
               render={<Link href="/admin" prefetch={false} />}
             >
               <BrandLogo
-                className="shadow-sm shadow-black/10 dark:shadow-black/40"
+                className="group-data-[collapsible=icon]:hidden"
+                priority
+                size={22}
+                variant="wordmark"
+              />
+              <BrandLogo
+                className="hidden shadow-sm shadow-black/10 group-data-[collapsible=icon]:flex dark:shadow-black/40"
                 priority
                 size={32}
               />
-              <div className="grid flex-1 text-left leading-tight">
-                <span className="truncate text-sm font-semibold tracking-tight">
-                  {t("brand.title")}
-                </span>
+              <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
                 <span className="truncate text-[0.7rem] text-muted-foreground">
                   {t("brand.tagline")}
                 </span>

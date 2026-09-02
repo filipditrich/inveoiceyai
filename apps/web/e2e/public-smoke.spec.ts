@@ -1,7 +1,14 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const PUBLIC_ROUTES = ["/", "/privacy", "/terms", "/cookies", "/docs"];
+const PUBLIC_ROUTES = [
+  "/",
+  "/brand",
+  "/privacy",
+  "/terms",
+  "/cookies",
+  "/docs",
+];
 
 function relativeLuminance(channel: number) {
   const normalized = channel / 255;
@@ -37,7 +44,7 @@ test.describe("public platform", () => {
       page.getByRole("link", { name: /invoicey/i }).first(),
     ).toBeVisible();
     await expect(
-      page.locator('img[src="/brand/invoicey-mark.svg"]').first(),
+      page.locator('img[src*="/brand/invoicey-lockup"]').first(),
     ).toBeVisible();
   });
 

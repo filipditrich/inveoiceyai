@@ -98,7 +98,8 @@ flowchart TD
 - **`@invoicey/invoice-tools`** — framework-agnostic create/render, ARES lookup, file presets, companion ops; consumed by MCP, Slack, CLI, and demo paths.
 - **`apps/mcp`** — stdio MCP for local Cursor / Claude Desktop.
 - **`apps/cli`** — interactive operator CLI; remote client of `/api/companion`.
-  Compile with `bun run invoicey:install` → `~/.invoicey/bin/invoicey`.
+  Install the published checksum-verified binary through `/install`, or compile
+  a checkout with `bun run invoicey:install` → `~/.invoicey/bin/invoicey`.
 - **Client components** — forms and interactive UI only where needed (`'use client'`).
 
 ## Data flow: creating an invoice

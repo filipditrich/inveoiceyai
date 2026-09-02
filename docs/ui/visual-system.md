@@ -34,21 +34,21 @@ lettering, glossy skeuomorphism, or mascot-led application chrome.
 
 ## Identity system
 
-### Product mark
+### Product identity
 
-Create one geometric, code-native SVG mark that evolves the existing
-document/check idea into a simple signal:
+The compact mark is a geometric `I`: two white horizontal rails joined by a
+white stem, finished by one orange endpoint. It reads as both the initial and a
+small structured workflow. The canonical mark remains recognizable at 16 px;
+the app-icon form places it on a graphite rounded-square field.
 
-- a folded document or invoice structure;
-- a forward/check gesture that reads as validated and moving toward payment;
-- one-color construction that works in orange, white, or black;
-- recognizable at 16 px and balanced at 512 px;
-- no gradients, shadows, embedded bitmap, word, or enclosing background in the
-  canonical SVG.
+The full wordmark is `Invoicey` in outlined Geist letterforms. Its orange dot
+**replaces the dot above the second `i`**—it is never an additional decoration.
+Use the wordmark in branded chrome, public navigation, documentation, auth, and
+README headers. Use the monogram for browser/PWA icons, menu bars, provider
+avatars, compact controls, and collapsed navigation.
 
-The wordmark is `Invoicey` in the product typeface with deliberate optical
-spacing. Provide mark-only and horizontal lockup SVGs. App icons may place the
-mark on a near-black rounded-square field with a restrained orange edge light.
+Both identities are code-native SVGs with no runtime font dependency. Never
+reintroduce the retired document/check logo as product identity.
 
 ### Product icons
 
@@ -244,14 +244,14 @@ shared visual-system family: it demonstrates the common public, authenticated,
 form, data, settings, and access-gate treatments without duplicating every route
 or transient error state.
 
-| Group        | Required evidence                                                                                                       |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| Public       | desktop and mobile home; docs index; privacy/legal; representative invalid auth/referral state                    |
-| Core app     | populated dashboard; invoice list; structured draft builder; issued detail; clients; businesses; mobile navigation |
-| Money        | payments ledger with representative history; bank connections; status treatment                                 |
-| Automation   | recurring invoices; historical import; JSON entry; integrations; AI usage                                          |
-| Settings     | workspace and document appearance                                                                                       |
-| Access gates | completed-onboarding redirect and non-admin platform gate                                                              |
+| Group        | Required evidence                                                                                                               |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Public       | desktop and mobile home; companion section; brand center; docs index; privacy/legal; representative invalid auth/referral state |
+| Core app     | populated dashboard; invoice list; structured draft builder; issued detail; clients; businesses; mobile navigation              |
+| Money        | payments ledger with representative history; bank connections; status treatment                                                 |
+| Automation   | recurring invoices; historical import; JSON entry; integrations; AI usage                                                       |
+| Settings     | workspace and document appearance                                                                                               |
+| Access gates | completed-onboarding redirect and non-admin platform gate                                                                       |
 
 Screenshots must contain synthetic or seeded data. Never place credentials,
 tokens, private customer data, or production-only identifiers in committed
@@ -260,8 +260,9 @@ evidence.
 ## Completion gates
 
 - Fresh-session default theme is dark; light and system selections still work.
-- New mark and lockup are used across web, docs, auth, app/admin chrome, email,
-  PWA/browser/social assets, and prepared external-provider PNGs.
+- New monogram and wordmark are used across web, docs, auth, app/admin chrome,
+  email, PWA/browser/social assets, the macOS companion, CLI materials, and
+  prepared external-provider PNGs.
 - No old peach/chocolate UI treatment remains outside deliberately retained
   historical audit screenshots.
 - Representative public and authenticated routes pass existing landmark,

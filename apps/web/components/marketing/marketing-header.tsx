@@ -22,6 +22,7 @@ export async function MarketingHeader() {
     { href: "/#platby", label: t("payments") },
     { href: "/#automatizace", label: t("automation") },
     { href: "/#napojeni", label: t("integrations") },
+    { href: "/#apps", label: t("apps") },
     { href: "/#faq", label: t("faq") },
     { href: "/docs", label: t("docs") },
   ];
@@ -33,15 +34,8 @@ export async function MarketingHeader() {
           href="/"
           className="group flex shrink-0 items-center gap-2.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
-          <BrandLogo
-            size={34}
-            priority
-            className="shadow-sm transition-transform group-hover:-rotate-2"
-          />
+          <BrandLogo size={26} priority variant="wordmark" />
           <span className="leading-none">
-            <span className="block text-base font-semibold tracking-tight">
-              Invoicey
-            </span>
             <span className="mt-1 block text-[0.65rem] tracking-wide text-muted-foreground">
               {tBrand("tagline")}
             </span>

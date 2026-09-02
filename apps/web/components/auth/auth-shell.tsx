@@ -46,11 +46,8 @@ export async function AuthShell({
           href="/"
           className="relative inline-flex w-fit items-center gap-3 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-white/35"
         >
-          <BrandLogo size={40} priority className="ring-white/15" />
+          <BrandLogo size={32} priority tone="on-dark" variant="wordmark" />
           <span>
-            <span className="block text-lg font-semibold tracking-tight">
-              Invoicey
-            </span>
             <span className="block text-xs text-background/50 dark:text-muted-foreground">
               {t("tagline")}
             </span>
@@ -111,8 +108,7 @@ export async function AuthShell({
             href="/"
             className="flex items-center gap-2.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50 lg:hidden"
           >
-            <BrandLogo size={34} priority />
-            <span className="font-semibold tracking-tight">Invoicey</span>
+            <BrandLogo size={28} priority variant="wordmark" />
           </Link>
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
             <Link

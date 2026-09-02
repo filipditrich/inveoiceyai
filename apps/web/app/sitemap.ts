@@ -3,7 +3,7 @@ import { source } from "@/lib/docs-source";
 
 import type { MetadataRoute } from "next";
 
-const PUBLIC_ROUTES = ["", "/privacy", "/terms", "/cookies"] as const;
+const PUBLIC_ROUTES = ["", "/brand", "/privacy", "/terms", "/cookies"] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticEntries: MetadataRoute.Sitemap = PUBLIC_ROUTES.map((path) => ({

@@ -262,7 +262,8 @@
       "skipToContent": "Skip to content",
       "ariaLabel": "Main navigation",
       "payments": "Payments",
-      "integrations": "Integrations"
+      "integrations": "Integrations",
+      "apps": "Mac & CLI"
     },
     "footer": {
       "description": "Invoices as structured data. Create them in the web, via JSON, or with AI — and always get the same validated output.",
@@ -271,6 +272,7 @@
       "terms": "Terms",
       "cookies": "Cookies",
       "cookieSettings": "Cookie settings",
+      "brand": "Brand assets",
       "copyright": "© {year} Invoicey · Private beta",
       "legalNav": "Legal"
     },
@@ -560,7 +562,53 @@
       "driveTitle": "Invoicey Drive",
       "driveDescription": "Issued PDFs in Finder on your Mac. Pair from the menu bar.",
       "docsCta": "Integration docs"
+    },
+    "companions": {
+      "eyebrow": "Native companions",
+      "title": "Invoicey beyond the browser.",
+      "description": "Keep issued documents in Finder or operate a workspace from the terminal. Both companions use the same identity, access boundaries, and Invoicey data.",
+      "macLabel": "Invoicey for Mac",
+      "macTitle": "Your issued invoices, where files belong.",
+      "macDescription": "Invoicey Drive mirrors issued PDFs into Finder, iCloud Drive, or Proton Drive. Pair once from the menu bar; creation and payment decisions stay in the web app.",
+      "macDownload": "Download for Mac",
+      "learnMore": "How Invoicey Drive works",
+      "cliLabel": "Invoicey CLI",
+      "cliTitle": "A focused operator cockpit for your terminal.",
+      "cliDescription": "List, draft, issue, send, and reconcile without wrapping MCP envelopes by hand. The CLI uses a workspace API key and keeps irreversible actions behind confirmation.",
+      "copy": "Copy install command",
+      "copied": "Install command copied",
+      "cliDocs": "Open the CLI quickstart"
     }
+  },
+  "BrandPage": {
+    "meta": {
+      "title": "Brand assets",
+      "description": "Official Invoicey logos, app icons, usage guidance, and downloadable brand files."
+    },
+    "eyebrow": "Invoicey brand",
+    "title": "A precise identity for serious invoice automation.",
+    "description": "Use the wordmark when Invoicey has room to introduce itself. Use the monogram for compact app, browser, provider, and menu-bar contexts.",
+    "downloadKit": "Download the brand kit",
+    "downloadManual": "Download guidelines",
+    "systemEyebrow": "Identity system",
+    "systemTitle": "One wordmark. One compact mark.",
+    "systemDescription": "Graphite carries the identity. Orange is a deliberate signal: the dot over the second i and one compact accent in the monogram.",
+    "wordmarkTitle": "Invoicey wordmark",
+    "wordmarkDescription": "The primary identity for websites, product chrome, documentation, presentations, and partner material.",
+    "markTitle": "Invoicey monogram",
+    "markDescription": "The compact identity for favicons, app icons, OAuth providers, Slack, and the macOS menu bar.",
+    "downloadSvg": "SVG",
+    "ruleWordmarkLabel": "Wordmark",
+    "ruleWordmarkValue": "Keep the orange dot directly above the second i. Never add another dot, symbol, or orange letter.",
+    "ruleMarkLabel": "Monogram",
+    "ruleMarkValue": "Keep the graphite field, white I, and one orange endpoint together. Do not recolor the whole mark orange.",
+    "ruleOrangeLabel": "Orange",
+    "ruleOrangeValue": "Use #F97316 for action, focus, and the brand accent. Neutral surfaces should remain graphite or warm white.",
+    "usageEyebrow": "Ready for every surface",
+    "usageTitle": "Social, product, app, and partner files included.",
+    "usageDescription": "The kit contains light and dark wordmarks, vector and raster app icons, social artwork, and prepared Slack, Google OAuth, and GitHub OAuth sizes.",
+    "docsCta": "Read the product documentation",
+    "socialAlt": "Invoicey social card with the wordmark and invoice automation flow"
   },
   "Auth": {
     "meta": {

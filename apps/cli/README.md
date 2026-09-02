@@ -2,7 +2,28 @@
 
 Interactive terminal cockpit for an Invoicey workspace.
 
-## Install (binary on PATH)
+## Install
+
+Install the standalone release binary with one command:
+
+```bash
+curl -fsSL https://invoicey.ditrich.me/install | bash
+```
+
+The installer detects macOS or Linux and the current architecture, downloads
+the matching binary, verifies it against the published SHA-256 manifest, and
+installs it to `~/.invoicey/bin/invoicey`.
+
+```bash
+invoicey login
+invoicey status
+```
+
+`invoicey login` asks for a personal API key from **Settings → API keys**. The
+key stays in `~/.invoicey/cli.json` with mode `0600` and is never sent anywhere
+except the configured Invoicey host.
+
+### Build from this repository
 
 From the monorepo root:
 
@@ -17,15 +38,9 @@ That runs `apps/cli/scripts/install.ts`:
 3. Append `export PATH="$HOME/.invoicey/bin:$PATH"` to `.zshrc` / `.bashrc` /
    fish `config.fish` when missing
 
-Reload the shell (or `export PATH="$HOME/.invoicey/bin:$PATH"`), then:
-
-```bash
-invoicey login
-invoicey status
-```
-
-Re-run the installer after pulling CLI changes. The binary embeds the Bun
-runtime (tens of MB). A hosted `curl | bash` page is out of v1.
+Reload the shell (or `export PATH="$HOME/.invoicey/bin:$PATH"`). Re-run the
+installer after pulling CLI changes. The binary embeds the Bun runtime, so the
+installed command does not require Bun.
 
 ## Run from source
 

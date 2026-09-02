@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" role="img" aria-labelledby="title">
   <title id="title">Invoicey</title>
-  <g fill="#f5f5f4" transform="translate(10 53) scale(.058 -.058)">
+  <g fill="#111113" transform="translate(10 53) scale(.058 -.058)">
     <path d="M92 0L92 710L178 710L178 0Z"/>
     <path transform="translate(276)" d="M80 0L80 530L157 530L159 435Q180 490 223.5 516Q267 542 322 542Q383 542 422.5 515Q462 488 481.5 442.5Q501 397 501 341L501 0L417 0L417 317Q417 391 390.5 429.5Q364 468 304 468Q243 468 203.5 429.5Q164 391 164 317L164 0Z"/>
     <path transform="translate(823)" d="M215 0L22 530L114 530L268 86L422 530L514 530L321 0Z"/>

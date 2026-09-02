@@ -1,5 +1,6 @@
 import { BrandLogo } from "@/components/brand-logo";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
+import { InstallCommand } from "@/components/marketing/install-command";
 import {
   FloatingInvoiceyGuide,
   InteractiveInvoicey,
@@ -9,8 +10,10 @@ import { MarketingSignedInChip } from "@/components/marketing/marketing-signed-i
 import { ProductPreview } from "@/components/marketing/product-preview";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { env } from "@/env.config.server";
 import { getOptionalSession } from "@/lib/auth/session";
 import {
+  AppleIcon,
   ArrowDownIcon,
   ArrowRightIcon,
   ArrowUpRightIcon,
@@ -20,6 +23,7 @@ import {
   CheckCircle2Icon,
   CoinsIcon,
   DatabaseIcon,
+  DownloadIcon,
   FileArchiveIcon,
   FileCheck2Icon,
   HardDriveIcon,
@@ -32,6 +36,7 @@ import {
   SendIcon,
   ShieldCheckIcon,
   SparklesIcon,
+  SquareTerminalIcon,
   WalletIcon,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -57,6 +62,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const t = await getTranslations("Marketing");
   const user = await getOptionalSession();
+  const macDownloadUrl =
+    env.INVOICEY_DRIVE_DMG_URL ??
+    "https://github.com/filipditrich/invoicey-mac/releases";
   const trustItems = [
     { icon: FileCheck2Icon, label: t("trust.pdfIsdoc") },
     { icon: QrCodeIcon, label: t("trust.spaydQr") },
@@ -509,6 +517,100 @@ export default async function HomePage() {
               {t("integrations.docsCta")}
               <ArrowRightIcon data-icon="inline-end" />
             </Button>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="apps"
+        className="scroll-mt-24 border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+      >
+        <div className="mx-auto max-w-7xl">
+          <SectionIntro
+            eyebrow={t("companions.eyebrow")}
+            title={t("companions.title")}
+            description={t("companions.description")}
+          />
+          <div className="mt-14 grid gap-5 lg:grid-cols-2">
+            <article
+              className={`${motionStyles.liftCard} relative overflow-hidden rounded-[2rem] border bg-background p-7 sm:p-10`}
+            >
+              <div className="absolute -top-28 -right-20 size-72 rounded-full bg-brand/15 blur-3xl" />
+              <div className="relative flex items-start justify-between gap-5">
+                <Image
+                  alt=""
+                  aria-hidden="true"
+                  className="size-16 rounded-2xl shadow-xl sm:size-20"
+                  height={80}
+                  src="/brand/invoicey-app-icon.svg"
+                  width={80}
+                />
+                <span className="inline-flex items-center gap-1.5 rounded-full border bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+                  <AppleIcon className="size-3.5" /> macOS 14+
+                </span>
+              </div>
+              <div className="relative mt-12 max-w-xl">
+                <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                  {t("companions.macLabel")}
+                </p>
+                <h3 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
+                  {t("companions.macTitle")}
+                </h3>
+                <p className="mt-4 leading-relaxed text-muted-foreground">
+                  {t("companions.macDescription")}
+                </p>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <Button size="lg" render={<a href={macDownloadUrl} />}>
+                    <AppleIcon data-icon="inline-start" />
+                    {t("companions.macDownload")}
+                    <DownloadIcon data-icon="inline-end" />
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    render={<Link href="/docs/integrations/invoicey-drive" />}
+                  >
+                    {t("companions.learnMore")}
+                  </Button>
+                </div>
+              </div>
+            </article>
+
+            <article
+              className={`${motionStyles.liftCard} overflow-hidden rounded-[2rem] border border-white/10 bg-[#101012] p-7 text-white shadow-2xl shadow-black/20 sm:p-10`}
+            >
+              <div className="flex items-center justify-between gap-5">
+                <BrandLogo size={30} tone="on-dark" variant="wordmark" />
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-400">
+                  <SquareTerminalIcon className="size-3.5" /> CLI
+                </span>
+              </div>
+              <div className="mt-12">
+                <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                  {t("companions.cliLabel")}
+                </p>
+                <h3 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
+                  {t("companions.cliTitle")}
+                </h3>
+                <p className="mt-4 max-w-xl leading-relaxed text-zinc-400">
+                  {t("companions.cliDescription")}
+                </p>
+                <div className="mt-8">
+                  <InstallCommand
+                    command="curl -fsSL https://invoicey.ditrich.me/install | bash"
+                    copiedLabel={t("companions.copied")}
+                    copyLabel={t("companions.copy")}
+                  />
+                </div>
+                <Link
+                  href="/docs/integrations/cli"
+                  className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-zinc-300 underline decoration-zinc-600 underline-offset-8 transition-colors hover:text-white"
+                >
+                  {t("companions.cliDocs")}
+                  <ArrowRightIcon className="size-4" />
+                </Link>
+              </div>
+            </article>
           </div>
         </div>
       </section>
