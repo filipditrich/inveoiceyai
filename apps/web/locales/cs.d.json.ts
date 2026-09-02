@@ -791,6 +791,7 @@ declare const messages: {
       "newInvoice": "Nová faktura",
       "toolsGroup": "Import a nástroje",
       "resourcesGroup": "Zdroje",
+      "home": "Domů",
       "docs": "Dokumentace",
       "collapseToggle": "Rozbalit nebo sbalit {title}",
       "newInvoiceMore": "Další způsoby vytvoření",

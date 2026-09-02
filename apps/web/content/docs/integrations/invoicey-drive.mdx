@@ -4,7 +4,9 @@ description: Issued invoices as files in Finder on your Mac.
 icon: HardDrive
 ---
 
-Invoicey Drive is a macOS companion. The website remains where you create, issue, and cancel invoices. The Mac app is a librarian: it lists issued PDFs in Finder and can keep an optional mirror folder in sync.
+Invoicey Drive is a macOS companion. The website remains where you create, issue, and cancel
+invoices. The Mac app is a librarian: it lists issued PDFs in Finder and can keep an optional
+mirror folder in sync.
 
 <Callout title="macOS 14+">
   Invoicey Drive targets macOS 14 Sonoma and newer. It is distributed as a
@@ -13,29 +15,87 @@ Invoicey Drive is a macOS companion. The website remains where you create, issue
 
 ## What you get
 
-```text
-Invoicey Drive/
-  {workspace}/
-    {issuer}/
-      2026/faktura_2026001.pdf
-```
+<Files>
+  <Folder name="Invoicey Drive" defaultOpen>
+    <Folder name="{workspace}" defaultOpen>
+      <Folder name="{issuer}" defaultOpen>
+        <Folder name="2026" defaultOpen>
+          <File name="faktura_2026001.pdf" />
+        </Folder>
+      </Folder>
+    </Folder>
+  </Folder>
+</Files>
 
-The default layout is `{year}/{kind}_{number}`. You can flatten it to `{year}_{name}` or `{name}` under **Settings → Invoicey Drive**.
+The default layout is `{year}/{kind}_{number}`. You can flatten it to `{year}_{name}` or `{name}`
+under **Settings → Invoicey Drive**.
 
-Drafts never appear. Cancelled invoices leave the tree. Native issued invoices appear even without a stored `pdf_url` (Drive renders or persists on download). Imports without a stored PDF are omitted.
+Drafts never appear. Cancelled invoices leave the tree. Native issued invoices appear even without a
+stored `pdf_url` (Drive renders or persists on download). Imports without a stored PDF are omitted.
 
-Finder color labels follow the same status as the website: green when paid, orange when unpaid or not yet due, red when overdue. Status is not in the filename.
+| Finder label | Invoice status        |
+| ------------ | --------------------- |
+| Green        | Paid                  |
+| Orange       | Unpaid or not yet due |
+| Red          | Overdue               |
+
+Status is not in the filename. Labels are local Finder metadata — they often do not survive a copy
+into iCloud or Proton Drive.
+
+<Mermaid
+  chart="
+flowchart LR
+  Issue[Issue on web] --> UT[Canonical PDF]
+  Mac[Invoicey Drive] -->|device token| API[Drive API]
+  API --> UT
+  Mac --> Finder[Finder Locations]
+  Mac --> Mirror[Optional mirror folder]
+"
+/>
 
 ## Install and connect
 
-1. Download Invoicey Drive from **Settings → Invoicey Drive** (or run the sibling `invoicey-mac` repo locally).
-2. Open the app. A menu bar extra appears. Login item is on by default.
-3. Choose **Connect Invoicey**. Sign in on the website if needed, then **Connect this Mac**.
-4. Invoicey Drive shows up in Finder Locations once File Provider is entitled. Until then, set a **mirror folder** (iCloud, Proton Drive, or a local `_faktury` folder) and use **Sync now**.
+<Steps>
 
-Pairing always starts in the Mac app. Settings lists devices and can revoke them. It does not start a new connect session.
+<Step>
 
-## Tokens
+### Download the Mac app
+
+Download Invoicey Drive from **Settings → Invoicey Drive** (or run the sibling `invoicey-mac` repo
+locally). Open the `.dmg` and drag the app to Applications.
+
+</Step>
+
+<Step>
+
+### Open it
+
+A menu bar extra appears. Login item is on by default so Drive comes back after a reboot.
+
+</Step>
+
+<Step>
+
+### Connect this Mac
+
+Choose **Connect Invoicey**. Sign in on the website if needed, then **Connect this Mac**. Pairing
+always starts in the Mac app — Settings lists devices and can revoke them, but it does not start a
+new connect session.
+
+</Step>
+
+<Step>
+
+### Pick a place to see the files
+
+Invoicey Drive shows up in Finder Locations once File Provider is entitled. Until then, set a
+**mirror folder** (iCloud, Proton Drive, or a local `_faktury` folder) and use **Sync now**.
+
+</Step>
+
+</Steps>
+
+## Layout tokens
 
 | Token                | Meaning                                  |
 | -------------------- | ---------------------------------------- |
@@ -45,15 +105,44 @@ Pairing always starts in the Mac app. Settings lists devices and can revoke them
 | `{client}`           | Client name                              |
 | `{name}`             | `{kind}_{number}`                        |
 
-The template must include `{number}` or `{name}`. A slash becomes a folder.
+The template must include `{number}` or `{name}`. A slash becomes a folder. `{year}_{name}` is one
+file, no year folder.
 
 ## iCloud vs Invoicey Drive
 
-Invoicey Drive is a Finder domain owned by Invoicey. iCloud Drive (or Proton Drive) is a folder you may choose as the **optional mirror**. They are not the same. Deleting a file in Finder or in the mirror only removes the local copy; the next sync restores it. Cancel an invoice on the website to remove it from the index.
+Invoicey Drive is a Finder domain owned by Invoicey. iCloud Drive (or Proton Drive) is a folder you
+may choose as the **optional mirror**. They are not the same.
+
+Deleting a file in Finder or in the mirror only removes the local copy; the next sync restores it.
+Cancel an invoice on the website to remove it from the index. A file dropped into the domain is
+ignored — Invoicey is the source of truth.
 
 ## Revoke
 
-**Settings → Invoicey Drive → Revoke**, or **Sign out** in the menu bar. That device token stops immediately. Connect again to pair a replacement Mac.
+**Settings → Invoicey Drive → Revoke**, or **Sign out** in the menu bar. That device token stops
+immediately. Connect again to pair a replacement Mac.
+
+## Troubleshooting
+
+<Accordions>
+
+<Accordion title="Nothing appears in Finder Locations">
+  File Provider needs a signed extension. Until that is entitled, set a mirror
+  folder and use **Sync now**. The menu bar extra still works.
+</Accordion>
+
+<Accordion title="A file I deleted came back">
+  Expected. Finder delete is local-only. The next sync restores the issued PDF.
+  Cancel the invoice on the website to take it out of the index.
+</Accordion>
+
+<Accordion title="Color labels disappeared after copying to iCloud">
+  Labels are Finder metadata on this Mac. Cloud folders often strip them. The
+  filename never includes status — look at the invoice in the web app if you
+  need a durable record.
+</Accordion>
+
+</Accordions>
 
 ## Local development
 
@@ -63,4 +152,25 @@ INVOICEY_DRIVE_API_URL=http://localhost:3000 swift run invoicey-drive pair
 swift run invoicey-drive sync
 ```
 
-The CLI uses a loopback callback (`http://127.0.0.1:<port>/oauth`). Production pairing uses Associated Domains on `invoicey.ditrich.me`.
+The CLI uses a loopback callback (`http://127.0.0.1:<port>/oauth`). Production pairing uses
+Associated Domains on `invoicey.ditrich.me`.
+
+## Related
+
+<Cards>
+  <Card
+    title="Statuses"
+    href="/docs/concepts/statuses"
+    description="Why paid / unpaid / overdue map to Finder labels."
+  />
+  <Card
+    title="CLI"
+    href="/docs/integrations/cli"
+    description="Issue and send from the terminal, then let Drive list the PDF."
+  />
+  <Card
+    title="PDF exports"
+    href="/docs/outputs/pdf"
+    description="What Drive downloads for each issued invoice."
+  />
+</Cards>

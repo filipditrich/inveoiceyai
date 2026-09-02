@@ -20,11 +20,13 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
+import { appResourceLinks } from "@/lib/public-nav";
 import {
   ArchiveRestoreIcon,
   BookOpenIcon,
   Building2Icon,
   FileTextIcon,
+  HouseIcon,
   LandmarkIcon,
   LayoutDashboardIcon,
   RepeatIcon,
@@ -237,14 +239,12 @@ export function AppSidebar({
         <NavSecondary
           className="mt-auto"
           groupLabel={t("nav.resourcesGroup")}
-          items={[
-            {
-              title: t("nav.docs"),
-              url: "/docs",
-              icon: <BookOpenIcon />,
-              isActive: pathname === "/docs" || pathname.startsWith("/docs/"),
-            },
-          ]}
+          items={appResourceLinks(pathname).map((item) => ({
+            title: item.key === "home" ? t("nav.home") : t("nav.docs"),
+            url: item.url,
+            icon: item.key === "home" ? <HouseIcon /> : <BookOpenIcon />,
+            isActive: item.isActive,
+          }))}
         />
       </SidebarContent>
       <SidebarFooter className="gap-3">

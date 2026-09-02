@@ -1,39 +1,7 @@
 import { createElement } from "react";
+import { resolveDocIcon } from "@/lib/docs-icons";
 import { loader, type Source } from "fumadocs-core/source";
 import { defineDocs } from "fumadocs-mdx/macro";
-import {
-  ArchiveRestoreIcon,
-  BookOpenIcon,
-  BotIcon,
-  BracesIcon,
-  Building2Icon,
-  CircleDotIcon,
-  CircleHelpIcon,
-  ContactIcon,
-  FileCode2Icon,
-  FilePlus2Icon,
-  FilesIcon,
-  FileTextIcon,
-  HashIcon,
-  KeyRoundIcon,
-  LandmarkIcon,
-  LibraryIcon,
-  ListChecksIcon,
-  MessageSquareIcon,
-  MousePointer2Icon,
-  PercentIcon,
-  PlugIcon,
-  QrCodeIcon,
-  RocketIcon,
-  SendIcon,
-  SnowflakeIcon,
-  SquareTerminalIcon,
-  StampIcon,
-  UsersIcon,
-  WorkflowIcon,
-  WrenchIcon,
-  type LucideIcon,
-} from "lucide-react";
 
 /**
  * Public product documentation served at `/docs` (`content/docs/**`).
@@ -64,43 +32,10 @@ type DocsSource = Source<{
 
 const docsSource: DocsSource = docs.toFumadocsSource();
 
-const DOC_ICONS: Record<string, LucideIcon> = {
-  ArchiveRestore: ArchiveRestoreIcon,
-  BookOpen: BookOpenIcon,
-  Bot: BotIcon,
-  Braces: BracesIcon,
-  Building2: Building2Icon,
-  CircleDot: CircleDotIcon,
-  CircleHelp: CircleHelpIcon,
-  Contact: ContactIcon,
-  FileCode2: FileCode2Icon,
-  FilePlus2: FilePlus2Icon,
-  Files: FilesIcon,
-  FileText: FileTextIcon,
-  Hash: HashIcon,
-  KeyRound: KeyRoundIcon,
-  Landmark: LandmarkIcon,
-  Library: LibraryIcon,
-  ListChecks: ListChecksIcon,
-  MessageSquare: MessageSquareIcon,
-  MousePointer2: MousePointer2Icon,
-  Percent: PercentIcon,
-  Plug: PlugIcon,
-  QrCode: QrCodeIcon,
-  Rocket: RocketIcon,
-  Send: SendIcon,
-  Snowflake: SnowflakeIcon,
-  SquareTerminal: SquareTerminalIcon,
-  Stamp: StampIcon,
-  Users: UsersIcon,
-  Workflow: WorkflowIcon,
-  Wrench: WrenchIcon,
-};
-
 export const source = loader(docsSource, {
   baseUrl: "/docs",
   icon(name) {
-    const Icon = name ? DOC_ICONS[name] : undefined;
+    const Icon = resolveDocIcon(name);
     return Icon ? createElement(Icon, { className: "size-4" }) : undefined;
   },
 });

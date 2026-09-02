@@ -1,5 +1,6 @@
 import { BrandLogo } from "@/components/brand-logo";
-import { ArrowUpRightIcon } from "lucide-react";
+import { docsChromeLinks } from "@/lib/public-nav";
+import { ArrowUpRightIcon, HouseIcon } from "lucide-react";
 
 import type { DocsLayoutProps } from "fumadocs-ui/layouts/docs";
 
@@ -27,14 +28,21 @@ export function docsBaseOptions(): Omit<DocsLayoutProps, "tree"> {
       url: "/docs",
     },
     githubUrl: GITHUB_URL,
-    links: [
-      {
-        type: "button",
-        text: "Open app",
-        url: "/dashboard",
-        icon: <ArrowUpRightIcon className="size-3.5" />,
-        active: "none",
-      },
-    ],
+    links: docsChromeLinks().map((link) =>
+      link.kind === "button"
+        ? {
+            type: "button" as const,
+            text: link.text,
+            url: link.url,
+            icon: <ArrowUpRightIcon className="size-3.5" />,
+            active: "none" as const,
+          }
+        : {
+            text: link.text,
+            url: link.url,
+            icon: <HouseIcon className="size-3.5" />,
+            active: "none" as const,
+          },
+    ),
   };
 }
