@@ -10,7 +10,8 @@
     "./artifacts": "./src/invoice-artifacts.ts",
     "./import": "./src/invoice-import.ts",
     "./email": "./src/send-invoice-email.ts",
-    "./workspace-context": "./src/workspace-context.ts"
+    "./workspace-context": "./src/workspace-context.ts",
+    "./companion": "./src/companion-ops.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",

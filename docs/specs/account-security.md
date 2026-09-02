@@ -43,10 +43,13 @@ Nav: user menu → Settings. Workspace invite accept: `/invite/[id]` (requires s
 
 ## API keys / machine auth
 
-**Remote MCP** (`/api/mcp`) verify order:
+**Remote MCP** (`/api/mcp`) and **Invoicey CLI** (`/api/companion`) verify order:
 
 1. Env ops key (`MCP_API_KEY`) → ops workspace.
 2. Else `auth.api.verifyApiKey({ key })` → user `defaultWorkspaceId`.
+
+The CLI stores the PAT in `~/.invoicey/cli.json` (mode `0600`) or
+`INVOICEY_API_KEY`. It does not use Drive device tokens.
 
 **Eve HTTP** (`/eve/v1/*`, non-Slack): ops `EVE_API_KEY` or `MCP_API_KEY` (or OIDC / localDev). User PATs are **not** accepted.
 

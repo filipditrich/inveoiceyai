@@ -44,6 +44,8 @@ If a doc disagrees with the code, the doc is right and the code is a bug — or 
   as Invoicey Drive (Plan 30). Server cannot write iCloud or Proton Drive.
 - [macOS archive app sketches](./research/macos-archive-app.md) — promoted into
   the Drive spec.
+- [Invoicey CLI](./research/invoicey-cli.md) — selected as Plan 31 operator
+  companion (PAT JSON API + `apps/cli`).
 
 ## Conventions
 

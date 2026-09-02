@@ -1,0 +1,59 @@
+---
+title: CLI
+description: Manage invoices, clients, and payments from an interactive terminal.
+icon: SquareTerminal
+---
+
+Invoicey CLI is an operator cockpit for the same workspace the web app, MCP, and
+Slack already share. It is not a second Invoicey — looks, members, bank connect,
+and bulk import stay on the website.
+
+## Install
+
+From a clone of the Invoicey repo:
+
+```bash
+bun install
+bun run --filter=@invoicey/cli start
+```
+
+Or run the binary directly:
+
+```bash
+bun apps/cli/src/bin.ts
+```
+
+## Login
+
+Create a personal key under **Settings → API keys** — see [API keys](/docs/integrations/api-keys).
+
+```bash
+invoicey login
+```
+
+The key is stored in `~/.invoicey/cli.json` (mode `0600`). You can also set
+`INVOICEY_API_KEY` and optional `INVOICEY_API_URL` (default
+`https://invoicey.ditrich.me`).
+
+## Daily use
+
+```bash
+invoicey                  # interactive home
+invoicey status
+invoicey invoices --unpaid
+invoicey invoices show 20260012
+invoicey invoices issue 20260012
+invoicey invoices send 20260012
+invoicey invoices new --ico 27082440 --desc "October consulting" --qty 32 --price 1800 --vat 21
+invoicey clients add 27082440
+invoicey payments
+invoicey ares NFCtron
+```
+
+Invoice refs are an issued **number** or a UUID. Irreversible actions confirm
+in a TTY unless you pass `--yes`. `--json` prints the companion payload.
+
+<Callout title="Same validation as every other surface">
+  Drafts still go through `InvoiceSchema`. The CLI cannot invent an issuer —
+  create injects the workspace default, the same way MCP does.
+</Callout>

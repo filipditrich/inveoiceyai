@@ -82,6 +82,7 @@ Same tools, same validation, same outputs. AI may draft. It may not invent an I�
 | **Web**   | Structured draft, AI prompt → schema, PDF preview, issue, email, payments.                                                                                                                                                               |
 | **MCP**   | Hosted at `https://invoicey.ditrich.me/api/mcp` (workspace API key) or local stdio for Cursor. [Cursor](https://invoicey.ditrich.me/docs/integrations/cursor) · [Claude Code](https://invoicey.ditrich.me/docs/integrations/claude-code) |
 | **Slack** | Eve drafts in-thread, asks when something would be a guess, confirms before it ships.                                                                                                                                                    |
+| **CLI**   | Interactive terminal for list / draft / issue / send / payments. Same PAT as MCP. [CLI](https://invoicey.ditrich.me/docs/integrations/cli)                                                                                               |
 | **Banks** | Read-only Fio and MONETA feeds → match proposals on the same ledger as manual payments.                                                                                                                                                  |
 
 ```json

@@ -4,6 +4,7 @@
   "pages": [
     "api-keys",
     "mcp",
+    "cli",
     "cursor",
     "claude-code",
     "slack",
