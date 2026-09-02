@@ -37,6 +37,13 @@ CLI needs the same handlers behind a machine-auth HTTP API.
    `https://invoicey.ditrich.me`.
 5. Irreversible actions (issue, send, mark paid, cancel, confirm/reject a
    match) confirm in a TTY unless `--yes` is passed.
+6. Ship `invoicey` as a **Bun-compiled standalone binary** into
+   `~/.invoicey/bin`, installed from the repo with `bun run invoicey:install`.
+   A public `curl | bash` page is out of v1; the installer stays in-tree.
+7. `POST /api/companion` always returns a JSON object
+   (`{ ok: true, ... }` or `{ ok: false, error }`). Handlers must not leak
+   Next.js HTML error pages. The CLI does not follow redirects and surfaces
+   non-JSON bodies instead of swallowing them.
 
 ## Consequences
 
@@ -46,6 +53,9 @@ CLI needs the same handlers behind a machine-auth HTTP API.
   companion API instead of MCP.
 - Entitlements and issuer lock stay server-side. The CLI cannot invent an
   issuer; `create` injects the workspace default the same way MCP does.
+- The compiled binary embeds the Bun runtime (tens of MB). Re-run
+  `bun run invoicey:install` after pulling CLI changes. Config stays in
+  `~/.invoicey/cli.json`; the binary lives in `~/.invoicey/bin/invoicey`.
 
 ## Alternatives rejected
 

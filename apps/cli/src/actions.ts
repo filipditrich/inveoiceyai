@@ -64,13 +64,23 @@ export async function cmdLogin(cfg: CliConfig): Promise<number> {
   }
   const host = String(apiUrl).replace(/\/$/, "");
   const client = new CompanionClient(host, String(token).trim());
-  const me = await client.op({ op: "me" });
-  client.requireOk(me);
-  const path = await saveConfig({ apiUrl: host, token: String(token).trim() });
-  p.outro(
-    `${ok("Saved")}  ${String(me.workspaceName ?? me.workspaceId)}  ${muted(path)}`,
-  );
-  return 0;
+  try {
+    const me = await client.op({ op: "me" });
+    client.requireOk(me);
+    const path = await saveConfig({
+      apiUrl: host,
+      token: String(token).trim(),
+    });
+    p.outro(
+      `${ok("Saved")}  ${String(me.workspaceName ?? me.workspaceId)}  ${muted(path)}`,
+    );
+    return 0;
+  } catch (err) {
+    const message = err instanceof CompanionError ? err.message : String(err);
+    p.log.error(message);
+    p.cancel("Login failed.");
+    return 1;
+  }
 }
 
 export async function cmdLogout(): Promise<number> {

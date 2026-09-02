@@ -763,8 +763,8 @@ APIs, two-way Finder edits that mutate Invoicey, APNs, Mac App Store.
 
 ## Plan 31 — Invoicey CLI (operator companion)
 
-**Status:** In progress
-**Completed:** —
+**Status:** Completed
+**Completed:** 2026-09-02
 
 **ADR:** [0044](./decisions/0044-invoicey-cli-companion.md) ·
 [spec](./specs/invoicey-cli.md) ·
@@ -779,9 +779,10 @@ stays the system of record for looks, members, bank connect, and import.
 - [x] `apps/cli` (`invoicey`) — login, status, invoices, clients, issuers,
       payments, ARES, interactive home
 - [x] Public docs `/docs/integrations/cli`
+- [x] Bun-compiled binary + `bun run invoicey:install` → `~/.invoicey/bin`
 
 **Out of 31:** look builder, bulk import, members, bank connect, recurring
-editor, Drive device tokens, local Neon mode.
+editor, Drive device tokens, local Neon mode, public `curl | bash` installer.
 
 ## Plans not yet promised
 

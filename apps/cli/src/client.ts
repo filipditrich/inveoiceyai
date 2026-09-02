@@ -10,6 +10,49 @@ export class CompanionError extends Error {
 
 export type CompanionJson = Record<string, unknown> & { ok?: boolean };
 
+export const CLI_USER_AGENT = "invoicey-cli/0.1.0";
+
+function snippet(body: string): string {
+  return body.replace(/\s+/g, " ").trim().slice(0, 180);
+}
+
+/** Turn a companion HTTP body into JSON or a readable CompanionError. */
+export function parseCompanionBody(
+  status: number,
+  contentType: string | null,
+  location: string | null,
+  body: string,
+): CompanionJson {
+  if (status === 401) {
+    throw new CompanionError("unauthorized — run `invoicey login`", 401);
+  }
+  if (status >= 300 && status < 400) {
+    throw new CompanionError(
+      `redirected to ${location ?? "(no location)"} — check the API URL`,
+      status,
+    );
+  }
+  const trimmed = body.trim();
+  if (!trimmed) {
+    throw new CompanionError(`empty response (${status})`, status);
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch {
+    const kind = contentType ?? "unknown type";
+    throw new CompanionError(
+      `expected JSON from /api/companion, got ${kind} (${status}): ${snippet(trimmed)}`,
+      status,
+    );
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new CompanionError(`unexpected JSON (${status})`, status);
+  }
+  /** SAFETY: envelope is a JSON object; callers read `ok` / `error`. */
+  return parsed as CompanionJson;
+}
+
 export class CompanionClient {
   constructor(
     readonly apiUrl: string,
@@ -19,22 +62,22 @@ export class CompanionClient {
   async op(body: Record<string, unknown>): Promise<CompanionJson> {
     const res = await fetch(`${this.apiUrl}/api/companion`, {
       method: "POST",
+      redirect: "manual",
       headers: {
+        accept: "application/json",
         authorization: `Bearer ${this.token}`,
         "content-type": "application/json",
-        "user-agent": "invoicey-cli/0.1.0",
+        "user-agent": CLI_USER_AGENT,
       },
       body: JSON.stringify(body),
     });
-    if (res.status === 401) {
-      throw new CompanionError("unauthorized — run `invoicey login`", 401);
-    }
-    const json: unknown = await res.json().catch(() => null);
-    if (!json || typeof json !== "object") {
-      throw new CompanionError(`unexpected response (${res.status})`);
-    }
-    /** SAFETY: companion JSON is an object envelope; callers read `ok` / `error`. */
-    return json as CompanionJson;
+    const text = await res.text();
+    return parseCompanionBody(
+      res.status,
+      res.headers.get("content-type"),
+      res.headers.get("location"),
+      text,
+    );
   }
 
   requireOk(json: CompanionJson): CompanionJson {
@@ -51,28 +94,41 @@ export class CompanionClient {
     const res = await fetch(
       `${this.apiUrl}/api/companion/invoices/${encodeURIComponent(ref)}/${kind}`,
       {
+        redirect: "manual",
         headers: {
+          accept: "application/pdf, application/xml, application/json",
           authorization: `Bearer ${this.token}`,
-          "user-agent": "invoicey-cli/0.1.0",
+          "user-agent": CLI_USER_AGENT,
         },
       },
     );
-    if (res.status === 401) {
-      throw new CompanionError("unauthorized — run `invoicey login`", 401);
-    }
     if (!res.ok) {
-      const json: unknown = await res.json().catch(() => null);
-      const error =
-        json && typeof json === "object" && "error" in json
-          ? String((json as { error: unknown }).error)
-          : `download failed (${res.status})`;
-      throw new CompanionError(error, res.status);
+      throw await downloadError(res);
     }
     const bytes = new Uint8Array(await res.arrayBuffer());
     const filename =
       filenameFromDisposition(res.headers.get("content-disposition")) ??
       `invoice.${kind}`;
     return { bytes, filename };
+  }
+}
+
+async function downloadError(res: Response): Promise<CompanionError> {
+  const text = await res.text();
+  try {
+    const json = parseCompanionBody(
+      res.status,
+      res.headers.get("content-type"),
+      res.headers.get("location"),
+      text,
+    );
+    return new CompanionError(
+      String(json.error ?? `download failed (${res.status})`),
+      res.status,
+    );
+  } catch (err) {
+    if (err instanceof CompanionError) return err;
+    return new CompanionError(`download failed (${res.status})`, res.status);
   }
 }
 

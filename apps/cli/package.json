@@ -9,6 +9,8 @@
   "scripts": {
     "start": "bun run src/bin.ts",
     "dev": "bun run src/bin.ts",
+    "compile": "bun build --compile --outfile dist/invoicey src/bin.ts",
+    "install:bin": "bun run scripts/install.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run"
   },
