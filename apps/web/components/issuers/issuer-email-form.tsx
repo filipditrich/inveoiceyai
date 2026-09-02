@@ -105,7 +105,7 @@ export function IssuerEmailForm(props: {
           placeholder="{kind}_{number}"
           value={emailFilename}
         />
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {t("filenameHint")} {"{kind}"} {"{number}"}.
         </p>
       </FieldGroup>

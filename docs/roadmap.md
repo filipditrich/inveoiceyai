@@ -720,7 +720,7 @@ by area, no marking of permissions the plan does not include, no bulk edit.
 
 ## Plan 30 — Invoicey Drive (macOS companion)
 
-**Status:** Proposed (docs + grill)
+**Status:** Done (web + Mac mirror; Finder Locations and notarized `.dmg` parked on Apple Developer team)
 
 **ADR:** [0041](./decisions/0041-invoicey-drive-companion.md) ·
 [0042](./decisions/0042-drive-device-pairing.md) ·
@@ -736,26 +736,26 @@ librarian, not a second Invoicey.
 
 **30a — Drive API + pairing (this repo):**
 
-- [ ] Layout template parser + preview
-- [ ] `drive_devices` / `drive_pair_grants` SQL
-- [ ] `/drive/connect` + `POST /api/drive/token`
-- [ ] `GET /api/drive/index` and artifact byte routes
-- [ ] Settings → Invoicey Drive
-- [ ] Audit events
+- [x] Layout template parser + preview
+- [x] `drive_devices` / `drive_pair_grants` SQL
+- [x] `/drive/connect` + `POST /api/drive/token`
+- [x] `GET /api/drive/index` and artifact byte routes
+- [x] Settings → Invoicey Drive
+- [x] Audit events
 
 **30b — Web promo + docs (this repo):**
 
-- [ ] Fumadocs `integrations/invoicey-drive`
-- [ ] Marketing companion mention
-- [ ] Post-issue banner when the user has zero devices
-- [ ] Download placeholder (notarized `.dmg`)
+- [x] Fumadocs `integrations/invoicey-drive`
+- [x] Marketing companion mention
+- [x] Post-issue banner when the user has zero devices
+- [x] Download placeholder (notarized `.dmg`)
 
 **30c — Mac app (sibling `invoicey-mac`):**
 
-- [ ] Menu bar + Keychain + connect session
-- [ ] File Provider domain from the index
-- [ ] On-demand PDF fetch
-- [ ] Optional mirror folder
+- [x] Menu bar + Keychain + connect session
+- [ ] File Provider domain from the index (enumerator compiles; Finder Locations needs a paid-team `.appex`)
+- [x] On-demand PDF fetch (mirror sync)
+- [x] Optional mirror folder
 - [ ] Notarized build
 
 **Out of 30:** Windows, iOS Files, invoice create/issue, server iCloud/Proton

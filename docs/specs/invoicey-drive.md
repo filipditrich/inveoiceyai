@@ -126,11 +126,13 @@ Bundle id `me.ditrich.invoicey.drive` (same `me.ditrich.*` house style as Calipe
 
 Out of v1: Windows, iOS Files, create/issue/pay, two-way PDF edit, Proton/iCloud APIs, APNs, Mac App Store.
 
-## Open questions / TODOs
+## Parked on Apple Developer enrollment
 
-- `TODO(plan-30):` Czech + English catalog copy (implementation)
-- `TODO(plan-30):` Associated Domains apple-app-site-association path once the team id exists
-- `TODO(plan-30):` `.dmg` hosting URL (Settings download placeholder until the first notarized build)
+Czech + English Drive catalog copy shipped in [PR 28](https://github.com/filipditrich/inveoiceyai/pull/28). Remaining:
+
+- Associated Domains `apple-app-site-association` on `invoicey.ditrich.me` once the Team ID exists
+- `.dmg` hosting URL (`INVOICEY_DRIVE_DMG_URL`; Settings shows a placeholder until the first notarized build)
+- File Provider `.appex` in Finder Locations (same paid team)
 
 ## References
 

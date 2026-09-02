@@ -1,6 +1,6 @@
 # Plan 30 — Invoicey Drive
 
-**Status:** proposed (grill closed; wait for shared-understanding confirm)
+**Status:** Implemented — 2026-09-01 (web in [#28](https://github.com/filipditrich/inveoiceyai/pull/28); Mac CLI / menu bar / mirror in sibling `invoicey-mac`). Finder Locations and the notarized `.dmg` wait on a paid Apple Developer team.
 **ADRs:** [0041](../../docs/decisions/0041-invoicey-drive-companion.md), [0042](../../docs/decisions/0042-drive-device-pairing.md), [0043](../../docs/decisions/0043-drive-layout-workspace-issuer-template.md)
 **Spec:** [invoicey-drive.md](../../docs/specs/invoicey-drive.md)
 **UI:** [invoicey-drive.md](../../docs/ui/invoicey-drive.md)
@@ -35,7 +35,7 @@ Pair a Mac companion, list issued invoices as files in Finder (Invoicey Drive), 
 4. Optional mirror folder bookmark
 5. Notarized `.dmg` (macOS 14+)
 
-Do not start 30c until 30a index + PDF routes work against staging.
+30c File Provider sources compile. Registering the Finder Locations domain needs an Xcode `.app` + `.appex` signed with a paid team. Until then, `invoicey-drive pair` + `sync` writes `~/Invoicey Drive`.
 
 ## Out of 30
 
