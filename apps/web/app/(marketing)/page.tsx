@@ -23,7 +23,6 @@ import {
   CheckCircle2Icon,
   CoinsIcon,
   DatabaseIcon,
-  DownloadIcon,
   FileArchiveIcon,
   FileCheck2Icon,
   HardDriveIcon,
@@ -560,10 +559,13 @@ export default async function HomePage() {
                   {t("companions.macDescription")}
                 </p>
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <Button size="lg" render={<a href={macDownloadUrl} />}>
+                  <Button
+                    size="lg"
+                    className="bg-foreground text-background hover:bg-foreground/90"
+                    render={<a href={macDownloadUrl} />}
+                  >
                     <AppleIcon data-icon="inline-start" />
                     {t("companions.macDownload")}
-                    <DownloadIcon data-icon="inline-end" />
                   </Button>
                   <Button
                     size="lg"

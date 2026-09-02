@@ -29,6 +29,7 @@
   <a href="#create-from-anywhere">Create from anywhere</a> ·
   <a href="#plans">Plans</a> ·
   <a href="#documentation">Docs</a> ·
+  <a href="https://invoicey.ditrich.me/brand">Brand</a> ·
   <a href="#contributing">Contributing</a>
 </p>
 
