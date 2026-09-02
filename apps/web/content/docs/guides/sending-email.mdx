@@ -30,11 +30,11 @@ stored copies made at issue rather than re-rendered.
 
 You do not control the From address, and that is a feature.
 
-| Part         | Value                                                                         |
-| ------------ | ----------------------------------------------------------------------------- |
-| From address | The deployment's verified sending domain, e.g. `invoices@invoicey.ditrich.me` |
-| From display | `{Issuer name} via Invoicey`                                                  |
-| Reply-To     | The issuer's contact email                                                    |
+| Part         | Value                                                                  |
+| ------------ | ---------------------------------------------------------------------- |
+| From address | The deployment's verified sending domain, e.g. `invoices@invoicey.app` |
+| From display | `{Issuer name} via Invoicey`                                           |
+| Reply-To     | The issuer's contact email                                             |
 
 Sending _as_ an arbitrary address would fail SPF and DKIM and land in spam. The `via Invoicey`
 display name plus a real `Reply-To` gets you recognisable, deliverable mail — replies go to you, not

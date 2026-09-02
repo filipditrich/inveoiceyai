@@ -25,11 +25,11 @@ Usage:
   invoicey ares <ico-or-name>
 
 Global:
-  --api <url>     override host (default https://invoicey.ditrich.me)
+  --api <url>     override host (default https://invoicey.app)
   --token <pat>   override saved API key
   --json          machine-readable output
   -y, --yes       skip confirmations
 
 Auth: Settings → API keys. Config: ~/.invoicey/cli.json
-Docs: https://invoicey.ditrich.me/docs/integrations/cli
+Docs: https://invoicey.app/docs/integrations/cli
 `;

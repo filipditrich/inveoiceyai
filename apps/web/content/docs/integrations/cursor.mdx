@@ -15,7 +15,7 @@ MCP servers are configured in `mcp.json` — `~/.cursor/mcp.json` for every proj
 {
   "mcpServers": {
     "invoicey": {
-      "url": "https://invoicey.ditrich.me/api/mcp",
+      "url": "https://invoicey.app/api/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_API_KEY"
       }
@@ -72,7 +72,7 @@ The key was revoked, mistyped, or truncated when copied. Personal keys are shown
 fresh one under **Settings → API keys** if you are unsure. Verify with:
 
 ```bash
-curl -X POST https://invoicey.ditrich.me/api/mcp \
+curl -X POST https://invoicey.app/api/mcp \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'

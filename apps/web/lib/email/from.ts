@@ -1,5 +1,5 @@
-const DEFAULT_FROM_ADDRESS = "invoices@invoicey.ditrich.me";
-const DEFAULT_SYSTEM_FROM_ADDRESS = "noreply@invoicey.ditrich.me";
+const DEFAULT_FROM_ADDRESS = "invoices@invoicey.app";
+const DEFAULT_SYSTEM_FROM_ADDRESS = "noreply@invoicey.app";
 const DEFAULT_FROM_NAME = "Invoicey";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

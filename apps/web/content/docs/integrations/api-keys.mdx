@@ -22,7 +22,7 @@ need to revoke one, the name is the only thing telling you which is which.
 Requests carry it as an ordinary bearer token:
 
 ```bash
-curl -X POST https://invoicey.ditrich.me/api/mcp \
+curl -X POST https://invoicey.app/api/mcp \
   -H "Authorization: Bearer YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'

@@ -7,7 +7,7 @@ export type CliConfig = {
   token: string;
 };
 
-export const DEFAULT_API_URL = "https://invoicey.ditrich.me";
+export const DEFAULT_API_URL = "https://invoicey.app";
 
 export function configDir(home = homedir()): string {
   return join(home, ".invoicey");

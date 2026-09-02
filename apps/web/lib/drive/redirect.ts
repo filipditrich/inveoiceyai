@@ -1,5 +1,7 @@
 const CUSTOM_SCHEME = "invoicey-drive:";
-const PROD_ORIGIN = "https://invoicey.ditrich.me";
+const CANONICAL_ORIGIN = "https://invoicey.app";
+/** keep serving Drive callbacks on the old host during the cutover window */
+const LEGACY_ORIGIN = "https://invoicey.ditrich.me";
 
 function isLocalHostname(hostname: string): boolean {
   return hostname === "127.0.0.1" || hostname === "localhost";
@@ -43,7 +45,11 @@ export function isAllowedDriveRedirect(
     configuredOrigin = "";
   }
   const origin = url.origin;
-  if (origin === PROD_ORIGIN || origin === configuredOrigin) {
+  if (
+    origin === CANONICAL_ORIGIN ||
+    origin === LEGACY_ORIGIN ||
+    origin === configuredOrigin
+  ) {
     return url.pathname === "/drive/oauth" || url.pathname === "/oauth";
   }
   return false;

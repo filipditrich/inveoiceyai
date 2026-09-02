@@ -23,7 +23,7 @@ The public installer detects the current architecture, downloads the matching st
 verifies it against the published SHA-256 checksum, and puts it in `~/.invoicey/bin`:
 
 ```bash
-curl -fsSL https://invoicey.ditrich.me/install | bash
+curl -fsSL https://invoicey.app/install | bash
 ```
 
 Open a **new** terminal, or add the install directory to the current shell:
@@ -87,7 +87,7 @@ Under **Settings → API keys**, create a key and copy it once. See [API keys](/
 invoicey login
 ```
 
-Paste the key, keep the default API URL (`https://invoicey.ditrich.me`) unless you are hitting a
+Paste the key, keep the default API URL (`https://invoicey.app`) unless you are hitting a
 local `bun dev`. The key is stored in `~/.invoicey/cli.json` (mode `0600`). You can also set
 `INVOICEY_API_KEY` and optional `INVOICEY_API_URL`.
 

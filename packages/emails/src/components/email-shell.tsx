@@ -16,7 +16,7 @@ import {
 import type { EmailLocale } from "../copy";
 import { invoiceEmailCopy, systemEmailCopy } from "../copy";
 
-const DEFAULT_APP_ORIGIN = "https://invoicey.ditrich.me";
+const DEFAULT_APP_ORIGIN = "https://invoicey.app";
 
 export type EmailShellVariant = "invoice" | "system";
 
@@ -86,7 +86,7 @@ export function EmailShell({
           <Text style={footer}>
             Invoicey ·{" "}
             <Link href={origin} style={footerLinkStyle}>
-              invoicey.ditrich.me
+              {new URL(origin).host}
             </Link>
           </Text>
           {footerLink ? (

@@ -187,10 +187,10 @@ The agent cannot complete these steps:
 
 ## Deploy note
 
-Production (`inveoiceyai-web` / https://invoicey.ditrich.me) builds with `VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1`. Eve requires **`ai` ^7** (peer of `eve@0.31.x`). Health probe:
+Production (`inveoiceyai-web` / https://invoicey.app) builds with `VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1`. Eve requires **`ai` ^7** (peer of `eve@0.31.x`). Health probe:
 
 ```bash
-curl -sS https://invoicey.ditrich.me/eve/v1/health
+curl -sS https://invoicey.app/eve/v1/health
 # {"ok":true,"status":"ready",...}
 ```
 
@@ -204,7 +204,7 @@ curl -sS https://invoicey.ditrich.me/eve/v1/health
 # from apps/web (Node 24+)
 bunx eve info
 bunx eve build
-curl -sS https://invoicey.ditrich.me/eve/v1/health
+curl -sS https://invoicey.app/eve/v1/health
 ```
 
 `bun dev` boots Next + eve via `withEve` when credentials allow.

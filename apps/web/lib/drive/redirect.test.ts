@@ -15,6 +15,9 @@ describe("isAllowedDriveRedirect", () => {
 
   it("allows the production https callback", () => {
     expect(
+      isAllowedDriveRedirect("https://invoicey.app/drive/oauth", APP),
+    ).toBe(true);
+    expect(
       isAllowedDriveRedirect("https://invoicey.ditrich.me/drive/oauth", APP),
     ).toBe(true);
   });

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (Plan 11, 2026-08-11)
+Accepted (Plan 11, 2026-08-11; production From-domain superseded by [0045](./0045-canonical-host-invoicey-app.md))
 
 ## Context
 

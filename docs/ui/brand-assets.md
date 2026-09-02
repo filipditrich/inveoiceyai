@@ -101,7 +101,7 @@ project or team avatar does not replace it.
 3. Keep the application name `Invoicey` and upload
    `apps/web/public/brand/external/invoicey-google-oauth-120.png`.
 4. Confirm the homepage, privacy policy and terms URLs still use
-   `https://invoicey.ditrich.me`.
+   `https://invoicey.app`.
 5. Save, complete brand verification if requested, and publish the verified
    branding.
 
