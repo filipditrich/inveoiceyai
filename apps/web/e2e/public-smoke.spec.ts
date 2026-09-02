@@ -41,6 +41,9 @@ test.describe("public platform", () => {
 
     await expect(page.locator("html")).toHaveClass(/dark/);
     await expect(
+      page.getByRole("button", { name: /appearance|vzhled/i }),
+    ).toBeVisible();
+    await expect(
       page.getByRole("link", { name: /invoicey/i }).first(),
     ).toBeVisible();
     await expect(

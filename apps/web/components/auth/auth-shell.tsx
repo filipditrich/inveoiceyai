@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   ArrowLeftIcon,
   CheckCircle2Icon,
@@ -119,6 +120,7 @@ export async function AuthShell({
               <ArrowLeftIcon className="size-3.5" />
               <span className="sr-only sm:not-sr-only">{t("backHome")}</span>
             </Link>
+            <ThemeToggle />
             <LocaleSwitcher compact className="sm:hidden" />
             <LocaleSwitcher size="sm" className="hidden sm:inline-flex" />
           </div>
