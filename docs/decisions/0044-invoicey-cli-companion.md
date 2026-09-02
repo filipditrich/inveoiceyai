@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (2026-09-01)
+Accepted (2026-09-01; distribution amended 2026-09-02)
 
 ## Context
 
@@ -38,8 +38,10 @@ CLI needs the same handlers behind a machine-auth HTTP API.
 5. Irreversible actions (issue, send, mark paid, cancel, confirm/reject a
    match) confirm in a TTY unless `--yes` is passed.
 6. Ship `invoicey` as a **Bun-compiled standalone binary** into
-   `~/.invoicey/bin`, installed from the repo with `bun run invoicey:install`.
-   A public `curl | bash` page is out of v1; the installer stays in-tree.
+   `~/.invoicey/bin`. Repository contributors can run
+   `bun run invoicey:install`; public releases publish macOS/Linux binaries and
+   `SHA256SUMS`, consumed by
+   `curl -fsSL https://invoicey.ditrich.me/install | bash`.
 7. `POST /api/companion` always returns a JSON object
    (`{ ok: true, ... }` or `{ ok: false, error }`). Handlers must not leak
    Next.js HTML error pages. The CLI does not follow redirects and surfaces

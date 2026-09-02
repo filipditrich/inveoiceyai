@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">Invoicey — Invoice automation</title>
+  <desc id="description">A graphite social card showing the Invoicey wordmark and a restrained orange pipeline from brief to paid.</desc>
+  <rect width="1200" height="630" fill="#0b0b0c"/>
+  <path d="M0 500C260 410 390 650 690 522S1032 318 1200 380V630H0Z" fill="#101012"/>
+  <g opacity=".32" stroke="#52525b" stroke-width="1">
+    <path d="M0 104H1200M0 210H1200M0 316H1200M0 422H1200M0 528H1200"/>
+    <path d="M84 0V630M190 0V630M296 0V630M402 0V630M508 0V630M614 0V630M720 0V630M826 0V630M932 0V630M1038 0V630M1144 0V630"/>
+  </g>
+  <g transform="translate(80 62) scale(1.25)">
+    <g fill="#f5f5f4" transform="translate(10 53) scale(.058 -.058)">
+      <path d="M92 0L92 710L178 710L178 0Z"/>
+      <path transform="translate(276)" d="M80 0L80 530L157 530L159 435Q180 490 223.5 516Q267 542 322 542Q383 542 422.5 515Q462 488 481.5 442.5Q501 397 501 341L501 0L417 0L417 317Q417 391 390.5 429.5Q364 468 304 468Q243 468 203.5 429.5Q164 391 164 317L164 0Z"/>
+      <path transform="translate(823)" d="M215 0L22 530L114 530L268 86L422 530L514 530L321 0Z"/>
+      <path transform="translate(1333)" d="M287 -12Q214 -12 159 22Q104 56 74 118.5Q44 181 44 265Q44 350 74 412Q104 474 159 508Q214 542 287 542Q360 542 414.5 508Q469 474 499 412Q529 350 529 265Q529 181 499 118.5Q469 56 414.5 22Q360 -12 287 -12ZM287 68Q360 68 400.5 120.5Q441 173 441 265Q441 357 400.5 409.5Q360 462 287 462Q214 462 173 409.5Q132 357 132 265Q132 173 173 120.5Q214 68 287 68Z"/>
+      <path transform="translate(1896)" d="M80 0L80 530L164 530L164 0Z"/>
+      <path transform="translate(2130)" d="M287 -12Q213 -12 158.5 22Q104 56 74 118.5Q44 181 44 265Q44 349 74 411Q104 473 158.5 507.5Q213 542 287 542Q379 542 439 494.5Q499 447 512 358L424 352Q415 405 378 433.5Q341 462 287 462Q214 462 173 409.5Q132 357 132 265Q132 173 173 120.5Q214 68 287 68Q341 68 378 98Q415 128 424 188L512 182Q499 94 439 41Q379 -12 287 -12Z"/>
+      <path transform="translate(2666)" d="M287 -12Q212 -12 157.5 22Q103 56 73.5 118.5Q44 181 44 265Q44 349 73.5 411Q103 473 156.5 507.5Q210 542 283 542Q352 542 405 509.5Q458 477 487.5 415Q517 353 517 264L517 239L132 239Q137 154 177.5 111Q218 68 287 68Q339 68 372.5 92.5Q406 117 419 157L509 150Q488 79 429.5 33.5Q371 -12 287 -12ZM132 313L425 313Q419 390 380.5 426Q342 462 283 462Q222 462 182.5 424.5Q143 387 132 313Z"/>
+      <path transform="translate(3202)" d="M103 -150L103 -76L164 -76Q192 -76 205.5 -67.5Q219 -59 226 -40L245 10L216 10L22 530L114 530L272 88L423 530L515 530L300 -67Q285 -110 255 -130Q225 -150 172 -150Z"/>
+      <path transform="translate(1896)" fill="#f97316" d="M78 613L78 711L166 711L166 613Z"/>
+    </g>
+  </g>
+  <g font-family="Geist, Arial, sans-serif">
+    <text x="80" y="255" fill="#f5f5f4" font-size="74" font-weight="600" letter-spacing="-3.4">Invoice automation</text>
+    <text x="80" y="314" fill="#a1a1aa" font-size="28" font-weight="400">From a brief to a paid invoice — with every detail in view.</text>
+  </g>
+  <g transform="translate(80 422)">
+    <rect width="166" height="72" rx="14" fill="#151517" stroke="#3f3f46"/>
+    <text x="24" y="31" fill="#a1a1aa" font-family="Geist, Arial, sans-serif" font-size="14" font-weight="600" letter-spacing="1.4">BRIEF</text>
+    <text x="24" y="55" fill="#f5f5f4" font-family="Geist Mono, monospace" font-size="17">Validated</text>
+    <path d="M190 36H278" stroke="#f97316" stroke-width="3"/>
+    <path d="M268 27 280 36 268 45" fill="none" stroke="#f97316" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="302" width="166" height="72" rx="14" fill="#151517" stroke="#3f3f46"/>
+    <text x="326" y="31" fill="#a1a1aa" font-family="Geist, Arial, sans-serif" font-size="14" font-weight="600" letter-spacing="1.4">INVOICE</text>
+    <text x="326" y="55" fill="#f5f5f4" font-family="Geist Mono, monospace" font-size="17">PDF + ISDOC</text>
+    <path d="M492 36H580" stroke="#f97316" stroke-width="3"/>
+    <path d="M570 27 582 36 570 45" fill="none" stroke="#f97316" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="604" width="166" height="72" rx="14" fill="#f97316"/>
+    <text x="628" y="31" fill="#1c1917" font-family="Geist, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4">PAID</text>
+    <text x="628" y="55" fill="#1c1917" font-family="Geist Mono, monospace" font-size="17" font-weight="600">Reconciled</text>
+  </g>
+  <g transform="translate(1018 425)">
+    <rect width="102" height="102" rx="26" fill="#101012" stroke="#fff" stroke-opacity=".12" stroke-width="2"/>
+    <rect x="27" y="28" width="38" height="9" rx="4.5" fill="#f5f5f4"/>
+    <rect x="69" y="28" width="8" height="9" rx="4" fill="#f97316"/>
+    <rect x="47" y="34" width="9" height="39" rx="4.5" fill="#f5f5f4"/>
+    <rect x="27" y="67" width="50" height="9" rx="4.5" fill="#f5f5f4"/>
+  </g>
+</svg>

@@ -20,8 +20,8 @@ export function docsBaseOptions(): Omit<DocsLayoutProps, "tree"> {
     nav: {
       title: (
         <>
-          <BrandLogo size={24} />
-          <span className="font-semibold">Invoicey docs</span>
+          <BrandLogo size={22} variant="wordmark" />
+          <span className="font-semibold text-muted-foreground">Docs</span>
         </>
       ),
       url: "/docs",

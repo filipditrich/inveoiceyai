@@ -20,28 +20,19 @@ export function PageHeader({
   title: ReactNode;
 }) {
   return (
-    <header
-      className={cn(
-        "relative overflow-hidden rounded-2xl border bg-gradient-to-br from-card via-card to-brand/[0.07] p-5 shadow-sm sm:p-6",
-        className,
-      )}
-    >
-      <div
-        aria-hidden
-        className="absolute -top-20 -right-12 size-44 rounded-full bg-brand/10 blur-3xl"
-      />
-      <div className="relative flex flex-wrap items-start justify-between gap-5">
+    <header className={cn("border-b bg-transparent py-5 sm:py-6", className)}>
+      <div className="flex flex-wrap items-start justify-between gap-5">
         <div className="flex min-w-0 items-start gap-4">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand ring-1 ring-brand/15 [&_svg]:size-5">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground ring-1 ring-border [&_svg]:size-4">
             {icon ?? <PanelsTopLeftIcon aria-hidden />}
           </div>
           <div className="min-w-0">
             {eyebrow ? (
-              <p className="mb-1 text-xs font-medium tracking-[0.14em] text-brand uppercase">
+              <p className="mb-1 text-xs font-medium tracking-[0.1em] text-primary uppercase">
                 {eyebrow}
               </p>
             ) : null}
-            <h1 className="text-2xl font-semibold tracking-[-0.025em] text-balance sm:text-3xl">
+            <h1 className="text-2xl font-medium tracking-[-0.03em] text-balance sm:text-3xl">
               {title}
             </h1>
             {description ? (

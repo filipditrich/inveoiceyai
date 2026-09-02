@@ -3,8 +3,8 @@
 @import "shadcn/tailwind.css";
 /**
  * Fumadocs UI for `/docs`. The `shadcn` preset maps every `--color-fd-*` onto
- * the brand tokens defined below, so the docs inherit the peach/chocolate theme
- * instead of shipping a second one.
+ * the brand tokens defined below, so documentation and product surfaces share
+ * one neutral, dark-first system.
  */
 @import "fumadocs-ui/css/shadcn.css";
 @import "fumadocs-ui/css/preset.css";
@@ -83,100 +83,100 @@
     ease-in-out infinite;
 }
 
-/** invoicey brand: peach + chocolate from logo */
+/** Invoicey visual system: dark graphite is the fresh-session foundation. */
 :root {
-  --background: oklch(0.985 0.006 55);
-  --foreground: oklch(0.25 0.02 40);
-  --card: oklch(0.995 0.003 55);
-  --card-foreground: oklch(0.25 0.02 40);
-  --popover: oklch(0.995 0.003 55);
-  --popover-foreground: oklch(0.25 0.02 40);
-  --primary: oklch(0.7 0.12 48);
-  --primary-foreground: oklch(0.12 0.01 40);
-  --secondary: oklch(0.95 0.015 50);
-  --secondary-foreground: oklch(0.3 0.025 40);
-  --muted: oklch(0.955 0.01 50);
-  --muted-foreground: oklch(0.5 0.02 45);
-  --accent: oklch(0.94 0.035 50);
-  --accent-foreground: oklch(0.3 0.04 45);
-  --destructive: oklch(0.55 0.2 25);
-  --border: oklch(0.9 0.015 50);
-  --input: oklch(0.9 0.015 50);
-  --ring: oklch(0.7 0.12 48);
-  --brand: oklch(0.763 0.103 47.9);
-  --brand-foreground: oklch(0.12 0.01 40);
-  --chart-1: oklch(0.7 0.12 48);
-  --chart-2: oklch(0.55 0.08 40);
-  --chart-3: oklch(0.45 0.05 35);
-  --chart-4: oklch(0.78 0.08 70);
-  --chart-5: oklch(0.35 0.03 40);
-  --radius: 0.75rem;
+  --background: #f7f7f6;
+  --foreground: #18181b;
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+  --primary: #c2410c;
+  --primary-foreground: #fffaf7;
+  --secondary: #f0f0ef;
+  --secondary-foreground: #27272a;
+  --muted: #f1f1f0;
+  --muted-foreground: #71717a;
+  --accent: #fff0e6;
+  --accent-foreground: #9a3412;
+  --destructive: #dc2626;
+  --border: rgb(24 24 27 / 12%);
+  --input: rgb(24 24 27 / 16%);
+  --ring: #f97316;
+  --brand: #c2410c;
+  --brand-foreground: #fffaf7;
+  --chart-1: #f97316;
+  --chart-2: #52525b;
+  --chart-3: #a1a1aa;
+  --chart-4: #27272a;
+  --chart-5: #d4d4d8;
+  --radius: 0.625rem;
   --spacing: 0.25rem;
   --header-height: 3.5rem;
-  --sidebar: oklch(0.97 0.012 48);
-  --sidebar-foreground: oklch(0.28 0.025 40);
-  --sidebar-primary: oklch(0.7 0.12 48);
-  --sidebar-primary-foreground: oklch(0.12 0.01 40);
-  --sidebar-accent: oklch(0.93 0.04 50);
-  --sidebar-accent-foreground: oklch(0.28 0.04 45);
-  --sidebar-border: oklch(0.9 0.02 50);
-  --sidebar-ring: oklch(0.7 0.12 48);
-  --sidebar-glow: oklch(0.8 0.08 50 / 35%);
-  --destructive-foreground: var(--color-red-800);
-  --success: var(--color-emerald-500);
-  --success-foreground: var(--color-emerald-900);
-  --info: var(--color-violet-500);
-  --info-foreground: var(--color-violet-900);
-  --warning: var(--color-yellow-500);
-  --warning-foreground: var(--color-yellow-900);
-  --invert: var(--color-zinc-900);
-  --invert-foreground: var(--color-zinc-50);
+  --sidebar: #fbfbfa;
+  --sidebar-foreground: #27272a;
+  --sidebar-primary: #c2410c;
+  --sidebar-primary-foreground: #fffaf7;
+  --sidebar-accent: #f1f1f0;
+  --sidebar-accent-foreground: #18181b;
+  --sidebar-border: rgb(24 24 27 / 10%);
+  --sidebar-ring: #f97316;
+  --sidebar-glow: rgb(249 115 22 / 8%);
+  --destructive-foreground: #991b1b;
+  --success: #16a34a;
+  --success-foreground: #166534;
+  --info: #2563eb;
+  --info-foreground: #1d4ed8;
+  --warning: #d97706;
+  --warning-foreground: #92400e;
+  --invert: #18181b;
+  --invert-foreground: #fafafa;
 }
 
 .dark {
-  --background: oklch(0.22 0.015 40);
-  --foreground: oklch(0.96 0.01 55);
-  --card: oklch(0.26 0.016 38);
-  --card-foreground: oklch(0.96 0.01 55);
-  --popover: oklch(0.26 0.016 38);
-  --popover-foreground: oklch(0.96 0.01 55);
-  --primary: oklch(0.78 0.1 50);
-  --primary-foreground: oklch(0.12 0.01 40);
-  --secondary: oklch(0.3 0.018 38);
-  --secondary-foreground: oklch(0.95 0.01 55);
-  --muted: oklch(0.3 0.018 38);
-  --muted-foreground: oklch(0.72 0.02 50);
-  --accent: oklch(0.32 0.04 48);
-  --accent-foreground: oklch(0.95 0.02 55);
-  --destructive: oklch(0.65 0.18 22);
-  --border: oklch(0.96 0.01 55 / 12%);
-  --input: oklch(0.96 0.01 55 / 14%);
-  --ring: oklch(0.78 0.1 50);
-  --brand: oklch(0.78 0.1 50);
-  --brand-foreground: oklch(0.12 0.01 40);
-  --chart-1: oklch(0.78 0.1 50);
-  --chart-2: oklch(0.65 0.08 40);
-  --chart-3: oklch(0.55 0.06 70);
-  --chart-4: oklch(0.45 0.04 35);
-  --chart-5: oklch(0.85 0.06 55);
-  --sidebar: oklch(0.2 0.016 35);
-  --sidebar-foreground: oklch(0.95 0.01 55);
-  --sidebar-primary: oklch(0.78 0.1 50);
-  --sidebar-primary-foreground: oklch(0.12 0.01 40);
-  --sidebar-accent: oklch(0.3 0.04 48);
-  --sidebar-accent-foreground: oklch(0.96 0.015 55);
-  --sidebar-border: oklch(0.96 0.01 55 / 10%);
-  --sidebar-ring: oklch(0.78 0.1 50);
-  --sidebar-glow: oklch(0.7 0.1 48 / 22%);
-  --destructive-foreground: var(--color-red-600);
-  --success: var(--color-emerald-500);
-  --success-foreground: var(--color-emerald-600);
-  --info: var(--color-violet-500);
-  --info-foreground: var(--color-violet-600);
-  --warning: var(--color-yellow-500);
-  --warning-foreground: var(--color-yellow-600);
-  --invert: var(--color-zinc-700);
-  --invert-foreground: var(--color-zinc-50);
+  --background: #0b0b0c;
+  --foreground: #f5f5f4;
+  --card: #151517;
+  --card-foreground: #f5f5f4;
+  --popover: #19191c;
+  --popover-foreground: #f5f5f4;
+  --primary: #f97316;
+  --primary-foreground: #1c1917;
+  --secondary: #222225;
+  --secondary-foreground: #f4f4f5;
+  --muted: #202023;
+  --muted-foreground: #a1a1aa;
+  --accent: #29211d;
+  --accent-foreground: #fed7aa;
+  --destructive: #ef4444;
+  --border: rgb(255 255 255 / 10%);
+  --input: rgb(255 255 255 / 16%);
+  --ring: #fb923c;
+  --brand: #f97316;
+  --brand-foreground: #1c1917;
+  --chart-1: #f97316;
+  --chart-2: #d4d4d8;
+  --chart-3: #71717a;
+  --chart-4: #a1a1aa;
+  --chart-5: #52525b;
+  --sidebar: #101012;
+  --sidebar-foreground: #e4e4e7;
+  --sidebar-primary: #f97316;
+  --sidebar-primary-foreground: #1c1917;
+  --sidebar-accent: #202023;
+  --sidebar-accent-foreground: #f5f5f4;
+  --sidebar-border: rgb(255 255 255 / 9%);
+  --sidebar-ring: #fb923c;
+  --sidebar-glow: rgb(249 115 22 / 7%);
+  --destructive-foreground: #fecaca;
+  --success: #4ade80;
+  --success-foreground: #bbf7d0;
+  --info: #93c5fd;
+  --info-foreground: #bfdbfe;
+  --warning: #fbbf24;
+  --warning-foreground: #fde68a;
+  --invert: #f4f4f5;
+  --invert-foreground: #18181b;
 }
 
 @layer base {
@@ -191,31 +191,39 @@
   }
   body {
     @apply bg-background font-sans text-foreground;
+    min-width: 320px;
+    text-rendering: optimizeLegibility;
   }
 }
 
 @layer components {
-  /** soft brand wash + rounded inset chrome */
+  /** Quiet graphite application chrome with a precise active indicator. */
   [data-slot="sidebar"][data-variant="inset"] [data-slot="sidebar-inner"] {
     overflow: hidden;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     box-shadow: 0 0 0 1px var(--sidebar-border);
     background-image:
-      radial-gradient(
-        ellipse 120% 55% at 0% -10%,
-        var(--sidebar-glow),
-        transparent 55%
-      ),
-      radial-gradient(
-        ellipse 80% 40% at 100% 100%,
-        var(--sidebar-glow),
-        transparent 50%
-      );
+      linear-gradient(180deg, var(--sidebar-glow), transparent 18%),
+      var(--sidebar);
   }
 
-  /** peach accent bar on active nav items */
+  /** Orange communicates location, not the selected surface itself. */
   [data-slot="sidebar-menu-button"][data-active] {
     box-shadow: inset 3px 0 0 0 var(--sidebar-primary);
+  }
+
+  [data-slot="sidebar-menu-button"] {
+    border-radius: var(--radius-sm);
+  }
+
+  [data-slot="card"] {
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+  }
+
+  .tabular-nums,
+  table,
+  [data-slot="table"] {
+    font-variant-numeric: tabular-nums;
   }
 
   .marketing-grid {
@@ -313,6 +321,17 @@
   [data-sonner-toaster]
     [data-sonner-toast][data-styled="true"][data-close-button="true"] {
     padding-inline-end: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
   }
 }
 

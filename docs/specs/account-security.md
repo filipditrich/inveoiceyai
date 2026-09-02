@@ -50,7 +50,8 @@ Nav: user menu → Settings. Workspace invite accept: `/invite/[id]` (requires s
 
 The CLI stores the PAT in `~/.invoicey/cli.json` (mode `0600`) or
 `INVOICEY_API_KEY`. It does not use Drive device tokens. The command itself is
-a Bun-compiled binary at `~/.invoicey/bin/invoicey` (`bun run invoicey:install`).
+a Bun-compiled binary at `~/.invoicey/bin/invoicey`, installed from the public
+checksum-verified release or compiled locally with `bun run invoicey:install`.
 
 **Eve HTTP** (`/eve/v1/*`, non-Slack): ops `EVE_API_KEY` or `MCP_API_KEY` (or OIDC / localDev). User PATs are **not** accepted.
 

@@ -15,8 +15,7 @@ export async function MarketingFooter() {
             href="/"
             className="inline-flex items-center gap-2.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
           >
-            <BrandLogo size={32} />
-            <span className="font-semibold tracking-tight">Invoicey</span>
+            <BrandLogo size={28} variant="wordmark" />
           </Link>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
             {t("description")}
@@ -33,6 +32,12 @@ export async function MarketingFooter() {
               href="/docs"
             >
               {t("docs")}
+            </Link>
+            <Link
+              className="transition-colors hover:text-foreground"
+              href="/brand"
+            >
+              {t("brand")}
             </Link>
             <Link
               className="transition-colors hover:text-foreground"

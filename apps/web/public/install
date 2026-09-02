@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repository="filipditrich/inveoiceyai"
+install_root="${INVOICEY_INSTALL_DIR:-$HOME/.invoicey/bin}"
+version="${INVOICEY_VERSION:-latest}"
+
+case "$(uname -s)" in
+  Darwin) platform="darwin" ;;
+  Linux) platform="linux" ;;
+  *) echo "Invoicey CLI supports macOS and Linux." >&2; exit 1 ;;
+esac
+
+case "$(uname -m)" in
+  arm64|aarch64) architecture="arm64" ;;
+  x86_64|amd64) architecture="x64" ;;
+  *) echo "Unsupported CPU architecture: $(uname -m)" >&2; exit 1 ;;
+esac
+
+asset="invoicey-${platform}-${architecture}"
+if [[ "$version" == "latest" ]]; then
+  releases="$(curl -fsSL "https://api.github.com/repos/${repository}/releases?per_page=100")"
+  version="$(printf '%s\n' "$releases" | sed -n 's/.*"tag_name": "\(cli-v[^"]*\)".*/\1/p' | sed -n '1p')"
+  if [[ -z "$version" ]]; then
+    echo "No Invoicey CLI release is published yet." >&2
+    exit 1
+  fi
+fi
+release_base="https://github.com/${repository}/releases/download/${version}"
+
+temporary_directory="$(mktemp -d)"
+trap 'rm -rf "$temporary_directory"' EXIT
+
+echo "Installing Invoicey CLI for ${platform}/${architecture}..."
+curl -fsSL "${release_base}/${asset}" -o "${temporary_directory}/invoicey"
+curl -fsSL "${release_base}/SHA256SUMS" -o "${temporary_directory}/SHA256SUMS"
+
+expected_checksum="$(awk -v name="$asset" '$2 == name { print $1 }' "${temporary_directory}/SHA256SUMS")"
+if [[ -z "$expected_checksum" ]]; then
+  echo "Release checksum is missing for ${asset}." >&2
+  exit 1
+fi
+
+if command -v sha256sum >/dev/null 2>&1; then
+  actual_checksum="$(sha256sum "${temporary_directory}/invoicey" | awk '{ print $1 }')"
+else
+  actual_checksum="$(shasum -a 256 "${temporary_directory}/invoicey" | awk '{ print $1 }')"
+fi
+
+if [[ "$actual_checksum" != "$expected_checksum" ]]; then
+  echo "Invoicey CLI checksum verification failed." >&2
+  exit 1
+fi
+
+mkdir -p "$install_root"
+install -m 0755 "${temporary_directory}/invoicey" "${install_root}/invoicey"
+
+echo "Installed Invoicey CLI to ${install_root}/invoicey"
+case ":$PATH:" in
+  *":${install_root}:"*) ;;
+  *)
+    echo "Add this line to your shell profile:"
+    echo "  export PATH=\"${install_root}:\$PATH\""
+    ;;
+esac
+echo "Next: invoicey login"

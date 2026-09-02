@@ -2,7 +2,10 @@
 
 ## Goal
 
-Give Invoicey a coherent public exterior around the existing authenticated web app: one substantial Czech landing page, polished OAuth and recovery onboarding screens, concise legal pages, and privacy controls that look and behave like Invoicey.
+Give Invoicey a coherent public exterior around the existing authenticated web
+app: one substantial Czech landing page, a downloadable brand center, polished
+OAuth and recovery onboarding screens, concise legal pages, and privacy controls
+that look and behave like Invoicey.
 
 The public website is intentionally small. Product explanation lives on `/`; separate feature, AI, pricing, about, or security marketing pages are out of scope until there is enough distinct content to justify them.
 
@@ -11,6 +14,8 @@ The public website is intentionally small. Product explanation lives on `/`; sep
 | Route         | Purpose                                                               |
 | ------------- | --------------------------------------------------------------------- |
 | `/`           | Public product landing page and primary acquisition surface           |
+| `/brand`      | Official wordmarks, app icons, provider assets, and usage manual      |
+| `/install`    | Static checksum-verifying CLI installer                               |
 | `/sign-in`    | Google/GitHub OAuth entry with safe `next` handling                   |
 | `/onboarding` | Recovery path for a signed-in user without a workspace                |
 | `/privacy`    | Privacy information grounded in the application's actual data flows   |
@@ -25,6 +30,7 @@ The public header links to anchored sections on the homepage rather than thin su
 - Product overview
 - Workflows
 - Automation
+- Mac and CLI companions
 - FAQ
 - Sign in / open app
 
@@ -37,16 +43,23 @@ The footer contains the legal routes and a first-party cookie-preferences contro
 3. **Core workflow:** create, issue/send, and track/import.
 4. **Structured-data advantage:** the same validated invoice contract serves web, JSON, MCP, and Slack. Automation is described as beta until its operator smoke checklist is complete.
 5. **Multiple businesses:** issuer-specific banking, numbering, branding, and VAT settings.
-6. **FAQ:** short answers to the practical questions a Czech freelancer or small team has before signing in.
-7. **Final CTA:** open the application.
+6. **Companions:** Mac download and a copyable checksum-verified CLI install command.
+7. **FAQ:** short answers to the practical questions a Czech freelancer or small team has before signing in.
+8. **Final CTA:** open the application.
 
 No customer logos, testimonials, usage counters, prices, certifications, or security guarantees are invented.
 
 ## Visual system
 
-- Reuse the existing Invoicey logo, Geist fonts, peach/chocolate tokens, shadcn primitives, and light/dark theme.
+- Follow the maintained [visual system](../ui/visual-system.md) and
+  [brand-asset guidance](../ui/brand-assets.md): use the full wordmark in public
+  chrome, the `I` monogram for compact placements, semantic graphite/orange
+  tokens, and dark-first presentation.
+  Light and system preferences remain supported; neither restores the retired
+  peach/chocolate treatment.
 - Keep the page server-rendered. Only mobile navigation, theme control, OAuth actions, and consent controls may require client JavaScript.
-- Product visuals are code-native and based on existing app UI so they remain crisp and do not introduce heavyweight media.
+- Product previews are code-native, populated, and based on existing app UI so
+  they remain crisp, credible, and do not introduce heavyweight media.
 - Respect reduced-motion preferences and retain visible keyboard focus.
 
 ## Consent UX
@@ -87,7 +100,8 @@ The pages describe verified product behavior and processors already present in t
 - `bun run lint`
 - `bun run test`
 - `bun run build` with the required build-time auth environment
-- Browser smoke at mobile and desktop widths in light and dark themes
+- Browser smoke at desktop and Pixel 7 widths; a fresh visit is dark, while
+  light and system preferences remain supported
 - Signed-out `/dashboard` redirect and safe OAuth `next` redirect
 - Fresh consent, necessary-only, measurement-enabled, preference edit, and reset flows
 

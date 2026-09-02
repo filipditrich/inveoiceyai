@@ -103,7 +103,7 @@ export function EmailShell({
 }
 
 const body: React.CSSProperties = {
-  backgroundColor: "#f6f6f4",
+  backgroundColor: "#f4f4f5",
   fontFamily:
     'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
   margin: 0,
@@ -112,6 +112,7 @@ const body: React.CSSProperties = {
 
 const container: React.CSSProperties = {
   backgroundColor: "#ffffff",
+  border: "1px solid #e4e4e7",
   borderRadius: "8px",
   margin: "0 auto",
   maxWidth: "560px",
@@ -134,7 +135,7 @@ const logo: React.CSSProperties = {
 };
 
 const heading: React.CSSProperties = {
-  color: "#111111",
+  color: "#18181b",
   fontSize: "22px",
   fontWeight: 600,
   lineHeight: "1.3",
@@ -142,8 +143,8 @@ const heading: React.CSSProperties = {
 };
 
 const hr: React.CSSProperties = {
-  borderColor: "#e8e8e4",
-  borderTop: "1px solid #e8e8e4",
+  borderColor: "#e4e4e7",
+  borderTop: "1px solid #e4e4e7",
   margin: "24px 0 12px",
 };
 
@@ -162,6 +163,6 @@ const footer: React.CSSProperties = {
 };
 
 const footerLinkStyle: React.CSSProperties = {
-  color: "#666666",
+  color: "#52525b",
   textDecoration: "underline",
 };

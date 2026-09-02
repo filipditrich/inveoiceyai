@@ -10,8 +10,28 @@ and bulk import stay on the website.
 
 ## Install
 
-From a clone of the Invoicey repo. This compiles a standalone `invoicey` binary
-(Bun `--compile`, includes the runtime) and puts it on PATH:
+The public installer detects macOS or Linux and the current architecture,
+downloads the matching standalone binary, verifies it against the published
+SHA-256 checksum, and puts it in `~/.invoicey/bin`:
+
+```bash
+curl -fsSL https://invoicey.ditrich.me/install | bash
+```
+
+Open a **new** terminal, or add the install directory to the current shell:
+
+```bash
+export PATH="$HOME/.invoicey/bin:$PATH"
+invoicey --version
+invoicey login
+```
+
+Set `INVOICEY_INSTALL_DIR` to choose another destination. Set
+`INVOICEY_VERSION` to install a specific release instead of the latest one.
+
+### Build from the repository
+
+Contributors can compile and install the current checkout with Bun:
 
 ```bash
 bun install
@@ -25,16 +45,7 @@ The installer:
 3. Appends `export PATH="$HOME/.invoicey/bin:$PATH"` to your shell rc
    (`.zshrc`, `.bashrc`, or fish `config.fish`) if that PATH is not already there
 
-Open a **new** terminal, or for the current one:
-
-```bash
-export PATH="$HOME/.invoicey/bin:$PATH"
-invoicey --version
-invoicey login
-```
-
-Re-run `bun run invoicey:install` after pulling CLI source changes. There is no
-public `curl | bash` page yet — the installer lives in the repo.
+Re-run `bun run invoicey:install` after pulling CLI source changes.
 
 To run from source without compiling:
 

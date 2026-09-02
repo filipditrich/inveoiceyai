@@ -34,7 +34,7 @@
     );
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.45),
-    0 42px 100px rgb(69 43 31 / 0.11);
+    0 42px 100px rgb(0 0 0 / 0.24);
   content: "";
   transform: rotate(calc(var(--pointer-x) * 1.5deg));
 }
@@ -104,7 +104,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 30px 26px rgb(67 39 28 / 0.18));
+  filter: drop-shadow(0 30px 26px rgb(0 0 0 / 0.28));
   opacity: 1;
   transition:
     opacity 420ms ease,
@@ -139,7 +139,7 @@
   border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
   border-radius: 1.25rem 1.25rem 0.35rem 1.25rem;
   background: color-mix(in oklab, var(--background) 91%, transparent);
-  box-shadow: 0 18px 48px rgb(54 35 26 / 0.12);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 0.24);
   padding: 0.9rem 1rem;
   font-size: 0.82rem;
   font-weight: 600;
@@ -167,7 +167,7 @@
   z-index: 4;
   width: clamp(6rem, 13vw, 9rem);
   height: auto;
-  filter: drop-shadow(0 18px 22px rgb(67 39 28 / 0.16));
+  filter: drop-shadow(0 18px 22px rgb(0 0 0 / 0.24));
   transform: translate3d(
       calc(var(--pointer-x) * -18px),
       calc(var(--pointer-y) * -12px),
@@ -184,7 +184,7 @@
   z-index: 1;
   height: 2.25rem;
   border-radius: 50%;
-  background: rgb(61 39 29 / 0.18);
+  background: rgb(0 0 0 / 0.3);
   filter: blur(15px);
   transform: translateX(calc(var(--pointer-x) * -10px)) scaleX(0.92);
 }
@@ -195,7 +195,7 @@
   border: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
   border-radius: 999px;
   background: color-mix(in oklab, var(--background) 90%, transparent);
-  box-shadow: 0 10px 30px rgb(52 34 25 / 0.09);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.2);
   padding: 0.42rem 0.65rem;
   color: var(--muted-foreground);
   font-family: var(--font-mono);
@@ -277,7 +277,7 @@
 .floatingGuide img {
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 15px 14px rgb(48 30 22 / 0.2));
+  filter: drop-shadow(0 15px 14px rgb(0 0 0 / 0.28));
 }
 
 .floatingGuideMessage {
@@ -286,7 +286,7 @@
   border: 1px solid var(--border);
   border-radius: 1rem 1rem 0.25rem 1rem;
   background: color-mix(in oklab, var(--background) 93%, transparent);
-  box-shadow: 0 14px 38px rgb(48 30 22 / 0.12);
+  box-shadow: 0 14px 38px rgb(0 0 0 / 0.22);
   padding: 0.75rem 0.85rem;
   font-size: 0.7rem;
   font-weight: 600;
@@ -295,7 +295,7 @@
 }
 
 .ctaMascot {
-  filter: drop-shadow(0 28px 36px rgb(59 36 25 / 0.16));
+  filter: drop-shadow(0 28px 36px rgb(0 0 0 / 0.28));
   transform: rotate(-4deg);
 }
 
@@ -312,8 +312,8 @@
       transparent 35%
     );
   box-shadow:
-    0 1px 2px rgb(45 38 28 / 0.04),
-    0 32px 90px rgb(45 38 28 / 0.12);
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 32px 90px rgb(0 0 0 / 0.22);
 }
 
 .productStage::before {
@@ -352,7 +352,7 @@
 
 .liftCard:hover {
   border-color: color-mix(in oklab, var(--primary) 28%, var(--border));
-  box-shadow: 0 18px 42px rgb(45 38 28 / 0.08);
+  box-shadow: 0 18px 42px rgb(0 0 0 / 0.18);
   transform: translateY(-4px);
 }
 
@@ -378,7 +378,7 @@
 }
 
 .chatStage:hover {
-  box-shadow: 0 34px 80px rgb(20 16 12 / 0.22);
+  box-shadow: 0 34px 80px rgb(0 0 0 / 0.3);
   transform: translateY(-3px) rotate(0.25deg);
 }
 

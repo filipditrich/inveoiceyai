@@ -46,16 +46,16 @@ export function InvoiceSummary(props: InvoiceSummaryProps) {
 }
 
 const row: React.CSSProperties = {
-  color: "#222222",
+  color: "#27272a",
   fontSize: "14px",
   lineHeight: "1.5",
   margin: "0 0 6px",
 };
 
 const button: React.CSSProperties = {
-  backgroundColor: "#111111",
+  backgroundColor: "#f97316",
   borderRadius: "6px",
-  color: "#ffffff",
+  color: "#1c1917",
   display: "inline-block",
   fontSize: "14px",
   fontWeight: 600,

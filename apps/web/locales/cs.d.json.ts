@@ -265,7 +265,8 @@ declare const messages: {
       "skipToContent": "Přeskočit na obsah",
       "ariaLabel": "Hlavní navigace",
       "payments": "Platby",
-      "integrations": "Napojení"
+      "integrations": "Napojení",
+      "apps": "Mac a CLI"
     },
     "footer": {
       "description": "Faktury jako strukturovaná data. Vytvořte je ve webu, přes JSON nebo s pomocí AI a pokaždé získejte stejný validovaný výstup.",
@@ -274,6 +275,7 @@ declare const messages: {
       "terms": "Podmínky",
       "cookies": "Cookies",
       "cookieSettings": "Nastavení cookies",
+      "brand": "Brand materiály",
       "copyright": "© {year} Invoicey · Neveřejná beta",
       "legalNav": "Právní informace"
     },
@@ -563,7 +565,53 @@ declare const messages: {
       "driveTitle": "Invoicey Drive",
       "driveDescription": "Vystavená PDF ve Finderu na Macu. Propojení z lišty nabídek.",
       "docsCta": "Dokumentace napojení"
+    },
+    "companions": {
+      "eyebrow": "Nativní doplňky",
+      "title": "Invoicey i mimo prohlížeč.",
+      "description": "Mějte vystavené doklady ve Finderu nebo obsluhujte workspace z terminálu. Oba doplňky používají stejnou identitu, pravidla přístupu a data Invoicey.",
+      "macLabel": "Invoicey pro Mac",
+      "macTitle": "Vystavené faktury tam, kam soubory patří.",
+      "macDescription": "Invoicey Drive zrcadlí vystavená PDF do Finderu, iCloud Drive nebo Proton Drive. Mac spárujete jednou z menu baru; vystavení a platby zůstávají ve webové aplikaci.",
+      "macDownload": "Stáhnout pro Mac",
+      "learnMore": "Jak funguje Invoicey Drive",
+      "cliLabel": "Invoicey CLI",
+      "cliTitle": "Soustředěný pracovní nástroj pro terminál.",
+      "cliDescription": "Seznamy, koncepty, vystavení, odeslání i párování plateb bez ruční práce s MCP obálkami. CLI používá API klíč workspace a nevratné kroky vždy potvrzuje.",
+      "copy": "Kopírovat instalační příkaz",
+      "copied": "Instalační příkaz zkopírován",
+      "cliDocs": "Otevřít rychlý start CLI"
     }
+  },
+  "BrandPage": {
+    "meta": {
+      "title": "Brand materiály",
+      "description": "Oficiální loga Invoicey, ikony aplikace, pravidla použití a materiály ke stažení."
+    },
+    "eyebrow": "Brand Invoicey",
+    "title": "Přesná identita pro seriózní automatizaci faktur.",
+    "description": "Wordmark použijte všude, kde má Invoicey prostor se představit. Monogram patří do kompaktních ikon aplikace, prohlížeče, providerů a menu baru.",
+    "downloadKit": "Stáhnout brand kit",
+    "downloadManual": "Stáhnout pravidla",
+    "systemEyebrow": "Systém identity",
+    "systemTitle": "Jeden wordmark. Jeden kompaktní znak.",
+    "systemDescription": "Identitu nese grafit. Oranžová je přesný signál: tečka nad druhým i a jediný akcent v monogramu.",
+    "wordmarkTitle": "Wordmark Invoicey",
+    "wordmarkDescription": "Hlavní identita pro web, aplikaci, dokumentaci, prezentace a partnerské materiály.",
+    "markTitle": "Monogram Invoicey",
+    "markDescription": "Kompaktní identita pro favicon, ikony aplikací, OAuth providery, Slack a menu bar v macOS.",
+    "downloadSvg": "SVG",
+    "ruleWordmarkLabel": "Wordmark",
+    "ruleWordmarkValue": "Oranžová tečka zůstává přímo nad druhým i. Nepřidávejte další tečku, symbol ani oranžové písmeno.",
+    "ruleMarkLabel": "Monogram",
+    "ruleMarkValue": "Grafitové pole, bílé I a jeden oranžový bod tvoří celek. Neobarvujte celý znak oranžově.",
+    "ruleOrangeLabel": "Oranžová",
+    "ruleOrangeValue": "#F97316 patří akcím, fokusu a brand akcentu. Povrchy zůstávají grafitové nebo teple bílé.",
+    "usageEyebrow": "Připraveno pro každý povrch",
+    "usageTitle": "Sociální sítě, produkt, aplikace i partneři.",
+    "usageDescription": "Balíček obsahuje světlý i tmavý wordmark, vektorové a rastrové ikony, sociální grafiku a připravené velikosti pro Slack, Google OAuth a GitHub OAuth.",
+    "docsCta": "Otevřít produktovou dokumentaci",
+    "socialAlt": "Sociální karta Invoicey s wordmarkem a tokem automatizace faktur"
   },
   "Auth": {
     "meta": {

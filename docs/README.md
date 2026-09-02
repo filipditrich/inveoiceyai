@@ -41,9 +41,11 @@ If a doc disagrees with the code, the doc is right and the code is a bug — or 
 - [Czech OSVČ companion](./research/osvc-companion.md) — exploratory and not
   scheduled.
 - [Personal invoice archive](./research/personal-invoice-archive.md) — selected
-  as Invoicey Drive (Plan 30). Server cannot write iCloud or Proton Drive.
+  as Invoicey Drive (Plan 30): auto-save issued PDFs to a Finder folder, with
+  iCloud Drive and Proton Drive handled by the local companion and server-side
+  destinations such as Google Drive, Dropbox, or WebDAV added separately.
 - [macOS archive app sketches](./research/macos-archive-app.md) — promoted into
-  the Drive spec.
+  the Drive spec as a menu-bar librarian / File Provider, not a web-app clone.
 - [Invoicey CLI](./research/invoicey-cli.md) — selected as Plan 31 operator
   companion (PAT JSON API + `apps/cli`).
 
