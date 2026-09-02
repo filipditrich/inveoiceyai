@@ -82,7 +82,7 @@ const legacyHostHtmlRedirects = [
     destination: `${CANONICAL_ORIGIN}/:path`,
     permanent: true,
   },
-] as const;
+];
 
 const legacySettingsRedirects = [
   ["/account", "/settings/account"],
