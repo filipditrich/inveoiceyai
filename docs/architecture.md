@@ -34,7 +34,7 @@ inveoiceyai/
 │   │   ├── app/
 │   │   │   ├── (app)/          sidebar shell (dashboard, invoices, clients, issuers, payments, settings)
 │   │   │   ├── (docs)/         Fumadocs product docs (/docs)
-│   │   │   └── api/            ARES, MCP, Drive, webhooks, cron (incl. bank-sync), auth
+│   │   │   └── api/            ARES, MCP, companion, Drive, webhooks, cron, auth
 │   │   ├── agent/              Eve Slack + HTTP channels (/eve/v1/*)
 │   │   ├── content/docs/       Public MDX docs
 │   │   ├── lib/payments/       Fio sync + allocation services
@@ -98,6 +98,7 @@ flowchart TD
 - **`@invoicey/invoice-tools`** — framework-agnostic create/render, ARES lookup, file presets, companion ops; consumed by MCP, Slack, CLI, and demo paths.
 - **`apps/mcp`** — stdio MCP for local Cursor / Claude Desktop.
 - **`apps/cli`** — interactive operator CLI; remote client of `/api/companion`.
+  Compile with `bun run invoicey:install` → `~/.invoicey/bin/invoicey`.
 - **Client components** — forms and interactive UI only where needed (`'use client'`).
 
 ## Data flow: creating an invoice

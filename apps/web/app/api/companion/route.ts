@@ -13,7 +13,23 @@ import {
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
+export function GET() {
+  return NextResponse.json(
+    { ok: false, error: "method_not_allowed" },
+    { status: 405 },
+  );
+}
+
 export async function POST(request: Request) {
+  try {
+    return await postCompanion(request);
+  } catch (cause) {
+    const message = cause instanceof Error ? cause.message : "companion_failed";
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+  }
+}
+
+async function postCompanion(request: Request) {
   const gate = await requireCompanionAuth(request);
   if ("response" in gate) return gate.response;
 

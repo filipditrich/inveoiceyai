@@ -145,7 +145,8 @@ Shared domain lives in `@invoicey/invoice-core` (schema, totals, PDF / ISDOC / Q
 <summary>Repo map</summary>
 
 ```text
-apps/web/                 Next.js — product, docs, /api/mcp, Eve
+apps/web/                 Next.js — product, docs, /api/mcp, /api/companion, Eve
+apps/cli/                 Invoicey CLI — `bun run invoicey:install` → ~/.invoicey/bin
 apps/mcp/                 Local stdio MCP server
 packages/invoice-core/    Schema, numbering, status, PDF / ISDOC / QR
 packages/invoice-tools/   Shared handlers + MCP registration

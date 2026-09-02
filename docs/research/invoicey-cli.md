@@ -47,7 +47,9 @@ Do not invent a second key type.
 Drive, it has a reason to sit next to `@invoicey/web`: shared docs, one PR,
 one release train. The CLI process itself does **not** import `@invoicey/db`.
 It is a remote client of `https://invoicey.ditrich.me`, same class as a Mac
-app talking `/api/drive/*`.
+app talking `/api/drive/*`. Daily use is a Bun-compiled binary at
+`~/.invoicey/bin/invoicey` (`bun run invoicey:install`), not `bun run` of the
+TypeScript entry.
 
 ## Alternatives rejected
 

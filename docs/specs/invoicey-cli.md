@@ -94,6 +94,24 @@ Global flags: `--api`, `--token`, `--json`, `--yes`. Config:
 `~/.invoicey/cli.json` `{ "apiUrl", "token" }`. Env: `INVOICEY_API_URL`,
 `INVOICEY_API_KEY`.
 
+### Install
+
+`bun run invoicey:install` compiles `apps/cli/src/bin.ts` with
+`bun build --compile` and copies the result to `~/.invoicey/bin/invoicey`.
+It appends `export PATH="$HOME/.invoicey/bin:$PATH"` to the user's shell rc
+(`.zshrc` / `.bashrc` / fish `config.fish`) when that PATH line is missing.
+
+The CLI process never imports `@invoicey/db`. Recompile after pulling CLI
+source changes. A hosted `curl | bash` installer is out of v1.
+
+### Companion JSON
+
+`POST /api/companion` is JSON in and JSON out. Auth failures are `401` with
+`{ ok: false, error: "unauthorized" }`. Thrown handler errors become
+`{ ok: false, error }` (HTTP 200 or 500), never an HTML error page. The CLI
+uses `redirect: "manual"` and prints content-type plus a body snippet when
+the response is not a JSON object.
+
 ### Out of v1
 
 Look builder, bulk import, members, bank-token connect, recurring schedule
@@ -101,10 +119,11 @@ editor, platform admin, Drive pairing, local Neon.
 
 ## Package map
 
-| Piece                                                      | Role                 |
-| ---------------------------------------------------------- | -------------------- |
-| `packages/invoice-tools/src/companion-ops.ts`              | Ops + request schema |
-| `apps/web/app/api/companion/route.ts`                      | POST JSON            |
-| `apps/web/app/api/companion/invoices/[ref]/pdf/route.ts`   | PDF bytes            |
-| `apps/web/app/api/companion/invoices/[ref]/isdoc/route.ts` | ISDOC bytes          |
-| `apps/cli`                                                 | `invoicey` binary    |
+| Piece                                                      | Role                                     |
+| ---------------------------------------------------------- | ---------------------------------------- |
+| `packages/invoice-tools/src/companion-ops.ts`              | Ops + request schema                     |
+| `apps/web/app/api/companion/route.ts`                      | POST JSON                                |
+| `apps/web/app/api/companion/invoices/[ref]/pdf/route.ts`   | PDF bytes                                |
+| `apps/web/app/api/companion/invoices/[ref]/isdoc/route.ts` | ISDOC bytes                              |
+| `apps/cli`                                                 | TypeScript source + `scripts/install.ts` |
+| `~/.invoicey/bin/invoicey`                                 | Compiled binary on PATH                  |

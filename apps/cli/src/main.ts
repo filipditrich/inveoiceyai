@@ -139,6 +139,21 @@ export async function run(argv: string[]): Promise<number> {
     process.stdout.write("invoicey 0.1.0\n");
     return 0;
   }
+  try {
+    return await runCommand(parsed);
+  } catch (err) {
+    if (err instanceof CompanionError) {
+      printError(err.message);
+      return err.status === 401 ? 1 : 2;
+    }
+    printError(err instanceof Error ? err.message : String(err));
+    return 2;
+  }
+}
+
+async function runCommand(
+  parsed: ReturnType<typeof parseArgv>,
+): Promise<number> {
   const [cmd] = parsed.rest;
   if (cmd === "login") {
     const session = await resolveSession({ flags: parsed.flags });
@@ -159,21 +174,12 @@ export async function run(argv: string[]): Promise<number> {
     yes: flagBool(parsed.flags, "yes"),
     flags: parsed.flags,
   };
-  try {
-    if (wantsInteractive) {
-      if (!process.stdin.isTTY) {
-        process.stdout.write(HELP);
-        return 0;
-      }
-      return await runInteractive(ctx);
+  if (wantsInteractive) {
+    if (!process.stdin.isTTY) {
+      process.stdout.write(HELP);
+      return 0;
     }
-    return await route(ctx, parsed.rest);
-  } catch (err) {
-    if (err instanceof CompanionError) {
-      printError(err.message);
-      return err.status === 401 ? 1 : 2;
-    }
-    printError(err instanceof Error ? err.message : String(err));
-    return 2;
+    return runInteractive(ctx);
   }
+  return route(ctx, parsed.rest);
 }

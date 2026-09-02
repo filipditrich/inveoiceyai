@@ -2,6 +2,33 @@
 
 Interactive terminal cockpit for an Invoicey workspace.
 
+## Install (binary on PATH)
+
+From the monorepo root:
+
+```bash
+bun run invoicey:install
+```
+
+That runs `apps/cli/scripts/install.ts`:
+
+1. `bun build --compile` of `src/bin.ts` → `apps/cli/dist/invoicey`
+2. Copy to `~/.invoicey/bin/invoicey` (mode `0755`)
+3. Append `export PATH="$HOME/.invoicey/bin:$PATH"` to `.zshrc` / `.bashrc` /
+   fish `config.fish` when missing
+
+Reload the shell (or `export PATH="$HOME/.invoicey/bin:$PATH"`), then:
+
+```bash
+invoicey login
+invoicey status
+```
+
+Re-run the installer after pulling CLI changes. The binary embeds the Bun
+runtime (tens of MB). A hosted `curl | bash` page is out of v1.
+
+## Run from source
+
 ```bash
 bun run --filter=@invoicey/cli start
 # or
@@ -11,9 +38,9 @@ bun apps/cli/src/bin.ts
 ```bash
 invoicey login
 invoicey status
-invoicey invoices
 invoicey invoices issue 20260012
 ```
 
 Auth is a personal API key from **Settings → API keys**, same as remote MCP.
-Config: `~/.invoicey/cli.json`. Docs: `/docs/integrations/cli`.
+Config: `~/.invoicey/cli.json` (mode `0600`). Docs: `/docs/integrations/cli`.
+Spec: `docs/specs/invoicey-cli.md`. ADR: `docs/decisions/0044-invoicey-cli-companion.md`.

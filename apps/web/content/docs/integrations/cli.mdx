@@ -10,17 +10,36 @@ and bulk import stay on the website.
 
 ## Install
 
-From a clone of the Invoicey repo:
+From a clone of the Invoicey repo. This compiles a standalone `invoicey` binary
+(Bun `--compile`, includes the runtime) and puts it on PATH:
 
 ```bash
 bun install
-bun run --filter=@invoicey/cli start
+bun run invoicey:install
 ```
 
-Or run the binary directly:
+The installer:
+
+1. Builds `apps/cli/src/bin.ts` → `apps/cli/dist/invoicey`
+2. Copies that file to `~/.invoicey/bin/invoicey`
+3. Appends `export PATH="$HOME/.invoicey/bin:$PATH"` to your shell rc
+   (`.zshrc`, `.bashrc`, or fish `config.fish`) if that PATH is not already there
+
+Open a **new** terminal, or for the current one:
 
 ```bash
-bun apps/cli/src/bin.ts
+export PATH="$HOME/.invoicey/bin:$PATH"
+invoicey --version
+invoicey login
+```
+
+Re-run `bun run invoicey:install` after pulling CLI source changes. There is no
+public `curl | bash` page yet — the installer lives in the repo.
+
+To run from source without compiling:
+
+```bash
+bun run --filter=@invoicey/cli start
 ```
 
 ## Login
@@ -31,9 +50,15 @@ Create a personal key under **Settings → API keys** — see [API keys](/docs/i
 invoicey login
 ```
 
-The key is stored in `~/.invoicey/cli.json` (mode `0600`). You can also set
-`INVOICEY_API_KEY` and optional `INVOICEY_API_URL` (default
-`https://invoicey.ditrich.me`).
+Paste the key, keep the default API URL (`https://invoicey.ditrich.me`) unless
+you are hitting a local `bun dev`. The key is stored in `~/.invoicey/cli.json`
+(mode `0600`). You can also set `INVOICEY_API_KEY` and optional
+`INVOICEY_API_URL`.
+
+`login` calls `POST /api/companion` with `{ "op": "me" }`. A bad key is `401`.
+If something in front of the API returns HTML (a redirect to sign-in, a
+challenge page), the CLI prints the content-type and a body snippet — it does
+not swallow that as a generic “unexpected response (200)”.
 
 ## Daily use
 
@@ -57,3 +82,14 @@ in a TTY unless you pass `--yes`. `--json` prints the companion payload.
   Drafts still go through `InvoiceSchema`. The CLI cannot invent an issuer —
   create injects the workspace default, the same way MCP does.
 </Callout>
+
+## Files on disk
+
+| Path                       | What                   |
+| -------------------------- | ---------------------- |
+| `~/.invoicey/bin/invoicey` | Compiled command       |
+| `~/.invoicey/cli.json`     | API URL + PAT (`0600`) |
+
+Logout removes `cli.json`. It does not uninstall the binary. Delete
+`~/.invoicey/bin/invoicey` and the PATH line in your shell rc if you want it
+gone.

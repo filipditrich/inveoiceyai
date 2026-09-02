@@ -600,5 +600,10 @@ export async function runCompanionOp(input: unknown): Promise<CompanionResult> {
     const first = parsed.error.issues[0];
     return fail(first?.message ?? "invalid_request");
   }
-  return dispatchOther(parsed.data);
+  try {
+    return await dispatchOther(parsed.data);
+  } catch (cause) {
+    const message = cause instanceof Error ? cause.message : "companion_failed";
+    return fail(message);
+  }
 }

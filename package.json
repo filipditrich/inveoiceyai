@@ -19,6 +19,7 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "gates": "bun typecheck && bun lint && bun format:check",
+    "invoicey:install": "bun run --filter=@invoicey/cli install:bin",
     "prepare": "husky",
     "commit": "cz",
     "release": "semantic-release"
