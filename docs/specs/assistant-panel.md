@@ -65,15 +65,18 @@ resolves the Better Auth cookie itself:
 
 1. Require a same-origin `Origin` header. Cookie auth is ambient, so this is
    what stops a cross-site POST from driving the agent as a signed-in user.
-   Requests with no `Origin` fall through to the bearer strategies. 2. Verify the cookie's HMAC (base64url-nopad of `HMAC-SHA256(BETTER_AUTH_SECRET, token)`,
-   the signature Better Auth writes), then look the token up with
+   Requests with no `Origin` fall through to the bearer strategies.
+2. Verify the cookie's HMAC (standard base64 of
+   `HMAC-SHA256(BETTER_AUTH_SECRET, token)`, matching Better Auth
+   `makeSignature` on `session_token` — not the base64url-nopad used on the
+   session-data cache cookie), then look the token up with
    `resolveWebSessionPrincipal` — unexpired session, then a re-checked
    membership in `session.activeOrganizationId`. The signature check is defence
    in depth: the token _is_ the credential, so a forged signature cannot conjure
    a session, but a tampered cookie is rejected before it reaches the database.
    A runtime with no `BETTER_AUTH_SECRET` skips the check (warning once) rather
    than locking every browser session out over a missing env var.
-2. Return a principal carrying `{ workspaceId, userId, surface: "web" }`.
+3. Return a principal carrying `{ workspaceId, userId, surface: "web" }`.
    `tool-workspace.ts` already reads those attributes for non-Slack sessions, so
    every tool binds to the right workspace with no further wiring.
 

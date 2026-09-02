@@ -104,12 +104,12 @@ export async function cookieSignatureValid(
     );
     const mac = await crypto.subtle.sign("HMAC", key, encoder.encode(token));
     /**
-     * Better Auth signs with `createHMAC("SHA-256", "base64urlnopad")` —
-     * URL-safe alphabet, no padding. Standard `btoa` is a different string
-     * and rejected every real browser cookie on the first deploy.
+     * Session cookies go through Better Auth `makeSignature`, which is
+     * standard `btoa` of HMAC-SHA256. The session-data cache uses
+     * base64url-nopad; that is a different cookie and a different string.
      */
     return timingSafeEqual(
-      bytesToBase64UrlNoPad(new Uint8Array(mac)),
+      bytesToStandardBase64(new Uint8Array(mac)),
       signature,
     );
   } catch {
@@ -117,14 +117,11 @@ export async function cookieSignatureValid(
   }
 }
 
-/** HMAC digest as Better Auth writes it on `better-auth.session_token`. */
-export function bytesToBase64UrlNoPad(bytes: Uint8Array): string {
+/** HMAC digest as Better Auth `makeSignature` writes on `session_token`. */
+export function bytesToStandardBase64(bytes: Uint8Array): string {
   let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/u, "");
+  return btoa(binary);
 }
 
 function timingSafeEqual(a: string, b: string): boolean {

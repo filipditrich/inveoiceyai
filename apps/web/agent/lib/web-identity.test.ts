@@ -1,7 +1,8 @@
+import { makeSignature } from "better-auth/crypto";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import {
-  bytesToBase64UrlNoPad,
+  bytesToStandardBase64,
   cookieSignatureValid,
   isWebSession,
   sessionCookieFrom,
@@ -17,7 +18,7 @@ function requestWithCookie(cookie: string): Request {
   });
 }
 
-/** The signature Better Auth writes: base64url-nopad of HMAC-SHA256(secret, token). */
+/** Same encoding as Better Auth `makeSignature`: standard base64 of HMAC-SHA256. */
 async function sign(token: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -28,7 +29,7 @@ async function sign(token: string, secret: string): Promise<string> {
     ["sign"],
   );
   const mac = await crypto.subtle.sign("HMAC", key, encoder.encode(token));
-  return bytesToBase64UrlNoPad(new Uint8Array(mac));
+  return bytesToStandardBase64(new Uint8Array(mac));
 }
 
 describe("sessionCookieFrom", () => {
@@ -78,6 +79,16 @@ describe("cookieSignatureValid", () => {
     ).resolves.toBe(true);
   });
 
+  /**
+   * Session cookies are `setSignedCookie` → Better Auth `makeSignature`, which
+   * is standard `btoa`, not the base64url used on the session-data cache.
+   */
+  it("accepts a signature Better Auth's makeSignature would write", async () => {
+    await expect(
+      cookieSignatureValid(TOKEN, await makeSignature(TOKEN, SECRET)),
+    ).resolves.toBe(true);
+  });
+
   it("rejects a signature from a different secret", async () => {
     await expect(
       cookieSignatureValid(TOKEN, await sign(TOKEN, "some-other-secret")),
@@ -95,8 +106,11 @@ describe("cookieSignatureValid", () => {
     await expect(cookieSignatureValid(TOKEN, "sig")).resolves.toBe(false);
   });
 
-  /** The first deploy used `btoa` and 401'd every signed-in browser. */
-  it("rejects a standard-base64 signature of the same mac", async () => {
+  /**
+   * The session-data cache cookie uses base64url-nopad. Verifying that here
+   * would reject every real `session_token` Better Auth writes.
+   */
+  it("rejects a base64url-nopad signature of the same mac", async () => {
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey(
       "raw",
@@ -108,9 +122,12 @@ describe("cookieSignatureValid", () => {
     const mac = new Uint8Array(
       await crypto.subtle.sign("HMAC", key, encoder.encode(TOKEN)),
     );
-    const standard = btoa(String.fromCharCode(...mac));
-    expect(standard).not.toBe(bytesToBase64UrlNoPad(mac));
-    await expect(cookieSignatureValid(TOKEN, standard)).resolves.toBe(false);
+    const urlSafe = btoa(String.fromCharCode(...mac))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/u, "");
+    expect(urlSafe).not.toBe(bytesToStandardBase64(mac));
+    await expect(cookieSignatureValid(TOKEN, urlSafe)).resolves.toBe(false);
   });
 
   /**
