@@ -1,13 +1,13 @@
 <p align="center">
   <a href="https://invoicey.ditrich.me">
-    <img src="docs/assets/readme/logo.png" width="88" height="88" alt="Invoicey"/>
+    <img src="apps/web/public/brand/invoicey-mark.svg" width="88" height="88" alt="Invoicey"/>
   </a>
 </p>
 
 <h1 align="center">Invoicey</h1>
 
 <p align="center">
-  <strong>Invoice automation.</strong> Data first, documents second.
+  <strong>Automatizace faktur.</strong> Data first, documents second.
 </p>
 
 <p align="center">
@@ -15,10 +15,10 @@
 </p>
 
 <p align="center">
-  <a href="https://invoicey.ditrich.me"><img src="https://img.shields.io/badge/product-invoicey.ditrich.me-914522?style=for-the-badge" alt="Open Invoicey"/></a>
-  <a href="https://invoicey.ditrich.me/docs"><img src="https://img.shields.io/badge/docs-guides-2A1810?style=for-the-badge" alt="Docs"/></a>
-  <img src="https://img.shields.io/badge/status-private%20beta-C4784A?style=for-the-badge" alt="Private beta"/>
-  <a href="https://github.com/filipditrich/inveoiceyai/releases"><img src="https://img.shields.io/github/v/release/filipditrich/inveoiceyai?style=for-the-badge&color=2A1810" alt="Latest release"/></a>
+  <a href="https://invoicey.ditrich.me"><img src="https://img.shields.io/badge/product-invoicey.ditrich.me-f97316?style=for-the-badge" alt="Open Invoicey"/></a>
+  <a href="https://invoicey.ditrich.me/docs"><img src="https://img.shields.io/badge/docs-guides-18181b?style=for-the-badge" alt="Docs"/></a>
+  <img src="https://img.shields.io/badge/status-private%20beta-f97316?style=for-the-badge" alt="Private beta"/>
+  <a href="https://github.com/filipditrich/inveoiceyai/releases"><img src="https://img.shields.io/github/v/release/filipditrich/inveoiceyai?style=for-the-badge&color=18181b" alt="Latest release"/></a>
 </p>
 
 <p align="center">
@@ -31,7 +31,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/readme/banner.png" alt="Invoicey — invoicing that starts with data" width="720"/>
+  <img src="apps/web/public/brand/invoicey-social-card.svg" alt="Invoicey — invoice automation from a brief to a paid invoice" width="720"/>
 </p>
 
 ---
@@ -42,15 +42,7 @@ An invoice in Invoicey is a validated JSON payload — parties, lines, VAT, paym
 
 The web app, [MCP](https://invoicey.ditrich.me/docs/integrations/mcp), and [Slack](https://invoicey.ditrich.me/docs/integrations/slack) all assemble the same schema. If it does not validate, it does not ship.
 
-<p align="center">
-  <img src="docs/assets/readme/architecture.svg" alt="Web, MCP, and Slack feed InvoiceSchema, which renders PDF, ISDOC, and SPAYD QR"/>
-</p>
-
 Issuing freezes issuer and client **snapshots**, so a later registry edit cannot rewrite history. Status is **derived** from the ledger — unpaid, partial, paid, overpaid — not a checkbox you maintain by hand.
-
-<p align="center">
-  <img src="docs/assets/readme/lifecycle.svg" alt="Draft, issue, send, match, paid"/>
-</p>
 
 ---
 
@@ -102,10 +94,6 @@ Same tools, same validation, same outputs. AI may draft. It may not invent an I�
 ## Plans
 
 Private beta. Plans are assigned by platform admin — there is no self-serve checkout yet.
-
-<p align="center">
-  <img src="docs/assets/readme/plans.svg" alt="Free, Pro, and Enterprise compared"/>
-</p>
 
 |                               | **Free** | **Pro**                         | **Enterprise**                  |
 | ----------------------------- | -------- | ------------------------------- | ------------------------------- |
@@ -189,13 +177,7 @@ This is a private-beta product with a public repo. Useful PRs are welcome; scope
 2. Conventional commits (`commitlint`) — `bun run commit` if you want the wizard.
 3. Do not commit `.env`, API keys, bank tokens, or `.cursor/mcp.json`.
 
-<p align="center">
-  <img src="docs/assets/readme/mascot.webp" width="160" alt="Invoicey mascot"/>
-</p>
-
-<p align="center">
-  <em>I watch the required fields. You watch the business.</em>
-</p>
+<p align="center"><em>Validated data in. Clear documents out.</em></p>
 
 ---
 

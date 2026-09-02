@@ -1,16 +1,20 @@
 # Invoicey brand assets and external surfaces
 
-Invoicey uses a document character as its expressive marketing mascot and a
-simplified document/check mark as its small product mark. The small mark is the
-default for browser chrome and dense UI because it stays legible below 48 px.
-Detailed renders are reserved for hero art, social previews, app profiles and
-other large placements.
+Invoicey uses a geometric document/validation signal as its product identity.
+The document character remains optional supporting delight on secondary
+marketing and assistant surfaces; it is never the primary brand or product
+explanation. The small mark is the default for browser chrome and dense UI
+because it stays legible below 48 px.
 
 ## Repository assets
 
 | Asset                                                              | Intended use                                        |
 | ------------------------------------------------------------------ | --------------------------------------------------- |
-| `apps/web/public/brand/invoicey-logo.png`                          | Canonical square product mark used by `BrandLogo`   |
+| `apps/web/public/brand/invoicey-mark.svg`                          | Canonical one-colour geometric product mark         |
+| `apps/web/public/brand/invoicey-lockup.svg`                        | Canonical horizontal product lockup                 |
+| `apps/web/public/brand/invoicey-app-icon.svg`                      | Source for app-icon raster derivatives              |
+| `apps/web/public/brand/invoicey-social-card.svg`                   | Source for the composed social-sharing preview      |
+| `apps/web/public/brand/invoicey-logo.png`                          | Backwards-compatible square app-icon raster         |
 | `apps/web/public/brand/invoicey-logo-192.png`                      | Email and PWA icon                                  |
 | `apps/web/public/brand/invoicey-logo-512.png`                      | PWA high-resolution icon                            |
 | `apps/web/public/brand/illustrations/invoicey-mascot.webp`         | Interactive hero and page companion                 |
@@ -18,7 +22,8 @@ other large placements.
 | `apps/web/public/brand/illustrations/invoicey-mascot-branded.webp` | Large CTA artwork                                   |
 | `apps/web/public/brand/illustrations/invoicey-wordmark.webp`       | Wide dark brand artwork; do not use as a small logo |
 | `apps/web/public/brand/models/invoicey.glb`                        | Optimized interactive hero model                    |
-| `apps/web/app/opengraph-image.png`                                 | Social sharing preview                              |
+| `apps/web/app/opengraph-image.png`                                 | 1200×630 social card, derived from social-card SVG  |
+| `apps/web/public/brand/external/invoicey-slack-icon.svg`           | Full-bleed source for the Slack app icon            |
 | `apps/web/public/brand/external/invoicey-slack-512.png`            | Slack app/bot icon                                  |
 | `apps/web/public/brand/external/invoicey-google-oauth-120.png`     | Google OAuth consent-screen logo                    |
 | `apps/web/public/brand/external/invoicey-github-oauth-200.png`     | GitHub OAuth app badge                              |
@@ -29,7 +34,7 @@ from these repository assets. They update with the next production deployment.
 
 ## Interactive hero model
 
-The landing-page hero uses a checked-in GLB rendered by Three.js.
+The checked-in GLB is rendered by Three.js only as optional supporting delight.
 `invoicey-3d-asset.ts` loads, normalizes and disposes the asset;
 `invoicey-3d-scene.ts` owns lighting, rendering and animation; and
 `invoicey-3d-canvas.tsx` controls browser loading and lifecycle. The production
@@ -63,9 +68,11 @@ surface manually after deploying the matching homepage assets.
 4. Save changes. A display-only update does not add scopes or change the Eve
    trigger. Do not detach/recreate the Connect resource just to change the icon.
 
-Slack accepts app icons from 512×512 to 2000×2000. The prepared asset is
-512×512. The visible Slack icon is owned by the Slack app's display settings;
-the Vercel project or team avatar does not replace it.
+The prepared Slack asset is 512×512. It uses a full-bleed square graphite field:
+Slack applies its own rounding, so do not upload a pre-rounded field or
+transparent corner gutter.
+The visible Slack icon is owned by the Slack app's display settings; the Vercel
+project or team avatar does not replace it.
 
 ### Google OAuth consent screen
 
@@ -89,7 +96,7 @@ verified and published before users see it.
 3. Under **Application logo**, upload
    `apps/web/public/brand/external/invoicey-github-oauth-200.png` and confirm the
    crop.
-4. Set the badge background to `#fffaf6` and save the application.
+4. Set the badge background to `#0b0b0c` and save the application.
 
 GitHub recommends a square image of at least 200×200 and under 1 MB. The
 prepared transparent mark is designed to sit inside GitHub's circular badge.
@@ -117,7 +124,16 @@ does not affect Invoicey users.
 
 ## Guardrails
 
-- Keep the simplified product mark for placements below 48 px.
+- Keep the simplified product mark for placements below 48 px; it has no
+  enclosing field, shadow, gradient, bitmap, or word.
+- `invoicey-lockup.svg` embeds vector outlines generated from Next's checked-in
+  `dist/compiled/@vercel/og/Geist-Regular.ttf`; it has no runtime font
+  dependency. Its `#f5f5f4` wordmark is for graphite/dark surfaces. On a light
+  surface, use the mark-only asset with adjacent semantic text until a dedicated
+  dark-wordmark lockup is added.
+- Derive every raster product asset from `invoicey-mark.svg`,
+  `invoicey-app-icon.svg`, or `invoicey-social-card.svg`; do not hand-edit
+  divergent identity variants.
 - Preserve transparent padding; do not stretch or crop the mascot's hands,
   shoes or check token.
 - Treat the mascot as supporting personality, not a substitute for product

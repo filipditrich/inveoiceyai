@@ -4,7 +4,12 @@ Information architecture, page intents, and per-flow UX specs. Written **just-in
 
 ## Status
 
-Shipped: [`invoice-builder-flow.md`](./invoice-builder-flow.md) (Plan 6), [`data-grid-ux.md`](./data-grid-ux.md) (Plan 7), [`onboarding.md`](./onboarding.md) (first-issuer `/welcome` + sectioned issuer edit), and [`brand-assets.md`](./brand-assets.md) (product identity and provider-hosted brand surfaces). Remaining docs land with their plans.
+Shipped: [`visual-system.md`](./visual-system.md) (dark-first product identity and
+cross-surface visual contract), [`invoice-builder-flow.md`](./invoice-builder-flow.md)
+(Plan 6), [`data-grid-ux.md`](./data-grid-ux.md) (Plan 7),
+[`onboarding.md`](./onboarding.md) (first-issuer `/welcome` + sectioned issuer
+edit), and [`brand-assets.md`](./brand-assets.md) (product identity and
+provider-hosted brand surfaces). Remaining docs land with their plans.
 
 ## Expected UI docs (with the plan that authors them)
 

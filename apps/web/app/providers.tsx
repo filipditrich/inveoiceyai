@@ -20,7 +20,7 @@ export default function Providers({ children }: PropsWithChildren) {
     <NuqsAdapter>
       <ThemeProvider
         attribute="class"
-        defaultTheme="system"
+        defaultTheme="dark"
         disableTransitionOnChange
         enableSystem
         storageKey="invoicey-theme"

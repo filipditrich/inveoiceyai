@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const port = 3_000;
+const port = Number(process.env.INVOICEY_E2E_PORT ?? 3_000);
+const baseURL = `http://localhost:${port}`;
 const authStorageState = process.env.INVOICEY_E2E_AUTH_STORAGE_STATE;
 const createsAgentSession = Boolean(
   authStorageState && process.env.INVOICEY_AGENT_LOGIN_SECRET,
@@ -20,7 +21,7 @@ export default defineConfig({
   workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI ? "github" : "list",
   use: {
-    baseURL: `http://localhost:${port}`,
+    baseURL,
     trace: "retain-on-failure",
   },
   projects: [
@@ -48,9 +49,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `NODE_ENV=development bun run dev --port ${port}`,
+    command: process.env.INVOICEY_E2E_NODE_24
+      ? `NODE_ENV=development ${process.env.INVOICEY_E2E_NODE_24} node_modules/next/dist/bin/next dev --webpack --port ${port}`
+      : `NODE_ENV=development bun run dev --port ${port}`,
     cwd: process.cwd(),
-    url: `http://localhost:${port}`,
+    url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

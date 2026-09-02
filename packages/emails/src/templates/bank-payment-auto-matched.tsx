@@ -76,22 +76,22 @@ export function BankPaymentAutoMatchedEmail(
 }
 
 const bodyText: React.CSSProperties = {
-  color: "#222222",
+  color: "#27272a",
   fontSize: "14px",
   lineHeight: "1.55",
   margin: "0 0 16px",
 };
 
 const summaryBox: React.CSSProperties = {
-  backgroundColor: "#f6f6f4",
-  border: "1px solid #e8e8e4",
+  backgroundColor: "#f4f4f5",
+  border: "1px solid #e4e4e7",
   borderRadius: "8px",
   margin: "0 0 20px",
   padding: "14px 16px",
 };
 
 const summaryLine: React.CSSProperties = {
-  color: "#333333",
+  color: "#3f3f46",
   fontSize: "13px",
   lineHeight: "1.5",
   margin: "0 0 6px",
@@ -103,9 +103,9 @@ const summaryLineLast: React.CSSProperties = {
 };
 
 const button: React.CSSProperties = {
-  backgroundColor: "#e99a6c",
+  backgroundColor: "#f97316",
   borderRadius: "7px",
-  color: "#1d1511",
+  color: "#1c1917",
   display: "inline-block",
   fontSize: "14px",
   fontWeight: 600,

@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Automatizace faktur — PDF, ISDOC, SPAYD QR a AI.",
     start_url: "/dashboard",
     display: "standalone",
-    background_color: "#fffaf6",
-    theme_color: "#dc9b79",
+    background_color: "#0b0b0c",
+    theme_color: "#0b0b0c",
     lang: "cs",
     icons: [
       {

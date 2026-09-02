@@ -44,9 +44,14 @@ No customer logos, testimonials, usage counters, prices, certifications, or secu
 
 ## Visual system
 
-- Reuse the existing Invoicey logo, Geist fonts, peach/chocolate tokens, shadcn primitives, and light/dark theme.
+- Follow the maintained [visual system](../ui/visual-system.md) and
+  [brand-asset guidance](../ui/brand-assets.md): use the canonical geometric
+  Invoicey mark, semantic graphite/orange tokens, and dark-first presentation.
+  Light and system preferences remain supported; neither restores the retired
+  peach/chocolate treatment.
 - Keep the page server-rendered. Only mobile navigation, theme control, OAuth actions, and consent controls may require client JavaScript.
-- Product visuals are code-native and based on existing app UI so they remain crisp and do not introduce heavyweight media.
+- Product previews are code-native, populated, and based on existing app UI so
+  they remain crisp, credible, and do not introduce heavyweight media.
 - Respect reduced-motion preferences and retain visible keyboard focus.
 
 ## Consent UX
@@ -87,7 +92,8 @@ The pages describe verified product behavior and processors already present in t
 - `bun run lint`
 - `bun run test`
 - `bun run build` with the required build-time auth environment
-- Browser smoke at mobile and desktop widths in light and dark themes
+- Browser smoke at desktop and Pixel 7 widths; a fresh visit is dark, while
+  light and system preferences remain supported
 - Signed-out `/dashboard` redirect and safe OAuth `next` redirect
 - Fresh consent, necessary-only, measurement-enabled, preference edit, and reset flows
 

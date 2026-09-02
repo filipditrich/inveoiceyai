@@ -18,17 +18,17 @@ export function BrandLogo({
   return (
     <span
       className={cn(
-        "relative inline-flex shrink-0 overflow-hidden rounded-xl ring-1 ring-black/10 dark:ring-white/10",
+        "inline-flex shrink-0 items-center justify-center",
         className,
       )}
       style={{ width: size, height: size }}
     >
       <Image
         alt="Invoicey"
-        className="object-cover"
+        className="size-full object-contain"
         height={size}
         priority={priority}
-        src="/brand/invoicey-logo.png"
+        src="/brand/invoicey-mark.svg"
         width={size}
       />
     </span>

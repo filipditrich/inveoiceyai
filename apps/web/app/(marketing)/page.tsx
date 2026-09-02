@@ -190,10 +190,10 @@ export default async function HomePage() {
   ];
   return (
     <>
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden border-b">
         <div className="marketing-grid absolute inset-0 -z-20 opacity-55" />
         <div className="absolute -top-48 left-1/2 -z-10 size-[38rem] -translate-x-1/2 rounded-full bg-brand/20 blur-3xl" />
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 pt-12 pb-16 sm:px-6 sm:pt-20 sm:pb-20 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-12 lg:px-8 lg:py-16">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 pt-12 pb-16 sm:px-6 sm:pt-20 sm:pb-20 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[0.86fr_1.14fr] lg:items-center lg:gap-14 lg:px-8 lg:py-16">
           <div className={`${motionStyles.heroCopy} max-w-2xl`}>
             <Badge
               variant="outline"
@@ -204,9 +204,7 @@ export default async function HomePage() {
             </Badge>
             <h1 className="mt-7 text-5xl leading-[0.98] font-semibold tracking-[-0.055em] text-balance sm:text-6xl lg:text-[4.5rem]">
               {t("hero.titleLine1")}
-              <span className="block text-[#914522] dark:text-primary">
-                {t("hero.titleLine2")}
-              </span>
+              <span className="block text-primary">{t("hero.titleLine2")}</span>
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-relaxed text-pretty text-muted-foreground sm:text-xl">
               {t("hero.subtitle")}
@@ -257,11 +255,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <InteractiveInvoicey
-            ariaLabel={t("mascot.ariaLabel")}
-            clickHint={t("mascot.clickHint")}
-            messages={mascotMessages}
-          />
+          <ProductPreview />
         </div>
       </section>
 
@@ -290,7 +284,11 @@ export default async function HomePage() {
             description={t("preview.description")}
           />
           <div className="mx-auto mt-14 max-w-4xl">
-            <ProductPreview />
+            <InteractiveInvoicey
+              ariaLabel={t("mascot.ariaLabel")}
+              clickHint={t("mascot.clickHint")}
+              messages={mascotMessages}
+            />
           </div>
         </div>
       </section>
@@ -374,7 +372,7 @@ export default async function HomePage() {
             <Badge variant="secondary" className="h-7 gap-1.5 px-3">
               <LandmarkIcon data-icon="inline-start" /> {t("payments.badge")}
             </Badge>
-            <p className="mt-6 text-sm font-semibold tracking-wide text-[#914522] uppercase dark:text-primary">
+            <p className="mt-6 text-sm font-semibold tracking-wide text-primary uppercase">
               {t("payments.eyebrow")}
             </p>
             <h2 className="mt-3 text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-5xl">
@@ -586,7 +584,7 @@ export default async function HomePage() {
             width={900}
           />
           <div className="relative max-w-2xl lg:max-w-[58%]">
-            <p className="text-sm font-semibold tracking-wide text-[#914522] uppercase dark:text-primary">
+            <p className="text-sm font-semibold tracking-wide text-primary uppercase">
               {t("cta.eyebrow")}
             </p>
             <h2 className="mt-4 text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-5xl">
@@ -711,7 +709,7 @@ function SectionIntro({
         align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-xl"
       }`}
     >
-      <p className="text-sm font-semibold tracking-wide text-[#914522] uppercase dark:text-primary">
+      <p className="text-sm font-semibold tracking-wide text-primary uppercase">
         {eyebrow}
       </p>
       <h2 className="mt-4 text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-5xl">
@@ -782,7 +780,7 @@ function FeaturePanel({
       <span className="grid size-11 place-items-center rounded-2xl bg-brand/12 [&_svg]:size-5">
         {icon}
       </span>
-      <p className="mt-8 text-xs font-semibold tracking-wide text-[#914522] uppercase dark:text-primary">
+      <p className="mt-8 text-xs font-semibold tracking-wide text-primary uppercase">
         {eyebrow}
       </p>
       <h2 className="mt-3 text-2xl font-semibold tracking-[-0.035em] text-balance">
