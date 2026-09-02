@@ -1,4 +1,5 @@
 import { BrandLogo } from "@/components/brand-logo";
+import { AppleLogo } from "@/components/marketing/apple-logo";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { InstallCommand } from "@/components/marketing/install-command";
 import {
@@ -13,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { env } from "@/env.config.server";
 import { getOptionalSession } from "@/lib/auth/session";
 import {
-  AppleIcon,
   ArrowDownIcon,
   ArrowRightIcon,
   ArrowUpRightIcon,
@@ -532,9 +532,9 @@ export default async function HomePage() {
           />
           <div className="mt-14 grid gap-5 lg:grid-cols-2">
             <article
-              className={`${motionStyles.liftCard} relative overflow-hidden rounded-[2rem] border bg-background p-7 sm:p-10`}
+              className={`${motionStyles.liftCard} relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#101012] p-7 text-white shadow-2xl shadow-black/20 sm:p-10`}
             >
-              <div className="absolute -top-28 -right-20 size-72 rounded-full bg-brand/15 blur-3xl" />
+              <div className="absolute -top-28 -right-20 size-72 rounded-full bg-brand/20 blur-3xl" />
               <div className="relative flex items-start justify-between gap-5">
                 <Image
                   alt=""
@@ -544,8 +544,9 @@ export default async function HomePage() {
                   src="/brand/invoicey-app-icon.svg"
                   width={80}
                 />
-                <span className="inline-flex items-center gap-1.5 rounded-full border bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
-                  <AppleIcon className="size-3.5" /> macOS 14+
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-400">
+                  <AppleLogo className="size-3" />
+                  macOS 14+
                 </span>
               </div>
               <div className="relative mt-12 max-w-xl">
@@ -555,21 +556,21 @@ export default async function HomePage() {
                 <h3 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
                   {t("companions.macTitle")}
                 </h3>
-                <p className="mt-4 leading-relaxed text-muted-foreground">
+                <p className="mt-4 leading-relaxed text-zinc-400">
                   {t("companions.macDescription")}
                 </p>
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <Button
-                    size="lg"
-                    className="bg-foreground text-background hover:bg-foreground/90"
-                    render={<a href={macDownloadUrl} />}
+                <div className="mt-8 flex flex-wrap items-center gap-3">
+                  <a
+                    href={macDownloadUrl}
+                    className="inline-flex h-12 items-center gap-2.5 rounded-full bg-[#f5f5f4] px-5 text-sm font-medium text-[#0b0b0c] shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   >
-                    <AppleIcon data-icon="inline-start" />
+                    <AppleLogo className="size-4" />
                     {t("companions.macDownload")}
-                  </Button>
+                  </a>
                   <Button
                     size="lg"
                     variant="outline"
+                    className="h-12 rounded-full border-white/15 bg-transparent px-5 text-white hover:bg-white/5 hover:text-white"
                     render={<Link href="/docs/integrations/invoicey-drive" />}
                   >
                     {t("companions.learnMore")}
