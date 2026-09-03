@@ -6,7 +6,7 @@ Per-feature implementation specs. Written **just-in-time** before the plan that 
 
 **Plan 3 specs:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md).
 
-**Shipped specs:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md), [`ares.md`](./ares.md), [`uploads.md`](./uploads.md), [`data-grid.md`](./data-grid.md), [`slack-bot.md`](./slack-bot.md), [`mcp.md`](./mcp.md), [`db-schema.md`](./db-schema.md), [`invoice-import.md`](./invoice-import.md), [`email.md`](./email.md), [`public-shell.md`](./public-shell.md), [`recurring.md`](./recurring.md), [`payment-ledger-fio.md`](./payment-ledger-fio.md) (Plan 22 — pilot pending), [`payment-ledger-moneta.md`](./payment-ledger-moneta.md) (Plan 23), [`assistant-panel.md`](./assistant-panel.md), [`platform-admin.md`](./platform-admin.md) (Plan 18b).
+**Shipped specs:** [`pdf-rendering.md`](./pdf-rendering.md), [`spayd-qr.md`](./spayd-qr.md), [`isdoc.md`](./isdoc.md), [`ares.md`](./ares.md), [`uploads.md`](./uploads.md), [`data-grid.md`](./data-grid.md), [`slack-bot.md`](./slack-bot.md), [`mcp.md`](./mcp.md), [`db-schema.md`](./db-schema.md), [`invoice-import.md`](./invoice-import.md), [`email.md`](./email.md), [`public-shell.md`](./public-shell.md), [`recurring.md`](./recurring.md), [`payment-ledger-fio.md`](./payment-ledger-fio.md) (Plan 22 — pilot pending), [`payment-ledger-moneta.md`](./payment-ledger-moneta.md) (Plan 23), [`assistant-panel.md`](./assistant-panel.md), [`platform-admin.md`](./platform-admin.md) (Plan 18b / 18c).
 
 > **Incoming invoices / payables were removed from the product on 2026-08-26.**
 > The feature needed a different shape from the rest of Invoicey — a five-gate
@@ -44,7 +44,7 @@ Just-in-time convention: write the remaining specs before the plan that consumes
 | `invoicey-drive.md`        | Plan 30              | macOS companion: File Provider domain, Drive device pairing, layout template, `/api/drive/*`                                         |
 | `invoicey-cli.md`          | Plan 31              | Operator CLI + PAT companion JSON API (`/api/companion`)                                                                             |
 | `standalone-domain.md`     | Plan 32              | Cutover canonical host + email From to `invoicey.app`                                                                                |
-| `platform-admin.md`        | Plan 18b             | See vs control vs never for `/admin`; monitor dashboard, AI usage, invoice/issuer drill-down                                         |
+| `platform-admin.md`        | Plan 18b / 18c       | See vs control vs never for `/admin`; monitor (18b) then support control (18c)                                                       |
 
 ## Spec format conventions
 

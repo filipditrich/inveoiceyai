@@ -27,6 +27,7 @@ flowchart LR
     P16 --> P17["Plan 17<br/>public shell<br/>implementation done"]
     P16 --> P18["Plan 18<br/>platform admin<br/>done"]
     P18 --> P18b["Plan 18b<br/>admin monitor<br/>done"]
+    P18b --> P18c["Plan 18c<br/>admin control<br/>done"]
     P16 --> P19["Plan 19<br/>invites + referrals<br/>done"]
     P16 --> P20["Plan 20<br/>multi-workspace UX<br/>done"]
     P20 --> P21["Plan 21<br/>AI usage<br/>done"]
@@ -502,6 +503,27 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 - [x] List cap is visible; i18n cs/en; typecheck / focused tests
 
 **Out of 18b:** Impersonation, freeze/ban, session/key revoke, email suppression lift, invoice mutations, in-app log tail.
+
+### Plan 18c — Platform admin support control
+
+**Status:** Done  
+**Completed:** 2026-09-03  
+**ADR:** [0046](./decisions/0046-workspace-freeze.md) · [plan](../.cursor/plans/plan-18c-platform-admin-control.md) · Spec: [`specs/platform-admin.md`](./specs/platform-admin.md)
+
+**Goal:** Give the operator control that matches the 18b monitor — cut access, lift accidental blocks, tailor one workspace — without impersonating or editing a tenant’s books.
+
+**Exit criteria:**
+
+- [x] ADR 0046 + spec Approach (control) + this roadmap section
+- [x] User detail: sessions + trusted devices + API key prefixes; revoke each (never secrets)
+- [x] Workspace entitlement-override editor (sectioned form) + clear overrides
+- [x] Freeze / unfreeze; `assertWorkspaceWritable` on web, MCP/Eve, companion, Drive writes, crons
+- [x] Email suppression list + lift
+- [x] Community-look unpublish from `/admin`
+- [x] Bank connections listed without secrets; disconnect via existing helpers
+- [x] New `platform_*` audit types; i18n cs/en; typecheck / focused tests; freeze SQL on Neon
+
+**Out of 18c:** Impersonation, user ban (18d), invoice/client/issuer/look edits, secret display, in-app log tail, billing admin, Slack unlink, cron last-run.
 
 ### Plan 19 — Workspace invites + referral attribution
 
