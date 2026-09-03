@@ -23,6 +23,7 @@ import {
   type MarkdownWrapKind,
 } from "./assistant-markdown-wrap";
 import { useAssistant, useAssistantSession } from "./assistant-provider";
+import { isAuthRequiredError } from "./assistant-thread";
 
 export function AssistantComposer() {
   const t = useTranslations("Assistant");
@@ -33,14 +34,20 @@ export function AssistantComposer() {
 
   const status = session?.agent.status ?? "ready";
   const busy = status === "submitted" || status === "streaming";
+  /**
+   * A cookie-auth failure cannot be retried by sending another message —
+   * every turn hits the same rejected session, so the composer would just
+   * collect dead-end attempts until the page is reloaded.
+   */
+  const signedOut = isAuthRequiredError(session?.agent.error?.message ?? "");
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
+    if (open && !signedOut) inputRef.current?.focus();
+  }, [open, signedOut]);
 
   function submit() {
     const text = value.trim();
-    if (!session || !text || busy) return;
+    if (!session || !text || busy || signedOut) return;
     setValue("");
     void session.agent.send(text);
   }
@@ -99,6 +106,7 @@ export function AssistantComposer() {
           <Textarea
             aria-label={t("composerLabel")}
             className="max-h-40 min-h-10 flex-1 resize-none border-0 bg-transparent py-2 shadow-none focus-visible:ring-0 dark:bg-transparent"
+            disabled={signedOut}
             onChange={(event) => setValue(event.target.value)}
             onKeyDown={(event) => {
               if ((event.metaKey || event.ctrlKey) && event.key === "b") {
@@ -140,7 +148,7 @@ export function AssistantComposer() {
           ) : (
             <Button
               aria-label={t("send")}
-              disabled={!value.trim()}
+              disabled={!value.trim() || signedOut}
               size="icon"
               type="submit"
             >

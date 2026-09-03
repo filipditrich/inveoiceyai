@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -15,6 +16,7 @@ import Link from "next/link";
 
 import { AssistantComposer } from "./assistant-composer";
 import { AssistantHistory } from "./assistant-history";
+import { useAssistantPanelWidth } from "./assistant-panel-width";
 import { useAssistant, useAssistantSession } from "./assistant-provider";
 import { AssistantThread } from "./assistant-thread";
 
@@ -30,6 +32,8 @@ export function AssistantPanel() {
   const t = useTranslations("Assistant");
   const { open, setOpen } = useAssistant();
   const session = useAssistantSession();
+  const { width, resizing, onHandlePointerDown, onHandleKeyDown } =
+    useAssistantPanelWidth();
 
   const outOfTokens = (session?.balance?.totalAvailable ?? 1) <= 0;
   const contextTokens = session?.contextTokens ?? 0;
@@ -48,10 +52,28 @@ export function AssistantPanel() {
          * (selects, tooltips), which mount at the end of `body`, still land on
          * top of the panel. Raising it further would bury its own dropdowns.
          */
-        "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l bg-popover shadow-lg transition-transform duration-200 ease-out sm:w-[30rem]",
+        "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l bg-popover shadow-lg ease-out sm:w-[var(--assistant-panel-width)]",
+        resizing ? "transition-none" : "transition-transform duration-200",
         open ? "translate-x-0" : "pointer-events-none translate-x-full",
       )}
+      // SAFETY: CSS custom properties are not in React's `CSSProperties` type,
+      // but this is a plain style object with no other untyped fields.
+      style={{ "--assistant-panel-width": `${width}px` } as CSSProperties}
     >
+      <div
+        aria-label={t("resize")}
+        aria-orientation="vertical"
+        className={cn(
+          "absolute inset-y-0 left-0 z-10 hidden w-1.5 -translate-x-1/2 cursor-col-resize touch-none sm:block",
+          "after:absolute after:inset-y-0 after:left-1/2 after:w-px after:-translate-x-1/2 after:bg-transparent hover:after:bg-ring",
+          resizing && "after:bg-ring",
+        )}
+        onKeyDown={onHandleKeyDown}
+        onPointerDown={onHandlePointerDown}
+        role="separator"
+        tabIndex={0}
+      />
+
       <header className="flex items-center gap-2 border-b px-4 py-3">
         <SparklesIcon className="size-4 shrink-0 text-brand" />
         <div className="min-w-0 flex-1">

@@ -7,6 +7,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import type { ComponentType } from "react";
 import { recordAccountSecurityEventAction } from "@/actions/security";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,12 +21,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth/client";
 import { formatDateTime } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import {
   CheckCircle2Icon,
   CopyIcon,
+  EllipsisIcon,
   ExternalLinkIcon,
   KeyRoundIcon,
   LoaderCircleIcon,
+  MousePointer2Icon,
   ShieldAlertIcon,
   SquareTerminalIcon,
 } from "lucide-react";
@@ -34,6 +38,22 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 import type { AppLocale } from "@/i18n/config";
+
+type McpClient = "claude-code" | "cursor" | "other";
+
+const MCP_CLIENTS: ReadonlyArray<{
+  id: McpClient;
+  icon: ComponentType<{ className?: string }>;
+  labelKey: "mcpClientClaudeCode" | "mcpClientCursor" | "mcpClientOther";
+}> = [
+  {
+    id: "claude-code",
+    icon: SquareTerminalIcon,
+    labelKey: "mcpClientClaudeCode",
+  },
+  { id: "cursor", icon: MousePointer2Icon, labelKey: "mcpClientCursor" },
+  { id: "other", icon: EllipsisIcon, labelKey: "mcpClientOther" },
+];
 
 type KeyRow = {
   id: string;
@@ -92,6 +112,17 @@ function buildMcpConfig(mcpUrl: string, apiKey: string): string {
   );
 }
 
+/** Matches the command in `content/docs/integrations/claude-code.mdx`. */
+function buildClaudeCommand(mcpUrl: string, apiKey: string): string {
+  return [
+    "claude mcp add --transport http --scope user invoicey \\",
+    `  ${mcpUrl} \\`,
+    `  --header "Authorization: Bearer ${apiKey}"`,
+  ].join("\n");
+}
+
+const CLAUDE_VERIFY_COMMAND = "claude mcp list";
+
 export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
   const t = useTranslations("Settings.apiKeys");
   const locale = useLocale() as AppLocale;
@@ -101,9 +132,14 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
   const [createdRaw, setCreatedRaw] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [client, setClient] = useState<McpClient>("claude-code");
 
   const configSnippet = useMemo(
     () => buildMcpConfig(mcpUrl, createdRaw ?? "YOUR_API_KEY"),
+    [mcpUrl, createdRaw],
+  );
+  const claudeCommand = useMemo(
+    () => buildClaudeCommand(mcpUrl, createdRaw ?? "YOUR_API_KEY"),
     [mcpUrl, createdRaw],
   );
 
@@ -305,33 +341,97 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
                 2
               </span>
               <div className="min-w-0 flex-1 space-y-2">
-                <p className="font-medium">{t("mcpStep2Title")}</p>
+                <p className="font-medium">{t("mcpClientStepTitle")}</p>
                 <p className="text-muted-foreground">
-                  {t("mcpStep2Body", {
-                    global: "~/.cursor/mcp.json",
-                    project: ".cursor/mcp.json",
-                  })}
+                  {t("mcpClientStepBody")}
                 </p>
-                <pre className="overflow-x-auto rounded-lg bg-muted p-3 text-xs leading-relaxed">
-                  {configSnippet}
-                </pre>
                 <div className="flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => copyText(configSnippet, t("configCopied"))}
-                  >
-                    <CopyIcon data-icon="inline-start" />
-                    {t("copyJson")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => copyText(mcpUrl, t("urlCopied"))}
-                  >
-                    {t("copyUrl")}
-                  </Button>
+                  {MCP_CLIENTS.map((option) => (
+                    <button
+                      key={option.id}
+                      aria-pressed={client === option.id}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                        client === option.id
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-input text-muted-foreground hover:text-foreground",
+                      )}
+                      onClick={() => setClient(option.id)}
+                      type="button"
+                    >
+                      <option.icon className="size-3.5" />
+                      {t(option.labelKey)}
+                    </button>
+                  ))}
                 </div>
+              </div>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                3
+              </span>
+              <div className="min-w-0 flex-1 space-y-2">
+                {client === "claude-code" ? (
+                  <>
+                    <p className="font-medium">
+                      {t("mcpStep3TitleClaudeCode")}
+                    </p>
+                    <p className="text-muted-foreground">
+                      {t("mcpStep3BodyClaudeCode")}
+                    </p>
+                    <pre className="overflow-x-auto rounded-lg bg-muted p-3 text-xs leading-relaxed">
+                      {claudeCommand}
+                    </pre>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        copyText(claudeCommand, t("commandCopied"))
+                      }
+                    >
+                      <CopyIcon data-icon="inline-start" />
+                      {t("copyCommand")}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-medium">
+                      {client === "cursor"
+                        ? t("mcpStep3TitleCursor")
+                        : t("mcpStep3TitleOther")}
+                    </p>
+                    <p className="text-muted-foreground">
+                      {client === "cursor"
+                        ? t("mcpStep3BodyCursor", {
+                            global: "~/.cursor/mcp.json",
+                            project: ".cursor/mcp.json",
+                          })
+                        : t("mcpStep3BodyOther")}
+                    </p>
+                    <pre className="overflow-x-auto rounded-lg bg-muted p-3 text-xs leading-relaxed">
+                      {configSnippet}
+                    </pre>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          copyText(configSnippet, t("configCopied"))
+                        }
+                      >
+                        <CopyIcon data-icon="inline-start" />
+                        {t("copyJson")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => copyText(mcpUrl, t("urlCopied"))}
+                      >
+                        {t("copyUrl")}
+                      </Button>
+                    </div>
+                  </>
+                )}
                 {!createdRaw ? (
                   <p className="text-xs text-muted-foreground">
                     {t("placeholderHint", { placeholder: "YOUR_API_KEY" })}
@@ -346,13 +446,42 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
             </li>
             <li className="flex gap-3">
               <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
-                3
+                4
               </span>
-              <div className="space-y-1">
-                <p className="font-medium">{t("mcpStep3Title")}</p>
-                <p className="text-muted-foreground">
-                  {t("mcpStep3Body", { tool: "list_invoices", url: mcpUrl })}
-                </p>
+              <div className="min-w-0 flex-1 space-y-2">
+                {client === "claude-code" ? (
+                  <>
+                    <p className="font-medium">
+                      {t("mcpStep4TitleClaudeCode")}
+                    </p>
+                    <p className="text-muted-foreground">
+                      {t("mcpStep4BodyClaudeCode", { tool: "invoicey" })}
+                    </p>
+                    <pre className="overflow-x-auto rounded-lg bg-muted p-3 text-xs leading-relaxed">
+                      {CLAUDE_VERIFY_COMMAND}
+                    </pre>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        copyText(CLAUDE_VERIFY_COMMAND, t("commandCopied"))
+                      }
+                    >
+                      <CopyIcon data-icon="inline-start" />
+                      {t("copyCommand")}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-medium">{t("mcpStep4Title")}</p>
+                    <p className="text-muted-foreground">
+                      {t("mcpStep4Body", {
+                        tool: "list_invoices",
+                        url: mcpUrl,
+                      })}
+                    </p>
+                  </>
+                )}
               </div>
             </li>
           </ol>
@@ -375,6 +504,13 @@ export function ApiKeysPanel({ appUrl }: { appUrl: string }) {
               className="inline-flex items-center gap-1 text-primary hover:underline"
             >
               {t("docsMcp")}
+              <ExternalLinkIcon className="size-3.5" />
+            </Link>
+            <Link
+              href="/docs/integrations/claude-code"
+              className="inline-flex items-center gap-1 text-primary hover:underline"
+            >
+              {t("docsClaudeCode")}
               <ExternalLinkIcon className="size-3.5" />
             </Link>
             <Link

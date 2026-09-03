@@ -86,7 +86,7 @@ export function DownloadMenu({
           <SquareTerminalIcon className="mt-0.5 size-4" />
           <span className="flex-1">
             <span className="block font-medium">{labels.cli}</span>
-            <span className="mt-0.5 block font-mono text-xs text-muted-foreground">
+            <span className="mt-0.5 block text-xs text-muted-foreground">
               {labels.cliHint}
             </span>
           </span>

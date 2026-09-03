@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
@@ -43,9 +44,25 @@ export function AssistantThread() {
             </p>
           ) : null}
           {session?.agent.error ? (
-            <p className="text-sm text-destructive" role="alert">
-              {friendlyError(session.agent.error.message, t)}
-            </p>
+            <div
+              className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2"
+              role="alert"
+            >
+              <p className="text-sm text-destructive">
+                {friendlyError(session.agent.error.message, t)}
+              </p>
+              {isAuthRequiredError(session.agent.error.message) ? (
+                <Button
+                  className="shrink-0"
+                  onClick={() => window.location.reload()}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  {t("reload")}
+                </Button>
+              ) : null}
+            </div>
           ) : null}
         </div>
       )}
@@ -134,11 +151,16 @@ function partKey(part: EveMessagePart, index: number): string {
   return `${part.type}:${index}`;
 }
 
+/** The cookie-auth check in `web-identity.ts` fails with this exact message. */
+export function isAuthRequiredError(message: string): boolean {
+  return message.toLowerCase().includes("authorization is required");
+}
+
 function friendlyError(
   message: string,
   t: (key: "authRequired") => string,
 ): string {
-  if (message.toLowerCase().includes("authorization is required")) {
+  if (isAuthRequiredError(message)) {
     return t("authRequired");
   }
   return message;

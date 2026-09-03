@@ -105,3 +105,25 @@ _Avoid_: Clamping refunds to zero, deleting grant or usage rows.
 **Polar invoice**:
 The merchant-of-record receipt Polar issues to the workspace. It is not an Invoicey invoice.
 _Avoid_: Invoice, faktura (for Polar’s PDF).
+
+## Free generator
+
+**Free invoice generator**:
+The public, sign-in-free surface that issues one real invoice from a stripped-down form. Distinct from the **Builder**, which edits look documents for Pro.
+_Avoid_: Free builder, demo, playground, invoice preview tool.
+
+**Guest issue**:
+Issuing a real, numbered, snapshotted invoice with no signed-in user. The output is an issued invoice, not a draft or a sample.
+_Avoid_: Demo invoice, sample invoice, test invoice, throwaway.
+
+**Guest workspace**:
+An unclaimed workspace created at guest issue to hold the invoice. It is a normal Free workspace with no owner, so numbering, snapshots, and artifacts follow the ordinary issued-invoice path. Admin metrics exclude unclaimed ones.
+_Avoid_: Soft account, lead, anonymous account, shadow account.
+
+**Claim**:
+Attaching a guest workspace to a real user — by matching the OAuth address to the guest address, or by a signed token in the invoice email. After claiming it is an ordinary Free workspace with no guest limits.
+_Avoid_: Merge, import, upgrade, convert (as the name of this step).
+
+**Guest allowance**:
+One guest issue per email address per month, with the issuer IČO counted as a soft signal only. It limits unclaimed guest issuing; it is not a Free-plan limit.
+_Avoid_: Free-plan invoice limit, free tier cap.
