@@ -7,6 +7,8 @@ export {
   detectInvoiceOrigin,
   buildExternalKey,
   IMPORT_COMPLETENESS,
+  INVOICE_ORIGIN_PROVIDERS,
+  isInvoiceOriginProvider,
   InvoiceOriginProviderSchema,
   InvoiceOriginSchema,
   ORIGIN_PROVIDER_LABELS,

@@ -17,14 +17,14 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { InvoiceOriginProviderSchema } from "@invoicey/invoice-core/import";
+import { INVOICE_ORIGIN_PROVIDERS } from "@invoicey/invoice-core/import";
 import { INVOICE_DISPLAY_STATUSES } from "@invoicey/invoice-core/status-display";
 
 import type { Filter, FilterFieldConfig } from "@/components/reui/filters";
 
 export type PartyOption = { id: string; name: string };
 
-const ORIGIN_PROVIDERS = InvoiceOriginProviderSchema.options;
+const ORIGIN_PROVIDERS = INVOICE_ORIGIN_PROVIDERS;
 
 type InvoiceListFiltersProps = {
   status?: string;

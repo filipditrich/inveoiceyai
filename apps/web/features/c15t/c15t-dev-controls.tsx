@@ -4,15 +4,18 @@ import { Button } from "@/components/ui/button";
 import { C15T_CONSENT_STORAGE_KEY } from "@/features/c15t/constants";
 import { useConsentManager } from "@c15t/react";
 
-import { IS_LOCAL_DEV } from "../../env.config.client";
-
 /**
  * Clears c15t storage for local QA.
  */
 export function C15tDevControls() {
   const consent = useConsentManager();
 
-  if (!IS_LOCAL_DEV) return null;
+  /**
+   * Read `NODE_ENV` directly rather than via `env.config.client`. That module
+   * validates with Zod, and a single client import of it pulls Zod (plus its
+   * whole locale table) into the bundle of every page under `providers.tsx`.
+   */
+  if (process.env.NODE_ENV === "production") return null;
 
   return (
     <Button
