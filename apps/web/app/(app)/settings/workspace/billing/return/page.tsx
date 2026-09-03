@@ -45,7 +45,7 @@ export default async function BillingReturnPage({
         title={fulfilled || paid ? t("titleReady") : t("titlePending")}
       />
       <p className="text-sm text-muted-foreground">
-        {fulfilled ? t("fulfilled") : t("pending")}
+        {fulfilled || paid ? t("fulfilled") : t("pending")}
       </p>
       <div className="flex flex-wrap gap-2">
         <Button render={<Link href="/settings/workspace/billing" />}>
