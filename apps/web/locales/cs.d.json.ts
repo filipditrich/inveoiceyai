@@ -2518,13 +2518,14 @@ declare const messages: {
       "dashboard": "Přehled",
       "users": "Uživatelé",
       "workspaces": "Pracovní prostory",
+      "plans": "Tarify",
+      "ai": "AI spotřeba",
       "invoices": "Faktury",
       "issuers": "Dodavatelé",
       "backToApp": "Zpět do aplikace",
       "productGroup": "Produkt",
       "productDashboard": "Produktový přehled",
-      "audit": "Audit log",
-      "plans": "Tarify"
+      "audit": "Audit log"
     },
     "breadcrumb": {
       "root": "Admin",
@@ -2534,7 +2535,8 @@ declare const messages: {
       "issuers": "Dodavatelé",
       "audit": "Audit log",
       "detail": "Detail",
-      "plans": "Tarify"
+      "plans": "Tarify",
+      "ai": "AI spotřeba"
     },
     "table": {
       "search": "Hledat",
@@ -2544,21 +2546,40 @@ declare const messages: {
       "paginationInfo": "'{'from'}' – '{'to'}' z '{'count'}'",
       "nextPage": "Další stránka",
       "previousPage": "Předchozí stránka",
-      "rowsPerPage": "Řádků na stránku"
+      "rowsPerPage": "Řádků na stránku",
+      "truncated": "Zobrazeno {cap} naposledy změněných řádků. Starší záznam hledejte ve filtrech."
     },
     "dashboard": {
       "title": "Platformní přehled",
       "subtitle": "Souhrny napříč všemi pracovními prostory.",
       "statusTitle": "Faktury podle stavu",
+      "volumeTitle": "Vystaveno za 12 měsíců",
+      "volumeEmpty": "Za poslední rok žádné vystavené faktury.",
+      "plansTitle": "Tarify",
+      "healthTitle": "Doručení a banky",
       "recentTitle": "Nedávné faktury",
       "recentEmpty": "Zatím žádné faktury.",
+      "chart": {
+        "title": "Vystavené a zaplacené",
+        "subtitle": "Počty faktur po měsících — počty, ne smíšené měny.",
+        "issued": "Vystavené",
+        "paid": "Zaplacené"
+      },
       "cards": {
         "users": "Uživatelé",
         "workspaces": "Pracovní prostory",
         "invoices": "Faktury",
         "issuers": "Dodavatelé",
+        "ai": "AI zbývá",
         "adminsHint": "{count} platformních adminů",
-        "issuedHint": "{count} vystavených za 12 měs. · {volume}"
+        "issuedHint": "{count} vystavených za 12 měs. · {volume}",
+        "aiHint": "{burn} spáleno za 30 dní"
+      },
+      "health": {
+        "email": "E-mail (7 dní)",
+        "emailHint": "{bounces} bounce · {complaints} stížností",
+        "banks": "Bankovní napojení",
+        "banksHint": "{errors} v chybě z {total}"
       },
       "recent": {
         "number": "Číslo",
@@ -2586,6 +2607,7 @@ declare const messages: {
         "referredBy": "Doporučil",
         "defaultWorkspace": "Výchozí prostor",
         "createdAt": "Vytvořeno",
+        "lastSeen": "Naposledy",
         "id": "ID uživatele",
         "actions": "Akce"
       },
@@ -2604,7 +2626,7 @@ declare const messages: {
     },
     "workspaces": {
       "title": "Pracovní prostory",
-      "subtitle": "Všechny organizace s počty členů a faktur.",
+      "subtitle": "Všechny organizace s tarifem a AI spotřebou.",
       "empty": "Žádné pracovní prostory.",
       "count": "{count, plural, one {# prostor} few {# prostory} other {# prostorů}}",
       "filters": {
@@ -2616,6 +2638,9 @@ declare const messages: {
         "members": "Členové",
         "invoices": "Faktury",
         "issuers": "Dodavatelé",
+        "plan": "Tarif",
+        "tokens": "AI zbývá",
+        "burn": "AI spotřeba (30d)",
         "createdAt": "Vytvořeno",
         "id": "ID prostoru"
       }
@@ -2692,6 +2717,7 @@ declare const messages: {
       "allUsers": "Všichni uživatelé",
       "auditTitle": "Bezpečnostní historie",
       "auditDescription": "Přihlášení, změny přístupů a zásahy admina týkající se tohoto účtu.",
+      "neverSeen": "Nikdy se nepřihlásil",
       "columns": {
         "workspace": "Prostor",
         "role": "Role",
@@ -2711,7 +2737,17 @@ declare const messages: {
         "monthly": "Měsíční",
         "purchased": "Zakoupené",
         "renewsAt": "Obnova",
-        "missing": "Tento prostor zatím nemá záznam o zůstatku. Darování ho založí."
+        "missing": "Tento prostor zatím nemá záznam o zůstatku. Darování ho založí.",
+        "burn30d": "Spáleno (30 dní)"
+      },
+      "usageTitle": "AI spotřeba",
+      "usageDescription": "LLM tokeny tohoto prostoru za 30 dní a ledger grantů.",
+      "grantsTitle": "Granty tokenů",
+      "grantsEmpty": "Žádné granty.",
+      "grantTrigger": {
+        "signup": "Registrace",
+        "first_invoice_issued": "První faktura",
+        "manual": "Ručně"
       },
       "grant": {
         "amountLabel": "Počet tokenů",
@@ -2752,7 +2788,11 @@ declare const messages: {
         "invitedBy": "Pozval",
         "expires": "Platí do",
         "issuer": "Firma",
-        "ico": "IČO"
+        "ico": "IČO",
+        "tokens": "Tokeny",
+        "when": "Kdy",
+        "trigger": "Důvod",
+        "note": "Poznámka"
       },
       "plan": {
         "title": "Tarif",
@@ -2868,6 +2908,113 @@ declare const messages: {
         "hint": "Načte se z ARES a synchronizuje do všech workspaců na tomto tarifu. Odebrání položky ponechá existující odběratele — jen zabrání novým fakturám.",
         "add": "Přidat subjekt",
         "remove": "Odebrat"
+      }
+    },
+    "ai": {
+      "title": "AI spotřeba",
+      "subtitle": "Zůstatek tokenů, 30denní LLM spotřeba a granty napříč všemi prostory.",
+      "remainingTitle": "Zbývá",
+      "burnTitle": "Spáleno za 30 dní",
+      "productTitle": "Podle produktu",
+      "topTitle": "Největší prostory",
+      "grantsTitle": "Nedávné granty",
+      "grantsEmpty": "Zatím žádné granty.",
+      "topEmpty": "Za 30 dní žádná LLM spotřeba.",
+      "chart": {
+        "title": "Denní LLM spotřeba",
+        "subtitle": "Tokeny podle produktu za posledních 30 dní.",
+        "web": "Web",
+        "slack": "Slack",
+        "mcp": "MCP",
+        "extract": "Extrakce"
+      },
+      "facts": {
+        "gifted": "Darované",
+        "monthly": "Měsíční",
+        "purchased": "Zakoupené",
+        "total": "Zbývá celkem"
+      },
+      "columns": {
+        "workspace": "Prostor",
+        "tokens": "Tokeny",
+        "events": "Události",
+        "product": "Produkt",
+        "trigger": "Důvod",
+        "by": "Kdo",
+        "note": "Poznámka",
+        "when": "Kdy"
+      },
+      "product": {
+        "web": "Web",
+        "slack": "Slack",
+        "mcp": "MCP",
+        "incoming_invoice_extract": "Extrakce"
+      },
+      "trigger": {
+        "signup": "Registrace",
+        "first_invoice_issued": "První faktura",
+        "manual": "Ručně"
+      }
+    },
+    "invoiceDetail": {
+      "eyebrow": "Faktura",
+      "back": "Zpět na faktury",
+      "overviewTitle": "Přehled",
+      "provenanceTitle": "Původ",
+      "artifactsTitle": "Soubory",
+      "emailsTitle": "E-mail",
+      "emailsEmpty": "Neodesláno.",
+      "noPdf": "PDF není uložené.",
+      "noIsdoc": "ISDOC není uložený.",
+      "openPdf": "Otevřít PDF",
+      "openIsdoc": "Otevřít ISDOC",
+      "native": "Vystaveno v Invoicey",
+      "immutable": "Originály zamčené",
+      "mutable": "Lze přegenerovat",
+      "columns": {
+        "to": "Komu",
+        "template": "Šablona",
+        "status": "Stav",
+        "when": "Kdy"
+      },
+      "facts": {
+        "number": "Číslo",
+        "client": "Klient",
+        "workspace": "Prostor",
+        "issuer": "Dodavatel",
+        "status": "Stav",
+        "total": "Celkem",
+        "issueDate": "Datum vystavení",
+        "dueDate": "Splatnost",
+        "type": "Typ",
+        "origin": "Zdroj",
+        "version": "Verze",
+        "imported": "Import",
+        "completeness": "Import",
+        "batch": "Dávka"
+      }
+    },
+    "issuerDetail": {
+      "eyebrow": "Dodavatel",
+      "back": "Zpět na dodavatele",
+      "overviewTitle": "Přehled",
+      "invoicesTitle": "Faktury",
+      "invoicesEmpty": "Žádné faktury.",
+      "facts": {
+        "workspace": "Prostor",
+        "ico": "IČO",
+        "dic": "DIČ",
+        "source": "Zdroj",
+        "invoices": "Faktury",
+        "updated": "Aktualizováno",
+        "id": "ID dodavatele"
+      },
+      "columns": {
+        "number": "Číslo",
+        "client": "Klient",
+        "total": "Celkem",
+        "issueDate": "Datum vystavení",
+        "status": "Stav"
       }
     }
   },

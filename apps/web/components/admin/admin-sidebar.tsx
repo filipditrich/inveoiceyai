@@ -23,6 +23,7 @@ import {
   LayoutDashboardIcon,
   ShieldIcon,
   ScrollTextIcon,
+  SparklesIcon,
   UsersIcon,
   WarehouseIcon,
 } from "lucide-react";
@@ -63,6 +64,12 @@ export function AdminSidebar({
       url: "/admin/plans",
       icon: <LayersIcon />,
       isActive: pathname.startsWith("/admin/plans"),
+    },
+    {
+      title: t("nav.ai"),
+      url: "/admin/ai",
+      icon: <SparklesIcon />,
+      isActive: pathname.startsWith("/admin/ai"),
     },
     {
       title: t("nav.invoices"),

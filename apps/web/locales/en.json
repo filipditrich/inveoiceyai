@@ -2515,13 +2515,14 @@
       "dashboard": "Dashboard",
       "users": "Users",
       "workspaces": "Workspaces",
+      "plans": "Plans",
+      "ai": "AI usage",
       "invoices": "Invoices",
       "issuers": "Issuers",
       "backToApp": "Back to app",
       "productGroup": "Product",
       "productDashboard": "Product dashboard",
-      "audit": "Audit log",
-      "plans": "Plans"
+      "audit": "Audit log"
     },
     "breadcrumb": {
       "root": "Admin",
@@ -2531,7 +2532,8 @@
       "issuers": "Issuers",
       "audit": "Audit log",
       "detail": "Detail",
-      "plans": "Plans"
+      "plans": "Plans",
+      "ai": "AI usage"
     },
     "table": {
       "search": "Search",
@@ -2541,21 +2543,40 @@
       "paginationInfo": "'{'from'}' – '{'to'}' of '{'count'}'",
       "nextPage": "Next page",
       "previousPage": "Previous page",
-      "rowsPerPage": "Rows per page"
+      "rowsPerPage": "Rows per page",
+      "truncated": "Showing the {cap} most recently updated rows. Narrow the filters if you need an older record."
     },
     "dashboard": {
       "title": "Platform dashboard",
       "subtitle": "Cross-tenant totals across all workspaces.",
       "statusTitle": "Invoices by status",
+      "volumeTitle": "Issued in 12 months",
+      "volumeEmpty": "No issued invoices in the last year.",
+      "plansTitle": "Plan mix",
+      "healthTitle": "Delivery and banks",
       "recentTitle": "Recent invoices",
       "recentEmpty": "No invoices yet.",
+      "chart": {
+        "title": "Issued and paid",
+        "subtitle": "Invoice counts by month — counts, not mixed-currency totals.",
+        "issued": "Issued",
+        "paid": "Paid"
+      },
       "cards": {
         "users": "Users",
         "workspaces": "Workspaces",
         "invoices": "Invoices",
         "issuers": "Issuers",
+        "ai": "AI remaining",
         "adminsHint": "{count} platform admins",
-        "issuedHint": "{count} issued in 12m · {volume}"
+        "issuedHint": "{count} issued in 12m · {volume}",
+        "aiHint": "{burn} burned in 30 days"
+      },
+      "health": {
+        "email": "Email (7 days)",
+        "emailHint": "{bounces} bounces · {complaints} complaints",
+        "banks": "Bank connections",
+        "banksHint": "{errors} in error of {total}"
       },
       "recent": {
         "number": "Number",
@@ -2583,6 +2604,7 @@
         "referredBy": "Referred by",
         "defaultWorkspace": "Default workspace",
         "createdAt": "Created",
+        "lastSeen": "Last seen",
         "id": "User id",
         "actions": "Actions"
       },
@@ -2601,7 +2623,7 @@
     },
     "workspaces": {
       "title": "Workspaces",
-      "subtitle": "All organizations with member and invoice counts.",
+      "subtitle": "All organizations with member, plan, and AI usage.",
       "empty": "No workspaces.",
       "count": "{count, plural, one {# workspace} other {# workspaces}}",
       "filters": {
@@ -2613,6 +2635,9 @@
         "members": "Members",
         "invoices": "Invoices",
         "issuers": "Issuers",
+        "plan": "Plan",
+        "tokens": "AI remaining",
+        "burn": "AI burn (30d)",
         "createdAt": "Created",
         "id": "Workspace id"
       }
@@ -2689,6 +2714,7 @@
       "allUsers": "All users",
       "auditTitle": "Security history",
       "auditDescription": "Sign-ins, access changes, and admin actions touching this account.",
+      "neverSeen": "Never signed in",
       "columns": {
         "workspace": "Workspace",
         "role": "Role",
@@ -2708,7 +2734,17 @@
         "monthly": "Monthly",
         "purchased": "Purchased",
         "renewsAt": "Renews",
-        "missing": "This workspace has no balance row yet. Granting creates one."
+        "missing": "This workspace has no balance row yet. Granting creates one.",
+        "burn30d": "Burned (30 days)"
+      },
+      "usageTitle": "AI usage",
+      "usageDescription": "LLM tokens this workspace burned in the last 30 days, plus the grant ledger.",
+      "grantsTitle": "Token grants",
+      "grantsEmpty": "No grants recorded.",
+      "grantTrigger": {
+        "signup": "Signup",
+        "first_invoice_issued": "First invoice",
+        "manual": "Manual"
       },
       "grant": {
         "amountLabel": "Tokens",
@@ -2749,7 +2785,11 @@
         "invitedBy": "Invited by",
         "expires": "Expires",
         "issuer": "Business",
-        "ico": "IČO"
+        "ico": "IČO",
+        "tokens": "Tokens",
+        "when": "When",
+        "trigger": "Trigger",
+        "note": "Note"
       },
       "plan": {
         "title": "Plan",
@@ -2865,6 +2905,113 @@
         "hint": "Looked up in ARES and synced into every workspace on this plan. Removing an entry leaves existing clients in place — it only stops new invoices.",
         "add": "Add entity",
         "remove": "Remove"
+      }
+    },
+    "ai": {
+      "title": "AI usage",
+      "subtitle": "Token remaining, 30-day LLM burn, and grants across every workspace.",
+      "remainingTitle": "Remaining",
+      "burnTitle": "Burned in 30 days",
+      "productTitle": "By product",
+      "topTitle": "Top workspaces",
+      "grantsTitle": "Recent grants",
+      "grantsEmpty": "No grants yet.",
+      "topEmpty": "No LLM usage in the last 30 days.",
+      "chart": {
+        "title": "Daily LLM burn",
+        "subtitle": "Tokens by product over the last 30 days.",
+        "web": "Web",
+        "slack": "Slack",
+        "mcp": "MCP",
+        "extract": "Extract"
+      },
+      "facts": {
+        "gifted": "Gifted",
+        "monthly": "Monthly",
+        "purchased": "Purchased",
+        "total": "Total remaining"
+      },
+      "columns": {
+        "workspace": "Workspace",
+        "tokens": "Tokens",
+        "events": "Events",
+        "product": "Product",
+        "trigger": "Trigger",
+        "by": "By",
+        "note": "Note",
+        "when": "When"
+      },
+      "product": {
+        "web": "Web",
+        "slack": "Slack",
+        "mcp": "MCP",
+        "incoming_invoice_extract": "Incoming extract"
+      },
+      "trigger": {
+        "signup": "Signup",
+        "first_invoice_issued": "First invoice",
+        "manual": "Manual"
+      }
+    },
+    "invoiceDetail": {
+      "eyebrow": "Invoice",
+      "back": "Back to invoices",
+      "overviewTitle": "Overview",
+      "provenanceTitle": "Provenance",
+      "artifactsTitle": "Artifacts",
+      "emailsTitle": "Email",
+      "emailsEmpty": "Not sent.",
+      "noPdf": "No PDF stored.",
+      "noIsdoc": "No ISDOC stored.",
+      "openPdf": "Open PDF",
+      "openIsdoc": "Open ISDOC",
+      "native": "Issued in Invoicey",
+      "immutable": "Original artifacts locked",
+      "mutable": "May regenerate",
+      "columns": {
+        "to": "To",
+        "template": "Template",
+        "status": "Status",
+        "when": "When"
+      },
+      "facts": {
+        "number": "Number",
+        "client": "Client",
+        "workspace": "Workspace",
+        "issuer": "Issuer",
+        "status": "Status",
+        "total": "Total",
+        "issueDate": "Issue date",
+        "dueDate": "Due date",
+        "type": "Type",
+        "origin": "Source",
+        "version": "Version",
+        "imported": "Imported",
+        "completeness": "Import",
+        "batch": "Import batch"
+      }
+    },
+    "issuerDetail": {
+      "eyebrow": "Issuer",
+      "back": "Back to issuers",
+      "overviewTitle": "Overview",
+      "invoicesTitle": "Invoices",
+      "invoicesEmpty": "No invoices.",
+      "facts": {
+        "workspace": "Workspace",
+        "ico": "IČO",
+        "dic": "DIČ",
+        "source": "Source",
+        "invoices": "Invoices",
+        "updated": "Updated",
+        "id": "Issuer id"
+      },
+      "columns": {
+        "number": "Number",
+        "client": "Client",
+        "total": "Total",
+        "issueDate": "Issue date",
+        "status": "Status"
       }
     }
   },

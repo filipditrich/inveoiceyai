@@ -108,6 +108,15 @@ export default async function AdminUserDetailPage({
               }),
             },
             {
+              label: tUsers("columns.lastSeen"),
+              value: detail.lastSeenAt
+                ? format.dateTime(detail.lastSeenAt, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })
+                : t("neverSeen"),
+            },
+            {
               label: tUsers("columns.referredBy"),
               value: detail.referredByEmail ?? "—",
             },

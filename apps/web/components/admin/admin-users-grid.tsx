@@ -45,6 +45,7 @@ export type AdminUserGridItem = {
   referredByEmail: string | null;
   membershipCount: number;
   createdAtIso: string;
+  lastSeenAtIso: string | null;
 };
 
 export function AdminUsersGrid({
@@ -253,6 +254,22 @@ export function AdminUsersGrid({
           </span>
         ),
         meta: { headerTitle: t("columns.createdAt") },
+      },
+      {
+        id: "lastSeenAt",
+        accessorFn: (row) => row.lastSeenAtIso ?? "",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={t("columns.lastSeen")} />
+        ),
+        cell: ({ row }) =>
+          row.original.lastSeenAtIso ? (
+            <span className="text-xs whitespace-nowrap text-muted-foreground tabular-nums">
+              {formatDateTime(row.original.lastSeenAtIso, locale)}
+            </span>
+          ) : (
+            "—"
+          ),
+        meta: { headerTitle: t("columns.lastSeen") },
       },
       {
         id: "id",

@@ -25,6 +25,7 @@ import {
 } from "@tanstack/react-table";
 import { Building2Icon, SearchIcon, WarehouseIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
 
 import {
   DISPLAY_STATUS_LABELS,
@@ -162,9 +163,12 @@ export function AdminInvoicesGrid({
           <DataGridColumnHeader column={column} title={t("columns.number")} />
         ),
         cell: ({ row }) => (
-          <span className="font-medium tabular-nums">
+          <Link
+            className="font-medium tabular-nums hover:underline"
+            href={`/admin/invoices/${row.original.id}`}
+          >
             {row.original.number ?? "—"}
-          </span>
+          </Link>
         ),
         meta: { headerTitle: t("columns.number") },
       },
