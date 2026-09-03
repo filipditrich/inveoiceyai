@@ -1,6 +1,6 @@
 import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
-import { CheckIcon, MinusIcon } from "lucide-react";
+import { CheckIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 /** Honest three-state cell: some of these rows we lose on purpose. */
@@ -96,7 +96,7 @@ const ROWS = [
       "accountingNote2",
       "accountingNote3",
     ],
-    values: ["no", "yes", "yes", "no"],
+    values: ["partial", "yes", "yes", "no"],
   },
   {
     key: "mobileApp",
@@ -108,12 +108,6 @@ const ROWS = [
       "mobileAppNote3",
     ],
     values: ["no", "yes", "yes", "no"],
-  },
-  {
-    key: "track",
-    label: "trackLabel",
-    notes: ["trackNote0", "trackNote1", "trackNote2", "trackNote3"],
-    values: ["no", "yes", "yes", "yes"],
   },
 ] as const satisfies readonly {
   key: string;
@@ -152,7 +146,7 @@ export async function CompetitorComparison() {
               </th>
               <th
                 scope="col"
-                className="w-[16.5%] border-x bg-brand/8 px-4 py-4 text-center"
+                className="w-[16.5%] border-x bg-brand/10 px-4 py-4 text-center"
               >
                 <BrandLogo size={20} variant="wordmark" className="mx-auto" />
               </th>
@@ -169,7 +163,10 @@ export async function CompetitorComparison() {
           </thead>
           <tbody>
             {ROWS.map((row) => (
-              <tr key={row.key} className="border-b last:border-0">
+              <tr
+                key={row.key}
+                className="group border-b last:border-0 hover:bg-muted/40"
+              >
                 <th
                   scope="row"
                   className="px-5 py-3.5 text-left align-middle font-medium"
@@ -181,10 +178,15 @@ export async function CompetitorComparison() {
                     key={note}
                     className={cn(
                       "px-4 py-3.5 text-center align-middle",
-                      index === 0 && "border-x bg-brand/8",
+                      index === 0 &&
+                        "border-x bg-brand/10 group-hover:bg-brand/16",
                     )}
                   >
-                    <SupportCell note={t(note)} support={row.values[index]!} />
+                    <SupportCell
+                      featured={index === 0}
+                      note={t(note)}
+                      support={row.values[index]!}
+                    />
                   </td>
                 ))}
               </tr>
@@ -200,31 +202,37 @@ export async function CompetitorComparison() {
 }
 
 function SupportCell({
+  featured,
   note,
   support,
-}: Readonly<{ note: string; support: Support }>) {
+}: Readonly<{ featured: boolean; note: string; support: Support }>) {
   return (
     <span className="flex flex-col items-center gap-1">
       <span
         className={cn(
-          "grid size-5 place-items-center rounded-full",
+          "grid size-6 place-items-center rounded-full",
+          support === "yes" && featured && "bg-primary text-primary-foreground",
           support === "yes" &&
-            "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+            !featured &&
+            "bg-emerald-500/20 text-emerald-700 dark:text-emerald-400",
           support === "partial" &&
-            "bg-amber-500/15 text-amber-600 dark:text-amber-400",
-          support === "no" && "bg-muted text-muted-foreground",
+            "bg-amber-500/20 text-amber-800 dark:text-amber-300",
+          support === "no" && "text-muted-foreground/40",
         )}
       >
         {support === "yes" ? (
-          <CheckIcon className="size-3" />
+          <CheckIcon className={cn("size-3.5", featured && "size-4")} />
         ) : support === "partial" ? (
           <span className="size-1.5 rounded-full bg-current" />
-        ) : (
-          <MinusIcon className="size-3" />
-        )}
+        ) : null}
       </span>
       {note.length > 0 ? (
-        <span className="text-[0.68rem] leading-tight text-balance text-muted-foreground">
+        <span
+          className={cn(
+            "max-w-[11rem] text-[0.72rem] leading-snug text-pretty",
+            featured ? "font-medium text-foreground/90" : "text-foreground/75",
+          )}
+        >
           {note}
         </span>
       ) : null}

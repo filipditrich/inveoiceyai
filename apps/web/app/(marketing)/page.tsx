@@ -31,6 +31,7 @@ import {
   FileCheck2Icon,
   HardDriveIcon,
   KeyRoundIcon,
+  LibraryIcon,
   LandmarkIcon,
   MailCheckIcon,
   MessageSquareTextIcon,
@@ -213,9 +214,15 @@ export default async function HomePage() {
               <span className="rounded-full border border-primary/40 px-2 py-0.5 text-[0.65rem] font-semibold tracking-[0.12em] text-primary uppercase">
                 {t("hero.badgeTag")}
               </span>
-              <span className="font-medium">{t("hero.badgeTitle")}</span>
-              <span className="hidden text-muted-foreground sm:inline">
-                · {t("hero.badgeAction")}
+              <span className="inline-flex items-center">
+                <span className="font-medium">{t("hero.badgeTitle")}</span>
+                <span
+                  aria-hidden="true"
+                  className="mx-2.5 hidden size-1 rounded-full bg-muted-foreground sm:inline-block"
+                />
+                <span className="hidden text-muted-foreground sm:inline">
+                  {t("hero.badgeAction")}
+                </span>
               </span>
               <span className="grid size-6 shrink-0 place-items-center rounded-full bg-muted transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                 <ArrowUpRightIcon className="size-3.5" />
@@ -232,7 +239,7 @@ export default async function HomePage() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Button
                 size="lg"
-                className="h-11 px-5 text-[0.95rem] shadow-lg shadow-primary/15"
+                className="h-11 !rounded-full px-5 text-[0.95rem] shadow-lg shadow-primary/15"
                 render={<Link href="/dashboard" prefetch={false} />}
               >
                 {user ? t("hero.ctaPrimarySignedIn") : t("hero.ctaPrimary")}
@@ -244,14 +251,6 @@ export default async function HomePage() {
                 macDownloadUrl={macUrl}
               />
             </div>
-            {user ? (
-              <p className="mt-5">
-                <MarketingSignedInChip
-                  user={user}
-                  caption={t("nav.signedIn")}
-                />
-              </p>
-            ) : null}
             <div className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2Icon className="size-3.5 text-primary" />
@@ -279,10 +278,10 @@ export default async function HomePage() {
                 href="https://www.nfctron.com"
                 rel="noreferrer"
                 target="_blank"
-                className="inline-flex items-center gap-1.5 rounded-lg px-1.5 py-1 font-semibold tracking-[-0.01em] text-foreground transition-colors outline-none hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+                aria-label="NFCtron"
+                className="inline-flex items-center rounded-md px-1 py-1 transition-opacity outline-none hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50"
               >
-                <NfctronLogo className="size-4" />
-                NFCtron
+                <NfctronLogo className="h-4" />
               </a>
             </div>
           </div>
@@ -519,26 +518,6 @@ export default async function HomePage() {
         className="scroll-mt-24 overflow-hidden px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2 lg:gap-20">
-          <div className={motionStyles.scrollReveal}>
-            <Badge variant="secondary" className="h-7 gap-1.5 px-3">
-              <BotIcon data-icon="inline-start" /> {t("automation.badge")}
-            </Badge>
-            <h2 className="mt-6 text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-5xl">
-              {t("automation.title")}
-            </h2>
-            <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-              {t("automation.description")}
-            </p>
-            <ul className="mt-8 space-y-3 text-sm">
-              {automationItems.map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-
           <div
             className={`${motionStyles.scrollReveal} ${motionStyles.chatStage} relative overflow-hidden rounded-[2rem] bg-foreground p-4 text-background shadow-2xl sm:p-6 dark:bg-card dark:text-card-foreground`}
           >
@@ -588,6 +567,29 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
+
+          <div className={motionStyles.scrollReveal}>
+            <Badge variant="secondary" className="h-7 gap-1.5 px-3">
+              <BotIcon data-icon="inline-start" /> {t("automation.badge")}
+            </Badge>
+            <p className="mt-6 text-sm font-semibold tracking-wide text-primary uppercase">
+              {t("automation.eyebrow")}
+            </p>
+            <h2 className="mt-3 text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-5xl">
+              {t("automation.title")}
+            </h2>
+            <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
+              {t("automation.description")}
+            </p>
+            <ul className="mt-8 space-y-3 text-sm">
+              {automationItems.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -602,7 +604,7 @@ export default async function HomePage() {
             description={t("integrations.description")}
           />
           <div
-            className={`${motionStyles.scrollReveal} mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3`}
+            className={`${motionStyles.scrollReveal} mt-14 grid gap-4 md:grid-cols-2 xl:grid-cols-4`}
           >
             {integrations.map((integration) => (
               <Link
@@ -624,12 +626,23 @@ export default async function HomePage() {
                 </p>
               </Link>
             ))}
-          </div>
-          <div className={`${motionStyles.scrollReveal} mt-8 text-center`}>
-            <Button variant="outline" render={<Link href="/docs" />}>
-              {t("integrations.docsCta")}
-              <ArrowRightIcon data-icon="inline-end" />
-            </Button>
+            <Link
+              href="/docs"
+              className={`${motionStyles.liftCard} group rounded-2xl border border-dashed bg-card/60 p-6 shadow-xs transition-colors outline-none hover:border-primary/40 focus-visible:ring-3 focus-visible:ring-ring/50`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <span className="grid size-10 place-items-center rounded-xl bg-brand/12">
+                  <LibraryIcon className="size-4.5" />
+                </span>
+                <ArrowUpRightIcon className="size-4 text-muted-foreground transition-colors group-hover:text-foreground" />
+              </div>
+              <h3 className="mt-5 text-base font-semibold tracking-tight">
+                {t("integrations.docsCta")}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {t("integrations.docsDescription")}
+              </p>
+            </Link>
           </div>
         </div>
       </section>

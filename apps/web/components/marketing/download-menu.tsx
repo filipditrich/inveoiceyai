@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils";
 import {
   ArrowUpRightIcon,
   ChevronDownIcon,
-  DownloadIcon,
   SquareTerminalIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -36,8 +35,12 @@ type DownloadMenuProps = Readonly<{
   macDownloadUrl: string;
 }>;
 
+/** Shared Mac-style pill: inverted fill, full radius, Apple mark. */
+const MACOS_TRIGGER_CLASS =
+  "!rounded-full border-transparent bg-foreground text-background hover:bg-foreground/90 hover:text-background dark:bg-[#f5f5f4] dark:text-[#0b0b0c] dark:hover:bg-white dark:hover:text-[#0b0b0c]";
+
 /**
- * Header download control: one button, one menu, both companion apps.
+ * Header and hero download control: one Mac-style button, one menu.
  * The Mac entry leaves the app, so it stays a plain anchor.
  */
 export function DownloadMenu({
@@ -48,14 +51,16 @@ export function DownloadMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={<Button variant="outline" className={cn(className)} />}
+        render={
+          <Button
+            variant="outline"
+            className={cn(MACOS_TRIGGER_CLASS, className)}
+          />
+        }
       >
-        <DownloadIcon data-icon="inline-start" />
+        <AppleLogo className="size-3.5" data-icon="inline-start" />
         {labels.trigger}
-        <ChevronDownIcon
-          data-icon="inline-end"
-          className="text-muted-foreground"
-        />
+        <ChevronDownIcon data-icon="inline-end" className="opacity-70" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-72" sideOffset={8}>
         <DropdownMenuLabel>{labels.label}</DropdownMenuLabel>

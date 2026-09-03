@@ -434,6 +434,7 @@
     },
     "automation": {
       "badge": "Automation · beta",
+      "eyebrow": "AI agents",
       "title": "The agent drafts. Rules decide what ships.",
       "description": "Slack and MCP use the same tools as the web. AI can look up a company, assemble a draft, and prepare files — but it never fabricates required fields, and confirming sensitive actions stays with you.",
       "item1": "ARES lookup by name or ICO",
@@ -596,11 +597,12 @@
       "apiDescription": "Validated InvoiceSchema JSON and keys for your own automation.",
       "driveTitle": "Invoicey Drive",
       "driveDescription": "Issued PDFs in Finder on your Mac. Pair from the menu bar.",
-      "docsCta": "Integration docs"
+      "docsCta": "Integration docs",
+      "docsDescription": "Guides for Slack, MCP, banks, the CLI, and Invoicey Drive."
     },
     "comparison": {
       "eyebrow": "Honest comparison",
-      "title": "Where Invoicey wins — and where it doesn't.",
+      "title": "Where Invoicey wins, and where it doesn't.",
       "description": "Czech invoicing is a crowded, mature market. Here is how Invoicey lines up against three tools people actually use, including the rows we lose.",
       "tableCaption": "Feature comparison of Invoicey, Fakturoid, iDoklad and FakturaOnline",
       "featureHeader": "Capability",
@@ -659,27 +661,21 @@
       "macAppNote2": "",
       "macAppNote3": "",
       "accountingLabel": "Bookkeeping: expenses, VAT returns, stock",
-      "accountingNote0": "Out of scope on purpose",
+      "accountingNote0": "Roadmap, as needed",
       "accountingNote1": "Expenses, VAT, tax returns",
       "accountingNote2": "Full agenda",
       "accountingNote3": "",
       "mobileAppLabel": "Mobile app",
-      "mobileAppNote0": "Responsive web only",
+      "mobileAppNote0": "No extra app",
       "mobileAppNote1": "iOS and Android",
       "mobileAppNote2": "iOS and Android",
-      "mobileAppNote3": "",
-      "trackLabel": "Years in production",
-      "trackNote0": "Public beta since 2026",
-      "trackNote1": "Since 2010",
-      "trackNote2": "Since 2012",
-      "trackNote3": "Since 2010"
+      "mobileAppNote3": ""
     },
     "pricing": {
       "eyebrow": "Pricing",
       "title": "Everything is free while Invoicey is in beta.",
       "description": "No card, no trial countdown, no expiring sandbox. When paid plans start you will hear about it well before anything is charged.",
       "betaBadge": "Free in beta",
-      "honestNote": "The honest version: Invoicey has no payment flow wired up and charges nobody today. Plan limits — seats, businesses, bank connections, AI tokens — are already enforced. The price is not.",
       "freeName": "Free",
       "freePrice": "0 Kč",
       "freePeriod": "/ month",

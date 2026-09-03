@@ -32,10 +32,10 @@ export async function MarketingFooter() {
               href="https://www.nfctron.com"
               rel="noreferrer"
               target="_blank"
-              className="inline-flex items-center gap-1.5 font-semibold text-foreground transition-colors hover:text-primary"
+              aria-label="NFCtron"
+              className="inline-flex items-center rounded-sm transition-opacity hover:opacity-80"
             >
-              <NfctronLogo className="size-3.5" />
-              NFCtron
+              <NfctronLogo className="h-3.5" />
             </a>
           </p>
         </div>

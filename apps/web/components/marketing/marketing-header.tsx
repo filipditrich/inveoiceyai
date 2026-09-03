@@ -9,10 +9,6 @@ import Link from "next/link";
 import { DownloadMenu } from "./download-menu";
 import { macDownloadUrl } from "./mac-download";
 import { MarketingMobileNav } from "./marketing-mobile-nav";
-import {
-  MarketingSignedInChip,
-  sessionDisplayName,
-} from "./marketing-signed-in";
 
 export async function MarketingHeader() {
   const t = await getTranslations("Marketing.nav");
@@ -47,17 +43,17 @@ export async function MarketingHeader() {
 
   const primaryCta = (
     <Button
-      className="shrink-0"
+      className="h-9 shrink-0 !rounded-full px-3.5"
       render={<Link href="/dashboard" prefetch={false} />}
     >
-      {user ? t("continueToApp") : t("openApp")}
+      {t("openApp")}
       <ArrowRightIcon data-icon="inline-end" />
     </Button>
   );
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         {/* The tagline is hidden on small screens, so the link needs its own name. */}
         <Link
           href="/"
@@ -65,14 +61,15 @@ export async function MarketingHeader() {
           className="flex shrink-0 flex-col items-start gap-0.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           <BrandLogo size={24} priority variant="wordmark" />
-          <span className="hidden text-[0.6rem] leading-none tracking-[0.12em] text-muted-foreground uppercase sm:block">
+          {/* The lockup SVG insets the first glyph; match that so the tagline lines up. */}
+          <span className="hidden pl-[4%] text-[0.6rem] leading-none tracking-[0.12em] text-muted-foreground uppercase sm:block">
             {tBrand("tagline")}
           </span>
         </Link>
 
         <nav
           aria-label={t("ariaLabel")}
-          className="mx-auto hidden items-center gap-1 lg:flex"
+          className="absolute left-1/2 z-10 hidden -translate-x-1/2 items-center gap-1 lg:flex"
         >
           {navItems.map((item) => (
             <Link
@@ -85,29 +82,16 @@ export async function MarketingHeader() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2 lg:ml-0">
+        <div className="relative z-20 flex items-center justify-end gap-2">
           <DownloadMenu
-            className="hidden lg:inline-flex"
+            className="hidden h-9 px-3.5 lg:inline-flex"
             labels={downloadLabels}
             macDownloadUrl={macDownloadUrl(env.INVOICEY_DRIVE_DMG_URL)}
           />
-          {user ? (
-            <Link
-              href="/dashboard"
-              prefetch={false}
-              aria-label={t("signedInAs", { name: sessionDisplayName(user) })}
-              className="hidden min-w-0 items-center rounded-lg px-2 py-1 outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 sm:flex"
-            >
-              <MarketingSignedInChip
-                user={user}
-                caption={t("signedIn")}
-                className="inline-flex max-w-44 min-w-0 items-center gap-2"
-              />
-            </Link>
-          ) : (
+          {user ? null : (
             <Button
               variant="ghost"
-              className="hidden sm:inline-flex"
+              className="hidden rounded-full sm:inline-flex"
               render={<Link href="/sign-in" />}
             >
               {t("signIn")}
