@@ -1,7 +1,7 @@
 "use server";
 
 import { ForbiddenError } from "@/lib/auth/errors";
-import { requireWorkspace } from "@/lib/auth/session";
+import { requireWritableWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
 import {
   PERMISSIONS,
@@ -41,7 +41,7 @@ export async function saveMemberPermissionsAction(
   formData: FormData,
 ): Promise<void> {
   await assertCan("members:manage");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
 
   const { entitlements } = await requireEntitlements();
   if (entitlements.permissions.mode !== "advanced") {

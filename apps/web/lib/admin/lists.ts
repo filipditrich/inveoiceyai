@@ -50,6 +50,7 @@ export type AdminWorkspaceRow = {
   planName: string;
   tokensRemaining: number;
   aiBurn30d: number;
+  frozenAt: Date | null;
 };
 
 export type AdminInvoiceRow = {
@@ -169,6 +170,7 @@ export async function adminListWorkspaces(): Promise<AdminWorkspaceRow[]> {
       slug: workspaces.slug,
       createdAt: workspaces.createdAt,
       planName: plans.name,
+      frozenAt: workspaces.frozenAt,
     })
     .from(workspaces)
     .innerJoin(plans, eq(workspaces.planId, plans.id))
@@ -255,6 +257,7 @@ export async function adminListWorkspaces(): Promise<AdminWorkspaceRow[]> {
     issuerCount: issuersByWorkspace.get(r.id) ?? 0,
     tokensRemaining: tokensByWorkspace.get(r.id) ?? 0,
     aiBurn30d: burnByWorkspace.get(r.id) ?? 0,
+    frozenAt: r.frozenAt,
   }));
 }
 

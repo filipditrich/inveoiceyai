@@ -15,6 +15,9 @@ import {
   AdminMiniTable,
   AdminSection,
 } from "@/components/admin/admin-detail-kit";
+import { AdminWorkspaceFreezeSection } from "@/components/admin/admin-workspace-freeze";
+import { AdminWorkspaceOverridesSection } from "@/components/admin/admin-workspace-overrides";
+import { AdminWorkspaceSupportSections } from "@/components/admin/admin-workspace-support";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -24,6 +27,11 @@ import { WorkspaceMark } from "@/components/workspace-mark";
 import { loadWorkspaceAiMonitor } from "@/lib/admin/ai";
 import { adminGetWorkspace } from "@/lib/admin/detail";
 import { adminSelectablePlans } from "@/lib/admin/plans";
+import {
+  adminListWorkspaceBanks,
+  adminListWorkspaceCommunityLooks,
+  adminListWorkspaceSuppressions,
+} from "@/lib/admin/workspace-control";
 import { formatTokenCount } from "@/lib/ai/format-tokens";
 import { requirePlatformAdmin } from "@/lib/auth/session";
 import { ArrowLeftIcon, WarehouseIcon } from "lucide-react";
@@ -56,10 +64,20 @@ export default async function AdminWorkspaceDetailPage({
     notFound();
   }
 
-  const [entitlementState, selectablePlans, aiMonitor] = await Promise.all([
+  const [
+    entitlementState,
+    selectablePlans,
+    aiMonitor,
+    banks,
+    suppressions,
+    looks,
+  ] = await Promise.all([
     getWorkspaceEntitlements(db, id),
     adminSelectablePlans(),
     loadWorkspaceAiMonitor(id),
+    adminListWorkspaceBanks(id),
+    adminListWorkspaceSuppressions(id),
+    adminListWorkspaceCommunityLooks(id),
   ]);
 
   const tokens = detail.tokens;
@@ -124,6 +142,12 @@ export default async function AdminWorkspaceDetailPage({
           ]}
         />
       </AdminSection>
+
+      <AdminWorkspaceFreezeSection
+        freezeReason={detail.freezeReason}
+        frozenAt={detail.frozenAt}
+        workspaceId={detail.id}
+      />
 
       <AdminSection description={t("plan.description")} title={t("plan.title")}>
         {entitlementState ? (
@@ -195,6 +219,14 @@ export default async function AdminWorkspaceDetailPage({
           <AdminEmpty>{t("plan.missing")}</AdminEmpty>
         )}
       </AdminSection>
+
+      {entitlementState ? (
+        <AdminWorkspaceOverridesSection
+          entitlements={entitlementState.entitlements}
+          hasOverrides={Boolean(entitlementState.overrides)}
+          workspaceId={detail.id}
+        />
+      ) : null}
 
       <AdminSection
         title={t("tokensTitle")}
@@ -384,6 +416,13 @@ export default async function AdminWorkspaceDetailPage({
           />
         )}
       </AdminSection>
+
+      <AdminWorkspaceSupportSections
+        banks={banks}
+        looks={looks}
+        suppressions={suppressions}
+        workspaceId={detail.id}
+      />
 
       <AdminSection title={t("auditTitle")} description={t("auditDescription")}>
         <AdminAuditList events={detail.auditEvents} />

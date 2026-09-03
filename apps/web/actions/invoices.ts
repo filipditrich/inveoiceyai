@@ -1,7 +1,11 @@
 "use server";
 
 import { notifyTokenRewardByEmail } from "@/lib/ai/token-reward-email";
-import { requireSession, requireWorkspace } from "@/lib/auth/session";
+import {
+  requireSession,
+  requireWorkspace,
+  requireWritableWorkspace,
+} from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
 import {
   addDaysIso,
@@ -322,7 +326,7 @@ async function replaceItems(
 /** Persist draft without consuming a number. */
 export async function saveInvoiceDraft(formData: FormData): Promise<void> {
   await assertCan("invoices:create");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   const user = await requireSession();
   const existingId = optionalTrim(formData.get("id"));
   const recoveryAttempt = existingId
@@ -461,7 +465,7 @@ export async function saveInvoiceDraft(formData: FormData): Promise<void> {
 
 /** Issue: lock numbering, assign number, freeze snapshots. */
 export async function issueInvoice(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   const user = await requireSession();
   await assertCan("invoices:issue");
   const existingId = optionalTrim(formData.get("id"));
@@ -670,7 +674,7 @@ export async function issueInvoice(formData: FormData): Promise<void> {
 /** Issue a saved draft by id (detail / list / bulk). */
 export async function issueSavedInvoice(formData: FormData): Promise<void> {
   await assertCan("invoices:issue");
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
@@ -704,7 +708,7 @@ export async function issueSavedInvoice(formData: FormData): Promise<void> {
 
 export async function bulkIssueInvoice(formData: FormData): Promise<void> {
   await assertCan("invoices:issue");
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   const ids = collectIds(formData);
   if (ids.length === 0) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
@@ -718,7 +722,7 @@ export async function bulkIssueInvoice(formData: FormData): Promise<void> {
 
 export async function markInvoicePaid(formData: FormData): Promise<void> {
   await assertCan("payments:manage");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
@@ -735,7 +739,7 @@ export async function markInvoicePaid(formData: FormData): Promise<void> {
 
 export async function unmarkInvoicePaid(formData: FormData): Promise<void> {
   await assertCan("payments:manage");
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
@@ -778,7 +782,7 @@ function bulkRedirect(result: {
 }
 
 export async function bulkMarkInvoicePaid(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("payments:manage");
   const ids = collectIds(formData);
   if (ids.length === 0) {
@@ -788,7 +792,7 @@ export async function bulkMarkInvoicePaid(formData: FormData): Promise<void> {
 }
 
 export async function bulkUnmarkInvoicePaid(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("payments:manage");
   const ids = collectIds(formData);
   if (ids.length === 0) {
@@ -799,7 +803,7 @@ export async function bulkUnmarkInvoicePaid(formData: FormData): Promise<void> {
 
 export async function bulkCancelInvoice(formData: FormData): Promise<void> {
   await assertCan("invoices:issue");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   const ids = collectIds(formData);
   if (ids.length === 0) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
@@ -809,7 +813,7 @@ export async function bulkCancelInvoice(formData: FormData): Promise<void> {
 
 export async function bulkDeleteInvoice(formData: FormData): Promise<void> {
   await assertCan("invoices:delete");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   const ids = collectIds(formData);
   if (ids.length === 0) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_ids")}`);
@@ -820,7 +824,7 @@ export async function bulkDeleteInvoice(formData: FormData): Promise<void> {
 /** Cancel an issued (unpaid) invoice. */
 export async function cancelInvoice(formData: FormData): Promise<void> {
   await assertCan("invoices:issue");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   const id = optionalTrim(formData.get("id"));
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
@@ -837,7 +841,7 @@ export async function cancelInvoice(formData: FormData): Promise<void> {
 
 export async function deleteInvoice(formData: FormData): Promise<void> {
   const id = optionalTrim(formData.get("id"));
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("invoices:delete");
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
@@ -864,7 +868,7 @@ export async function deleteInvoice(formData: FormData): Promise<void> {
 /** Duplicate issued or draft into a new draft. */
 export async function duplicateInvoice(formData: FormData): Promise<void> {
   const id = optionalTrim(formData.get("id"));
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("invoices:create");
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);
@@ -912,7 +916,7 @@ export async function duplicateInvoice(formData: FormData): Promise<void> {
 /** Send issued invoice by email. */
 export async function sendInvoiceEmail(formData: FormData): Promise<void> {
   const id = optionalTrim(formData.get("id"));
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   await assertCan("invoices:send");
   if (!id) {
     redirect(`/invoices?invalid=${encodeURIComponent("missing_id")}`);

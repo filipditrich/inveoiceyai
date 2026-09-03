@@ -1,7 +1,7 @@
 "use server";
 
 import { recordSecurityAuditEvent } from "@/lib/auth/security-audit";
-import { requireWorkspace } from "@/lib/auth/session";
+import { requireWorkspace, requireWritableWorkspace } from "@/lib/auth/session";
 import { revalidatePath } from "next/cache";
 
 import {
@@ -25,7 +25,7 @@ export type ConfirmSlackLinkResult =
 export async function confirmSlackLinkAction(
   code: string,
 ): Promise<ConfirmSlackLinkResult> {
-  const { userId, workspaceId } = await requireWorkspace();
+  const { userId, workspaceId } = await requireWritableWorkspace();
   const row = await getSlackLinkCode(db, code);
   if (!row) return { ok: false, error: "not_found" };
 
@@ -106,7 +106,7 @@ export async function rebindSlackIdentityAction(input: {
   slackTeamId: string;
   slackUserId: string;
 }): Promise<{ ok: boolean }> {
-  const { userId, workspaceId } = await requireWorkspace();
+  const { userId, workspaceId } = await requireWritableWorkspace();
   const ok = await rebindSlackIdentityWorkspace(db, {
     userId,
     slackTeamId: input.slackTeamId,

@@ -17,6 +17,7 @@ Plans complement [`docs/roadmap.md`](../../docs/roadmap.md): roadmap owns phase 
 | [`plan-16-account-security.md`](./plan-16-account-security.md)               | Plan 16 — Account security & settings        |
 | [`plan-18-platform-admin.md`](./plan-18-platform-admin.md)                   | Plan 18 — Global platform admin              |
 | [`plan-18b-platform-admin-monitor.md`](./plan-18b-platform-admin-monitor.md) | Plan 18b — Platform admin monitor            |
+| [`plan-18c-platform-admin-control.md`](./plan-18c-platform-admin-control.md) | Plan 18c — Platform admin support control    |
 | [`plan-19-invites-referrals.md`](./plan-19-invites-referrals.md)             | Plan 19 — Invites + referral attribution     |
 | [`plan-20-multi-workspace.md`](./plan-20-multi-workspace.md)                 | Plan 20 — Multi-workspace product UX         |
 | [`plan-21-ai-usage.md`](./plan-21-ai-usage.md)                               | Plan 21 — In-app AI draft + workspace tokens |

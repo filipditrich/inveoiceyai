@@ -6,7 +6,7 @@ import { recordSecurityAuditEvent } from "@/lib/auth/security-audit";
 import {
   assertWorkspaceMember,
   requireSession,
-  requireWorkspace,
+  requireWritableWorkspace,
 } from "@/lib/auth/session";
 import {
   isOrganizationSlugConflict,
@@ -167,6 +167,7 @@ export async function updateWorkspaceAction(input: {
   }
 
   try {
+    await requireWritableWorkspace();
     await assertCan("workspace:manage");
     await auth.api.updateOrganization({
       headers: await headers(),
@@ -193,7 +194,7 @@ export async function updateWorkspaceLookAction(input: {
   }
 
   try {
-    const { workspaceId, role } = await requireWorkspace();
+    const { workspaceId, role } = await requireWritableWorkspace();
     if (role !== "owner" && role !== "admin") {
       return { ok: false, errorCode: "forbidden" };
     }

@@ -164,7 +164,20 @@ declare const messages: {
     "admin_plan_client_added": "Subjekt přidán do katalogu",
     "admin_plan_client_removed": "Subjekt odebrán z katalogu",
     "admin_invalid_ico": "Neplatné IČO",
-    "admin_ares_failed": "Načtení z ARES selhalo"
+    "admin_ares_failed": "Načtení z ARES selhalo",
+    "workspace_frozen": "Tento pracovní prostor je zmrazený",
+    "admin_reason_required": "Zadejte důvod zmrazení",
+    "admin_session_revoked": "Relace odhlášena",
+    "admin_device_revoked": "Důvěryhodné zařízení odvoláno",
+    "admin_api_key_revoked": "API klíč odvolán",
+    "admin_drive_device_revoked": "Drive zařízení odvoláno",
+    "admin_workspace_frozen": "Pracovní prostor zmrazen",
+    "admin_workspace_unfrozen": "Pracovní prostor rozmrazen",
+    "admin_overrides_saved": "Výjimky oprávnění uloženy",
+    "admin_overrides_cleared": "Výjimky oprávnění smazány",
+    "admin_suppression_lifted": "Blokace e-mailu zrušena",
+    "admin_look_unpublished": "Komunitní vzhled stažen z katalogu",
+    "admin_bank_disconnected": "Bankovní napojení odpojeno"
   },
   "ToastDescriptions": {
     "issuer_saved": "Údaje firmy jsou připravené pro další faktury.",
@@ -217,7 +230,20 @@ declare const messages: {
     "admin_plan_client_added": "Synchronizováno do všech workspaců na tomto tarifu.",
     "admin_plan_client_removed": "Existující odběratelé zůstali, ale už jim nelze fakturovat.",
     "admin_invalid_ico": "IČO má 8 číslic.",
-    "admin_ares_failed": "Registr pro toto IČO nevrátil data."
+    "admin_ares_failed": "Registr pro toto IČO nevrátil data.",
+    "workspace_frozen": "Čtení funguje dál. Zápisy, crony, MCP i Eve jsou zablokované, dokud platformní admin prostor nerozmrazí.",
+    "admin_reason_required": "Zmrazení bez důvodu je zámek, který nikdo později nevysvětlí.",
+    "admin_session_revoked": "Ten prohlížeč se musí znovu přihlásit.",
+    "admin_device_revoked": "Cookie zařízení už nepřeskakuje druhé ověření.",
+    "admin_api_key_revoked": "MCP, Eve ani CLI ten klíč už nepoužijí.",
+    "admin_drive_device_revoked": "Ten Mac se musí znovu spárovat, aby stahoval vystavená PDF.",
+    "admin_workspace_frozen": "Členové se pořád přihlásí a čtou. Zápisy končí chybou.",
+    "admin_workspace_unfrozen": "Zápisy, crony, MCP i Eve znovu běží.",
+    "admin_overrides_saved": "Ukládají se jen klíče, které se liší od tarifu.",
+    "admin_overrides_cleared": "Prostor teď bere tarif přesně.",
+    "admin_suppression_lifted": "Automatický e-mail na tuto adresu znovu smí odejít.",
+    "admin_look_unpublished": "V live katalogu už není.",
+    "admin_bank_disconnected": "Importované pohyby zůstaly. Token byl přepsán."
   },
   "Status": {
     "invoice": {
@@ -922,6 +948,10 @@ declare const messages: {
     },
     "brand": {
       "tagline": "Automatizace faktur"
+    },
+    "freeze": {
+      "banner": "Tento pracovní prostor je zmrazený. Všechno pořád přečtete; zápisy jsou zablokované, dokud ho platformní admin nerozmrazí.",
+      "reason": "Důvod: {reason}"
     },
     "build": {
       "runningWithSha": "{version} · {sha}",
@@ -2675,6 +2705,7 @@ declare const messages: {
       "ai": "AI spotřeba",
       "invoices": "Faktury",
       "issuers": "Dodavatelé",
+      "looks": "Vzhledy",
       "backToApp": "Zpět do aplikace",
       "productGroup": "Produkt",
       "productDashboard": "Produktový přehled",
@@ -2689,7 +2720,8 @@ declare const messages: {
       "audit": "Audit log",
       "detail": "Detail",
       "plans": "Tarify",
-      "ai": "AI spotřeba"
+      "ai": "AI spotřeba",
+      "looks": "Vzhledy"
     },
     "table": {
       "search": "Hledat",
@@ -2796,7 +2828,8 @@ declare const messages: {
         "burn": "AI spotřeba (30d)",
         "createdAt": "Vytvořeno",
         "id": "ID prostoru"
-      }
+      },
+      "frozen": "Zmrazený"
     },
     "invoices": {
       "title": "Faktury",
@@ -2871,12 +2904,40 @@ declare const messages: {
       "auditTitle": "Bezpečnostní historie",
       "auditDescription": "Přihlášení, změny přístupů a zásahy admina týkající se tohoto účtu.",
       "neverSeen": "Nikdy se nepřihlásil",
+      "sessionsTitle": "Relace",
+      "sessionsDescription": "Aktivní relace Better Auth. Samotný token se nikdy nezobrazuje.",
+      "noSessions": "Žádné relace.",
+      "devicesTitle": "Důvěryhodná zařízení",
+      "devicesDescription": "Prohlížeče, které přeskakují druhé přihlášení.",
+      "noDevices": "Žádná důvěryhodná zařízení.",
+      "apiKeysTitle": "API klíče",
+      "apiKeysDescription": "Osobní tokeny pro MCP, Eve a CLI. Jen prefix — nikdy secret.",
+      "noApiKeys": "Žádné API klíče.",
+      "driveTitle": "Drive zařízení",
+      "driveDescription": "Macy spárované pro Invoicey Drive.",
+      "noDriveDevices": "Žádná Drive zařízení.",
+      "enabled": "Zapnuto",
+      "disabled": "Vypnuto",
+      "actions": {
+        "revoke": "Odvolat"
+      },
       "columns": {
         "workspace": "Prostor",
         "role": "Role",
         "joined": "Připojen",
         "email": "E-mail",
-        "signedUp": "Registrace"
+        "signedUp": "Registrace",
+        "created": "Vytvořeno",
+        "expires": "Vyprší",
+        "ip": "IP",
+        "userAgent": "User agent",
+        "label": "Popisek",
+        "lastSeen": "Naposledy",
+        "name": "Název",
+        "prefix": "Prefix",
+        "lastRequest": "Poslední požadavek",
+        "enabled": "Stav",
+        "fingerprint": "Otisk"
       }
     },
     "workspaceDetail": {
@@ -2931,7 +2992,10 @@ declare const messages: {
       },
       "actions": {
         "removeMember": "Odebrat",
-        "cancelInvite": "Zrušit"
+        "cancelInvite": "Zrušit",
+        "disconnect": "Odpojit",
+        "lift": "Odblokovat",
+        "unpublish": "Stáhnout"
       },
       "columns": {
         "member": "Člen",
@@ -2945,7 +3009,47 @@ declare const messages: {
         "tokens": "Tokeny",
         "when": "Kdy",
         "trigger": "Důvod",
-        "note": "Poznámka"
+        "note": "Poznámka",
+        "provider": "Poskytovatel",
+        "status": "Stav",
+        "error": "Poslední chyba",
+        "lastSync": "Poslední sync",
+        "look": "Vzhled",
+        "version": "Verze",
+        "reason": "Důvod"
+      },
+      "freeze": {
+        "title": "Zmrazení",
+        "description": "Obsazenost, ne oprávnění. Členové se pořád přihlásí a čtou. Zápisy, crony, MCP i Eve končí chybou.",
+        "status": "Stav",
+        "live": "Živý",
+        "frozen": "Zmrazený",
+        "since": "Zmrazeno od",
+        "reason": "Důvod",
+        "reasonLabel": "Proč je tento prostor zmrazený",
+        "freeze": "Zmrazit prostor",
+        "unfreeze": "Rozmrazit"
+      },
+      "overrides": {
+        "title": "Výjimky oprávnění",
+        "description": "Ukládají se jen klíče, které se liší od tarifu. Smazání vrátí tarif přesně. Grantová pravidla zůstávají na tarifu.",
+        "save": "Uložit výjimky",
+        "clear": "Smazat výjimky"
+      },
+      "banks": {
+        "title": "Bankovní napojení",
+        "description": "Jen poskytovatel a stav. Secret se nikdy nezobrazuje.",
+        "empty": "Žádná bankovní napojení."
+      },
+      "suppressions": {
+        "title": "Blokace e-mailů",
+        "description": "Adresy zablokované po bounce nebo stížnosti.",
+        "empty": "Žádné blokace."
+      },
+      "looks": {
+        "title": "Komunitní vzhledy",
+        "description": "Vzhledy, které tento prostor teď publikuje v live katalogu.",
+        "empty": "Nic nepublikováno."
       },
       "plan": {
         "title": "Tarif",
@@ -3128,8 +3232,12 @@ declare const messages: {
         "to": "Komu",
         "template": "Šablona",
         "status": "Stav",
-        "when": "Kdy"
+        "when": "Kdy",
+        "reason": "Důvod"
       },
+      "suppressionsTitle": "Blokace e-mailů",
+      "suppressionsDescription": "Příjemci této faktury, kteří jsou teď zablokovaní pro automatický mail.",
+      "lift": "Odblokovat",
       "facts": {
         "number": "Číslo",
         "client": "Klient",
@@ -3145,6 +3253,20 @@ declare const messages: {
         "imported": "Import",
         "completeness": "Import",
         "batch": "Dávka"
+      }
+    },
+    "looks": {
+      "title": "Komunitní vzhledy",
+      "subtitle": "Živé řádky katalogu. Stažení je odebere z katalogu; kopie ve workspace zůstanou.",
+      "liveTitle": "Publikované",
+      "liveDescription": "Z katalogu mizí jen stažené řádky. Dokument vzhledu se tady needituje.",
+      "empty": "Žádné živé komunitní vzhledy.",
+      "unpublish": "Stáhnout",
+      "columns": {
+        "look": "Vzhled",
+        "version": "Verze",
+        "workspace": "Vydavatel",
+        "published": "Publikováno"
       }
     },
     "issuerDetail": {

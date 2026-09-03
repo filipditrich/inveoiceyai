@@ -91,6 +91,9 @@ export type AdminWorkspaceDetail = {
     purchasedRemaining: number;
     periodEnd: Date;
   } | null;
+  frozenAt: Date | null;
+  frozenBy: string | null;
+  freezeReason: string | null;
   auditEvents: AdminAuditRow[];
 };
 
@@ -220,6 +223,9 @@ export async function adminGetWorkspace(
       slug: workspaces.slug,
       logo: workspaces.logo,
       createdAt: workspaces.createdAt,
+      frozenAt: workspaces.frozenAt,
+      frozenBy: workspaces.frozenBy,
+      freezeReason: workspaces.freezeReason,
     })
     .from(workspaces)
     .where(eq(workspaces.id, workspaceId))

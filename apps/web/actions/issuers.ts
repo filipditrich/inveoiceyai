@@ -1,6 +1,6 @@
 "use server";
 
-import { requireWorkspace } from "@/lib/auth/session";
+import { requireWritableWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
 import { assertIssuerQuota } from "@/lib/entitlements/quotas";
 import {
@@ -354,7 +354,7 @@ function parsePaymentQrFromForm(
  * Redirects to edit identity (or welcome done when `next=welcome`).
  */
 export async function createIssuer(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("issuers:manage");
   // Write path only: an over-limit workspace after a downgrade stays readable,
   // it just cannot add another issuer (ADR 0035).
@@ -437,7 +437,7 @@ export async function createIssuer(formData: FormData): Promise<void> {
 
 /** Update identity fields; keeps bank / assets intact. */
 export async function saveIssuerIdentity(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("issuers:manage");
   const issuerId = optionalTrim(formData.get("id"));
   if (!issuerId) {
@@ -519,7 +519,7 @@ export async function saveIssuerIdentity(formData: FormData): Promise<void> {
 
 /** Update bank fields only. */
 export async function saveIssuerBank(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("issuers:manage");
   const issuerId = optionalTrim(formData.get("id"));
   if (!issuerId) {
@@ -578,7 +578,7 @@ export async function saveIssuerBank(formData: FormData): Promise<void> {
 
 /** Update logo / stamp / signature URLs. */
 export async function saveIssuerAssets(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("issuers:manage");
   const issuerId = optionalTrim(formData.get("id"));
   if (!issuerId) {
@@ -646,7 +646,7 @@ export async function saveIssuerAssets(formData: FormData): Promise<void> {
 
 /** Update numbering schemes for all doc types. */
 export async function saveIssuerNumbering(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("issuers:manage");
   const issuerId = optionalTrim(formData.get("id"));
   if (!issuerId) {
@@ -689,7 +689,7 @@ export async function saveIssuerNumbering(formData: FormData): Promise<void> {
 
 /** Update issuer email defaults (fixes prior FormData wiring gap). */
 export async function saveIssuerEmail(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("issuers:manage");
   const issuerId = optionalTrim(formData.get("id"));
   if (!issuerId) {
@@ -730,7 +730,7 @@ export async function saveIssuerEmail(formData: FormData): Promise<void> {
 /** Mark this issuer as the workspace default for Eve / MCP / AI drafts. */
 export async function setDefaultIssuer(formData: FormData): Promise<void> {
   const issuerId = optionalTrim(formData.get("id"));
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("issuers:manage");
   if (!issuerId) {
     redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
@@ -769,7 +769,7 @@ export async function setDefaultIssuer(formData: FormData): Promise<void> {
 
 /** Skip first-issuer welcome for this workspace. */
 export async function dismissIssuerWelcome(): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await dismissIssuerWelcomeForWorkspace(workspaceId);
   revalidatePath("/dashboard");
   revalidatePath("/welcome");
@@ -779,7 +779,7 @@ export async function dismissIssuerWelcome(): Promise<void> {
 /** Delete issuer when it has no invoices; cascades numbering schemes. */
 export async function deleteIssuer(formData: FormData): Promise<void> {
   const id = optionalTrim(formData.get("id"));
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("issuers:manage");
   if (!id) {
     redirect(`/issuers?invalid=${encodeURIComponent("missing_id")}`);
@@ -874,7 +874,7 @@ export async function parseIssuerFromWelcomePdf(
 ): Promise<
   { ok: true; draft: WelcomeIssuerDraft } | { ok: false; message: string }
 > {
-  await requireWorkspace();
+  await requireWritableWorkspace();
   await assertCan("issuers:manage");
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {

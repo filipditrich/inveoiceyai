@@ -1,6 +1,6 @@
 "use server";
 
-import { requireWorkspace } from "@/lib/auth/session";
+import { requireWritableWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -106,7 +106,7 @@ export async function classifyImportPdfs(input: {
   files: Array<{ fileName: string; pdfUrl: string; isdocUrl?: string }>;
   defaultPaid?: boolean;
 }): Promise<{ rows: ClassifiedImportFile[]; error?: string }> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("import:run");
   const issuer = await loadIssuer(workspaceId, input.issuerId);
   if (!issuer) {
@@ -206,7 +206,7 @@ export async function commitInvoiceImport(input: {
   failed: number;
   errors: Array<{ fileName: string; error: string }>;
 }> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("import:run");
   const issuer = await loadIssuer(workspaceId, input.issuerId);
   if (!issuer) {

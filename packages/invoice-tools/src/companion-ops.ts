@@ -1,6 +1,8 @@
 import { and, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
 
 import {
+  WorkspaceFrozenError,
+  assertWorkspaceWritable,
   bankTransactions,
   clients,
   confirmPaymentMatchProposal,
@@ -600,9 +602,33 @@ export async function runCompanionOp(input: unknown): Promise<CompanionResult> {
     const first = parsed.error.issues[0];
     return fail(first?.message ?? "invalid_request");
   }
+  const mutating = new Set([
+    "invoices.create",
+    "invoices.issue",
+    "invoices.send",
+    "invoices.paid",
+    "invoices.unpaid",
+    "invoices.cancel",
+    "clients.add",
+    "payments.confirm",
+    "payments.reject",
+  ]);
+  if (mutating.has(parsed.data.op)) {
+    try {
+      await assertWorkspaceWritable(requireDb(), resolveWorkspaceId());
+    } catch (error) {
+      if (error instanceof WorkspaceFrozenError) {
+        return fail("workspace_frozen");
+      }
+      throw error;
+    }
+  }
   try {
     return await dispatchOther(parsed.data);
   } catch (cause) {
+    if (cause instanceof WorkspaceFrozenError) {
+      return fail("workspace_frozen");
+    }
     const message = cause instanceof Error ? cause.message : "companion_failed";
     return fail(message);
   }

@@ -22,6 +22,7 @@ import {
   LayersIcon,
   LayoutDashboardIcon,
   ShieldIcon,
+  PaletteIcon,
   ScrollTextIcon,
   SparklesIcon,
   UsersIcon,
@@ -82,6 +83,12 @@ export function AdminSidebar({
       url: "/admin/issuers",
       icon: <Building2Icon />,
       isActive: pathname.startsWith("/admin/issuers"),
+    },
+    {
+      title: t("nav.looks"),
+      url: "/admin/looks",
+      icon: <PaletteIcon />,
+      isActive: pathname.startsWith("/admin/looks"),
     },
     {
       title: t("nav.audit"),

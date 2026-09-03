@@ -31,6 +31,7 @@ export default async function AdminWorkspacesPage() {
           planName: r.planName,
           tokensRemaining: r.tokensRemaining,
           aiBurn30d: r.aiBurn30d,
+          frozen: Boolean(r.frozenAt),
           createdAtIso: r.createdAt.toISOString(),
         }))}
       />

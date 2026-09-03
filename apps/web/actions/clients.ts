@@ -1,6 +1,6 @@
 "use server";
 
-import { requireWorkspace } from "@/lib/auth/session";
+import { requireWritableWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
 import { lookupAresByIcoCached } from "@/lib/cached-ares";
 import { assertClientsWritable } from "@/lib/entitlements/managed-clients";
@@ -59,7 +59,7 @@ export async function createClientFromAres(
   icoInput: string,
 ): Promise<CreateClientFromAresResult> {
   await assertCan("clients:manage");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   // A managed workspace bills only its plan catalog (ADR 0036), so an ARES
   // lookup here could only ever end in a client it may not use.
   await assertClientsWritable(workspaceId);
@@ -128,7 +128,7 @@ export async function createClientFromAres(
 /** UPSERT validated `ClientSnapshot` in default workspace. */
 export async function saveClient(formData: FormData): Promise<void> {
   await assertCan("clients:manage");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertClientsWritable(workspaceId);
   const rowId = optionalTrim(formData.get("id")) ?? crypto.randomUUID();
   const errBase = `/clients/${rowId}/edit`;
@@ -226,7 +226,7 @@ export async function saveClient(formData: FormData): Promise<void> {
 
 export async function deleteClient(formData: FormData): Promise<void> {
   const id = optionalTrim(formData.get("id"));
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("clients:manage");
   await assertClientsWritable(workspaceId);
   if (!id) {
@@ -265,7 +265,7 @@ export async function deleteClient(formData: FormData): Promise<void> {
 /** Collapse duplicate clients by IČO or normalized legal name + full address. */
 export async function mergeClientsAction(): Promise<void> {
   await assertCan("clients:manage");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   // Merging rewrites and removes client rows, so it is a client mutation like
   // any other — and on a managed workspace the catalog sync already guarantees
   // there is nothing to merge.

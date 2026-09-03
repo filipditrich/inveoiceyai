@@ -1,6 +1,6 @@
 "use server";
 
-import { requireWorkspace } from "@/lib/auth/session";
+import { requireWritableWorkspace } from "@/lib/auth/session";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -57,7 +57,7 @@ async function requireLookEditor(): Promise<
     }
   | { ok: false; errorCode: WorkspaceLookActionError }
 > {
-  const { workspaceId, role } = await requireWorkspace();
+  const { workspaceId, role } = await requireWritableWorkspace();
   if (role !== "owner" && role !== "admin") {
     return { ok: false, errorCode: "forbidden" };
   }

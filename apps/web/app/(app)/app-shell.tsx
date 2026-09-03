@@ -7,6 +7,7 @@ import { NavigationPendingOverlay } from "@/components/navigation/navigation-pro
 import { SiteHeader } from "@/components/site-header";
 import { ToastFromSearchParams } from "@/components/toast-from-search-params";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { useTranslations } from "next-intl";
 
 import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 
@@ -35,6 +36,7 @@ export function AppShell({
   tokenBalance,
   uploadConfigured = true,
   canSeePayments = true,
+  frozenReason = null,
 }: Readonly<{
   children: ReactNode;
   user: AppShellUser;
@@ -45,7 +47,9 @@ export function AppShell({
   tokenBalance?: AppShellTokenBalance | null;
   uploadConfigured?: boolean;
   canSeePayments?: boolean;
+  frozenReason?: string | null;
 }>) {
+  const t = useTranslations("App.freeze");
   return (
     <AssistantProvider
       initialBalance={tokenBalance ?? null}
@@ -72,6 +76,16 @@ export function AppShell({
         <SidebarInset className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
           <SiteHeader />
           <ToastFromSearchParams />
+          {frozenReason !== null ? (
+            <div className="border-b border-destructive/30 bg-destructive/5 px-4 py-3 text-sm md:px-6 lg:px-10">
+              <p className="font-medium text-destructive">{t("banner")}</p>
+              {frozenReason ? (
+                <p className="mt-1 text-muted-foreground">
+                  {t("reason", { reason: frozenReason })}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
           <div className="@container/main relative flex min-h-0 flex-1 flex-col gap-2 overflow-auto">
             <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col px-4 py-4 md:gap-6 md:px-6 md:py-6 lg:px-10">
               {children}

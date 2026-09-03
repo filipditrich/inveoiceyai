@@ -6,7 +6,10 @@ import { db } from "@invoicey/db/client";
 
 const required = new Map([
   ["issuer_businesses", new Set(["is_default"])],
-  ["workspaces", new Set(["default_look_id", "default_look_version"])],
+  [
+    "workspaces",
+    new Set(["default_look_id", "default_look_version", "frozen_at"]),
+  ],
   [
     "invoices",
     new Set([

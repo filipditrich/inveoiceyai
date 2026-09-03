@@ -7,11 +7,13 @@ import {
   AdminMiniTable,
   AdminSection,
 } from "@/components/admin/admin-detail-kit";
+import { AdminUserAccessSections } from "@/components/admin/admin-user-access";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { adminGetUser } from "@/lib/admin/detail";
+import { adminListUserAccess } from "@/lib/admin/user-access";
 import { requirePlatformAdmin } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 import { ArrowLeftIcon, UserRoundIcon } from "lucide-react";
@@ -40,6 +42,7 @@ export default async function AdminUserDetailPage({
   if (!detail) {
     notFound();
   }
+  const access = await adminListUserAccess(id);
 
   const isAdmin = detail.platformRole === "admin";
   const isSelf = detail.id === actor.userId;
@@ -201,6 +204,8 @@ export default async function AdminUserDetailPage({
           />
         )}
       </AdminSection>
+
+      <AdminUserAccessSections access={access} userId={detail.id} />
 
       <AdminSection title={t("auditTitle")} description={t("auditDescription")}>
         <AdminAuditList events={detail.auditEvents} showWorkspace />
