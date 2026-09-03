@@ -402,6 +402,8 @@ export const invoices = pgTable(
       t.externalKey,
     ),
     index("invoices_recurring_schedule_idx").on(t.recurringScheduleId),
+    /** Dashboard "recently touched" list — ordered scan, no sort. */
+    index("invoices_workspace_updated_idx").on(t.workspaceId, t.updatedAt),
   ],
 );
 

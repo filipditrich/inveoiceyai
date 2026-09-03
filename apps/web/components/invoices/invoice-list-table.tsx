@@ -77,7 +77,7 @@ import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 
-import { InvoiceOriginProviderSchema } from "@invoicey/invoice-core/import";
+import { isInvoiceOriginProvider } from "@invoicey/invoice-core/import";
 import type { InvoiceDisplayStatus } from "@invoicey/invoice-core/status-display";
 
 import type { AppLocale } from "@/i18n/config";
@@ -231,8 +231,9 @@ export function InvoiceListTable({
         ),
         cell: ({ row }) => {
           const provider = row.original.originProvider ?? "invoicey";
-          const parsed = InvoiceOriginProviderSchema.safeParse(provider);
-          const label = parsed.success ? tOrigin(parsed.data) : provider;
+          const label = isInvoiceOriginProvider(provider)
+            ? tOrigin(provider)
+            : provider;
           return <span className="text-xs text-muted-foreground">{label}</span>;
         },
         meta: { headerTitle: t("source") },

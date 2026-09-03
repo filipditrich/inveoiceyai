@@ -36,25 +36,26 @@ export function isIssuerWelcomeDismissed(metadata: WorkspaceMetadata): boolean {
 /** True when workspace has zero issuers and welcome was not dismissed. */
 export const shouldGateIssuerWelcome = cache(
   async (workspaceId: string): Promise<boolean> => {
-    const [countRow, workspace] = await Promise.all([
-      db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(issuerBusinesses)
-        .where(eq(issuerBusinesses.workspaceId, workspaceId)),
-      db
-        .select({ metadata: workspaces.metadata })
-        .from(workspaces)
-        .where(eq(workspaces.id, workspaceId))
-        .limit(1),
-    ]);
+    // One round trip: this runs in the `(gated)` layout, so every dashboard,
+    // invoice, and client page view pays for it, and for an established
+    // workspace the answer is always "no".
+    const [row] = await db
+      .select({
+        metadata: workspaces.metadata,
+        hasIssuer: sql<boolean>`exists (
+          select 1 from ${issuerBusinesses}
+          where ${issuerBusinesses.workspaceId} = ${workspaceId}
+        )`,
+      })
+      .from(workspaces)
+      .where(eq(workspaces.id, workspaceId))
+      .limit(1);
 
-    const count = countRow[0]?.count ?? 0;
-    if (count > 0) {
+    if (!row || row.hasIssuer) {
       return false;
     }
 
-    const meta = parseWorkspaceMetadata(workspace[0]?.metadata);
-    return !isIssuerWelcomeDismissed(meta);
+    return !isIssuerWelcomeDismissed(parseWorkspaceMetadata(row.metadata));
   },
 );
 

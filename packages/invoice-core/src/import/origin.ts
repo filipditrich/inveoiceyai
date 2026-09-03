@@ -1,7 +1,13 @@
 import { z } from "zod";
 
-/** Known Czech / Invoicey issuers for imported invoice provenance. */
-export const InvoiceOriginProviderSchema = z.enum([
+/**
+ * Known Czech / Invoicey issuers for imported invoice provenance.
+ *
+ * A plain tuple, with the Zod enum derived from it, so the list and the
+ * membership test can be used from a client component without pulling Zod
+ * into the browser bundle.
+ */
+export const INVOICE_ORIGIN_PROVIDERS = [
   "invoicey",
   "fakturaonline",
   "idoklad",
@@ -11,9 +17,23 @@ export const InvoiceOriginProviderSchema = z.enum([
   "vyfakturuj",
   "superfaktura",
   "custom",
-]);
+] as const;
 
-export type InvoiceOriginProvider = z.infer<typeof InvoiceOriginProviderSchema>;
+export type InvoiceOriginProvider = (typeof INVOICE_ORIGIN_PROVIDERS)[number];
+
+/**
+ * Membership test for a provenance string read back from the database or a
+ * query parameter, where the value is a free-form string until checked.
+ */
+export function isInvoiceOriginProvider(
+  value: string,
+): value is InvoiceOriginProvider {
+  // SAFETY: widening the literal tuple to `readonly string[]` only relaxes the
+  // argument type of `includes`; the narrowing is what the check establishes.
+  return (INVOICE_ORIGIN_PROVIDERS as readonly string[]).includes(value);
+}
+
+export const InvoiceOriginProviderSchema = z.enum(INVOICE_ORIGIN_PROVIDERS);
 
 export const IMPORT_COMPLETENESS = ["full", "archive"] as const;
 export type ImportCompleteness = (typeof IMPORT_COMPLETENESS)[number];

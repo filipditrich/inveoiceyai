@@ -138,6 +138,30 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      /**
+       * `public/` is served with `max-age=0` by default, so the mascot GLB
+       * (~3.9 MB) and the brand raster art are revalidated on every landing.
+       * These are content-addressed by hand: change the art, change the file
+       * name. `stale-while-revalidate` keeps a rename from ever blocking paint.
+       */
+      {
+        source: "/brand/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=2592000",
+          },
+        ],
+      },
+      {
+        source: "/banks/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=2592000",
+          },
+        ],
+      },
     ];
   },
   /** so NFT can follow `../../packages/invoice-core/assets/**` outside apps/web */

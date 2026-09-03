@@ -88,13 +88,27 @@ export default async function InvoiceDetailPage({
   params: Params;
   searchParams: Search;
 }) {
-  const { id } = await params;
-  const sp = await searchParams;
-  const t = await getTranslations("Invoices.detail");
-  const tOrigin = await getTranslations("Invoices.origin");
-  const tErrors = await getTranslations("Errors.invalid");
-  const locale = (await getLocale()) as AppLocale;
-  const { workspaceId, userId } = await requireWorkspace();
+  // Nothing in this first wave depends on anything else in it. Serialising the
+  // translations, the locale, and the session behind each other costs a full
+  // round trip apiece before the first query even starts.
+  const [
+    { id },
+    sp,
+    t,
+    tOrigin,
+    tErrors,
+    localeValue,
+    { workspaceId, userId },
+  ] = await Promise.all([
+    params,
+    searchParams,
+    getTranslations("Invoices.detail"),
+    getTranslations("Invoices.origin"),
+    getTranslations("Errors.invalid"),
+    getLocale(),
+    requireWorkspace(),
+  ]);
+  const locale = localeValue as AppLocale;
   const rows = await db
     .select()
     .from(invoices)
@@ -121,19 +135,34 @@ export default async function InvoiceDetailPage({
     (row.issuedAt ? "invoicey" : null)) as InvoiceOriginProvider | null;
   const originLabel =
     originProvider != null ? tOrigin(originProvider) : row.originLabel;
-  const showDriveBanner =
-    Boolean(row.issuedAt) && (await countActiveDriveDevices(db, userId)) === 0;
-
-  const [issuerRow] = await db
-    .select()
-    .from(issuerBusinesses)
-    .where(
-      and(
-        eq(issuerBusinesses.id, row.issuerId),
-        eq(issuerBusinesses.workspaceId, workspaceId),
-      ),
-    )
-    .limit(1);
+  // Second wave: everything that only needs the invoice row we just read.
+  const [
+    driveDeviceCount,
+    issuerRows,
+    emailRows,
+    suppressedRows,
+    allocationRows,
+  ] = await Promise.all([
+    row.issuedAt ? countActiveDriveDevices(db, userId) : Promise.resolve(1),
+    db
+      .select()
+      .from(issuerBusinesses)
+      .where(
+        and(
+          eq(issuerBusinesses.id, row.issuerId),
+          eq(issuerBusinesses.workspaceId, workspaceId),
+        ),
+      )
+      .limit(1),
+    listInvoiceEmailMessages({ db, workspaceId, invoiceId: id }),
+    db
+      .select({ email: emailSuppressions.email })
+      .from(emailSuppressions)
+      .where(eq(emailSuppressions.workspaceId, workspaceId)),
+    listInvoicePaymentAllocations(db, workspaceId, id),
+  ]);
+  const showDriveBanner = Boolean(row.issuedAt) && driveDeviceCount === 0;
+  const issuerRow = issuerRows[0];
   const emailSettings = resolveIssuerEmailSettings(
     issuerRow?.emailSettings,
     payload?.success ? payload.data.meta.language : "cs",
@@ -161,11 +190,6 @@ export default async function InvoiceDetailPage({
     applyDisplayNameTemplate(emailSettings.displayNameTemplate, templateVars),
   )} <${parseEmailFrom(env.EMAIL_FROM).address}>`;
 
-  const emailRows = await listInvoiceEmailMessages({
-    db,
-    workspaceId,
-    invoiceId: id,
-  });
   const emailEvents = await listEmailEventsForMessages({
     db,
     messageIds: emailRows.map((m) => m.id),
@@ -177,16 +201,7 @@ export default async function InvoiceDetailPage({
     eventsByMessage.set(ev.messageId, list);
   }
 
-  const suppressedRows = await db
-    .select({ email: emailSuppressions.email })
-    .from(emailSuppressions)
-    .where(eq(emailSuppressions.workspaceId, workspaceId));
   const suppressedEmails = suppressedRows.map((r) => r.email);
-  const allocationRows = await listInvoicePaymentAllocations(
-    db,
-    workspaceId,
-    id,
-  );
   const hasActivePayments = allocationRows.some(
     (allocation) => !allocation.reversedAt,
   );

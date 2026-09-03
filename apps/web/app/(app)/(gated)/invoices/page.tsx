@@ -15,6 +15,10 @@ import {
   parseInvoiceSort,
   serializeInvoiceSort,
 } from "@/lib/invoices/list-sort";
+import {
+  loadInvoiceStatusTallies,
+  toStatusBuckets,
+} from "@/lib/invoices/status-summary";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import { and, count } from "drizzle-orm";
 import { FilesIcon } from "lucide-react";
@@ -24,10 +28,8 @@ import Link from "next/link";
 import { invoices } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import {
-  INVOICE_DISPLAY_STATUSES,
   normalizeDisplayStatusParam,
   resolveDisplayStatus,
-  type InvoiceDisplayStatus,
 } from "@invoicey/invoice-core/status-display";
 
 type Search = Promise<{
@@ -76,61 +78,38 @@ export default async function InvoicesPage({
   }
 
   const whereClause = and(...listConditions);
-  const summaryWhere = and(...baseConditions);
   const offset = (page - 1) * pageSize;
 
-  const [totalRows, rows, summaryRows, issuers, clients] = await Promise.all([
+  const [totalRows, rows, tallies, issuers, clients] = await Promise.all([
     db.select({ value: count() }).from(invoices).where(whereClause),
     db
-      .select()
+      .select({
+        id: invoices.id,
+        number: invoices.number,
+        issueDate: invoices.issueDate,
+        dueDate: invoices.dueDate,
+        issuedAt: invoices.issuedAt,
+        paidAt: invoices.paidAt,
+        cancelledAt: invoices.cancelledAt,
+        clientName: invoices.clientName,
+        total: invoices.total,
+        currency: invoices.currency,
+        paymentState: invoices.paymentState,
+        importCompleteness: invoices.importCompleteness,
+        originProvider: invoices.originProvider,
+      })
       .from(invoices)
       .where(whereClause)
       .orderBy(...invoiceOrderBy(sort))
       .limit(pageSize)
       .offset(offset),
-    db.select().from(invoices).where(summaryWhere),
+    loadInvoiceStatusTallies(baseConditions, todayIso),
     loadIssuerOptions(workspaceId),
     loadClientOptions(workspaceId),
   ]);
   const total = Number(totalRows[0]?.value ?? 0);
 
-  const tally: Record<
-    InvoiceDisplayStatus,
-    { count: number; totalsByCurrency: Record<string, number> }
-  > = {
-    draft: { count: 0, totalsByCurrency: {} },
-    unpaid: { count: 0, totalsByCurrency: {} },
-    overdue: { count: 0, totalsByCurrency: {} },
-    paid: { count: 0, totalsByCurrency: {} },
-    future: { count: 0, totalsByCurrency: {} },
-    cancelled: { count: 0, totalsByCurrency: {} },
-  };
-  for (const row of summaryRows) {
-    const display = resolveDisplayStatus(
-      {
-        issuedAt: row.issuedAt,
-        dueDate: row.dueDate,
-        paidAt: row.paidAt,
-        cancelledAt: row.cancelledAt,
-        issueDate: row.issueDate,
-      },
-      todayIso,
-    );
-    tally[display].count += 1;
-    const currency = row.currency || "CZK";
-    const total = Math.abs(Number(row.total) || 0);
-    const amount =
-      display === "unpaid" || display === "overdue" || display === "future"
-        ? Math.max(0, total - Number(row.paidAmount))
-        : total;
-    tally[display].totalsByCurrency[currency] =
-      (tally[display].totalsByCurrency[currency] ?? 0) + amount;
-  }
-  const summaryBuckets = INVOICE_DISPLAY_STATUSES.map((status) => ({
-    status,
-    count: tally[status].count,
-    totalsByCurrency: tally[status].totalsByCurrency,
-  }));
+  const summaryBuckets = toStatusBuckets(tallies);
 
   const pageItems = rows.map((row) => ({
     id: row.id,

@@ -1,14 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { IS_LOCAL_DEV } from "@/env.config.client";
 import { openModal } from "@/features/modals-manager/events";
 
 import type { ModalsProviderContextProps } from "@/features/modals-manager/modal-types";
 
 /** Dev smoke: CustomEvent openModal → ModalShell. */
 export function ModalSmokeButton() {
-  if (!IS_LOCAL_DEV) return null;
+  /** Direct `NODE_ENV` read — see `c15t-dev-controls.tsx` for why. */
+  if (process.env.NODE_ENV === "production") return null;
 
   return (
     <Button

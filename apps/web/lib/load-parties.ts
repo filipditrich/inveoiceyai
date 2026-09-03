@@ -15,32 +15,51 @@ import {
   IssuerSnapshotSchema,
 } from "@invoicey/invoice-core/schema";
 
-import type { ClientOption, IssuerOption } from "@/lib/invoice-party-types";
+import type {
+  ClientOption,
+  IssuerNumberingRule,
+  IssuerOption,
+} from "@/lib/invoice-party-types";
 
 export async function loadIssuerOptions(
   workspaceId: string,
 ): Promise<IssuerOption[]> {
-  const rows = await db
-    .select()
-    .from(issuerBusinesses)
-    .where(eq(issuerBusinesses.workspaceId, workspaceId));
+  // Both reads are workspace-scoped and independent, and this runs on every
+  // list, dashboard, and invoice-form page — issue them together.
+  const [rows, existingSchemes] = await Promise.all([
+    db
+      .select()
+      .from(issuerBusinesses)
+      .where(eq(issuerBusinesses.workspaceId, workspaceId)),
+    db
+      .select()
+      .from(issuerNumberingSchemes)
+      .where(eq(issuerNumberingSchemes.workspaceId, workspaceId)),
+  ]);
 
-  /** backfill defaults for issuers created before schemes were persisted */
-  await ensureAllIssuerNumberingSchemes(
+  /**
+   * Backfill defaults for issuers created before schemes were persisted. The
+   * schemes are already in hand, so a workspace that needs nothing (every
+   * workspace, after the first load) pays no extra query.
+   */
+  const backfilled = await ensureAllIssuerNumberingSchemes(
     workspaceId,
     rows.map((r) => r.id),
+    existingSchemes,
   );
 
-  const schemes = await db
-    .select()
-    .from(issuerNumberingSchemes)
-    .where(eq(issuerNumberingSchemes.workspaceId, workspaceId));
-
-  const byIssuer = new Map<string, typeof schemes>();
-  for (const s of schemes) {
-    const list = byIssuer.get(s.issuerId) ?? [];
-    list.push(s);
-    byIssuer.set(s.issuerId, list);
+  const byIssuer = new Map<string, IssuerNumberingRule[]>();
+  for (const scheme of [...existingSchemes, ...backfilled]) {
+    const list = byIssuer.get(scheme.issuerId) ?? [];
+    list.push({
+      docType: scheme.docType,
+      template: scheme.template,
+      counter: scheme.counter ?? 0,
+      counterYear: scheme.counterYear ?? null,
+      resetPeriod: scheme.resetPeriod,
+      padding: scheme.padding ?? 4,
+    });
+    byIssuer.set(scheme.issuerId, list);
   }
 
   const out: IssuerOption[] = [];
@@ -52,14 +71,7 @@ export async function loadIssuerOptions(
     out.push({
       id: r.id,
       snapshot: snap.data,
-      schemes: (byIssuer.get(r.id) ?? []).map((s) => ({
-        docType: s.docType,
-        template: s.template,
-        counter: s.counter,
-        counterYear: s.counterYear,
-        resetPeriod: s.resetPeriod,
-        padding: s.padding,
-      })),
+      schemes: byIssuer.get(r.id) ?? [],
     });
   }
   return out;
