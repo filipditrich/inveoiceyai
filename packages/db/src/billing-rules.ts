@@ -114,6 +114,18 @@ export function isLiveSubscriptionStatus(status: string): boolean {
   return LIVE_SUBSCRIPTION_STATUSES.some((live) => live === status);
 }
 
+/** Gifted / manual plans are not a subscription. Only Polar live rows count. */
+export function isProjectedPolarSubscription(input: {
+  authority: BillingAuthority;
+  status: string | null | undefined;
+}): boolean {
+  return (
+    input.authority === "polar" &&
+    input.status != null &&
+    isLiveSubscriptionStatus(input.status)
+  );
+}
+
 export function showsPastDueBanner(status: string): boolean {
   return status === "past_due";
 }

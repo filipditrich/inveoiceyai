@@ -6,6 +6,7 @@ import {
   canCheckoutPlanOffer,
   canCheckoutTokenPack,
   isLiveSubscriptionStatus,
+  isProjectedPolarSubscription,
   paidAccessEnded,
   planKeyForOffer,
   purchasedDebtBlocksAi,
@@ -38,6 +39,18 @@ describe("offer mapping", () => {
       tokens_medium: 500,
       tokens_large: 1990,
     });
+  });
+
+  it("drops gifted and revoked rows from the subscription projection", () => {
+    expect(
+      isProjectedPolarSubscription({ authority: "manual", status: "active" }),
+    ).toBe(false);
+    expect(
+      isProjectedPolarSubscription({ authority: "polar", status: "revoked" }),
+    ).toBe(false);
+    expect(
+      isProjectedPolarSubscription({ authority: "polar", status: "active" }),
+    ).toBe(true);
   });
 });
 

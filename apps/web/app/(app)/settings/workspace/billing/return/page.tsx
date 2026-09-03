@@ -34,9 +34,7 @@ export default async function BillingReturnPage({
     }
   }
 
-  const fulfilled =
-    billing.authority === "polar" ||
-    (billing.subscription != null && billing.subscription.status !== "revoked");
+  const fulfilled = billing.subscription != null;
   const paid = checkoutStatus === "succeeded";
 
   return (
