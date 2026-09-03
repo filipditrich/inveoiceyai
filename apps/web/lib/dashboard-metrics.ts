@@ -1,5 +1,9 @@
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
-import { and, eq, isNull } from "drizzle-orm";
+import {
+  loadInvoiceStatusTallies,
+  type StatusBucket,
+} from "@/lib/invoices/status-summary";
+import { and, desc, eq, gte, isNull, isNotNull, sql } from "drizzle-orm";
 
 import {
   invoicePaymentAllocations,
@@ -12,12 +16,7 @@ import {
   type InvoiceDisplayStatus,
 } from "@invoicey/invoice-core/status-display";
 
-export type StatusBucket = {
-  status: InvoiceDisplayStatus;
-  count: number;
-  /** totals by currency */
-  totalsByCurrency: Record<string, number>;
-};
+export type { StatusBucket };
 
 export type MonthPoint = {
   month: string;
@@ -61,8 +60,29 @@ function addAmount(
   map[code] = (map[code] ?? 0) + amount;
 }
 
+/** The 12 month keys the chart shows, oldest first, plus the window start. */
+type ChartWindow = { keys: string[]; start: Date };
+
+function chartWindow(now: Date): ChartWindow {
+  const cursor = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1),
+  );
+  const start = new Date(cursor);
+  const keys: string[] = [];
+  for (let i = 0; i < 12; i++) {
+    keys.push(monthKey(cursor));
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  }
+  return { keys, start };
+}
+
 /**
  * Aggregates workspace invoices for the dashboard (optional issuer filter).
+ *
+ * Everything here is a bounded query: grouped tallies, a 12-row month series,
+ * a 12-month volume roll-up, and the 10 most recent invoices. The dashboard
+ * must not get slower as a workspace accumulates invoices, so nothing reads
+ * the full invoice table — those rows carry three JSONB columns each.
  */
 export async function loadDashboardMetrics(
   workspaceId: string,
@@ -77,23 +97,63 @@ export async function loadDashboardMetrics(
   issuerCount: number;
 }> {
   const todayIso = pragueTodayIso();
+  const now = new Date();
+  const { keys: monthKeys, start: windowStart } = chartWindow(now);
+  const windowStartIso = windowStart.toISOString();
 
   const base = [eq(invoices.workspaceId, workspaceId)];
   if (opts?.issuerId) {
     base.push(eq(invoices.issuerId, opts.issuerId));
   }
 
-  const [rows, allocationRows, issuerRows] = await Promise.all([
-    db
-      .select()
-      .from(invoices)
-      .where(and(...base)),
+  const issuedMonth = sql<string>`to_char(${invoices.issuedAt} at time zone 'UTC', 'YYYY-MM')`;
+  const invoiceCurrency = sql<string>`coalesce(nullif(${invoices.currency}, ''), 'CZK')`;
+
+  const [
+    tallies,
+    issuedMonthly,
+    issuedVolume,
+    paidMonthly,
+    recentRows,
+    issuerCountRow,
+  ] = await Promise.all([
+    loadInvoiceStatusTallies(base, todayIso),
+    // CZK-only issued series for the chart (no FX mix).
     db
       .select({
-        amount: invoicePaymentAllocations.amount,
-        currency: invoicePaymentAllocations.currency,
-        effectiveDate: invoicePaymentAllocations.effectiveDate,
-        issuerId: invoices.issuerId,
+        month: issuedMonth,
+        amount: sql<string>`sum(${invoices.total})::text`,
+      })
+      .from(invoices)
+      .where(
+        and(
+          ...base,
+          isNotNull(invoices.issuedAt),
+          eq(invoices.currency, "CZK"),
+          gte(invoices.issuedAt, sql`${windowStartIso}::timestamptz`),
+        ),
+      )
+      .groupBy(issuedMonth),
+    // 12-month issued volume, all currencies, for the balance row.
+    db
+      .select({
+        currency: invoiceCurrency,
+        amount: sql<string>`sum(${invoices.total})::text`,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(invoices)
+      .where(
+        and(
+          ...base,
+          isNotNull(invoices.issuedAt),
+          gte(invoices.issuedAt, sql`${windowStartIso}::timestamptz`),
+        ),
+      )
+      .groupBy(invoiceCurrency),
+    db
+      .select({
+        month: sql<string>`substring(${invoicePaymentAllocations.effectiveDate} from 1 for 7)`,
+        amount: sql<string>`sum(${invoicePaymentAllocations.amount})::text`,
       })
       .from(invoicePaymentAllocations)
       .innerJoin(invoices, eq(invoices.id, invoicePaymentAllocations.invoiceId))
@@ -101,47 +161,35 @@ export async function loadDashboardMetrics(
         and(
           eq(invoicePaymentAllocations.workspaceId, workspaceId),
           isNull(invoicePaymentAllocations.reversedAt),
+          eq(invoicePaymentAllocations.currency, "CZK"),
           ...(opts?.issuerId ? [eq(invoices.issuerId, opts.issuerId)] : []),
         ),
+      )
+      .groupBy(
+        sql`substring(${invoicePaymentAllocations.effectiveDate} from 1 for 7)`,
       ),
     db
-      .select({ id: issuerBusinesses.id })
+      .select({
+        id: invoices.id,
+        number: invoices.number,
+        clientName: invoices.clientName,
+        total: invoices.total,
+        currency: invoices.currency,
+        issueDate: invoices.issueDate,
+        dueDate: invoices.dueDate,
+        issuedAt: invoices.issuedAt,
+        paidAt: invoices.paidAt,
+        cancelledAt: invoices.cancelledAt,
+      })
+      .from(invoices)
+      .where(and(...base))
+      .orderBy(desc(invoices.updatedAt))
+      .limit(10),
+    db
+      .select({ count: sql<number>`count(*)::int` })
       .from(issuerBusinesses)
       .where(eq(issuerBusinesses.workspaceId, workspaceId)),
   ]);
-
-  const now = new Date();
-  const tally: Record<
-    InvoiceDisplayStatus,
-    { count: number; totalsByCurrency: Record<string, number> }
-  > = {
-    draft: { count: 0, totalsByCurrency: {} },
-    unpaid: { count: 0, totalsByCurrency: {} },
-    overdue: { count: 0, totalsByCurrency: {} },
-    paid: { count: 0, totalsByCurrency: {} },
-    future: { count: 0, totalsByCurrency: {} },
-    cancelled: { count: 0, totalsByCurrency: {} },
-  };
-
-  for (const row of rows) {
-    const status = resolveDisplayStatus(
-      {
-        issuedAt: row.issuedAt,
-        dueDate: row.dueDate,
-        paidAt: row.paidAt,
-        cancelledAt: row.cancelledAt,
-        issueDate: row.issueDate,
-      },
-      todayIso,
-    );
-    const total = Math.abs(Number(row.total) || 0);
-    const amount =
-      status === "unpaid" || status === "overdue" || status === "future"
-        ? Math.max(0, total - Number(row.paidAmount))
-        : total;
-    tally[status].count += 1;
-    addAmount(tally[status].totalsByCurrency, row.currency, amount);
-  }
 
   const primary: InvoiceDisplayStatus[] = [
     "paid",
@@ -152,67 +200,47 @@ export async function loadDashboardMetrics(
   ];
   const buckets: StatusBucket[] = primary.map((status) => ({
     status,
-    count: tally[status].count,
-    totalsByCurrency: tally[status].totalsByCurrency,
+    count: tallies[status].count,
+    totalsByCurrency: tallies[status].totalsByCurrency,
   }));
-  if (tally.cancelled.count > 0) {
+  if (tallies.cancelled.count > 0) {
     buckets.push({
       status: "cancelled",
-      count: tally.cancelled.count,
-      totalsByCurrency: tally.cancelled.totalsByCurrency,
+      count: tallies.cancelled.count,
+      totalsByCurrency: tallies.cancelled.totalsByCurrency,
     });
   }
 
-  const monthlyMap = new Map<string, MonthPoint>();
-  const cursor = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1),
+  const issuedByMonth = new Map(
+    issuedMonthly.map((r) => [r.month, Number(r.amount) || 0]),
   );
-  const windowStart = new Date(cursor);
-  for (let i = 0; i < 12; i++) {
-    const key = monthKey(cursor);
-    monthlyMap.set(key, { month: key, issued: 0, paid: 0 });
-    cursor.setUTCMonth(cursor.getUTCMonth() + 1);
-  }
+  const paidByMonth = new Map(
+    paidMonthly.map((r) => [r.month, Number(r.amount) || 0]),
+  );
+  const monthly: MonthPoint[] = monthKeys.map((month) => ({
+    month,
+    issued: issuedByMonth.get(month) ?? 0,
+    paid: paidByMonth.get(month) ?? 0,
+  }));
 
   const issuedByCurrency: Record<string, number> = {};
-  const outstandingByCurrency: Record<string, number> = {};
   let issuedCount12m = 0;
-
-  for (const row of rows) {
-    const currency = row.currency || "CZK";
-    const amount = Number(row.total) || 0;
-    /** monthly chart is CZK-only (no FX mix) */
-    const isCzk = currency === "CZK";
-    if (row.issuedAt) {
-      const issuedAt = new Date(row.issuedAt);
-      const key = monthKey(issuedAt);
-      const point = monthlyMap.get(key);
-      if (point && isCzk) {
-        point.issued += amount;
-      }
-      if (issuedAt >= windowStart) {
-        addAmount(issuedByCurrency, currency, amount);
-        issuedCount12m += 1;
-      }
-    }
+  for (const row of issuedVolume) {
+    addAmount(issuedByCurrency, row.currency, Number(row.amount) || 0);
+    issuedCount12m += row.count;
   }
 
-  for (const allocation of allocationRows) {
-    if (allocation.currency !== "CZK") continue;
-    const point = monthlyMap.get(allocation.effectiveDate.slice(0, 7));
-    if (point) point.paid += Number(allocation.amount) || 0;
-  }
-
+  const outstandingByCurrency: Record<string, number> = {};
   for (const status of ["unpaid", "overdue", "future"] as const) {
     for (const [currency, amount] of Object.entries(
-      tally[status].totalsByCurrency,
+      tallies[status].totalsByCurrency,
     )) {
       addAmount(outstandingByCurrency, currency, amount);
     }
   }
 
   const outstandingCount =
-    tally.unpaid.count + tally.overdue.count + tally.future.count;
+    tallies.unpaid.count + tallies.overdue.count + tallies.future.count;
 
   const currencyCodes = new Set([
     ...Object.keys(issuedByCurrency),
@@ -228,10 +256,6 @@ export async function loadDashboardMetrics(
       issuedVolume12m: issuedByCurrency[currency] ?? 0,
       outstanding: outstandingByCurrency[currency] ?? 0,
     }));
-
-  const recentRows = [...rows]
-    .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
-    .slice(0, 10);
 
   const recent: RecentInvoice[] = recentRows.map((row) => ({
     id: row.id,
@@ -255,13 +279,13 @@ export async function loadDashboardMetrics(
 
   return {
     buckets,
-    monthly: [...monthlyMap.values()],
+    monthly,
     recent,
     balance: {
       byCurrency,
       issuedCount12m,
       outstandingCount,
     },
-    issuerCount: issuerRows.length,
+    issuerCount: issuerCountRow[0]?.count ?? 0,
   };
 }
