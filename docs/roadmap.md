@@ -26,6 +26,7 @@ flowchart LR
     P14 --> P16["Plan 16<br/>account security<br/>done"]
     P16 --> P17["Plan 17<br/>public shell<br/>implementation done"]
     P16 --> P18["Plan 18<br/>platform admin<br/>done"]
+    P18 --> P18b["Plan 18b<br/>admin monitor<br/>done"]
     P16 --> P19["Plan 19<br/>invites + referrals<br/>done"]
     P16 --> P20["Plan 20<br/>multi-workspace UX<br/>done"]
     P20 --> P21["Plan 21<br/>AI usage<br/>done"]
@@ -481,6 +482,26 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 - [ ] Set `INVOICEY_PLATFORM_ADMIN_EMAILS` on Vercel prod/preview
 
 **Out of v1:** Better Auth admin plugin, MCP/Eve platform role, cross-tenant business mutations, RLS.
+
+### Plan 18b — Platform admin monitor
+
+**Status:** Done  
+**Completed:** 2026-09-03  
+**ADR:** [0024](./decisions/0024-platform-admin-user-flag.md) · [plan](../.cursor/plans/plan-18b-platform-admin-monitor.md) · Spec: [`specs/platform-admin.md`](./specs/platform-admin.md)
+
+**Goal:** Make `/admin` the morning ops console — truthful aggregates, global AI usage, invoice/issuer drill-down, richer lists. No new tenant mutations.
+
+**Exit criteria:**
+
+- [x] Spec + this roadmap section
+- [x] Dashboard uses SQL aggregates; monthly issued/paid chart; volume by currency
+- [x] `/admin/ai` + workspace grant/usage history
+- [x] Read-only invoice and issuer detail; list rows link through
+- [x] Workspace/user lists show plan, tokens, last session
+- [x] Platform audit includes `platform_plan_assign` / `platform_plan_update`
+- [x] List cap is visible; i18n cs/en; typecheck / focused tests
+
+**Out of 18b:** Impersonation, freeze/ban, session/key revoke, email suppression lift, invoice mutations, in-app log tail.
 
 ### Plan 19 — Workspace invites + referral attribution
 
