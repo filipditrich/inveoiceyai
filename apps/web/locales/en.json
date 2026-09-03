@@ -1048,7 +1048,7 @@
         "drive": "Finder copies of issued invoices",
         "members": "People and permissions",
         "usage": "AI tokens, charts, and history",
-        "billing": "Plan, Polar checkout, and token packs",
+        "billing": "Plan and AI token packs",
         "referrals": "Invite friends to Invoicey",
         "apiKeys": "Access for automation",
         "bankConnections": "Read-only payment feeds",
@@ -1292,53 +1292,78 @@
       },
       "billing": {
         "pageTitle": "Billing",
-        "pageDescription": "Subscribe to Pro, buy AI token packs, and manage the Polar customer portal. Invoicey never treats the checkout return as payment.",
-        "notConfigured": "Billing is not configured in this environment yet.",
+        "pageDescription": "The workspace plan and extra AI tokens. Checkout opens a payment page; Invoicey updates the plan after payment confirms.",
+        "notConfigured": "Payments are not available in this environment yet.",
         "plan": {
-          "title": "Workspace plan",
-          "subtitle": "Polar collects payment. Invoicey still decides what the plan allows.",
+          "title": "Current plan",
+          "subtitle": "What this workspace can use today.",
           "unknown": "Plan",
-          "manage": "Manage billing",
-          "polarManaged": "This workspace is billed through Polar.",
-          "manualManaged": "This workspace is not on a Polar subscription. Existing Pro seats stay as they are until you subscribe.",
-          "status": "Polar status: {status}",
-          "periodEnd": "Current period ends {date}"
+          "manage": "Payment details",
+          "subscribed": "Subscription",
+          "workspacePlan": "Workspace plan",
+          "renews": "Renews {date}",
+          "ends": "Paid through {date}",
+          "customNote": "This plan is arranged with us, not from this page.",
+          "current": {
+            "free": "A complete invoicing workspace for one person.",
+            "pro": "People, banks, and the full look catalogue.",
+            "enterprise": "A negotiated plan with workspace-wide boundaries.",
+            "nfctron": "A sponsored plan for this workspace."
+          }
         },
         "offers": {
-          "pro_monthly": "Pro monthly",
-          "pro_yearly": "Pro yearly",
-          "tokens_small": "Small pack",
-          "tokens_medium": "Medium pack",
-          "tokens_large": "Large pack"
+          "title": "Pro",
+          "subtitle": "Five seats, bank connections, and more monthly AI tokens. A discount code can be entered on the payment page.",
+          "cta": "Continue to Pro",
+          "switch": "Change billing period",
+          "pro_monthly": "Monthly",
+          "pro_yearly": "Yearly",
+          "tokens_small": "2M tokens",
+          "tokens_medium": "10M tokens",
+          "tokens_large": "50M tokens",
+          "period": {
+            "pro_monthly": "/ month",
+            "pro_yearly": "/ year"
+          },
+          "blurb": {
+            "pro_monthly": "Pay month to month. Cancel when you no longer need Pro.",
+            "pro_yearly": "A lower price if you pay once for the year."
+          },
+          "features": {
+            "proFeature1": "5 seats and 5 businesses",
+            "proFeature2": "Bank connections (Fio, MONETA)",
+            "proFeature3": "1.5M AI tokens each month"
+          }
         },
         "packs": {
           "title": "AI token packs",
-          "subtitle": "One-time purchased tokens. They stay until you use them, and refunds can create a debt that pauses Invoicey-hosted AI.",
-          "buy": "Buy"
+          "subtitle": "One-time purchased tokens. They stay until this workspace uses them. A pack never changes the plan.",
+          "buy": "Buy",
+          "tax": "Prices in CZK, tax included."
         },
         "banner": {
-          "pastDue": "Payment for this workspace failed. Update the payment method to keep Pro.",
-          "canceling": "Pro stays active until the paid period ends.",
-          "cta": "Manage billing"
+          "pastDue": "The last payment did not go through. Update the payment method to keep Pro.",
+          "canceling": "Pro stays until the paid period ends.",
+          "cta": "Payment details"
         },
         "return": {
-          "pageDescription": "Polar is confirming the payment. Invoicey applies the plan or tokens only after the signed webhook.",
+          "pageDescription": "We are confirming the payment. The plan or tokens update in a moment.",
           "titleReady": "Payment received",
           "titlePending": "Waiting for confirmation",
-          "fulfilled": "This workspace already shows the Polar-backed change. You can go back to billing or usage.",
-          "pending": "If you just paid, refresh in a moment. The success page never credits tokens or changes the plan by itself.",
+          "fulfilled": "This workspace already shows the change. You can go back to billing or usage.",
+          "pending": "If you just finished paying, refresh in a moment.",
           "back": "Back to billing",
           "usage": "View usage"
         },
         "errors": {
-          "not_configured": "Billing is not configured.",
+          "not_configured": "Payments are not available yet.",
           "forbidden": "You cannot manage billing for this workspace.",
           "unknown_offer": "That offer is not available.",
-          "custom_plan": "Sponsored plans do not use Polar checkout.",
-          "enterprise": "Enterprise is sales-led, not self-serve.",
+          "custom_plan": "This plan cannot be bought here.",
+          "enterprise": "Enterprise is arranged with us, not self-serve.",
           "top_up_disabled": "This workspace cannot buy token packs.",
           "checkout_failed": "Could not start checkout.",
-          "portal_failed": "Could not open the billing portal."
+          "portal_failed": "Could not open payment details."
         }
       },
       "scopes": {

@@ -164,6 +164,7 @@ export {
   canCheckoutTokenPack,
   isBillingOfferKey,
   isPlanOffer,
+  isProjectedPolarSubscription,
   isTokenPackOffer,
   planKeyForOffer,
   tokenPackAmount,

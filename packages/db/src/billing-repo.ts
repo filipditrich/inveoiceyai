@@ -4,6 +4,7 @@ import { aiTokenBalances, initialAiTokenBalanceValues } from "./ai-usage";
 import {
   isLiveSubscriptionStatus,
   isPlanOffer,
+  isProjectedPolarSubscription,
   isTokenPackOffer,
   paidAccessEnded,
   planKeyForOffer,
@@ -530,16 +531,28 @@ export async function getWorkspaceBillingState(
     .orderBy(desc(billingSubscriptions.updatedAt))
     .limit(1);
 
+  const authority = workspace?.billingAuthority ?? "manual";
+  const liveSubscription =
+    subscription &&
+    isProjectedPolarSubscription({
+      authority,
+      status: subscription.status,
+    })
+      ? subscription
+      : null;
+
   return {
-    authority: workspace?.billingAuthority ?? "manual",
+    authority,
     customer: customer ?? null,
-    subscription: subscription ?? null,
-    pastDue: subscription ? showsPastDueBanner(subscription.status) : false,
-    canceling: subscription
+    subscription: liveSubscription,
+    pastDue: liveSubscription
+      ? showsPastDueBanner(liveSubscription.status)
+      : false,
+    canceling: liveSubscription
       ? showsCancelingBanner({
-          status: subscription.status,
-          cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
-          endedAt: subscription.endedAt,
+          status: liveSubscription.status,
+          cancelAtPeriodEnd: liveSubscription.cancelAtPeriodEnd,
+          endedAt: liveSubscription.endedAt,
         })
       : false,
   };
@@ -552,9 +565,11 @@ export async function workspaceHasLivePolarSubscription(
   const [row] = await db
     .select({ id: billingSubscriptions.id })
     .from(billingSubscriptions)
+    .innerJoin(workspaces, eq(workspaces.id, billingSubscriptions.workspaceId))
     .where(
       and(
         eq(billingSubscriptions.workspaceId, workspaceId),
+        eq(workspaces.billingAuthority, "polar"),
         inArray(billingSubscriptions.status, [
           "active",
           "past_due",
@@ -573,8 +588,10 @@ export async function listLivePolarWorkspaceIds(
   const rows = await db
     .select({ workspaceId: billingSubscriptions.workspaceId })
     .from(billingSubscriptions)
+    .innerJoin(workspaces, eq(workspaces.id, billingSubscriptions.workspaceId))
     .where(
       and(
+        eq(workspaces.billingAuthority, "polar"),
         inArray(billingSubscriptions.status, [
           "active",
           "past_due",
