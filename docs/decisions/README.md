@@ -57,3 +57,4 @@ When a decision changes:
 | [0044](./0044-invoicey-cli-companion.md)                   | Invoicey CLI is a PAT-authenticated operator companion     | Accepted (default host superseded by 0045) |
 | [0045](./0045-canonical-host-invoicey-app.md)              | Canonical host is `invoicey.app`                           | Accepted                                   |
 | [0046](./0046-workspace-freeze.md)                         | Workspace freeze is occupancy, not an entitlement          | Accepted                                   |
+| [0047](./0047-polar-billing-projects-into-invoicey.md)     | Polar owns commerce; Invoicey owns entitlements            | Accepted                                   |

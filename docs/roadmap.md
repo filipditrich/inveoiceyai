@@ -861,6 +861,41 @@ clients update.
 **Out of 32:** repo/Vercel rename, Neon/Resend account move, Drive bundle-id
 change, inbound `inbox.` revival, legal-entity copy.
 
+## Plan 33 — Polar billing for plans and AI-token top-ups
+
+**Status:** In progress  
+**Started:** 2026-09-03
+
+**Goal:** Self-serve Pro (monthly/yearly) and one-time AI token packs through
+Polar Checkout, with Invoicey remaining the entitlement and token-ledger
+authority.
+
+**Spec:** [`specs/polar-billing.md`](./specs/polar-billing.md)  
+**ADR:** [0047](./decisions/0047-polar-billing-projects-into-invoicey.md)  
+**Research:** [`research/polar-billing.md`](./research/polar-billing.md)
+
+### Exit criteria
+
+- [ ] Polar-managed workspace buys Pro; verified `order.paid` assigns the
+      internal Pro row exactly once
+- [ ] Token packs credit `purchased_remaining` exactly once; replayed webhooks
+      do not double-grant
+- [ ] Full and partial refunds apply the documented reversal and purchased-token
+      debt without double-revocation
+- [ ] Scheduled cancellation keeps access; revocation downgrades to Free without
+      deleting data
+- [ ] Past-due keeps the plan and shows a billing banner until `revoked`
+- [ ] Polar period resets monthly tokens; the 30-day cron skips live Polar
+      subscriptions
+- [ ] Only `billing:manage` can start checkout or open the Customer Portal
+- [ ] Checkout return page never assigns a plan or credits tokens
+- [ ] Grandfathered Pro and custom/sponsored plans are not charged or exposed
+      as Polar checkout
+- [ ] Incomplete Polar env fails closed (no sandbox fallback in production)
+
+**Out of 33:** Enterprise self-serve, portal plan-switching, MCP/Eve/CLI
+billing, Invoicey-hosted billing-profile table, Polar Better Auth adapter.
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:
@@ -870,4 +905,3 @@ These are tracked here for traceability but not currently slotted:
   and guided portal filings) — see
   [`research/osvc-companion.md`](./research/osvc-companion.md)
 - Tax-period reporting (kontrolní hlášení / DPH přiznání) — adjacent product
-- AI token top-up via payment
