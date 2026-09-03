@@ -155,7 +155,9 @@ export {
 } from "./workspace-freeze";
 export {
   BILLING_AUTHORITIES,
+  BILLING_OFFER_CURRENCY,
   BILLING_OFFER_KEYS,
+  BILLING_OFFER_PRICES,
   PLAN_OFFER_PLAN_KEYS,
   TOKEN_PACK_AMOUNTS,
   canCheckoutPlanOffer,

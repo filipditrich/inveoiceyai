@@ -1,6 +1,4 @@
-import { toIntlLocale } from "@/i18n/config";
-
-import type { AppLocale } from "@/i18n/config";
+import { toIntlLocale, type AppLocale } from "@/i18n/config";
 
 /** Format one or more currency totals (never mix into a single CZK figure). */
 export function formatMoneyByCurrency(
@@ -15,6 +13,20 @@ export function formatMoneyByCurrency(
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([currency, total]) => formatMoney(total, currency, locale))
     .join(" · ");
+}
+
+/** Whole-unit catalog price (Polar list prices have no hellers). */
+export function formatCatalogMoney(
+  amount: number,
+  currency: string = "CZK",
+  locale: AppLocale = "cs",
+): string {
+  return new Intl.NumberFormat(toIntlLocale(locale), {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 /** Locale-aware money. */

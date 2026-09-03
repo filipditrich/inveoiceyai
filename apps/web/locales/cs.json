@@ -701,11 +701,10 @@
     },
     "pricing": {
       "eyebrow": "Ceník",
-      "title": "Dokud je Invoicey v betě, je všechno zdarma.",
-      "description": "Žádná karta, žádné odčítávání zkušební doby. Až se spustí placené tarify, dozvíte se to s dostatečným předstihem.",
-      "betaBadge": "V betě zdarma",
+      "title": "Začněte zdarma. Pro až workspace poroste.",
+      "description": "Ceny v Kč včetně DPH. Platbu vybere Polar; Invoicey dál rozhoduje, co tarif dovolí.",
+      "betaBadge": "Nejčastější volba",
       "freeName": "Free",
-      "freePrice": "0 Kč",
       "freePeriod": "/ měsíc",
       "freeDescription": "Kompletní česká fakturace pro jednoho. Ne zkušební verze.",
       "freeCta": "Začít zdarma",
@@ -718,11 +717,11 @@
       "freeFeature5": "100k AI tokenů měsíčně a 750k na začátek",
       "freeFeature6": "Vzhled Classic, historie změn 30 dní",
       "proName": "Pro",
-      "proPrice": "0 Kč",
-      "proPeriod": "/ měsíc po dobu bety",
+      "proPeriod": "/ měsíc",
+      "proYearly": "nebo {price} / rok",
       "proDescription": "Všechno z Free a navíc lidé, banky a vlastní vzhled faktur.",
-      "proCta": "Získat Pro zdarma",
-      "proCtaSignedIn": "Otevřít přehled",
+      "proCta": "Získat Pro",
+      "proCtaSignedIn": "Otevřít předplatné",
       "proIncludesLabel": "Všechno z Free a navíc:",
       "proFeature1": "5 uživatelů a 5 firem, oprávnění po členech",
       "proFeature2": "Napojení banky a párování plateb (Fio, MONETA)",
@@ -740,7 +739,16 @@
       "enterpriseFeature2": "Povolené e-mailové domény a automatické přiřazení",
       "enterpriseFeature3": "Řízený katalog odběratelů",
       "enterpriseFeature4": "5M AI tokenů měsíčně",
-      "enterpriseFeature5": "Historie změn bez omezení"
+      "enterpriseFeature5": "Historie změn bez omezení",
+      "packsTitle": "Balíčky AI tokenů",
+      "packsDescription": "Jednorázově koupené tokeny. Balíček nikdy nezmění tarif workspace.",
+      "packNames": {
+        "tokens_small": "Balíček 2M tokenů",
+        "tokens_medium": "Balíček 10M tokenů",
+        "tokens_large": "Balíček 50M tokenů"
+      },
+      "packsBuy": "Koupit",
+      "taxNote": "Ceník v Kč, DPH je v ceně."
     },
     "companions": {
       "eyebrow": "Nativní doplňky",
