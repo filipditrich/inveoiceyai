@@ -3,17 +3,20 @@ import type {
   IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
 
+/** One issuer's numbering rule for a single document type. */
+export type IssuerNumberingRule = {
+  docType: string;
+  template: string;
+  counter: number;
+  counterYear: number | null;
+  resetPeriod: string;
+  padding: number;
+};
+
 export type IssuerOption = {
   id: string;
   snapshot: IssuerSnapshot;
-  schemes: Array<{
-    docType: string;
-    template: string;
-    counter: number;
-    counterYear: number | null;
-    resetPeriod: string;
-    padding: number;
-  }>;
+  schemes: IssuerNumberingRule[];
 };
 
 export type ClientOption = {
