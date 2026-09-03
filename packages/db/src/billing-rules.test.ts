@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   availableAiTokens,
+  BILLING_OFFER_PRICES,
   canCheckoutPlanOffer,
   canCheckoutTokenPack,
   isLiveSubscriptionStatus,
@@ -27,6 +28,16 @@ describe("offer mapping", () => {
     expect(tokenPackAmount("tokens_medium")).toBe(10_000_000);
     expect(tokenPackAmount("tokens_large")).toBe(50_000_000);
     expect(tokenPackAmount("pro_monthly")).toBeNull();
+  });
+
+  it("pins the Polar CZK list prices for UI", () => {
+    expect(BILLING_OFFER_PRICES).toEqual({
+      pro_monthly: 99,
+      pro_yearly: 799,
+      tokens_small: 100,
+      tokens_medium: 500,
+      tokens_large: 1990,
+    });
   });
 });
 

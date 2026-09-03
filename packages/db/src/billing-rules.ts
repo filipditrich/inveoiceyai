@@ -1,8 +1,9 @@
 /**
  * Pure Polar → Invoicey billing rules (ADR 0047).
  *
- * Product ids, amounts, and webhook payloads stay out of this module. Callers
- * resolve an offer key first, then ask what Invoicey should do.
+ * Polar remains the charged amount. The CZK list prices below are the UI
+ * catalog so marketing and Billing do not drift. Callers still resolve an
+ * offer key first, then ask what Invoicey should do.
  */
 
 export const BILLING_AUTHORITIES = ["manual", "polar"] as const;
@@ -22,6 +23,17 @@ export const TOKEN_PACK_AMOUNTS = {
   tokens_medium: 10_000_000,
   tokens_large: 50_000_000,
 } as const;
+
+/** CZK list prices shown in Billing and on the public pricing page. */
+export const BILLING_OFFER_CURRENCY = "CZK" as const;
+
+export const BILLING_OFFER_PRICES = {
+  pro_monthly: 99,
+  pro_yearly: 799,
+  tokens_small: 100,
+  tokens_medium: 500,
+  tokens_large: 1990,
+} as const satisfies Record<BillingOfferKey, number>;
 
 export const PLAN_OFFER_PLAN_KEYS = {
   pro_monthly: "pro",

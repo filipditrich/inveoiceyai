@@ -701,11 +701,10 @@
     },
     "pricing": {
       "eyebrow": "Pricing",
-      "title": "Everything is free while Invoicey is in beta.",
-      "description": "No card, no trial countdown, no expiring sandbox. When paid plans start you will hear about it well before anything is charged.",
-      "betaBadge": "Free in beta",
+      "title": "Start free. Upgrade when the workspace grows.",
+      "description": "CZK prices include VAT. Polar collects payment; Invoicey still decides what the plan allows.",
+      "betaBadge": "Most chosen",
       "freeName": "Free",
-      "freePrice": "0 Kč",
       "freePeriod": "/ month",
       "freeDescription": "A complete solo Czech invoicing tool, not a trial.",
       "freeCta": "Start free",
@@ -718,11 +717,11 @@
       "freeFeature5": "100k AI tokens a month, plus 750k to get started",
       "freeFeature6": "Classic invoice look, 30-day audit history",
       "proName": "Pro",
-      "proPrice": "0 Kč",
-      "proPeriod": "/ month during beta",
+      "proPeriod": "/ month",
+      "proYearly": "or {price} / year",
       "proDescription": "Everything in Free, plus people, banks and branding.",
-      "proCta": "Get Pro free",
-      "proCtaSignedIn": "Open dashboard",
+      "proCta": "Get Pro",
+      "proCtaSignedIn": "Open billing",
       "proIncludesLabel": "Everything in Free, plus:",
       "proFeature1": "5 seats and 5 businesses, per-member permissions",
       "proFeature2": "Bank connections and payment matching (Fio, MONETA)",
@@ -740,7 +739,16 @@
       "enterpriseFeature2": "Allowed e-mail domains and auto-assignment",
       "enterpriseFeature3": "Managed client catalogue",
       "enterpriseFeature4": "5M AI tokens a month",
-      "enterpriseFeature5": "Audit history kept indefinitely"
+      "enterpriseFeature5": "Audit history kept indefinitely",
+      "packsTitle": "AI token packs",
+      "packsDescription": "One-time purchased tokens. A pack never changes the workspace plan.",
+      "packNames": {
+        "tokens_small": "2M token pack",
+        "tokens_medium": "10M token pack",
+        "tokens_large": "50M token pack"
+      },
+      "packsBuy": "Buy",
+      "taxNote": "List prices in CZK, tax included."
     },
     "companions": {
       "eyebrow": "Native companions",
