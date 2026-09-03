@@ -434,6 +434,7 @@
     },
     "automation": {
       "badge": "Automatizace · beta",
+      "eyebrow": "AI agenti",
       "title": "Agent připraví návrh. Pravidla rozhodnou, co projde.",
       "description": "Slack a MCP používají stejné nástroje jako web. AI může dohledat firmu, sestavit návrh a připravit soubory, ale nevymýšlí chybějící povinné údaje a potvrzení citlivých akcí zůstává na vás.",
       "item1": "ARES dohledání podle názvu nebo IČO",
@@ -596,11 +597,12 @@
       "apiDescription": "Validovaný InvoiceSchema JSON a klíče pro vlastní automatizaci.",
       "driveTitle": "Invoicey Drive",
       "driveDescription": "Vystavená PDF ve Finderu na Macu. Propojení z lišty nabídek.",
-      "docsCta": "Dokumentace napojení"
+      "docsCta": "Dokumentace napojení",
+      "docsDescription": "Návody pro Slack, MCP, banky, CLI a Invoicey Drive."
     },
     "comparison": {
       "eyebrow": "Upřímné srovnání",
-      "title": "V čem Invoicey vyhrává — a v čem ne.",
+      "title": "V čem Invoicey vyhrává, a v čem ne.",
       "description": "Česká fakturace je nabitý a vyzrálý trh. Takhle si Invoicey stojí proti třem nástrojům, které lidé opravdu používají — včetně řádků, kde prohráváme.",
       "tableCaption": "Srovnání funkcí Invoicey, Fakturoidu, iDokladu a FakturaOnline",
       "featureHeader": "Funkce",
@@ -659,27 +661,21 @@
       "macAppNote2": "",
       "macAppNote3": "",
       "accountingLabel": "Účetnictví: náklady, přiznání k DPH, sklad",
-      "accountingNote0": "Záměrně mimo záběr",
+      "accountingNote0": "Na roadmapě podle potřeb",
       "accountingNote1": "Náklady, DPH, přiznání",
       "accountingNote2": "Kompletní agenda",
       "accountingNote3": "",
       "mobileAppLabel": "Mobilní aplikace",
-      "mobileAppNote0": "Zatím jen responzivní web",
+      "mobileAppNote0": "Žádná zbytečná appka",
       "mobileAppNote1": "iOS a Android",
       "mobileAppNote2": "iOS a Android",
-      "mobileAppNote3": "",
-      "trackLabel": "Roky v ostrém provozu",
-      "trackNote0": "Veřejná beta od 2026",
-      "trackNote1": "Od roku 2010",
-      "trackNote2": "Od roku 2012",
-      "trackNote3": "Od roku 2010"
+      "mobileAppNote3": ""
     },
     "pricing": {
       "eyebrow": "Ceník",
       "title": "Dokud je Invoicey v betě, je všechno zdarma.",
       "description": "Žádná karta, žádné odčítávání zkušební doby. Až se spustí placené tarify, dozvíte se to s dostatečným předstihem.",
       "betaBadge": "V betě zdarma",
-      "honestNote": "Upřímně: Invoicey nemá zapojenou platební bránu a dnes nikomu neúčtuje. Limity tarifů — uživatelé, firmy, bankovní napojení, AI tokeny — už ale platí. Cena zatím ne.",
       "freeName": "Free",
       "freePrice": "0 Kč",
       "freePeriod": "/ měsíc",
