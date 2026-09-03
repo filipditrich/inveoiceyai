@@ -48,6 +48,14 @@ export const workspaces = pgTable(
      * would make the pair circular.
      */
     planAssignedBy: text("plan_assigned_by"),
+    /**
+     * Who may change `plan_id` (ADR 0047). `manual` is admin / domain /
+     * grandfathered. `polar` is a verified Polar subscription.
+     */
+    billingAuthority: text("billing_authority")
+      .$type<"manual" | "polar">()
+      .notNull()
+      .default("manual"),
     defaultLookId: text("default_look_id").notNull().default("classic"),
     defaultLookVersion: text("default_look_version").notNull().default("1.0.0"),
     /**

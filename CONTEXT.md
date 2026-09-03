@@ -75,3 +75,33 @@ _Avoid_: Using this name for PDF appearance.
 **Preset**:
 A saved MCP/Slack _data_ blob (`issuer` or `invoice_template`). It is not a look.
 _Avoid_: Using this name for PDF appearance.
+
+## Billing
+
+**Workspace**:
+The billable tenant. Polar's customer `external_id` is the workspace id. Plans, AI tokens, and purchased packs never follow a user across workspaces.
+_Avoid_: Polar “customer” in product copy, account, org (as the billed thing).
+
+**Plan**:
+An Invoicey `plans` row. Polar products map onto a plan; they are not the plan.
+_Avoid_: Polar product as the thing a workspace is “on”.
+
+**Billing authority**:
+Who may change `workspaces.plan_id`. `manual` is admin/domain/grandfathered. `polar` is a verified Polar subscription.
+_Avoid_: Inferring authority from a non-null `plan_assigned_by`.
+
+**AI tokens**:
+Invoicey’s usage unit (monthly / gifted / purchased). Polar never grants Polar benefits as tokens.
+_Avoid_: Credits, Polar benefits.
+
+**Token pack**:
+A one-time Polar product that credits a fixed purchased-token amount from Invoicey’s allowlist.
+_Avoid_: Ad-hoc checkout prices, metadata-supplied quantities.
+
+**Purchased-token debt**:
+A negative `purchased_remaining` after a refund of tokens already spent. It blocks Invoicey-hosted AI until cleared.
+_Avoid_: Clamping refunds to zero, deleting grant or usage rows.
+
+**Polar invoice**:
+The merchant-of-record receipt Polar issues to the workspace. It is not an Invoicey invoice.
+_Avoid_: Invoice, faktura (for Polar’s PDF).

@@ -33,6 +33,7 @@
     "@invoicey/invoice-tools": "workspace:*",
     "@invoicey/payment-core": "workspace:*",
     "@modelcontextprotocol/sdk": "1.26.0",
+    "@polar-sh/sdk": "0.49.0",
     "@react-pdf/renderer": "4.6.0",
     "@tanstack/react-table": "^9",
     "@tanstack/react-virtual": "3.14.9",

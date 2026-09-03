@@ -238,7 +238,15 @@ The webhook URL Slack provides on every slash-command and interactive payload. O
 
 ### Workspace AI tokens
 
-Entitlement unit for Invoicey-hosted LLM usage (ADR 0026). Buckets: gifted / monthly / purchased; products: web, slack, mcp (activity). See [ai-usage.md](./specs/ai-usage.md).
+Entitlement unit for Invoicey-hosted LLM usage (ADR 0026). Buckets: gifted / monthly / purchased; products: web, slack, mcp (activity). See [ai-usage.md](./specs/ai-usage.md). Purchased packs and refunds are Polar-backed (ADR 0047); Polar “credits” and Polar benefits are not this unit.
+
+### Billing authority
+
+Who may change a workspace’s plan: `manual` (admin, domain rule, grandfathered beta) or `polar` (verified Polar subscription). See [ADR 0047](./decisions/0047-polar-billing-projects-into-invoicey.md).
+
+### Polar invoice
+
+Merchant-of-record receipt Polar issues _to_ the workspace. Distinct from an Invoicey **Invoice** / _faktura_ the workspace issues to its clients.
 
 ### Tool calling
 

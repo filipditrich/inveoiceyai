@@ -19,6 +19,7 @@ import { workspaces } from "./workspaces";
 
 export * from "./ai-usage";
 export * from "./auth-schema";
+export * from "./billing-schema";
 export * from "./drive-schema";
 export * from "./plans";
 export * from "./referral-schema";

@@ -10,6 +10,7 @@ import {
 import { can } from "@/lib/authz/can";
 
 import {
+  getWorkspaceBillingState,
   getWorkspaceFreeze,
   getWorkspaceTokenSummary,
   isFrozen,
@@ -37,6 +38,7 @@ export default async function AppShellLayout({
     tokenSummary,
     canSeePayments,
     freeze,
+    billingState,
   ] = await Promise.all([
     isPlatformAdmin(),
     listUserWorkspaces(user.id),
@@ -53,11 +55,20 @@ export default async function AppShellLayout({
       console.error("[app-shell] freeze state unavailable", error);
       return null;
     }),
+    getWorkspaceBillingState(db, workspaceId).catch((error: unknown) => {
+      console.error("[app-shell] billing state unavailable", error);
+      return null;
+    }),
   ]);
 
   return (
     <AppShell
       activeWorkspaceId={workspaceId}
+      billingAlert={
+        billingState
+          ? { pastDue: billingState.pastDue, canceling: billingState.canceling }
+          : null
+      }
       canSeePayments={canSeePayments}
       defaultWorkspaceId={defaultWorkspaceId}
       frozenReason={

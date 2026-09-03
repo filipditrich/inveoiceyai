@@ -22,6 +22,14 @@ export class PlanNotFoundError extends Error {
   }
 }
 
+export class PolarPlanLockedError extends Error {
+  readonly code = "polar_plan_locked" as const;
+  constructor(workspaceId: string) {
+    super(`Workspace ${workspaceId} is under Polar plan authority`);
+    this.name = "PolarPlanLockedError";
+  }
+}
+
 /** A workspace's plan and the entitlements that actually apply to it. */
 export interface WorkspaceEntitlements {
   workspaceId: string;
@@ -35,6 +43,7 @@ export interface WorkspaceEntitlements {
   overrides: EntitlementOverrides | null;
   assignedAt: Date;
   assignedBy: string | null;
+  billingAuthority: "manual" | "polar";
 }
 
 /** Normalizes `Foo@NFCtron.COM` / `nfctron.com` to `nfctron.com`. */
@@ -149,6 +158,7 @@ export async function getWorkspaceEntitlements(
       overrides: workspaces.entitlementOverrides,
       assignedAt: workspaces.planAssignedAt,
       assignedBy: workspaces.planAssignedBy,
+      billingAuthority: workspaces.billingAuthority,
       planId: plans.id,
       planKey: plans.key,
       planName: plans.name,
@@ -172,6 +182,7 @@ export async function getWorkspaceEntitlements(
     overrides: row.overrides ?? null,
     assignedAt: row.assignedAt,
     assignedBy: row.assignedBy,
+    billingAuthority: row.billingAuthority,
   };
 }
 
@@ -182,6 +193,10 @@ export interface AssignPlanInput {
   assignedBy: string | null;
   /** Replaces the existing overrides wholesale. Omit to leave them untouched. */
   overrides?: EntitlementOverrides | null;
+  /** Polar fulfillment may change a Polar-managed plan; admin may not. */
+  source?: "admin" | "automatic" | "polar";
+  /** Platform-admin takeover after any live Polar subscription is gone. */
+  detachPolar?: boolean;
 }
 
 /**
@@ -204,6 +219,21 @@ export async function assignWorkspacePlan(
   const plan = await getPlanById(db, input.planId);
   if (!plan) throw new PlanNotFoundError(input.planId);
 
+  const [current] = await db
+    .select({ billingAuthority: workspaces.billingAuthority })
+    .from(workspaces)
+    .where(eq(workspaces.id, input.workspaceId))
+    .limit(1);
+  if (!current) throw new PlanNotFoundError(input.workspaceId);
+
+  if (
+    current.billingAuthority === "polar" &&
+    input.source !== "polar" &&
+    !input.detachPolar
+  ) {
+    throw new PolarPlanLockedError(input.workspaceId);
+  }
+
   await db
     .update(workspaces)
     .set({
@@ -213,6 +243,8 @@ export async function assignWorkspacePlan(
       ...(input.overrides === undefined
         ? {}
         : { entitlementOverrides: input.overrides }),
+      ...(input.source === "polar" ? { billingAuthority: "polar" } : {}),
+      ...(input.detachPolar ? { billingAuthority: "manual" } : {}),
     })
     .where(eq(workspaces.id, input.workspaceId));
 

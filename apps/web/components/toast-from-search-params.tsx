@@ -69,6 +69,7 @@ const TOAST_KEYS = [
   "admin_suppression_lifted",
   "admin_look_unpublished",
   "admin_bank_disconnected",
+  "admin_polar_managed",
   "fio_payments_enabled",
   "fio_payments_disabled",
 ] as const;
@@ -91,6 +92,7 @@ const ERROR_KEYS = [
   "admin_action_failed",
   "admin_reason_required",
   "workspace_frozen",
+  "admin_polar_managed",
 ] as const;
 
 type ErrorToastKey = (typeof ERROR_KEYS)[number];

@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 
 import {
   EntitlementsSchema,
+  PolarPlanLockedError,
   assignWorkspacePlan,
   countWorkspacesByPlan,
   getPlanById,
@@ -103,6 +104,9 @@ export async function adminAssignPlan(input: {
       await unmarkManagedClients(db, input.workspaceId);
     }
   } catch (error) {
+    if (error instanceof PolarPlanLockedError) {
+      return { ok: false, error: "polar_managed" };
+    }
     console.error("[admin] plan assignment failed", error);
     return { ok: false, error: "failed" };
   }

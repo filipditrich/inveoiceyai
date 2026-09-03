@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import {
   ActivityIcon,
   Building2Icon,
+  CreditCardIcon,
   GiftIcon,
   HardDriveIcon,
   KeyRoundIcon,
@@ -39,6 +40,7 @@ interface SettingsLink {
     | "workspace"
     | "members"
     | "usage"
+    | "billing"
     | "apiKeys"
     | "bankConnections"
     | "integrations"
@@ -98,6 +100,12 @@ const WORKSPACE_LINKS: SettingsLink[] = [
     key: "usage",
     exact: false,
     icon: ActivityIcon,
+  },
+  {
+    href: "/settings/workspace/billing",
+    key: "billing",
+    exact: false,
+    icon: CreditCardIcon,
   },
   {
     href: "/settings/workspace/api-keys",

@@ -156,6 +156,7 @@
     "admin_last_owner": "Nelze odebrat posledního vlastníka",
     "admin_confirmation_mismatch": "Potvrzení nesouhlasí",
     "admin_action_failed": "Akce se nezdařila",
+    "admin_polar_managed": "Tento workspace platí přes Polar",
     "admin_plan_assigned": "Tarif přiřazen",
     "admin_plan_updated": "Tarif upraven",
     "admin_plan_client_added": "Subjekt přidán do katalogu",
@@ -221,6 +222,7 @@
     "admin_last_owner": "Prostor musí mít vždy alespoň jednoho vlastníka.",
     "admin_confirmation_mismatch": "Přepište slug prostoru přesně.",
     "admin_action_failed": "Zkuste to znovu, nebo se podívejte do logů.",
+    "admin_polar_managed": "Nejdřív odpojte nebo ukončete Polar předplatné, než tarif přiřadíte ručně.",
     "invoice_issued_rewarded": "Vystavili jste první fakturu — přidali jsme {tokens} bonusových AI tokenů.",
     "admin_plan_assigned": "Nic se nesmazalo — workspacy nad limit zůstávají čitelné.",
     "admin_plan_updated": "Všechny workspacy na tomto tarifu nyní používají nová oprávnění.",
@@ -1033,6 +1035,7 @@
         "drive": "Invoicey Drive",
         "members": "Členové",
         "usage": "Využití",
+        "billing": "Předplatné",
         "referrals": "Doporučení",
         "apiKeys": "API klíče",
         "bankConnections": "Bankovní spojení",
@@ -1046,6 +1049,7 @@
         "drive": "Kopie vystavených faktur ve Finderu",
         "members": "Lidé a oprávnění",
         "usage": "AI tokeny, grafy a historie",
+        "billing": "Tarif, Polar a balíčky tokenů",
         "referrals": "Pozvěte přátele do Invoicey",
         "apiKeys": "Přístup pro automatizaci",
         "bankConnections": "Bankovní přehledy jen pro čtení",
@@ -1259,7 +1263,8 @@
           "subtitle": "Nákup tokenů a kódy přijdou později. Tlačítka jsou zatím jen zástupné.",
           "redeem": "Uplatnit kód",
           "buy": "Koupit tokeny",
-          "comingSoon": "Nákup tokenů zatím není dostupný — dáme vám vědět, až bude."
+          "comingSoon": "Nákup tokenů zatím není dostupný — dáme vám vědět, až bude.",
+          "billingHint": "Balíčky tokenů se kupují v Předplatném. Balíček nikdy nezmění tarif workspace."
         },
         "chip": {
           "title": "Zůstatek tokenů",
@@ -1284,6 +1289,57 @@
             "first_invoice_issued": "První vystavená faktura",
             "manual": "Přiděleno Invoicey"
           }
+        }
+      },
+      "billing": {
+        "pageTitle": "Předplatné",
+        "pageDescription": "Přejděte na Pro, kupte balíčky AI tokenů a spravujte Polar portál. Návrat z pokladny sám o sobě nic nepřičte.",
+        "notConfigured": "Předplatné v tomto prostředí ještě není zapnuté.",
+        "plan": {
+          "title": "Tarif workspace",
+          "subtitle": "Platbu vybírá Polar. Oprávnění tarifu pořád určuje Invoicey.",
+          "unknown": "Tarif",
+          "manage": "Spravovat platby",
+          "polarManaged": "Tento workspace platí přes Polar.",
+          "manualManaged": "Tento workspace nemá Polar předplatné. Stávající Pro zůstává, dokud se nepřihlásíte k platbě.",
+          "status": "Stav Polar: {status}",
+          "periodEnd": "Aktuální období končí {date}"
+        },
+        "offers": {
+          "pro_monthly": "Pro měsíčně",
+          "pro_yearly": "Pro ročně",
+          "tokens_small": "Malý balíček",
+          "tokens_medium": "Střední balíček",
+          "tokens_large": "Velký balíček"
+        },
+        "packs": {
+          "title": "Balíčky AI tokenů",
+          "subtitle": "Jednorázově koupené tokeny. Zůstanou, dokud je nespotřebujete. Refundace může vytvořit dluh a pozastavit AI v Invoicey.",
+          "buy": "Koupit"
+        },
+        "banner": {
+          "pastDue": "Platba za tento workspace selhala. Aktualizujte platební metodu, aby Pro zůstalo.",
+          "canceling": "Pro zůstává aktivní do konce zaplaceného období.",
+          "cta": "Spravovat platby"
+        },
+        "return": {
+          "pageDescription": "Polar potvrzuje platbu. Invoicey změní tarif nebo tokeny až po podepsaném webhooku.",
+          "titleReady": "Platba přišla",
+          "titlePending": "Čekáme na potvrzení",
+          "fulfilled": "Workspace už ukazuje změnu z Polar. Můžete se vrátit k předplatnému nebo využití.",
+          "pending": "Když jste právě zaplatili, obnovte stránku za chvíli. Úspěšný návrat sám o sobě nic nepřičte.",
+          "back": "Zpět na předplatné",
+          "usage": "Zobrazit využití"
+        },
+        "errors": {
+          "not_configured": "Předplatné není nastavené.",
+          "forbidden": "Pro tento workspace nemůžete spravovat platby.",
+          "unknown_offer": "Tato nabídka není k dispozici.",
+          "custom_plan": "Sponzorované tarify nepoužívají Polar pokladnu.",
+          "enterprise": "Enterprise se sjednává, není samoobslužné.",
+          "top_up_disabled": "Tento workspace nemůže kupovat balíčky tokenů.",
+          "checkout_failed": "Pokladnu se nepodařilo spustit.",
+          "portal_failed": "Portál plateb se nepodařilo otevřít."
         }
       },
       "scopes": {
