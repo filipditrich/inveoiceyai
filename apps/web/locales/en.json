@@ -739,16 +739,7 @@
       "enterpriseFeature2": "Allowed e-mail domains and auto-assignment",
       "enterpriseFeature3": "Managed client catalogue",
       "enterpriseFeature4": "5M AI tokens a month",
-      "enterpriseFeature5": "Audit history kept indefinitely",
-      "packsTitle": "AI token packs",
-      "packsDescription": "One-time purchased tokens. A pack never changes the workspace plan.",
-      "packNames": {
-        "tokens_small": "2M token pack",
-        "tokens_medium": "10M token pack",
-        "tokens_large": "50M token pack"
-      },
-      "packsBuy": "Buy",
-      "taxNote": "List prices in CZK, tax included."
+      "enterpriseFeature5": "Audit history kept indefinitely"
     },
     "companions": {
       "eyebrow": "Native companions",
