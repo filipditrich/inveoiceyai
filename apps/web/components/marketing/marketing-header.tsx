@@ -8,11 +8,11 @@ import Link from "next/link";
 
 import { DownloadMenu } from "./download-menu";
 import { macDownloadUrl } from "./mac-download";
+import { MARKETING_PILL_CLASS } from "./marketing-cta";
 import { MarketingMobileNav } from "./marketing-mobile-nav";
 
 export async function MarketingHeader() {
   const t = await getTranslations("Marketing.nav");
-  const tBrand = await getTranslations("App.brand");
   const tDownload = await getTranslations("Marketing.download");
   const user = await getOptionalSession();
 
@@ -43,7 +43,7 @@ export async function MarketingHeader() {
 
   const primaryCta = (
     <Button
-      className="h-9 shrink-0 !rounded-full px-3.5"
+      className={`h-9 shrink-0 ${MARKETING_PILL_CLASS}`}
       render={<Link href="/dashboard" prefetch={false} />}
     >
       {t("openApp")}
@@ -54,17 +54,12 @@ export async function MarketingHeader() {
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-xl">
       <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-        {/* The tagline is hidden on small screens, so the link needs its own name. */}
         <Link
           href="/"
           aria-label="Invoicey"
-          className="flex shrink-0 flex-col items-start gap-0.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="inline-flex shrink-0 items-center rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           <BrandLogo size={24} priority variant="wordmark" />
-          {/* The lockup SVG insets the first glyph; match that so the tagline lines up. */}
-          <span className="hidden pl-[4%] text-[0.6rem] leading-none tracking-[0.12em] text-muted-foreground uppercase sm:block">
-            {tBrand("tagline")}
-          </span>
         </Link>
 
         <nav
@@ -84,7 +79,7 @@ export async function MarketingHeader() {
 
         <div className="relative z-20 flex items-center justify-end gap-2">
           <DownloadMenu
-            className="hidden h-9 px-3.5 lg:inline-flex"
+            className={`hidden h-9 lg:inline-flex ${MARKETING_PILL_CLASS}`}
             labels={downloadLabels}
             macDownloadUrl={macDownloadUrl(env.INVOICEY_DRIVE_DMG_URL)}
           />

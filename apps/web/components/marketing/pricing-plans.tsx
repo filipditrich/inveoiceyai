@@ -4,6 +4,8 @@ import { ArrowRightIcon, CheckIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { MARKETING_PILL_LG_CLASS } from "./marketing-cta";
+
 /**
  * The three public plans. The sponsored NFCtron plan is a custom row in the
  * database and is deliberately absent here. Feature keys are spelled out
@@ -86,7 +88,7 @@ export async function PricingPlans({
             <Button
               size="lg"
               variant={featured ? "default" : "outline"}
-              className="mt-7 h-11 w-full !rounded-full text-[0.95rem]"
+              className={`mt-7 h-11 w-full text-[0.95rem] ${MARKETING_PILL_LG_CLASS}`}
               render={
                 external ? (
                   <a href={plan.href} />
