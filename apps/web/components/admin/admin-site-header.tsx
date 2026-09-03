@@ -27,6 +27,8 @@ export function AdminSiteHeader() {
     invoices: t("breadcrumb.invoices"),
     issuers: t("breadcrumb.issuers"),
     audit: t("breadcrumb.audit"),
+    plans: t("breadcrumb.plans"),
+    ai: t("breadcrumb.ai"),
   };
 
   /** Detail routes end in an id; a raw UUID is not a useful crumb label. */

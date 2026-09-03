@@ -25,6 +25,7 @@ import {
 } from "@tanstack/react-table";
 import { SearchIcon, WarehouseIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
 
 import type { Filter, FilterFieldConfig } from "@/components/reui/filters";
 import type { AppLocale } from "@/i18n/config";
@@ -126,7 +127,12 @@ export function AdminIssuersGrid({ items }: { items: AdminIssuerGridItem[] }) {
           <DataGridColumnHeader column={column} title={t("columns.name")} />
         ),
         cell: ({ row }) => (
-          <span className="font-medium">{row.original.name}</span>
+          <Link
+            className="font-medium hover:underline"
+            href={`/admin/issuers/${row.original.id}`}
+          >
+            {row.original.name}
+          </Link>
         ),
         meta: { headerTitle: t("columns.name"), autoSize: true },
       },

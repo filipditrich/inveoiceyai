@@ -13,6 +13,7 @@ import {
   type DataGridFeatures,
 } from "@/components/reui/data-grid/data-grid";
 import { DataGridColumnHeader } from "@/components/reui/data-grid/data-grid-column-header";
+import { formatTokenCount } from "@/lib/ai/format-tokens";
 import { formatDateTime } from "@/lib/format";
 import {
   useTable,
@@ -36,6 +37,9 @@ export type AdminWorkspaceGridItem = {
   memberCount: number;
   invoiceCount: number;
   issuerCount: number;
+  planName: string;
+  tokensRemaining: number;
+  aiBurn30d: number;
   createdAtIso: string;
 };
 
@@ -152,6 +156,40 @@ export function AdminWorkspacesGrid({
         meta: { headerTitle: t("columns.issuers") },
       },
       {
+        accessorKey: "planName",
+        id: "planName",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={t("columns.plan")} />
+        ),
+        meta: { headerTitle: t("columns.plan"), autoSize: true },
+      },
+      {
+        accessorKey: "tokensRemaining",
+        id: "tokensRemaining",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={t("columns.tokens")} />
+        ),
+        cell: ({ row }) => (
+          <span className="tabular-nums">
+            {formatTokenCount(row.original.tokensRemaining)}
+          </span>
+        ),
+        meta: { headerTitle: t("columns.tokens") },
+      },
+      {
+        accessorKey: "aiBurn30d",
+        id: "aiBurn30d",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={t("columns.burn")} />
+        ),
+        cell: ({ row }) => (
+          <span className="tabular-nums">
+            {formatTokenCount(row.original.aiBurn30d)}
+          </span>
+        ),
+        meta: { headerTitle: t("columns.burn") },
+      },
+      {
         id: "createdAt",
         accessorFn: (row) => row.createdAtIso,
         header: ({ column }) => (
@@ -206,6 +244,7 @@ export function AdminWorkspacesGrid({
       return (
         row.original.name.toLowerCase().includes(q) ||
         row.original.slug.toLowerCase().includes(q) ||
+        row.original.planName.toLowerCase().includes(q) ||
         row.original.id.toLowerCase().includes(q)
       );
     },

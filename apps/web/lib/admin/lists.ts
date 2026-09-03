@@ -1,11 +1,15 @@
 import "server-only";
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
-import { asc, count, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, sql } from "drizzle-orm";
 
 import {
+  aiTokenBalances,
+  aiUsageEvents,
   issuerBusinesses,
   invoices,
   member,
+  plans,
+  session,
   user,
   workspaces,
   type PlatformRole,
@@ -15,6 +19,11 @@ import {
   resolveDisplayStatus,
   type InvoiceDisplayStatus,
 } from "@invoicey/invoice-core/status-display";
+
+import { ADMIN_LIST_CAP, utcDaysAgo } from "./constants";
+import { snapshotString } from "./snapshot";
+
+export { ADMIN_LIST_CAP };
 
 export type AdminUserRow = {
   id: string;
@@ -27,6 +36,7 @@ export type AdminUserRow = {
   referredByEmail: string | null;
   createdAt: Date;
   membershipCount: number;
+  lastSeenAt: Date | null;
 };
 
 export type AdminWorkspaceRow = {
@@ -37,6 +47,9 @@ export type AdminWorkspaceRow = {
   memberCount: number;
   invoiceCount: number;
   issuerCount: number;
+  planName: string;
+  tokensRemaining: number;
+  aiBurn30d: number;
 };
 
 export type AdminInvoiceRow = {
@@ -65,8 +78,6 @@ export type AdminIssuerRow = {
   source: string;
   updatedAt: Date;
 };
-
-const ADMIN_LIST_CAP = 2000;
 
 export async function adminListUsers(): Promise<AdminUserRow[]> {
   const rows = await db
@@ -116,6 +127,23 @@ export async function adminListUsers(): Promise<AdminUserRow[]> {
     }
   }
 
+  const userIds = rows.map((r) => r.id);
+  const lastSeenRows =
+    userIds.length === 0
+      ? []
+      : await db
+          .select({
+            userId: session.userId,
+            lastSeenAt: sql<Date>`max(${session.updatedAt})`,
+          })
+          .from(session)
+          .where(inArray(session.userId, userIds))
+          .groupBy(session.userId);
+
+  const lastSeenByUser = new Map(
+    lastSeenRows.map((row) => [row.userId, row.lastSeenAt]),
+  );
+
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
@@ -129,51 +157,76 @@ export async function adminListUsers(): Promise<AdminUserRow[]> {
       : null,
     createdAt: r.createdAt,
     membershipCount: Number(r.membershipCount ?? 0),
+    lastSeenAt: lastSeenByUser.get(r.id) ?? null,
   }));
 }
 
 export async function adminListWorkspaces(): Promise<AdminWorkspaceRow[]> {
-  /** correlated sql`` subselects render unqualified "id" (text = uuid on invoices) */
   const rows = await db
     .select({
       id: workspaces.id,
       name: workspaces.name,
       slug: workspaces.slug,
       createdAt: workspaces.createdAt,
+      planName: plans.name,
     })
     .from(workspaces)
+    .innerJoin(plans, eq(workspaces.planId, plans.id))
     .orderBy(asc(workspaces.name))
     .limit(ADMIN_LIST_CAP);
 
   if (rows.length === 0) return [];
 
   const workspaceIds = rows.map((row) => row.id);
-  const [memberCounts, invoiceCounts, issuerCounts] = await Promise.all([
-    db
-      .select({
-        workspaceId: member.organizationId,
-        value: count(),
-      })
-      .from(member)
-      .where(inArray(member.organizationId, workspaceIds))
-      .groupBy(member.organizationId),
-    db
-      .select({
-        workspaceId: invoices.workspaceId,
-        value: count(),
-      })
-      .from(invoices)
-      .where(inArray(invoices.workspaceId, workspaceIds))
-      .groupBy(invoices.workspaceId),
-    db
-      .select({
-        workspaceId: issuerBusinesses.workspaceId,
-        value: count(),
-      })
-      .from(issuerBusinesses)
-      .where(inArray(issuerBusinesses.workspaceId, workspaceIds))
-      .groupBy(issuerBusinesses.workspaceId),
-  ]);
+  const window30d = utcDaysAgo(30);
+  const [memberCounts, invoiceCounts, issuerCounts, tokenRows, burnRows] =
+    await Promise.all([
+      db
+        .select({
+          workspaceId: member.organizationId,
+          value: count(),
+        })
+        .from(member)
+        .where(inArray(member.organizationId, workspaceIds))
+        .groupBy(member.organizationId),
+      db
+        .select({
+          workspaceId: invoices.workspaceId,
+          value: count(),
+        })
+        .from(invoices)
+        .where(inArray(invoices.workspaceId, workspaceIds))
+        .groupBy(invoices.workspaceId),
+      db
+        .select({
+          workspaceId: issuerBusinesses.workspaceId,
+          value: count(),
+        })
+        .from(issuerBusinesses)
+        .where(inArray(issuerBusinesses.workspaceId, workspaceIds))
+        .groupBy(issuerBusinesses.workspaceId),
+      db
+        .select({
+          workspaceId: aiTokenBalances.workspaceId,
+          remaining: sql<number>`${aiTokenBalances.giftedRemaining} + ${aiTokenBalances.monthlyRemaining} + ${aiTokenBalances.purchasedRemaining}`,
+        })
+        .from(aiTokenBalances)
+        .where(inArray(aiTokenBalances.workspaceId, workspaceIds)),
+      db
+        .select({
+          workspaceId: aiUsageEvents.workspaceId,
+          tokens: sql<number>`coalesce(sum(${aiUsageEvents.totalTokens}), 0)`,
+        })
+        .from(aiUsageEvents)
+        .where(
+          and(
+            inArray(aiUsageEvents.workspaceId, workspaceIds),
+            sql`${aiUsageEvents.kind} = 'llm'`,
+            gte(aiUsageEvents.createdAt, window30d),
+          ),
+        )
+        .groupBy(aiUsageEvents.workspaceId),
+    ]);
 
   const membersByWorkspace = new Map(
     memberCounts.map((row) => [row.workspaceId, Number(row.value)]),
@@ -184,12 +237,24 @@ export async function adminListWorkspaces(): Promise<AdminWorkspaceRow[]> {
   const issuersByWorkspace = new Map(
     issuerCounts.map((row) => [row.workspaceId, Number(row.value)]),
   );
+  const tokensByWorkspace = new Map(
+    tokenRows.map((row) => [row.workspaceId, Number(row.remaining) || 0]),
+  );
+  const burnByWorkspace = new Map(
+    burnRows.map((row) => [row.workspaceId, Number(row.tokens) || 0]),
+  );
 
   return rows.map((r) => ({
-    ...r,
+    id: r.id,
+    name: r.name,
+    slug: r.slug,
+    createdAt: r.createdAt,
+    planName: r.planName,
     memberCount: membersByWorkspace.get(r.id) ?? 0,
     invoiceCount: invoicesByWorkspace.get(r.id) ?? 0,
     issuerCount: issuersByWorkspace.get(r.id) ?? 0,
+    tokensRemaining: tokensByWorkspace.get(r.id) ?? 0,
+    aiBurn30d: burnByWorkspace.get(r.id) ?? 0,
   }));
 }
 
@@ -220,8 +285,7 @@ export async function adminListInvoices(): Promise<AdminInvoiceRow[]> {
     .limit(ADMIN_LIST_CAP);
 
   return rows.map((row) => {
-    const snap = row.issuerSnapshot as { name?: unknown };
-    const issuerName = typeof snap.name === "string" ? snap.name : "—";
+    const issuerName = snapshotString(row.issuerSnapshot, "name") ?? "—";
     return {
       id: row.id,
       number: row.number,
@@ -265,18 +329,13 @@ export async function adminListIssuers(): Promise<AdminIssuerRow[]> {
     .limit(ADMIN_LIST_CAP);
 
   return rows.map((r) => {
-    const snap = r.snapshot as {
-      name?: unknown;
-      ico?: unknown;
-      dic?: unknown;
-    };
     return {
       id: r.id,
       workspaceId: r.workspaceId,
       workspaceName: r.workspaceName,
-      name: typeof snap.name === "string" ? snap.name : "—",
-      ico: typeof snap.ico === "string" ? snap.ico : null,
-      dic: typeof snap.dic === "string" ? snap.dic : null,
+      name: snapshotString(r.snapshot, "name") ?? "—",
+      ico: snapshotString(r.snapshot, "ico"),
+      dic: snapshotString(r.snapshot, "dic"),
       source: r.source,
       updatedAt: r.updatedAt,
     };

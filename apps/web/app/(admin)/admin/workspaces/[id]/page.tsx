@@ -6,6 +6,7 @@ import {
   renameWorkspaceAction,
 } from "@/actions/admin";
 import { assignWorkspacePlanAction } from "@/actions/admin-plans";
+import { AdminAiChart } from "@/components/admin/admin-ai-chart";
 import { AdminAuditList } from "@/components/admin/admin-audit-list";
 import { AdminCopyId } from "@/components/admin/admin-copy-id";
 import {
@@ -20,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { WorkspaceMark } from "@/components/workspace-mark";
+import { loadWorkspaceAiMonitor } from "@/lib/admin/ai";
 import { adminGetWorkspace } from "@/lib/admin/detail";
 import { adminSelectablePlans } from "@/lib/admin/plans";
 import { formatTokenCount } from "@/lib/ai/format-tokens";
@@ -54,9 +56,10 @@ export default async function AdminWorkspaceDetailPage({
     notFound();
   }
 
-  const [entitlementState, selectablePlans] = await Promise.all([
+  const [entitlementState, selectablePlans, aiMonitor] = await Promise.all([
     getWorkspaceEntitlements(db, id),
     adminSelectablePlans(),
+    loadWorkspaceAiMonitor(id),
   ]);
 
   const tokens = detail.tokens;
@@ -218,6 +221,10 @@ export default async function AdminWorkspaceDetailPage({
                   dateStyle: "medium",
                 }),
               },
+              {
+                label: t("tokens.burn30d"),
+                value: formatTokenCount(aiMonitor.burn30d),
+              },
             ]}
           />
         ) : (
@@ -251,6 +258,37 @@ export default async function AdminWorkspaceDetailPage({
           <p className="text-xs text-muted-foreground">{t("grant.hint")}</p>
           <SubmitButton size="sm">{t("grant.submit")}</SubmitButton>
         </form>
+      </AdminSection>
+
+      <AdminSection description={t("usageDescription")} title={t("usageTitle")}>
+        <AdminAiChart data={aiMonitor.byDay} />
+        {aiMonitor.grants.length === 0 ? (
+          <div className="mt-6">
+            <AdminEmpty>{t("grantsEmpty")}</AdminEmpty>
+          </div>
+        ) : (
+          <div className="mt-6">
+            <AdminMiniTable
+              headers={[
+                t("columns.trigger"),
+                t("columns.tokens"),
+                t("columns.note"),
+                t("columns.when"),
+              ]}
+              rows={aiMonitor.grants.map((grant) => [
+                t(`grantTrigger.${grant.trigger}`),
+                formatTokenCount(grant.tokens),
+                grant.note ?? "—",
+                <span key="at" className="whitespace-nowrap tabular-nums">
+                  {format.dateTime(grant.createdAt, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                </span>,
+              ])}
+            />
+          </div>
+        )}
       </AdminSection>
 
       <AdminSection title={t("membersTitle")}>
@@ -334,7 +372,13 @@ export default async function AdminWorkspaceDetailPage({
           <AdminMiniTable
             headers={[t("columns.issuer"), t("columns.ico")]}
             rows={detail.issuers.map((issuer) => [
-              issuer.name,
+              <Link
+                key={issuer.id}
+                className="hover:underline"
+                href={`/admin/issuers/${issuer.id}`}
+              >
+                {issuer.name}
+              </Link>,
               issuer.ico ?? "—",
             ])}
           />

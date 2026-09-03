@@ -1,17 +1,25 @@
 import { AdminUsersGrid } from "@/components/admin/admin-users-grid";
 import { PageHeader } from "@/components/layout/page-header";
-import { adminListUsers } from "@/lib/admin/lists";
+import { ADMIN_LIST_CAP, adminListUsers } from "@/lib/admin/lists";
 import { requirePlatformAdmin } from "@/lib/auth/session";
 import { getTranslations } from "next-intl/server";
 
 export default async function AdminUsersPage() {
   const admin = await requirePlatformAdmin();
-  const t = await getTranslations("Admin.users");
+  const [t, tTable] = await Promise.all([
+    getTranslations("Admin.users"),
+    getTranslations("Admin.table"),
+  ]);
   const rows = await adminListUsers();
 
   return (
     <div className="flex flex-1 flex-col gap-4">
       <PageHeader description={t("subtitle")} title={t("title")} />
+      {rows.length >= ADMIN_LIST_CAP ? (
+        <p className="text-sm text-muted-foreground">
+          {tTable("truncated", { cap: String(ADMIN_LIST_CAP) })}
+        </p>
+      ) : null}
       <AdminUsersGrid
         currentUserId={admin.userId}
         items={rows.map((r) => ({
@@ -25,6 +33,7 @@ export default async function AdminUsersPage() {
           referredByEmail: r.referredByEmail,
           membershipCount: r.membershipCount,
           createdAtIso: r.createdAt.toISOString(),
+          lastSeenAtIso: r.lastSeenAt?.toISOString() ?? null,
         }))}
       />
     </div>

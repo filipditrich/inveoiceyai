@@ -1,20 +1,31 @@
 import "server-only";
+import { pragueTodayIso } from "@/lib/invoice-status-sql";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 
 import {
   aiTokenBalances,
+  emailMessages,
   invitation,
+  invoiceImportBatches,
   invoices,
   issuerBusinesses,
   member,
   referralEvents,
   securityAuditEvents,
+  session,
   user,
   workspaces,
   type PlatformRole,
   type SecurityAuditEventType,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
+import {
+  resolveDisplayStatus,
+  type InvoiceDisplayStatus,
+} from "@invoicey/invoice-core/status-display";
+
+import { PLATFORM_AUDIT_TYPES } from "./constants";
+import { snapshotString } from "./snapshot";
 
 /** Detail pages read one tenant at a time; lists stay in `lists.ts`. */
 const DETAIL_ROW_CAP = 50;
@@ -39,6 +50,7 @@ export type AdminUserDetail = {
   defaultWorkspaceId: string | null;
   createdAt: Date;
   referredByEmail: string | null;
+  lastSeenAt: Date | null;
   memberships: {
     workspaceId: string;
     workspaceName: string;
@@ -114,6 +126,7 @@ async function loadAuditRows(
     actorEmail: row.actorEmail,
     workspaceId: row.workspaceId,
     workspaceName: row.workspaceName,
+    /** SAFETY: audit metadata is opaque jsonb; the console only displays it. */
     metadata: (row.metadata ?? {}) as Record<string, unknown>,
     createdAt: row.createdAt,
   }));
@@ -140,36 +153,45 @@ export async function adminGetUser(
 
   if (!row) return null;
 
-  const [memberships, referredUsers, referredByRows, auditEvents] =
-    await Promise.all([
-      db
-        .select({
-          workspaceId: member.organizationId,
-          workspaceName: workspaces.name,
-          workspaceSlug: workspaces.slug,
-          role: member.role,
-          joinedAt: member.createdAt,
-        })
-        .from(member)
-        .innerJoin(workspaces, eq(member.organizationId, workspaces.id))
-        .where(eq(member.userId, userId))
-        .orderBy(desc(member.createdAt))
-        .limit(DETAIL_ROW_CAP),
-      db
-        .select({ email: user.email, createdAt: user.createdAt })
-        .from(user)
-        .where(eq(user.referredByUserId, userId))
-        .orderBy(desc(user.createdAt))
-        .limit(DETAIL_ROW_CAP),
-      row.referredByUserId
-        ? db
-            .select({ email: user.email })
-            .from(user)
-            .where(eq(user.id, row.referredByUserId))
-            .limit(1)
-        : Promise.resolve([]),
-      loadAuditRows("user", userId),
-    ]);
+  const [
+    memberships,
+    referredUsers,
+    referredByRows,
+    auditEvents,
+    lastSeenRows,
+  ] = await Promise.all([
+    db
+      .select({
+        workspaceId: member.organizationId,
+        workspaceName: workspaces.name,
+        workspaceSlug: workspaces.slug,
+        role: member.role,
+        joinedAt: member.createdAt,
+      })
+      .from(member)
+      .innerJoin(workspaces, eq(member.organizationId, workspaces.id))
+      .where(eq(member.userId, userId))
+      .orderBy(desc(member.createdAt))
+      .limit(DETAIL_ROW_CAP),
+    db
+      .select({ email: user.email, createdAt: user.createdAt })
+      .from(user)
+      .where(eq(user.referredByUserId, userId))
+      .orderBy(desc(user.createdAt))
+      .limit(DETAIL_ROW_CAP),
+    row.referredByUserId
+      ? db
+          .select({ email: user.email })
+          .from(user)
+          .where(eq(user.id, row.referredByUserId))
+          .limit(1)
+      : Promise.resolve([]),
+    loadAuditRows("user", userId),
+    db
+      .select({ lastSeenAt: sql<Date>`max(${session.updatedAt})` })
+      .from(session)
+      .where(eq(session.userId, userId)),
+  ]);
 
   return {
     id: row.id,
@@ -181,6 +203,7 @@ export async function adminGetUser(
     defaultWorkspaceId: row.defaultWorkspaceId,
     createdAt: row.createdAt,
     referredByEmail: referredByRows[0]?.email ?? null,
+    lastSeenAt: lastSeenRows[0]?.lastSeenAt ?? null,
     memberships,
     referredUsers,
     auditEvents,
@@ -274,14 +297,11 @@ export async function adminGetWorkspace(
     members,
     pendingInvites,
     // Issuer name and IČO live inside the snapshot jsonb, not as columns.
-    issuers: issuers.map((issuer) => {
-      const snapshot = issuer.snapshot as { name?: unknown; ico?: unknown };
-      return {
-        id: issuer.id,
-        name: typeof snapshot.name === "string" ? snapshot.name : "—",
-        ico: typeof snapshot.ico === "string" ? snapshot.ico : null,
-      };
-    }),
+    issuers: issuers.map((issuer) => ({
+      id: issuer.id,
+      name: snapshotString(issuer.snapshot, "name") ?? "—",
+      ico: snapshotString(issuer.snapshot, "ico"),
+    })),
     invoiceCount: invoiceCountRows[0]?.value ?? 0,
     tokens: tokenRows[0] ?? null,
     auditEvents,
@@ -292,16 +312,6 @@ export async function adminGetWorkspace(
 export async function adminListPlatformAuditEvents(
   limit = 200,
 ): Promise<AdminAuditRow[]> {
-  const PLATFORM_TYPES: SecurityAuditEventType[] = [
-    "platform_admin_grant",
-    "platform_admin_revoke",
-    "platform_tokens_grant",
-    "platform_workspace_rename",
-    "platform_workspace_delete",
-    "platform_member_remove",
-    "platform_invite_cancel",
-  ];
-
   const rows = await db
     .select({
       id: securityAuditEvents.id,
@@ -315,7 +325,7 @@ export async function adminListPlatformAuditEvents(
     .from(securityAuditEvents)
     .leftJoin(user, eq(securityAuditEvents.userId, user.id))
     .leftJoin(workspaces, eq(securityAuditEvents.workspaceId, workspaces.id))
-    .where(inArray(securityAuditEvents.type, PLATFORM_TYPES))
+    .where(inArray(securityAuditEvents.type, [...PLATFORM_AUDIT_TYPES]))
     .orderBy(desc(securityAuditEvents.createdAt))
     .limit(limit);
 
@@ -325,6 +335,7 @@ export async function adminListPlatformAuditEvents(
     actorEmail: row.actorEmail,
     workspaceId: row.workspaceId,
     workspaceName: row.workspaceName,
+    /** SAFETY: audit metadata is opaque jsonb; the console only displays it. */
     metadata: (row.metadata ?? {}) as Record<string, unknown>,
     createdAt: row.createdAt,
   }));
@@ -339,4 +350,251 @@ export async function adminCountReferralEvents(
     .from(referralEvents)
     .where(eq(referralEvents.referrerUserId, userId));
   return row?.value ?? 0;
+}
+
+export type AdminInvoiceEmailRow = {
+  id: string;
+  toEmail: string;
+  status: string;
+  template: string;
+  createdAt: Date;
+};
+
+export type AdminInvoiceDetail = {
+  id: string;
+  number: string | null;
+  docType: string;
+  clientName: string;
+  total: string;
+  currency: string;
+  issueDate: string;
+  dueDate: string;
+  issuedAt: Date | null;
+  paidAt: Date | null;
+  cancelledAt: Date | null;
+  displayStatus: InvoiceDisplayStatus;
+  workspaceId: string;
+  workspaceName: string;
+  issuerId: string;
+  issuerName: string;
+  pdfUrl: string | null;
+  isdocUrl: string | null;
+  originProvider: string | null;
+  originLabel: string | null;
+  originVersion: string | null;
+  importCompleteness: string | null;
+  importedAt: Date | null;
+  artifactsImmutable: boolean;
+  importBatch: {
+    id: string;
+    originProvider: string;
+    createdCount: number;
+    skippedCount: number;
+    failedCount: number;
+    createdAt: Date;
+  } | null;
+  emails: AdminInvoiceEmailRow[];
+};
+
+export async function adminGetInvoice(
+  invoiceId: string,
+): Promise<AdminInvoiceDetail | null> {
+  const [row] = await db
+    .select({
+      id: invoices.id,
+      number: invoices.number,
+      docType: invoices.docType,
+      clientName: invoices.clientName,
+      total: invoices.total,
+      currency: invoices.currency,
+      issueDate: invoices.issueDate,
+      dueDate: invoices.dueDate,
+      issuedAt: invoices.issuedAt,
+      paidAt: invoices.paidAt,
+      cancelledAt: invoices.cancelledAt,
+      workspaceId: invoices.workspaceId,
+      workspaceName: workspaces.name,
+      issuerId: invoices.issuerId,
+      issuerSnapshot: invoices.issuerSnapshot,
+      pdfUrl: invoices.pdfUrl,
+      isdocUrl: invoices.isdocUrl,
+      originProvider: invoices.originProvider,
+      originLabel: invoices.originLabel,
+      originVersion: invoices.originVersion,
+      importCompleteness: invoices.importCompleteness,
+      importedAt: invoices.importedAt,
+      artifactsImmutable: invoices.artifactsImmutable,
+      importBatchId: invoices.importBatchId,
+    })
+    .from(invoices)
+    .innerJoin(workspaces, eq(invoices.workspaceId, workspaces.id))
+    .where(eq(invoices.id, invoiceId))
+    .limit(1);
+
+  if (!row) return null;
+
+  const [emails, batchRows] = await Promise.all([
+    db
+      .select({
+        id: emailMessages.id,
+        toEmail: emailMessages.toEmail,
+        status: emailMessages.status,
+        template: emailMessages.template,
+        createdAt: emailMessages.createdAt,
+      })
+      .from(emailMessages)
+      .where(eq(emailMessages.invoiceId, invoiceId))
+      .orderBy(desc(emailMessages.createdAt))
+      .limit(DETAIL_ROW_CAP),
+    row.importBatchId
+      ? db
+          .select({
+            id: invoiceImportBatches.id,
+            originProvider: invoiceImportBatches.originProvider,
+            createdCount: invoiceImportBatches.createdCount,
+            skippedCount: invoiceImportBatches.skippedCount,
+            failedCount: invoiceImportBatches.failedCount,
+            createdAt: invoiceImportBatches.createdAt,
+          })
+          .from(invoiceImportBatches)
+          .where(eq(invoiceImportBatches.id, row.importBatchId))
+          .limit(1)
+      : Promise.resolve([]),
+  ]);
+
+  return {
+    id: row.id,
+    number: row.number,
+    docType: row.docType,
+    clientName: row.clientName,
+    total: row.total,
+    currency: row.currency,
+    issueDate: row.issueDate,
+    dueDate: row.dueDate,
+    issuedAt: row.issuedAt,
+    paidAt: row.paidAt,
+    cancelledAt: row.cancelledAt,
+    displayStatus: resolveDisplayStatus(
+      {
+        issuedAt: row.issuedAt,
+        dueDate: row.dueDate,
+        paidAt: row.paidAt,
+        cancelledAt: row.cancelledAt,
+        issueDate: row.issueDate,
+      },
+      pragueTodayIso(),
+    ),
+    workspaceId: row.workspaceId,
+    workspaceName: row.workspaceName,
+    issuerId: row.issuerId,
+    issuerName: snapshotString(row.issuerSnapshot, "name") ?? "—",
+    pdfUrl: row.pdfUrl,
+    isdocUrl: row.isdocUrl,
+    originProvider: row.originProvider,
+    originLabel: row.originLabel,
+    originVersion: row.originVersion,
+    importCompleteness: row.importCompleteness,
+    importedAt: row.importedAt,
+    artifactsImmutable: row.artifactsImmutable === 1,
+    importBatch: batchRows[0] ?? null,
+    emails,
+  };
+}
+
+export type AdminIssuerInvoiceRow = {
+  id: string;
+  number: string | null;
+  clientName: string;
+  total: string;
+  currency: string;
+  issueDate: string;
+  displayStatus: InvoiceDisplayStatus;
+};
+
+export type AdminIssuerDetail = {
+  id: string;
+  name: string;
+  ico: string | null;
+  dic: string | null;
+  source: string;
+  updatedAt: Date;
+  workspaceId: string;
+  workspaceName: string;
+  invoiceCount: number;
+  invoices: AdminIssuerInvoiceRow[];
+};
+
+export async function adminGetIssuer(
+  issuerId: string,
+): Promise<AdminIssuerDetail | null> {
+  const [row] = await db
+    .select({
+      id: issuerBusinesses.id,
+      snapshot: issuerBusinesses.snapshot,
+      source: issuerBusinesses.source,
+      updatedAt: issuerBusinesses.updatedAt,
+      workspaceId: issuerBusinesses.workspaceId,
+      workspaceName: workspaces.name,
+    })
+    .from(issuerBusinesses)
+    .innerJoin(workspaces, eq(issuerBusinesses.workspaceId, workspaces.id))
+    .where(eq(issuerBusinesses.id, issuerId))
+    .limit(1);
+
+  if (!row) return null;
+
+  const todayIso = pragueTodayIso();
+  const [countRows, invoiceRows] = await Promise.all([
+    db
+      .select({ value: sql<number>`count(*)::int` })
+      .from(invoices)
+      .where(eq(invoices.issuerId, issuerId)),
+    db
+      .select({
+        id: invoices.id,
+        number: invoices.number,
+        clientName: invoices.clientName,
+        total: invoices.total,
+        currency: invoices.currency,
+        issueDate: invoices.issueDate,
+        issuedAt: invoices.issuedAt,
+        dueDate: invoices.dueDate,
+        paidAt: invoices.paidAt,
+        cancelledAt: invoices.cancelledAt,
+      })
+      .from(invoices)
+      .where(eq(invoices.issuerId, issuerId))
+      .orderBy(desc(invoices.updatedAt))
+      .limit(DETAIL_ROW_CAP),
+  ]);
+
+  return {
+    id: row.id,
+    name: snapshotString(row.snapshot, "name") ?? "—",
+    ico: snapshotString(row.snapshot, "ico"),
+    dic: snapshotString(row.snapshot, "dic"),
+    source: row.source,
+    updatedAt: row.updatedAt,
+    workspaceId: row.workspaceId,
+    workspaceName: row.workspaceName,
+    invoiceCount: countRows[0]?.value ?? 0,
+    invoices: invoiceRows.map((invoice) => ({
+      id: invoice.id,
+      number: invoice.number,
+      clientName: invoice.clientName,
+      total: invoice.total,
+      currency: invoice.currency,
+      issueDate: invoice.issueDate,
+      displayStatus: resolveDisplayStatus(
+        {
+          issuedAt: invoice.issuedAt,
+          dueDate: invoice.dueDate,
+          paidAt: invoice.paidAt,
+          cancelledAt: invoice.cancelledAt,
+          issueDate: invoice.issueDate,
+        },
+        todayIso,
+      ),
+    })),
+  };
 }
