@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { MarketingFooter } from "./marketing-footer";
 import { MarketingHeader } from "./marketing-header";
+import { MarketingReveal } from "./marketing-reveal";
 
 export async function MarketingShell({
   children,
@@ -18,7 +19,7 @@ export async function MarketingShell({
       </a>
       <MarketingHeader />
       <main id="main-content" className="flex-1">
-        {children}
+        <MarketingReveal>{children}</MarketingReveal>
       </main>
       <MarketingFooter />
     </div>

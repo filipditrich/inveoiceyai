@@ -18,6 +18,7 @@ import {
 import Link from "next/link";
 
 import { AppleLogo } from "./apple-logo";
+import { MARKETING_PILL_CLASS } from "./marketing-cta";
 
 type DownloadMenuLabels = Readonly<{
   cli: string;
@@ -36,8 +37,7 @@ type DownloadMenuProps = Readonly<{
 }>;
 
 /** Shared Mac-style pill: inverted fill, full radius, Apple mark. */
-const MACOS_TRIGGER_CLASS =
-  "!rounded-full border-transparent bg-foreground text-background hover:bg-foreground/90 hover:text-background dark:bg-[#f5f5f4] dark:text-[#0b0b0c] dark:hover:bg-white dark:hover:text-[#0b0b0c]";
+const MACOS_TRIGGER_CLASS = `${MARKETING_PILL_CLASS} border-transparent bg-foreground text-background hover:bg-foreground/90 hover:text-background dark:bg-[#f5f5f4] dark:text-[#0b0b0c] dark:hover:bg-white dark:hover:text-[#0b0b0c]`;
 
 /**
  * Header and hero download control: one Mac-style button, one menu.

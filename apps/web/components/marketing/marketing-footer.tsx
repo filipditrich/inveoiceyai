@@ -26,16 +26,16 @@ export async function MarketingFooter() {
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
             {t("description")}
           </p>
-          <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-            {tHero("backedBy")}
+          <p className="mt-4 inline-flex items-center gap-2 text-xs leading-none text-muted-foreground">
+            <span className="leading-none">{tHero("backedBy")}</span>
             <a
               href="https://www.nfctron.com"
               rel="noreferrer"
               target="_blank"
               aria-label="NFCtron"
-              className="inline-flex items-center rounded-sm transition-opacity hover:opacity-80"
+              className="inline-flex items-center leading-none transition-opacity hover:opacity-80"
             >
-              <NfctronLogo className="h-3.5" />
+              <NfctronLogo className="h-[13px]" />
             </a>
           </p>
         </div>

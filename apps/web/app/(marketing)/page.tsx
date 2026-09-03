@@ -8,6 +8,7 @@ import {
   CLI_INSTALL_COMMAND,
   macDownloadUrl,
 } from "@/components/marketing/mac-download";
+import { MARKETING_PILL_LG_CLASS } from "@/components/marketing/marketing-cta";
 import motionStyles from "@/components/marketing/marketing-motion.module.css";
 import { MarketingSignedInChip } from "@/components/marketing/marketing-signed-in";
 import { NfctronLogo } from "@/components/marketing/nfctron-logo";
@@ -239,14 +240,14 @@ export default async function HomePage() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Button
                 size="lg"
-                className="h-11 !rounded-full px-5 text-[0.95rem] shadow-lg shadow-primary/15"
+                className={`h-11 text-[0.95rem] shadow-lg shadow-primary/15 ${MARKETING_PILL_LG_CLASS}`}
                 render={<Link href="/dashboard" prefetch={false} />}
               >
                 {user ? t("hero.ctaPrimarySignedIn") : t("hero.ctaPrimary")}
                 <ArrowRightIcon data-icon="inline-end" />
               </Button>
               <DownloadMenu
-                className="h-11 px-5 text-[0.95rem]"
+                className={`h-11 text-[0.95rem] ${MARKETING_PILL_LG_CLASS}`}
                 labels={downloadLabels}
                 macDownloadUrl={macUrl}
               />
@@ -270,23 +271,24 @@ export default async function HomePage() {
               </span>
             </div>
 
-            <div className="mt-12 flex items-center gap-2.5 text-muted-foreground">
-              <span className="text-xs tracking-wide">
+            <div className="mt-12 flex items-center gap-3 text-muted-foreground">
+              <span className="text-[0.7rem] leading-none tracking-[0.08em] uppercase">
                 {t("hero.backedBy")}
               </span>
+              <span aria-hidden="true" className="h-3 w-px bg-foreground/20" />
               <a
                 href="https://www.nfctron.com"
                 rel="noreferrer"
                 target="_blank"
                 aria-label="NFCtron"
-                className="inline-flex items-center rounded-md px-1 py-1 transition-opacity outline-none hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50"
+                className="inline-flex items-center leading-none transition-opacity outline-none hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50"
               >
-                <NfctronLogo className="h-4" />
+                <NfctronLogo className="h-3.5" />
               </a>
             </div>
           </div>
 
-          <div className="mt-16 sm:mt-20">
+          <div className={`${motionStyles.heroDemo} mt-16 sm:mt-20`}>
             <ProductDemo />
           </div>
         </div>
@@ -386,7 +388,7 @@ export default async function HomePage() {
                 <div className="mt-8 flex flex-wrap items-center gap-3">
                   <a
                     href={macUrl}
-                    className="inline-flex h-12 items-center gap-2.5 rounded-full bg-[#f5f5f4] px-5 text-sm font-medium text-[#0b0b0c] shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    className="inline-flex h-12 items-center gap-2.5 rounded-full bg-[#f5f5f4] px-6 text-sm font-medium text-[#0b0b0c] shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   >
                     <AppleLogo className="size-4" />
                     {t("companions.macDownload")}
@@ -719,7 +721,7 @@ export default async function HomePage() {
             <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
               <Button
                 size="lg"
-                className="h-11 px-5 text-[0.95rem]"
+                className={`h-11 text-[0.95rem] ${MARKETING_PILL_LG_CLASS}`}
                 render={<Link href="/dashboard" prefetch={false} />}
               >
                 {user ? t("cta.buttonSignedIn") : t("cta.button")}
@@ -728,7 +730,7 @@ export default async function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="h-11 border-white/15 bg-transparent px-5 text-[0.95rem] text-white hover:bg-white/5 hover:text-white"
+                className={`h-11 border-white/15 bg-transparent text-[0.95rem] text-white hover:bg-white/5 hover:text-white ${MARKETING_PILL_LG_CLASS}`}
                 render={<Link href="/docs" />}
               >
                 {t("cta.secondaryButton")}
