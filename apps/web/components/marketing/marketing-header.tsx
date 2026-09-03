@@ -1,12 +1,14 @@
 import { BrandLogo } from "@/components/brand-logo";
-import { LocaleSwitcher } from "@/components/locale-switcher";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { env } from "@/env.config.server";
 import { getOptionalSession } from "@/lib/auth/session";
-import { ArrowRightIcon, MenuIcon } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { DownloadMenu } from "./download-menu";
+import { macDownloadUrl } from "./mac-download";
+import { MarketingMobileNav } from "./marketing-mobile-nav";
 import {
   MarketingSignedInChip,
   sessionDisplayName,
@@ -15,37 +17,62 @@ import {
 export async function MarketingHeader() {
   const t = await getTranslations("Marketing.nav");
   const tBrand = await getTranslations("App.brand");
+  const tDownload = await getTranslations("Marketing.download");
   const user = await getOptionalSession();
 
+  /** Four destinations, not nine — anything deeper belongs to the page itself. */
   const navItems = [
     { href: "/#jak-to-funguje", label: t("howItWorks") },
     { href: "/#prehled", label: t("capabilities") },
-    { href: "/#platby", label: t("payments") },
-    { href: "/#automatizace", label: t("automation") },
-    { href: "/#napojeni", label: t("integrations") },
-    { href: "/#apps", label: t("apps") },
-    { href: "/#faq", label: t("faq") },
+    { href: "/#cenik", label: t("pricing") },
     { href: "/docs", label: t("docs") },
   ];
+  /** The sheet has room the header bar does not, so it carries the long tail. */
+  const mobileNavItems = [
+    ...navItems.slice(0, 2),
+    { href: "/#apps", label: t("apps") },
+    { href: "/#srovnani", label: t("comparison") },
+    ...navItems.slice(2),
+    { href: "/#faq", label: t("faq") },
+  ];
+  const downloadLabels = {
+    cli: tDownload("cli"),
+    cliHint: tDownload("cliHint"),
+    label: tDownload("label"),
+    mac: tDownload("mac"),
+    macHint: tDownload("macHint"),
+    requirements: tDownload("requirements"),
+    trigger: tDownload("trigger"),
+  };
+
+  const primaryCta = (
+    <Button
+      className="shrink-0"
+      render={<Link href="/dashboard" prefetch={false} />}
+    >
+      {user ? t("continueToApp") : t("openApp")}
+      <ArrowRightIcon data-icon="inline-end" />
+    </Button>
+  );
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+        {/* The tagline is hidden on small screens, so the link needs its own name. */}
         <Link
           href="/"
-          className="group flex shrink-0 items-center gap-2.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          aria-label="Invoicey"
+          className="flex shrink-0 flex-col items-start gap-0.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
-          <BrandLogo size={26} priority variant="wordmark" />
-          <span className="leading-none">
-            <span className="mt-1 block text-[0.65rem] tracking-wide text-muted-foreground">
-              {tBrand("tagline")}
-            </span>
+          <BrandLogo size={24} priority variant="wordmark" />
+          <span className="hidden text-[0.6rem] leading-none tracking-[0.12em] text-muted-foreground uppercase sm:block">
+            {tBrand("tagline")}
           </span>
         </Link>
 
         <nav
           aria-label={t("ariaLabel")}
-          className="ml-auto hidden items-center gap-1 xl:flex"
+          className="mx-auto hidden items-center gap-1 lg:flex"
         >
           {navItems.map((item) => (
             <Link
@@ -58,9 +85,12 @@ export async function MarketingHeader() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2 xl:ml-2">
-          <ThemeToggle className="hidden sm:inline-flex" />
-          <LocaleSwitcher compact className="hidden sm:inline-flex" />
+        <div className="ml-auto flex items-center gap-2 lg:ml-0">
+          <DownloadMenu
+            className="hidden lg:inline-flex"
+            labels={downloadLabels}
+            macDownloadUrl={macDownloadUrl(env.INVOICEY_DRIVE_DMG_URL)}
+          />
           {user ? (
             <Link
               href="/dashboard"
@@ -83,58 +113,25 @@ export async function MarketingHeader() {
               {t("signIn")}
             </Button>
           )}
-          <Button render={<Link href="/dashboard" prefetch={false} />}>
-            {user ? t("continueToApp") : t("openApp")}
-            <ArrowRightIcon data-icon="inline-end" />
-          </Button>
-          <details className="group relative xl:hidden">
-            <summary className="flex size-9 cursor-pointer list-none items-center justify-center rounded-md border border-input outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-              <MenuIcon className="size-4" aria-hidden="true" />
-              <span className="sr-only">{t("openMenu")}</span>
-            </summary>
-            <nav
-              aria-label={t("ariaLabel")}
-              className="absolute top-11 right-0 z-50 w-64 space-y-1 rounded-xl border bg-popover p-2 text-popover-foreground shadow-xl"
-            >
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted"
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <div className="my-2 border-t" />
-              {user ? (
-                <Link
-                  href="/dashboard"
-                  prefetch={false}
-                  aria-label={t("signedInAs", {
-                    name: sessionDisplayName(user),
-                  })}
-                  className="flex items-center rounded-lg px-3 py-2 hover:bg-muted"
-                >
-                  <MarketingSignedInChip user={user} caption={t("signedIn")} />
-                </Link>
-              ) : (
-                <Link
-                  href="/sign-in"
-                  className="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted"
-                >
-                  {t("signIn")}
-                </Link>
-              )}
-              <div className="mt-1 flex items-center gap-1">
-                <ThemeToggle align="start" />
-                <LocaleSwitcher
-                  align="start"
-                  size="sm"
-                  className="min-w-0 flex-1 justify-start"
-                />
-              </div>
-            </nav>
-          </details>
+          <span className="hidden sm:inline-flex">{primaryCta}</span>
+          <MarketingMobileNav
+            items={mobileNavItems}
+            labels={{
+              description: t("menuDescription"),
+              openMenu: t("openMenu"),
+              title: t("menuTitle"),
+            }}
+            actions={
+              <>
+                {user ? null : (
+                  <Button variant="outline" render={<Link href="/sign-in" />}>
+                    {t("signIn")}
+                  </Button>
+                )}
+                {primaryCta}
+              </>
+            }
+          />
         </div>
       </div>
     </header>

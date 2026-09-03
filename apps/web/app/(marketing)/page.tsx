@@ -1,14 +1,18 @@
 import { BrandLogo } from "@/components/brand-logo";
 import { AppleLogo } from "@/components/marketing/apple-logo";
+import { CompetitorComparison } from "@/components/marketing/competitor-comparison";
+import { DownloadMenu } from "@/components/marketing/download-menu";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { InstallCommand } from "@/components/marketing/install-command";
 import {
-  FloatingInvoiceyGuide,
-  InteractiveInvoicey,
-} from "@/components/marketing/interactive-invoicey";
+  CLI_INSTALL_COMMAND,
+  macDownloadUrl,
+} from "@/components/marketing/mac-download";
 import motionStyles from "@/components/marketing/marketing-motion.module.css";
 import { MarketingSignedInChip } from "@/components/marketing/marketing-signed-in";
-import { ProductPreview } from "@/components/marketing/product-preview";
+import { NfctronLogo } from "@/components/marketing/nfctron-logo";
+import { PricingPlans } from "@/components/marketing/pricing-plans";
+import { ProductDemo } from "@/components/marketing/product-demo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { env } from "@/env.config.server";
@@ -60,10 +64,18 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const t = await getTranslations("Marketing");
+  const tDownload = await getTranslations("Marketing.download");
   const user = await getOptionalSession();
-  const macDownloadUrl =
-    env.INVOICEY_DRIVE_DMG_URL ??
-    "https://github.com/filipditrich/invoicey-mac/releases";
+  const macUrl = macDownloadUrl(env.INVOICEY_DRIVE_DMG_URL);
+  const downloadLabels = {
+    cli: tDownload("cli"),
+    cliHint: tDownload("cliHint"),
+    label: tDownload("label"),
+    mac: tDownload("mac"),
+    macHint: tDownload("macHint"),
+    requirements: tDownload("requirements"),
+    trigger: tDownload("trigger"),
+  };
   const trustItems = [
     { icon: FileCheck2Icon, label: t("trust.pdfIsdoc") },
     { icon: QrCodeIcon, label: t("trust.spaydQr") },
@@ -185,35 +197,36 @@ export default async function HomePage() {
     { question: t("faq.q4"), answer: t("faq.a4") },
     { question: t("faq.q5"), answer: t("faq.a5") },
   ];
-  const mascotMessages = [
-    t("mascot.message1"),
-    t("mascot.message2"),
-    t("mascot.message3"),
-  ];
-  const floatingMascotMessages = [
-    t("mascot.floating1"),
-    t("mascot.floating2"),
-    t("mascot.floating3"),
-  ];
   return (
     <>
       <section className="relative overflow-hidden border-b">
         <div className="marketing-grid absolute inset-0 -z-20 opacity-55" />
         <div className="absolute -top-48 left-1/2 -z-10 size-[38rem] -translate-x-1/2 rounded-full bg-brand/20 blur-3xl" />
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 pt-12 pb-16 sm:px-6 sm:pt-20 sm:pb-20 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[0.86fr_1.14fr] lg:items-center lg:gap-14 lg:px-8 lg:py-16">
-          <div className={`${motionStyles.heroCopy} max-w-2xl`}>
-            <Badge
-              variant="outline"
-              className="h-7 gap-1.5 bg-background/70 px-3 backdrop-blur"
+        <div className="mx-auto max-w-7xl px-4 pt-14 pb-16 sm:px-6 sm:pt-20 lg:px-8">
+          <div
+            className={`${motionStyles.heroCopy} mx-auto flex max-w-3xl flex-col items-center text-center`}
+          >
+            <Link
+              href="/#apps"
+              className="group inline-flex items-center gap-2.5 rounded-full border bg-background/70 py-1 pr-1.5 pl-1.5 text-sm backdrop-blur transition-colors outline-none hover:border-primary/40 focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <SparklesIcon data-icon="inline-start" />
-              {t("hero.badge")}
-            </Badge>
-            <h1 className="mt-7 text-5xl leading-[0.98] font-semibold tracking-[-0.055em] text-balance sm:text-6xl lg:text-[4.5rem]">
+              <span className="rounded-full border border-primary/40 px-2 py-0.5 text-[0.65rem] font-semibold tracking-[0.12em] text-primary uppercase">
+                {t("hero.badgeTag")}
+              </span>
+              <span className="font-medium">{t("hero.badgeTitle")}</span>
+              <span className="hidden text-muted-foreground sm:inline">
+                · {t("hero.badgeAction")}
+              </span>
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-muted transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                <ArrowUpRightIcon className="size-3.5" />
+              </span>
+            </Link>
+
+            <h1 className="mt-8 text-5xl leading-[0.98] font-semibold tracking-[-0.055em] text-balance sm:text-6xl lg:text-[4.5rem]">
               {t("hero.titleLine1")}
               <span className="block text-primary">{t("hero.titleLine2")}</span>
             </h1>
-            <p className="mt-7 max-w-xl text-lg leading-relaxed text-pretty text-muted-foreground sm:text-xl">
+            <p className="mt-7 max-w-2xl text-lg leading-relaxed text-pretty text-muted-foreground sm:text-xl">
               {t("hero.subtitle")}
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -225,14 +238,11 @@ export default async function HomePage() {
                 {user ? t("hero.ctaPrimarySignedIn") : t("hero.ctaPrimary")}
                 <ArrowRightIcon data-icon="inline-end" />
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
+              <DownloadMenu
                 className="h-11 px-5 text-[0.95rem]"
-                render={<Link href="#jak-to-funguje" />}
-              >
-                {t("hero.ctaSecondary")}
-              </Button>
+                labels={downloadLabels}
+                macDownloadUrl={macUrl}
+              />
             </div>
             {user ? (
               <p className="mt-5">
@@ -242,7 +252,7 @@ export default async function HomePage() {
                 />
               </p>
             ) : null}
-            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
+            <div className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2Icon className="size-3.5 text-primary" />
                 {t("hero.noPassword")}
@@ -260,15 +270,32 @@ export default async function HomePage() {
                 {t("hero.betaAccess")}
               </span>
             </div>
+
+            <div className="mt-12 flex items-center gap-2.5 text-muted-foreground">
+              <span className="text-xs tracking-wide">
+                {t("hero.backedBy")}
+              </span>
+              <a
+                href="https://www.nfctron.com"
+                rel="noreferrer"
+                target="_blank"
+                className="inline-flex items-center gap-1.5 rounded-lg px-1.5 py-1 font-semibold tracking-[-0.01em] text-foreground transition-colors outline-none hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
+                <NfctronLogo className="size-4" />
+                NFCtron
+              </a>
+            </div>
           </div>
 
-          <ProductPreview />
+          <div className="mt-16 sm:mt-20">
+            <ProductDemo />
+          </div>
         </div>
       </section>
 
       <section
         aria-label={t("trust.ariaLabel")}
-        className="border-y bg-muted/25"
+        className="border-b bg-muted/25"
       >
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-4 sm:px-6 md:grid-cols-3 lg:grid-cols-6 lg:px-8">
           {trustItems.map((item) => (
@@ -280,23 +307,6 @@ export default async function HomePage() {
               {item.label}
             </div>
           ))}
-        </div>
-      </section>
-
-      <section className="overflow-hidden px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <SectionIntro
-            eyebrow={t("preview.eyebrow")}
-            title={t("preview.title")}
-            description={t("preview.description")}
-          />
-          <div className="mx-auto mt-14 max-w-4xl">
-            <InteractiveInvoicey
-              ariaLabel={t("mascot.ariaLabel")}
-              clickHint={t("mascot.clickHint")}
-              messages={mascotMessages}
-            />
-          </div>
         </div>
       </section>
 
@@ -336,8 +346,112 @@ export default async function HomePage() {
       </section>
 
       <section
-        id="prehled"
+        id="apps"
         className="scroll-mt-24 border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+      >
+        <div className="mx-auto max-w-7xl">
+          <SectionIntro
+            eyebrow={t("companions.eyebrow")}
+            title={t("companions.title")}
+            description={t("companions.description")}
+          />
+          <div className="mt-14 grid gap-5 lg:grid-cols-2">
+            <article
+              className={`${motionStyles.liftCard} relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#101012] p-7 text-white shadow-2xl shadow-black/20 sm:p-10`}
+            >
+              <div className="absolute -top-28 -right-20 size-72 rounded-full bg-brand/20 blur-3xl" />
+              <div className="relative flex items-start justify-between gap-5">
+                <Image
+                  alt=""
+                  aria-hidden="true"
+                  className="size-16 rounded-2xl shadow-xl sm:size-20"
+                  height={80}
+                  src="/brand/invoicey-app-icon.svg"
+                  width={80}
+                />
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-400">
+                  <AppleLogo className="size-3" />
+                  macOS 14+
+                </span>
+              </div>
+              <div className="relative mt-12 max-w-xl">
+                <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                  {t("companions.macLabel")}
+                </p>
+                <h3 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
+                  {t("companions.macTitle")}
+                </h3>
+                <p className="mt-4 leading-relaxed text-zinc-400">
+                  {t("companions.macDescription")}
+                </p>
+                <div className="mt-8 flex flex-wrap items-center gap-3">
+                  <a
+                    href={macUrl}
+                    className="inline-flex h-12 items-center gap-2.5 rounded-full bg-[#f5f5f4] px-5 text-sm font-medium text-[#0b0b0c] shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  >
+                    <AppleLogo className="size-4" />
+                    {t("companions.macDownload")}
+                  </a>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 rounded-full border-white/15 bg-transparent px-5 text-white hover:bg-white/5 hover:text-white"
+                    render={<Link href="/docs/integrations/invoicey-drive" />}
+                  >
+                    {t("companions.learnMore")}
+                  </Button>
+                </div>
+                <p className="mt-4 text-xs leading-relaxed text-zinc-400">
+                  {t("companions.macRequirements")}
+                </p>
+              </div>
+            </article>
+
+            <article
+              className={`${motionStyles.liftCard} overflow-hidden rounded-[2rem] border border-white/10 bg-[#101012] p-7 text-white shadow-2xl shadow-black/20 sm:p-10`}
+            >
+              <div className="flex items-center justify-between gap-5">
+                <BrandLogo size={30} tone="on-dark" variant="wordmark" />
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-400">
+                  <SquareTerminalIcon className="size-3.5" /> CLI
+                </span>
+              </div>
+              <div className="mt-12">
+                <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                  {t("companions.cliLabel")}
+                </p>
+                <h3 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
+                  {t("companions.cliTitle")}
+                </h3>
+                <p className="mt-4 max-w-xl leading-relaxed text-zinc-400">
+                  {t("companions.cliDescription")}
+                </p>
+                <div className="mt-8">
+                  <InstallCommand
+                    command={CLI_INSTALL_COMMAND}
+                    copiedLabel={t("companions.copied")}
+                    copyLabel={t("companions.copy")}
+                  />
+                </div>
+                <p className="mt-4 text-xs leading-relaxed text-zinc-400">
+                  {t("companions.cliRequirements")}
+                </p>
+                <Link
+                  href="/docs/integrations/cli"
+                  className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-zinc-300 underline decoration-zinc-600 underline-offset-8 transition-colors hover:text-white"
+                >
+                  {t("companions.cliDocs")}
+                  <ArrowRightIcon className="size-4" />
+                </Link>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="prehled"
+        className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto max-w-7xl">
           <SectionIntro
@@ -370,7 +484,7 @@ export default async function HomePage() {
 
       <section
         id="platby"
-        className="scroll-mt-24 overflow-hidden px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 overflow-hidden border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2 lg:gap-20">
           <PaymentLedgerCard />
@@ -402,7 +516,7 @@ export default async function HomePage() {
 
       <section
         id="automatizace"
-        className="scroll-mt-24 overflow-hidden border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 overflow-hidden px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2 lg:gap-20">
           <div className={motionStyles.scrollReveal}>
@@ -479,7 +593,7 @@ export default async function HomePage() {
 
       <section
         id="napojeni"
-        className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto max-w-7xl">
           <SectionIntro
@@ -521,140 +635,30 @@ export default async function HomePage() {
       </section>
 
       <section
-        id="apps"
-        className="scroll-mt-24 border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        id="srovnani"
+        className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
       >
-        <div className="mx-auto max-w-7xl">
+        <div className={`${motionStyles.scrollReveal} mx-auto max-w-7xl`}>
           <SectionIntro
-            eyebrow={t("companions.eyebrow")}
-            title={t("companions.title")}
-            description={t("companions.description")}
+            eyebrow={t("comparison.eyebrow")}
+            title={t("comparison.title")}
+            description={t("comparison.description")}
           />
-          <div className="mt-14 grid gap-5 lg:grid-cols-2">
-            <article
-              className={`${motionStyles.liftCard} relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#101012] p-7 text-white shadow-2xl shadow-black/20 sm:p-10`}
-            >
-              <div className="absolute -top-28 -right-20 size-72 rounded-full bg-brand/20 blur-3xl" />
-              <div className="relative flex items-start justify-between gap-5">
-                <Image
-                  alt=""
-                  aria-hidden="true"
-                  className="size-16 rounded-2xl shadow-xl sm:size-20"
-                  height={80}
-                  src="/brand/invoicey-app-icon.svg"
-                  width={80}
-                />
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-400">
-                  <AppleLogo className="size-3" />
-                  macOS 14+
-                </span>
-              </div>
-              <div className="relative mt-12 max-w-xl">
-                <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                  {t("companions.macLabel")}
-                </p>
-                <h3 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
-                  {t("companions.macTitle")}
-                </h3>
-                <p className="mt-4 leading-relaxed text-zinc-400">
-                  {t("companions.macDescription")}
-                </p>
-                <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <a
-                    href={macDownloadUrl}
-                    className="inline-flex h-12 items-center gap-2.5 rounded-full bg-[#f5f5f4] px-5 text-sm font-medium text-[#0b0b0c] shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                  >
-                    <AppleLogo className="size-4" />
-                    {t("companions.macDownload")}
-                  </a>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="h-12 rounded-full border-white/15 bg-transparent px-5 text-white hover:bg-white/5 hover:text-white"
-                    render={<Link href="/docs/integrations/invoicey-drive" />}
-                  >
-                    {t("companions.learnMore")}
-                  </Button>
-                </div>
-              </div>
-            </article>
-
-            <article
-              className={`${motionStyles.liftCard} overflow-hidden rounded-[2rem] border border-white/10 bg-[#101012] p-7 text-white shadow-2xl shadow-black/20 sm:p-10`}
-            >
-              <div className="flex items-center justify-between gap-5">
-                <BrandLogo size={30} tone="on-dark" variant="wordmark" />
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-400">
-                  <SquareTerminalIcon className="size-3.5" /> CLI
-                </span>
-              </div>
-              <div className="mt-12">
-                <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                  {t("companions.cliLabel")}
-                </p>
-                <h3 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
-                  {t("companions.cliTitle")}
-                </h3>
-                <p className="mt-4 max-w-xl leading-relaxed text-zinc-400">
-                  {t("companions.cliDescription")}
-                </p>
-                <div className="mt-8">
-                  <InstallCommand
-                    command="curl -fsSL https://invoicey.app/install | bash"
-                    copiedLabel={t("companions.copied")}
-                    copyLabel={t("companions.copy")}
-                  />
-                </div>
-                <Link
-                  href="/docs/integrations/cli"
-                  className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-zinc-300 underline decoration-zinc-600 underline-offset-8 transition-colors hover:text-white"
-                >
-                  {t("companions.cliDocs")}
-                  <ArrowRightIcon className="size-4" />
-                </Link>
-              </div>
-            </article>
-          </div>
+          <CompetitorComparison />
         </div>
       </section>
 
-      <section className="border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-        <div
-          className={`${motionStyles.scrollReveal} mx-auto grid max-w-7xl gap-5 md:grid-cols-2 lg:grid-cols-3`}
-        >
-          <FeaturePanel
-            icon={<Building2Icon />}
-            eyebrow={t("featurePanels.multiIssuerEyebrow")}
-            title={t("featurePanels.multiIssuerTitle")}
-            description={t("featurePanels.multiIssuerDescription")}
-            items={[
-              t("featurePanels.multiIssuerItem1"),
-              t("featurePanels.multiIssuerItem2"),
-              t("featurePanels.multiIssuerItem3"),
-            ]}
+      <section
+        id="cenik"
+        className="scroll-mt-24 border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+      >
+        <div className={`${motionStyles.scrollReveal} mx-auto max-w-7xl`}>
+          <SectionIntro
+            eyebrow={t("pricing.eyebrow")}
+            title={t("pricing.title")}
+            description={t("pricing.description")}
           />
-          <FeaturePanel
-            icon={<CalendarSyncIcon />}
-            eyebrow={t("featurePanels.recurringEyebrow")}
-            title={t("featurePanels.recurringTitle")}
-            description={t("featurePanels.recurringDescription")}
-            items={[
-              t("featurePanels.recurringItem1"),
-              t("featurePanels.recurringItem2"),
-              t("featurePanels.recurringItem3"),
-            ]}
-          />
-          <FeaturePanel
-            icon={<FileArchiveIcon />}
-            eyebrow={t("featurePanels.importEyebrow")}
-            title={t("featurePanels.importTitle")}
-            description={t("featurePanels.importDescription")}
-            items={[
-              t("featurePanels.importItem1"),
-              t("featurePanels.importItem2"),
-              t("featurePanels.importItem3"),
-            ]}
-          />
+          <PricingPlans signedIn={user != null} />
         </div>
       </section>
 
@@ -677,50 +681,49 @@ export default async function HomePage() {
 
       <section className="px-4 pb-20 sm:px-6 sm:pb-28 lg:px-8">
         <div
-          className={`${motionStyles.scrollReveal} relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] border bg-linear-to-br from-brand/35 via-brand/15 to-background p-8 sm:p-12 lg:p-16`}
+          className={`${motionStyles.scrollReveal} relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#101012] px-8 py-14 text-center text-white sm:px-12 sm:py-20`}
         >
-          <Image
-            alt=""
-            aria-hidden="true"
-            className={`${motionStyles.ctaMascot} absolute -right-12 -bottom-16 hidden h-auto w-[25rem] select-none lg:block`}
-            height={900}
-            sizes="400px"
-            src="/brand/illustrations/invoicey-mascot-branded.webp"
-            width={900}
-          />
-          <div className="relative max-w-2xl lg:max-w-[58%]">
+          <div className="marketing-grid absolute inset-0 opacity-25" />
+          <div className="absolute -top-32 left-1/2 size-[34rem] -translate-x-1/2 rounded-full bg-brand/25 blur-3xl" />
+          <div className="relative mx-auto max-w-2xl">
             <p className="text-sm font-semibold tracking-wide text-primary uppercase">
               {t("cta.eyebrow")}
             </p>
             <h2 className="mt-4 text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-5xl">
               {t("cta.title")}
             </h2>
-            <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
+            <p className="mt-5 text-base leading-relaxed text-zinc-400 sm:text-lg">
               {user ? t("cta.descriptionSignedIn") : t("cta.description")}
             </p>
             {user ? (
-              <div className="mt-6">
+              <div className="mt-7 flex justify-center">
                 <MarketingSignedInChip
                   user={user}
                   caption={t("nav.signedIn")}
                 />
               </div>
             ) : null}
-            <Button
-              size="lg"
-              className="mt-8 h-11 px-5 text-[0.95rem]"
-              render={<Link href="/dashboard" prefetch={false} />}
-            >
-              {user ? t("cta.buttonSignedIn") : t("cta.button")}
-              <ArrowRightIcon data-icon="inline-end" />
-            </Button>
+            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+              <Button
+                size="lg"
+                className="h-11 px-5 text-[0.95rem]"
+                render={<Link href="/dashboard" prefetch={false} />}
+              >
+                {user ? t("cta.buttonSignedIn") : t("cta.button")}
+                <ArrowRightIcon data-icon="inline-end" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-11 border-white/15 bg-transparent px-5 text-[0.95rem] text-white hover:bg-white/5 hover:text-white"
+                render={<Link href="/docs" />}
+              >
+                {t("cta.secondaryButton")}
+              </Button>
+            </div>
           </div>
         </div>
       </section>
-      <FloatingInvoiceyGuide
-        ariaLabel={t("mascot.floatingAriaLabel")}
-        messages={floatingMascotMessages}
-      />
     </>
   );
 }
@@ -861,50 +864,6 @@ function ChatRow({ label, value }: Readonly<{ label: string; value: string }>) {
     <div className="flex items-center justify-between gap-4">
       <span>{label}</span>
       <span className="text-right font-medium">{value}</span>
-    </div>
-  );
-}
-
-function FeaturePanel({
-  description,
-  eyebrow,
-  icon,
-  items,
-  title,
-}: Readonly<{
-  description: string;
-  eyebrow: string;
-  icon: React.ReactNode;
-  items: readonly string[];
-  title: string;
-}>) {
-  return (
-    <div
-      className={`${motionStyles.liftCard} rounded-[2rem] border bg-background p-7 sm:p-10`}
-    >
-      <span className="grid size-11 place-items-center rounded-2xl bg-brand/12 [&_svg]:size-5">
-        {icon}
-      </span>
-      <p className="mt-8 text-xs font-semibold tracking-wide text-primary uppercase">
-        {eyebrow}
-      </p>
-      <h2 className="mt-3 text-2xl font-semibold tracking-[-0.035em] text-balance">
-        {title}
-      </h2>
-      <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-        {description}
-      </p>
-      <div className="mt-7 flex flex-wrap gap-2">
-        {items.map((item) => (
-          <span
-            key={item}
-            className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-medium"
-          >
-            <CheckCircle2Icon className="size-3 text-primary" />
-            {item}
-          </span>
-        ))}
-      </div>
     </div>
   );
 }

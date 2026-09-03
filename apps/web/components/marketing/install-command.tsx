@@ -27,7 +27,11 @@ export function InstallCommand({
       <span className="px-3 font-mono text-base text-primary select-none sm:px-4">
         $
       </span>
-      <code className="min-w-0 flex-1 overflow-x-auto py-5 font-mono text-xs whitespace-nowrap">
+      {/* Overflows on narrow screens; focusable so it can be scrolled by keyboard. */}
+      <code
+        className="min-w-0 flex-1 overflow-x-auto py-5 font-mono text-xs whitespace-nowrap"
+        tabIndex={0}
+      >
         {command}
       </code>
       <button
