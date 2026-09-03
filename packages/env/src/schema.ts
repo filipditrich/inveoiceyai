@@ -164,6 +164,44 @@ export const privateEnvSchema = z.object({
    * shows a placeholder instead of a download button.
    */
   INVOICEY_DRIVE_DMG_URL: z.preprocess(emptyEnvToUndefined, z.url().optional()),
+
+  /**
+   * Polar billing (Plan 33 / ADR 0047). Unset disables checkout and webhooks
+   * so the app still boots. When `POLAR_ENVIRONMENT` is set, the token,
+   * webhook secret, and every launch product id are required.
+   */
+  POLAR_ENVIRONMENT: z.preprocess(
+    emptyEnvToUndefined,
+    z.enum(["sandbox", "production"]).optional(),
+  ),
+  POLAR_ACCESS_TOKEN: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
+  POLAR_WEBHOOK_SECRET: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
+  POLAR_PRODUCT_PRO_MONTHLY: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
+  POLAR_PRODUCT_PRO_YEARLY: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
+  POLAR_PRODUCT_TOKENS_SMALL: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
+  POLAR_PRODUCT_TOKENS_MEDIUM: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
+  POLAR_PRODUCT_TOKENS_LARGE: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
 });
 
 /** Vercel-only system vars (subset). @see https://vercel.com/docs/environment-variables/system-environment-variables */
@@ -182,9 +220,30 @@ export const vercelEnvSchema = z.object({
   npm_package_version: z.string().optional(),
 });
 
+const POLAR_REQUIRED_WHEN_ENABLED = [
+  "POLAR_ACCESS_TOKEN",
+  "POLAR_WEBHOOK_SECRET",
+  "POLAR_PRODUCT_PRO_MONTHLY",
+  "POLAR_PRODUCT_PRO_YEARLY",
+  "POLAR_PRODUCT_TOKENS_SMALL",
+  "POLAR_PRODUCT_TOKENS_MEDIUM",
+  "POLAR_PRODUCT_TOKENS_LARGE",
+] as const;
+
 export const fullEnvSchema = vercelEnvSchema
   .merge(publicEnvSchema)
-  .merge(privateEnvSchema);
+  .merge(privateEnvSchema)
+  .superRefine((data, ctx) => {
+    if (!data.POLAR_ENVIRONMENT) return;
+    for (const key of POLAR_REQUIRED_WHEN_ENABLED) {
+      if (data[key]) continue;
+      ctx.addIssue({
+        code: "custom",
+        path: [key],
+        message: `${key} is required when POLAR_ENVIRONMENT is set`,
+      });
+    }
+  });
 
 export type PublicEnv = z.infer<typeof publicEnvSchema>;
 export type PrivateEnv = z.infer<typeof privateEnvSchema>;

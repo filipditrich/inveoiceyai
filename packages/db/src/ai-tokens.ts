@@ -12,6 +12,8 @@ import {
   type AiUsageProduct,
 } from "./ai-usage";
 import { user } from "./auth-schema";
+import { listLivePolarWorkspaceIds } from "./billing-repo";
+import { availableAiTokens, purchasedDebtBlocksAi } from "./billing-rules";
 import type { InvoiceyDb } from "./create-db";
 import { getWorkspaceEntitlements } from "./plans-repo";
 import type { DbTransaction } from "./transaction";
@@ -48,8 +50,11 @@ export type AiTokenSummary = {
 };
 
 function toSummary(row: typeof aiTokenBalances.$inferSelect): AiTokenSummary {
-  const totalAvailable =
-    row.giftedRemaining + row.monthlyRemaining + row.purchasedRemaining;
+  const totalAvailable = availableAiTokens({
+    monthlyRemaining: row.monthlyRemaining,
+    giftedRemaining: row.giftedRemaining,
+    purchasedRemaining: row.purchasedRemaining,
+  });
   const ms = row.periodEnd.getTime() - Date.now();
   const daysUntilRenewal = Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
   return {
@@ -109,7 +114,10 @@ export async function assertHasTokens(
   workspaceId: string,
 ): Promise<AiTokenSummary> {
   const summary = await getWorkspaceTokenSummary(db, workspaceId);
-  if (summary.totalAvailable <= 0) {
+  if (
+    purchasedDebtBlocksAi(summary.purchasedRemaining) ||
+    summary.totalAvailable <= 0
+  ) {
     throw new OutOfAiTokensError();
   }
   return summary;
@@ -209,6 +217,10 @@ export async function recordLlmUsage(
 
     if (!locked) {
       throw new Error(`ai_token_balances missing for ${input.workspaceId}`);
+    }
+
+    if (purchasedDebtBlocksAi(locked.purchasedRemaining)) {
+      throw new OutOfAiTokensError();
     }
 
     const next = allocateDebit(locked, totalTokens);
@@ -369,8 +381,10 @@ export async function renewDueAiTokenPeriods(
     .where(lte(aiTokenBalances.periodEnd, now))
     .orderBy(asc(aiTokenBalances.periodEnd));
 
+  const livePolar = await listLivePolarWorkspaceIds(db);
   const workspaceIds: string[] = [];
   for (const row of due) {
+    if (livePolar.has(row.workspaceId)) continue;
     await renewMonthlyPeriod(db, row.workspaceId, now);
     workspaceIds.push(row.workspaceId);
   }

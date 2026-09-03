@@ -132,6 +132,7 @@ export {
 } from "./token-grants";
 export {
   PlanNotFoundError,
+  PolarPlanLockedError,
   assignWorkspacePlan,
   countWorkspacesByPlan,
   emailDomain,
@@ -152,6 +153,36 @@ export {
   isFrozen,
   type WorkspaceFreezeState,
 } from "./workspace-freeze";
+export {
+  BILLING_AUTHORITIES,
+  BILLING_OFFER_KEYS,
+  PLAN_OFFER_PLAN_KEYS,
+  TOKEN_PACK_AMOUNTS,
+  canCheckoutPlanOffer,
+  canCheckoutTokenPack,
+  isBillingOfferKey,
+  isPlanOffer,
+  isTokenPackOffer,
+  planKeyForOffer,
+  tokenPackAmount,
+  type BillingAuthority,
+  type BillingOfferKey,
+  type CheckoutRefusal,
+} from "./billing-rules";
+export {
+  BillingWorkspaceNotFoundError,
+  applyNormalizedBillingEvent,
+  claimWebhookEvent,
+  finishWebhookEvent,
+  getWorkspaceBillingState,
+  listLivePolarWorkspaceIds,
+  workspaceHasLivePolarSubscription,
+  type NormalizedBillingEvent,
+  type NormalizedCustomer,
+  type NormalizedOrder,
+  type NormalizedSubscription,
+  type WorkspaceBillingState,
+} from "./billing-repo";
 export {
   resolveWebSessionPrincipal,
   type ResolvedWebSession,
