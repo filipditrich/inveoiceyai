@@ -1,18 +1,24 @@
 import { BrandLogo } from "@/components/brand-logo";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { C15tSettingsLink } from "@/features/c15t";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { NfctronLogo } from "./nfctron-logo";
+
 export async function MarketingFooter() {
   const t = await getTranslations("Marketing.footer");
+  const tHero = await getTranslations("Marketing.hero");
 
   return (
     <footer className="border-t bg-muted/25">
       <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6 md:flex-row md:items-end md:justify-between lg:px-8">
         <div className="max-w-md">
+          {/* In dark mode the visible lockup is aria-hidden, so name the link. */}
           <Link
             href="/"
+            aria-label="Invoicey"
             className="inline-flex items-center gap-2.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <BrandLogo size={28} variant="wordmark" />
@@ -20,9 +26,21 @@ export async function MarketingFooter() {
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
             {t("description")}
           </p>
+          <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+            {tHero("backedBy")}
+            <a
+              href="https://www.nfctron.com"
+              rel="noreferrer"
+              target="_blank"
+              className="inline-flex items-center gap-1.5 font-semibold text-foreground transition-colors hover:text-primary"
+            >
+              <NfctronLogo className="size-3.5" />
+              NFCtron
+            </a>
+          </p>
         </div>
 
-        <div className="space-y-3 md:text-right">
+        <div className="space-y-4 md:text-right">
           <nav
             aria-label={t("legalNav")}
             className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground md:justify-end"
@@ -61,9 +79,11 @@ export async function MarketingFooter() {
               {t("cookieSettings")}
             </C15tSettingsLink>
           </nav>
-          <div className="flex items-center gap-3 md:justify-end">
+          {/* Appearance and language live here only — the header stays a nav bar. */}
+          <div className="flex flex-wrap items-center gap-2 md:justify-end">
             <LocaleSwitcher size="sm" />
-            <p className="text-xs text-muted-foreground">
+            <ThemeToggle />
+            <p className="text-xs text-muted-foreground md:ml-2">
               {t("copyright", { year: String(new Date().getFullYear()) })}
             </p>
           </div>

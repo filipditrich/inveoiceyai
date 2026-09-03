@@ -1,0 +1,72 @@
+.window {
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, white 10%, transparent);
+  border-radius: 1.25rem;
+  background: linear-gradient(180deg, #16161a 0%, #101012 45%, #0c0c0e 100%);
+  box-shadow:
+    0 1px 0 0 color-mix(in oklab, white 6%, transparent) inset,
+    0 32px 80px -24px rgb(0 0 0 / 0.65);
+  margin: 0;
+}
+
+.screen {
+  height: 23rem;
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .screen {
+    height: 28rem;
+  }
+}
+
+.tabProgress {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-end: 0;
+  block-size: 2px;
+  inline-size: 100%;
+  transform-origin: left center;
+  background: var(--color-brand, currentColor);
+  animation: tab-progress linear forwards;
+}
+
+@keyframes tab-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.reveal {
+  animation: demo-reveal 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes demo-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .tabProgress {
+    animation: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .tabProgress {
+    display: none;
+  }
+}
