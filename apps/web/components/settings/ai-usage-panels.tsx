@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { formatTokenCount } from "@/lib/ai/format-tokens";
 import { useFormatter, useTranslations } from "next-intl";
+import Link from "next/link";
 
 import { AiUsageChart, type UsageDayPoint } from "./ai-usage-chart";
 
@@ -79,10 +80,14 @@ export function AiUsagePanels({
               <CardDescription>{t("plan.description")}</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button type="button" variant="outline" disabled>
+              <Button
+                render={<Link href="/settings/workspace/billing" />}
+                type="button"
+                variant="outline"
+              >
                 {t("plan.viewPlans")}
               </Button>
-              <Button type="button" disabled>
+              <Button render={<Link href="/settings/workspace/billing" />}>
                 {t("plan.upgrade")}
               </Button>
             </div>
@@ -107,7 +112,10 @@ export function AiUsagePanels({
                 {t("balance.renewal", { days: balance.daysUntilRenewal })}
               </CardDescription>
             </div>
-            <Button type="button" variant="outline" disabled>
+            <Button
+              render={<Link href="/settings/workspace/billing" />}
+              variant="outline"
+            >
               {t("plan.upgrade")}
             </Button>
           </div>
@@ -279,17 +287,12 @@ export function AiUsagePanels({
           </CardHeader>
           <CardContent className="space-y-3 pt-5">
             <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" disabled>
-                {t("topup.redeem")}
-              </Button>
-              <Button type="button" disabled>
+              <Button render={<Link href="/settings/workspace/billing" />}>
                 {t("topup.buy")}
               </Button>
             </div>
-            {/* Honest about the stub: the buttons are disabled because there
-                is no payment path yet, not because something is broken. */}
             <p className="text-xs text-muted-foreground">
-              {t("topup.comingSoon")}
+              {t("topup.billingHint")}
             </p>
           </CardContent>
         </Card>

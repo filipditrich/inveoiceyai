@@ -22,7 +22,8 @@ export type AdminMutationError =
   | "name_required"
   | "last_owner"
   | "confirmation_mismatch"
-  | "failed";
+  | "failed"
+  | "polar_managed";
 
 /** Ceiling on a single grant — a slipped digit here is not recoverable. */
 const MAX_TOKEN_GRANT = 10_000_000;

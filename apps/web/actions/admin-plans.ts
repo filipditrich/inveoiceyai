@@ -29,7 +29,9 @@ export async function assignWorkspacePlanAction(
   });
 
   if (!result.ok) {
-    redirect(`${target}?toast=admin_action_failed`);
+    redirect(
+      `${target}?toast=${result.error === "polar_managed" ? "admin_polar_managed" : "admin_action_failed"}`,
+    );
   }
 
   revalidatePath(target);

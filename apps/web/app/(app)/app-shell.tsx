@@ -4,6 +4,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AssistantProvider } from "@/components/assistant/assistant-provider";
 import { NavigationPendingOverlay } from "@/components/navigation/navigation-progress";
+import { BillingBanner } from "@/components/settings/billing-banner";
 import { SiteHeader } from "@/components/site-header";
 import { ToastFromSearchParams } from "@/components/toast-from-search-params";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -37,6 +38,7 @@ export function AppShell({
   uploadConfigured = true,
   canSeePayments = true,
   frozenReason = null,
+  billingAlert = null,
 }: Readonly<{
   children: ReactNode;
   user: AppShellUser;
@@ -48,6 +50,7 @@ export function AppShell({
   uploadConfigured?: boolean;
   canSeePayments?: boolean;
   frozenReason?: string | null;
+  billingAlert?: { pastDue: boolean; canceling: boolean } | null;
 }>) {
   const t = useTranslations("App.freeze");
   return (
@@ -88,6 +91,12 @@ export function AppShell({
           ) : null}
           <div className="@container/main relative flex min-h-0 flex-1 flex-col gap-2 overflow-auto">
             <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col px-4 py-4 md:gap-6 md:px-6 md:py-6 lg:px-10">
+              {billingAlert ? (
+                <BillingBanner
+                  canceling={billingAlert.canceling}
+                  pastDue={billingAlert.pastDue}
+                />
+              ) : null}
               {children}
             </div>
             <NavigationPendingOverlay />

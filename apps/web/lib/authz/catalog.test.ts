@@ -15,6 +15,9 @@ describe("role presets", () => {
     expect(PRESET_PERMISSIONS.admin).not.toContain("workspace:manage");
     // An admin runs the workspace day to day but cannot dissolve it.
     expect(PRESET_PERMISSIONS.admin).toContain("members:manage");
+    expect(PRESET_PERMISSIONS.admin).toContain("billing:manage");
+    expect(PRESET_PERMISSIONS.accountant).not.toContain("billing:manage");
+    expect(PRESET_PERMISSIONS.issuer).not.toContain("billing:manage");
   });
 
   it("keeps the payments layer off the issuer and viewer presets", () => {

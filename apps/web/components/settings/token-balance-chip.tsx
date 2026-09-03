@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -105,9 +105,12 @@ export function TokenBalanceChip({
           >
             {t("viewUsage")}
           </Link>
-          <Button type="button" size="sm" className="w-full" disabled>
+          <Link
+            href="/settings/workspace/billing"
+            className={cn(buttonVariants({ size: "sm" }), "w-full")}
+          >
             {t("upgrade")}
-          </Button>
+          </Link>
         </div>
       </PopoverContent>
     </Popover>

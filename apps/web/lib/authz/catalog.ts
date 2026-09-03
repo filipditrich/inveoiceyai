@@ -29,6 +29,7 @@ export const PERMISSIONS = [
   "members:manage",
   "workspace:manage",
   "apikeys:manage",
+  "billing:manage",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
