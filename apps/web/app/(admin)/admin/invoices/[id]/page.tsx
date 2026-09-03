@@ -1,3 +1,4 @@
+import { liftEmailSuppressionAction } from "@/actions/admin-control";
 import { AdminCopyId } from "@/components/admin/admin-copy-id";
 import {
   AdminEmpty,
@@ -8,7 +9,9 @@ import {
 import { InvoiceStatusBadge } from "@/components/invoices/invoice-status-badge";
 import { PageHeader } from "@/components/layout/page-header";
 import { buttonVariants } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { adminGetInvoice } from "@/lib/admin/detail";
+import { adminListInvoiceSuppressions } from "@/lib/admin/workspace-control";
 import { requirePlatformAdmin } from "@/lib/auth/session";
 import { formatInvoiceDate, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -43,6 +46,10 @@ export default async function AdminInvoiceDetailPage({
   if (!detail) {
     notFound();
   }
+  const suppressions = await adminListInvoiceSuppressions({
+    workspaceId: detail.workspaceId,
+    emails: detail.emails.map((email) => email.toEmail),
+  });
 
   /** SAFETY: unknown providers fall through to originLabel / raw id. */
   const originLabel = detail.originProvider
@@ -230,6 +237,37 @@ export default async function AdminInvoiceDetailPage({
           />
         )}
       </AdminSection>
+
+      {suppressions.length > 0 ? (
+        <AdminSection
+          description={t("suppressionsDescription")}
+          title={t("suppressionsTitle")}
+        >
+          <AdminMiniTable
+            headers={[t("columns.to"), t("columns.reason"), ""]}
+            rows={suppressions.map((row) => [
+              row.email,
+              row.reason,
+              <form key="lift" action={liftEmailSuppressionAction}>
+                <input
+                  name="workspaceId"
+                  type="hidden"
+                  value={detail.workspaceId}
+                />
+                <input name="email" type="hidden" value={row.email} />
+                <input
+                  name="returnTo"
+                  type="hidden"
+                  value={`/admin/invoices/${detail.id}`}
+                />
+                <SubmitButton size="sm" variant="ghost">
+                  {t("lift")}
+                </SubmitButton>
+              </form>,
+            ])}
+          />
+        </AdminSection>
+      ) : null}
     </div>
   );
 }

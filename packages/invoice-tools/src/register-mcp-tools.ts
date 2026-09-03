@@ -1,6 +1,12 @@
 import { z } from "zod";
 
 import {
+  WorkspaceFrozenError,
+  assertWorkspaceWritable,
+  tryCreateDbFromEnv,
+} from "@invoicey/db";
+
+import {
   createAndRenderInvoice,
   lookupBusiness,
   searchBusiness,
@@ -21,6 +27,7 @@ import {
   type PresetKind,
 } from "./presets";
 import { sendInvoiceEmailById } from "./send-invoice-email";
+import { resolveWorkspaceId } from "./workspace-context";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const presetKindSchema = z.enum(["issuer", "invoice_template"]);
@@ -49,6 +56,33 @@ export type RegisterInvoiceyMcpToolsOptions = {
   }) => void | Promise<void>;
 };
 
+const WRITE_TOOLS = new Set([
+  "create_invoice",
+  "mark_invoice_paid",
+  "issue_invoice",
+  "send_invoice_email",
+  "save_preset",
+  "delete_preset",
+]);
+
+async function rejectFrozenWrite(toolName: string): Promise<ToolResult | null> {
+  if (!WRITE_TOOLS.has(toolName)) return null;
+  const database = tryCreateDbFromEnv();
+  if (!database) return null;
+  try {
+    await assertWorkspaceWritable(database, resolveWorkspaceId());
+    return null;
+  } catch (error) {
+    if (error instanceof WorkspaceFrozenError) {
+      return jsonToolResult(
+        { ok: false as const, error: "workspace_frozen" },
+        true,
+      );
+    }
+    throw error;
+  }
+}
+
 /** Registers Plan 12a tools on an MCP server (stdio or HTTP). */
 export function registerInvoiceyMcpTools(
   server: McpServer,
@@ -62,7 +96,8 @@ export function registerInvoiceyMcpTools(
     handler: (args: Record<string, unknown>) => Promise<ToolResult>,
   ) => {
     return async (args: Record<string, unknown>): Promise<ToolResult> => {
-      const result = await handler(args);
+      const frozen = await rejectFrozenWrite(toolName);
+      const result = frozen ?? (await handler(args));
       if (onToolCall) {
         try {
           await onToolCall({

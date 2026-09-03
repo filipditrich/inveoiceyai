@@ -1,6 +1,8 @@
 import { and, desc, eq } from "drizzle-orm";
 
 import {
+  WorkspaceFrozenError,
+  assertWorkspaceWritable,
   emailMessages,
   emailSuppressions,
   invoices,
@@ -219,6 +221,14 @@ export async function sendInvoiceEmailById(
     return { ok: false, error: "DATABASE_URL is not set" };
   }
   const workspaceId = resolveWorkspaceId(input.workspaceId);
+  try {
+    await assertWorkspaceWritable(database, workspaceId);
+  } catch (error) {
+    if (error instanceof WorkspaceFrozenError) {
+      return { ok: false, error: "workspace_frozen" };
+    }
+    throw error;
+  }
 
   const [row] = await database
     .select()

@@ -162,3 +162,42 @@ export function readBooleanEntitlement(
 export function hasQuotaRoom(max: number | null, used: number): boolean {
   return max === null || used < max;
 }
+
+/**
+ * Diff a proposed entitlement blob against the plan. Only keys that differ
+ * are kept, so clearing the override later restores the plan exactly.
+ *
+ * Grant rules are not overridable here: their `key` is an idempotency
+ * identifier (ADR 0037), and a workspace form must not re-grant by accident.
+ */
+export function computeEntitlementOverrides(
+  planEntitlements: unknown,
+  next: unknown,
+): EntitlementOverrides | null {
+  const plan = EntitlementsSchema.parse(planEntitlements);
+  const parsed = EntitlementsSchema.parse(next);
+  const overrides: EntitlementOverrides = {};
+
+  /** SAFETY: a parsed Entitlements blob only enumerates schema section keys. */
+  for (const section of Object.keys(plan) as (keyof Entitlements)[]) {
+    const planSection = plan[section];
+    const nextSection = parsed[section];
+    if (!isPlainObject(planSection) || !isPlainObject(nextSection)) continue;
+
+    const planRecord = Object.fromEntries(Object.entries(planSection));
+    const nextRecord = Object.fromEntries(Object.entries(nextSection));
+    const partial: Record<string, unknown> = {};
+    for (const key of Object.keys(nextRecord)) {
+      if (key === "grants") continue;
+      if (JSON.stringify(planRecord[key]) !== JSON.stringify(nextRecord[key])) {
+        partial[key] = nextRecord[key];
+      }
+    }
+    if (Object.keys(partial).length > 0) {
+      /** SAFETY: keys were copied from a parsed section, minus grant rules. */
+      overrides[section] = partial as EntitlementOverrides[typeof section];
+    }
+  }
+
+  return Object.keys(overrides).length === 0 ? null : overrides;
+}

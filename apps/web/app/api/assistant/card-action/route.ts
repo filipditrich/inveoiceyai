@@ -6,6 +6,9 @@ import { requireWorkspaceForRoute } from "@/lib/auth/api";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+import { getWorkspaceFreeze, isFrozen } from "@invoicey/db";
+import { db } from "@invoicey/db/client";
+
 export const runtime = "nodejs";
 
 /**
@@ -35,6 +38,10 @@ export async function POST(request: NextRequest) {
     return gate.response;
   }
   const { workspaceId, userId } = gate.context;
+  const freeze = await getWorkspaceFreeze(db, workspaceId);
+  if (freeze == null || isFrozen(freeze.frozenAt)) {
+    return NextResponse.json({ error: "workspace_frozen" }, { status: 403 });
+  }
 
   let body: unknown;
   try {

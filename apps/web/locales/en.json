@@ -161,7 +161,20 @@
     "admin_plan_client_added": "Entity added to catalog",
     "admin_plan_client_removed": "Entity removed from catalog",
     "admin_invalid_ico": "Invalid IČO",
-    "admin_ares_failed": "ARES lookup failed"
+    "admin_ares_failed": "ARES lookup failed",
+    "workspace_frozen": "This workspace is frozen",
+    "admin_reason_required": "Enter a freeze reason",
+    "admin_session_revoked": "Session revoked",
+    "admin_device_revoked": "Trusted device revoked",
+    "admin_api_key_revoked": "API key revoked",
+    "admin_drive_device_revoked": "Drive device revoked",
+    "admin_workspace_frozen": "Workspace frozen",
+    "admin_workspace_unfrozen": "Workspace unfrozen",
+    "admin_overrides_saved": "Entitlement overrides saved",
+    "admin_overrides_cleared": "Entitlement overrides cleared",
+    "admin_suppression_lifted": "Email suppression lifted",
+    "admin_look_unpublished": "Community look unpublished",
+    "admin_bank_disconnected": "Bank connection disconnected"
   },
   "ToastDescriptions": {
     "issuer_saved": "Your business details are ready for future invoices.",
@@ -214,7 +227,20 @@
     "admin_plan_client_added": "Synced into every workspace on this plan.",
     "admin_plan_client_removed": "Existing clients were kept, but can no longer be invoiced.",
     "admin_invalid_ico": "An IČO is 8 digits.",
-    "admin_ares_failed": "The register did not return data for this IČO."
+    "admin_ares_failed": "The register did not return data for this IČO.",
+    "workspace_frozen": "Reads still work. Writes, crons, MCP, and Eve are blocked until a platform admin unfreezes it.",
+    "admin_reason_required": "A freeze without a reason is just a lock nobody can explain later.",
+    "admin_session_revoked": "That browser must sign in again.",
+    "admin_device_revoked": "The device cookie no longer skips a second factor.",
+    "admin_api_key_revoked": "MCP, Eve, and the CLI can no longer use that key.",
+    "admin_drive_device_revoked": "That Mac must pair again to sync issued PDFs.",
+    "admin_workspace_frozen": "Members can still sign in and read. Writes fail closed.",
+    "admin_workspace_unfrozen": "Tenant writes, crons, MCP, and Eve can run again.",
+    "admin_overrides_saved": "Only keys that differ from the plan are stored.",
+    "admin_overrides_cleared": "The workspace now resolves the plan exactly.",
+    "admin_suppression_lifted": "Automated invoice mail to this address can go out again.",
+    "admin_look_unpublished": "It is no longer in the live community catalog.",
+    "admin_bank_disconnected": "Imported transactions were kept. The token was overwritten."
   },
   "Status": {
     "invoice": {
@@ -919,6 +945,10 @@
     },
     "brand": {
       "tagline": "Invoice automation"
+    },
+    "freeze": {
+      "banner": "This workspace is frozen. You can still read everything; writes are blocked until a platform admin unfreezes it.",
+      "reason": "Reason: {reason}"
     },
     "build": {
       "runningWithSha": "{version} · {sha}",
@@ -2672,6 +2702,7 @@
       "ai": "AI usage",
       "invoices": "Invoices",
       "issuers": "Issuers",
+      "looks": "Looks",
       "backToApp": "Back to app",
       "productGroup": "Product",
       "productDashboard": "Product dashboard",
@@ -2686,7 +2717,8 @@
       "audit": "Audit log",
       "detail": "Detail",
       "plans": "Plans",
-      "ai": "AI usage"
+      "ai": "AI usage",
+      "looks": "Looks"
     },
     "table": {
       "search": "Search",
@@ -2793,7 +2825,8 @@
         "burn": "AI burn (30d)",
         "createdAt": "Created",
         "id": "Workspace id"
-      }
+      },
+      "frozen": "Frozen"
     },
     "invoices": {
       "title": "Invoices",
@@ -2868,12 +2901,40 @@
       "auditTitle": "Security history",
       "auditDescription": "Sign-ins, access changes, and admin actions touching this account.",
       "neverSeen": "Never signed in",
+      "sessionsTitle": "Sessions",
+      "sessionsDescription": "Active Better Auth sessions. The token itself is never shown.",
+      "noSessions": "No sessions.",
+      "devicesTitle": "Trusted devices",
+      "devicesDescription": "Browsers that skip a second sign-in prompt.",
+      "noDevices": "No trusted devices.",
+      "apiKeysTitle": "API keys",
+      "apiKeysDescription": "Personal access tokens for MCP, Eve, and the CLI. Prefix only — never the secret.",
+      "noApiKeys": "No API keys.",
+      "driveTitle": "Drive devices",
+      "driveDescription": "Macs paired for Invoicey Drive.",
+      "noDriveDevices": "No Drive devices.",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "actions": {
+        "revoke": "Revoke"
+      },
       "columns": {
         "workspace": "Workspace",
         "role": "Role",
         "joined": "Joined",
         "email": "Email",
-        "signedUp": "Signed up"
+        "signedUp": "Signed up",
+        "created": "Created",
+        "expires": "Expires",
+        "ip": "IP",
+        "userAgent": "User agent",
+        "label": "Label",
+        "lastSeen": "Last seen",
+        "name": "Name",
+        "prefix": "Prefix",
+        "lastRequest": "Last request",
+        "enabled": "Status",
+        "fingerprint": "Fingerprint"
       }
     },
     "workspaceDetail": {
@@ -2928,7 +2989,10 @@
       },
       "actions": {
         "removeMember": "Remove",
-        "cancelInvite": "Cancel"
+        "cancelInvite": "Cancel",
+        "disconnect": "Disconnect",
+        "lift": "Lift",
+        "unpublish": "Unpublish"
       },
       "columns": {
         "member": "Member",
@@ -2942,7 +3006,47 @@
         "tokens": "Tokens",
         "when": "When",
         "trigger": "Trigger",
-        "note": "Note"
+        "note": "Note",
+        "provider": "Provider",
+        "status": "Status",
+        "error": "Last error",
+        "lastSync": "Last sync",
+        "look": "Look",
+        "version": "Version",
+        "reason": "Reason"
+      },
+      "freeze": {
+        "title": "Freeze",
+        "description": "Occupancy hold — not an entitlement. Members can still sign in and read. Writes, crons, MCP, and Eve fail closed.",
+        "status": "Status",
+        "live": "Live",
+        "frozen": "Frozen",
+        "since": "Frozen since",
+        "reason": "Reason",
+        "reasonLabel": "Why this workspace is frozen",
+        "freeze": "Freeze workspace",
+        "unfreeze": "Unfreeze"
+      },
+      "overrides": {
+        "title": "Entitlement overrides",
+        "description": "Only keys that differ from the plan are stored. Clearing restores the plan exactly. Grant rules stay on the plan row.",
+        "save": "Save overrides",
+        "clear": "Clear overrides"
+      },
+      "banks": {
+        "title": "Bank connections",
+        "description": "Provider and status only. Secrets are never shown.",
+        "empty": "No bank connections."
+      },
+      "suppressions": {
+        "title": "Email suppressions",
+        "description": "Addresses blocked after a bounce or complaint.",
+        "empty": "No suppressions."
+      },
+      "looks": {
+        "title": "Community looks",
+        "description": "Looks this workspace currently publishes to the live catalog.",
+        "empty": "None published."
       },
       "plan": {
         "title": "Plan",
@@ -3125,8 +3229,12 @@
         "to": "To",
         "template": "Template",
         "status": "Status",
-        "when": "When"
+        "when": "When",
+        "reason": "Reason"
       },
+      "suppressionsTitle": "Email suppressions",
+      "suppressionsDescription": "Recipients of this invoice currently blocked for automated mail.",
+      "lift": "Lift",
       "facts": {
         "number": "Number",
         "client": "Client",
@@ -3142,6 +3250,20 @@
         "imported": "Imported",
         "completeness": "Import",
         "batch": "Import batch"
+      }
+    },
+    "looks": {
+      "title": "Community looks",
+      "subtitle": "Live catalog rows. Unpublishing removes them from the catalog; workspace copies stay.",
+      "liveTitle": "Published",
+      "liveDescription": "Only unpublished rows leave the catalog. Look documents are not edited here.",
+      "empty": "No live community looks.",
+      "unpublish": "Unpublish",
+      "columns": {
+        "look": "Look",
+        "version": "Version",
+        "workspace": "Publisher",
+        "published": "Published"
       }
     },
     "issuerDetail": {

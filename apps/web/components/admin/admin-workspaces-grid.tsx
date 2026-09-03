@@ -41,6 +41,7 @@ export type AdminWorkspaceGridItem = {
   tokensRemaining: number;
   aiBurn30d: number;
   createdAtIso: string;
+  frozen: boolean;
 };
 
 export function AdminWorkspacesGrid({
@@ -106,6 +107,7 @@ export function AdminWorkspacesGrid({
             <div className="truncate font-medium">{row.original.name}</div>
             <div className="truncate font-mono text-xs text-muted-foreground">
               {row.original.slug}
+              {row.original.frozen ? ` · ${t("frozen")}` : ""}
             </div>
           </Link>
         ),

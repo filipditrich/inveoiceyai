@@ -1,7 +1,9 @@
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import {
+  WorkspaceFrozenError,
   applyTriggerGrants,
+  assertWorkspaceWritable,
   createManualPaymentAllocation,
   getWorkspaceEntitlements,
   invoiceItems,
@@ -77,6 +79,20 @@ function requireDb(): InvoiceyDb {
     throw new Error("DATABASE_URL is not set");
   }
   return database;
+}
+
+async function rejectIfFrozen(
+  workspaceId?: string,
+): Promise<{ ok: false; error: string } | null> {
+  try {
+    await assertWorkspaceWritable(requireDb(), resolveWorkspaceId(workspaceId));
+    return null;
+  } catch (error) {
+    if (error instanceof WorkspaceFrozenError) {
+      return { ok: false, error: "workspace_frozen" };
+    }
+    throw error;
+  }
 }
 
 function rowToSummary(row: typeof invoices.$inferSelect): InvoiceSummary {
@@ -215,6 +231,8 @@ export async function markInvoicePaidById(options: {
 }): Promise<
   { ok: true; summary: InvoiceSummary } | { ok: false; error: string }
 > {
+  const frozen = await rejectIfFrozen(options.workspaceId);
+  if (frozen) return frozen;
   const database = requireDb();
   const workspaceId = resolveWorkspaceId(options.workspaceId);
   const rows = await database
@@ -323,6 +341,8 @@ export async function cancelInvoiceById(options: {
   id: string;
   workspaceId?: string;
 }): Promise<CancelInvoiceResult> {
+  const frozen = await rejectIfFrozen(options.workspaceId);
+  if (frozen) return frozen;
   const workspaceId = resolveWorkspaceId(options.workspaceId);
   return withDbTransaction((tx) =>
     cancelLockedInvoice(tx, { id: options.id, workspaceId }),
@@ -337,6 +357,8 @@ export async function unmarkInvoicePaidById(options: {
 }): Promise<
   { ok: true; summary: InvoiceSummary } | { ok: false; error: string }
 > {
+  const frozen = await rejectIfFrozen(options.workspaceId);
+  if (frozen) return frozen;
   const database = requireDb();
   const workspaceId = resolveWorkspaceId(options.workspaceId);
   const rows = await database
@@ -462,6 +484,10 @@ export async function bulkDeleteDraftInvoices(options: {
   ids: string[];
   workspaceId?: string;
 }): Promise<BulkOpResult> {
+  const frozen = await rejectIfFrozen(options.workspaceId);
+  if (frozen) {
+    return { ok: 0, skipped: 0, failed: options.ids.length };
+  }
   const database = requireDb();
   const workspaceId = resolveWorkspaceId(options.workspaceId);
   const rows = await loadWorkspaceInvoicesByIds(
@@ -513,6 +539,8 @@ export async function issueInvoiceById(options: {
     }
   | { ok: false; error: string }
 > {
+  const frozen = await rejectIfFrozen(options.workspaceId);
+  if (frozen) return frozen;
   const workspaceId = resolveWorkspaceId(options.workspaceId);
 
   try {

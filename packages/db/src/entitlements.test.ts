@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   BASE_ENTITLEMENTS,
+  computeEntitlementOverrides,
   hasQuotaRoom,
   readBooleanEntitlement,
   resolveEntitlements,
@@ -138,5 +139,57 @@ describe("hasQuotaRoom", () => {
     // Already over the limit after a downgrade: cannot grow, but nothing is
     // deleted and every existing row stays valid (ADR 0035).
     expect(hasQuotaRoom(1, 8)).toBe(false);
+  });
+});
+
+describe("computeEntitlementOverrides", () => {
+  it("returns null when the workspace matches the plan", () => {
+    expect(
+      computeEntitlementOverrides(BASE_ENTITLEMENTS, BASE_ENTITLEMENTS),
+    ).toBeNull();
+  });
+
+  it("keeps only the keys that differ", () => {
+    expect(
+      computeEntitlementOverrides(BASE_ENTITLEMENTS, {
+        ...BASE_ENTITLEMENTS,
+        seats: { max: 8 },
+        features: { ...BASE_ENTITLEMENTS.features, bankConnections: true },
+      }),
+    ).toEqual({
+      seats: { max: 8 },
+      features: { bankConnections: true },
+    });
+  });
+
+  it("replaces domain lists wholesale and ignores grant-rule diffs", () => {
+    const withDomains = {
+      ...BASE_ENTITLEMENTS,
+      auth: { allowedEmailDomains: ["invoicey.app"] },
+    };
+    expect(computeEntitlementOverrides(BASE_ENTITLEMENTS, withDomains)).toEqual(
+      {
+        auth: { allowedEmailDomains: ["invoicey.app"] },
+      },
+    );
+
+    const withGrants = {
+      ...BASE_ENTITLEMENTS,
+      ai: {
+        ...BASE_ENTITLEMENTS.ai,
+        grants: [
+          {
+            key: "signup-gift",
+            trigger: "signup" as const,
+            tokens: 10_000,
+            bucket: "gifted" as const,
+            notify: false,
+          },
+        ],
+      },
+    };
+    expect(
+      computeEntitlementOverrides(BASE_ENTITLEMENTS, withGrants),
+    ).toBeNull();
   });
 });

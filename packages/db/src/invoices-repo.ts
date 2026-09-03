@@ -5,6 +5,7 @@ import { ensureClient, normalizeIco } from "./clients-repo";
 import type { InvoiceyDb } from "./create-db";
 import { invoiceItems, invoices, issuerBusinesses } from "./schema";
 import { ensureDefaultWorkspace, getDefaultWorkspaceId } from "./workspace";
+import { assertWorkspaceWritable } from "./workspace-freeze";
 
 /** Line shape for denormalized `invoice_items` rows. */
 export interface PersistableInvoiceItem {
@@ -189,6 +190,7 @@ export async function persistDraftInvoice(
 ): Promise<PersistDraftInvoiceResult> {
   const workspaceId = options?.workspaceId ?? getDefaultWorkspaceId();
   await ensureDefaultWorkspace(database, { id: workspaceId });
+  await assertWorkspaceWritable(database, workspaceId);
 
   const now = new Date();
   const clientSnapshotBase = invoice.client as Record<string, unknown>;

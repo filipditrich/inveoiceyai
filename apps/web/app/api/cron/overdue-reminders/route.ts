@@ -3,6 +3,7 @@ import {
   sendOverdueReminderForInvoice,
 } from "@/lib/email/send-invoice";
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
+import { isNull } from "drizzle-orm";
 
 import { workspaces } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
@@ -26,7 +27,10 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const todayIso = pragueTodayIso();
-  const workspaceRows = await db.select({ id: workspaces.id }).from(workspaces);
+  const workspaceRows = await db
+    .select({ id: workspaces.id })
+    .from(workspaces)
+    .where(isNull(workspaces.frozenAt));
 
   let sent = 0;
   let skipped = 0;

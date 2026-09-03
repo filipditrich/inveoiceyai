@@ -9,7 +9,11 @@ import {
 } from "@/lib/auth/workspaces";
 import { can } from "@/lib/authz/can";
 
-import { getWorkspaceTokenSummary } from "@invoicey/db";
+import {
+  getWorkspaceFreeze,
+  getWorkspaceTokenSummary,
+  isFrozen,
+} from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 
 import { AppShell } from "./app-shell";
@@ -32,6 +36,7 @@ export default async function AppShellLayout({
     defaultWorkspaceId,
     tokenSummary,
     canSeePayments,
+    freeze,
   ] = await Promise.all([
     isPlatformAdmin(),
     listUserWorkspaces(user.id),
@@ -44,6 +49,10 @@ export default async function AppShellLayout({
     // Hides the payments nav for a member without the permission. The route
     // itself is gated too — this only avoids offering a dead end (ADR 0038).
     can("payments:read").catch(() => false),
+    getWorkspaceFreeze(db, workspaceId).catch((error: unknown) => {
+      console.error("[app-shell] freeze state unavailable", error);
+      return null;
+    }),
   ]);
 
   return (
@@ -51,6 +60,9 @@ export default async function AppShellLayout({
       activeWorkspaceId={workspaceId}
       canSeePayments={canSeePayments}
       defaultWorkspaceId={defaultWorkspaceId}
+      frozenReason={
+        isFrozen(freeze?.frozenAt) ? (freeze?.freezeReason ?? "") : null
+      }
       isPlatformAdmin={platformAdmin}
       tokenBalance={
         tokenSummary

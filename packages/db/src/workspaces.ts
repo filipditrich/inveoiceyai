@@ -50,9 +50,19 @@ export const workspaces = pgTable(
     planAssignedBy: text("plan_assigned_by"),
     defaultLookId: text("default_look_id").notNull().default("classic"),
     defaultLookVersion: text("default_look_version").notNull().default("1.0.0"),
+    /**
+     * Occupancy hold (ADR 0046). Null = live. Not an entitlement — freeze
+     * fails closed on writes even if the plan would otherwise allow them.
+     */
+    frozenAt: timestamp("frozen_at", { withTimezone: true }),
+    frozenBy: text("frozen_by"),
+    freezeReason: text("freeze_reason"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
-  (t) => [index("workspaces_plan_idx").on(t.planId)],
+  (t) => [
+    index("workspaces_plan_idx").on(t.planId),
+    index("workspaces_frozen_idx").on(t.frozenAt),
+  ],
 );

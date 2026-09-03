@@ -4,7 +4,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { member } from "@invoicey/db";
+import { getWorkspaceFreeze, isFrozen, member } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import {
   parseIssuedByGender,
@@ -124,6 +124,21 @@ export const requireWorkspace = cache(async (): Promise<WorkspaceContext> => {
   }
   return context;
 });
+
+/**
+ * Tenant writes. Reads and the app shell keep using `requireWorkspace()` so a
+ * frozen workspace stays open to look at.
+ */
+export const requireWritableWorkspace = cache(
+  async (): Promise<WorkspaceContext> => {
+    const context = await requireWorkspace();
+    const freeze = await getWorkspaceFreeze(db, context.workspaceId);
+    if (freeze == null || isFrozen(freeze.frozenAt)) {
+      redirect("/dashboard?toast=workspace_frozen");
+    }
+    return context;
+  },
+);
 
 /** Asserts membership of an explicitly supplied workspace id. */
 export async function assertWorkspaceMember(

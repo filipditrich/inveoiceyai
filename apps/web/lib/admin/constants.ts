@@ -18,6 +18,16 @@ export const PLATFORM_AUDIT_TYPES = [
   "platform_invite_cancel",
   "platform_plan_assign",
   "platform_plan_update",
+  "platform_session_revoke",
+  "platform_device_revoke",
+  "platform_api_key_revoke",
+  "platform_drive_device_revoke",
+  "platform_workspace_freeze",
+  "platform_workspace_unfreeze",
+  "platform_entitlement_override",
+  "platform_email_suppression_lift",
+  "platform_community_look_unpublish",
+  "platform_bank_disconnect",
 ] as const satisfies readonly SecurityAuditEventType[];
 
 export type PlatformMonthPoint = {

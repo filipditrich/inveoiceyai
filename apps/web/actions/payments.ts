@@ -1,6 +1,6 @@
 "use server";
 
-import { requireWorkspace } from "@/lib/auth/session";
+import { requireWritableWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
 import { normalizeFioError } from "@/lib/payments/fio-error";
 import {
@@ -60,7 +60,7 @@ function revalidatePayments(invoiceId?: string) {
 
 export async function connectFio(formData: FormData): Promise<void> {
   await assertCan("payments:manage");
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   const token = field(formData, "token");
   const issuerId = field(formData, "issuerId");
   if (!issuerId) settingsRedirect({ error: "missing_issuer" });
@@ -90,7 +90,7 @@ export async function connectFio(formData: FormData): Promise<void> {
 
 export async function syncFio(formData: FormData): Promise<void> {
   await assertCan("payments:manage");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   const connectionId = field(formData, "connectionId");
   if (!connectionId) settingsRedirect({ error: "missing_connection" });
   const result = await syncFioConnection({ workspaceId, connectionId });
@@ -111,7 +111,7 @@ export async function syncFio(formData: FormData): Promise<void> {
 
 export async function disconnectFio(formData: FormData): Promise<void> {
   await assertCan("payments:manage");
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   const connectionId = field(formData, "connectionId");
   if (!connectionId) settingsRedirect({ error: "missing_connection" });
   const disconnected = await deleteFioConnection({
@@ -127,7 +127,7 @@ export async function disconnectFio(formData: FormData): Promise<void> {
 
 export async function toggleFioAutoMatch(formData: FormData): Promise<void> {
   await assertCan("payments:manage");
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   const connectionId = field(formData, "connectionId");
   if (!connectionId) settingsRedirect({ error: "missing_connection" });
   const enabled = field(formData, "enabled") === "true";
@@ -177,7 +177,7 @@ export async function discoverMonetaAccountsAction(input: {
 
 export async function connectMoneta(formData: FormData): Promise<void> {
   await assertCan("payments:manage");
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   const token = field(formData, "token");
   const issuerId = field(formData, "issuerId");
   let providerAccountId = field(formData, "providerAccountId");
@@ -218,7 +218,7 @@ export async function connectMoneta(formData: FormData): Promise<void> {
 
 export async function syncMoneta(formData: FormData): Promise<void> {
   await assertCan("payments:manage");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   const connectionId = field(formData, "connectionId");
   if (!connectionId) settingsRedirect({ error: "missing_connection" });
   const result = await syncMonetaConnection({ workspaceId, connectionId });
@@ -239,7 +239,7 @@ export async function syncMoneta(formData: FormData): Promise<void> {
 
 export async function disconnectMoneta(formData: FormData): Promise<void> {
   await assertCan("payments:manage");
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   const connectionId = field(formData, "connectionId");
   if (!connectionId) settingsRedirect({ error: "missing_connection" });
   const disconnected = await deleteMonetaConnection({
@@ -255,7 +255,7 @@ export async function disconnectMoneta(formData: FormData): Promise<void> {
 
 export async function toggleMonetaAutoMatch(formData: FormData): Promise<void> {
   await assertCan("payments:manage");
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   const connectionId = field(formData, "connectionId");
   if (!connectionId) settingsRedirect({ error: "missing_connection" });
   const enabled = field(formData, "enabled") === "true";
@@ -280,7 +280,7 @@ export async function toggleMonetaAutoMatch(formData: FormData): Promise<void> {
 export async function confirmPaymentProposal(
   formData: FormData,
 ): Promise<void> {
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   const proposalId = field(formData, "proposalId");
   const result = await confirmPaymentMatchProposal({
     workspaceId,
@@ -304,7 +304,7 @@ export async function confirmPaymentProposal(
 }
 
 export async function rejectPaymentProposal(formData: FormData): Promise<void> {
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   const proposalId = field(formData, "proposalId");
   const rejected = await rejectPaymentMatchProposal({
     workspaceId,
@@ -318,7 +318,7 @@ export async function rejectPaymentProposal(formData: FormData): Promise<void> {
 }
 
 export async function addManualPayment(formData: FormData): Promise<void> {
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   const invoiceId = field(formData, "invoiceId");
   const amount = field(formData, "amount").replace(",", ".");
   const effectiveDate = field(formData, "effectiveDate");
@@ -352,7 +352,7 @@ export async function addManualPayment(formData: FormData): Promise<void> {
 }
 
 export async function reversePayment(formData: FormData): Promise<void> {
-  const { workspaceId, userId } = await requireWorkspace();
+  const { workspaceId, userId } = await requireWritableWorkspace();
   const allocationId = field(formData, "allocationId");
   const result = await reversePaymentAllocation({
     workspaceId,

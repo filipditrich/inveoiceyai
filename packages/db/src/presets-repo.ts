@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import type { InvoiceyDb } from "./create-db";
 import { presets } from "./schema";
 import { ensureDefaultWorkspace, getDefaultWorkspaceId } from "./workspace";
+import { assertWorkspaceWritable } from "./workspace-freeze";
 
 export type PresetKind = "issuer" | "invoice_template";
 
@@ -77,6 +78,7 @@ export async function savePresetDb(
 ): Promise<PresetRecord> {
   const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
   await ensureDefaultWorkspace(database, { id: workspaceId });
+  await assertWorkspaceWritable(database, workspaceId);
 
   const id = options.id ?? randomUUID();
   const name = options.name.trim();
@@ -118,6 +120,7 @@ export async function deletePresetDb(
   options: { id: string; workspaceId?: string },
 ): Promise<boolean> {
   const workspaceId = options.workspaceId ?? getDefaultWorkspaceId();
+  await assertWorkspaceWritable(database, workspaceId);
   const deleted = await database
     .delete(presets)
     .where(

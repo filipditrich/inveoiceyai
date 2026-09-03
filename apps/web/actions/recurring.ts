@@ -1,6 +1,6 @@
 "use server";
 
-import { requireWorkspace } from "@/lib/auth/session";
+import { requireWritableWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
 import { revalidatePath } from "next/cache";
@@ -36,7 +36,7 @@ function parseCadence(raw: string | undefined): RecurringCadence | null {
 export async function saveRecurringFromInvoice(
   formData: FormData,
 ): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("recurring:manage");
   const invoiceId = optionalTrim(formData.get("invoiceId"));
   const name = optionalTrim(formData.get("name"));
@@ -69,7 +69,7 @@ export async function saveRecurringFromInvoice(
 }
 
 export async function setRecurringPaused(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("recurring:manage");
   const scheduleId = optionalTrim(formData.get("scheduleId"));
   const paused = optionalTrim(formData.get("paused")) === "1";
@@ -93,7 +93,7 @@ export async function setRecurringPaused(formData: FormData): Promise<void> {
 }
 
 export async function skipRecurringNext(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   await assertCan("recurring:manage");
   const scheduleId = optionalTrim(formData.get("scheduleId"));
   if (!scheduleId) {
@@ -113,7 +113,7 @@ export async function skipRecurringNext(formData: FormData): Promise<void> {
 
 export async function runRecurringNow(formData: FormData): Promise<void> {
   await assertCan("recurring:manage");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   const scheduleId = optionalTrim(formData.get("scheduleId"));
   if (!scheduleId) {
     fail("/invoices/recurring", "missing_id");
@@ -134,7 +134,7 @@ export async function runRecurringNow(formData: FormData): Promise<void> {
 
 export async function deleteRecurring(formData: FormData): Promise<void> {
   await assertCan("recurring:manage");
-  const { workspaceId } = await requireWorkspace();
+  const { workspaceId } = await requireWritableWorkspace();
   const templateId = optionalTrim(formData.get("templateId"));
   if (!templateId) {
     fail("/invoices/recurring", "missing_id");

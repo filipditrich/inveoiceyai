@@ -39,4 +39,17 @@ describe("PLATFORM_AUDIT_TYPES", () => {
     expect(PLATFORM_AUDIT_TYPES).toContain("platform_plan_assign");
     expect(PLATFORM_AUDIT_TYPES).toContain("platform_plan_update");
   });
+
+  it("includes the 18c control writes", () => {
+    expect(PLATFORM_AUDIT_TYPES).toContain("platform_session_revoke");
+    expect(PLATFORM_AUDIT_TYPES).toContain("platform_device_revoke");
+    expect(PLATFORM_AUDIT_TYPES).toContain("platform_api_key_revoke");
+    expect(PLATFORM_AUDIT_TYPES).toContain("platform_drive_device_revoke");
+    expect(PLATFORM_AUDIT_TYPES).toContain("platform_workspace_freeze");
+    expect(PLATFORM_AUDIT_TYPES).toContain("platform_workspace_unfreeze");
+    expect(PLATFORM_AUDIT_TYPES).toContain("platform_entitlement_override");
+    expect(PLATFORM_AUDIT_TYPES).toContain("platform_email_suppression_lift");
+    expect(PLATFORM_AUDIT_TYPES).toContain("platform_community_look_unpublish");
+    expect(PLATFORM_AUDIT_TYPES).toContain("platform_bank_disconnect");
+  });
 });

@@ -2,7 +2,7 @@ import { syncFioConnection } from "@/lib/payments/fio-service";
 import { syncMonetaConnection } from "@/lib/payments/moneta-service";
 import { and, asc, eq, inArray, isNull, lte, or } from "drizzle-orm";
 
-import { bankConnections } from "@invoicey/db";
+import { bankConnections, workspaces } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
 
@@ -30,8 +30,10 @@ export async function GET(request: Request): Promise<Response> {
       provider: bankConnections.provider,
     })
     .from(bankConnections)
+    .innerJoin(workspaces, eq(bankConnections.workspaceId, workspaces.id))
     .where(
       and(
+        isNull(workspaces.frozenAt),
         inArray(bankConnections.provider, ["fio", "moneta"]),
         eq(bankConnections.status, "active"),
         or(

@@ -101,6 +101,7 @@ export {
   BASE_ENTITLEMENTS,
   EntitlementsSchema,
   TokenGrantRuleSchema,
+  computeEntitlementOverrides,
   hasQuotaRoom,
   readBooleanEntitlement,
   resolveEntitlements,
@@ -143,6 +144,14 @@ export {
   type AssignPlanInput,
   type WorkspaceEntitlements,
 } from "./plans-repo";
+export {
+  WorkspaceFrozenError,
+  assertNotFrozen,
+  assertWorkspaceWritable,
+  getWorkspaceFreeze,
+  isFrozen,
+  type WorkspaceFreezeState,
+} from "./workspace-freeze";
 export {
   resolveWebSessionPrincipal,
   type ResolvedWebSession,
