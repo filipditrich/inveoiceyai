@@ -333,9 +333,10 @@
     },
     "generatorTeaser": {
       "title": "Nejdřív opravdová faktura",
-      "body": "Doplňte IČO dodavatele. Otevřeme generátor — bez účtu, náhled s vodoznakem, čisté PDF po zadání e-mailu.",
-      "cta": "Otevřít generátor",
-      "ico": "Vaše IČO"
+      "body": "Zadejte IČO dodavatele. Otevřeme vyplněnou Classic fakturu — bez účtu, náhled s vodoznakem, čisté PDF po zadání e-mailu.",
+      "cta": "Vystavit fakturu zdarma",
+      "ico": "Vaše IČO",
+      "hint": "ARES doplní dodavatele. Bez IČO začnete od ukázky."
     },
     "demo": {
       "ariaLabel": "Prohlídka Invoicey",
@@ -891,7 +892,11 @@
     "eyebrow": "Bez účtu",
     "title": "Vystavte opravdovou fakturu",
     "subtitle": "Stejný ověřený doklad, jaký Invoicey používá u každé vystavené faktury. Náhled je s vodoznakem, stažený PDF je čistý.",
+    "step1": "Nejdřív IČO — ARES doplní dodavatele",
+    "step2": "Pište přímo na stránku. Součty se dopočítají.",
+    "step3": "Čisté PDF po zadání e-mailu.",
     "typeOnPage": "Pište přímo na fakturu. Součty a DPH se dopočítají — ty editovat nelze.",
+    "sampleHint": "Ukázka je předvyplněná, abyste hned viděli opravdovou stránku. Cokoli změňte — ARES se spustí jen při zadání nového IČO.",
     "settings": "Nastavení dokladu",
     "download": "Stáhnout PDF",
     "downloading": "Vystavuji…",

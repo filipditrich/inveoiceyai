@@ -58,6 +58,7 @@ export type InvoiceLabels = {
   docNo: string;
   correctsDocument: string;
   correctsDocumentIsdoc: string;
+  previewWatermark: string;
 };
 
 const CS: InvoiceLabels = {
@@ -115,6 +116,7 @@ const CS: InvoiceLabels = {
   docNo: "č.",
   correctsDocument: "Opravuje doklad č.:",
   correctsDocumentIsdoc: "Opravuje doklad č.",
+  previewWatermark: "NÁHLED",
 };
 
 const EN: InvoiceLabels = {
@@ -172,6 +174,7 @@ const EN: InvoiceLabels = {
   docNo: "No.",
   correctsDocument: "Corrects document no.:",
   correctsDocumentIsdoc: "Corrects document no.",
+  previewWatermark: "PREVIEW",
 };
 
 const ISDOC_COUNTRY_CS: Record<string, string> = {

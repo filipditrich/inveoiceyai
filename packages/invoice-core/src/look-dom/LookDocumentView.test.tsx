@@ -68,4 +68,20 @@ describe("LookDocumentView", () => {
     expect(html).toContain('data-look-block="issuer"');
     expect(html).toContain("<input");
   });
+
+  it("puts IČO first in edit mode and keeps address collapsed", () => {
+    const invoice = parseInvoice(domesticFixture);
+    const html = renderToStaticMarkup(
+      createElement(LookDocumentView, {
+        invoice,
+        onEdit: () => undefined,
+      }),
+    );
+    expect(html).toContain('placeholder="Název firmy"');
+    expect(html).toContain("Adresa a identifikace");
+    expect(html).not.toContain('placeholder="Ulice a číslo"');
+    const issuer = html.split('data-look-block="issuer"')[1] ?? "";
+    expect(issuer.indexOf("IČO")).toBeGreaterThan(-1);
+    expect(issuer.indexOf("IČO")).toBeLessThan(issuer.indexOf("Název firmy"));
+  });
 });

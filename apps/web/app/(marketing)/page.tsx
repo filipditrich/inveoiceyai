@@ -19,7 +19,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { env } from "@/env.config.server";
 import { getOptionalSession } from "@/lib/auth/session";
-import { appLocaleFrom, generatorPathForLocale } from "@/lib/generator/href";
 import {
   ArrowDownIcon,
   ArrowRightIcon,
@@ -46,7 +45,7 @@ import {
   SquareTerminalIcon,
   WalletIcon,
 } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -70,8 +69,6 @@ export default async function HomePage() {
   const t = await getTranslations("Marketing");
   const tDownload = await getTranslations("Marketing.download");
   const user = await getOptionalSession();
-  const locale = appLocaleFrom(await getLocale());
-  const generatorHref = generatorPathForLocale(locale);
   const macUrl = macDownloadUrl(env.INVOICEY_DRIVE_DMG_URL);
   const downloadLabels = {
     cli: tDownload("cli"),
@@ -241,7 +238,7 @@ export default async function HomePage() {
             <p className="mt-7 max-w-2xl text-lg leading-relaxed text-pretty text-muted-foreground sm:text-xl">
               {t("hero.subtitle")}
             </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row">
               <Button
                 size="lg"
                 className={`h-11 text-[0.95rem] shadow-lg shadow-primary/15 ${MARKETING_PILL_LG_CLASS}`}
@@ -256,14 +253,9 @@ export default async function HomePage() {
                 macDownloadUrl={macUrl}
               />
             </div>
-            <p className="mt-4">
-              <Link
-                href={generatorHref}
-                className="text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
-              >
-                {t("hero.ctaGenerator")}
-              </Link>
-            </p>
+            <div className="mt-6">
+              <GeneratorTeaser />
+            </div>
             <div className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2Icon className="size-3.5 text-primary" />
@@ -301,9 +293,6 @@ export default async function HomePage() {
           </div>
 
           <div className={`${motionStyles.heroDemo} mt-16 sm:mt-20`}>
-            <div className="mb-10">
-              <GeneratorTeaser />
-            </div>
             <ProductDemo />
           </div>
         </div>

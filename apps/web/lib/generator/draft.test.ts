@@ -6,6 +6,7 @@ import {
   guestDisplayInvoiceFromDraft,
   guestInvoiceFromDraft,
   guestPreviewInvoiceFromDraft,
+  sampleGeneratorDraft,
   withPrefillNumber,
   withSuggestedIban,
 } from "./draft";
@@ -75,6 +76,24 @@ describe("guestInvoiceFromDraft", () => {
   });
 });
 
+describe("sampleGeneratorDraft", () => {
+  it("issues immediately so the generator can show a live PDF", () => {
+    const draft = sampleGeneratorDraft({
+      issuerId: ISSUER_ID,
+      clientId: CLIENT_ID,
+      locale: "cs",
+    });
+    const built = guestInvoiceFromDraft(draft);
+    expect(built.ok).toBe(true);
+    if (!built.ok) return;
+    expect(built.invoice.issuer.name).toBe("Studio Ukázka s.r.o.");
+    expect(built.invoice.totals.total).toBe(9680);
+    const display = guestDisplayInvoiceFromDraft(draft);
+    expect(built.invoice.issuer.bank.iban).toBe("CZ6508000000192000145399");
+    expect(display?.issuer.ico).toBe("12345678");
+    expect(display?.items[0]?.description).toContain("Grafické");
+  });
+});
 describe("guestPreviewInvoiceFromDraft", () => {
   it("builds a Classic invoice from an empty draft so the editor can mount", () => {
     const draft = emptyGeneratorDraft({

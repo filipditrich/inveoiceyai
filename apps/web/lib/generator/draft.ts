@@ -125,6 +125,56 @@ export function emptyGeneratorDraft(input: {
   };
 }
 
+/** Filled Classic sample so the generator opens as a real page, not a blank form. */
+export function sampleGeneratorDraft(input: {
+  issuerId: string;
+  clientId: string;
+  locale: AppLocale;
+}): GeneratorDraft {
+  const draft = emptyGeneratorDraft(input);
+  const czech = input.locale === "cs";
+  return withPrefillNumber({
+    ...draft,
+    notes: czech
+      ? "Splatnost 14 dní. Děkujeme za spolupráci."
+      : "Due in 14 days. Thank you.",
+    issuer: withSuggestedIban({
+      ...draft.issuer,
+      name: czech ? "Studio Ukázka s.r.o." : "Sample Studio s.r.o.",
+      ico: "12345678",
+      dic: "CZ12345678",
+      street: "Na Příkopě 14",
+      city: "Praha",
+      zip: "110 00",
+      contactEmail: "fakturace@studio-ukazka.example",
+      accountNumber: "19-2000145399/0800",
+      vatPayer: true,
+    }),
+    client: {
+      ...draft.client,
+      name: czech ? "Klient Demo s.r.o." : "Demo Client s.r.o.",
+      ico: "87654321",
+      street: "Křížová 2598/4",
+      city: "Brno",
+      zip: "603 00",
+      contactEmail: czech
+        ? "ucetni@klient-demo.example"
+        : "accounts@demo-client.example",
+    },
+    items: [
+      {
+        description: czech
+          ? "Grafické práce — září"
+          : "Design work — September",
+        quantity: 1,
+        unit: "ks",
+        unitPriceWithoutVat: 8000,
+        vatRate: 21,
+      },
+    ],
+  });
+}
+
 export function applyAresToParty(
   party: GeneratorParty,
   draft: ClientDraft,

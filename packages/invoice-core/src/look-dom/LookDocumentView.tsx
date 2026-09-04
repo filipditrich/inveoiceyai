@@ -12,6 +12,7 @@ import type { Invoice } from "../schema";
 import { cssFromLookBox } from "./css";
 import type { LookEdit } from "./edits";
 import { DOM_LOOK_BLOCK_HANDLERS } from "./handlers";
+import { lookEditPlaceholders } from "./placeholders";
 import type { LookDomAssets, LookDomCtx } from "./types";
 
 export function LookDocumentView({
@@ -38,6 +39,7 @@ export function LookDocumentView({
     intlLocale,
     styles,
     assets,
+    placeholders: lookEditPlaceholders(invoice.meta.language),
     onEdit,
   };
 
