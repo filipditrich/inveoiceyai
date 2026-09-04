@@ -112,6 +112,28 @@ describe("guestPreviewInvoiceFromDraft", () => {
     expect(display?.client.name).toBe("");
     expect(display?.items[0]?.description).toBe("");
   });
+
+  it("keeps the editor mounted while IČO, zip, email, or bank are mid-keystroke", () => {
+    const draft = sampleGeneratorDraft({
+      issuerId: ISSUER_ID,
+      clientId: CLIENT_ID,
+      locale: "en",
+    });
+    draft.client.ico = "2";
+    draft.issuer.ico = "270";
+    draft.issuer.contactEmail = "fa";
+    draft.issuer.zip = "11";
+    draft.issuer.accountNumber = "19";
+    draft.issuer.iban = "CZ";
+    draft.issuer.ibanTouched = true;
+    draft.issuer.dic = "CZ";
+    expect(guestPreviewInvoiceFromDraft(draft).ok).toBe(true);
+    const display = guestDisplayInvoiceFromDraft(draft);
+    expect(display?.client.ico).toBe("2");
+    expect(display?.issuer.ico).toBe("270");
+    expect(display?.issuer.contactEmail).toBe("fa");
+    expect(display?.issuer.bank.accountNumber).toBe("19");
+  });
 });
 
 describe("applyAresToIssuer", () => {

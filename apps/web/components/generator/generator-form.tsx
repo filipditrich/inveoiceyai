@@ -87,8 +87,11 @@ export function GeneratorForm() {
     if (!draft) return { invoice: null, display: null, error: null };
     const built = guestPreviewInvoiceFromDraft(draft);
     const display = guestDisplayInvoiceFromDraft(draft);
-    if (built.ok) return { invoice: built.invoice, display, error: null };
-    return { invoice: null, display: null, error: null };
+    return {
+      invoice: built.ok ? built.invoice : null,
+      display,
+      error: null,
+    };
   }, [draft]);
 
   React.useEffect(() => {
