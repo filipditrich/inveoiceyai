@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
 const PDF_VIEW_HASH = "#page=1&toolbar=0&navpanes=0&scrollbar=0&view=Fit";
+const PDF_PAGE_FIT_HASH =
+  "#page=1&toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit";
 
 export function InvoicePdfPreview({
   url,
@@ -13,6 +15,7 @@ export function InvoicePdfPreview({
   lockedPreview = false,
   className,
   emptyLabel,
+  zoom = "fit",
 }: {
   url: string | null;
   updating?: boolean;
@@ -21,9 +24,11 @@ export function InvoicePdfPreview({
   lockedPreview?: boolean;
   className?: string;
   emptyLabel?: string;
+  zoom?: "fit" | "page-fit";
 }) {
   const t = useTranslations("PdfPreview");
-  const src = url ? `${url}${PDF_VIEW_HASH}` : null;
+  const hash = zoom === "page-fit" ? PDF_PAGE_FIT_HASH : PDF_VIEW_HASH;
+  const src = url ? `${url}${hash}` : null;
 
   return (
     <div

@@ -21,7 +21,7 @@ import {
   type InvoiceDisplayStatus,
 } from "@invoicey/invoice-core/status-display";
 
-import { ADMIN_LIST_CAP, utcDaysAgo } from "./constants";
+import { ADMIN_LIST_CAP, coerceDate, utcDaysAgo } from "./constants";
 import { snapshotString } from "./snapshot";
 
 export { ADMIN_LIST_CAP };
@@ -97,17 +97,7 @@ export async function adminListUsers(): Promise<AdminUserRow[]> {
     })
     .from(user)
     .leftJoin(member, eq(member.userId, user.id))
-    .groupBy(
-      user.id,
-      user.name,
-      user.email,
-      user.emailVerified,
-      user.platformRole,
-      user.defaultWorkspaceId,
-      user.referralCode,
-      user.referredByUserId,
-      user.createdAt,
-    )
+    .groupBy(user.id)
     .orderBy(desc(user.createdAt))
     .limit(ADMIN_LIST_CAP);
 
@@ -159,7 +149,7 @@ export async function adminListUsers(): Promise<AdminUserRow[]> {
       : null,
     createdAt: r.createdAt,
     membershipCount: Number(r.membershipCount ?? 0),
-    lastSeenAt: lastSeenByUser.get(r.id) ?? null,
+    lastSeenAt: coerceDate(lastSeenByUser.get(r.id)),
   }));
 }
 

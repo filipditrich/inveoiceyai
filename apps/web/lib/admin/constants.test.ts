@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   PLATFORM_AUDIT_TYPES,
+  coerceDate,
   emptyMonthlySeries,
   utcDaysAgo,
   utcFirstOfMonthMonthsAgo,
@@ -31,6 +32,25 @@ describe("utcFirstOfMonthMonthsAgo", () => {
     const start = utcFirstOfMonthMonthsAgo(11, now);
     expect(start.toISOString()).toBe("2025-10-01T00:00:00.000Z");
     expect(emptyMonthlySeries(now)[0]?.month).toBe("2025-10");
+  });
+});
+
+describe("coerceDate", () => {
+  it("keeps a valid Date", () => {
+    const value = new Date("2026-09-04T12:00:00.000Z");
+    expect(coerceDate(value)?.toISOString()).toBe("2026-09-04T12:00:00.000Z");
+  });
+
+  it("parses neon HTTP timestamp aggregates", () => {
+    expect(coerceDate("2026-09-04T12:00:00.000Z")?.toISOString()).toBe(
+      "2026-09-04T12:00:00.000Z",
+    );
+  });
+
+  it("returns null for empty values", () => {
+    expect(coerceDate(null)).toBeNull();
+    expect(coerceDate(undefined)).toBeNull();
+    expect(coerceDate("not-a-date")).toBeNull();
   });
 });
 

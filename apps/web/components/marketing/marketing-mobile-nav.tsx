@@ -41,7 +41,7 @@ export function MarketingMobileNav({ actions, items, labels }: MobileNavProps) {
             variant="outline"
             size="icon"
             aria-label={labels.openMenu}
-            className="lg:hidden"
+            className="xl:hidden"
           />
         }
       >

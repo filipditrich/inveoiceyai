@@ -257,17 +257,17 @@ export function GeneratorForm() {
         open={gateOpen}
       />
       <Dialog onOpenChange={setPdfOpen} open={pdfOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
+        <DialogContent className="flex max-h-[92vh] w-[min(calc(100vw-2rem),calc((92vh-5.5rem)*210/297+2.5rem))] max-w-none flex-col overflow-hidden p-4 sm:p-5">
+          <DialogHeader className="mb-3 shrink-0">
             <DialogTitle>{t("previewReal")}</DialogTitle>
           </DialogHeader>
           <InvoicePdfPreview
-            className="mt-4"
+            className="w-full"
             emptyLabel={t("previewLoading")}
             error={preview.error}
-            lockedPreview
             updating={preview.updating}
             url={preview.url}
+            zoom="page-fit"
           />
         </DialogContent>
       </Dialog>

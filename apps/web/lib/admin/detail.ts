@@ -24,7 +24,7 @@ import {
   type InvoiceDisplayStatus,
 } from "@invoicey/invoice-core/status-display";
 
-import { PLATFORM_AUDIT_TYPES } from "./constants";
+import { PLATFORM_AUDIT_TYPES, coerceDate } from "./constants";
 import { snapshotString } from "./snapshot";
 
 /** Detail pages read one tenant at a time; lists stay in `lists.ts`. */
@@ -206,7 +206,7 @@ export async function adminGetUser(
     defaultWorkspaceId: row.defaultWorkspaceId,
     createdAt: row.createdAt,
     referredByEmail: referredByRows[0]?.email ?? null,
-    lastSeenAt: lastSeenRows[0]?.lastSeenAt ?? null,
+    lastSeenAt: coerceDate(lastSeenRows[0]?.lastSeenAt),
     memberships,
     referredUsers,
     auditEvents,
