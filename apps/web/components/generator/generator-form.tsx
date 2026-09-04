@@ -2,12 +2,19 @@
 
 import * as React from "react";
 import { DownloadGate } from "@/components/generator/download-gate";
+import { PdfPreviewStub } from "@/components/generator/pdf-preview-stub";
 import { useDemoInvoicePreview } from "@/components/generator/use-demo-preview";
 import { Field, selectClassName } from "@/components/invoices/field";
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
 import { lookupAresByIco } from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { applyLookEdit } from "@/lib/generator/apply-look-edit";
 import {
   applyAresToIssuer,
@@ -23,8 +30,9 @@ import {
 } from "@/lib/generator/draft";
 import { readGeneratorHandoff } from "@/lib/generator/handoff";
 import { appLocaleFrom } from "@/lib/generator/href";
+import { generatorIssueKeys } from "@/lib/generator/issue-hints";
 import { cn } from "@/lib/utils";
-import { DownloadIcon, FileTextIcon } from "lucide-react";
+import { DownloadIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Inter } from "next/font/google";
 import { debounce, parseAsJson, parseAsString, useQueryState } from "nuqs";
@@ -114,7 +122,7 @@ export function GeneratorForm() {
   const { draft, setDraft, lastIssuerIco, lastClientIco } =
     useGeneratorDraft(locale);
   const [gateOpen, setGateOpen] = React.useState(false);
-  const [formError, setFormError] = React.useState<string | null>(null);
+  const [pdfOpen, setPdfOpen] = React.useState(false);
   const [qrDataUrl, setQrDataUrl] = React.useState<string | null>(null);
 
   const previewBuild = React.useMemo(() => {
@@ -165,12 +173,13 @@ export function GeneratorForm() {
   function onDownload() {
     if (!draft) return;
     const built = guestInvoiceFromDraft(draft);
-    if (!built.ok) {
-      setFormError(built.message);
-      return;
-    }
-    setFormError(null);
+    if (!built.ok) return;
     setGateOpen(true);
+  }
+
+  async function onOpenPdf() {
+    setPdfOpen(true);
+    await preview.render(previewBuild.invoice);
   }
 
   function onLookEdit(edit: LookEdit) {
@@ -186,9 +195,13 @@ export function GeneratorForm() {
 
   return (
     <div className="grid items-start gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
-      <div className="min-w-0 space-y-4">
-        <p className="text-sm text-muted-foreground">{t("typeOnPage")}</p>
-        <p className="text-sm text-muted-foreground">{t("sampleHint")}</p>
+      <div className="min-w-0 space-y-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="rounded-full border px-2 py-0.5 text-[0.7rem] font-medium tracking-wide text-muted-foreground uppercase">
+            {t("sampleBadge")}
+          </span>
+          <p className="text-sm text-muted-foreground">{t("editorHint")}</p>
+        </div>
         <div className="overflow-x-auto rounded-2xl border bg-gradient-to-b from-muted/50 to-muted/20 p-3 shadow-inner sm:p-8">
           {previewBuild.display ? (
             <div
@@ -227,34 +240,14 @@ export function GeneratorForm() {
             <DownloadIcon />
             {issueInvoice.ok ? t("download") : t("downloadFix")}
           </Button>
-          {formError ? (
-            <p className="text-sm text-destructive" role="alert">
-              <span className="block font-medium">{t("errorInvoice")}</span>
-              <span className="mt-1 block font-mono text-[0.7rem] leading-snug">
-                {formError}
-              </span>
-            </p>
-          ) : null}
-          {!issueInvoice.ok && !formError ? (
-            <p className="text-sm text-muted-foreground">{t("downloadHint")}</p>
-          ) : null}
+          {issueInvoice.ok ? null : (
+            <IssueHints message={issueInvoice.message} />
+          )}
         </div>
         <div className="space-y-3">
-          <p className="text-sm font-medium">{t("preview")}</p>
-          <Button
-            className="w-full"
-            onClick={() => preview.render(previewBuild.invoice)}
-            type="button"
-            variant="outline"
-          >
-            <FileTextIcon />
-            {t("previewReal")}
-          </Button>
-          <InvoicePdfPreview
-            emptyLabel={t("previewRealHint")}
-            error={preview.error}
-            updating={preview.updating}
-            url={preview.url}
+          <PdfPreviewStub
+            busy={preview.updating}
+            onOpen={() => void onOpenPdf()}
           />
         </div>
       </aside>
@@ -263,6 +256,41 @@ export function GeneratorForm() {
         onOpenChange={setGateOpen}
         open={gateOpen}
       />
+      <Dialog onOpenChange={setPdfOpen} open={pdfOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{t("previewReal")}</DialogTitle>
+          </DialogHeader>
+          <InvoicePdfPreview
+            className="mt-4"
+            emptyLabel={t("previewLoading")}
+            error={preview.error}
+            lockedPreview
+            updating={preview.updating}
+            url={preview.url}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function IssueHints({ message }: { message: string }) {
+  const t = useTranslations("Generator");
+  const keys = generatorIssueKeys(message);
+  return (
+    <div
+      className="rounded-lg border border-destructive/25 bg-destructive/10 px-3 py-2.5"
+      role="alert"
+    >
+      <p className="text-sm font-medium text-destructive">
+        {t("errorInvoice")}
+      </p>
+      <ul className="mt-1.5 list-disc space-y-1 pl-4 text-sm leading-snug text-muted-foreground">
+        {keys.map((key) => (
+          <li key={key}>{t(key)}</li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -348,26 +376,27 @@ function SettingsPanel({
         />
         {t("vatPayer")}
       </label>
-      <Field label={t("vatMode")}>
-        <select
-          className={selectClassName()}
-          disabled={vatLocked}
-          onChange={(ev) =>
-            onChange(
-              withVatMode(
-                draft,
-                ev.target.value === "reverse_charge"
-                  ? "reverse_charge"
-                  : "regular",
-              ),
-            )
-          }
-          value={vatLocked ? "regular" : draft.vatMode}
-        >
-          <option value="regular">{t("vatRegular")}</option>
-          <option value="reverse_charge">{t("vatReverse")}</option>
-        </select>
-      </Field>
+      {vatLocked ? null : (
+        <Field label={t("vatMode")}>
+          <select
+            className={selectClassName()}
+            onChange={(ev) =>
+              onChange(
+                withVatMode(
+                  draft,
+                  ev.target.value === "reverse_charge"
+                    ? "reverse_charge"
+                    : "regular",
+                ),
+              )
+            }
+            value={draft.vatMode}
+          >
+            <option value="regular">{t("vatRegular")}</option>
+            <option value="reverse_charge">{t("vatReverse")}</option>
+          </select>
+        </Field>
+      )}
       <AppearanceFields
         accentKey={draft.accentKey}
         showQr={draft.showQr}

@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Field } from "@/components/invoices/field";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +18,7 @@ import {
 } from "@/lib/generator/issue-response";
 import { DownloadIcon, MailIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 import type { Invoice } from "@invoicey/invoice-core/schema";
 
@@ -43,7 +43,6 @@ export function DownloadGate({
 }) {
   const t = useTranslations("Generator");
   const [email, setEmail] = React.useState("");
-  const [marketingOptIn, setMarketingOptIn] = React.useState(false);
   const [pending, setPending] = React.useState(false);
   const [errorKey, setErrorKey] = React.useState<GuestIssueErrorKey | null>(
     null,
@@ -64,7 +63,7 @@ export function DownloadGate({
         body: JSON.stringify({
           invoice,
           email,
-          marketingOptIn,
+          marketingOptIn: false,
         }),
       });
       const body: unknown = await res.json().catch(() => null);
@@ -108,14 +107,26 @@ export function DownloadGate({
               value={email}
             />
           </Field>
-          <label className="flex items-start gap-2 text-sm leading-snug">
-            <Checkbox
-              checked={marketingOptIn}
-              className="mt-0.5"
-              onCheckedChange={(checked) => setMarketingOptIn(checked === true)}
-            />
-            {t("gateOptIn")}
-          </label>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            {t.rich("gateLegal", {
+              terms: (chunks) => (
+                <Link
+                  className="text-foreground underline-offset-4 hover:underline"
+                  href="/terms"
+                >
+                  {chunks}
+                </Link>
+              ),
+              privacy: (chunks) => (
+                <Link
+                  className="text-foreground underline-offset-4 hover:underline"
+                  href="/privacy"
+                >
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
           <DialogFooter>
             <Button
               className="w-full"

@@ -35,38 +35,40 @@ export function useDemoInvoicePreview(options?: { bakeWatermark?: boolean }) {
   const controllerRef = React.useRef<AbortController | null>(null);
 
   const render = React.useCallback(
-    (invoice: Invoice | null) => {
+    async (invoice: Invoice | null): Promise<string | null> => {
       controllerRef.current?.abort();
       if (!invoice) {
         setPreviewError("invoice build failed");
-        return;
+        return null;
       }
       const controller = new AbortController();
       controllerRef.current = controller;
       setUpdating(true);
       setPreviewError(null);
-      void fetchDemoPdf(
-        invoice,
-        controller.signal,
-        options?.bakeWatermark === true,
-      )
-        .then((nextUrl) => {
-          if (controller.signal.aborted) return;
-          if (urlRef.current && urlRef.current !== nextUrl) {
-            URL.revokeObjectURL(urlRef.current);
-          }
-          urlRef.current = nextUrl;
-          setUrl(nextUrl);
-        })
+      try {
+        const nextUrl = await fetchDemoPdf(
+          invoice,
+          controller.signal,
+          options?.bakeWatermark === true,
+        );
+        if (controller.signal.aborted) return null;
+        if (urlRef.current && urlRef.current !== nextUrl) {
+          URL.revokeObjectURL(urlRef.current);
+        }
+        urlRef.current = nextUrl;
+        setUrl(nextUrl);
+        return nextUrl;
+      } catch (error) {
         /** SAFETY: fetchDemoPdf rejects Error; abort is ignored */
-        .catch((error: Error) => {
-          if (controller.signal.aborted) return;
-          if (error.name === "AbortError") return;
-          setPreviewError(error.message);
-        })
-        .finally(() => {
-          if (!controller.signal.aborted) setUpdating(false);
-        });
+        if (!(error instanceof Error)) return null;
+        if (controller.signal.aborted || error.name === "AbortError") {
+          return null;
+        }
+        setPreviewError(error.message);
+        return null;
+      } finally {
+        if (!controller.signal.aborted) setUpdating(false);
+      }
     },
     [options?.bakeWatermark],
   );
