@@ -134,10 +134,13 @@ function timingSafeEqual(a: string, b: string): boolean {
 }
 
 /**
- * Cookie auth is ambient, so a cross-site POST would otherwise drive the agent
- * on a signed-in user's behalf. Same-origin is required before the cookie is
- * even looked up; requests with no `Origin` at all (curl, server-to-server)
- * fall through to the bearer strategies instead of being trusted here.
+ * Cookie auth is ambient, so a cross-site request would otherwise drive the
+ * agent on a signed-in user's behalf. Trust a request only when the browser
+ * says it is same-origin — never because it merely has a cookie.
+ *
+ * `Origin` is omitted on many same-origin GETs (Eve's session stream is one).
+ * Those still send `Sec-Fetch-Site: same-origin`, which pages cannot set.
+ * Curl and server-to-server have neither, so they fall through to bearer.
  */
 function configuredOrigins(): string[] {
   const origins = [appOrigin()];
@@ -146,9 +149,7 @@ function configuredOrigins(): string[] {
   return origins;
 }
 
-function isSameOrigin(request: Request): boolean {
-  const origin = request.headers.get("origin");
-  if (!origin) return false;
+function originAllowed(origin: string, request: Request): boolean {
   if (configuredOrigins().includes(origin)) return true;
   try {
     return new URL(origin).origin === new URL(request.url).origin;
@@ -157,9 +158,17 @@ function isSameOrigin(request: Request): boolean {
   }
 }
 
+export function isTrustedBrowserRequest(request: Request): boolean {
+  if (request.headers.get("sec-fetch-site") === "same-origin") return true;
+
+  const origin = request.headers.get("origin");
+  if (origin) return originAllowed(origin, request);
+  return false;
+}
+
 export function browserSession(): AuthFn<Request> {
   return withAuthChallenges(async (request) => {
-    if (!isSameOrigin(request)) return null;
+    if (!isTrustedBrowserRequest(request)) return null;
 
     const cookie = sessionCookieFrom(request);
     if (!cookie) return null;

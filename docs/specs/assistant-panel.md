@@ -63,9 +63,11 @@ The Eve runtime is its own service: it has no `next/headers` and cannot use
 `lib/auth/session.ts` (which is `server-only`). `browserSession()` therefore
 resolves the Better Auth cookie itself:
 
-1. Require a same-origin `Origin` header. Cookie auth is ambient, so this is
-   what stops a cross-site POST from driving the agent as a signed-in user.
-   Requests with no `Origin` fall through to the bearer strategies.
+1. Require a same-origin browser. Cookie auth is ambient, so this is what
+   stops a cross-site request from driving the agent as a signed-in user.
+   Accept `Sec-Fetch-Site: same-origin` (Eve's GET stream often has no
+   `Origin`) or a matching `Origin`. Requests with neither fall through to
+   the bearer strategies.
 2. Verify the cookie's HMAC (standard base64 of
    `HMAC-SHA256(BETTER_AUTH_SECRET, token)`, matching Better Auth
    `makeSignature` on `session_token` — not the base64url-nopad used on the

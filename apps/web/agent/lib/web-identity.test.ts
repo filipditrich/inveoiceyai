@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   bytesToStandardBase64,
   cookieSignatureValid,
+  isTrustedBrowserRequest,
   isWebSession,
   sessionCookieFrom,
   WEB_AUTHENTICATOR,
@@ -137,6 +138,66 @@ describe("cookieSignatureValid", () => {
   it("skips the check when no secret is configured", async () => {
     delete process.env.BETTER_AUTH_SECRET;
     await expect(cookieSignatureValid(TOKEN, "anything")).resolves.toBe(true);
+  });
+});
+
+describe("isTrustedBrowserRequest", () => {
+  const originalApp = process.env.NEXT_PUBLIC_APP_URL;
+
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_APP_URL = "https://invoicey.app";
+  });
+
+  afterEach(() => {
+    if (originalApp === undefined) delete process.env.NEXT_PUBLIC_APP_URL;
+    else process.env.NEXT_PUBLIC_APP_URL = originalApp;
+  });
+
+  it("accepts a same-origin POST with Origin", () => {
+    expect(
+      isTrustedBrowserRequest(
+        new Request("https://invoicey.app/eve/v1/session", {
+          method: "POST",
+          headers: { origin: "https://invoicey.app" },
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  /**
+   * Eve streams over GET. Browsers often omit Origin on same-origin GET;
+   * requiring it 401'd every `/eve/v1/session/:id/stream` after the POST
+   * had already succeeded.
+   */
+  it("accepts a stream GET with Sec-Fetch-Site same-origin and no Origin", () => {
+    expect(
+      isTrustedBrowserRequest(
+        new Request("https://invoicey.app/eve/v1/session/abc/stream", {
+          headers: { "sec-fetch-site": "same-origin" },
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it("rejects curl — cookie only, no Origin, no Sec-Fetch-Site", () => {
+    expect(
+      isTrustedBrowserRequest(
+        new Request("https://invoicey.app/eve/v1/session/abc/stream", {
+          headers: { cookie: "better-auth.session_token=tok.sig" },
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it("rejects a cross-site Origin", () => {
+    expect(
+      isTrustedBrowserRequest(
+        new Request("https://invoicey.app/eve/v1/session", {
+          method: "POST",
+          headers: { origin: "https://evil.example" },
+        }),
+      ),
+    ).toBe(false);
   });
 });
 
