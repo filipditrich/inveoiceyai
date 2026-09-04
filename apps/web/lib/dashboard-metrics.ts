@@ -1,14 +1,35 @@
-import { pragueTodayIso } from "@/lib/invoice-status-sql";
+import {
+  dashboardAttentionActions,
+  type DashboardAttentionAction,
+} from "@/lib/dashboard-attention";
+import {
+  dashboardPeriodWindow,
+  type DashboardPeriod,
+  type DashboardPeriodWindow,
+} from "@/lib/dashboard-period";
+import { displayStatusWhere, pragueTodayIso } from "@/lib/invoice-status-sql";
 import {
   loadInvoiceStatusTallies,
   type StatusBucket,
 } from "@/lib/invoices/status-summary";
-import { and, desc, eq, gte, isNull, isNotNull, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  isNull,
+  isNotNull,
+  lte,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 
 import {
   invoicePaymentAllocations,
-  issuerBusinesses,
   invoices,
+  issuerBusinesses,
+  paymentMatchProposals,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import {
@@ -37,19 +58,38 @@ export type RecentInvoice = {
 
 export type CurrencyBalance = {
   currency: string;
-  issuedVolume12m: number;
+  issuedVolume: number;
   outstanding: number;
 };
 
 export type DashboardBalance = {
   byCurrency: CurrencyBalance[];
-  issuedCount12m: number;
+  issuedCount: number;
   outstandingCount: number;
 };
 
-function monthKey(d: Date): string {
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
-}
+export type AttentionInvoice = {
+  id: string;
+  number: string | null;
+  clientName: string;
+  total: string;
+  currency: string;
+  dueDate: string;
+};
+
+export type DashboardAttention = {
+  actions: DashboardAttentionAction[];
+  overduePreview: AttentionInvoice[];
+  hasAnyInvoices: boolean;
+};
+
+const PRIMARY_STATUSES: InvoiceDisplayStatus[] = [
+  "paid",
+  "draft",
+  "unpaid",
+  "overdue",
+  "future",
+];
 
 function addAmount(
   map: Record<string, number>,
@@ -60,34 +100,67 @@ function addAmount(
   map[code] = (map[code] ?? 0) + amount;
 }
 
-/** The 12 month keys the chart shows, oldest first, plus the window start. */
-type ChartWindow = { keys: string[]; start: Date };
+function workspaceInvoiceConditions(
+  workspaceId: string,
+  issuerId?: string,
+): SQL[] {
+  const conditions: SQL[] = [eq(invoices.workspaceId, workspaceId)];
+  if (issuerId) conditions.push(eq(invoices.issuerId, issuerId));
+  return conditions;
+}
 
-function chartWindow(now: Date): ChartWindow {
-  const cursor = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1),
-  );
-  const start = new Date(cursor);
-  const keys: string[] = [];
-  for (let i = 0; i < 12; i++) {
-    keys.push(monthKey(cursor));
-    cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+function issueDateWindowConditions(window: DashboardPeriodWindow): SQL[] {
+  const conditions: SQL[] = [];
+  if (window.from) conditions.push(gte(invoices.issueDate, window.from));
+  if (window.to) conditions.push(lte(invoices.issueDate, window.to));
+  return conditions;
+}
+
+function bucketsFromTallies(
+  tallies: Awaited<ReturnType<typeof loadInvoiceStatusTallies>>,
+): StatusBucket[] {
+  const buckets: StatusBucket[] = PRIMARY_STATUSES.map((status) => ({
+    status,
+    count: tallies[status].count,
+    totalsByCurrency: tallies[status].totalsByCurrency,
+  }));
+  if (tallies.cancelled.count > 0) {
+    buckets.push({
+      status: "cancelled",
+      count: tallies.cancelled.count,
+      totalsByCurrency: tallies.cancelled.totalsByCurrency,
+    });
   }
-  return { keys, start };
+  return buckets;
+}
+
+function tallyHasInvoices(
+  tallies: Awaited<ReturnType<typeof loadInvoiceStatusTallies>>,
+): boolean {
+  return (
+    tallies.paid.count +
+      tallies.draft.count +
+      tallies.unpaid.count +
+      tallies.overdue.count +
+      tallies.future.count +
+      tallies.cancelled.count >
+    0
+  );
 }
 
 /**
- * Aggregates workspace invoices for the dashboard (optional issuer filter).
+ * Aggregates workspace invoices for the dashboard (optional issuer + period).
  *
- * Everything here is a bounded query: grouped tallies, a 12-row month series,
- * a 12-month volume roll-up, and the 10 most recent invoices. The dashboard
- * must not get slower as a workspace accumulates invoices, so nothing reads
- * the full invoice table — those rows carry three JSONB columns each.
+ * Everything here is a bounded query: grouped tallies, a month series for the
+ * selected window, a volume roll-up, and the 10 most recent invoices. The
+ * dashboard must not get slower as a workspace accumulates invoices, so nothing
+ * reads the full invoice table — those rows carry three JSONB columns each.
  */
 export async function loadDashboardMetrics(
   workspaceId: string,
-  opts?: {
+  opts: {
     issuerId?: string;
+    period: DashboardPeriod;
   },
 ): Promise<{
   buckets: StatusBucket[];
@@ -97,17 +170,16 @@ export async function loadDashboardMetrics(
   issuerCount: number;
 }> {
   const todayIso = pragueTodayIso();
-  const now = new Date();
-  const { keys: monthKeys, start: windowStart } = chartWindow(now);
-  const windowStartIso = windowStart.toISOString();
+  const periodWindow = dashboardPeriodWindow(opts.period, todayIso);
+  const base = workspaceInvoiceConditions(workspaceId, opts.issuerId);
+  const inPeriod = [...base, ...issueDateWindowConditions(periodWindow)];
+  const lastChartMonth = periodWindow.chartKeys.at(-1) ?? todayIso.slice(0, 7);
+  const chartFrom = `${periodWindow.chartKeys[0]}-01`;
+  const chartTo = `${lastChartMonth}-31`;
 
-  const base = [eq(invoices.workspaceId, workspaceId)];
-  if (opts?.issuerId) {
-    base.push(eq(invoices.issuerId, opts.issuerId));
-  }
-
-  const issuedMonth = sql<string>`to_char(${invoices.issuedAt} at time zone 'UTC', 'YYYY-MM')`;
+  const issuedMonth = sql<string>`substring(${invoices.issueDate} from 1 for 7)`;
   const invoiceCurrency = sql<string>`coalesce(nullif(${invoices.currency}, ''), 'CZK')`;
+  const paidMonth = sql<string>`substring(${invoicePaymentAllocations.effectiveDate} from 1 for 7)`;
 
   const [
     tallies,
@@ -117,8 +189,7 @@ export async function loadDashboardMetrics(
     recentRows,
     issuerCountRow,
   ] = await Promise.all([
-    loadInvoiceStatusTallies(base, todayIso),
-    // CZK-only issued series for the chart (no FX mix).
+    loadInvoiceStatusTallies(inPeriod, todayIso),
     db
       .select({
         month: issuedMonth,
@@ -130,11 +201,11 @@ export async function loadDashboardMetrics(
           ...base,
           isNotNull(invoices.issuedAt),
           eq(invoices.currency, "CZK"),
-          gte(invoices.issuedAt, sql`${windowStartIso}::timestamptz`),
+          gte(invoices.issueDate, chartFrom),
+          lte(invoices.issueDate, chartTo),
         ),
       )
       .groupBy(issuedMonth),
-    // 12-month issued volume, all currencies, for the balance row.
     db
       .select({
         currency: invoiceCurrency,
@@ -142,17 +213,11 @@ export async function loadDashboardMetrics(
         count: sql<number>`count(*)::int`,
       })
       .from(invoices)
-      .where(
-        and(
-          ...base,
-          isNotNull(invoices.issuedAt),
-          gte(invoices.issuedAt, sql`${windowStartIso}::timestamptz`),
-        ),
-      )
+      .where(and(...inPeriod, isNotNull(invoices.issuedAt)))
       .groupBy(invoiceCurrency),
     db
       .select({
-        month: sql<string>`substring(${invoicePaymentAllocations.effectiveDate} from 1 for 7)`,
+        month: paidMonth,
         amount: sql<string>`sum(${invoicePaymentAllocations.amount})::text`,
       })
       .from(invoicePaymentAllocations)
@@ -162,12 +227,12 @@ export async function loadDashboardMetrics(
           eq(invoicePaymentAllocations.workspaceId, workspaceId),
           isNull(invoicePaymentAllocations.reversedAt),
           eq(invoicePaymentAllocations.currency, "CZK"),
-          ...(opts?.issuerId ? [eq(invoices.issuerId, opts.issuerId)] : []),
+          gte(invoicePaymentAllocations.effectiveDate, chartFrom),
+          lte(invoicePaymentAllocations.effectiveDate, chartTo),
+          ...(opts.issuerId ? [eq(invoices.issuerId, opts.issuerId)] : []),
         ),
       )
-      .groupBy(
-        sql`substring(${invoicePaymentAllocations.effectiveDate} from 1 for 7)`,
-      ),
+      .groupBy(paidMonth),
     db
       .select({
         id: invoices.id,
@@ -191,43 +256,23 @@ export async function loadDashboardMetrics(
       .where(eq(issuerBusinesses.workspaceId, workspaceId)),
   ]);
 
-  const primary: InvoiceDisplayStatus[] = [
-    "paid",
-    "draft",
-    "unpaid",
-    "overdue",
-    "future",
-  ];
-  const buckets: StatusBucket[] = primary.map((status) => ({
-    status,
-    count: tallies[status].count,
-    totalsByCurrency: tallies[status].totalsByCurrency,
-  }));
-  if (tallies.cancelled.count > 0) {
-    buckets.push({
-      status: "cancelled",
-      count: tallies.cancelled.count,
-      totalsByCurrency: tallies.cancelled.totalsByCurrency,
-    });
-  }
-
   const issuedByMonth = new Map(
     issuedMonthly.map((r) => [r.month, Number(r.amount) || 0]),
   );
   const paidByMonth = new Map(
     paidMonthly.map((r) => [r.month, Number(r.amount) || 0]),
   );
-  const monthly: MonthPoint[] = monthKeys.map((month) => ({
+  const monthly: MonthPoint[] = periodWindow.chartKeys.map((month) => ({
     month,
     issued: issuedByMonth.get(month) ?? 0,
     paid: paidByMonth.get(month) ?? 0,
   }));
 
   const issuedByCurrency: Record<string, number> = {};
-  let issuedCount12m = 0;
+  let issuedCount = 0;
   for (const row of issuedVolume) {
     addAmount(issuedByCurrency, row.currency, Number(row.amount) || 0);
-    issuedCount12m += row.count;
+    issuedCount += row.count;
   }
 
   const outstandingByCurrency: Record<string, number> = {};
@@ -253,7 +298,7 @@ export async function loadDashboardMetrics(
     .sort()
     .map((currency) => ({
       currency,
-      issuedVolume12m: issuedByCurrency[currency] ?? 0,
+      issuedVolume: issuedByCurrency[currency] ?? 0,
       outstanding: outstandingByCurrency[currency] ?? 0,
     }));
 
@@ -278,14 +323,73 @@ export async function loadDashboardMetrics(
   }));
 
   return {
-    buckets,
+    buckets: bucketsFromTallies(tallies),
     monthly,
     recent,
     balance: {
       byCurrency,
-      issuedCount12m,
+      issuedCount,
       outstandingCount,
     },
     issuerCount: issuerCountRow[0]?.count ?? 0,
+  };
+}
+
+/** Open work right now — not scoped to the selected dashboard period. */
+export async function loadDashboardAttention(
+  workspaceId: string,
+  opts?: { issuerId?: string },
+): Promise<DashboardAttention> {
+  const todayIso = pragueTodayIso();
+  const base = workspaceInvoiceConditions(workspaceId, opts?.issuerId);
+  const overdueWhere = displayStatusWhere("overdue", todayIso);
+
+  const [tallies, matchCountRow, overdueRows] = await Promise.all([
+    loadInvoiceStatusTallies(base, todayIso),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(paymentMatchProposals)
+      .innerJoin(invoices, eq(invoices.id, paymentMatchProposals.invoiceId))
+      .where(
+        and(
+          eq(paymentMatchProposals.workspaceId, workspaceId),
+          eq(paymentMatchProposals.status, "pending"),
+          ...(opts?.issuerId ? [eq(invoices.issuerId, opts.issuerId)] : []),
+        ),
+      ),
+    db
+      .select({
+        id: invoices.id,
+        number: invoices.number,
+        clientName: invoices.clientName,
+        total: invoices.total,
+        currency: invoices.currency,
+        dueDate: invoices.dueDate,
+      })
+      .from(invoices)
+      .where(and(...base, overdueWhere))
+      .orderBy(asc(invoices.dueDate))
+      .limit(3),
+  ]);
+
+  return {
+    actions: dashboardAttentionActions({
+      overdueCount: tallies.overdue.count,
+      overdueTotals: tallies.overdue.totalsByCurrency,
+      unpaidCount: tallies.unpaid.count,
+      unpaidTotals: tallies.unpaid.totalsByCurrency,
+      draftCount: tallies.draft.count,
+      pendingMatchCount: matchCountRow[0]?.count ?? 0,
+      issuerId: opts?.issuerId,
+    }),
+    overduePreview: overdueRows.map((row) => ({
+      id: row.id,
+      number: row.number,
+      clientName: row.clientName,
+      total: row.total,
+      currency: row.currency,
+      dueDate: row.dueDate,
+    })),
+    hasAnyInvoices: tallyHasInvoices(tallies),
   };
 }
