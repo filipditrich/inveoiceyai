@@ -18,7 +18,13 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import type { MonthPoint } from "@/lib/dashboard-metrics";
 
-export function DashboardMonthlyChart({ data }: { data: MonthPoint[] }) {
+export function DashboardMonthlyChart({
+  data,
+  subtitle,
+}: {
+  data: MonthPoint[];
+  subtitle: string;
+}) {
   const t = useTranslations("Dashboard.chart");
   const format = useFormatter();
 
@@ -31,7 +37,7 @@ export function DashboardMonthlyChart({ data }: { data: MonthPoint[] }) {
     <Card className="@container/card">
       <CardHeader>
         <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("subtitle")}</CardDescription>
+        <CardDescription>{subtitle}</CardDescription>
       </CardHeader>
       <CardContent className="px-2 pt-2 sm:px-6">
         <ChartContainer

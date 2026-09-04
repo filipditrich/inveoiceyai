@@ -1,19 +1,30 @@
-import { DashboardBalanceRow } from "@/components/dashboard/dashboard-balance";
+import { DashboardAttention } from "@/components/dashboard/dashboard-attention";
 import { DashboardGettingStarted } from "@/components/dashboard/dashboard-getting-started";
 import { DashboardIssuerFilter } from "@/components/dashboard/dashboard-issuer-filter";
+import { DashboardKpiCards } from "@/components/dashboard/dashboard-kpi-cards";
 import { DashboardMonthlyChart } from "@/components/dashboard/dashboard-monthly-chart";
+import { DashboardPeriodFilter } from "@/components/dashboard/dashboard-period-filter";
 import { DashboardRecentInvoices } from "@/components/dashboard/dashboard-recent-invoices";
-import { DashboardStatusCards } from "@/components/dashboard/dashboard-status-cards";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
-import { loadDashboardMetrics } from "@/lib/dashboard-metrics";
+import {
+  loadDashboardAttention,
+  loadDashboardMetrics,
+} from "@/lib/dashboard-metrics";
+import {
+  dashboardPeriodValues,
+  dashboardPeriodWindow,
+  parseDashboardPeriod,
+  serializeDashboardPeriod,
+} from "@/lib/dashboard-period";
+import { pragueTodayIso } from "@/lib/invoice-status-sql";
 import { loadIssuerOptions } from "@/lib/load-parties";
 import { ChartNoAxesCombinedIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-type Search = Promise<{ issuerId?: string }>;
+type Search = Promise<{ issuerId?: string; period?: string }>;
 
 export default async function DashboardPage({
   searchParams,
@@ -26,9 +37,13 @@ export default async function DashboardPage({
     searchParams,
   ]);
   const issuerId = sp.issuerId?.trim() || undefined;
-  const [issuers, metrics] = await Promise.all([
+  const todayIso = pragueTodayIso();
+  const period = parseDashboardPeriod(sp.period, todayIso);
+  const periodWindow = dashboardPeriodWindow(period, todayIso);
+  const [issuers, metrics, attention] = await Promise.all([
     loadIssuerOptions(workspaceId),
-    loadDashboardMetrics(workspaceId, { issuerId }),
+    loadDashboardMetrics(workspaceId, { issuerId, period }),
+    loadDashboardAttention(workspaceId, { issuerId }),
   ]);
 
   if (metrics.issuerCount === 0) {
@@ -48,8 +63,7 @@ export default async function DashboardPage({
     );
   }
 
-  const hasInvoices = metrics.buckets.some((bucket) => bucket.count > 0);
-  if (!issuerId && !hasInvoices) {
+  if (!issuerId && !attention.hasAnyInvoices) {
     return (
       <div className="flex flex-1 flex-col gap-6 py-6">
         <PageHeader
@@ -82,15 +96,36 @@ export default async function DashboardPage({
           }
           description={t("subtitle")}
           filters={
-            <DashboardIssuerFilter issuers={issuers} selectedId={issuerId} />
+            <>
+              <DashboardPeriodFilter
+                selected={serializeDashboardPeriod(period)}
+                values={dashboardPeriodValues(
+                  todayIso,
+                  period.kind === "year" ? period.year : undefined,
+                )}
+              />
+              <DashboardIssuerFilter issuers={issuers} selectedId={issuerId} />
+            </>
           }
           icon={<ChartNoAxesCombinedIcon />}
           title={t("title")}
         />
       </div>
-      <DashboardStatusCards buckets={metrics.buckets} issuerId={issuerId} />
-      <DashboardBalanceRow balance={metrics.balance} />
-      <DashboardMonthlyChart data={metrics.monthly} />
+      <DashboardAttention attention={attention} />
+      <DashboardKpiCards
+        balance={metrics.balance}
+        buckets={metrics.buckets}
+        issuerId={issuerId}
+        periodWindow={periodWindow}
+      />
+      <DashboardMonthlyChart
+        data={metrics.monthly}
+        subtitle={
+          period.kind === "year"
+            ? t("chart.subtitleYear", { year: String(period.year) })
+            : t("chart.subtitleRolling")
+        }
+      />
       <DashboardRecentInvoices rows={metrics.recent} />
     </div>
   );
