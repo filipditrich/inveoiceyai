@@ -1114,6 +1114,11 @@
       "sidebarDescription": "Main app navigation",
       "navigating": "Loading page"
     },
+    "docs": {
+      "loopTitle": "Reload loop stopped",
+      "loopBody": "This tab was reloading the docs too quickly, which burns hosting quota. Close extra /docs tabs, then continue.",
+      "loopContinue": "Continue"
+    },
     "settings": {
       "navigationLabel": {
         "account": "Account settings sections",

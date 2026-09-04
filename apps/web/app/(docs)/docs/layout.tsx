@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { DocsReloadGuard } from "@/components/docs/docs-reload-guard";
 import { source } from "@/lib/docs-source";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { RootProvider } from "fumadocs-ui/provider/next";
@@ -27,7 +28,7 @@ export default function DocsRootLayout({
          * A normal block wrapper pushes "On this page" under the article.
          */}
         <main className="contents" id="main-content" lang="en">
-          {children}
+          <DocsReloadGuard>{children}</DocsReloadGuard>
         </main>
       </DocsLayout>
     </RootProvider>

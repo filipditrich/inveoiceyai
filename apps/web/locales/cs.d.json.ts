@@ -1117,6 +1117,11 @@ declare const messages: {
       "sidebarDescription": "Hlavní navigace aplikace",
       "navigating": "Načítání stránky"
     },
+    "docs": {
+      "loopTitle": "Smyčka obnovování zastavena",
+      "loopBody": "Tato karta znovu načítala dokumentaci příliš rychle a spalovala hosting. Zavřete extra karty /docs a pokračujte.",
+      "loopContinue": "Pokračovat"
+    },
     "settings": {
       "navigationLabel": {
         "account": "Sekce nastavení účtu",
