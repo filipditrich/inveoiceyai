@@ -4,6 +4,7 @@ import {
   tryBuildInvoicePayload,
   type BuilderInvoiceInput,
 } from "@/lib/build-invoice";
+import { z } from "zod";
 
 import type { ClientDraft } from "@invoicey/ares";
 import {
@@ -288,6 +289,8 @@ function builderInput(
   items: GeneratorLine[],
 ): BuilderInvoiceInput {
   const numbered = withPrefillNumber(draft);
+  const reverse =
+    numbered.issuer.vatPayer && numbered.vatMode === "reverse_charge";
   return {
     docType: "invoice",
     number: numbered.number,
@@ -300,11 +303,13 @@ function builderInput(
     client: clientSnapshot(numbered),
     vatMode: numbered.issuer.vatPayer ? numbered.vatMode : "regular",
     suppliesAbroad: "none",
+    ...(reverse ? { localReverseChargeCode: CZ_REVERSE_CHARGE_CODE } : {}),
     items,
     notes: numbered.notes.trim() || undefined,
     look: { id: CLASSIC_LOOK_ID, version: CLASSIC_LOOK_VERSION },
     lookSnapshot: CLASSIC_LOOK_1_0_0,
     appearance: appearanceForDraft(numbered),
+    issuedBy: issuedByFromContact(numbered.issuer.contactEmail),
   };
 }
 
@@ -316,6 +321,7 @@ const PREVIEW_STUB_STREET = "—";
 const PREVIEW_STUB_CITY = "—";
 const PREVIEW_STUB_ZIP = "000 00";
 const PREVIEW_STUB_ACCOUNT = "19-2000145399/0800";
+const CZ_REVERSE_CHARGE_CODE = "4";
 const CZ_ACCOUNT_RE = /^(?:\d{1,6}-)?\d{1,10}\/\d{4}$/u;
 const CZ_ZIP_RE = /^\d{3} ?\d{2}$/u;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
@@ -377,6 +383,32 @@ function stubParty(
   };
 }
 
+function issuedByFromContact(
+  email: string,
+): Invoice["meta"]["issuedBy"] | undefined {
+  const name = email.trim();
+  if (name.length === 0) return undefined;
+  return { name, gender: "unspecified" };
+}
+
+function stubClientDic(client: GeneratorParty): string {
+  const parsed = stubDic(client.dic, false);
+  if (parsed.length > 0) return parsed;
+  const ico = stubIco(client.ico, true);
+  return `CZ${ico}`;
+}
+
+function withReverseChargePreview(draft: GeneratorDraft): GeneratorDraft {
+  if (!draft.issuer.vatPayer || draft.vatMode !== "reverse_charge") {
+    return draft;
+  }
+  return {
+    ...draft,
+    items: draft.items.map((line) => ({ ...line, vatRate: 0 })),
+    client: { ...draft.client, dic: stubClientDic(draft.client) },
+  };
+}
+
 function stubDraftForPreview(draft: GeneratorDraft): GeneratorDraft {
   const issuerParty = stubParty(draft.issuer, {
     ico: true,
@@ -387,7 +419,7 @@ function stubDraftForPreview(draft: GeneratorDraft): GeneratorDraft {
   const iban = draft.issuer.iban.replace(/\s+/gu, "").toUpperCase();
   const ibanOk =
     isValidCzIban(iban) && czIbanMatchesAccount(iban, accountNumber);
-  return {
+  const stubbed: GeneratorDraft = {
     ...draft,
     issuer: withSuggestedIban({
       ...issuerParty,
@@ -403,6 +435,7 @@ function stubDraftForPreview(draft: GeneratorDraft): GeneratorDraft {
       issuerDic: false,
     }),
   };
+  return withReverseChargePreview(stubbed);
 }
 
 function previewLines(draft: GeneratorDraft): GeneratorLine[] {
@@ -477,8 +510,11 @@ function overlayClient(
  */
 function overlayDraftValues(invoice: Invoice, draft: GeneratorDraft): Invoice {
   const issuer = overlayIssuer(invoice, draft);
+  const issuedBy = issuedByFromContact(draft.issuer.contactEmail);
+  const { issuedBy: _stubIssuedBy, ...meta } = invoice.meta;
   return {
     ...invoice,
+    meta: issuedBy ? { ...meta, issuedBy } : meta,
     issuer,
     client: overlayClient(invoice, draft),
     payment:
@@ -530,4 +566,83 @@ export function guestDisplayInvoiceFromDraft(
   const built = guestPreviewInvoiceFromDraft(draft);
   if (!built.ok) return null;
   return overlayDraftValues(built.invoice, draft);
+}
+
+export function withVatMode(
+  draft: GeneratorDraft,
+  vatMode: GeneratorDraft["vatMode"],
+): GeneratorDraft {
+  if (vatMode === "reverse_charge") {
+    return {
+      ...draft,
+      vatMode,
+      items: draft.items.map((line) => ({ ...line, vatRate: 0 })),
+    };
+  }
+  return {
+    ...draft,
+    vatMode,
+    items: draft.items.map((line) => ({
+      ...line,
+      vatRate: line.vatRate === 0 ? 21 : line.vatRate,
+    })),
+  };
+}
+
+const PartyUrlSchema = z.object({
+  id: z.string().min(1),
+  ico: z.string(),
+  name: z.string(),
+  dic: z.string(),
+  street: z.string(),
+  city: z.string(),
+  zip: z.string(),
+  country: z.string(),
+  contactEmail: z.string(),
+});
+
+const IssuerUrlSchema = PartyUrlSchema.extend({
+  vatPayer: z.boolean(),
+  accountNumber: z.string(),
+  iban: z.string(),
+  ibanTouched: z.boolean(),
+  accountTouched: z.boolean(),
+});
+
+const LineUrlSchema = z.object({
+  description: z.string(),
+  quantity: z.number(),
+  unit: z.string(),
+  unitPriceWithoutVat: z.number(),
+  vatRate: z.number(),
+});
+
+export const GeneratorDraftUrlSchema = z.object({
+  issuer: IssuerUrlSchema,
+  client: PartyUrlSchema,
+  number: z.string(),
+  numberTouched: z.boolean(),
+  issueDate: z.string(),
+  dueDate: z.string(),
+  currency: z.enum(["CZK", "EUR"]),
+  language: z.enum(["cs", "en"]),
+  vatMode: z.enum(["regular", "reverse_charge"]),
+  notes: z.string(),
+  accentKey: z.enum([
+    "default",
+    "neutral",
+    "blue",
+    "green",
+    "amber",
+    "rose",
+    "violet",
+  ]),
+  showQr: z.boolean(),
+  items: z.array(LineUrlSchema).min(1),
+});
+
+/** Parse a shareable generator draft from the URL. */
+export function parseGeneratorDraftUrl(value: unknown): GeneratorDraft | null {
+  const parsed = GeneratorDraftUrlSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
 }

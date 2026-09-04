@@ -339,7 +339,7 @@ declare const messages: {
       "body": "Zadejte IČO dodavatele. Otevřeme vyplněnou Classic fakturu — bez účtu, náhled s vodoznakem, čisté PDF po zadání e-mailu.",
       "cta": "Vystavit fakturu zdarma",
       "ico": "Vaše IČO",
-      "hint": "ARES doplní dodavatele. Bez IČO začnete od ukázky."
+      "hint": "ARES doplní dodavatele. IČO je volitelné — bez něj začnete od ukázky."
     },
     "demo": {
       "ariaLabel": "Prohlídka Invoicey",
@@ -902,9 +902,13 @@ declare const messages: {
     "sampleHint": "Ukázka je předvyplněná, abyste hned viděli opravdovou stránku. Cokoli změňte — ARES se spustí jen při zadání nového IČO.",
     "settings": "Nastavení dokladu",
     "download": "Stáhnout PDF",
+    "downloadFix": "Doplňte fakturu a stáhněte",
+    "downloadHint": "Zvýrazněná pole ještě potřebují platnou hodnotu. Doplňte je a pak stáhněte.",
     "downloading": "Vystavuji…",
     "preview": "Náhled",
     "previewLoading": "Sestavuji náhled…",
+    "previewReal": "Zobrazit opravdové PDF",
+    "previewRealHint": "Vykreslí skutečné PDF s vodoznakem. Neobnovuje se samo.",
     "issuer": "Dodavatel",
     "client": "Odběratel",
     "ico": "IČO",
@@ -941,8 +945,9 @@ declare const messages: {
     "accentClassic": "Classic",
     "showQr": "Platební QR",
     "gateTitle": "Kam má faktura přijít?",
-    "gateBody": "Pošleme vám PDF e-mailem a fakturu uschováme. Až se přihlásíte, bude už u vás.",
+    "gateBody": "Zadejte e-mail. Fakturu vystavíme, pošleme vám PDF a uschováme ji, až se přihlásíte.",
     "gateEmail": "E-mail",
+    "gateEmailPlaceholder": "vy@firma.cz",
     "gateOptIn": "Občas mi napište novinky o produktu. Ve výchozím stavu nezaškrtnuto.",
     "gateSubmit": "Vystavit a stáhnout",
     "gateCancel": "Zpět",
@@ -1573,7 +1578,7 @@ declare const messages: {
   },
   "Dashboard": {
     "title": "Přehled",
-    "subtitle": "Stavy faktur a obrat za posledních 12 měsíců.",
+    "subtitle": "Stavy, obrat a co teď potřebuje pozornost.",
     "goToInvoices": "Přejít na faktury",
     "newInvoice": "Nová faktura",
     "empty": {
@@ -1593,6 +1598,33 @@ declare const messages: {
       "all": "Všechny firmy",
       "description": "Zaměřte všechny přehledy a grafy na jednu firmu."
     },
+    "periodFilter": {
+      "label": "Období",
+      "rolling12": "Posledních 12 měsíců",
+      "all": "Celé období"
+    },
+    "kpi": {
+      "issued": "Vystaveno",
+      "outstanding": "Neuhrazeno"
+    },
+    "attention": {
+      "title": "Co teď",
+      "clearTitle": "Máte hotovo",
+      "clearDescription": "Žádné faktury po splatnosti, čekající návrhy ani platby k potvrzení.",
+      "overdue": "{count, plural, one {# faktura po splatnosti} few {# faktury po splatnosti} other {# faktur po splatnosti}}",
+      "unpaid": "{count, plural, one {# faktura čeká na platbu} few {# faktury čekají na platbu} other {# faktur čeká na platbu}}",
+      "drafts": "{count, plural, one {# návrh k vystavení} few {# návrhy k vystavení} other {# návrhů k vystavení}}",
+      "matches": "{count, plural, one {# platba k potvrzení} few {# platby k potvrzení} other {# plateb k potvrzení}}",
+      "cta": {
+        "overdue": "Zobrazit po splatnosti",
+        "unpaid": "Zobrazit neuhrazené",
+        "drafts": "Zkontrolovat návrhy",
+        "matches": "Zkontrolovat platby"
+      },
+      "createInvoice": "Nová faktura",
+      "due": "Splatnost",
+      "draft": "NÁVRH"
+    },
     "recent": {
       "title": "Nedávné faktury",
       "client": "Klient",
@@ -1609,15 +1641,12 @@ declare const messages: {
       "status": "Stav",
       "draft": "NÁVRH"
     },
-    "balance": {
-      "issued12m": "Vystavené faktury (12 měsíců)",
-      "outstanding": "Neuhrazeno (včetně po splatnosti a budoucích)"
-    },
     "chart": {
       "title": "Vystaveno vs zaplaceno",
       "issued": "Vystaveno",
       "paid": "Zaplaceno",
-      "subtitle": "Posledních 12 měsíců (částka, CZK)"
+      "subtitleYear": "{year} (částka, CZK)",
+      "subtitleRolling": "Posledních 12 měsíců (částka, CZK)"
     }
   },
   "Invoices": {

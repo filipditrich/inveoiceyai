@@ -235,6 +235,9 @@ export default async function HomePage() {
               {t("hero.titleLine1")}
               <span className="block text-primary">{t("hero.titleLine2")}</span>
             </h1>
+            <div className="mt-8 w-full">
+              <GeneratorTeaser />
+            </div>
             <p className="mt-7 max-w-2xl text-lg leading-relaxed text-pretty text-muted-foreground sm:text-xl">
               {t("hero.subtitle")}
             </p>
@@ -252,9 +255,6 @@ export default async function HomePage() {
                 labels={downloadLabels}
                 macDownloadUrl={macUrl}
               />
-            </div>
-            <div className="mt-6">
-              <GeneratorTeaser />
             </div>
             <div className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">

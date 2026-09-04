@@ -336,7 +336,7 @@
       "body": "Type your supplier IČO. We'll open a filled Classic invoice — no account, a watermarked preview, a clean PDF after your email.",
       "cta": "Issue a free invoice",
       "ico": "Your IČO",
-      "hint": "ARES fills the supplier. Skip IČO to start from a sample."
+      "hint": "ARES fills the supplier. IČO is optional — skip it to start from a sample."
     },
     "demo": {
       "ariaLabel": "Invoicey product tour",
@@ -899,9 +899,13 @@
     "sampleHint": "We've filled a sample so you can see a real page immediately. Change anything — ARES runs only when you type a new IČO.",
     "settings": "Invoice settings",
     "download": "Download PDF",
+    "downloadFix": "Finish the invoice to download",
+    "downloadHint": "Highlighted fields still need a valid value. Fix those, then download.",
     "downloading": "Issuing…",
     "preview": "Preview",
     "previewLoading": "Building preview…",
+    "previewReal": "See real PDF preview",
+    "previewRealHint": "Renders the actual PDF with a watermark. Not updated live.",
     "issuer": "Supplier",
     "client": "Customer",
     "ico": "IČO",
@@ -937,9 +941,10 @@
     "accent": "Accent colour",
     "accentClassic": "Classic",
     "showQr": "Payment QR",
-    "gateTitle": "Where should we send the invoice?",
-    "gateBody": "We'll email you the PDF and keep the invoice. Sign in later and it's already there.",
+    "gateTitle": "Where should we send it?",
+    "gateBody": "Enter your email. We'll issue the invoice, email you the PDF, and keep it for when you sign in.",
     "gateEmail": "Email",
+    "gateEmailPlaceholder": "you@company.com",
     "gateOptIn": "I'd like occasional product news. Unticked by default.",
     "gateSubmit": "Issue and download",
     "gateCancel": "Back",
@@ -1570,7 +1575,7 @@
   },
   "Dashboard": {
     "title": "Dashboard",
-    "subtitle": "Invoice statuses and revenue over the last 12 months.",
+    "subtitle": "Statuses, issued volume, and what needs attention.",
     "goToInvoices": "Go to invoices",
     "newInvoice": "New invoice",
     "empty": {
@@ -1590,6 +1595,33 @@
       "all": "All businesses",
       "description": "Focus every dashboard figure and chart on one business."
     },
+    "periodFilter": {
+      "label": "Period",
+      "rolling12": "Last 12 months",
+      "all": "All time"
+    },
+    "kpi": {
+      "issued": "Issued",
+      "outstanding": "Outstanding"
+    },
+    "attention": {
+      "title": "Next up",
+      "clearTitle": "You're caught up",
+      "clearDescription": "No overdue invoices, drafts waiting, or payments to confirm.",
+      "overdue": "{count, plural, one {# invoice is overdue} other {# invoices are overdue}}",
+      "unpaid": "{count, plural, one {# invoice awaiting payment} other {# invoices awaiting payment}}",
+      "drafts": "{count, plural, one {# draft ready to issue} other {# drafts ready to issue}}",
+      "matches": "{count, plural, one {# bank payment to confirm} other {# bank payments to confirm}}",
+      "cta": {
+        "overdue": "View overdue",
+        "unpaid": "View unpaid",
+        "drafts": "Review drafts",
+        "matches": "Review payments"
+      },
+      "createInvoice": "New invoice",
+      "due": "Due",
+      "draft": "DRAFT"
+    },
     "recent": {
       "title": "Recent invoices",
       "client": "Client",
@@ -1606,15 +1638,12 @@
       "status": "Status",
       "draft": "DRAFT"
     },
-    "balance": {
-      "issued12m": "Issued invoices (12 months)",
-      "outstanding": "Outstanding (incl. overdue and future)"
-    },
     "chart": {
       "title": "Issued vs paid",
       "issued": "Issued",
       "paid": "Paid",
-      "subtitle": "Last 12 months (amount, CZK)"
+      "subtitleYear": "{year} (amount, CZK)",
+      "subtitleRolling": "Last 12 months (amount, CZK)"
     }
   },
   "Invoices": {
