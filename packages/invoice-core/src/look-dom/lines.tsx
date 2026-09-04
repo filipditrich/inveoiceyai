@@ -14,6 +14,7 @@ import {
 import { invoicePdfShowsVatColumn } from "../pdf/pdf-presentation";
 import {
   invoiceDisplayUnit,
+  currencyDisplaySuffix,
   type InvoiceItem,
   type InvoiceLanguage,
 } from "../schema";
@@ -65,6 +66,47 @@ function priceFieldValue(
 function vatFieldValue(item: InvoiceItem, editing: boolean): string {
   if (editing) return String(item.vatRate);
   return `${String(item.vatRate)}\u00a0%`;
+}
+
+function LineAffixCell({
+  ariaLabel,
+  value,
+  onChange,
+  affix,
+  style,
+}: {
+  ariaLabel: string;
+  value: string;
+  onChange?: (value: string) => void;
+  affix: string;
+  style: LookDomCtx["styles"]["cellFig"];
+}) {
+  return (
+    <LookBox
+      extra={{
+        ...CELL_CLIP,
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        alignItems: "baseline",
+        gap: 2,
+      }}
+    >
+      <LookField
+        ariaLabel={ariaLabel}
+        extra={{ textAlign: "right", width: "auto", flex: 1, minWidth: 0 }}
+        inputMode={onChange ? "decimal" : undefined}
+        onChange={onChange}
+        style={style}
+        value={value}
+      />
+      {onChange ? (
+        <LookText extra={{ flexShrink: 0 }} style={style}>
+          {affix}
+        </LookText>
+      ) : null}
+    </LookBox>
+  );
 }
 
 function DomInvoiceLineRow({
@@ -154,27 +196,21 @@ function DomInvoiceLineRow({
           />
         ) : null}
       </LookBox>
-      <LookBox extra={CELL_CLIP}>
-        <LookField
-          ariaLabel={labels.colUnitPrice}
-          extra={{ textAlign: "right", width: "100%" }}
-          inputMode="decimal"
-          onChange={patch?.("unitPriceWithoutVat")}
-          style={styles.cellFig}
-          value={priceFieldValue(item, ctx, editing)}
-        />
-      </LookBox>
+      <LineAffixCell
+        affix={currencyDisplaySuffix(inv.meta.currency, inv.meta.language)}
+        ariaLabel={labels.colUnitPrice}
+        onChange={patch?.("unitPriceWithoutVat")}
+        style={styles.cellFig}
+        value={priceFieldValue(item, ctx, editing)}
+      />
       {showVat ? (
-        <LookBox extra={CELL_CLIP}>
-          <LookField
-            ariaLabel={labels.colVat}
-            extra={{ textAlign: "right", width: "100%" }}
-            inputMode="decimal"
-            onChange={patch?.("vatRate")}
-            style={styles.cellFig}
-            value={vatFieldValue(item, editing)}
-          />
-        </LookBox>
+        <LineAffixCell
+          affix="%"
+          ariaLabel={labels.colVat}
+          onChange={patch?.("vatRate")}
+          style={styles.cellFig}
+          value={vatFieldValue(item, editing)}
+        />
       ) : null}
       <LookText
         extra={{ ...CELL_CLIP, textAlign: "right" }}
