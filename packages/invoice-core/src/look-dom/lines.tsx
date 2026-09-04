@@ -5,7 +5,12 @@ import {
   formatInvoiceQty,
   splitDescription,
 } from "../looks/format-invoice";
-import { LINE_COLS_NO_VAT, LINE_COLS_WITH_VAT } from "../looks/line-columns";
+import {
+  LINE_COLS_NO_VAT,
+  LINE_COLS_WITH_VAT,
+  lineGridTemplate,
+  type LineCols,
+} from "../looks/line-columns";
 import { invoicePdfShowsVatColumn } from "../pdf/pdf-presentation";
 import {
   invoiceDisplayUnit,
@@ -14,6 +19,21 @@ import {
 } from "../schema";
 import { LookBox, LookField, LookText } from "./field";
 import type { LookDomCtx } from "./types";
+
+const CELL_CLIP: React.CSSProperties = {
+  minWidth: 0,
+  overflow: "hidden",
+  width: "100%",
+};
+
+function lineGridExtra(cols: LineCols): React.CSSProperties {
+  return {
+    display: "grid",
+    gridTemplateColumns: lineGridTemplate(cols),
+    position: "relative",
+    width: "100%",
+  };
+}
 
 function qtyFieldValue(
   item: InvoiceItem,
@@ -62,7 +82,7 @@ function DomInvoiceLineRow({
   last: boolean;
   lineCount: number;
   showVat: boolean;
-  cols: typeof LINE_COLS_WITH_VAT | typeof LINE_COLS_NO_VAT;
+  cols: LineCols;
 }) {
   const { invoice: inv, labels, intlLocale, styles, onEdit } = ctx;
   const split = splitDescription(item.description);
@@ -80,8 +100,8 @@ function DomInvoiceLineRow({
           onEdit({ type: "line", index, field, value })
     : undefined;
   return (
-    <LookBox style={styles.lineRow}>
-      <LookBox extra={{ width: cols.desc }} style={styles.descCol}>
+    <LookBox extra={lineGridExtra(cols)} style={styles.lineRow}>
+      <LookBox extra={CELL_CLIP} style={styles.descCol}>
         <LookField
           ariaLabel={labels.colDescription}
           onChange={patch?.("description")}
@@ -98,10 +118,10 @@ function DomInvoiceLineRow({
       </LookBox>
       <LookBox
         extra={{
-          width: cols.qty,
+          ...CELL_CLIP,
+          display: "flex",
           flexDirection: "row",
           justifyContent: "flex-end",
-          minWidth: 0,
           gap: 4,
         }}
       >
@@ -134,10 +154,10 @@ function DomInvoiceLineRow({
           />
         ) : null}
       </LookBox>
-      <LookBox extra={{ width: cols.unitPx, minWidth: 0 }}>
+      <LookBox extra={CELL_CLIP}>
         <LookField
           ariaLabel={labels.colUnitPrice}
-          extra={{ textAlign: "right", width: "100%", minWidth: 0 }}
+          extra={{ textAlign: "right", width: "100%" }}
           inputMode="decimal"
           onChange={patch?.("unitPriceWithoutVat")}
           style={styles.cellFig}
@@ -145,10 +165,10 @@ function DomInvoiceLineRow({
         />
       </LookBox>
       {showVat ? (
-        <LookBox extra={{ width: LINE_COLS_WITH_VAT.vat, minWidth: 0 }}>
+        <LookBox extra={CELL_CLIP}>
           <LookField
             ariaLabel={labels.colVat}
-            extra={{ textAlign: "right", width: "100%", minWidth: 0 }}
+            extra={{ textAlign: "right", width: "100%" }}
             inputMode="decimal"
             onChange={patch?.("vatRate")}
             style={styles.cellFig}
@@ -157,7 +177,7 @@ function DomInvoiceLineRow({
         </LookBox>
       ) : null}
       <LookText
-        extra={{ width: cols.tot, textAlign: "right", flexShrink: 0 }}
+        extra={{ ...CELL_CLIP, textAlign: "right" }}
         style={styles.cellFigStrong}
       >
         {formatInvoiceMoneyWithCurrency(
@@ -178,6 +198,9 @@ function DomInvoiceLineRow({
             cursor: "pointer",
             fontSize: "7pt",
             padding: 0,
+            position: "absolute",
+            right: -10,
+            top: 2,
           }}
           type="button"
         >
@@ -195,32 +218,32 @@ export function renderLines(ctx: LookDomCtx): React.ReactElement {
   const cols = showVat ? LINE_COLS_WITH_VAT : LINE_COLS_NO_VAT;
   return (
     <LookBox lookBlock="lines" style={styles.tableWrap}>
-      <LookBox style={styles.tableHeadRow}>
-        <LookText extra={{ width: cols.desc }} style={styles.th}>
+      <LookBox extra={lineGridExtra(cols)} style={styles.tableHeadRow}>
+        <LookText extra={CELL_CLIP} style={styles.th}>
           {labels.colDescription}
         </LookText>
         <LookText
-          extra={{ width: cols.qty, textAlign: "right" }}
+          extra={{ ...CELL_CLIP, textAlign: "right" }}
           style={styles.th}
         >
           {labels.colQty}
         </LookText>
         <LookText
-          extra={{ width: cols.unitPx, textAlign: "right" }}
+          extra={{ ...CELL_CLIP, textAlign: "right" }}
           style={styles.th}
         >
           {labels.colUnitPrice}
         </LookText>
         {showVat ? (
           <LookText
-            extra={{ width: LINE_COLS_WITH_VAT.vat, textAlign: "right" }}
+            extra={{ ...CELL_CLIP, textAlign: "right" }}
             style={styles.th}
           >
             {labels.colVat}
           </LookText>
         ) : null}
         <LookText
-          extra={{ width: cols.tot, textAlign: "right" }}
+          extra={{ ...CELL_CLIP, textAlign: "right" }}
           style={styles.th}
         >
           {labels.colTotal}
