@@ -10,6 +10,7 @@ const SYSTEM_TEMPLATES = new Set<EmailTemplateId>([
   "bank_payment_auto_matched",
   "new_sign_in",
   "workspace_invite",
+  "guest_invoice",
 ]);
 
 export type EmailFromFamily = "invoice" | "system";

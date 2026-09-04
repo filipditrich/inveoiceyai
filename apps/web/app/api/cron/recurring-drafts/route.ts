@@ -1,7 +1,7 @@
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
-import { isNull } from "drizzle-orm";
+import { and, isNull } from "drizzle-orm";
 
-import { workspaces } from "@invoicey/db";
+import { notUnclaimedWorkspaces, workspaces } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
 import { runDueRecurringForWorkspace } from "@invoicey/invoice-tools/ops";
@@ -27,7 +27,9 @@ export async function GET(request: Request): Promise<Response> {
   const workspaceRows = await db
     .select({ id: workspaces.id })
     .from(workspaces)
-    .where(isNull(workspaces.frozenAt));
+    // Unclaimed guest workspaces (ADR 0048 §2) never have a recurring
+    // template, but they must not be swept into daily work regardless.
+    .where(and(isNull(workspaces.frozenAt), notUnclaimedWorkspaces()));
 
   let created = 0;
   let skipped = 0;

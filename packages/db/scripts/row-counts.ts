@@ -15,6 +15,7 @@ const sql = neon(url);
 
 const tables = [
   "workspaces",
+  "guest_issues",
   "clients",
   "issuer_businesses",
   "issuer_numbering_schemes",

@@ -520,10 +520,18 @@ export async function bulkDeleteDraftInvoices(options: {
 /**
  * Issue a draft by id: lock numbering scheme, assign number, freeze snapshots.
  * Idempotent if already issued.
+ *
+ * `number` is the guest-numbering seam (ADR 0048 §3): the free generator lets
+ * the visitor keep their own series, unique only within the guest workspace.
+ * When supplied (non-empty after trim) it is used verbatim instead of
+ * `nextInvoiceNumber`; the scheme counter still advances in this transaction
+ * so the sequence stays coherent after the workspace is claimed. Empty values
+ * fall back to the scheme. Do not fork this function for guests.
  */
 export async function issueInvoiceById(options: {
   id: string;
   workspaceId?: string;
+  number?: string;
 }): Promise<
   | {
       ok: true;
@@ -615,18 +623,23 @@ export async function issueInvoiceById(options: {
 
       const issueDateStr = draftParsed.data.meta.issueDate;
       const issueDate = new Date(`${issueDateStr}T12:00:00.000Z`);
-      const number = nextInvoiceNumber(
-        {
-          template: scheme.template,
-          counter: scheme.counter,
-          counterYear: scheme.counterYear ?? undefined,
-          resetPeriod: scheme.resetPeriod === "never" ? "never" : "yearly",
-          padding: scheme.padding,
-          docType,
-          issuerName: issuerSnap.data.name,
-        },
-        issueDate,
-      );
+      const requestedNumber = options.number?.trim();
+      const number =
+        requestedNumber && requestedNumber.length > 0
+          ? requestedNumber
+          : nextInvoiceNumber(
+              {
+                template: scheme.template,
+                counter: scheme.counter,
+                counterYear: scheme.counterYear ?? undefined,
+                resetPeriod:
+                  scheme.resetPeriod === "never" ? "never" : "yearly",
+                padding: scheme.padding,
+                docType,
+                issuerName: issuerSnap.data.name,
+              },
+              issueDate,
+            );
 
       const year = issueDate.getFullYear();
       let nextCounter = scheme.counter + 1;

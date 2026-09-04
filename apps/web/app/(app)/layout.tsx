@@ -8,6 +8,9 @@ import {
   listUserWorkspaces,
 } from "@/lib/auth/workspaces";
 import { can } from "@/lib/authz/can";
+import { CLAIM_COOKIE_NAME } from "@/lib/generator/claim-cookie";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import {
   getWorkspaceBillingState,
@@ -24,6 +27,11 @@ export default async function AppShellLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const claimToken = (await cookies()).get(CLAIM_COOKIE_NAME)?.value?.trim();
+  if (claimToken) {
+    redirect(`/claim/${encodeURIComponent(claimToken)}`);
+  }
+
   // Redirects signed-out users. Individual pages still call
   // `requireWorkspace()` themselves — a layout is not an authorization
   // boundary, since route handlers and actions do not pass through it.

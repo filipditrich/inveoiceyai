@@ -5,6 +5,7 @@ import {
   bankConnections,
   communityLooks,
   emailSuppressions,
+  notUnclaimedWorkspaces,
   workspaces,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
@@ -109,7 +110,7 @@ export async function adminListLiveCommunityLooks(): Promise<
       workspaces,
       eq(communityLooks.publisherWorkspaceId, workspaces.id),
     )
-    .where(isNull(communityLooks.unpublishedAt))
+    .where(and(isNull(communityLooks.unpublishedAt), notUnclaimedWorkspaces()))
     .orderBy(desc(communityLooks.createdAt));
 }
 

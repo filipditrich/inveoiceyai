@@ -1,9 +1,10 @@
 import "server-only";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 
 import {
   aiTokenBalances,
   aiUsageEvents,
+  notUnclaimedWorkspaces,
   user,
   workspaces,
   workspaceTokenGrants,
@@ -148,7 +149,10 @@ export async function loadPlatformAiUsage(): Promise<PlatformAiUsage> {
         .from(aiUsageEvents)
         .innerJoin(workspaces, eq(aiUsageEvents.workspaceId, workspaces.id))
         .where(
-          sql`${aiUsageEvents.kind} = 'llm' and ${aiUsageEvents.createdAt} >= ${window30d}`,
+          and(
+            sql`${aiUsageEvents.kind} = 'llm' and ${aiUsageEvents.createdAt} >= ${window30d}`,
+            notUnclaimedWorkspaces(),
+          ),
         )
         .groupBy(aiUsageEvents.workspaceId, workspaces.name)
         .orderBy(desc(sql`sum(${aiUsageEvents.totalTokens})`))
@@ -170,6 +174,7 @@ export async function loadPlatformAiUsage(): Promise<PlatformAiUsage> {
           eq(workspaceTokenGrants.workspaceId, workspaces.id),
         )
         .leftJoin(user, eq(workspaceTokenGrants.grantedBy, user.id))
+        .where(notUnclaimedWorkspaces())
         .orderBy(desc(workspaceTokenGrants.createdAt))
         .limit(25),
     ]);

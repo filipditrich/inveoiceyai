@@ -15,36 +15,37 @@ Per-feature implementation specs. Written **just-in-time** before the plan that 
 > Plan 25 design specs and the mPohoda API analysis, is preserved on the
 > `feat/payables-lifecycle` branch (tag `archive/payables-lifecycle`).
 
-**Planned specs:** [`production-ux-finish.md`](./production-ux-finish.md) is the active cross-feature production UX program. [`plans-entitlements.md`](./plans-entitlements.md) is the active Plan 26 spec (plans, entitlements, managed clients, permissions). [`pdf-looks.md`](./pdf-looks.md) is the Plan 27 S0 spec (look documents, Classic + Minimal, snapshot, picker). [`pdf-looks-builder.md`](./pdf-looks-builder.md) is the Plan 28 S1 spec (workspace looks + builder). [`pdf-looks-community.md`](./pdf-looks-community.md) is the Plan 29 S2 spec (community publish). [`invoicey-drive.md`](./invoicey-drive.md) is the Plan 30 spec (macOS companion File Provider + pairing API). [`invoicey-cli.md`](./invoicey-cli.md) is the Plan 31 spec (operator CLI + companion JSON API). [`standalone-domain.md`](./standalone-domain.md) is the Plan 32 spec (cutover from `invoicey.ditrich.me` to `invoicey.app`).
+**Planned specs:** [`production-ux-finish.md`](./production-ux-finish.md) is the active cross-feature production UX program. [`plans-entitlements.md`](./plans-entitlements.md) is the active Plan 26 spec (plans, entitlements, managed clients, permissions). [`pdf-looks.md`](./pdf-looks.md) is the Plan 27 S0 spec (look documents, Classic + Minimal, snapshot, picker). [`pdf-looks-builder.md`](./pdf-looks-builder.md) is the Plan 28 S1 spec (workspace looks + builder). [`pdf-looks-community.md`](./pdf-looks-community.md) is the Plan 29 S2 spec (community publish). [`invoicey-drive.md`](./invoicey-drive.md) is the Plan 30 spec (macOS companion File Provider + pairing API). [`invoicey-cli.md`](./invoicey-cli.md) is the Plan 31 spec (operator CLI + companion JSON API). [`standalone-domain.md`](./standalone-domain.md) is the Plan 32 spec (cutover from `invoicey.ditrich.me` to `invoicey.app`). [`free-invoice-generator.md`](./free-invoice-generator.md) is the Plan 34/35 spec (public free invoice generator, guest issuance and claim, editable page).
 
 Just-in-time convention: write the remaining specs before the plan that consumes them ([lifecycle](../README.md#lifecycle-conventions)).
 
 ## Expected specs (with the plan that authors them)
 
-| Spec                       | Plan that creates it | Purpose                                                                                                                              |
-| -------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `pdf-rendering.md`         | Plan 3               | `@react-pdf/renderer` template structure, font selection, layout grid, asset embedding                                               |
-| `spayd-qr.md`              | Plan 3               | SPAYD payload builder, QR encoding, rendering as PDF image                                                                           |
-| `isdoc.md`                 | Plan 3               | ISDOC 6.0.2 element-by-element mapping from `InvoiceSchema`, validators, importer compat notes                                       |
-| `ares.md`                  | Plan 4               | ARES REST v3 endpoint URL, response shape, Zod parser, caching policy, error handling, identifikovaná osoba edge case                |
-| `mcp.md`                   | Plan 12a             | Local stdio MCP + Vercel `/api/mcp`, tools, presets, Cursor + go-live checklist                                                      |
-| `db-schema.md`             | DB foundation        | Neon tables: workspaces, issuer_businesses, clients, invoices, presets                                                               |
-| `uploads.md`               | Plan 5               | UploadThing endpoints (issuer logo / stamp / signature, workspace logo), allowed MIME types and sizes, replace-without-delete policy |
-| `data-grid.md`             | Plan 7               | ReUI Data Grid columns, filter/sort/search wiring, virtualization, row actions                                                       |
-| `email.md`                 | Plan 11              | react-email templates, EmailTransport adapters (Resend first), From/Reply-To, webhooks, invoice send                                 |
-| `public-shell.md`          | Plan 17              | Public homepage, auth entry shell, essential legal routes, consent UX, and launch metadata                                           |
-| `recurring.md`             | Plan 10              | Invoice templates, monthly/quarterly schedules, cron drafts (HITL)                                                                   |
-| `payment-ledger-fio.md`    | Plan 22              | Provider-neutral allocations, deterministic matching, encrypted Fio connection, sync, reconciliation UI                              |
-| `payment-ledger-moneta.md` | Plan 23              | MONETA VIP AISP read-only adapter on the same ledger                                                                                 |
-| `plans-entitlements.md`    | Plan 26              | `plans` table, entitlement resolution, managed client catalogs, token grant rules, permission catalog                                |
-| `pdf-looks.md`             | Plan 27 S0           | Look documents, Classic + Minimal, issue snapshot, Free/Pro apply gate, picker                                                       |
-| `pdf-looks-builder.md`     | Plan 28 S1           | Workspace-origin looks, structured + JSON builder, versioned `workspace_looks` rows                                                  |
-| `pdf-looks-community.md`   | Plan 29 S2           | Publish a workspace look to a global community catalog                                                                               |
-| `assistant-panel.md`       | —                    | In-app assistant on the same Eve agent as Slack: browser auth, shared card model and card actions, per-surface metering              |
-| `invoicey-drive.md`        | Plan 30              | macOS companion: File Provider domain, Drive device pairing, layout template, `/api/drive/*`                                         |
-| `invoicey-cli.md`          | Plan 31              | Operator CLI + PAT companion JSON API (`/api/companion`)                                                                             |
-| `standalone-domain.md`     | Plan 32              | Cutover canonical host + email From to `invoicey.app`                                                                                |
-| `platform-admin.md`        | Plan 18b / 18c       | See vs control vs never for `/admin`; monitor (18b) then support control (18c)                                                       |
+| Spec                        | Plan that creates it | Purpose                                                                                                                              |
+| --------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `pdf-rendering.md`          | Plan 3               | `@react-pdf/renderer` template structure, font selection, layout grid, asset embedding                                               |
+| `spayd-qr.md`               | Plan 3               | SPAYD payload builder, QR encoding, rendering as PDF image                                                                           |
+| `isdoc.md`                  | Plan 3               | ISDOC 6.0.2 element-by-element mapping from `InvoiceSchema`, validators, importer compat notes                                       |
+| `ares.md`                   | Plan 4               | ARES REST v3 endpoint URL, response shape, Zod parser, caching policy, error handling, identifikovaná osoba edge case                |
+| `mcp.md`                    | Plan 12a             | Local stdio MCP + Vercel `/api/mcp`, tools, presets, Cursor + go-live checklist                                                      |
+| `db-schema.md`              | DB foundation        | Neon tables: workspaces, issuer_businesses, clients, invoices, presets                                                               |
+| `uploads.md`                | Plan 5               | UploadThing endpoints (issuer logo / stamp / signature, workspace logo), allowed MIME types and sizes, replace-without-delete policy |
+| `data-grid.md`              | Plan 7               | ReUI Data Grid columns, filter/sort/search wiring, virtualization, row actions                                                       |
+| `email.md`                  | Plan 11              | react-email templates, EmailTransport adapters (Resend first), From/Reply-To, webhooks, invoice send                                 |
+| `public-shell.md`           | Plan 17              | Public homepage, auth entry shell, essential legal routes, consent UX, and launch metadata                                           |
+| `recurring.md`              | Plan 10              | Invoice templates, monthly/quarterly schedules, cron drafts (HITL)                                                                   |
+| `payment-ledger-fio.md`     | Plan 22              | Provider-neutral allocations, deterministic matching, encrypted Fio connection, sync, reconciliation UI                              |
+| `payment-ledger-moneta.md`  | Plan 23              | MONETA VIP AISP read-only adapter on the same ledger                                                                                 |
+| `plans-entitlements.md`     | Plan 26              | `plans` table, entitlement resolution, managed client catalogs, token grant rules, permission catalog                                |
+| `pdf-looks.md`              | Plan 27 S0           | Look documents, Classic + Minimal, issue snapshot, Free/Pro apply gate, picker                                                       |
+| `pdf-looks-builder.md`      | Plan 28 S1           | Workspace-origin looks, structured + JSON builder, versioned `workspace_looks` rows                                                  |
+| `pdf-looks-community.md`    | Plan 29 S2           | Publish a workspace look to a global community catalog                                                                               |
+| `assistant-panel.md`        | —                    | In-app assistant on the same Eve agent as Slack: browser auth, shared card model and card actions, per-surface metering              |
+| `invoicey-drive.md`         | Plan 30              | macOS companion: File Provider domain, Drive device pairing, layout template, `/api/drive/*`                                         |
+| `invoicey-cli.md`           | Plan 31              | Operator CLI + PAT companion JSON API (`/api/companion`)                                                                             |
+| `standalone-domain.md`      | Plan 32              | Cutover canonical host + email From to `invoicey.app`                                                                                |
+| `platform-admin.md`         | Plan 18b / 18c       | See vs control vs never for `/admin`; monitor (18b) then support control (18c)                                                       |
+| `free-invoice-generator.md` | Plan 34 / 35         | Public sign-in-free generator: guest issuance, download gate, claim, then the editable page                                          |
 
 ## Spec format conventions
 

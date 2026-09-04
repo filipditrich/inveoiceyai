@@ -250,13 +250,16 @@ export type AresFillResult = {
 /** Shared ARES IČO lookup used by identity / create / welcome forms. */
 export async function lookupAresByIco(
   icoInput: string,
+  options?: { endpoint?: "session" | "generator" },
 ): Promise<AresLookupResult> {
   const raw = (icoInput ?? "").replace(/\s/g, "");
   const parsed = IcoSchema.safeParse(raw);
   if (!parsed.success) {
     return { ok: false, code: "invalid_ico" };
   }
-  const res = await fetch(`/api/ares/${parsed.data}`);
+  const prefix =
+    options?.endpoint === "generator" ? "/api/generator/ares" : "/api/ares";
+  const res = await fetch(`${prefix}/${parsed.data}`);
   let payload: unknown;
   try {
     payload = await res.json();

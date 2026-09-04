@@ -192,6 +192,22 @@ export {
   type WebSessionPrincipal,
 } from "./web-sessions";
 export {
+  attachGuestIssueInvoice,
+  claimGuestWorkspace,
+  countGuestIssuesByIco,
+  deleteExpiredGuestWorkspaces,
+  findUnclaimedGuestWorkspaces,
+  getGuestIssueByWorkspace,
+  guestAllowancePeriod,
+  releaseGuestIssue,
+  reserveGuestIssue,
+  type ClaimGuestWorkspaceResult,
+  type DeleteExpiredGuestWorkspacesResult,
+  type GuestIssueByWorkspace,
+  type ReserveGuestIssueResult,
+  type UnclaimedGuestWorkspace,
+} from "./guest-repo";
+export {
   DEFAULT_DRIVE_LAYOUT_TEMPLATE as DEFAULT_DRIVE_LAYOUT,
   DRIVE_PAIR_GRANT_TTL_MS,
   consumeDrivePairGrant,

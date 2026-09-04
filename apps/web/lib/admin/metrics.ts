@@ -1,6 +1,6 @@
 import "server-only";
 import { displayStatusWhere, pragueTodayIso } from "@/lib/invoice-status-sql";
-import { count, desc, eq, gte, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, sql } from "drizzle-orm";
 
 import {
   aiTokenBalances,
@@ -9,6 +9,7 @@ import {
   emailMessages,
   invoices,
   issuerBusinesses,
+  notUnclaimedWorkspaces,
   plans,
   user,
   workspaces,
@@ -79,13 +80,33 @@ export type PlatformDashboardMetrics = {
 };
 
 async function countTable(
-  table:
-    | typeof user
-    | typeof workspaces
-    | typeof issuerBusinesses
-    | typeof invoices,
+  table: typeof user | typeof issuerBusinesses | typeof invoices,
 ): Promise<number> {
   const [row] = await db.select({ value: count() }).from(table);
+  return Number(row?.value ?? 0);
+}
+
+async function countInClaimedWorkspaces(
+  table: typeof issuerBusinesses | typeof invoices,
+): Promise<number> {
+  const [row] = await db
+    .select({ value: count() })
+    .from(table)
+    .innerJoin(workspaces, eq(table.workspaceId, workspaces.id))
+    .where(notUnclaimedWorkspaces());
+  return Number(row?.value ?? 0);
+}
+
+/**
+ * Unclaimed guest workspaces (ADR 0048 §2) are not tenants and must not count
+ * toward the platform total, or growth from the free generator would read as
+ * customer growth.
+ */
+async function countWorkspaces(): Promise<number> {
+  const [row] = await db
+    .select({ value: count() })
+    .from(workspaces)
+    .where(notUnclaimedWorkspaces());
   return Number(row?.value ?? 0);
 }
 
@@ -97,7 +118,10 @@ async function loadStatusBuckets(
       const [row] = await db
         .select({ value: count() })
         .from(invoices)
-        .where(displayStatusWhere(status, todayIso));
+        .innerJoin(workspaces, eq(invoices.workspaceId, workspaces.id))
+        .where(
+          and(displayStatusWhere(status, todayIso), notUnclaimedWorkspaces()),
+        );
       return { status, count: Number(row?.value ?? 0) };
     }),
   );
@@ -117,7 +141,8 @@ async function loadMonthly(windowStart: Date): Promise<PlatformMonthPoint[]> {
         value: count(),
       })
       .from(invoices)
-      .where(gte(invoices.issuedAt, windowStart))
+      .innerJoin(workspaces, eq(invoices.workspaceId, workspaces.id))
+      .where(and(gte(invoices.issuedAt, windowStart), notUnclaimedWorkspaces()))
       .groupBy(
         sql`to_char(date_trunc('month', ${invoices.issuedAt}), 'YYYY-MM')`,
       ),
@@ -127,7 +152,8 @@ async function loadMonthly(windowStart: Date): Promise<PlatformMonthPoint[]> {
         value: count(),
       })
       .from(invoices)
-      .where(gte(invoices.paidAt, windowStart))
+      .innerJoin(workspaces, eq(invoices.workspaceId, workspaces.id))
+      .where(and(gte(invoices.paidAt, windowStart), notUnclaimedWorkspaces()))
       .groupBy(
         sql`to_char(date_trunc('month', ${invoices.paidAt}), 'YYYY-MM')`,
       ),
@@ -168,9 +194,9 @@ export async function loadPlatformDashboardMetrics(): Promise<PlatformDashboardM
     [bankErrorRow],
   ] = await Promise.all([
     countTable(user),
-    countTable(workspaces),
-    countTable(issuerBusinesses),
-    countTable(invoices),
+    countWorkspaces(),
+    countInClaimedWorkspaces(issuerBusinesses),
+    countInClaimedWorkspaces(invoices),
     db
       .select({ value: count() })
       .from(user)
@@ -194,6 +220,7 @@ export async function loadPlatformDashboardMetrics(): Promise<PlatformDashboardM
       })
       .from(invoices)
       .innerJoin(workspaces, eq(invoices.workspaceId, workspaces.id))
+      .where(notUnclaimedWorkspaces())
       .orderBy(desc(invoices.updatedAt))
       .limit(10),
     db
@@ -203,7 +230,8 @@ export async function loadPlatformDashboardMetrics(): Promise<PlatformDashboardM
         volume: sql<string>`coalesce(sum(${invoices.total}), 0)::text`,
       })
       .from(invoices)
-      .where(gte(invoices.issuedAt, window12m))
+      .innerJoin(workspaces, eq(invoices.workspaceId, workspaces.id))
+      .where(and(gte(invoices.issuedAt, window12m), notUnclaimedWorkspaces()))
       .groupBy(invoices.currency),
     db
       .select({
@@ -212,7 +240,13 @@ export async function loadPlatformDashboardMetrics(): Promise<PlatformDashboardM
         workspaceCount: sql<number>`count(${workspaces.id})::int`,
       })
       .from(plans)
-      .leftJoin(workspaces, eq(workspaces.planId, plans.id))
+      // The filter belongs in the join condition, not a `where` — a `where`
+      // would turn this back into an inner join and drop plans with zero
+      // (non-guest) workspaces from the mix.
+      .leftJoin(
+        workspaces,
+        and(eq(workspaces.planId, plans.id), notUnclaimedWorkspaces()),
+      )
       .groupBy(plans.id, plans.name)
       .orderBy(desc(sql`count(${workspaces.id})`)),
     db

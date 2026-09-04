@@ -1,4 +1,6 @@
 import "server-only";
+import { autoClaimGuestWorkspacesByEmail } from "@/lib/generator/claim";
+
 import { appOrigin, sendNewSignInEmail } from "../email/security";
 import {
   createTrustToken,
@@ -51,6 +53,14 @@ export async function onSessionCreated(
 
     const headers = context?.headers;
     const profile = await loadUserEmail(session.userId);
+    if (profile?.email && profile.emailVerified) {
+      await autoClaimGuestWorkspacesByEmail({
+        id: session.userId,
+        name: profile.name,
+        email: profile.email,
+        emailVerified: profile.emailVerified,
+      });
+    }
     const referralCode = headers ? readReferralCodeFromHeaders(headers) : null;
     if (
       referralCode &&

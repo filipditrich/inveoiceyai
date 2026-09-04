@@ -65,6 +65,20 @@ export const workspaces = pgTable(
     frozenAt: timestamp("frozen_at", { withTimezone: true }),
     frozenBy: text("frozen_by"),
     freezeReason: text("freeze_reason"),
+    /**
+     * Guest issuance (Plan 34, ADR 0048). **A workspace is an ordinary tenant
+     * iff `unclaimedSince` is null** — that single-column predicate is what
+     * every cross-tenant query, admin metric, and plan count filters on
+     * (`notUnclaimedWorkspaces()` in `guest-issuance.ts`). The four columns
+     * below only ever have values together: a guest row is created with all
+     * of them (`unclaimedSince` set, the rest null) and claiming flips them
+     * atomically (`claimGuestWorkspace` in `guest-repo.ts`).
+     */
+    guestEmail: text("guest_email"),
+    unclaimedSince: timestamp("unclaimed_since", { withTimezone: true }),
+    claimedAt: timestamp("claimed_at", { withTimezone: true }),
+    /** Claiming user id. No FK, mirrors `planAssignedBy` above. */
+    claimedBy: text("claimed_by"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -72,5 +86,6 @@ export const workspaces = pgTable(
   (t) => [
     index("workspaces_plan_idx").on(t.planId),
     index("workspaces_frozen_idx").on(t.frozenAt),
+    index("workspaces_unclaimed_idx").on(t.unclaimedSince),
   ],
 );

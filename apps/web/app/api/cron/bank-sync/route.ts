@@ -2,7 +2,11 @@ import { syncFioConnection } from "@/lib/payments/fio-service";
 import { syncMonetaConnection } from "@/lib/payments/moneta-service";
 import { and, asc, eq, inArray, isNull, lte, or } from "drizzle-orm";
 
-import { bankConnections, workspaces } from "@invoicey/db";
+import {
+  bankConnections,
+  notUnclaimedWorkspaces,
+  workspaces,
+} from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
 
@@ -34,6 +38,11 @@ export async function GET(request: Request): Promise<Response> {
     .where(
       and(
         isNull(workspaces.frozenAt),
+        // A guest workspace can never actually have a `bankConnections` row
+        // (ADR 0048 keeps guests to one issued invoice), but every scheduled
+        // cross-workspace sweep applies this filter regardless of whether the
+        // join happens to be reachable from a guest workspace today.
+        notUnclaimedWorkspaces(),
         inArray(bankConnections.provider, ["fio", "moneta"]),
         eq(bankConnections.status, "active"),
         or(

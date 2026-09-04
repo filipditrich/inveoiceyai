@@ -6,7 +6,15 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: ["/", "/brand", "/privacy", "/terms", "/cookies"],
+      allow: [
+        "/",
+        "/brand",
+        "/privacy",
+        "/terms",
+        "/cookies",
+        "/faktura-zdarma",
+        "/free-invoice-generator",
+      ],
       disallow: [
         "/api/",
         "/dashboard",
@@ -16,6 +24,7 @@ export default function robots(): MetadataRoute.Robots {
         "/settings/account",
         "/onboarding",
         "/sign-in",
+        "/claim",
         "/eve/",
       ],
     },

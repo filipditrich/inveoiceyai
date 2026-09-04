@@ -1,6 +1,7 @@
 export {
   EMAIL_TEMPLATES,
   renderBankPaymentAutoMatchedEmail,
+  renderGuestInvoiceEmail,
   renderInvoiceSentEmail,
   renderNewSignInEmail,
   renderOverdueReminderEmail,
@@ -22,6 +23,10 @@ export {
   BankPaymentAutoMatchedEmail,
   type BankPaymentAutoMatchedEmailProps,
 } from "./templates/bank-payment-auto-matched";
+export {
+  GuestInvoiceEmail,
+  type GuestInvoiceEmailProps,
+} from "./templates/guest-invoice";
 export {
   InvoiceSentEmail,
   type InvoiceSentEmailProps,

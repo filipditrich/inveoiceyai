@@ -8,6 +8,7 @@ import {
   issuerBusinesses,
   invoices,
   member,
+  notUnclaimedWorkspaces,
   plans,
   session,
   user,
@@ -174,6 +175,7 @@ export async function adminListWorkspaces(): Promise<AdminWorkspaceRow[]> {
     })
     .from(workspaces)
     .innerJoin(plans, eq(workspaces.planId, plans.id))
+    .where(notUnclaimedWorkspaces())
     .orderBy(asc(workspaces.name))
     .limit(ADMIN_LIST_CAP);
 
@@ -284,6 +286,7 @@ export async function adminListInvoices(): Promise<AdminInvoiceRow[]> {
     })
     .from(invoices)
     .innerJoin(workspaces, eq(invoices.workspaceId, workspaces.id))
+    .where(notUnclaimedWorkspaces())
     .orderBy(desc(invoices.updatedAt))
     .limit(ADMIN_LIST_CAP);
 
@@ -328,6 +331,7 @@ export async function adminListIssuers(): Promise<AdminIssuerRow[]> {
     })
     .from(issuerBusinesses)
     .innerJoin(workspaces, eq(issuerBusinesses.workspaceId, workspaces.id))
+    .where(notUnclaimedWorkspaces())
     .orderBy(desc(issuerBusinesses.updatedAt))
     .limit(ADMIN_LIST_CAP);
 

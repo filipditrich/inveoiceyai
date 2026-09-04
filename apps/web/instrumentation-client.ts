@@ -5,5 +5,6 @@ initBotId({
   protect: [
     { path: "/api/auth/*", method: "POST" },
     { path: "/api/demo/invoice-pdf", method: "POST" },
+    { path: "/api/generator/issue", method: "POST" },
   ],
 });
