@@ -2,14 +2,18 @@ import { BrandLogo } from "@/components/brand-logo";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { C15tSettingsLink } from "@/features/c15t";
-import { getTranslations } from "next-intl/server";
+import { appLocaleFrom, generatorPathForLocale } from "@/lib/generator/href";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { NfctronLogo } from "./nfctron-logo";
 
 export async function MarketingFooter() {
   const t = await getTranslations("Marketing.footer");
+  const tNav = await getTranslations("Marketing.nav");
   const tHero = await getTranslations("Marketing.hero");
+  const locale = appLocaleFrom(await getLocale());
+  const generatorHref = generatorPathForLocale(locale);
 
   return (
     <footer className="border-t bg-muted/25">
@@ -45,6 +49,12 @@ export async function MarketingFooter() {
             aria-label={t("legalNav")}
             className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground md:justify-end"
           >
+            <Link
+              className="transition-colors hover:text-foreground"
+              href={generatorHref}
+            >
+              {tNav("generator")}
+            </Link>
             <Link
               className="transition-colors hover:text-foreground"
               href="/docs"

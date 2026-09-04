@@ -176,6 +176,7 @@ export function verifyTrustToken(token: string) {
 export async function loadUserEmail(userId: string): Promise<{
   email: string;
   name: string;
+  emailVerified: boolean;
   defaultWorkspaceId: string | null;
   createdAt: Date;
 } | null> {
@@ -183,6 +184,7 @@ export async function loadUserEmail(userId: string): Promise<{
     .select({
       email: user.email,
       name: user.name,
+      emailVerified: user.emailVerified,
       defaultWorkspaceId: user.defaultWorkspaceId,
       createdAt: user.createdAt,
     })

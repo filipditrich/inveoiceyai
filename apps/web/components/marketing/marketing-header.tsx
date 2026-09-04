@@ -2,8 +2,9 @@ import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
 import { env } from "@/env.config.server";
 import { getOptionalSession } from "@/lib/auth/session";
+import { appLocaleFrom, generatorPathForLocale } from "@/lib/generator/href";
 import { ArrowRightIcon } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { DownloadMenu } from "./download-menu";
@@ -15,9 +16,12 @@ export async function MarketingHeader() {
   const t = await getTranslations("Marketing.nav");
   const tDownload = await getTranslations("Marketing.download");
   const user = await getOptionalSession();
+  const locale = appLocaleFrom(await getLocale());
+  const generatorHref = generatorPathForLocale(locale);
 
-  /** Four destinations, not nine — anything deeper belongs to the page itself. */
+  /** Generator first — the rest is the page itself. */
   const navItems = [
+    { href: generatorHref, label: t("generator") },
     { href: "/#jak-to-funguje", label: t("howItWorks") },
     { href: "/#prehled", label: t("capabilities") },
     { href: "/#cenik", label: t("pricing") },

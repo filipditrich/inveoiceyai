@@ -1,4 +1,8 @@
 import "server-only";
+import {
+  autoClaimGuestWorkspacesByEmail,
+  setDefaultWorkspaceIfMissing,
+} from "@/lib/generator/claim";
 import { asc, eq } from "drizzle-orm";
 
 import {
@@ -63,6 +67,19 @@ function randomSuffix(): string {
 export async function createPersonalWorkspace(
   user: CreatedUser,
 ): Promise<string> {
+  if (user.email && user.emailVerified !== false) {
+    const claimed = await autoClaimGuestWorkspacesByEmail({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      emailVerified: user.emailVerified,
+    });
+    if (claimed[0]) {
+      await setDefaultWorkspaceIfMissing(user.id, claimed[0]);
+      return claimed[0];
+    }
+  }
+
   const workspaceId = crypto.randomUUID();
   // This hook runs outside a request, so there is no UI locale to translate a
   // suffix into. The user's own name reads correctly in either catalog, and the

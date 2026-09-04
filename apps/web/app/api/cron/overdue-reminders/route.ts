@@ -3,9 +3,9 @@ import {
   sendOverdueReminderForInvoice,
 } from "@/lib/email/send-invoice";
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
-import { isNull } from "drizzle-orm";
+import { and, isNull } from "drizzle-orm";
 
-import { workspaces } from "@invoicey/db";
+import { notUnclaimedWorkspaces, workspaces } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
 
@@ -30,7 +30,10 @@ export async function GET(request: Request): Promise<Response> {
   const workspaceRows = await db
     .select({ id: workspaces.id })
     .from(workspaces)
-    .where(isNull(workspaces.frozenAt));
+    // Unclaimed guest workspaces (ADR 0048 §2) hold exactly one already-paid-
+    // or-not invoice and no recipient relationship to chase — they must not
+    // be swept into daily reminder work regardless.
+    .where(and(isNull(workspaces.frozenAt), notUnclaimedWorkspaces()));
 
   let sent = 0;
   let skipped = 0;

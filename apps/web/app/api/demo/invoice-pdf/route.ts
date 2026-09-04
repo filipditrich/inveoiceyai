@@ -1,4 +1,9 @@
 import { getOptionalSession } from "@/lib/auth/session";
+import {
+  clientIpKey,
+  createConcurrencyGate,
+  createFixedWindowLimiter,
+} from "@/lib/rate-limit";
 import { checkBotId } from "botid/server";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -9,47 +14,11 @@ export const runtime = "nodejs";
 
 const MAX_BODY_BYTES = 128 * 1024;
 const MAX_ITEMS = 100;
-const WINDOW_MS = 60_000;
-const REQUESTS_PER_WINDOW = 10;
-const MAX_CONCURRENT_RENDERS = 2;
-const requestWindows = new Map<string, { count: number; resetAt: number }>();
-let concurrentRenders = 0;
-
-function clientKey(request: NextRequest): string {
-  return (
-    request.headers.get("x-vercel-forwarded-for")?.split(",", 1)[0]?.trim() ||
-    request.headers.get("x-forwarded-for")?.split(",", 1)[0]?.trim() ||
-    "unknown"
-  );
-}
-
-function consumeRequest(key: string): { allowed: boolean; retryAfter: number } {
-  const now = Date.now();
-  if (requestWindows.size >= 10_000) {
-    for (const [storedKey, window] of requestWindows) {
-      if (window.resetAt <= now) requestWindows.delete(storedKey);
-    }
-    if (requestWindows.size >= 10_000) {
-      const oldestKey = requestWindows.keys().next().value as
-        | string
-        | undefined;
-      if (oldestKey) requestWindows.delete(oldestKey);
-    }
-  }
-  const current = requestWindows.get(key);
-  if (!current || current.resetAt <= now) {
-    requestWindows.set(key, { count: 1, resetAt: now + WINDOW_MS });
-    return { allowed: true, retryAfter: 0 };
-  }
-  if (current.count >= REQUESTS_PER_WINDOW) {
-    return {
-      allowed: false,
-      retryAfter: Math.max(1, Math.ceil((current.resetAt - now) / 1_000)),
-    };
-  }
-  current.count += 1;
-  return { allowed: true, retryAfter: 0 };
-}
+const previewLimiter = createFixedWindowLimiter({
+  windowMs: 60_000,
+  max: 10,
+});
+const previewGate = createConcurrencyGate(2);
 
 /**
  * Validates posted JSON against `InvoiceSchema` and streams a PDF preview.
@@ -60,11 +29,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "access denied" }, { status: 403 });
   }
 
-  const rate = consumeRequest(clientKey(request));
-  if (!rate.allowed) {
+  const rate = previewLimiter.consume(clientIpKey(request));
+  if (!rate.ok) {
     return NextResponse.json(
       { error: "rate limit exceeded" },
-      { status: 429, headers: { "Retry-After": String(rate.retryAfter) } },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rate.retryAfterSeconds) },
+      },
     );
   }
 
@@ -116,7 +88,7 @@ export async function POST(request: NextRequest) {
       { status: 422 },
     );
   }
-  if (concurrentRenders >= MAX_CONCURRENT_RENDERS) {
+  if (!previewGate.tryEnter()) {
     return NextResponse.json(
       { error: "preview service is busy" },
       { status: 503, headers: { "Retry-After": "2" } },
@@ -124,7 +96,6 @@ export async function POST(request: NextRequest) {
   }
 
   let pdfBytes: Uint8Array;
-  concurrentRenders += 1;
   try {
     pdfBytes = await renderInvoicePdf(invoice);
   } catch (error) {
@@ -140,7 +111,7 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ error: "pdf render failed" }, { status: 500 });
   } finally {
-    concurrentRenders -= 1;
+    previewGate.leave();
   }
 
   const buffer = Buffer.from(pdfBytes);
