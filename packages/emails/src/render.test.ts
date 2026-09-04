@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   renderBankPaymentAutoMatchedEmail,
+  renderGuestInvoiceEmail,
   renderInvoiceSentEmail,
   renderNewSignInEmail,
   renderOverdueReminderEmail,
@@ -86,6 +87,34 @@ describe("email renders", () => {
     const out = await renderPaymentReceivedEmail(invoiceFixture);
     expect(out.subject).toContain("Platba");
     expect(out.html).toContain("přijetí platby");
+  });
+
+  it("renders guest_invoice", async () => {
+    const out = await renderGuestInvoiceEmail({
+      ...invoiceFixture,
+      claimUrl: "https://invoicey.app/claim?token=abc",
+      downloadUrl: "https://invoicey.app/api/generator/download/xyz",
+    });
+    expect(out.subject).toContain("2026-0001");
+    expect(out.html).toContain("Klient s.r.o.");
+    expect(out.html).toContain("claim?token=abc");
+    expect(out.html).toContain("Uschovali jsme ji pro vás");
+    expect(out.text).toContain("claim?token=abc");
+    expect(out.text).toContain("download/xyz");
+  });
+
+  it("renders guest_invoice in English", async () => {
+    const out = await renderGuestInvoiceEmail({
+      ...invoiceFixture,
+      locale: "en",
+      claimUrl: "https://invoicey.app/claim?token=abc",
+      downloadUrl: "https://invoicey.app/api/generator/download/xyz",
+    });
+    expect(out.subject).toContain("Invoice");
+    expect(out.html).toContain("We've kept it for you");
+    expect(out.html).toContain("claim?token=abc");
+    expect(out.text).toContain("claim?token=abc");
+    expect(out.text).toContain("download/xyz");
   });
 
   it("renders new_sign_in", async () => {

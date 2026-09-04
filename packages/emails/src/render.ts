@@ -6,6 +6,10 @@ import {
   type BankPaymentAutoMatchedEmailProps,
 } from "./templates/bank-payment-auto-matched";
 import {
+  GuestInvoiceEmail,
+  type GuestInvoiceEmailProps,
+} from "./templates/guest-invoice";
+import {
   InvoiceSentEmail,
   type InvoiceSentEmailProps,
 } from "./templates/invoice-sent";
@@ -44,6 +48,7 @@ export const EMAIL_TEMPLATES = [
   "bank_payment_auto_matched",
   "new_sign_in",
   "token_reward",
+  "guest_invoice",
 ] as const;
 
 export type EmailTemplateId = (typeof EMAIL_TEMPLATES)[number];
@@ -61,6 +66,21 @@ export async function renderInvoiceSentEmail(
       props.number,
       props.issuerName,
     ),
+    html,
+    text,
+  };
+}
+
+export async function renderGuestInvoiceEmail(
+  props: GuestInvoiceEmailProps,
+): Promise<RenderedEmail> {
+  const element = GuestInvoiceEmail(props);
+  const [html, text] = await Promise.all([
+    render(element),
+    render(element, { plainText: true }),
+  ]);
+  return {
+    subject: invoiceEmailCopy(props.locale ?? "cs").guestSubject(props.number),
     html,
     text,
   };

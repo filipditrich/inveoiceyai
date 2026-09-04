@@ -23,6 +23,14 @@ type InvoiceEmailCopy = {
   paidPreview: (number: string) => string;
   paidSubject: (number: string) => string;
   paidBody: (number: string, issuerName: string) => string;
+  guestTitle: (number: string) => string;
+  guestPreview: (number: string) => string;
+  guestSubject: (number: string) => string;
+  guestIntro: (number: string) => string;
+  guestKept: string;
+  guestClaimCta: string;
+  guestDownloadLead: string;
+  guestDownloadLinkLabel: string;
   number: string;
   customer: string;
   supplier: string;
@@ -88,6 +96,16 @@ const INVOICE_CS: InvoiceEmailCopy = {
   paidSubject: (n) => `Platba přijata — ${n}`,
   paidBody: (n, issuer) =>
     `Dobrý den, potvrzujeme přijetí platby za fakturu ${n} od ${issuer}.`,
+  guestTitle: (n) => `Faktura ${n} je připravená`,
+  guestPreview: (n) => `Faktura ${n} je v příloze a uschovaná pro vás`,
+  guestSubject: (n) => `Faktura ${n} je připravená`,
+  guestIntro: (n) =>
+    `V příloze najdete fakturu ${n} jako řádně vystavený doklad.`,
+  guestKept:
+    "Uschovali jsme ji pro vás — přihlaste se a fakturu si převezmete.",
+  guestClaimCta: "Přihlásit se a převzít fakturu",
+  guestDownloadLead: "Fakturu si můžete stáhnout i bez přihlášení:",
+  guestDownloadLinkLabel: "Stáhnout PDF",
   number: "Číslo",
   customer: "Odběratel",
   supplier: "Dodavatel",
@@ -114,6 +132,14 @@ const INVOICE_EN: InvoiceEmailCopy = {
   paidSubject: (n) => `Payment received — ${n}`,
   paidBody: (n, issuer) =>
     `Hello, we confirm receipt of payment for invoice ${n} from ${issuer}.`,
+  guestTitle: (n) => `Invoice ${n} is ready`,
+  guestPreview: (n) => `Invoice ${n} is attached and kept for you`,
+  guestSubject: (n) => `Invoice ${n} is ready`,
+  guestIntro: (n) => `Attached is invoice ${n} as a properly issued document.`,
+  guestKept: "We've kept it for you — sign in to claim it.",
+  guestClaimCta: "Sign in to claim your invoice",
+  guestDownloadLead: "You can also download the invoice without signing in:",
+  guestDownloadLinkLabel: "Download PDF",
   number: "Number",
   customer: "Customer",
   supplier: "Supplier",
