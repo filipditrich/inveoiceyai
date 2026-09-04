@@ -5,4 +5,5 @@ export {
   invoicePdfShowsVatColumn,
   invoicePdfTaxPointLabel,
 } from "./pdf-presentation";
+export { PDF_LOOK_BLOCK_HANDLERS } from "./InvoicePdfDocument";
 export { renderInvoicePdf, renderVisualInvoicePdf } from "./render-invoice-pdf";

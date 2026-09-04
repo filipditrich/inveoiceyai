@@ -72,3 +72,15 @@ export {
   validateLookForInvoice,
   type LookValidationIssue,
 } from "./validate";
+export {
+  type LookBlockHandler,
+  type LookBlockHandlers,
+  lookBlockHandlerIds,
+} from "./block-coverage";
+export {
+  createLookStyleIr,
+  LOOK_FONT_SANS,
+  rowColumnStyleIr,
+  type LookStyleBox,
+  type LookStyleIr,
+} from "./style-ir";

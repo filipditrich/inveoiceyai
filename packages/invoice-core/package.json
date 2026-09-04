@@ -8,6 +8,7 @@
     "./schema": "./src/schema.ts",
     "./drive-layout": "./src/drive-layout.ts",
     "./looks": "./src/looks/index.ts",
+    "./look-dom": "./src/look-dom/index.ts",
     "./numbering": "./src/numbering.ts",
     "./status": "./src/status.ts",
     "./status-display": "./src/status-display.ts",

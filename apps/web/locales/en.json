@@ -891,6 +891,8 @@
     "eyebrow": "No account needed",
     "title": "Issue a real invoice",
     "subtitle": "The same validated document Invoicey uses for every issued invoice. Preview is watermarked; the download is clean.",
+    "typeOnPage": "Type on the invoice. Totals and VAT are calculated — they cannot be edited.",
+    "settings": "Invoice settings",
     "download": "Download PDF",
     "downloading": "Issuing…",
     "preview": "Preview",

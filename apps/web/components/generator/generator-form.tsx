@@ -2,31 +2,36 @@
 
 import * as React from "react";
 import { DownloadGate } from "@/components/generator/download-gate";
-import { PartyFields } from "@/components/generator/party-fields";
 import { useDemoInvoicePreview } from "@/components/generator/use-demo-preview";
 import { Field, selectClassName } from "@/components/invoices/field";
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
 import { lookupAresByIco } from "@/components/issuers/issuer-form-shared";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { applyLookEdit } from "@/lib/generator/apply-look-edit";
 import {
   applyAresToParty,
   emptyGeneratorDraft,
+  guestDisplayInvoiceFromDraft,
   guestInvoiceFromDraft,
   guestPreviewInvoiceFromDraft,
   withPrefillNumber,
   type GeneratorDraft,
-  type GeneratorLine,
 } from "@/lib/generator/draft";
 import { readGeneratorHandoff } from "@/lib/generator/handoff";
 import { appLocaleFrom } from "@/lib/generator/href";
 import { cn } from "@/lib/utils";
-import { PlusIcon, Trash2Icon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { Inter } from "next/font/google";
 
+import {
+  LookDocumentView,
+  renderSpaydQrDataUrl,
+  type LookEdit,
+} from "@invoicey/invoice-core/look-dom";
 import { ACCENT_COLOR_HEX } from "@invoicey/invoice-core/looks";
+
+const lookSans = Inter({ subsets: ["latin", "latin-ext"] });
 
 const ACCENT_KEYS = [
   "neutral",
@@ -52,6 +57,9 @@ export function GeneratorForm() {
   const [draft, setDraft] = React.useState<GeneratorDraft | null>(null);
   const [gateOpen, setGateOpen] = React.useState(false);
   const [formError, setFormError] = React.useState<string | null>(null);
+  const [qrDataUrl, setQrDataUrl] = React.useState<string | null>(null);
+  const lastIssuerIco = React.useRef("");
+  const lastClientIco = React.useRef("");
 
   React.useEffect(() => {
     const initial = emptyGeneratorDraft({
@@ -60,18 +68,20 @@ export function GeneratorForm() {
       locale,
     });
     const handoff = readGeneratorHandoff();
-    if (!handoff.issuerIco) {
+    const issuerIco = handoff.issuerIco;
+    if (!issuerIco) {
       setDraft(initial);
       return;
     }
     const withIco: GeneratorDraft = {
       ...initial,
-      issuer: { ...initial.issuer, ico: handoff.issuerIco },
+      issuer: { ...initial.issuer, ico: issuerIco },
     };
     setDraft(withIco);
-    void lookupAresByIco(handoff.issuerIco, { endpoint: "generator" }).then(
+    void lookupAresByIco(issuerIco, { endpoint: "generator" }).then(
       (result) => {
         if (!result.ok) return;
+        lastIssuerIco.current = issuerIco;
         setDraft((current) => {
           if (!current) return current;
           return withPrefillNumber({
@@ -87,11 +97,46 @@ export function GeneratorForm() {
   }, [locale]);
 
   const previewBuild = React.useMemo(() => {
-    if (!draft) return { invoice: null, error: null };
+    if (!draft) return { invoice: null, display: null, error: null };
     const built = guestPreviewInvoiceFromDraft(draft);
-    if (built.ok) return { invoice: built.invoice, error: null };
-    return { invoice: null, error: null };
+    const display = guestDisplayInvoiceFromDraft(draft);
+    if (built.ok) return { invoice: built.invoice, display, error: null };
+    return { invoice: null, display: null, error: null };
   }, [draft]);
+
+  React.useEffect(() => {
+    const invoice = previewBuild.invoice;
+    const hasBank = Boolean(
+      draft?.issuer.accountNumber.trim() || draft?.issuer.iban.trim(),
+    );
+    if (!invoice || !draft?.showQr || !hasBank) {
+      setQrDataUrl(null);
+      return;
+    }
+    let cancelled = false;
+    void renderSpaydQrDataUrl(invoice).then((url) => {
+      if (!cancelled) setQrDataUrl(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    previewBuild.invoice,
+    draft?.showQr,
+    draft?.issuer.accountNumber,
+    draft?.issuer.iban,
+  ]);
+
+  const issuerIco = draft?.issuer.ico ?? "";
+  const clientIco = draft?.client.ico ?? "";
+
+  React.useEffect(() => {
+    void lookupPartyIco("issuer", issuerIco, lastIssuerIco, setDraft);
+  }, [issuerIco]);
+
+  React.useEffect(() => {
+    void lookupPartyIco("client", clientIco, lastClientIco, setDraft);
+  }, [clientIco]);
 
   const preview = useDemoInvoicePreview(
     previewBuild.invoice,
@@ -109,6 +154,10 @@ export function GeneratorForm() {
     setGateOpen(true);
   }
 
+  function onLookEdit(edit: LookEdit) {
+    patchDraft(setDraft, (current) => applyLookEdit(current, edit));
+  }
+
   if (!draft) {
     return <p className="text-sm text-muted-foreground">{t("preview")}</p>;
   }
@@ -117,56 +166,35 @@ export function GeneratorForm() {
   const vatLocked = !draft.issuer.vatPayer;
 
   return (
-    <div className="grid items-start gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(22rem,28rem)]">
-      <div className="space-y-10">
-        <PartyFields
-          issuer={draft.issuer}
-          kind="issuer"
-          onIssuer={(issuer) =>
-            patchDraft(setDraft, (current) => ({ ...current, issuer }))
-          }
-          party={draft.issuer}
-        />
-        <PartyFields
-          kind="client"
-          onParty={(client) =>
-            patchDraft(setDraft, (current) => ({ ...current, client }))
-          }
-          party={draft.client}
-        />
-        <MetaFields
+    <div className="grid items-start gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
+      <div className="min-w-0 space-y-4">
+        <p className="text-sm text-muted-foreground">{t("typeOnPage")}</p>
+        <div className="overflow-x-auto rounded-lg border bg-muted/30 p-3 sm:p-6">
+          {previewBuild.display ? (
+            <div
+              className={lookSans.className}
+              style={{
+                boxShadow: "0 8px 28px rgba(0, 0, 0, 0.18)",
+                maxWidth: "100%",
+                width: "max-content",
+              }}
+            >
+              <LookDocumentView
+                assets={{ qrDataUrl }}
+                invoice={previewBuild.display}
+                onEdit={onLookEdit}
+              />
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t("preview")}</p>
+          )}
+        </div>
+      </div>
+      <aside className="space-y-6 xl:sticky xl:top-20 xl:self-start">
+        <SettingsPanel
           draft={draft}
           vatLocked={vatLocked}
           onChange={(next) => patchDraft(setDraft, () => next)}
-        />
-        <LineItems
-          items={draft.items}
-          vatLocked={vatLocked}
-          onChange={(items) =>
-            patchDraft(setDraft, (current) => ({ ...current, items }))
-          }
-        />
-        <Field label={t("notes")}>
-          <Textarea
-            onChange={(ev) =>
-              patchDraft(setDraft, (current) => ({
-                ...current,
-                notes: ev.target.value,
-              }))
-            }
-            rows={3}
-            value={draft.notes}
-          />
-        </Field>
-        <AppearanceFields
-          accentKey={draft.accentKey}
-          showQr={draft.showQr}
-          onAccent={(accentKey) =>
-            patchDraft(setDraft, (current) => ({ ...current, accentKey }))
-          }
-          onShowQr={(showQr) =>
-            patchDraft(setDraft, (current) => ({ ...current, showQr }))
-          }
         />
         {formError ? (
           <p className="text-sm text-destructive" role="alert">
@@ -176,15 +204,15 @@ export function GeneratorForm() {
         <Button onClick={onDownload} size="lg" type="button">
           {t("download")}
         </Button>
-      </div>
-      <aside className="xl:sticky xl:top-20 xl:self-start">
-        <p className="mb-3 text-sm font-medium">{t("preview")}</p>
-        <InvoicePdfPreview
-          error={preview.error}
-          lockedPreview
-          updating={preview.updating}
-          url={preview.url}
-        />
+        <div>
+          <p className="mb-3 text-sm font-medium">{t("preview")}</p>
+          <InvoicePdfPreview
+            error={preview.error}
+            lockedPreview
+            updating={preview.updating}
+            url={preview.url}
+          />
+        </div>
       </aside>
       <DownloadGate
         invoice={issueInvoice.ok ? issueInvoice.invoice : null}
@@ -195,7 +223,35 @@ export function GeneratorForm() {
   );
 }
 
-function MetaFields({
+async function lookupPartyIco(
+  side: "issuer" | "client",
+  ico: string,
+  last: React.MutableRefObject<string>,
+  setDraft: React.Dispatch<React.SetStateAction<GeneratorDraft | null>>,
+) {
+  if (ico.length !== 8 || last.current === ico) return;
+  last.current = ico;
+  const result = await lookupAresByIco(ico, { endpoint: "generator" });
+  if (!result.ok) return;
+  setDraft((current) => {
+    if (!current) return current;
+    if (side === "issuer") {
+      return withPrefillNumber({
+        ...current,
+        issuer: {
+          ...current.issuer,
+          ...applyAresToParty(current.issuer, result.draft),
+        },
+      });
+    }
+    return {
+      ...current,
+      client: applyAresToParty(current.client, result.draft),
+    };
+  });
+}
+
+function SettingsPanel({
   draft,
   vatLocked,
   onChange,
@@ -206,15 +262,8 @@ function MetaFields({
 }) {
   const t = useTranslations("Generator");
   return (
-    <section className="grid gap-4 sm:grid-cols-2">
-      <Field label={t("number")}>
-        <Input
-          onChange={(ev) =>
-            onChange({ ...draft, number: ev.target.value, numberTouched: true })
-          }
-          value={draft.number}
-        />
-      </Field>
+    <section className="space-y-4">
+      <h2 className="text-lg font-medium">{t("settings")}</h2>
       <Field label={t("currency")}>
         <select
           className={selectClassName()}
@@ -229,20 +278,6 @@ function MetaFields({
           <option value="CZK">CZK</option>
           <option value="EUR">EUR</option>
         </select>
-      </Field>
-      <Field label={t("issueDate")}>
-        <Input
-          onChange={(ev) => onChange({ ...draft, issueDate: ev.target.value })}
-          type="date"
-          value={draft.issueDate}
-        />
-      </Field>
-      <Field label={t("dueDate")}>
-        <Input
-          onChange={(ev) => onChange({ ...draft, dueDate: ev.target.value })}
-          type="date"
-          value={draft.dueDate}
-        />
       </Field>
       <Field label={t("language")}>
         <select
@@ -259,6 +294,19 @@ function MetaFields({
           <option value="en">{t("languageEn")}</option>
         </select>
       </Field>
+      <label className="flex items-center gap-2 text-sm">
+        <Checkbox
+          checked={draft.issuer.vatPayer}
+          onCheckedChange={(checked) =>
+            onChange({
+              ...draft,
+              issuer: { ...draft.issuer, vatPayer: checked === true },
+              vatMode: checked === true ? draft.vatMode : "regular",
+            })
+          }
+        />
+        {t("vatPayer")}
+      </label>
       <Field label={t("vatMode")}>
         <select
           className={selectClassName()}
@@ -278,109 +326,12 @@ function MetaFields({
           <option value="reverse_charge">{t("vatReverse")}</option>
         </select>
       </Field>
-    </section>
-  );
-}
-
-function LineItems({
-  items,
-  vatLocked,
-  onChange,
-}: {
-  items: GeneratorLine[];
-  vatLocked: boolean;
-  onChange: (items: GeneratorLine[]) => void;
-}) {
-  const t = useTranslations("Generator");
-
-  function patch(index: number, patch: Partial<GeneratorLine>) {
-    onChange(
-      items.map((line, i) => (i === index ? { ...line, ...patch } : line)),
-    );
-  }
-
-  return (
-    <section className="space-y-4">
-      <h2 className="text-lg font-medium">{t("items")}</h2>
-      {items.map((line, index) => (
-        <div
-          className="grid gap-3 rounded-lg border p-3 sm:grid-cols-[minmax(0,1fr)_5.5rem_5rem_7rem_5.5rem_auto]"
-          key={`line-${String(index)}`}
-        >
-          <Field label={t("description")}>
-            <Input
-              onChange={(ev) => patch(index, { description: ev.target.value })}
-              value={line.description}
-            />
-          </Field>
-          <Field label={t("quantity")}>
-            <Input
-              onChange={(ev) =>
-                patch(index, { quantity: Number(ev.target.value) || 0 })
-              }
-              type="number"
-              value={line.quantity}
-            />
-          </Field>
-          <Field label={t("unit")}>
-            <Input
-              onChange={(ev) => patch(index, { unit: ev.target.value })}
-              value={line.unit}
-            />
-          </Field>
-          <Field label={t("price")}>
-            <Input
-              onChange={(ev) =>
-                patch(index, {
-                  unitPriceWithoutVat: Number(ev.target.value) || 0,
-                })
-              }
-              type="number"
-              value={line.unitPriceWithoutVat}
-            />
-          </Field>
-          <Field label={t("vatRate")}>
-            <Input
-              disabled={vatLocked}
-              onChange={(ev) =>
-                patch(index, { vatRate: Number(ev.target.value) || 0 })
-              }
-              type="number"
-              value={vatLocked ? 0 : line.vatRate}
-            />
-          </Field>
-          <div className="flex items-end">
-            <Button
-              aria-label={t("removeLine")}
-              disabled={items.length === 1}
-              onClick={() => onChange(items.filter((_, i) => i !== index))}
-              type="button"
-              variant="ghost"
-            >
-              <Trash2Icon />
-            </Button>
-          </div>
-        </div>
-      ))}
-      <Button
-        onClick={() =>
-          onChange([
-            ...items,
-            {
-              description: "",
-              quantity: 1,
-              unit: "ks",
-              unitPriceWithoutVat: 0,
-              vatRate: vatLocked ? 0 : 21,
-            },
-          ])
-        }
-        type="button"
-        variant="outline"
-      >
-        <PlusIcon data-icon="inline-start" />
-        {t("addLine")}
-      </Button>
+      <AppearanceFields
+        accentKey={draft.accentKey}
+        showQr={draft.showQr}
+        onAccent={(accentKey) => onChange({ ...draft, accentKey })}
+        onShowQr={(showQr) => onChange({ ...draft, showQr })}
+      />
     </section>
   );
 }

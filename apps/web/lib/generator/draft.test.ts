@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyAresToParty,
   emptyGeneratorDraft,
+  guestDisplayInvoiceFromDraft,
   guestInvoiceFromDraft,
   guestPreviewInvoiceFromDraft,
   withPrefillNumber,
@@ -71,6 +72,25 @@ describe("guestInvoiceFromDraft", () => {
     draft.items[0]!.description = "  ";
     expect(guestInvoiceFromDraft(draft).ok).toBe(false);
     expect(guestPreviewInvoiceFromDraft(draft).ok).toBe(true);
+  });
+});
+
+describe("guestPreviewInvoiceFromDraft", () => {
+  it("builds a Classic invoice from an empty draft so the editor can mount", () => {
+    const draft = emptyGeneratorDraft({
+      issuerId: ISSUER_ID,
+      clientId: CLIENT_ID,
+      locale: "cs",
+    });
+    const preview = guestPreviewInvoiceFromDraft(draft);
+    expect(preview.ok).toBe(true);
+    const display = guestDisplayInvoiceFromDraft(draft);
+    expect(display).not.toBeNull();
+    expect(display?.issuer.name).toBe("");
+    expect(display?.issuer.ico).toBe("");
+    expect(display?.issuer.contactEmail).toBe("");
+    expect(display?.client.name).toBe("");
+    expect(display?.items[0]?.description).toBe("");
   });
 });
 
