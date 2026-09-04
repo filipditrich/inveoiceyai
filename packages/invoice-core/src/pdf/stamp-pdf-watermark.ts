@@ -7,7 +7,7 @@ export async function stampPdfWatermark(
 ): Promise<Uint8Array> {
   const doc = await PDFDocument.load(pdfBytes);
   const font = await doc.embedFont(StandardFonts.HelveticaBold);
-  const size = 42;
+  const size = 58;
   for (const page of doc.getPages()) {
     const { width, height } = page.getSize();
     const textWidth = font.widthOfTextAtSize(text, size);

@@ -14,8 +14,6 @@ export type LookEditPlaceholders = {
   readonly line: string;
   readonly unit: string;
   readonly notes: string;
-  readonly details: string;
-  readonly hideDetails: string;
   readonly addLine: string;
   readonly removeLine: string;
 };
@@ -34,8 +32,6 @@ const CS: LookEditPlaceholders = {
   line: "Popis položky",
   unit: "ks",
   notes: "Poznámka k dokladu",
-  details: "Adresa a identifikace",
-  hideDetails: "Skrýt adresu",
   addLine: "Přidat položku",
   removeLine: "Odebrat položku",
 };
@@ -52,10 +48,8 @@ const EN: LookEditPlaceholders = {
   account: "number/bank code",
   iban: "CZ00 0000 0000 0000 0000 0000",
   line: "Line description",
-  unit: "ks",
+  unit: "pcs",
   notes: "Notes",
-  details: "Address and IDs",
-  hideDetails: "Hide address",
   addLine: "Add line",
   removeLine: "Remove line",
 };

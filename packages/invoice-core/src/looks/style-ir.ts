@@ -257,7 +257,8 @@ export function createLookStyleIr(theme: LookTheme) {
       color: ink,
     },
     paymentBlock: {
-      width: "100%",
+      width: 260,
+      alignSelf: "flex-end",
       marginTop: compact ? 8 : 14,
       paddingTop: 10,
       borderTopWidth: 0.5,

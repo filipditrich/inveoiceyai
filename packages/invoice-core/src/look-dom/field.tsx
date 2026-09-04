@@ -25,6 +25,8 @@ const FIELD_RESET: React.CSSProperties = {
   width: "100%",
 };
 
+const EDITABLE_TINT = "color-mix(in srgb, currentColor 7%, transparent)";
+
 function fieldValue(target: EventTarget): string {
   if (
     target instanceof HTMLInputElement ||
@@ -102,8 +104,11 @@ export function LookField({
   const css: React.CSSProperties = {
     ...cssFromLookText(style),
     ...FIELD_RESET,
+    background: onChange ? EDITABLE_TINT : "transparent",
     display: multiline ? "block" : "inline-block",
     minHeight: "1.15em",
+    paddingLeft: onChange ? 2 : 0,
+    paddingRight: onChange ? 2 : 0,
     borderBottom: empty
       ? "1px dashed color-mix(in srgb, currentColor 45%, transparent)"
       : "1px solid transparent",
