@@ -111,6 +111,20 @@ describe("LookDocumentView", () => {
     expect(html).toContain('aria-label="Přidat položku"');
   });
 
+  it("lays the line header and row on the same clipped grid", () => {
+    const invoice = parseInvoice(domesticFixture);
+    const html = renderToStaticMarkup(
+      createElement(LookDocumentView, {
+        invoice,
+        onEdit: () => undefined,
+      }),
+    );
+    const grid =
+      "minmax(0, 42%) minmax(0, 15%) minmax(0, 18%) minmax(0, 6%) minmax(0, 19%)";
+    expect(html.split(grid)).toHaveLength(3);
+    expect(html).toContain("overflow:hidden");
+  });
+
   it("hints an empty bank as a format, not a plausible account number", () => {
     const invoice = parseInvoice(domesticFixture);
     const html = renderToStaticMarkup(
