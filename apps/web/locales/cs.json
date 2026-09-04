@@ -1575,7 +1575,7 @@
   },
   "Dashboard": {
     "title": "Přehled",
-    "subtitle": "Stavy, obrat a co teď potřebuje pozornost.",
+    "subtitle": "Stavy faktur a obrat za posledních 12 měsíců.",
     "goToInvoices": "Přejít na faktury",
     "newInvoice": "Nová faktura",
     "empty": {
@@ -1595,33 +1595,6 @@
       "all": "Všechny firmy",
       "description": "Zaměřte všechny přehledy a grafy na jednu firmu."
     },
-    "periodFilter": {
-      "label": "Období",
-      "rolling12": "Posledních 12 měsíců",
-      "all": "Celé období"
-    },
-    "kpi": {
-      "issued": "Vystaveno",
-      "outstanding": "Neuhrazeno"
-    },
-    "attention": {
-      "title": "Co teď",
-      "clearTitle": "Máte hotovo",
-      "clearDescription": "Žádné faktury po splatnosti, čekající návrhy ani platby k potvrzení.",
-      "overdue": "{count, plural, one {# faktura po splatnosti} few {# faktury po splatnosti} other {# faktur po splatnosti}}",
-      "unpaid": "{count, plural, one {# faktura čeká na platbu} few {# faktury čekají na platbu} other {# faktur čeká na platbu}}",
-      "drafts": "{count, plural, one {# návrh k vystavení} few {# návrhy k vystavení} other {# návrhů k vystavení}}",
-      "matches": "{count, plural, one {# platba k potvrzení} few {# platby k potvrzení} other {# plateb k potvrzení}}",
-      "cta": {
-        "overdue": "Zobrazit po splatnosti",
-        "unpaid": "Zobrazit neuhrazené",
-        "drafts": "Zkontrolovat návrhy",
-        "matches": "Zkontrolovat platby"
-      },
-      "createInvoice": "Nová faktura",
-      "due": "Splatnost",
-      "draft": "NÁVRH"
-    },
     "recent": {
       "title": "Nedávné faktury",
       "client": "Klient",
@@ -1638,12 +1611,15 @@
       "status": "Stav",
       "draft": "NÁVRH"
     },
+    "balance": {
+      "issued12m": "Vystavené faktury (12 měsíců)",
+      "outstanding": "Neuhrazeno (včetně po splatnosti a budoucích)"
+    },
     "chart": {
       "title": "Vystaveno vs zaplaceno",
       "issued": "Vystaveno",
       "paid": "Zaplaceno",
-      "subtitleYear": "{year} (částka, CZK)",
-      "subtitleRolling": "Posledních 12 měsíců (částka, CZK)"
+      "subtitle": "Posledních 12 měsíců (částka, CZK)"
     }
   },
   "Invoices": {

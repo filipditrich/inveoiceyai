@@ -641,7 +641,7 @@ export const GeneratorDraftUrlSchema = z.object({
   items: z.array(LineUrlSchema).min(1),
 });
 
-/** Parse a shareable generator draft from the URL. */
+/** Parse a shareable generator draft from the URL. Invalid JSON yields null. */
 export function parseGeneratorDraftUrl(value: unknown): GeneratorDraft | null {
   const parsed = GeneratorDraftUrlSchema.safeParse(value);
   return parsed.success ? parsed.data : null;
