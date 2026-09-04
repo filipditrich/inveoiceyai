@@ -20,6 +20,7 @@ const FIELD_RESET: React.CSSProperties = {
   margin: 0,
   minWidth: 0,
   MozAppearance: "textfield",
+  overflow: "hidden",
   padding: 0,
   textAlign: "inherit",
   WebkitAppearance: "none",
