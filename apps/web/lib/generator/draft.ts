@@ -14,13 +14,18 @@ import {
   CLASSIC_LOOK_VERSION,
   type LegacyAccentColor,
 } from "@invoicey/invoice-core/looks";
-import { suggestCzIban } from "@invoicey/invoice-core/schema";
-import type {
-  ClientSnapshot,
-  Invoice,
-  InvoiceCurrency,
-  InvoiceLanguage,
-  IssuerSnapshot,
+import {
+  ClientVatIdSchema,
+  czIbanMatchesAccount,
+  DicSchema,
+  IcoSchema,
+  isValidCzIban,
+  suggestCzIban,
+  type ClientSnapshot,
+  type Invoice,
+  type InvoiceCurrency,
+  type InvoiceLanguage,
+  type IssuerSnapshot,
 } from "@invoicey/invoice-core/schema";
 
 import { defaultGuestInvoiceNumber } from "./default-number";
@@ -311,39 +316,92 @@ const PREVIEW_STUB_STREET = "—";
 const PREVIEW_STUB_CITY = "—";
 const PREVIEW_STUB_ZIP = "000 00";
 const PREVIEW_STUB_ACCOUNT = "19-2000145399/0800";
+const CZ_ACCOUNT_RE = /^(?:\d{1,6}-)?\d{1,10}\/\d{4}$/u;
+const CZ_ZIP_RE = /^\d{3} ?\d{2}$/u;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
+
+function stubIco(value: string, required: boolean): string {
+  const digits = value.replace(/\s/gu, "");
+  if (IcoSchema.safeParse(digits).success) return digits;
+  return required ? PREVIEW_STUB_ICO : "";
+}
+
+function stubZip(value: string): string {
+  const trimmed = value.trim();
+  if (CZ_ZIP_RE.test(trimmed)) return trimmed;
+  return PREVIEW_STUB_ZIP;
+}
+
+function stubEmail(value: string, required: boolean): string {
+  const trimmed = value.trim();
+  if (EMAIL_RE.test(trimmed)) return trimmed;
+  if (!required && trimmed.length === 0) return "";
+  return required ? PREVIEW_STUB_EMAIL : "";
+}
+
+function stubDic(value: string, issuer: boolean): string {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return "";
+  const parsed = issuer
+    ? DicSchema.safeParse(trimmed)
+    : ClientVatIdSchema.safeParse(trimmed);
+  return parsed.success ? trimmed : "";
+}
+
+function stubAccount(value: string): string {
+  const trimmed = value.trim();
+  if (CZ_ACCOUNT_RE.test(trimmed)) return trimmed;
+  return PREVIEW_STUB_ACCOUNT;
+}
+
+function stubCountry(value: string): string {
+  const trimmed = value.trim().toUpperCase();
+  if (/^[A-Z]{2}$/u.test(trimmed)) return trimmed;
+  return "CZ";
+}
 
 function stubParty(
   party: GeneratorParty,
-  required: { ico: boolean; email: boolean },
+  required: { ico: boolean; email: boolean; issuerDic: boolean },
 ): GeneratorParty {
   return {
     ...party,
     name: party.name.trim() || PREVIEW_STUB_NAME,
-    ico: required.ico
-      ? party.ico.replace(/\s/gu, "") || PREVIEW_STUB_ICO
-      : party.ico,
+    ico: stubIco(party.ico, required.ico),
+    dic: stubDic(party.dic, required.issuerDic),
     street: party.street.trim() || PREVIEW_STUB_STREET,
     city: party.city.trim() || PREVIEW_STUB_CITY,
-    zip: party.zip.trim() || PREVIEW_STUB_ZIP,
-    contactEmail: required.email
-      ? party.contactEmail.trim() || PREVIEW_STUB_EMAIL
-      : party.contactEmail,
+    zip: stubZip(party.zip),
+    country: stubCountry(party.country),
+    contactEmail: stubEmail(party.contactEmail, required.email),
   };
 }
 
 function stubDraftForPreview(draft: GeneratorDraft): GeneratorDraft {
-  const issuerParty = stubParty(draft.issuer, { ico: true, email: true });
+  const issuerParty = stubParty(draft.issuer, {
+    ico: true,
+    email: true,
+    issuerDic: true,
+  });
+  const accountNumber = stubAccount(draft.issuer.accountNumber);
+  const iban = draft.issuer.iban.replace(/\s+/gu, "").toUpperCase();
+  const ibanOk =
+    isValidCzIban(iban) && czIbanMatchesAccount(iban, accountNumber);
   return {
     ...draft,
     issuer: withSuggestedIban({
       ...issuerParty,
       vatPayer: draft.issuer.vatPayer,
-      accountNumber: draft.issuer.accountNumber.trim() || PREVIEW_STUB_ACCOUNT,
-      iban: draft.issuer.iban,
-      ibanTouched: draft.issuer.ibanTouched,
+      accountNumber,
+      iban: ibanOk ? iban : "",
+      ibanTouched: ibanOk,
       accountTouched: draft.issuer.accountTouched,
     }),
-    client: stubParty(draft.client, { ico: false, email: false }),
+    client: stubParty(draft.client, {
+      ico: false,
+      email: false,
+      issuerDic: false,
+    }),
   };
 }
 

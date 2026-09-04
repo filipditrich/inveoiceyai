@@ -74,11 +74,27 @@ export function renderTitle(ctx: LookDomCtx): React.ReactElement {
       <LookBox style={styles.titleColRule} />
       {onEdit ? (
         <LookBox
-          extra={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}
+          extra={{
+            flexDirection: "row",
+            alignItems: "baseline",
+            gap: 6,
+            minWidth: 0,
+          }}
         >
-          <LookText style={styles.invoiceTitle}>{titlePrefix}</LookText>
+          <LookText
+            extra={{ whiteSpace: "nowrap", flexShrink: 0 }}
+            style={styles.invoiceTitle}
+          >
+            {titlePrefix}
+          </LookText>
           <LookField
             ariaLabel={labels.docNo}
+            extra={{
+              width: "auto",
+              flex: "1 1 auto",
+              minWidth: "4ch",
+              whiteSpace: "nowrap",
+            }}
             onChange={(value) =>
               onEdit({ type: "meta", field: "number", value })
             }

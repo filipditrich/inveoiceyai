@@ -125,6 +125,28 @@ describe("LookDocumentView", () => {
     expect(html).toContain("overflow:hidden");
   });
 
+  it("keeps Invoice No. on one line and paints party names in Classic weight", () => {
+    const invoice = parseInvoice(domesticFixture);
+    const html = renderToStaticMarkup(
+      createElement(LookDocumentView, {
+        invoice,
+        onEdit: () => undefined,
+      }),
+    );
+    expect(html).toContain("white-space:nowrap");
+    expect(html).toContain("font-weight:700");
+    expect(html).toContain("Kč");
+    expect(html).toContain("%");
+  });
+
+  it("keeps both columns of a 1/1 band when logo and QR are absent", () => {
+    const invoice = parseInvoice(domesticFixture);
+    const html = renderToStaticMarkup(
+      createElement(LookDocumentView, { invoice }),
+    );
+    expect((html.match(/width:48%/g) ?? []).length).toBe(8);
+  });
+
   it("hints an empty bank as a format, not a plausible account number", () => {
     const invoice = parseInvoice(domesticFixture);
     const html = renderToStaticMarkup(
