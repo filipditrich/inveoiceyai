@@ -11,10 +11,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { applyLookEdit } from "@/lib/generator/apply-look-edit";
 import {
   applyAresToParty,
-  emptyGeneratorDraft,
   guestDisplayInvoiceFromDraft,
   guestInvoiceFromDraft,
   guestPreviewInvoiceFromDraft,
+  sampleGeneratorDraft,
   withPrefillNumber,
   type GeneratorDraft,
 } from "@/lib/generator/draft";
@@ -62,38 +62,24 @@ export function GeneratorForm() {
   const lastClientIco = React.useRef("");
 
   React.useEffect(() => {
-    const initial = emptyGeneratorDraft({
+    const sample = sampleGeneratorDraft({
       issuerId: crypto.randomUUID(),
       clientId: crypto.randomUUID(),
       locale,
     });
+    lastClientIco.current = sample.client.ico;
     const handoff = readGeneratorHandoff();
     const issuerIco = handoff.issuerIco;
     if (!issuerIco) {
-      setDraft(initial);
+      lastIssuerIco.current = sample.issuer.ico;
+      setDraft(sample);
       return;
     }
-    const withIco: GeneratorDraft = {
-      ...initial,
-      issuer: { ...initial.issuer, ico: issuerIco },
-    };
-    setDraft(withIco);
-    void lookupAresByIco(issuerIco, { endpoint: "generator" }).then(
-      (result) => {
-        if (!result.ok) return;
-        lastIssuerIco.current = issuerIco;
-        setDraft((current) => {
-          if (!current) return current;
-          return withPrefillNumber({
-            ...current,
-            issuer: {
-              ...current.issuer,
-              ...applyAresToParty(current.issuer, result.draft),
-            },
-          });
-        });
-      },
-    );
+    lastIssuerIco.current = "";
+    setDraft({
+      ...sample,
+      issuer: { ...sample.issuer, ico: issuerIco },
+    });
   }, [locale]);
 
   const previewBuild = React.useMemo(() => {
@@ -141,6 +127,7 @@ export function GeneratorForm() {
   const preview = useDemoInvoicePreview(
     previewBuild.invoice,
     previewBuild.error,
+    { bakeWatermark: true },
   );
 
   function onDownload() {
@@ -169,12 +156,14 @@ export function GeneratorForm() {
     <div className="grid items-start gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
       <div className="min-w-0 space-y-4">
         <p className="text-sm text-muted-foreground">{t("typeOnPage")}</p>
-        <div className="overflow-x-auto rounded-lg border bg-muted/30 p-3 sm:p-6">
+        <p className="text-sm text-muted-foreground">{t("sampleHint")}</p>
+        <div className="overflow-x-auto rounded-2xl border bg-gradient-to-b from-muted/50 to-muted/20 p-3 shadow-inner sm:p-8">
           {previewBuild.display ? (
             <div
               className={lookSans.className}
               style={{
-                boxShadow: "0 8px 28px rgba(0, 0, 0, 0.18)",
+                boxShadow:
+                  "0 18px 50px rgba(15, 23, 42, 0.18), 0 2px 8px rgba(15, 23, 42, 0.08)",
                 maxWidth: "100%",
                 width: "max-content",
               }}
@@ -190,7 +179,7 @@ export function GeneratorForm() {
           )}
         </div>
       </div>
-      <aside className="space-y-6 xl:sticky xl:top-20 xl:self-start">
+      <aside className="space-y-6 rounded-2xl border bg-card/60 p-5 xl:sticky xl:top-20 xl:self-start">
         <SettingsPanel
           draft={draft}
           vatLocked={vatLocked}
@@ -208,7 +197,6 @@ export function GeneratorForm() {
           <p className="mb-3 text-sm font-medium">{t("preview")}</p>
           <InvoicePdfPreview
             error={preview.error}
-            lockedPreview
             updating={preview.updating}
             url={preview.url}
           />

@@ -7,13 +7,18 @@ import {
 import { checkBotId } from "botid/server";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { InvoiceSchema, renderInvoicePdf } from "@invoicey/invoice-core";
+import {
+  InvoiceSchema,
+  invoiceLabels,
+  renderInvoicePdf,
+} from "@invoicey/invoice-core";
 import { issuedByFromProfile, withIssuedBy } from "@invoicey/invoice-tools";
 
 export const runtime = "nodejs";
 
 const MAX_BODY_BYTES = 128 * 1024;
 const MAX_ITEMS = 100;
+const LOCKED_PREVIEW_HEADER = "x-invoicey-locked-preview";
 const previewLimiter = createFixedWindowLimiter({
   windowMs: 60_000,
   max: 10,
@@ -74,7 +79,8 @@ export async function POST(request: NextRequest) {
   }
 
   let invoice = parsed.data;
-  if (!invoice.meta.issuedBy) {
+  const lockedPreview = request.headers.get(LOCKED_PREVIEW_HEADER) === "1";
+  if (!lockedPreview && !invoice.meta.issuedBy) {
     const session = await getOptionalSession();
     invoice = withIssuedBy(
       invoice,
@@ -97,7 +103,11 @@ export async function POST(request: NextRequest) {
 
   let pdfBytes: Uint8Array;
   try {
-    pdfBytes = await renderInvoicePdf(invoice);
+    pdfBytes = await renderInvoicePdf(invoice, {
+      watermark: lockedPreview
+        ? invoiceLabels(invoice.meta.language).previewWatermark
+        : undefined,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
     if (message.startsWith("invalid_look")) {

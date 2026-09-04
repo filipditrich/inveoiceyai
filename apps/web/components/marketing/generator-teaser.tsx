@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { MARKETING_PILL_LG_CLASS } from "@/components/marketing/marketing-cta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { writeGeneratorHandoff } from "@/lib/generator/handoff";
 import { appLocaleFrom, generatorPathForLocale } from "@/lib/generator/href";
+import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
@@ -21,30 +23,34 @@ export function GeneratorTeaser() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl rounded-2xl border bg-background/70 px-6 py-8 text-left shadow-sm backdrop-blur">
-      <h2 className="text-2xl font-semibold tracking-[-0.03em]">
-        {t("title")}
-      </h2>
-      <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-        {t("body")}
-      </p>
+    <div className="mx-auto w-full max-w-xl">
       <form
-        className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center"
+        className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center"
         onSubmit={onSubmit}
       >
         <Input
           aria-label={t("ico")}
-          className="sm:max-w-[12rem]"
+          className="h-11 bg-background/80 sm:max-w-[11rem]"
           inputMode="numeric"
           maxLength={8}
           onChange={(ev) => setIco(ev.target.value.replace(/\D/gu, ""))}
           placeholder={t("ico")}
           value={ico}
         />
-        <Button className="shrink-0" type="submit">
+        <Button
+          className={cn(
+            "h-11 shrink-0 text-[0.95rem]",
+            MARKETING_PILL_LG_CLASS,
+          )}
+          type="submit"
+          variant="outline"
+        >
           {t("cta")}
         </Button>
       </form>
+      <p className="mt-2.5 text-center text-xs text-muted-foreground">
+        {t("hint")}
+      </p>
     </div>
   );
 }

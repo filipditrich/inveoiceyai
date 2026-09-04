@@ -7,10 +7,15 @@ import type { Invoice } from "@invoicey/invoice-core/schema";
 async function fetchDemoPdf(
   invoice: Invoice,
   signal: AbortSignal,
+  bakeWatermark: boolean,
 ): Promise<string> {
+  const headers = new Headers({ "Content-Type": "application/json" });
+  if (bakeWatermark) {
+    headers.set("x-invoicey-locked-preview", "1");
+  }
   const res = await fetch("/api/demo/invoice-pdf", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(invoice),
     signal,
   });
@@ -21,10 +26,11 @@ async function fetchDemoPdf(
   return URL.createObjectURL(blob);
 }
 
-/** Watermarked Classic preview; the issued download uses a different route. */
+/** Classic preview. Pass `bakeWatermark` so Open PDF carries PREVIEW in the bytes. */
 export function useDemoInvoicePreview(
   invoice: Invoice | null,
   error: string | null,
+  options?: { bakeWatermark?: boolean },
 ) {
   const [url, setUrl] = React.useState<string | null>(null);
   const [updating, setUpdating] = React.useState(false);
@@ -50,7 +56,11 @@ export function useDemoInvoicePreview(
     const controller = new AbortController();
     const handle = window.setTimeout(() => {
       setUpdating(true);
-      void fetchDemoPdf(invoice, controller.signal)
+      void fetchDemoPdf(
+        invoice,
+        controller.signal,
+        options?.bakeWatermark === true,
+      )
         .then((nextUrl) => {
           if (controller.signal.aborted) return;
           lastKey.current = previewKey;
@@ -76,7 +86,7 @@ export function useDemoInvoicePreview(
       controller.abort();
       window.clearTimeout(handle);
     };
-  }, [error, invoice, previewKey]);
+  }, [error, invoice, previewKey, options?.bakeWatermark]);
   /* oxlint-enable react-doctor/no-fetch-in-effect */
 
   React.useEffect(() => {

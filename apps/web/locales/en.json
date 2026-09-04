@@ -333,9 +333,10 @@
     },
     "generatorTeaser": {
       "title": "Try a real invoice first",
-      "body": "Fill in the supplier IČO. We'll take you to the free generator — no account, a watermarked preview, a clean PDF after your email.",
-      "cta": "Open the generator",
-      "ico": "Your IČO"
+      "body": "Type your supplier IČO. We'll open a filled Classic invoice — no account, a watermarked preview, a clean PDF after your email.",
+      "cta": "Issue a free invoice",
+      "ico": "Your IČO",
+      "hint": "ARES fills the supplier. Skip IČO to start from a sample."
     },
     "demo": {
       "ariaLabel": "Invoicey product tour",
@@ -891,7 +892,11 @@
     "eyebrow": "No account needed",
     "title": "Issue a real invoice",
     "subtitle": "The same validated document Invoicey uses for every issued invoice. Preview is watermarked; the download is clean.",
+    "step1": "IČO first — ARES fills the supplier",
+    "step2": "Type on the page. Totals stay computed.",
+    "step3": "Download a clean PDF after your email.",
     "typeOnPage": "Type on the invoice. Totals and VAT are calculated — they cannot be edited.",
+    "sampleHint": "We've filled a sample so you can see a real page immediately. Change anything — ARES runs only when you type a new IČO.",
     "settings": "Invoice settings",
     "download": "Download PDF",
     "downloading": "Issuing…",
