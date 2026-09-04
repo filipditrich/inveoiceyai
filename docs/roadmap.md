@@ -896,6 +896,62 @@ authority.
 **Out of 33:** Enterprise self-serve, portal plan-switching, MCP/Eve/CLI
 billing, Invoicey-hosted billing-profile table, Polar Better Auth adapter.
 
+## Plan 34 — Free invoice generator (guest issuance)
+
+**Status:** Done (implementation)
+
+**Completed:** 2026-09-04
+
+**Goal:** A public, sign-in-free surface that issues one real invoice, collects
+an email address at the download gate, keeps the invoice in an unclaimed guest
+workspace, and hands it over when the visitor signs up.
+
+**Spec:** [`specs/free-invoice-generator.md`](./specs/free-invoice-generator.md)
+**ADR:** [0048](./decisions/0048-guest-issuance-into-unclaimed-workspaces.md)
+
+### Exit criteria
+
+- [ ] A visitor with no account issues an invoice and downloads a clean PDF
+- [ ] The same PDF and a signed claim link arrive by mail
+- [ ] The invoice is a numbered, snapshotted, issued invoice in an unclaimed
+      guest workspace — no parallel guest table, no claim-time migration
+- [ ] Second attempt from the same address in the same month is refused; another
+      address behind the same IP is not
+- [ ] Disposable addresses are refused before any render
+- [ ] Auto-claim on matching OAuth address; token claim on a mismatched one
+- [ ] Claiming lifts every guest limit and offers the guest issuer to onboarding
+- [ ] Unclaimed workspaces are excluded from admin metrics and plan counts
+- [ ] Unclaimed guest data older than 12 months is hard-deleted
+- [ ] Marketing opt-in is unticked by default and recorded per address
+
+**Out of 34:** The editable page (Plan 35), guest logo upload, guest access to
+anything but the invoice just issued, merging a claimed workspace into an
+existing one, sending the invoice onward to the guest's own client.
+
+## Plan 35 — Editable invoice page (DOM look interpreter)
+
+**Status:** Planned — sequenced after 34 on purpose; if the generator does not
+convert, the second interpreter is never built.
+
+**Goal:** Replace the generator's form with an editable page that renders the
+same Classic look document in DOM, so a visitor types on the invoice rather than
+beside it.
+
+**Spec:** [`specs/free-invoice-generator.md`](./specs/free-invoice-generator.md)
+**ADR:** [0049](./decisions/0049-dom-look-interpreter-for-editing.md)
+
+### Exit criteria
+
+- [ ] One style IR derived from the theme feeds both interpreters
+- [ ] Classic renders with identical structure through both
+- [ ] A block missing from either interpreter fails to compile
+- [ ] Inline edits to parties, dates, notes, and line items round-trip through
+      `InvoiceSchema` and appear in the downloaded PDF
+- [ ] `totals` and `tax` cannot be edited on the page
+
+**Out of 35:** Pixel parity between browser and embedded font metrics, Minimal
+and workspace looks, the in-app builder adopting the interpreter.
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:

@@ -68,6 +68,14 @@ _Avoid_: Custom template, forked look, per-invoice layout.
 A named region the renderer knows how to fill from the invoice. v1: `logo`, `title`, `issuer`, `client`, `dates`, `lines`, `totals`, `tax`, `payment`, `qr`, `stamp`, `signature`, `notes`, `footer`. `logo` is optional; its bytes still come from `issuer.logoUrl`. `tax` is one block whose interior follows the invoice VAT mode. `dates` is optional: Classic places it under the client; Minimal has no dates band — `title` prints the dates. Required blocks are a function of document type and VAT mode.
 _Avoid_: Widget, component, section (when you mean a typed block).
 
+**Look interpreter**:
+An implementation that turns a look document into a rendered invoice. The **PDF interpreter** (`@react-pdf/renderer`) produces the artifact; the **DOM interpreter** produces the editable page. Both read the same document and the same style IR.
+_Avoid_: Renderer (unqualified), template engine, viewer.
+
+**Style IR**:
+The renderer-neutral spacing, type-scale, density, and colour values derived once from a theme and consumed by both interpreters.
+_Avoid_: Styles, CSS, stylesheet.
+
 **Invoice template**:
 A saved invoice _payload_ used to materialize recurring drafts. It is not a look.
 _Avoid_: Using this name for PDF appearance.
