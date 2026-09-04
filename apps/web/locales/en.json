@@ -3560,9 +3560,15 @@
     },
     "hitl": {
       "approvalEyebrow": "Approval needed · {tool}",
-      "answered": "Answered.",
+      "answered": "Got it",
+      "denied": "Denied",
       "freeformPlaceholder": "Or type an answer…",
-      "send": "Send"
+      "send": "Send",
+      "budgetTitle": "This conversation is getting long",
+      "budgetBody": "Start a new conversation to keep going with a clean slate, or continue here if you still need this thread.",
+      "budgetContinue": "Continue",
+      "budgetNewConversation": "New conversation",
+      "budgetContinued": "Continuing this conversation"
     },
     "authorization": {
       "connected": "{name} connected.",

@@ -104,7 +104,7 @@ These are the only intentional ones:
 
 | Behavior     | Slack                              | Panel                                          |
 | ------------ | ---------------------------------- | ---------------------------------------------- |
-| Progress     | Thinking Steps block               | Step rows in the thread (same labels/snippets) |
+| Progress     | Thinking Steps block (label + snippet) | Quiet past-tense step rows; failures still show a snippet |
 | PDF / ISDOC  | `upload_invoice_files` into thread | Card links to `/api/invoices/[id]/pdf`         |
 | Page context | —                                  | Route + invoice id sent as `clientContext`     |
 
@@ -141,11 +141,14 @@ written until the first turn finishes.
 
 ## Context budget
 
-`agent/agent.ts` sets `limits.maxInputTokensPerSession` to 64_000 (keep in
-lockstep with `ASSISTANT_CONTEXT_LIMIT_TOKENS`). The panel shows the latest
-`step.completed` / compaction input count against that cap and refuses further
-sends once it is full — start a new conversation instead. Eve also compactes
-at 75% of the model window.
+`agent/agent.ts` sets `limits.maxInputTokensPerSession` to 256_000 (keep in
+lockstep with `ASSISTANT_CONTEXT_LIMIT_TOKENS`). Eve's cap is a **running sum
+of every model call's input**, not the latest window fill — the panel sums
+every `step.completed` usage the same way. Showing only the last step made the
+bar sit at ~14k while Eve parked the turn. Once the sum is full the composer
+is replaced with a "start a new conversation" note. Eve also parks a HITL
+turn at the cap; the panel replaces Eve's "defective session" copy with
+Continue / New conversation. Compaction still runs at 75% of the model window.
 
 ### Restored cards can lag the database
 

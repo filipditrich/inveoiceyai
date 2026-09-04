@@ -1,24 +1,24 @@
 "use client";
 
 import { toolOutputSnippet } from "@/agent/lib/slack-tool-output";
-import { toolLabel } from "@/agent/lib/tool-presentation";
+import { toolDoneLabel, toolLabel } from "@/agent/lib/tool-presentation";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { CheckIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import type { EveDynamicToolPart } from "eve/react";
 
 /**
- * One thinking step.
+ * One thinking step in the web thread.
  *
- * The Slack channel streams these into a Thinking Steps block; here they are
- * rows in the thread. Both label the tool with `toolLabel` and summarize the
- * result with `toolOutputSnippet`, so a step that reads "Searching ARES… ·
- * NFCtron a.s. · IČO 08453961" reads the same in either place — that snippet is
- * the whole reason the step is worth showing at all.
+ * Slack dumps `toolOutputSnippet` next to the progressive label — that snippet
+ * is the whole Slack row. Here the reply already lists the result, so a
+ * successful step is just a past-tense label. Failures still show a snippet
+ * because there is no reply to carry the error.
  */
 export function AssistantToolStep({ part }: { part: EveDynamicToolPart }) {
-  const label = toolLabel(part.toolName);
+  const t = useTranslations("Assistant.hitl");
   const done =
     part.state === "output-available" ||
     part.state === "output-error" ||
@@ -28,18 +28,20 @@ export function AssistantToolStep({ part }: { part: EveDynamicToolPart }) {
     part.state === "output-denied" ||
     (part.state === "output-available" && isFailure(part.output));
 
-  const snippet =
-    part.state === "output-available"
+  const label =
+    done && !failed ? toolDoneLabel(part.toolName) : toolLabel(part.toolName);
+
+  const snippet = failed
+    ? part.state === "output-available"
       ? toolOutputSnippet(part.toolName, part.output)
       : part.state === "output-error"
         ? part.errorText
-        : part.state === "output-denied"
-          ? "Denied"
-          : undefined;
+        : t("denied")
+    : undefined;
 
   return (
-    <div className="flex items-start gap-2 text-xs text-muted-foreground">
-      <span className="mt-0.5 shrink-0">
+    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <span className="shrink-0">
         {!done ? (
           <Spinner className="size-3" />
         ) : failed ? (

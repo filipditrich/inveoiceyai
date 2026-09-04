@@ -3,22 +3,22 @@ import { describe, expect, it } from "vitest";
 import { contextTokensFromEvents } from "./assistant-context";
 
 describe("contextTokensFromEvents", () => {
-  it("keeps the latest step input count, not a sum", () => {
+  it("sums every step's input — that is the Eve session budget", () => {
     expect(
       contextTokensFromEvents([
-        { type: "step.completed", data: { usage: { inputTokens: 1200 } } },
-        { type: "step.completed", data: { usage: { inputTokens: 3400 } } },
+        { type: "step.completed", data: { usage: { inputTokens: 12_000 } } },
+        { type: "step.completed", data: { usage: { inputTokens: 14_000 } } },
+        { type: "step.completed", data: { usage: { inputTokens: 14_000 } } },
       ]),
-    ).toBe(3400);
+    ).toBe(40_000);
   });
 
-  it("reads compaction triggers", () => {
+  it("reads promptTokens when inputTokens is missing", () => {
     expect(
       contextTokensFromEvents([
         { type: "step.completed", data: { usage: { promptTokens: 800 } } },
-        { type: "compaction.requested", data: { usageInputTokens: 12_000 } },
       ]),
-    ).toBe(12_000);
+    ).toBe(800);
   });
 
   it("ignores events without usage", () => {

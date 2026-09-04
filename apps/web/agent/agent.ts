@@ -9,6 +9,6 @@ export default defineAgent({
   model: process.env.INVOICEY_AI_MODEL ?? "anthropic/claude-haiku-4.5",
   compaction: { thresholdPercent: 0.75 },
   limits: {
-    maxInputTokensPerSession: 64_000,
+    maxInputTokensPerSession: 256_000,
   },
 });

@@ -8,11 +8,13 @@ import { cn } from "@/lib/utils";
 import {
   CheckIcon,
   HelpCircleIcon,
+  HourglassIcon,
   ShieldQuestionIcon,
   XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { isSessionBudgetPrompt } from "./assistant-hitl";
 import { useAssistantSession } from "./assistant-provider";
 import type { EveDynamicToolPart, EveMessageInputRequest } from "eve/react";
 
@@ -29,8 +31,24 @@ import type { EveDynamicToolPart, EveMessageInputRequest } from "eve/react";
  * Approvals show the tool input verbatim — the agent is instructed to fill
  * `confirm` with the number, client and total copied off the card — so nobody
  * is ever approving a bare id.
+ *
+ * Eve also parks when the session input budget is spent. That prompt is
+ * framework copy; `SessionBudgetRequest` replaces it with Invoicey wording.
  */
 export function AssistantInputRequest({
+  part,
+  request,
+}: {
+  part: EveDynamicToolPart;
+  request: EveMessageInputRequest;
+}) {
+  if (isSessionBudgetPrompt(request.prompt)) {
+    return <SessionBudgetRequest part={part} request={request} />;
+  }
+  return <ParkedTurnRequest part={part} request={request} />;
+}
+
+function ParkedTurnRequest({
   part,
   request,
 }: {
@@ -81,7 +99,10 @@ export function AssistantInputRequest({
       </div>
 
       {answered ? (
-        <p className="text-xs text-muted-foreground">{t("answered")}</p>
+        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <CheckIcon className="size-3" />
+          {t("answered")}
+        </p>
       ) : (
         <>
           {request.options && request.options.length > 0 ? (
@@ -138,6 +159,76 @@ export function AssistantInputRequest({
             </form>
           ) : null}
         </>
+      )}
+    </div>
+  );
+}
+
+function SessionBudgetRequest({
+  part,
+  request,
+}: {
+  part: EveDynamicToolPart;
+  request: EveMessageInputRequest;
+}) {
+  const t = useTranslations("Assistant.hitl");
+  const session = useAssistantSession();
+  const answered =
+    part.toolMetadata?.eve?.inputResponse ??
+    (part.state === "approval-responded" ? part.approval : undefined);
+  const busy =
+    session?.agent.status === "streaming" ||
+    session?.agent.status === "submitted";
+  const continueOption =
+    request.options?.find((option) => option.style === "primary") ??
+    request.options?.[0];
+
+  async function continueSession() {
+    if (!session || busy) return;
+    if (continueOption) {
+      await session.agent.respond([
+        { requestId: request.requestId, optionId: continueOption.id },
+      ]);
+      return;
+    }
+    await session.agent.respond([
+      { requestId: request.requestId, text: "continue" },
+    ]);
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border bg-card p-3">
+      <div className="flex gap-2">
+        <HourglassIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium">{t("budgetTitle")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("budgetBody")}</p>
+        </div>
+      </div>
+
+      {answered ? (
+        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <CheckIcon className="size-3" />
+          {t("budgetContinued")}
+        </p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            disabled={busy}
+            onClick={() => void continueSession()}
+            size="sm"
+          >
+            {t("budgetContinue")}
+          </Button>
+          <Button
+            disabled={busy}
+            onClick={() => session?.newConversation()}
+            size="sm"
+            variant="outline"
+          >
+            {t("budgetNewConversation")}
+          </Button>
+        </div>
       )}
     </div>
   );

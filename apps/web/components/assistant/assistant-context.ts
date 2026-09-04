@@ -3,22 +3,21 @@ import { ASSISTANT_CONTEXT_LIMIT_TOKENS } from "@/lib/assistant-limits";
 export { ASSISTANT_CONTEXT_LIMIT_TOKENS };
 
 /**
- * Latest provider-reported input size on the stream.
+ * Session input spent so far.
  *
- * Eve reports usage on `step.completed` and the compaction trigger. The last
- * input count is the current window fill — not a sum of every step.
+ * Eve's `maxInputTokensPerSession` is a running sum of every model call's
+ * input, not the latest window fill. Showing only the last `step.completed`
+ * made the bar sit at ~14k while Eve parked the turn at the session cap.
  */
 export function contextTokensFromEvents(
   events: readonly { type?: string; data?: unknown }[],
 ): number {
-  let latest = 0;
+  let total = 0;
   for (const event of events) {
     const fromStep = inputTokensFromStep(event);
-    if (fromStep != null) latest = fromStep;
-    const fromCompact = inputTokensFromCompaction(event);
-    if (fromCompact != null) latest = fromCompact;
+    if (fromStep != null) total += fromStep;
   }
-  return latest;
+  return total;
 }
 
 function inputTokensFromStep(event: {
@@ -30,16 +29,6 @@ function inputTokensFromStep(event: {
   const record = readRecord(usage);
   if (!record) return null;
   return firstNumber(record.inputTokens, record.promptTokens);
-}
-
-function inputTokensFromCompaction(event: {
-  type?: string;
-  data?: unknown;
-}): number | null {
-  if (event.type !== "compaction.requested") return null;
-  const record = readRecord(event.data);
-  if (!record) return null;
-  return firstNumber(record.usageInputTokens);
 }
 
 function readRecord(value: unknown): Record<string, unknown> | null {

@@ -2,36 +2,67 @@
 
 import type { ReactNode } from "react";
 
+import {
+  parseAssistantMarkdown,
+  type AssistantMarkdownBlock,
+} from "./assistant-markdown-parse";
+
 /**
  * The small slice of markdown the agent actually replies with.
  *
  * Replies are instructed to stay short — details belong on the card — so this
- * covers `*bold*`/`**bold**`, `_italic_`, `` `code` `` and bullet lines, and
- * deliberately nothing else. A full markdown pipeline in the browser bundle
- * would be a lot of weight for one-line answers.
+ * covers `*bold*`/`**bold**`, `_italic_`, `` `code` ``, bullets and numbered
+ * lists, and deliberately nothing else. A full markdown pipeline in the
+ * browser bundle would be a lot of weight for one-line answers.
  */
 export function AssistantMarkdown({ text }: { text: string }) {
-  const lines = text.trim().split("\n");
+  const blocks = parseAssistantMarkdown(text);
 
   return (
-    <div className="space-y-1 text-sm leading-relaxed">
-      {lines.map((line, index) => {
-        const bullet = /^\s*[-•*]\s+(.*)$/u.exec(line);
-        if (bullet) {
-          return (
-            <p className="flex gap-2" key={index}>
+    <div className="space-y-2 text-sm leading-relaxed">
+      {blocks.map((block, index) => (
+        <MarkdownBlock block={block} key={index} />
+      ))}
+    </div>
+  );
+}
+
+function MarkdownBlock({ block }: { block: AssistantMarkdownBlock }) {
+  switch (block.kind) {
+    case "blank":
+      return <div className="h-1" />;
+    case "paragraph":
+      return <p>{inline(block.text)}</p>;
+    case "bullets":
+      return (
+        <ul className="flex flex-col gap-1.5">
+          {block.items.map((item, index) => (
+            <li className="flex gap-2" key={index}>
               <span aria-hidden className="text-muted-foreground">
                 •
               </span>
-              <span>{inline(bullet[1] ?? "")}</span>
-            </p>
-          );
-        }
-        if (!line.trim()) return <div className="h-1" key={index} />;
-        return <p key={index}>{inline(line)}</p>;
-      })}
-    </div>
-  );
+              <span>{inline(item)}</span>
+            </li>
+          ))}
+        </ul>
+      );
+    case "ordered":
+      return (
+        <ol className="flex flex-col gap-1.5">
+          {block.items.map((item, index) => (
+            <li className="flex gap-2" key={index}>
+              <span
+                aria-hidden
+                className="w-4 shrink-0 text-right text-muted-foreground tabular-nums"
+              >
+                {index + 1}.
+              </span>
+              <span>{inline(item)}</span>
+            </li>
+          ))}
+        </ol>
+      );
+  }
 }
 
 /** Splits on the marker tokens and rebuilds the line as React nodes. */

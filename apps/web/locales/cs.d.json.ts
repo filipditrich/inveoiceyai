@@ -3563,9 +3563,15 @@ declare const messages: {
     },
     "hitl": {
       "approvalEyebrow": "Potřebuji schválení · {tool}",
-      "answered": "Zodpovězeno.",
+      "answered": "Hotovo",
+      "denied": "Odmítnuto",
       "freeformPlaceholder": "Nebo napište odpověď…",
-      "send": "Odeslat"
+      "send": "Odeslat",
+      "budgetTitle": "Tahle konverzace se protahuje",
+      "budgetBody": "Začněte novou, ať máme čistý stůl, nebo pokračujte tady, pokud tohle vlákno ještě potřebujete.",
+      "budgetContinue": "Pokračovat",
+      "budgetNewConversation": "Nová konverzace",
+      "budgetContinued": "Pokračuji v téhle konverzaci"
     },
     "authorization": {
       "connected": "{name} připojeno.",

@@ -79,13 +79,60 @@ function AssistantMessage({ message }: { message: EveMessage }) {
   if (message.role === "user") {
     return <UserMessage message={message} />;
   }
+
+  const groups = groupAssistantParts(message.parts);
+
   return (
-    <div className="flex flex-col gap-2">
-      {message.parts.map((part, index) => (
-        <AssistantPart key={partKey(part, index)} part={part} />
-      ))}
+    <div className="flex flex-col gap-3">
+      {groups.map((group, index) =>
+        group.kind === "tools" ? (
+          <div className="flex flex-col gap-1" key={`tools:${index}`}>
+            {group.parts.map((part) => (
+              <AssistantToolStep key={part.toolCallId} part={part} />
+            ))}
+          </div>
+        ) : (
+          <AssistantPart key={partKey(group.part, index)} part={group.part} />
+        ),
+      )}
     </div>
   );
+}
+
+type AssistantPartGroup =
+  | { kind: "tools"; parts: Extract<EveMessagePart, { type: "dynamic-tool" }>[] }
+  | { kind: "part"; part: EveMessagePart };
+
+/**
+ * Consecutive plain tool steps sit in one cluster so they do not take a
+ * full message-gap between each other and the reply.
+ */
+function groupAssistantParts(
+  parts: readonly EveMessagePart[],
+): AssistantPartGroup[] {
+  const groups: AssistantPartGroup[] = [];
+  for (const part of parts) {
+    if (isPlainToolStep(part)) {
+      const last = groups.at(-1);
+      if (last?.kind === "tools") {
+        last.parts.push(part);
+        continue;
+      }
+      groups.push({ kind: "tools", parts: [part] });
+      continue;
+    }
+    groups.push({ kind: "part", part });
+  }
+  return groups;
+}
+
+function isPlainToolStep(
+  part: EveMessagePart,
+): part is Extract<EveMessagePart, { type: "dynamic-tool" }> {
+  if (part.type !== "dynamic-tool") return false;
+  if (part.toolMetadata?.eve?.inputRequest) return false;
+  if (invoiceCardFromToolPart(part)) return false;
+  return true;
 }
 
 function UserMessage({ message }: { message: EveMessage }) {

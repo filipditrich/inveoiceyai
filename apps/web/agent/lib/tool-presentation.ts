@@ -27,6 +27,33 @@ export function toolLabel(toolName: string): string {
   return TOOL_LABELS[toolName] ?? toolName;
 }
 
+/**
+ * Past-tense label for a finished step in the web thread.
+ *
+ * Slack keeps the progressive `TOOL_LABELS` plus a result snippet. The panel
+ * already prints the reply, so a completed row only needs to say what ran.
+ */
+export const TOOL_DONE_LABELS: Record<string, string> = {
+  ask_question: "Asked you",
+  search_business: "Searched ARES",
+  lookup_business: "Looked up company",
+  list_presets: "Loaded presets",
+  get_preset: "Loaded preset",
+  save_preset: "Saved preset",
+  create_invoice: "Created invoice draft",
+  update_invoice_draft: "Updated draft",
+  upload_invoice_files: "Uploaded files",
+  list_invoices: "Listed invoices",
+  get_invoice: "Loaded invoice",
+  issue_invoice: "Issued invoice",
+  mark_invoice_paid: "Marked invoice paid",
+  send_invoice_email: "Sent invoice email",
+};
+
+export function toolDoneLabel(toolName: string): string {
+  return TOOL_DONE_LABELS[toolName] ?? toolLabel(toolName);
+}
+
 /** Tools gated by Eve `approval: always()` — these park for Allow/Deny. */
 export const HITL_TOOL_NAMES = new Set([
   "issue_invoice",
