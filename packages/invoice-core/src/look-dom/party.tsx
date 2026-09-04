@@ -1,10 +1,7 @@
 import React from "react";
 
 import { lookHasBlock } from "../looks";
-import {
-  countryHuman,
-  formatInvoiceDateIsoLocal,
-} from "../looks/format-invoice";
+import { countryHuman } from "../looks/format-invoice";
 import type { LookStyleBox } from "../looks/style-ir";
 import {
   invoicePdfDocKindSubtitle,
@@ -13,7 +10,7 @@ import {
 } from "../pdf/pdf-presentation";
 import type { LookPartyField, LookPartySide } from "./edits";
 import { LookBox, LookField, LookText } from "./field";
-import { DomKv } from "./kv";
+import { DomDateKv, DomKv } from "./kv";
 import type { LookDomCtx } from "./types";
 
 function dateFields(ctx: LookDomCtx, boxStyle: LookStyleBox) {
@@ -22,55 +19,43 @@ function dateFields(ctx: LookDomCtx, boxStyle: LookStyleBox) {
     inv.meta.docType !== "proforma" && inv.meta.docType !== "advance";
   return (
     <LookBox style={boxStyle}>
-      <DomKv
+      <DomDateKv
         first
         ariaLabel={labels.issueDate}
+        iso={inv.meta.issueDate}
         k={labels.issueDate}
+        locale={intlLocale}
         onChange={
           onEdit
             ? (value) => onEdit({ type: "meta", field: "issueDate", value })
             : undefined
         }
         styles={styles}
-        type="date"
-        v={
-          onEdit
-            ? inv.meta.issueDate
-            : formatInvoiceDateIsoLocal(inv.meta.issueDate, intlLocale)
-        }
       />
-      <DomKv
+      <DomDateKv
         ariaLabel={labels.dueDate}
+        iso={inv.meta.dueDate}
         k={labels.dueDate}
+        locale={intlLocale}
         onChange={
           onEdit
             ? (value) => onEdit({ type: "meta", field: "dueDate", value })
             : undefined
         }
         styles={styles}
-        type="date"
-        v={
-          onEdit
-            ? inv.meta.dueDate
-            : formatInvoiceDateIsoLocal(inv.meta.dueDate, intlLocale)
-        }
       />
       {showDuzp ? (
-        <DomKv
+        <DomDateKv
           ariaLabel={invoicePdfTaxPointLabel(inv, labels)}
+          iso={inv.meta.duzp}
           k={invoicePdfTaxPointLabel(inv, labels)}
+          locale={intlLocale}
           onChange={
             onEdit
               ? (value) => onEdit({ type: "meta", field: "duzp", value })
               : undefined
           }
           styles={styles}
-          type="date"
-          v={
-            onEdit
-              ? inv.meta.duzp
-              : formatInvoiceDateIsoLocal(inv.meta.duzp, intlLocale)
-          }
         />
       ) : null}
     </LookBox>
@@ -127,6 +112,118 @@ function partyPatch(ctx: LookDomCtx, side: LookPartySide) {
     ctx.onEdit?.({ type: "party", side, field, value });
 }
 
+function collapsedPlaceLine(open: boolean, zip: string, city: string): string {
+  if (open) return "";
+  return [zip, city].filter((part) => part.length > 0).join(" · ");
+}
+
+function shouldExpandAfterIcoChange(
+  previousIco: string,
+  ico: string,
+  zip: string,
+  city: string,
+): boolean {
+  if (previousIco === ico) return false;
+  return ico.length === 8 && zip.length === 0 && city.length === 0;
+}
+
+type PartyPatch = ReturnType<typeof partyPatch>;
+
+function EditPartyDetails({
+  ctx,
+  patch,
+  street,
+  city,
+  zip,
+  country,
+  dic,
+  email,
+  registryNote,
+  showDic,
+  nonVatLabel,
+}: {
+  ctx: LookDomCtx;
+  patch: PartyPatch;
+  street: string;
+  city: string;
+  zip: string;
+  country: string;
+  dic: string;
+  email: string;
+  registryNote?: string;
+  showDic: boolean;
+  nonVatLabel?: string;
+}) {
+  const { labels, styles, placeholders } = ctx;
+  return (
+    <>
+      <LookField
+        ariaLabel={placeholders.street}
+        onChange={patch?.("street")}
+        placeholder={placeholders.street}
+        style={styles.partyAddr}
+        value={street}
+      />
+      <LookBox extra={{ flexDirection: "row", gap: 4 }}>
+        <LookField
+          ariaLabel={placeholders.zip}
+          extra={{ width: "auto" }}
+          onChange={patch?.("zip")}
+          placeholder={placeholders.zip}
+          style={styles.partyAddrTight}
+          value={zip}
+        />
+        <LookField
+          ariaLabel={placeholders.city}
+          onChange={patch?.("city")}
+          placeholder={placeholders.city}
+          style={styles.partyAddrTight}
+          value={city}
+        />
+      </LookBox>
+      <LookText style={styles.partyAddrTight}>{country}</LookText>
+      <LookBox style={styles.kvBlock}>
+        {showDic ? (
+          <DomKv
+            first
+            ariaLabel={labels.dic}
+            k={labels.dic}
+            onChange={patch?.("dic")}
+            placeholder={placeholders.dic}
+            styles={styles}
+            v={dic}
+          />
+        ) : null}
+        {nonVatLabel ? (
+          <DomKv
+            first={!showDic}
+            k={labels.vat}
+            styles={styles}
+            v={nonVatLabel}
+          />
+        ) : null}
+        <DomKv
+          first={!showDic && !nonVatLabel}
+          ariaLabel={labels.contactEmail}
+          k={labels.contactEmail}
+          onChange={patch?.("contactEmail")}
+          placeholder={placeholders.email}
+          styles={styles}
+          v={email}
+        />
+      </LookBox>
+      {registryNote !== undefined ? (
+        <LookField
+          ariaLabel="registry"
+          onChange={patch?.("registryNote")}
+          style={styles.registryNote}
+          value={registryNote}
+        />
+      ) : null}
+    </>
+  );
+}
+
 function EditPartyBlock({
   ctx,
   side,
@@ -160,7 +257,19 @@ function EditPartyBlock({
 }) {
   const { labels, styles, placeholders } = ctx;
   const [open, setOpen] = React.useState(false);
+  const prevIco = React.useRef(ico);
   const patch = partyPatch(ctx, side);
+  const placeSummary = collapsedPlaceLine(open, zip, city);
+
+  React.useEffect(() => {
+    if (!shouldExpandAfterIcoChange(prevIco.current, ico, zip, city)) {
+      prevIco.current = ico;
+      return;
+    }
+    prevIco.current = ico;
+    setOpen(true);
+  }, [ico, zip, city]);
+
   return (
     <>
       <LookBox style={styles.sectionHairShort} />
@@ -188,6 +297,11 @@ function EditPartyBlock({
         style={styles.partyName}
         value={name}
       />
+      {placeSummary.length > 0 ? (
+        <LookText extra={{ marginTop: 2 }} style={styles.partyAddrTight}>
+          {placeSummary}
+        </LookText>
+      ) : null}
       <button
         onClick={() => setOpen((current) => !current)}
         style={{
@@ -203,74 +317,22 @@ function EditPartyBlock({
         }}
         type="button"
       >
-        {open ? placeholders.hideDetails : placeholders.details}
+        {`${open ? "▾ " : "▸ "}${open ? placeholders.hideDetails : placeholders.details}`}
       </button>
       {open ? (
-        <>
-          <LookField
-            ariaLabel={placeholders.street}
-            onChange={patch?.("street")}
-            placeholder={placeholders.street}
-            style={styles.partyAddr}
-            value={street}
-          />
-          <LookBox extra={{ flexDirection: "row", gap: 4 }}>
-            <LookField
-              ariaLabel={placeholders.zip}
-              extra={{ width: "auto" }}
-              onChange={patch?.("zip")}
-              placeholder={placeholders.zip}
-              style={styles.partyAddrTight}
-              value={zip}
-            />
-            <LookField
-              ariaLabel={placeholders.city}
-              onChange={patch?.("city")}
-              placeholder={placeholders.city}
-              style={styles.partyAddrTight}
-              value={city}
-            />
-          </LookBox>
-          <LookText style={styles.partyAddrTight}>{country}</LookText>
-          <LookBox style={styles.kvBlock}>
-            {showDic ? (
-              <DomKv
-                first
-                ariaLabel={labels.dic}
-                k={labels.dic}
-                onChange={patch?.("dic")}
-                placeholder={placeholders.dic}
-                styles={styles}
-                v={dic}
-              />
-            ) : null}
-            {nonVatLabel ? (
-              <DomKv
-                first={!showDic}
-                k={labels.vat}
-                styles={styles}
-                v={nonVatLabel}
-              />
-            ) : null}
-            <DomKv
-              first={!showDic && !nonVatLabel}
-              ariaLabel={labels.contactEmail}
-              k={labels.contactEmail}
-              onChange={patch?.("contactEmail")}
-              placeholder={placeholders.email}
-              styles={styles}
-              v={email}
-            />
-          </LookBox>
-          {registryNote !== undefined ? (
-            <LookField
-              ariaLabel="registry"
-              onChange={patch?.("registryNote")}
-              style={styles.registryNote}
-              value={registryNote}
-            />
-          ) : null}
-        </>
+        <EditPartyDetails
+          city={city}
+          country={country}
+          ctx={ctx}
+          dic={dic}
+          email={email}
+          nonVatLabel={nonVatLabel}
+          patch={patch}
+          registryNote={registryNote}
+          showDic={showDic}
+          street={street}
+          zip={zip}
+        />
       ) : null}
     </>
   );

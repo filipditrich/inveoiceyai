@@ -1,21 +1,29 @@
 import React from "react";
 
+import {
+  formatInvoiceDateIsoLocal,
+  parseInvoiceDateInput,
+} from "../looks/format-invoice";
 import type { LookStyleBox } from "../looks/style-ir";
 import { cssFromLookBox, cssFromLookText } from "./css";
 
 const FIELD_RESET: React.CSSProperties = {
+  appearance: "none",
   background: "transparent",
   border: "1px solid transparent",
   borderRadius: 2,
+  boxSizing: "border-box",
+  color: "inherit",
+  font: "inherit",
+  letterSpacing: "inherit",
+  lineHeight: "inherit",
   margin: 0,
   minWidth: 0,
+  MozAppearance: "textfield",
   padding: 0,
-  width: "100%",
-  font: "inherit",
-  color: "inherit",
   textAlign: "inherit",
-  lineHeight: "inherit",
-  letterSpacing: "inherit",
+  WebkitAppearance: "none",
+  width: "100%",
 };
 
 function fieldValue(target: EventTarget): string {
@@ -72,31 +80,35 @@ export function LookField({
   style,
   extra,
   ariaLabel,
-  type = "text",
   multiline = false,
   onEnter,
+  onBlur,
+  onFocus,
   placeholder,
+  inputMode,
 }: {
   value: string;
   onChange?: (value: string) => void;
   style: LookStyleBox;
   extra?: React.CSSProperties;
   ariaLabel: string;
-  type?: "text" | "date" | "number";
   multiline?: boolean;
   onEnter?: () => void;
+  onBlur?: () => void;
+  onFocus?: () => void;
   placeholder?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 }) {
   const empty = Boolean(onChange) && value.length === 0;
   const css: React.CSSProperties = {
-    ...cssFromLookText(style, extra),
+    ...cssFromLookText(style),
     ...FIELD_RESET,
     display: multiline ? "block" : "inline-block",
     minHeight: "1.15em",
     borderBottom: empty
       ? "1px dashed color-mix(in srgb, currentColor 45%, transparent)"
       : "1px solid transparent",
-    colorScheme: type === "date" ? "light" : undefined,
+    ...extra,
   };
   if (!onChange) {
     return <span style={cssFromLookText(style, extra)}>{value}</span>;
@@ -105,7 +117,9 @@ export function LookField({
     return (
       <textarea
         aria-label={ariaLabel}
+        onBlur={onBlur}
         onChange={(event) => onChange(fieldValue(event.currentTarget))}
+        onFocus={onFocus}
         placeholder={placeholder}
         rows={2}
         style={{ ...css, resize: "none" }}
@@ -116,14 +130,70 @@ export function LookField({
   return (
     <input
       aria-label={ariaLabel}
+      inputMode={inputMode}
+      onBlur={onBlur}
       onChange={(event) => onChange(fieldValue(event.currentTarget))}
+      onFocus={onFocus}
       onKeyDown={(event) => {
         if (event.key === "Enter") onEnter?.();
       }}
       placeholder={placeholder}
       style={css}
-      type={type}
+      type="text"
       value={value}
+    />
+  );
+}
+
+/** Type a calendar day as on the PDF (04.09.2026). Commit ISO only when it parses. */
+export function LookDateField({
+  iso,
+  locale,
+  onChange,
+  style,
+  extra,
+  ariaLabel,
+  placeholder,
+}: {
+  iso: string;
+  locale: string;
+  onChange?: (iso: string) => void;
+  style: LookStyleBox;
+  extra?: React.CSSProperties;
+  ariaLabel: string;
+  placeholder?: string;
+}) {
+  const formatted = formatInvoiceDateIsoLocal(iso, locale);
+  const [text, setText] = React.useState(formatted);
+  const focused = React.useRef(false);
+
+  React.useEffect(() => {
+    if (!focused.current) setText(formatInvoiceDateIsoLocal(iso, locale));
+  }, [iso, locale]);
+
+  return (
+    <LookField
+      ariaLabel={ariaLabel}
+      extra={extra}
+      onBlur={() => {
+        focused.current = false;
+        setText(formatInvoiceDateIsoLocal(iso, locale));
+      }}
+      onChange={
+        onChange
+          ? (value) => {
+              setText(value);
+              const parsed = parseInvoiceDateInput(value);
+              if (parsed) onChange(parsed);
+            }
+          : undefined
+      }
+      onFocus={() => {
+        focused.current = true;
+      }}
+      placeholder={placeholder}
+      style={style}
+      value={onChange ? text : formatted}
     />
   );
 }
