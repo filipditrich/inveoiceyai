@@ -339,7 +339,7 @@ declare const messages: {
       "body": "Zadejte IČO dodavatele. Otevřeme vyplněnou Classic fakturu — bez účtu, náhled s vodoznakem, čisté PDF po zadání e-mailu.",
       "cta": "Vystavit fakturu zdarma",
       "ico": "Vaše IČO",
-      "hint": "ARES doplní dodavatele. Bez IČO začnete od ukázky."
+      "hint": "ARES doplní dodavatele. IČO je volitelné — bez něj začnete od ukázky."
     },
     "demo": {
       "ariaLabel": "Prohlídka Invoicey",
@@ -902,9 +902,13 @@ declare const messages: {
     "sampleHint": "Ukázka je předvyplněná, abyste hned viděli opravdovou stránku. Cokoli změňte — ARES se spustí jen při zadání nového IČO.",
     "settings": "Nastavení dokladu",
     "download": "Stáhnout PDF",
+    "downloadFix": "Doplňte fakturu a stáhněte",
+    "downloadHint": "Zvýrazněná pole ještě potřebují platnou hodnotu. Doplňte je a pak stáhněte.",
     "downloading": "Vystavuji…",
     "preview": "Náhled",
     "previewLoading": "Sestavuji náhled…",
+    "previewReal": "Zobrazit opravdové PDF",
+    "previewRealHint": "Vykreslí skutečné PDF s vodoznakem. Neobnovuje se samo.",
     "issuer": "Dodavatel",
     "client": "Odběratel",
     "ico": "IČO",
@@ -941,8 +945,9 @@ declare const messages: {
     "accentClassic": "Classic",
     "showQr": "Platební QR",
     "gateTitle": "Kam má faktura přijít?",
-    "gateBody": "Pošleme vám PDF e-mailem a fakturu uschováme. Až se přihlásíte, bude už u vás.",
+    "gateBody": "Zadejte e-mail. Fakturu vystavíme, pošleme vám PDF a uschováme ji, až se přihlásíte.",
     "gateEmail": "E-mail",
+    "gateEmailPlaceholder": "vy@firma.cz",
     "gateOptIn": "Občas mi napište novinky o produktu. Ve výchozím stavu nezaškrtnuto.",
     "gateSubmit": "Vystavit a stáhnout",
     "gateCancel": "Zpět",

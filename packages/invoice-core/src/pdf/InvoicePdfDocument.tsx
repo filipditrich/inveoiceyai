@@ -35,6 +35,7 @@ import type {
   InvoiceLanguage,
 } from "../schema";
 import { invoiceDisplayUnit } from "../schema";
+import { invoiceyIssuedWithUrl } from "../site";
 import { parseInlineMarkdown } from "./inline-markdown";
 import {
   createInvoicePdfStyles,
@@ -49,7 +50,7 @@ import {
 } from "./pdf-presentation";
 import { keepPdfWord } from "./register-fonts";
 
-const INVOICEY_SITE_URL = "https://invoicey.app/";
+const INVOICEY_SITE_URL = invoiceyIssuedWithUrl("pdf");
 
 type InvoiceVatBreakdownRowModel = Invoice["totals"]["vatBreakdown"][number];
 

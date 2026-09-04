@@ -26,36 +26,25 @@ async function fetchDemoPdf(
   return URL.createObjectURL(blob);
 }
 
-/** Classic preview. Pass `bakeWatermark` so Open PDF carries PREVIEW in the bytes. */
-export function useDemoInvoicePreview(
-  invoice: Invoice | null,
-  error: string | null,
-  options?: { bakeWatermark?: boolean },
-) {
+/** On-demand Classic PDF. Pass `bakeWatermark` so Open PDF carries PREVIEW. */
+export function useDemoInvoicePreview(options?: { bakeWatermark?: boolean }) {
   const [url, setUrl] = React.useState<string | null>(null);
   const [updating, setUpdating] = React.useState(false);
   const [previewError, setPreviewError] = React.useState<string | null>(null);
-  const lastKey = React.useRef<string | null>(null);
   const urlRef = React.useRef<string | null>(null);
+  const controllerRef = React.useRef<AbortController | null>(null);
 
-  const previewKey = invoice ? JSON.stringify(invoice) : null;
-
-  /* oxlint-disable react-doctor/no-fetch-in-effect -- debounce blob preview; abort on change */
-  React.useEffect(() => {
-    if (error) {
-      setPreviewError(error);
-      return;
-    }
-    if (!previewKey || !invoice) {
-      return;
-    }
-    if (previewKey === lastKey.current) {
-      return;
-    }
-
-    const controller = new AbortController();
-    const handle = window.setTimeout(() => {
+  const render = React.useCallback(
+    (invoice: Invoice | null) => {
+      controllerRef.current?.abort();
+      if (!invoice) {
+        setPreviewError("invoice build failed");
+        return;
+      }
+      const controller = new AbortController();
+      controllerRef.current = controller;
       setUpdating(true);
+      setPreviewError(null);
       void fetchDemoPdf(
         invoice,
         controller.signal,
@@ -63,13 +52,11 @@ export function useDemoInvoicePreview(
       )
         .then((nextUrl) => {
           if (controller.signal.aborted) return;
-          lastKey.current = previewKey;
           if (urlRef.current && urlRef.current !== nextUrl) {
             URL.revokeObjectURL(urlRef.current);
           }
           urlRef.current = nextUrl;
           setUrl(nextUrl);
-          setPreviewError(null);
         })
         /** SAFETY: fetchDemoPdf rejects Error; abort is ignored */
         .catch((error: Error) => {
@@ -80,20 +67,16 @@ export function useDemoInvoicePreview(
         .finally(() => {
           if (!controller.signal.aborted) setUpdating(false);
         });
-    }, 400);
-
-    return () => {
-      controller.abort();
-      window.clearTimeout(handle);
-    };
-  }, [error, invoice, previewKey, options?.bakeWatermark]);
-  /* oxlint-enable react-doctor/no-fetch-in-effect */
+    },
+    [options?.bakeWatermark],
+  );
 
   React.useEffect(() => {
     return () => {
+      controllerRef.current?.abort();
       if (urlRef.current) URL.revokeObjectURL(urlRef.current);
     };
   }, []);
 
-  return { url, updating, error: previewError };
+  return { url, updating, error: previewError, render };
 }

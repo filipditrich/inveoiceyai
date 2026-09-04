@@ -75,6 +75,25 @@ describe("guestInvoiceFromDraft", () => {
     expect(guestInvoiceFromDraft(draft).ok).toBe(false);
     expect(guestPreviewInvoiceFromDraft(draft).ok).toBe(true);
   });
+
+  it("refuses reverse charge without a client DIČ and issues when it is present", () => {
+    const draft = completeDraft();
+    draft.vatMode = "reverse_charge";
+    draft.items[0]!.vatRate = 0;
+    const missing = guestInvoiceFromDraft(draft);
+    expect(missing.ok).toBe(false);
+    if (!missing.ok) {
+      expect(missing.message).toContain("client DIČ");
+    }
+    draft.client.dic = "CZ87654321";
+    const built = guestInvoiceFromDraft(draft);
+    expect(built.ok).toBe(true);
+    if (!built.ok) return;
+    expect(built.invoice.vat.localReverseChargeCode).toBe("4");
+    expect(built.invoice.meta.issuedBy?.name).toBe(
+      "fakturace@acmesupplier.example",
+    );
+  });
 });
 
 describe("sampleGeneratorDraft", () => {
@@ -93,6 +112,10 @@ describe("sampleGeneratorDraft", () => {
     expect(built.invoice.issuer.bank.iban).toBe("CZ6508000000192000145399");
     expect(display?.issuer.ico).toBe("12345678");
     expect(display?.items[0]?.description).toContain("Grafické");
+    expect(display?.meta.issuedBy).toEqual({
+      name: "fakturace@studio-ukazka.example",
+      gender: "unspecified",
+    });
   });
 });
 describe("guestPreviewInvoiceFromDraft", () => {
@@ -133,6 +156,23 @@ describe("guestPreviewInvoiceFromDraft", () => {
     expect(display?.issuer.ico).toBe("270");
     expect(display?.issuer.contactEmail).toBe("fa");
     expect(display?.issuer.bank.accountNumber).toBe("19");
+  });
+
+  it("keeps the editor mounted in reverse charge without a client DIČ", () => {
+    const draft = sampleGeneratorDraft({
+      issuerId: ISSUER_ID,
+      clientId: CLIENT_ID,
+      locale: "en",
+    });
+    draft.vatMode = "reverse_charge";
+    draft.client.dic = "";
+    const preview = guestPreviewInvoiceFromDraft(draft);
+    expect(preview.ok).toBe(true);
+    const display = guestDisplayInvoiceFromDraft(draft);
+    expect(display?.vat.mode).toBe("reverse_charge");
+    expect(display?.vat.localReverseChargeCode).toBe("4");
+    expect(display?.items[0]?.vatRate).toBe(0);
+    expect(display?.client.dic).toBeUndefined();
   });
 });
 

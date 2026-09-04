@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { MARKETING_PILL_LG_CLASS } from "@/components/marketing/marketing-cta";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { writeGeneratorHandoff } from "@/lib/generator/handoff";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { appLocaleFrom, generatorPathForLocale } from "@/lib/generator/href";
-import { cn } from "@/lib/utils";
+import { ArrowRightIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
@@ -18,35 +20,36 @@ export function GeneratorTeaser() {
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
-    writeGeneratorHandoff({ issuerIco: ico });
-    router.push(generatorPathForLocale(locale));
+    const digits = ico.replace(/\D/gu, "").slice(0, 8);
+    const path = generatorPathForLocale(locale);
+    router.push(digits.length === 8 ? `${path}?ico=${digits}` : path);
   }
 
   return (
     <div className="mx-auto w-full max-w-xl">
-      <form
-        className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center"
-        onSubmit={onSubmit}
-      >
-        <Input
-          aria-label={t("ico")}
-          className="h-11 bg-background/80 sm:max-w-[11rem]"
-          inputMode="numeric"
-          maxLength={8}
-          onChange={(ev) => setIco(ev.target.value.replace(/\D/gu, ""))}
-          placeholder={t("ico")}
-          value={ico}
-        />
-        <Button
-          className={cn(
-            "h-11 shrink-0 text-[0.95rem]",
-            MARKETING_PILL_LG_CLASS,
-          )}
-          type="submit"
-          variant="outline"
-        >
-          {t("cta")}
-        </Button>
+      <form className="w-full" onSubmit={onSubmit}>
+        <InputGroup className="h-12 rounded-full border-border/80 bg-background/80 pr-1 shadow-sm">
+          <InputGroupInput
+            aria-label={t("ico")}
+            className="h-12 px-4"
+            inputMode="numeric"
+            maxLength={8}
+            onChange={(ev) => setIco(ev.target.value.replace(/\D/gu, ""))}
+            placeholder={t("ico")}
+            value={ico}
+          />
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton
+              className="h-9 rounded-full px-4"
+              size="sm"
+              type="submit"
+              variant="default"
+            >
+              {t("cta")}
+              <ArrowRightIcon />
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
       </form>
       <p className="mt-2.5 text-center text-xs text-muted-foreground">
         {t("hint")}

@@ -38,29 +38,33 @@ export async function GeneratorLanding() {
   const steps = [t("step1"), t("step2"), t("step3")];
   return (
     <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
-      <header className="max-w-3xl">
-        <p className="text-sm font-semibold tracking-wide text-primary uppercase">
-          {t("eyebrow")}
-        </p>
-        <h1 className="mt-4 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
-          {t("title")}
-        </h1>
-        <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
-          {t("subtitle")}
-        </p>
-        <ol className="mt-8 grid gap-3 sm:grid-cols-3">
-          {steps.map((step, index) => (
-            <li
-              className="rounded-xl border bg-card/50 px-4 py-3 text-sm leading-snug"
-              key={step}
-            >
-              <span className="block text-[0.65rem] font-semibold tracking-[0.14em] text-primary uppercase">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <span className="mt-1.5 block text-foreground">{step}</span>
-            </li>
-          ))}
-        </ol>
+      <header className="relative overflow-hidden rounded-2xl border px-5 py-8 sm:px-8 sm:py-10">
+        <div className="marketing-grid absolute inset-0 -z-20 opacity-40" />
+        <div className="absolute -top-20 left-1/3 -z-10 size-[18rem] rounded-full bg-brand/15 blur-3xl" />
+        <div className="max-w-3xl">
+          <p className="text-sm font-semibold tracking-wide text-primary uppercase">
+            {t("eyebrow")}
+          </p>
+          <h1 className="mt-4 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
+            {t("title")}
+          </h1>
+          <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
+            {t("subtitle")}
+          </p>
+          <ol className="mt-8 grid gap-3 sm:grid-cols-3">
+            {steps.map((step, index) => (
+              <li
+                className="rounded-xl border bg-card/50 px-4 py-3 text-sm leading-snug"
+                key={step}
+              >
+                <span className="block text-[0.65rem] font-semibold tracking-[0.14em] text-primary uppercase">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="mt-1.5 block text-foreground">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
       </header>
       <div className="pt-10">
         <GeneratorForm />

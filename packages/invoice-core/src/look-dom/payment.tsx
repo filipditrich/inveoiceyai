@@ -2,6 +2,7 @@ import React from "react";
 
 import { formatIbanDisplay, paymentMethodLabel } from "../looks/format-invoice";
 import { parseInlineMarkdown } from "../pdf/inline-markdown";
+import { cssFromLookBox } from "./css";
 import { LookBox, LookText } from "./field";
 import { DomKv, DomPaymentKv } from "./kv";
 import type { LookDomCtx } from "./types";
@@ -152,14 +153,17 @@ function renderPaymentFull(ctx: LookDomCtx): React.ReactElement {
 
 export function renderQr(ctx: LookDomCtx): React.ReactElement | null {
   if (!ctx.look.theme.showQr || !ctx.assets.qrDataUrl) return null;
+  const qrBox = cssFromLookBox(ctx.styles.qr);
   return (
     <LookBox lookBlock="qr">
       <img
         alt=""
-        height={96}
         src={ctx.assets.qrDataUrl}
-        style={{ width: 96, height: 96, flexShrink: 0 }}
-        width={96}
+        style={{
+          width: qrBox.width,
+          height: qrBox.height,
+          flexShrink: 0,
+        }}
       />
       <LookText style={ctx.styles.paymentHint}>{ctx.labels.qrHint}</LookText>
     </LookBox>

@@ -1,11 +1,12 @@
 import React from "react";
 
 import { issuedByFooterLine } from "../labels";
+import { invoiceyIssuedWithUrl } from "../site";
 import { cssFromLookText } from "./css";
 import { LookBox, LookText } from "./field";
 import type { LookDomCtx } from "./types";
 
-const INVOICEY_SITE_URL = "https://invoicey.app/";
+const INVOICEY_SITE_URL = invoiceyIssuedWithUrl("dom");
 
 export function renderLogo(ctx: LookDomCtx): React.ReactElement | null {
   if (!ctx.assets.logoUrl) return null;

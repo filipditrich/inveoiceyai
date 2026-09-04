@@ -54,13 +54,18 @@ function priceFieldValue(
   ctx: LookDomCtx,
   editing: boolean,
 ): string {
-  if (editing) return String(item.unitPriceWithoutVat);
+  if (editing) return editMoneyValue(item.unitPriceWithoutVat, ctx.intlLocale);
   return formatInvoiceMoneyWithCurrency(
     item.unitPriceWithoutVat,
     ctx.invoice.meta.currency,
     ctx.intlLocale,
     ctx.invoice.meta.language,
   );
+}
+
+function editMoneyValue(amount: number, locale: string): string {
+  const fixed = amount.toFixed(2);
+  return locale.startsWith("cs") ? fixed.replace(".", ",") : fixed;
 }
 
 function vatFieldValue(item: InvoiceItem, editing: boolean): string {
@@ -192,7 +197,7 @@ function DomInvoiceLineRow({
             onChange={patch?.("unit")}
             placeholder={ctx.placeholders.unit}
             style={styles.cellFig}
-            value={item.unit}
+            value={invoiceDisplayUnit(item.unit, inv.meta.language)}
           />
         ) : null}
       </LookBox>
@@ -228,15 +233,24 @@ function DomInvoiceLineRow({
           aria-label={ctx.placeholders.removeLine}
           onClick={() => onEdit({ type: "removeLine", index })}
           style={{
+            alignItems: "center",
             background: "none",
             border: "none",
+            bottom: 0,
             color: styles.kvKey.color,
             cursor: "pointer",
-            fontSize: "7pt",
+            display: "flex",
+            fontSize: "8pt",
+            height: 16,
+            justifyContent: "center",
+            lineHeight: 1,
+            marginBottom: "auto",
+            marginTop: "auto",
             padding: 0,
             position: "absolute",
-            right: -10,
-            top: 2,
+            right: -14,
+            top: 0,
+            width: 16,
           }}
           type="button"
         >
@@ -305,17 +319,20 @@ export function renderLines(ctx: LookDomCtx): React.ReactElement {
           onClick={() => onEdit({ type: "addLine" })}
           style={{
             alignSelf: "flex-start",
-            background: "none",
-            border: "none",
+            background: "color-mix(in srgb, currentColor 6%, transparent)",
+            border:
+              "1px solid color-mix(in srgb, currentColor 18%, transparent)",
+            borderRadius: 3,
             color: styles.kvKey.color,
             cursor: "pointer",
-            fontSize: "8pt",
-            marginTop: 6,
-            padding: 0,
+            fontSize: "7.5pt",
+            letterSpacing: "0.02em",
+            marginTop: 8,
+            padding: "3px 8px",
           }}
           type="button"
         >
-          +
+          {`+ ${ctx.placeholders.addLine}`}
         </button>
       ) : null}
     </LookBox>

@@ -69,7 +69,7 @@ describe("LookDocumentView", () => {
     expect(html).toContain("<input");
   });
 
-  it("puts IČO first in edit mode and keeps address collapsed", () => {
+  it("expands party details in edit mode and puts IČO under the address", () => {
     const invoice = parseInvoice(domesticFixture);
     const html = renderToStaticMarkup(
       createElement(LookDocumentView, {
@@ -78,12 +78,13 @@ describe("LookDocumentView", () => {
       }),
     );
     expect(html).toContain('placeholder="Název firmy"');
-    expect(html).toContain("Adresa a identifikace");
-    expect(html).not.toContain('placeholder="Ulice a číslo"');
+    expect(html).toContain('placeholder="Ulice a číslo"');
+    expect(html).not.toContain("Adresa a identifikace");
     const issuer = html.split('data-look-block="issuer"')[1] ?? "";
-    expect(issuer.indexOf("IČO")).toBeGreaterThan(-1);
-    expect(issuer.indexOf("IČO")).toBeLessThan(issuer.indexOf("Název firmy"));
-    expect(issuer).toContain("110 00 · Praha");
+    expect(issuer.indexOf("Název firmy")).toBeGreaterThan(-1);
+    expect(issuer.indexOf("IČO")).toBeGreaterThan(
+      issuer.indexOf("Název firmy"),
+    );
   });
 
   it("edits dates as formatted text, not native date inputs", () => {
@@ -108,7 +109,9 @@ describe("LookDocumentView", () => {
     );
     expect(html).not.toContain('type="number"');
     expect(html).toContain("2.2rem");
+    expect(html).toContain("1000,00");
     expect(html).toContain('aria-label="Přidat položku"');
+    expect(html).toContain("+ Přidat položku");
   });
 
   it("lays the line header and row on the same clipped grid", () => {
@@ -139,12 +142,13 @@ describe("LookDocumentView", () => {
     expect(html).toContain("%");
   });
 
-  it("keeps both columns of a 1/1 band when logo and QR are absent", () => {
+  it("collapses empty start/end columns so the title band is full width", () => {
     const invoice = parseInvoice(domesticFixture);
     const html = renderToStaticMarkup(
       createElement(LookDocumentView, { invoice }),
     );
-    expect((html.match(/width:48%/g) ?? []).length).toBe(8);
+    expect((html.match(/width:48%/g) ?? []).length).toBe(4);
+    expect(html).toContain("width:100%");
   });
 
   it("hints an empty bank as a format, not a plausible account number", () => {

@@ -111,6 +111,26 @@ function renderBand(
   const start = renderSlotColumn(ctx, band.start, "start");
   const end = renderSlotColumn(ctx, band.end, "end");
   if (!start && !end) return null;
+  if (!start) {
+    return (
+      <div
+        key={`band-${String(index)}`}
+        style={cssFromLookBox(ctx.styles.colFull)}
+      >
+        {end}
+      </div>
+    );
+  }
+  if (!end) {
+    return (
+      <div
+        key={`band-${String(index)}`}
+        style={cssFromLookBox(ctx.styles.colFull)}
+      >
+        {start}
+      </div>
+    );
+  }
   const rowStyle =
     index === 0
       ? { ...ctx.styles.bandRow, ...ctx.styles.bandRowFirst }

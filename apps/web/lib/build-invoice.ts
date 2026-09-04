@@ -157,9 +157,43 @@ export function tryBuildInvoicePayload(
   } catch (e) {
     return {
       ok: false,
-      message: e instanceof Error ? e.message : "invoice build failed",
+      message: buildFailureMessage(e),
     };
   }
+}
+
+function buildFailureMessage(error: unknown): string {
+  const issues = zodIssues(error);
+  if (issues) {
+    return issues
+      .map((issue) => {
+        const path = issue.path.map(String).join(".");
+        return path.length > 0 ? `${path}: ${issue.message}` : issue.message;
+      })
+      .join("; ");
+  }
+  if (error instanceof Error) return error.message;
+  return "invoice build failed";
+}
+
+function zodIssues(
+  error: unknown,
+): { path: PropertyKey[]; message: string }[] | null {
+  if (!error || typeof error !== "object" || !("issues" in error)) return null;
+  const issues = error.issues;
+  if (!Array.isArray(issues) || issues.length === 0) return null;
+  const parsed = issues.filter(
+    (issue): issue is { path: PropertyKey[]; message: string } =>
+      Boolean(
+        issue &&
+        typeof issue === "object" &&
+        "message" in issue &&
+        typeof issue.message === "string" &&
+        "path" in issue &&
+        Array.isArray(issue.path),
+      ),
+  );
+  return parsed.length > 0 ? parsed : null;
 }
 
 function digitsOnly(s: string): string {

@@ -15,15 +15,19 @@ import {
   guestDisplayInvoiceFromDraft,
   guestInvoiceFromDraft,
   guestPreviewInvoiceFromDraft,
+  parseGeneratorDraftUrl,
   sampleGeneratorDraft,
   withPrefillNumber,
+  withVatMode,
   type GeneratorDraft,
 } from "@/lib/generator/draft";
 import { readGeneratorHandoff } from "@/lib/generator/handoff";
 import { appLocaleFrom } from "@/lib/generator/href";
 import { cn } from "@/lib/utils";
+import { DownloadIcon, FileTextIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Inter } from "next/font/google";
+import { debounce, parseAsJson, parseAsString, useQueryState } from "nuqs";
 
 import {
   LookDocumentView,
@@ -31,6 +35,8 @@ import {
   type LookEdit,
 } from "@invoicey/invoice-core/look-dom";
 import { ACCENT_COLOR_HEX } from "@invoicey/invoice-core/looks";
+
+import type { AppLocale } from "@/i18n/config";
 
 const lookSans = Inter({ subsets: ["latin", "latin-ext"] });
 
@@ -43,6 +49,11 @@ const ACCENT_KEYS = [
   "violet",
 ] as const;
 
+const draftUrlParser = parseAsJson(parseGeneratorDraftUrl).withOptions({
+  history: "replace",
+  limitUrlUpdates: debounce(400),
+});
+
 function patchDraft(
   setDraft: React.Dispatch<React.SetStateAction<GeneratorDraft | null>>,
   updater: (draft: GeneratorDraft) => GeneratorDraft,
@@ -52,25 +63,31 @@ function patchDraft(
   );
 }
 
-export function GeneratorForm() {
-  const t = useTranslations("Generator");
-  const locale = appLocaleFrom(useLocale());
+function useGeneratorDraft(locale: AppLocale) {
+  const [icoParam] = useQueryState("ico", parseAsString);
+  const [draftUrl, setDraftUrl] = useQueryState("d", draftUrlParser);
   const [draft, setDraft] = React.useState<GeneratorDraft | null>(null);
-  const [gateOpen, setGateOpen] = React.useState(false);
-  const [formError, setFormError] = React.useState<string | null>(null);
-  const [qrDataUrl, setQrDataUrl] = React.useState<string | null>(null);
   const lastIssuerIco = React.useRef("");
   const lastClientIco = React.useRef("");
 
   React.useEffect(() => {
+    if (draft) return;
     const sample = sampleGeneratorDraft({
       issuerId: crypto.randomUUID(),
       clientId: crypto.randomUUID(),
       locale,
     });
-    lastClientIco.current = sample.client.ico;
+    if (draftUrl) {
+      lastIssuerIco.current = draftUrl.issuer.ico;
+      lastClientIco.current = draftUrl.client.ico;
+      setDraft(withPrefillNumber(draftUrl));
+      return;
+    }
+    const fromQuery = (icoParam ?? "").replace(/\D/gu, "").slice(0, 8);
     const handoff = readGeneratorHandoff();
-    const issuerIco = handoff.issuerIco;
+    const issuerIco =
+      fromQuery.length === 8 ? fromQuery : (handoff.issuerIco ?? "");
+    lastClientIco.current = sample.client.ico;
     if (!issuerIco) {
       lastIssuerIco.current = sample.issuer.ico;
       setDraft(sample);
@@ -81,16 +98,31 @@ export function GeneratorForm() {
       ...sample,
       issuer: { ...sample.issuer, ico: issuerIco },
     });
-  }, [locale]);
+  }, [draft, draftUrl, icoParam, locale]);
+
+  React.useEffect(() => {
+    if (!draft) return;
+    void setDraftUrl(draft);
+  }, [draft, setDraftUrl]);
+
+  return { draft, setDraft, lastIssuerIco, lastClientIco };
+}
+
+export function GeneratorForm() {
+  const t = useTranslations("Generator");
+  const locale = appLocaleFrom(useLocale());
+  const { draft, setDraft, lastIssuerIco, lastClientIco } =
+    useGeneratorDraft(locale);
+  const [gateOpen, setGateOpen] = React.useState(false);
+  const [formError, setFormError] = React.useState<string | null>(null);
+  const [qrDataUrl, setQrDataUrl] = React.useState<string | null>(null);
 
   const previewBuild = React.useMemo(() => {
-    if (!draft) return { invoice: null, display: null, error: null };
+    if (!draft) return { invoice: null, display: null };
     const built = guestPreviewInvoiceFromDraft(draft);
-    const display = guestDisplayInvoiceFromDraft(draft);
     return {
       invoice: built.ok ? built.invoice : null,
-      display,
-      error: null,
+      display: guestDisplayInvoiceFromDraft(draft),
     };
   }, [draft]);
 
@@ -122,23 +154,19 @@ export function GeneratorForm() {
 
   React.useEffect(() => {
     void lookupPartyIco("issuer", issuerIco, lastIssuerIco, setDraft);
-  }, [issuerIco]);
+  }, [issuerIco, lastIssuerIco, setDraft]);
 
   React.useEffect(() => {
     void lookupPartyIco("client", clientIco, lastClientIco, setDraft);
-  }, [clientIco]);
+  }, [clientIco, lastClientIco, setDraft]);
 
-  const preview = useDemoInvoicePreview(
-    previewBuild.invoice,
-    previewBuild.error,
-    { bakeWatermark: true },
-  );
+  const preview = useDemoInvoicePreview({ bakeWatermark: true });
 
   function onDownload() {
     if (!draft) return;
     const built = guestInvoiceFromDraft(draft);
     if (!built.ok) {
-      setFormError(t("errorInvoice"));
+      setFormError(built.message);
       return;
     }
     setFormError(null);
@@ -189,18 +217,41 @@ export function GeneratorForm() {
           vatLocked={vatLocked}
           onChange={(next) => patchDraft(setDraft, () => next)}
         />
-        {formError ? (
-          <p className="text-sm text-destructive" role="alert">
-            {formError}
-          </p>
-        ) : null}
-        <Button onClick={onDownload} size="lg" type="button">
-          {t("download")}
-        </Button>
-        <div>
-          <p className="mb-3 text-sm font-medium">{t("preview")}</p>
+        <div className="space-y-2">
+          <Button
+            className="h-11 w-full text-[0.95rem]"
+            onClick={onDownload}
+            size="lg"
+            type="button"
+          >
+            <DownloadIcon />
+            {issueInvoice.ok ? t("download") : t("downloadFix")}
+          </Button>
+          {formError ? (
+            <p className="text-sm text-destructive" role="alert">
+              <span className="block font-medium">{t("errorInvoice")}</span>
+              <span className="mt-1 block font-mono text-[0.7rem] leading-snug">
+                {formError}
+              </span>
+            </p>
+          ) : null}
+          {!issueInvoice.ok && !formError ? (
+            <p className="text-sm text-muted-foreground">{t("downloadHint")}</p>
+          ) : null}
+        </div>
+        <div className="space-y-3">
+          <p className="text-sm font-medium">{t("preview")}</p>
+          <Button
+            className="w-full"
+            onClick={() => preview.render(previewBuild.invoice)}
+            type="button"
+            variant="outline"
+          >
+            <FileTextIcon />
+            {t("previewReal")}
+          </Button>
           <InvoicePdfPreview
-            emptyLabel={t("previewLoading")}
+            emptyLabel={t("previewRealHint")}
             error={preview.error}
             updating={preview.updating}
             url={preview.url}
@@ -302,13 +353,14 @@ function SettingsPanel({
           className={selectClassName()}
           disabled={vatLocked}
           onChange={(ev) =>
-            onChange({
-              ...draft,
-              vatMode:
+            onChange(
+              withVatMode(
+                draft,
                 ev.target.value === "reverse_charge"
                   ? "reverse_charge"
                   : "regular",
-            })
+              ),
+            )
           }
           value={vatLocked ? "regular" : draft.vatMode}
         >
