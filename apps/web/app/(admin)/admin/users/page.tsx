@@ -1,5 +1,6 @@
 import { AdminUsersGrid } from "@/components/admin/admin-users-grid";
 import { PageHeader } from "@/components/layout/page-header";
+import { coerceDateIso } from "@/lib/admin/constants";
 import { ADMIN_LIST_CAP, adminListUsers } from "@/lib/admin/lists";
 import { requirePlatformAdmin } from "@/lib/auth/session";
 import { getTranslations } from "next-intl/server";
@@ -32,8 +33,8 @@ export default async function AdminUsersPage() {
           referralCode: r.referralCode,
           referredByEmail: r.referredByEmail,
           membershipCount: r.membershipCount,
-          createdAtIso: r.createdAt.toISOString(),
-          lastSeenAtIso: r.lastSeenAt?.toISOString() ?? null,
+          createdAtIso: coerceDateIso(r.createdAt) ?? "",
+          lastSeenAtIso: coerceDateIso(r.lastSeenAt),
         }))}
       />
     </div>

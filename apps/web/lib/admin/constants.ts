@@ -53,6 +53,33 @@ export function emptyMonthlySeries(now = new Date()): PlatformMonthPoint[] {
   return points;
 }
 
+/**
+ * Neon HTTP returns timestamp columns as Date, but SQL aggregates like
+ * `max(updated_at)` arrive as ISO strings. Calling `.toISOString()` on those
+ * throws and takes down the admin users list.
+ */
+export function coerceDate(
+  value: Date | string | null | undefined,
+): Date | null {
+  if (value == null) {
+    return null;
+  }
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) {
+    return null;
+  }
+  return new Date(parsed);
+}
+
+export function coerceDateIso(
+  value: Date | string | null | undefined,
+): string | null {
+  return coerceDate(value)?.toISOString() ?? null;
+}
+
 /** Instant `days` UTC days before `now`. Not snapped to a month. */
 export function utcDaysAgo(days: number, now = new Date()): Date {
   const d = new Date(now);
