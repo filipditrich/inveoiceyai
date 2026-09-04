@@ -1,7 +1,7 @@
 import React from "react";
 
 import type { LookStyleIr } from "../looks/style-ir";
-import { LookBox, LookField, LookText } from "./field";
+import { LookBox, LookDateField, LookField, LookText } from "./field";
 
 export function DomKv({
   k,
@@ -10,7 +10,6 @@ export function DomKv({
   styles,
   onChange,
   ariaLabel,
-  type = "text",
   placeholder,
 }: {
   k: string;
@@ -19,7 +18,6 @@ export function DomKv({
   styles: LookStyleIr;
   onChange?: (value: string) => void;
   ariaLabel?: string;
-  type?: "text" | "date" | "number";
   placeholder?: string;
 }) {
   const row =
@@ -36,8 +34,45 @@ export function DomKv({
           onChange={onChange}
           placeholder={placeholder}
           style={styles.kvVal}
-          type={type}
           value={v}
+        />
+      </LookBox>
+    </LookBox>
+  );
+}
+
+export function DomDateKv({
+  k,
+  iso,
+  locale,
+  first,
+  styles,
+  onChange,
+  ariaLabel,
+}: {
+  k: string;
+  iso: string;
+  locale: string;
+  first?: boolean;
+  styles: LookStyleIr;
+  onChange?: (iso: string) => void;
+  ariaLabel?: string;
+}) {
+  const row =
+    first === true ? { ...styles.kvRow, ...styles.kvRowFirst } : styles.kvRow;
+  return (
+    <LookBox style={row}>
+      <LookBox style={styles.kvKeyCol}>
+        <LookText style={styles.kvKey}>{k}</LookText>
+      </LookBox>
+      <LookBox style={styles.kvValCol}>
+        <LookDateField
+          ariaLabel={ariaLabel ?? k}
+          extra={{ textAlign: "right", width: "100%" }}
+          iso={iso}
+          locale={locale}
+          onChange={onChange}
+          style={styles.kvVal}
         />
       </LookBox>
     </LookBox>

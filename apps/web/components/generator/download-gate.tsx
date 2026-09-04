@@ -83,7 +83,10 @@ export function DownloadGate({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="overflow-y-auto sm:max-w-md">
+      <SheetContent
+        className="overflow-y-auto sm:max-w-md"
+        showCloseButton={false}
+      >
         <SheetHeader>
           <SheetTitle>{t("gateTitle")}</SheetTitle>
           <SheetDescription>{t("gateBody")}</SheetDescription>

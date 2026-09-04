@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  applyAresToIssuer,
   applyAresToParty,
   emptyGeneratorDraft,
   guestDisplayInvoiceFromDraft,
@@ -110,6 +111,55 @@ describe("guestPreviewInvoiceFromDraft", () => {
     expect(display?.issuer.contactEmail).toBe("");
     expect(display?.client.name).toBe("");
     expect(display?.items[0]?.description).toBe("");
+  });
+});
+
+describe("applyAresToIssuer", () => {
+  it("clears the sample bank when ARES fills a new issuer", () => {
+    const issuer = sampleGeneratorDraft({
+      issuerId: ISSUER_ID,
+      clientId: CLIENT_ID,
+      locale: "cs",
+    }).issuer;
+    expect(issuer.accountNumber).toBe("19-2000145399/0800");
+    const next = applyAresToIssuer(issuer, {
+      name: "Alza.cz a.s.",
+      ico: "27082440",
+      address: {
+        street: "Jindřišská 937/16",
+        city: "Praha",
+        zip: "110 00",
+        country: "CZ",
+      },
+    });
+    expect(next.name).toBe("Alza.cz a.s.");
+    expect(next.ico).toBe("27082440");
+    expect(next.accountNumber).toBe("");
+    expect(next.iban).toBe("");
+  });
+
+  it("keeps a bank the visitor already typed", () => {
+    const issuer = sampleGeneratorDraft({
+      issuerId: ISSUER_ID,
+      clientId: CLIENT_ID,
+      locale: "cs",
+    }).issuer;
+    issuer.accountTouched = true;
+    issuer.accountNumber = "123/0100";
+    issuer.iban = "CZ1101000000000000000123";
+    issuer.ibanTouched = true;
+    const next = applyAresToIssuer(issuer, {
+      name: "Alza.cz a.s.",
+      ico: "27082440",
+      address: {
+        street: "Jindřišská 937/16",
+        city: "Praha",
+        zip: "110 00",
+        country: "CZ",
+      },
+    });
+    expect(next.accountNumber).toBe("123/0100");
+    expect(next.iban).toBe("CZ1101000000000000000123");
   });
 });
 

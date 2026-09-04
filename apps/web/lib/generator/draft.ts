@@ -45,6 +45,7 @@ export type GeneratorIssuer = GeneratorParty & {
   accountNumber: string;
   iban: string;
   ibanTouched: boolean;
+  accountTouched: boolean;
 };
 
 export type GeneratorLine = {
@@ -98,6 +99,7 @@ export function emptyGeneratorDraft(input: {
       accountNumber: "",
       iban: "",
       ibanTouched: false,
+      accountTouched: false,
     },
     client: emptyParty(input.clientId, "CZ"),
     number: defaultGuestInvoiceNumber(
@@ -190,6 +192,17 @@ export function applyAresToParty(
     country: draft.address.country || party.country,
     contactEmail: draft.contactEmail ?? party.contactEmail,
   };
+}
+
+/** Apply ARES to the issuer. Sample bank is a template — drop it until the visitor types one. */
+export function applyAresToIssuer(
+  issuer: GeneratorIssuer,
+  draft: ClientDraft,
+): GeneratorIssuer {
+  const party = applyAresToParty(issuer, draft);
+  const next: GeneratorIssuer = { ...issuer, ...party };
+  if (issuer.accountTouched || issuer.ibanTouched) return next;
+  return { ...next, accountNumber: "", iban: "", ibanTouched: false };
 }
 
 export function withSuggestedIban(issuer: GeneratorIssuer): GeneratorIssuer {
@@ -328,6 +341,7 @@ function stubDraftForPreview(draft: GeneratorDraft): GeneratorDraft {
       accountNumber: draft.issuer.accountNumber.trim() || PREVIEW_STUB_ACCOUNT,
       iban: draft.issuer.iban,
       ibanTouched: draft.issuer.ibanTouched,
+      accountTouched: draft.issuer.accountTouched,
     }),
     client: stubParty(draft.client, { ico: false, email: false }),
   };

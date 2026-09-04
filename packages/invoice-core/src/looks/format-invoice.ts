@@ -33,6 +33,35 @@ export function formatInvoiceDateIsoLocal(
   }).format(value);
 }
 
+function calendarIso(year: number, month: number, day: number): string | null {
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return null;
+  }
+  const mm = String(month).padStart(2, "0");
+  const dd = String(day).padStart(2, "0");
+  return `${String(year)}-${mm}-${dd}`;
+}
+
+/** Accept ISO or D.M.YYYY / D/M/YYYY (spaces allowed). Null until a real calendar day. */
+export function parseInvoiceDateInput(value: string): string | null {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return null;
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/u.exec(trimmed);
+  if (iso) {
+    return calendarIso(Number(iso[1]), Number(iso[2]), Number(iso[3]));
+  }
+  const compact = trimmed.replace(/\s/gu, "");
+  const dotted = /^(\d{1,2})[./](\d{1,2})[./](\d{4})$/u.exec(compact);
+  if (!dotted) return null;
+  return calendarIso(Number(dotted[3]), Number(dotted[2]), Number(dotted[1]));
+}
+
 export function formatInvoiceQty(n: number, locale: string): string {
   const s = n.toLocaleString(locale, {
     minimumFractionDigits: 0,

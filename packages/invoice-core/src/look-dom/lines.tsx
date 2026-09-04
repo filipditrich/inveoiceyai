@@ -101,20 +101,32 @@ function DomInvoiceLineRow({
           width: cols.qty,
           flexDirection: "row",
           justifyContent: "flex-end",
+          minWidth: 0,
+          gap: 4,
         }}
       >
         <LookField
           ariaLabel={labels.colQty}
-          extra={{ textAlign: "right", width: "3.5rem" }}
+          extra={{
+            textAlign: "right",
+            minWidth: "1.6rem",
+            flex: 1,
+            width: "auto",
+          }}
+          inputMode="decimal"
           onChange={patch?.("quantity")}
           style={styles.cellFig}
-          type="number"
           value={qtyFieldValue(item, editing, intlLocale, inv.meta.language)}
         />
         {editing ? (
           <LookField
             ariaLabel={labels.colUnit}
-            extra={{ width: "2.2rem", marginLeft: 4, textAlign: "right" }}
+            extra={{
+              width: "2.2rem",
+              minWidth: "2.2rem",
+              flexShrink: 0,
+              textAlign: "right",
+            }}
             onChange={patch?.("unit")}
             placeholder={ctx.placeholders.unit}
             style={styles.cellFig}
@@ -122,26 +134,30 @@ function DomInvoiceLineRow({
           />
         ) : null}
       </LookBox>
-      <LookField
-        ariaLabel={labels.colUnitPrice}
-        extra={{ width: cols.unitPx, textAlign: "right" }}
-        onChange={patch?.("unitPriceWithoutVat")}
-        style={styles.cellFig}
-        type={editing ? "number" : "text"}
-        value={priceFieldValue(item, ctx, editing)}
-      />
-      {showVat ? (
+      <LookBox extra={{ width: cols.unitPx, minWidth: 0 }}>
         <LookField
-          ariaLabel={labels.colVat}
-          extra={{ width: LINE_COLS_WITH_VAT.vat, textAlign: "right" }}
-          onChange={patch?.("vatRate")}
+          ariaLabel={labels.colUnitPrice}
+          extra={{ textAlign: "right", width: "100%", minWidth: 0 }}
+          inputMode="decimal"
+          onChange={patch?.("unitPriceWithoutVat")}
           style={styles.cellFig}
-          type={editing ? "number" : "text"}
-          value={vatFieldValue(item, editing)}
+          value={priceFieldValue(item, ctx, editing)}
         />
+      </LookBox>
+      {showVat ? (
+        <LookBox extra={{ width: LINE_COLS_WITH_VAT.vat, minWidth: 0 }}>
+          <LookField
+            ariaLabel={labels.colVat}
+            extra={{ textAlign: "right", width: "100%", minWidth: 0 }}
+            inputMode="decimal"
+            onChange={patch?.("vatRate")}
+            style={styles.cellFig}
+            value={vatFieldValue(item, editing)}
+          />
+        </LookBox>
       ) : null}
       <LookText
-        extra={{ width: cols.tot, textAlign: "right" }}
+        extra={{ width: cols.tot, textAlign: "right", flexShrink: 0 }}
         style={styles.cellFigStrong}
       >
         {formatInvoiceMoneyWithCurrency(
@@ -153,7 +169,7 @@ function DomInvoiceLineRow({
       </LookText>
       {onEdit && lineCount > 1 ? (
         <button
-          aria-label="remove line"
+          aria-label={ctx.placeholders.removeLine}
           onClick={() => onEdit({ type: "removeLine", index })}
           style={{
             background: "none",
@@ -226,6 +242,7 @@ export function renderLines(ctx: LookDomCtx): React.ReactElement {
       </LookBox>
       {onEdit ? (
         <button
+          aria-label={ctx.placeholders.addLine}
           onClick={() => onEdit({ type: "addLine" })}
           style={{
             alignSelf: "flex-start",

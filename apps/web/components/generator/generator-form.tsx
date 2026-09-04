@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { applyLookEdit } from "@/lib/generator/apply-look-edit";
 import {
+  applyAresToIssuer,
   applyAresToParty,
   guestDisplayInvoiceFromDraft,
   guestInvoiceFromDraft,
@@ -196,6 +197,7 @@ export function GeneratorForm() {
         <div>
           <p className="mb-3 text-sm font-medium">{t("preview")}</p>
           <InvoicePdfPreview
+            emptyLabel={t("previewLoading")}
             error={preview.error}
             updating={preview.updating}
             url={preview.url}
@@ -226,10 +228,7 @@ async function lookupPartyIco(
     if (side === "issuer") {
       return withPrefillNumber({
         ...current,
-        issuer: {
-          ...current.issuer,
-          ...applyAresToParty(current.issuer, result.draft),
-        },
+        issuer: applyAresToIssuer(current.issuer, result.draft),
       });
     }
     return {
@@ -350,7 +349,7 @@ function AppearanceFields({
           onClick={() => onAccent("default")}
           type="button"
         >
-          Classic
+          {t("accentClassic")}
         </button>
         {ACCENT_KEYS.map((key) => (
           <button

@@ -1,4 +1,5 @@
 import type { LookEdit } from "@invoicey/invoice-core/look-dom";
+import { parseInvoiceDateInput } from "@invoicey/invoice-core/looks";
 
 import {
   withPrefillNumber,
@@ -25,6 +26,10 @@ function patchParty(
   return party;
 }
 
+function parseLineNumber(value: string): number {
+  return Number(value.replace(/\s/gu, "").replace(",", ".")) || 0;
+}
+
 function patchLine(
   line: GeneratorLine,
   field: string,
@@ -32,12 +37,24 @@ function patchLine(
 ): GeneratorLine {
   if (field === "description") return { ...line, description: value };
   if (field === "unit") return { ...line, unit: value };
-  if (field === "quantity") return { ...line, quantity: Number(value) || 0 };
+  if (field === "quantity")
+    return { ...line, quantity: parseLineNumber(value) };
   if (field === "unitPriceWithoutVat") {
-    return { ...line, unitPriceWithoutVat: Number(value) || 0 };
+    return { ...line, unitPriceWithoutVat: parseLineNumber(value) };
   }
-  if (field === "vatRate") return { ...line, vatRate: Number(value) || 0 };
+  if (field === "vatRate") return { ...line, vatRate: parseLineNumber(value) };
   return line;
+}
+
+function withParsedDate(
+  draft: GeneratorDraft,
+  field: "issueDate" | "dueDate",
+  value: string,
+): GeneratorDraft {
+  const iso = parseInvoiceDateInput(value);
+  if (!iso) return draft;
+  if (field === "dueDate") return { ...draft, dueDate: iso };
+  return withPrefillNumber({ ...draft, issueDate: iso });
 }
 
 export function applyLookEdit(
@@ -66,6 +83,7 @@ export function applyLookEdit(
         issuer: withSuggestedIban({
           ...draft.issuer,
           accountNumber: edit.value,
+          accountTouched: true,
         }),
       };
     }
@@ -82,13 +100,10 @@ export function applyLookEdit(
     if (edit.field === "number") {
       return { ...draft, number: edit.value, numberTouched: true };
     }
-    if (edit.field === "issueDate") {
-      return withPrefillNumber({ ...draft, issueDate: edit.value });
-    }
     if (edit.field === "dueDate") {
-      return { ...draft, dueDate: edit.value };
+      return withParsedDate(draft, "dueDate", edit.value);
     }
-    return withPrefillNumber({ ...draft, issueDate: edit.value });
+    return withParsedDate(draft, "issueDate", edit.value);
   }
   if (edit.type === "notes") {
     return { ...draft, notes: edit.value };

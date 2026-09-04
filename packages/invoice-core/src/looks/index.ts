@@ -84,3 +84,7 @@ export {
   type LookStyleBox,
   type LookStyleIr,
 } from "./style-ir";
+export {
+  formatInvoiceDateIsoLocal,
+  parseInvoiceDateInput,
+} from "./format-invoice";

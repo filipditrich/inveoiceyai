@@ -41,6 +41,26 @@ describe("applyLookEdit", () => {
     expect(next.items[0]?.unitPriceWithoutVat).toBe(1000);
   });
 
+  it("parses a Czech decimal comma on line amounts", () => {
+    const next = applyLookEdit(draft(), {
+      type: "line",
+      index: 0,
+      field: "quantity",
+      value: "1,5",
+    });
+    expect(next.items[0]?.quantity).toBe(1.5);
+  });
+
+  it("marks the account as touched when the visitor edits the sample bank", () => {
+    const next = applyLookEdit(draft(), {
+      type: "bank",
+      field: "accountNumber",
+      value: "123456789/0100",
+    });
+    expect(next.issuer.accountTouched).toBe(true);
+    expect(next.issuer.accountNumber).toBe("123456789/0100");
+  });
+
   it("adds and removes line rows", () => {
     const added = applyLookEdit(draft(), { type: "addLine" });
     expect(added.items).toHaveLength(2);

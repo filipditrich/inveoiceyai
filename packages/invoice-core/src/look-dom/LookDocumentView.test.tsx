@@ -83,5 +83,43 @@ describe("LookDocumentView", () => {
     const issuer = html.split('data-look-block="issuer"')[1] ?? "";
     expect(issuer.indexOf("IČO")).toBeGreaterThan(-1);
     expect(issuer.indexOf("IČO")).toBeLessThan(issuer.indexOf("Název firmy"));
+    expect(issuer).toContain("110 00 · Praha");
+  });
+
+  it("edits dates as formatted text, not native date inputs", () => {
+    const invoice = parseInvoice(domesticFixture);
+    const html = renderToStaticMarkup(
+      createElement(LookDocumentView, {
+        invoice,
+        onEdit: () => undefined,
+      }),
+    );
+    expect(html).not.toContain('type="date"');
+    expect(html).toContain("03. 05. 2026");
+  });
+
+  it("edits qty, price, and VAT as text so Classic columns stay on one row", () => {
+    const invoice = parseInvoice(domesticFixture);
+    const html = renderToStaticMarkup(
+      createElement(LookDocumentView, {
+        invoice,
+        onEdit: () => undefined,
+      }),
+    );
+    expect(html).not.toContain('type="number"');
+    expect(html).toContain("2.2rem");
+    expect(html).toContain('aria-label="Přidat položku"');
+  });
+
+  it("hints an empty bank as a format, not a plausible account number", () => {
+    const invoice = parseInvoice(domesticFixture);
+    const html = renderToStaticMarkup(
+      createElement(LookDocumentView, {
+        invoice,
+        onEdit: () => undefined,
+      }),
+    );
+    expect(html).not.toContain('placeholder="123456789/0100"');
+    expect(html).toContain('placeholder="číslo/kód banky"');
   });
 });
