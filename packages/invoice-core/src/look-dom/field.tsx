@@ -13,8 +13,6 @@ const FIELD_RESET: React.CSSProperties = {
   border: "1px solid transparent",
   borderRadius: 2,
   boxSizing: "border-box",
-  color: "inherit",
-  font: "inherit",
   letterSpacing: "inherit",
   lineHeight: "inherit",
   margin: 0,

@@ -61,6 +61,13 @@ export function LookDocumentView({
   );
 }
 
+const SLOT_COL: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  minWidth: 0,
+  width: "100%",
+};
+
 function renderSlotColumn(
   ctx: LookDomCtx,
   slots: readonly BlockInstance[],
@@ -71,12 +78,14 @@ function renderSlotColumn(
     .map((slot, index) => {
       const node = DOM_LOOK_BLOCK_HANDLERS[slot.block](scoped, slot);
       return node ? (
-        <div key={`${slot.block}-${String(index)}`}>{node}</div>
+        <div key={`${slot.block}-${String(index)}`} style={SLOT_COL}>
+          {node}
+        </div>
       ) : null;
     })
     .filter(Boolean);
   if (children.length === 0) return null;
-  return <div>{children}</div>;
+  return <div style={SLOT_COL}>{children}</div>;
 }
 
 function renderBand(
@@ -102,26 +111,6 @@ function renderBand(
   const start = renderSlotColumn(ctx, band.start, "start");
   const end = renderSlotColumn(ctx, band.end, "end");
   if (!start && !end) return null;
-  if (!start) {
-    return (
-      <div
-        key={`band-${String(index)}`}
-        style={cssFromLookBox(ctx.styles.colFull)}
-      >
-        {end}
-      </div>
-    );
-  }
-  if (!end) {
-    return (
-      <div
-        key={`band-${String(index)}`}
-        style={cssFromLookBox(ctx.styles.colFull)}
-      >
-        {start}
-      </div>
-    );
-  }
   const rowStyle =
     index === 0
       ? { ...ctx.styles.bandRow, ...ctx.styles.bandRowFirst }
