@@ -382,6 +382,8 @@
 }
 
 @media (scripting: none) {
+  .heroCopy,
+  .heroDemo,
   .scrollReveal {
     opacity: 1;
     transform: none;
@@ -460,6 +462,12 @@
   .ctaMascot,
   .floatingGuide img {
     animation: none;
+  }
+
+  .heroCopy,
+  .heroDemo {
+    opacity: 1;
+    transform: none;
   }
 
   .liftCard,
