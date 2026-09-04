@@ -894,6 +894,8 @@ declare const messages: {
     "eyebrow": "Bez účtu",
     "title": "Vystavte opravdovou fakturu",
     "subtitle": "Stejný ověřený doklad, jaký Invoicey používá u každé vystavené faktury. Náhled je s vodoznakem, stažený PDF je čistý.",
+    "typeOnPage": "Pište přímo na fakturu. Součty a DPH se dopočítají — ty editovat nelze.",
+    "settings": "Nastavení dokladu",
     "download": "Stáhnout PDF",
     "downloading": "Vystavuji…",
     "preview": "Náhled",
