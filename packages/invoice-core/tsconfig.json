@@ -3,7 +3,8 @@
   "compilerOptions": {
     "rootDir": "src",
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

@@ -14,15 +14,27 @@ import {
   validateLookForInvoice,
   type BlockInstance,
   type LookBand,
+  type LookBlockHandlers,
   type LookDocument,
 } from "../looks";
+import {
+  countryHuman,
+  formatIbanDisplay,
+  formatInvoiceDateIsoLocal,
+  formatInvoiceMoneyWithCurrency,
+  formatInvoiceQty,
+  paymentMethodLabel,
+  postalCityLine,
+  splitDescription,
+} from "../looks/format-invoice";
+import { LINE_COLS_NO_VAT, LINE_COLS_WITH_VAT } from "../looks/line-columns";
 import type {
   Invoice,
   InvoiceCurrency,
   InvoiceItem,
   InvoiceLanguage,
 } from "../schema";
-import { currencyDisplaySuffix, invoiceDisplayUnit } from "../schema";
+import { invoiceDisplayUnit } from "../schema";
 import { parseInlineMarkdown } from "./inline-markdown";
 import {
   createInvoicePdfStyles,
@@ -36,21 +48,6 @@ import {
   invoicePdfTaxPointLabel,
 } from "./pdf-presentation";
 import { keepPdfWord } from "./register-fonts";
-
-const LINE_COLS_WITH_VAT = {
-  desc: "42%",
-  qty: "15%",
-  unitPx: "18%",
-  vat: "6%",
-  tot: "19%",
-} as const;
-
-const LINE_COLS_NO_VAT = {
-  desc: "46%",
-  qty: "17%",
-  unitPx: "18%",
-  tot: "19%",
-} as const;
 
 const INVOICEY_SITE_URL = "https://invoicey.app/";
 
@@ -70,88 +67,8 @@ type PdfCtx = {
   readonly intlLocale: string;
   readonly look: LookDocument;
   readonly styles: InvoicePdfStyles;
+  readonly column?: "start" | "end";
 };
-
-function fmtMoneyAmount(n: number, locale: string): string {
-  return new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(n);
-}
-
-function fmtMoneyWithCurrency(
-  n: number,
-  currency: InvoiceCurrency,
-  locale: string,
-  language: InvoiceLanguage,
-): string {
-  return `${fmtMoneyAmount(n, locale)}\u00a0${currencyDisplaySuffix(currency, language)}`;
-}
-
-function fmtDateIsoLocal(dateIso: string, locale: string): string {
-  const value = new Date(dateIso);
-  if (Number.isNaN(value.getTime())) {
-    return dateIso;
-  }
-  return new Intl.DateTimeFormat(locale, {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(value);
-}
-
-function fmtQty(n: number, locale: string): string {
-  const s = n.toLocaleString(locale, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 3,
-  });
-  return s.replaceAll(",", " ");
-}
-
-function formatIbanDisplay(iban: string): string {
-  const clean = iban.replace(/\s/g, "");
-  const chunks: string[] = [];
-  for (let i = 0; i < clean.length; i += 4) {
-    chunks.push(clean.slice(i, i + 4));
-  }
-  return chunks.join("\u00a0");
-}
-
-function paymentMethodLabel(
-  method: Invoice["payment"]["method"],
-  labels: InvoiceLabels,
-): string {
-  switch (method) {
-    case "transfer":
-      return labels.payTransfer;
-    case "cash":
-      return labels.payCashShort;
-    case "card":
-      return labels.payCardShort;
-    default: {
-      const _never: never = method;
-      return _never;
-    }
-  }
-}
-
-function countryHuman(code: string, labels: InvoiceLabels): string {
-  return code === "CZ" ? labels.countryCz : code;
-}
-
-function postalCityLine(zip: string, city: string): string {
-  return `${zip} ${city}`;
-}
-
-function splitDescription(raw: string): { title: string; detail?: string } {
-  const idx = raw.indexOf("\n");
-  if (idx === -1) {
-    return { title: raw };
-  }
-  const title = raw.slice(0, idx).trim();
-  const rest = raw.slice(idx + 1).trim();
-  return { title: title.length > 0 ? title : raw, detail: rest || undefined };
-}
 
 function PdfKv({
   k,
@@ -269,7 +186,7 @@ function PdfInvoiceLineRow({
           { width: cols.qty, textAlign: "right", paddingRight: 4 },
         ]}
       >
-        {fmtQty(item.quantity, locale)}
+        {formatInvoiceQty(item.quantity, locale)}
         {item.unit ? `\u00a0${invoiceDisplayUnit(item.unit, language)}` : ""}
       </Text>
       <Text
@@ -277,7 +194,7 @@ function PdfInvoiceLineRow({
         style={[styles.cellFig, { width: cols.unitPx, textAlign: "right" }]}
         wrap={false}
       >
-        {fmtMoneyWithCurrency(
+        {formatInvoiceMoneyWithCurrency(
           item.unitPriceWithoutVat,
           currency,
           locale,
@@ -303,7 +220,12 @@ function PdfInvoiceLineRow({
         style={[styles.cellFigStrong, { width: cols.tot, textAlign: "right" }]}
         wrap={false}
       >
-        {fmtMoneyWithCurrency(item.lineTotal, currency, locale, language)}
+        {formatInvoiceMoneyWithCurrency(
+          item.lineTotal,
+          currency,
+          locale,
+          language,
+        )}
       </Text>
     </View>
   );
@@ -330,7 +252,7 @@ function PdfVatRow({
         style={styles.totalLbl}
       >{`${labels.vat} ${String(row.rate)}\u00a0%`}</Text>
       <Text style={styles.totalFig}>
-        {fmtMoneyWithCurrency(row.vat, currency, locale, language)}
+        {formatInvoiceMoneyWithCurrency(row.vat, currency, locale, language)}
       </Text>
     </View>
   );
@@ -343,7 +265,7 @@ function renderLogo(ctx: PdfCtx): React.ReactElement | null {
 
 function renderDateFields(
   ctx: PdfCtx,
-  boxStyle: InvoicePdfStyles["kvBlock"] | InvoicePdfStyles["partyMeta"],
+  boxStyle: InvoicePdfStyles["kvBlock"],
 ): React.ReactElement {
   const { inv, labels, intlLocale, styles } = ctx;
   const showDuzp =
@@ -353,18 +275,18 @@ function renderDateFields(
       <PdfKv
         first
         k={labels.issueDate}
-        v={fmtDateIsoLocal(inv.meta.issueDate, intlLocale)}
+        v={formatInvoiceDateIsoLocal(inv.meta.issueDate, intlLocale)}
         styles={styles}
       />
       <PdfKv
         k={labels.dueDate}
-        v={fmtDateIsoLocal(inv.meta.dueDate, intlLocale)}
+        v={formatInvoiceDateIsoLocal(inv.meta.dueDate, intlLocale)}
         styles={styles}
       />
       {showDuzp ? (
         <PdfKv
           k={invoicePdfTaxPointLabel(inv, labels)}
-          v={fmtDateIsoLocal(inv.meta.duzp, intlLocale)}
+          v={formatInvoiceDateIsoLocal(inv.meta.duzp, intlLocale)}
           styles={styles}
         />
       ) : null}
@@ -650,7 +572,7 @@ function renderTotals(ctx: PdfCtx): React.ReactElement {
           <View style={styles.totalLine}>
             <Text style={styles.totalLbl}>{labels.totalExVat}</Text>
             <Text style={styles.totalFig}>
-              {fmtMoneyWithCurrency(
+              {formatInvoiceMoneyWithCurrency(
                 inv.totals.subtotal,
                 inv.meta.currency,
                 intlLocale,
@@ -675,7 +597,7 @@ function renderTotals(ctx: PdfCtx): React.ReactElement {
             <View style={styles.totalLine}>
               <Text style={styles.totalLbl}>{labels.vat}</Text>
               <Text style={styles.totalFig}>
-                {fmtMoneyWithCurrency(
+                {formatInvoiceMoneyWithCurrency(
                   inv.totals.vatTotal,
                   inv.meta.currency,
                   intlLocale,
@@ -695,7 +617,7 @@ function renderTotals(ctx: PdfCtx): React.ReactElement {
       >
         <Text style={styles.totalGrandLbl}>{labels.amountDue}</Text>
         <Text style={styles.totalGrandFig}>
-          {fmtMoneyWithCurrency(
+          {formatInvoiceMoneyWithCurrency(
             inv.totals.total,
             inv.meta.currency,
             intlLocale,
@@ -745,13 +667,10 @@ function renderNotes(ctx: PdfCtx): React.ReactElement | null {
   );
 }
 
-function renderStamp(
-  ctx: PdfCtx,
-  column?: "start" | "end",
-): React.ReactElement | null {
+function renderStamp(ctx: PdfCtx): React.ReactElement | null {
   if (!ctx.look.theme.showStamp || !ctx.assets.stamp) return null;
   const image = <Image style={ctx.styles.stampSig} src={ctx.assets.stamp} />;
-  if (column !== "end") return image;
+  if (ctx.column !== "end") return image;
   return <View style={ctx.styles.stampWrapEnd}>{image}</View>;
 }
 
@@ -786,47 +705,34 @@ function renderFooter(ctx: PdfCtx): React.ReactElement {
   );
 }
 
+export const PDF_LOOK_BLOCK_HANDLERS: LookBlockHandlers<
+  PdfCtx,
+  React.ReactElement
+> = {
+  logo: (ctx) => renderLogo(ctx),
+  title: (ctx) => renderTitle(ctx),
+  issuer: (ctx) => renderIssuer(ctx),
+  client: (ctx) => renderClient(ctx),
+  dates: (ctx) => renderDates(ctx),
+  payment: (ctx, slot) =>
+    slot.variant === "compact"
+      ? renderPaymentCompact(ctx)
+      : renderPaymentFull(ctx),
+  qr: (ctx) => renderQr(ctx),
+  lines: (ctx) => renderLines(ctx),
+  totals: (ctx) => renderTotals(ctx),
+  tax: (ctx) => renderTax(ctx),
+  notes: (ctx) => renderNotes(ctx),
+  stamp: (ctx) => renderStamp(ctx),
+  signature: (ctx) => renderSignature(ctx),
+  footer: (ctx) => renderFooter(ctx),
+};
+
 function renderBlock(
   ctx: PdfCtx,
   slot: BlockInstance,
-  column?: "start" | "end",
 ): React.ReactElement | null {
-  switch (slot.block) {
-    case "logo":
-      return renderLogo(ctx);
-    case "title":
-      return renderTitle(ctx);
-    case "issuer":
-      return renderIssuer(ctx);
-    case "client":
-      return renderClient(ctx);
-    case "dates":
-      return renderDates(ctx);
-    case "payment":
-      return slot.variant === "compact"
-        ? renderPaymentCompact(ctx)
-        : renderPaymentFull(ctx);
-    case "qr":
-      return renderQr(ctx);
-    case "lines":
-      return renderLines(ctx);
-    case "totals":
-      return renderTotals(ctx);
-    case "tax":
-      return renderTax(ctx);
-    case "notes":
-      return renderNotes(ctx);
-    case "stamp":
-      return renderStamp(ctx, column);
-    case "signature":
-      return renderSignature(ctx);
-    case "footer":
-      return renderFooter(ctx);
-    default: {
-      const _never: never = slot.block;
-      return _never;
-    }
-  }
+  return PDF_LOOK_BLOCK_HANDLERS[slot.block](ctx, slot);
 }
 
 function renderSlotColumn(
@@ -834,9 +740,10 @@ function renderSlotColumn(
   slots: readonly BlockInstance[],
   column?: "start" | "end",
 ): React.ReactElement | null {
+  const scoped: PdfCtx = { ...ctx, column };
   const children = slots
     .map((slot, index) => {
-      const node = renderBlock(ctx, slot, column);
+      const node = renderBlock(scoped, slot);
       return node ? (
         <View key={`${slot.block}-${String(index)}`}>{node}</View>
       ) : null;
