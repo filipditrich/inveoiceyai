@@ -6,6 +6,10 @@ import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
 import { AssistantAuthorization } from "./assistant-authorization";
+import {
+  friendlyAssistantError,
+  isReloadableAssistantError,
+} from "./assistant-errors";
 import { AssistantEmptyState } from "./assistant-empty-state";
 import { AssistantInputRequest } from "./assistant-input-request";
 import { AssistantInvoiceCard } from "./assistant-invoice-card";
@@ -49,9 +53,9 @@ export function AssistantThread() {
               role="alert"
             >
               <p className="text-sm text-destructive">
-                {friendlyError(session.agent.error.message, t)}
+                {friendlyAssistantError(session.agent.error.message, t)}
               </p>
-              {isAuthRequiredError(session.agent.error.message) ? (
+              {isReloadableAssistantError(session.agent.error.message) ? (
                 <Button
                   className="shrink-0"
                   onClick={() => window.location.reload()}
@@ -149,19 +153,4 @@ function AssistantPart({ part }: { part: EveMessagePart }) {
 function partKey(part: EveMessagePart, index: number): string {
   if (part.type === "dynamic-tool") return part.toolCallId;
   return `${part.type}:${index}`;
-}
-
-/** The cookie-auth check in `web-identity.ts` fails with this exact message. */
-export function isAuthRequiredError(message: string): boolean {
-  return message.toLowerCase().includes("authorization is required");
-}
-
-function friendlyError(
-  message: string,
-  t: (key: "authRequired") => string,
-): string {
-  if (isAuthRequiredError(message)) {
-    return t("authRequired");
-  }
-  return message;
 }

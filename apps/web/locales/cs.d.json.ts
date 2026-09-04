@@ -3543,6 +3543,7 @@ declare const messages: {
     "contextUsage": "{used} / {limit} kontextu",
     "contextFull": "Tahle konverzace je na limitu kontextu. Začněte novou, ať můžeme pokračovat.",
     "authRequired": "Asistenta se nepodařilo přihlásit.",
+    "blocked": "Požadavek na asistenta zablokovala bezpečnostní kontrola. Obnovte stránku a zkuste to znovu.",
     "reload": "Obnovit",
     "resize": "Změnit šířku panelu asistenta",
     "composerBold": "Tučně",
@@ -3557,7 +3558,7 @@ declare const messages: {
       "suggestions": {
         "draftInvoice": "Fakturuj NFCtron a.s. konzultace, 12 500 Kč, splatnost 14 dní",
         "unpaidInvoices": "Které faktury jsou nezaplacené?",
-        "lookupCompany": "Najdi IČO 08453961 v ARESu"
+        "lookupCompany": "Najdi NFCtron a.s. v ARESu"
       }
     },
     "hitl": {

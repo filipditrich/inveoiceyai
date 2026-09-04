@@ -3540,6 +3540,7 @@
     "contextUsage": "{used} / {limit} context",
     "contextFull": "This conversation is at the context limit. Start a new one to keep going.",
     "authRequired": "Could not sign the assistant in.",
+    "blocked": "The assistant request was blocked by a security check. Reload and try again.",
     "reload": "Reload",
     "resize": "Resize assistant panel",
     "composerBold": "Bold",
@@ -3554,7 +3555,7 @@
       "suggestions": {
         "draftInvoice": "Invoice NFCtron a.s. for consulting, 12 500 CZK, due in 14 days",
         "unpaidInvoices": "Which invoices are unpaid?",
-        "lookupCompany": "Look up IČO 08453961 in ARES"
+        "lookupCompany": "Look up NFCtron a.s. in ARES"
       }
     },
     "hitl": {

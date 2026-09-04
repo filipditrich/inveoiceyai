@@ -83,6 +83,11 @@ resolves the Better Auth cookie itself:
 A signed-in user whose session has no workspace gets an explicit
 `no_workspace` 401 rather than falling through to a bare "unauthorized".
 
+Eve session and stream fetches send a BotID token (`instrumentation-client.ts`).
+Without it, Vercel Security Checkpoint can return an HTML interstitial as the
+POST body; the panel maps that to a short "blocked" message instead of dumping
+the page source.
+
 ## Metering
 
 `hooks/ai-token-usage.ts` reads the product off the session principal:

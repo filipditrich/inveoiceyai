@@ -23,7 +23,7 @@ import {
   type MarkdownWrapKind,
 } from "./assistant-markdown-wrap";
 import { useAssistant, useAssistantSession } from "./assistant-provider";
-import { isAuthRequiredError } from "./assistant-thread";
+import { isReloadableAssistantError } from "./assistant-errors";
 
 export function AssistantComposer() {
   const t = useTranslations("Assistant");
@@ -35,11 +35,13 @@ export function AssistantComposer() {
   const status = session?.agent.status ?? "ready";
   const busy = status === "submitted" || status === "streaming";
   /**
-   * A cookie-auth failure cannot be retried by sending another message —
-   * every turn hits the same rejected session, so the composer would just
-   * collect dead-end attempts until the page is reloaded.
+   * Cookie-auth and Security Checkpoint failures cannot be retried by sending
+   * another message — every turn hits the same rejected request, so the
+   * composer would just collect dead-end attempts until the page is reloaded.
    */
-  const signedOut = isAuthRequiredError(session?.agent.error?.message ?? "");
+  const signedOut = isReloadableAssistantError(
+    session?.agent.error?.message ?? "",
+  );
 
   useEffect(() => {
     if (open && !signedOut) inputRef.current?.focus();
