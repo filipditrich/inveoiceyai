@@ -7,6 +7,7 @@ import {
   type Entitlements,
   type EntitlementOverrides,
 } from "./entitlements";
+import { notUnclaimedWorkspaces } from "./guest-issuance";
 import { DEFAULT_PLAN_KEY } from "./plan-presets";
 import { plans, type PlanRow } from "./plans";
 import type { DbTransaction } from "./transaction";
@@ -259,13 +260,19 @@ export async function assignWorkspacePlan(
   return resolved;
 }
 
-/** How many workspaces sit on each plan — the number that makes an edit scary. */
+/**
+ * How many workspaces sit on each plan — the number that makes an edit scary.
+ * Unclaimed guest workspaces (ADR 0048 §2) are excluded: they all land on the
+ * default plan, and counting them would make Free look far more populated
+ * than it is.
+ */
 export async function countWorkspacesByPlan(
   db: DbOrTx,
 ): Promise<Map<string, number>> {
   const rows = await db
     .select({ planId: workspaces.planId, count: sql<number>`count(*)::int` })
     .from(workspaces)
+    .where(notUnclaimedWorkspaces())
     .groupBy(workspaces.planId);
   return new Map(rows.map((row) => [row.planId, row.count]));
 }
