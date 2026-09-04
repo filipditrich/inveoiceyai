@@ -38,11 +38,11 @@ export function renderPayment(ctx: LookDomCtx, compact: boolean) {
 }
 
 function renderPaymentCompact(ctx: LookDomCtx): React.ReactElement | null {
-  const { invoice: inv, labels, styles, onEdit } = ctx;
+  const { invoice: inv, labels, styles, onEdit, placeholders } = ctx;
   const transfer = inv.payment.method === "transfer" && inv.payment.bankAccount;
   return (
     <LookBox lookBlock="payment" style={styles.partyMeta}>
-      {transfer ? (
+      {inv.payment.method === "transfer" ? (
         <DomKv
           first
           ariaLabel={labels.bankAccount}
@@ -53,8 +53,9 @@ function renderPaymentCompact(ctx: LookDomCtx): React.ReactElement | null {
                   onEdit({ type: "bank", field: "accountNumber", value })
               : undefined
           }
+          placeholder={placeholders.account}
           styles={styles}
-          v={transfer.accountNumber}
+          v={transfer ? transfer.accountNumber : ""}
         />
       ) : null}
       {transfer && inv.payment.variableSymbol ? (
@@ -65,7 +66,7 @@ function renderPaymentCompact(ctx: LookDomCtx): React.ReactElement | null {
         />
       ) : null}
       <DomKv
-        first={!transfer}
+        first={inv.payment.method !== "transfer"}
         k={labels.paymentMethod}
         styles={styles}
         v={paymentMethodLabel(inv.payment.method, labels)}
@@ -75,7 +76,7 @@ function renderPaymentCompact(ctx: LookDomCtx): React.ReactElement | null {
 }
 
 function renderPaymentFull(ctx: LookDomCtx): React.ReactElement {
-  const { invoice: inv, labels, styles, onEdit } = ctx;
+  const { invoice: inv, labels, styles, onEdit, placeholders } = ctx;
   const transfer = inv.payment.method === "transfer" && inv.payment.bankAccount;
   const instructionsBefore = inv.payment.instructionsBefore?.trim() || null;
   const instructionsAfter = inv.payment.instructionsAfter?.trim() || null;
@@ -102,6 +103,7 @@ function renderPaymentFull(ctx: LookDomCtx): React.ReactElement {
                       onEdit({ type: "bank", field: "accountNumber", value })
                   : undefined
               }
+              placeholder={placeholders.account}
               styles={styles}
               v={transfer.accountNumber}
             />
@@ -113,6 +115,7 @@ function renderPaymentFull(ctx: LookDomCtx): React.ReactElement {
                   ? (value) => onEdit({ type: "bank", field: "iban", value })
                   : undefined
               }
+              placeholder={placeholders.iban}
               styles={styles}
               v={onEdit ? transfer.iban : formatIbanDisplay(transfer.iban)}
             />

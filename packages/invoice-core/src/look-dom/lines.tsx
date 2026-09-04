@@ -88,6 +88,7 @@ function DomInvoiceLineRow({
           onEnter={
             onEdit && last ? () => onEdit({ type: "addLine" }) : undefined
           }
+          placeholder={ctx.placeholders.line}
           style={styles.cellFig}
           value={editing ? item.description : split.title}
         />
@@ -115,6 +116,7 @@ function DomInvoiceLineRow({
             ariaLabel={labels.colUnit}
             extra={{ width: "2.2rem", marginLeft: 4, textAlign: "right" }}
             onChange={patch?.("unit")}
+            placeholder={ctx.placeholders.unit}
             style={styles.cellFig}
             value={item.unit}
           />
@@ -366,6 +368,7 @@ export function renderNotes(ctx: LookDomCtx): React.ReactElement | null {
             ? (value) => ctx.onEdit?.({ type: "notes", value })
             : undefined
         }
+        placeholder={ctx.placeholders.notes}
         style={ctx.styles.legalMini}
         value={ctx.invoice.notes ?? ""}
       />

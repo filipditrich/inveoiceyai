@@ -96,6 +96,7 @@ export function LookField({
     borderBottom: empty
       ? "1px dashed color-mix(in srgb, currentColor 45%, transparent)"
       : "1px solid transparent",
+    colorScheme: type === "date" ? "light" : undefined,
   };
   if (!onChange) {
     return <span style={cssFromLookText(style, extra)}>{value}</span>;
@@ -106,8 +107,8 @@ export function LookField({
         aria-label={ariaLabel}
         onChange={(event) => onChange(fieldValue(event.currentTarget))}
         placeholder={placeholder}
-        rows={3}
-        style={css}
+        rows={2}
+        style={{ ...css, resize: "none" }}
         value={value}
       />
     );

@@ -3,6 +3,7 @@ import type { LookDocument } from "../looks";
 import type { LookStyleIr } from "../looks/style-ir";
 import type { Invoice } from "../schema";
 import type { LookEdit } from "./edits";
+import type { LookEditPlaceholders } from "./placeholders";
 
 export type LookDomAssets = {
   readonly qrDataUrl?: string | null;
@@ -18,6 +19,7 @@ export type LookDomCtx = {
   readonly intlLocale: string;
   readonly styles: LookStyleIr;
   readonly assets: LookDomAssets;
+  readonly placeholders: LookEditPlaceholders;
   readonly onEdit?: (edit: LookEdit) => void;
   readonly column?: "start" | "end";
 };

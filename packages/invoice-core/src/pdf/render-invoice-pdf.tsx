@@ -10,6 +10,11 @@ import type { InvoicePdfAssets } from "./InvoicePdfDocument";
 import { InvoicePdfDocument } from "./InvoicePdfDocument";
 import { loadImageForPdf } from "./load-image";
 import { registerInvoiceFonts } from "./register-fonts";
+import { stampPdfWatermark } from "./stamp-pdf-watermark";
+
+export type RenderInvoicePdfOptions = {
+  readonly watermark?: string;
+};
 
 async function streamToUint8Array(
   stream: NodeJS.ReadableStream,
@@ -28,6 +33,7 @@ async function streamToUint8Array(
 /** Visual page only (react-pdf). Prefer {@link renderInvoicePdf} for PDF + embedded ISDOC. */
 export async function renderVisualInvoicePdf(
   invoice: Invoice,
+  options: RenderInvoicePdfOptions = {},
 ): Promise<Uint8Array> {
   registerInvoiceFonts();
 
@@ -53,14 +59,19 @@ export async function renderVisualInvoicePdf(
   };
 
   const pdfStream = await pdf(
-    <InvoicePdfDocument invoice={invoice} assets={assets} />,
+    <InvoicePdfDocument assets={assets} invoice={invoice} />,
   ).toBuffer();
-  return streamToUint8Array(pdfStream);
+  const visual = await streamToUint8Array(pdfStream);
+  if (!options.watermark) return visual;
+  return stampPdfWatermark(visual, options.watermark);
 }
 
 /** Render invoice PDF with ISDOC XML attached as `invoice.isdoc`. */
-export async function renderInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
-  const visual = await renderVisualInvoicePdf(invoice);
+export async function renderInvoicePdf(
+  invoice: Invoice,
+  options: RenderInvoicePdfOptions = {},
+): Promise<Uint8Array> {
+  const visual = await renderVisualInvoicePdf(invoice, options);
   const isdocXml = renderIsdoc(invoice);
   return embedIsdocInPdf(visual, isdocXml);
 }

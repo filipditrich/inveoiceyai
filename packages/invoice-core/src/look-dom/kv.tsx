@@ -11,6 +11,7 @@ export function DomKv({
   onChange,
   ariaLabel,
   type = "text",
+  placeholder,
 }: {
   k: string;
   v: string;
@@ -19,6 +20,7 @@ export function DomKv({
   onChange?: (value: string) => void;
   ariaLabel?: string;
   type?: "text" | "date" | "number";
+  placeholder?: string;
 }) {
   const row =
     first === true ? { ...styles.kvRow, ...styles.kvRowFirst } : styles.kvRow;
@@ -32,6 +34,7 @@ export function DomKv({
           ariaLabel={ariaLabel ?? k}
           extra={{ textAlign: "right", width: "100%" }}
           onChange={onChange}
+          placeholder={placeholder}
           style={styles.kvVal}
           type={type}
           value={v}
@@ -48,6 +51,7 @@ export function DomPaymentKv({
   styles,
   onChange,
   ariaLabel,
+  placeholder,
 }: {
   k: string;
   v: string;
@@ -55,6 +59,7 @@ export function DomPaymentKv({
   styles: LookStyleIr;
   onChange?: (value: string) => void;
   ariaLabel?: string;
+  placeholder?: string;
 }) {
   const row =
     first === true ? { ...styles.kvRow, ...styles.kvRowFirst } : styles.kvRow;
@@ -68,6 +73,7 @@ export function DomPaymentKv({
           ariaLabel={ariaLabel ?? k}
           extra={{ textAlign: "right", width: "100%" }}
           onChange={onChange}
+          placeholder={placeholder}
           style={styles.kvVal}
           value={v}
         />
