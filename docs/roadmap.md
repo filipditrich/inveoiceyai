@@ -930,8 +930,8 @@ existing one, sending the invoice onward to the guest's own client.
 
 ## Plan 35 — Editable invoice page (DOM look interpreter)
 
-**Status:** Planned — sequenced after 34 on purpose; if the generator does not
-convert, the second interpreter is never built.
+**Status:** In progress
+**Started:** 2026-09-04
 
 **Goal:** Replace the generator's form with an editable page that renders the
 same Classic look document in DOM, so a visitor types on the invoice rather than
