@@ -55,37 +55,40 @@ export async function MarketingHeader() {
     </Button>
   );
 
+  const macUrl = macDownloadUrl(env.INVOICEY_DRIVE_DMG_URL);
+
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-xl">
-      <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-        <Link
-          href="/"
-          aria-label="Invoicey"
-          className="inline-flex shrink-0 items-center rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          <BrandLogo size={24} priority variant="wordmark" />
-        </Link>
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 flex-1 items-center gap-5 overflow-hidden">
+          <Link
+            href="/"
+            aria-label="Invoicey"
+            className="inline-flex shrink-0 items-center rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <BrandLogo size={24} priority variant="wordmark" />
+          </Link>
+          <nav
+            aria-label={t("ariaLabel")}
+            className="hidden min-w-0 items-center xl:flex"
+          >
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-lg px-2 py-2 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
 
-        <nav
-          aria-label={t("ariaLabel")}
-          className="absolute left-1/2 z-10 hidden -translate-x-1/2 items-center gap-1 lg:flex"
-        >
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="relative z-20 flex items-center justify-end gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <DownloadMenu
-            className={`hidden h-9 lg:inline-flex ${MARKETING_PILL_CLASS}`}
+            className="hidden h-9 xl:inline-flex"
             labels={downloadLabels}
-            macDownloadUrl={macDownloadUrl(env.INVOICEY_DRIVE_DMG_URL)}
+            macDownloadUrl={macUrl}
           />
           {user ? null : (
             <Button
@@ -106,6 +109,11 @@ export async function MarketingHeader() {
             }}
             actions={
               <>
+                <DownloadMenu
+                  className="h-9 w-full justify-center"
+                  labels={downloadLabels}
+                  macDownloadUrl={macUrl}
+                />
                 {user ? null : (
                   <Button variant="outline" render={<Link href="/sign-in" />}>
                     {t("signIn")}
