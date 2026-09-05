@@ -47,7 +47,9 @@ export async function MarketingFooter() {
         <div className="space-y-4 md:text-right">
           <nav
             aria-label={t("legalNav")}
-            className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground md:justify-end"
+            /* `-my-1.5` keeps the row's visual rhythm while the padding gives each
+               link a 44px target on a phone. */
+            className="-my-1.5 flex flex-wrap gap-x-5 text-sm text-muted-foreground md:justify-end [&>*]:py-1.5"
           >
             <Link
               className="transition-colors hover:text-foreground"
