@@ -6,11 +6,11 @@ import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
 import { AssistantAuthorization } from "./assistant-authorization";
+import { AssistantEmptyState } from "./assistant-empty-state";
 import {
   friendlyAssistantError,
   isReloadableAssistantError,
 } from "./assistant-errors";
-import { AssistantEmptyState } from "./assistant-empty-state";
 import { AssistantInputRequest } from "./assistant-input-request";
 import { AssistantInvoiceCard } from "./assistant-invoice-card";
 import { AssistantMarkdown } from "./assistant-markdown";
@@ -100,7 +100,10 @@ function AssistantMessage({ message }: { message: EveMessage }) {
 }
 
 type AssistantPartGroup =
-  | { kind: "tools"; parts: Extract<EveMessagePart, { type: "dynamic-tool" }>[] }
+  | {
+      kind: "tools";
+      parts: Extract<EveMessagePart, { type: "dynamic-tool" }>[];
+    }
   | { kind: "part"; part: EveMessagePart };
 
 /**

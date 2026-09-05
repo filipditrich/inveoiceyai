@@ -202,7 +202,9 @@ function SessionBudgetRequest({
         <HourglassIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium">{t("budgetTitle")}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{t("budgetBody")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("budgetBody")}
+          </p>
         </div>
       </div>
 

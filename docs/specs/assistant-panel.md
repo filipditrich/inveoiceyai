@@ -102,11 +102,11 @@ accounting).
 
 These are the only intentional ones:
 
-| Behavior     | Slack                              | Panel                                          |
-| ------------ | ---------------------------------- | ---------------------------------------------- |
+| Behavior     | Slack                                  | Panel                                                     |
+| ------------ | -------------------------------------- | --------------------------------------------------------- |
 | Progress     | Thinking Steps block (label + snippet) | Quiet past-tense step rows; failures still show a snippet |
-| PDF / ISDOC  | `upload_invoice_files` into thread | Card links to `/api/invoices/[id]/pdf`         |
-| Page context | —                                  | Route + invoice id sent as `clientContext`     |
+| PDF / ISDOC  | `upload_invoice_files` into thread     | Card links to `/api/invoices/[id]/pdf`                    |
+| Page context | —                                      | Route + invoice id sent as `clientContext`                |
 
 The card's own strings (field labels, `Regular · domestic`, `in 30 days`) come
 from the shared model and are English on both surfaces. Localizing them for the

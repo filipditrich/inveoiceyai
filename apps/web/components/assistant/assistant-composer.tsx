@@ -18,12 +18,12 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { isReloadableAssistantError } from "./assistant-errors";
 import {
   wrapMarkdownSelection,
   type MarkdownWrapKind,
 } from "./assistant-markdown-wrap";
 import { useAssistant, useAssistantSession } from "./assistant-provider";
-import { isReloadableAssistantError } from "./assistant-errors";
 
 export function AssistantComposer() {
   const t = useTranslations("Assistant");
