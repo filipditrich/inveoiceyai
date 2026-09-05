@@ -60,7 +60,8 @@
     "empty": "Fill in line items for a preview…",
     "title": "Invoice PDF preview",
     "open": "Open PDF",
-    "lockedWatermark": "Preview"
+    "lockedWatermark": "Preview",
+    "mobileHint": "Opens in a new tab on a phone."
   },
   "Errors": {
     "invalid": {
@@ -984,7 +985,12 @@
     "faq6Q": "Is the PDF the same as in the app?",
     "faq6A": "Yes. Same validator, same Classic look, ISDOC next to the PDF. Use See real PDF preview for a watermarked check; the emailed download is clean.",
     "languageCs": "Czech",
-    "languageEn": "English"
+    "languageEn": "English",
+    "zoomFit": "Fit to width",
+    "zoomActual": "Actual size",
+    "zoomFitHint": "Whole page scaled down to the screen width.",
+    "zoomActualHint": "Actual size — the page scrolls sideways.",
+    "zoomTapToEdit": "Tap to edit"
   },
   "SlackLink": {
     "title": "Link Slack to Invoicey",

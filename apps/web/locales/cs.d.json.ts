@@ -63,7 +63,8 @@ declare const messages: {
     "empty": "Vyplň položky pro náhled…",
     "title": "Náhled faktury PDF",
     "open": "Otevřít PDF",
-    "lockedWatermark": "Náhled"
+    "lockedWatermark": "Náhled",
+    "mobileHint": "Na telefonu se otevře v nové záložce."
   },
   "Errors": {
     "invalid": {
@@ -987,7 +988,12 @@ declare const messages: {
     "faq6Q": "Je PDF stejné jako v aplikaci?",
     "faq6A": "Ano. Stejný validátor, stejný vzhled Classic, ISDOC vedle PDF. Opravdové PDF v náhledu je s vodoznakem; stažený soubor z e-mailu je čistý.",
     "languageCs": "Česky",
-    "languageEn": "Anglicky"
+    "languageEn": "Anglicky",
+    "zoomFit": "Přizpůsobit šířce",
+    "zoomActual": "Skutečná velikost",
+    "zoomFitHint": "Celá stránka zmenšená na šířku displeje.",
+    "zoomActualHint": "Skutečná velikost — stránkou lze posouvat do stran.",
+    "zoomTapToEdit": "Ťukněte pro úpravy"
   },
   "SlackLink": {
     "title": "Propojit Slack s Invoicey",

@@ -1,6 +1,8 @@
 "use client";
 
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { FileTextIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 const PDF_VIEW_HASH = "#page=1&toolbar=0&navpanes=0&scrollbar=0&view=Fit";
@@ -27,8 +29,25 @@ export function InvoicePdfPreview({
   zoom?: "fit" | "page-fit";
 }) {
   const t = useTranslations("PdfPreview");
+  // Phones do not render an inline PDF: the frame paints a blank A4-tall slab.
+  // A compact card that links out is the honest surface there.
+  const isMobile = useIsMobile();
   const hash = zoom === "page-fit" ? PDF_PAGE_FIT_HASH : PDF_VIEW_HASH;
   const src = url ? `${url}${hash}` : null;
+
+  if (isMobile) {
+    return (
+      <CompactPdfPreview
+        className={className}
+        emptyLabel={emptyLabel}
+        error={error}
+        errorDetail={errorDetail}
+        hasFile={src !== null}
+        updating={updating}
+        url={url}
+      />
+    );
+  }
 
   return (
     <div
@@ -88,6 +107,74 @@ export function InvoicePdfPreview({
           {emptyLabel ?? t("empty")}
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * A phone renders nothing for an inline PDF, so the A4-ratio frame would paint
+ * a blank slab the height of a page. Name the file and link out instead.
+ */
+function CompactPdfPreview({
+  url,
+  hasFile,
+  updating,
+  error,
+  errorDetail,
+  className,
+  emptyLabel,
+}: {
+  url: string | null;
+  hasFile: boolean;
+  updating?: boolean;
+  error?: string | null;
+  errorDetail?: string | null;
+  className?: string;
+  emptyLabel?: string;
+}) {
+  const t = useTranslations("PdfPreview");
+
+  function statusLine(): string {
+    if (error) return error;
+    if (updating) return t("updating");
+    if (hasFile) return t("mobileHint");
+    return emptyLabel ?? t("empty");
+  }
+
+  return (
+    <div
+      className={cn(
+        "flex w-full flex-col gap-3 rounded-md border bg-card p-4",
+        className,
+      )}
+      data-slot="pdf-preview-compact"
+    >
+      <div className="flex items-center gap-3">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+          <FileTextIcon className="size-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium">{t("title")}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {statusLine()}
+          </p>
+        </div>
+      </div>
+      {error && errorDetail ? (
+        <p className="font-mono text-[0.65rem] leading-snug break-words text-muted-foreground">
+          {errorDetail}
+        </p>
+      ) : null}
+      {hasFile ? (
+        <a
+          className="inline-flex h-10 items-center justify-center rounded-lg border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted"
+          href={url ?? undefined}
+          rel="noreferrer"
+          target="_blank"
+        >
+          {t("open")}
+        </a>
+      ) : null}
     </div>
   );
 }

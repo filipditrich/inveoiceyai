@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { DownloadGate } from "@/components/generator/download-gate";
+import { LookPageFrame } from "@/components/generator/look-page-frame";
 import { PdfPreviewStub } from "@/components/generator/pdf-preview-stub";
 import { useDemoInvoicePreview } from "@/components/generator/use-demo-preview";
 import { Field, selectClassName } from "@/components/invoices/field";
@@ -202,14 +203,13 @@ export function GeneratorForm() {
           </span>
           <p className="text-sm text-muted-foreground">{t("editorHint")}</p>
         </div>
-        <div className="overflow-x-auto rounded-2xl border bg-gradient-to-b from-muted/50 to-muted/20 p-3 shadow-inner sm:p-8">
+        <LookPageFrame>
           {previewBuild.display ? (
             <div
               className={lookSans.className}
               style={{
                 boxShadow:
                   "0 18px 50px rgba(15, 23, 42, 0.18), 0 2px 8px rgba(15, 23, 42, 0.08)",
-                maxWidth: "100%",
                 width: "max-content",
               }}
             >
@@ -222,7 +222,7 @@ export function GeneratorForm() {
           ) : (
             <p className="text-sm text-muted-foreground">{t("preview")}</p>
           )}
-        </div>
+        </LookPageFrame>
       </div>
       <aside className="space-y-6 rounded-2xl border bg-card/60 p-5 xl:sticky xl:top-20 xl:self-start">
         <SettingsPanel
