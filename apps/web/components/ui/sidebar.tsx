@@ -189,7 +189,9 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="w-(--sidebar-width) bg-sidebar text-sidebar-foreground p-0 [&>button]:hidden"
+          /* `!w` beats the sheet default, which goes full-bleed on a phone:
+             a nav drawer wants the scrim left over to tap out of. */
+          className="!w-(--sidebar-width) bg-sidebar text-sidebar-foreground p-0 [&>button]:hidden"
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,

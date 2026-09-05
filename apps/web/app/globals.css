@@ -355,6 +355,13 @@
     min-height: 2.5rem;
   }
 
+  /* The native box defaults to ~13px, well under a finger. */
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
   /**
    * Right-edge fade on a horizontal strip. Unlayered for the same reason:
    * a `@media` nested inside `@layer components` never made it into the

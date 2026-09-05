@@ -281,7 +281,7 @@ export function CommandPalette() {
       <Dialog.Root open={open} onOpenChange={setOpenState}>
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
-          <Dialog.Popup className="fixed top-[12vh] left-1/2 z-50 w-[min(36rem,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-xl border bg-popover shadow-2xl transition-opacity outline-none data-[ending-style]:opacity-0 data-[starting-style]:opacity-0">
+          <Dialog.Popup className="fixed top-[max(1rem,env(safe-area-inset-top))] left-1/2 z-50 w-[min(36rem,calc(100vw-1.5rem))] -translate-x-1/2 overflow-hidden rounded-xl border bg-popover shadow-2xl transition-opacity outline-none data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 sm:top-[12vh] sm:w-[min(36rem,calc(100vw-2rem))]">
             <Dialog.Title className="sr-only">{t("title")}</Dialog.Title>
             <Dialog.Description className="sr-only">
               {t("description")}
@@ -294,7 +294,7 @@ export function CommandPalette() {
               <input
                 aria-label={t("title")}
                 autoFocus
-                className="h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                className="h-12 w-full bg-transparent text-base text-ellipsis outline-none placeholder:text-muted-foreground sm:text-sm"
                 onChange={(event) => setQuery(event.target.value)}
                 onKeyDown={onInputKeyDown}
                 placeholder={t("placeholder")}
@@ -304,7 +304,7 @@ export function CommandPalette() {
                 <LoaderCircleIcon className="size-4 shrink-0 animate-spin text-muted-foreground" />
               ) : null}
             </div>
-            <div className="max-h-[min(24rem,60vh)] overflow-y-auto p-1.5">
+            <div className="max-h-[calc(100svh-8rem)] overflow-y-auto overscroll-contain p-1.5 sm:max-h-[min(24rem,60vh)]">
               {rows.length === 0 ? (
                 <p className="px-3 py-6 text-center text-sm text-muted-foreground">
                   {t("empty")}
@@ -316,7 +316,7 @@ export function CommandPalette() {
                       <button
                         aria-selected={index === selectedIndex}
                         className={cn(
-                          "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors",
+                          "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors sm:min-h-0",
                           index === selectedIndex
                             ? "bg-muted text-foreground"
                             : "text-muted-foreground hover:bg-muted/60",

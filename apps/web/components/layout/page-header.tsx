@@ -45,7 +45,7 @@ export function PageHeader({
         {filters || actions ? (
           /* Left-aligned and comfortably tapped on phones; the ragged
              right-aligned wrap only reads well once there is room for one row. */
-          <div className="flex w-full max-w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end max-sm:[&_[data-slot=button]]:h-9">
+          <div className="flex w-full max-w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
             {filters}
             {actions}
           </div>

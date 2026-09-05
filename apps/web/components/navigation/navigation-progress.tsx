@@ -56,7 +56,7 @@ export function NavigationPendingOverlay({
       aria-busy={pending}
       aria-hidden={!pending}
       className={cn(
-        "pointer-events-none absolute inset-0 z-20 flex items-start justify-center pt-20 transition-opacity duration-150",
+        "pointer-events-none fixed inset-0 z-20 flex items-start justify-center pt-20 transition-opacity duration-150",
         pending
           ? "pointer-events-auto bg-background/45 opacity-100 backdrop-blur-[1px]"
           : "opacity-0",

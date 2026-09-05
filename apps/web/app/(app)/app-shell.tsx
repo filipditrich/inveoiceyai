@@ -76,7 +76,10 @@ export function AppShell({
           user={user}
           workspaces={workspaces}
         />
-        <SidebarInset className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
+        {/* `overflow-clip` keeps the inset's rounded corners without making this a
+            scroll container — `overflow-hidden` here silently killed every
+            `position: sticky` inside the app, header and form bars included. */}
+        <SidebarInset className="flex min-w-0 flex-1 flex-col overflow-clip bg-background">
           <SiteHeader />
           <ToastFromSearchParams />
           {frozenReason !== null ? (
@@ -89,7 +92,7 @@ export function AppShell({
               ) : null}
             </div>
           ) : null}
-          <div className="@container/main relative flex min-h-0 flex-1 flex-col gap-2 overflow-auto">
+          <div className="@container/main relative flex min-w-0 flex-1 flex-col gap-2">
             <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col px-4 py-4 md:gap-6 md:px-6 md:py-6 lg:px-10">
               {billingAlert ? (
                 <BillingBanner
