@@ -2079,7 +2079,8 @@ declare const messages: {
         "vatRequired": "Zadejte sazbu DPH",
         "itemsMin": "Přidejte alespoň jednu položku",
         "dueBeforeIssue": "Splatnost nesmí být před datem vystavení"
-      }
+      },
+      "explanationsSummary": "Jak vystavení funguje"
     },
     "import": {
       "title": "Import historických faktur",

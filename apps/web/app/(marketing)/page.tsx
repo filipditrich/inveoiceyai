@@ -317,7 +317,7 @@ export default async function HomePage() {
 
       <section
         id="jak-to-funguje"
-        className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 px-4 py-14 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto max-w-7xl">
           <SectionIntro
@@ -352,7 +352,7 @@ export default async function HomePage() {
 
       <section
         id="apps"
-        className="scroll-mt-24 border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 border-y bg-muted/25 px-4 py-14 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto max-w-7xl">
           <SectionIntro
@@ -456,7 +456,7 @@ export default async function HomePage() {
 
       <section
         id="prehled"
-        className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 px-4 py-14 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto max-w-7xl">
           <SectionIntro
@@ -489,7 +489,7 @@ export default async function HomePage() {
 
       <section
         id="platby"
-        className="scroll-mt-24 overflow-hidden border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 overflow-hidden border-y bg-muted/25 px-4 py-14 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2 lg:gap-20">
           <PaymentLedgerCard />
@@ -521,7 +521,7 @@ export default async function HomePage() {
 
       <section
         id="automatizace"
-        className="scroll-mt-24 overflow-hidden px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 overflow-hidden px-4 py-14 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2 lg:gap-20">
           <div
@@ -601,7 +601,7 @@ export default async function HomePage() {
 
       <section
         id="napojeni"
-        className="scroll-mt-24 border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 border-y bg-muted/25 px-4 py-14 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto max-w-7xl">
           <SectionIntro
@@ -655,7 +655,7 @@ export default async function HomePage() {
 
       <section
         id="srovnani"
-        className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 px-4 py-14 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className={`${motionStyles.scrollReveal} mx-auto max-w-7xl`}>
           <SectionIntro
@@ -669,7 +669,7 @@ export default async function HomePage() {
 
       <section
         id="cenik"
-        className="scroll-mt-24 border-y bg-muted/25 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 border-y bg-muted/25 px-4 py-14 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className={`${motionStyles.scrollReveal} mx-auto max-w-7xl`}>
           <SectionIntro
@@ -683,7 +683,7 @@ export default async function HomePage() {
 
       <section
         id="faq"
-        className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+        className="scroll-mt-24 px-4 py-14 sm:px-6 sm:py-28 lg:px-8"
       >
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.7fr_1fr] lg:gap-20">
           <SectionIntro

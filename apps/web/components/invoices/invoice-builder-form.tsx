@@ -2134,8 +2134,9 @@ export function InvoiceBuilderForm({
           </Field>
         </FormSection>
 
-        <div className="sticky bottom-0 z-20 -mx-4 flex flex-wrap gap-2 border-t bg-background/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
+        <div className="sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center gap-2 border-t bg-background/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
           <Button
+            className="flex-1 sm:flex-none"
             disabled={submitting !== null}
             loading={submitting === "draft"}
             onClick={() => void submit("draft")}
@@ -2146,6 +2147,7 @@ export function InvoiceBuilderForm({
             {submitting === "draft" ? t("savingDraft") : t("saveDraft")}
           </Button>
           <Button
+            className="flex-1 sm:flex-none"
             disabled={submitting !== null}
             loading={submitting === "issue"}
             onClick={() => void submit("issue")}
@@ -2154,7 +2156,7 @@ export function InvoiceBuilderForm({
             <FileCheck2Icon />
             {submitting === "issue" ? t("issuing") : t("issue")}
           </Button>
-          <span className="self-center text-xs text-muted-foreground">
+          <span className="hidden self-center text-xs text-muted-foreground sm:inline">
             {mode === "edit" ? t("modeEdit") : t("modeCreate")}
           </span>
         </div>

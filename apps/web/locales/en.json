@@ -2076,7 +2076,8 @@
         "vatRequired": "Enter a VAT rate",
         "itemsMin": "Add at least one line item",
         "dueBeforeIssue": "Due date cannot be before the issue date"
-      }
+      },
+      "explanationsSummary": "How issuing works"
     },
     "import": {
       "title": "Import historical invoices",

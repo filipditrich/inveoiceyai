@@ -12,6 +12,7 @@ import {
 } from "@/lib/load-workspace-look";
 import {
   BookOpenIcon,
+  ChevronDownIcon,
   ExternalLinkIcon,
   FileCheck2Icon,
   FilePenLineIcon,
@@ -42,6 +43,26 @@ export default async function InvoiceNewPage({
     issuerId: issuers[0]?.id,
     clientId: clients[0]?.id,
   });
+
+  const explanations = (
+    <div className="grid gap-3 md:grid-cols-3">
+      <PageExplanation
+        description={t("draftExplanation")}
+        icon={<FilePenLineIcon />}
+        title={t("draftExplanationTitle")}
+      />
+      <PageExplanation
+        description={t("issueExplanation")}
+        icon={<FileCheck2Icon />}
+        title={t("issueExplanationTitle")}
+      />
+      <PageExplanation
+        description={t("outputsExplanation")}
+        icon={<QrCodeIcon />}
+        title={t("outputsExplanationTitle")}
+      />
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -85,23 +106,16 @@ export default async function InvoiceNewPage({
         title={t("title")}
       />
 
-      <div className="grid gap-3 md:grid-cols-3">
-        <PageExplanation
-          description={t("draftExplanation")}
-          icon={<FilePenLineIcon />}
-          title={t("draftExplanationTitle")}
-        />
-        <PageExplanation
-          description={t("issueExplanation")}
-          icon={<FileCheck2Icon />}
-          title={t("issueExplanationTitle")}
-        />
-        <PageExplanation
-          description={t("outputsExplanation")}
-          icon={<QrCodeIcon />}
-          title={t("outputsExplanationTitle")}
-        />
-      </div>
+      {/* Three stacked cards push the first field two screens down a phone,
+          so the primer folds away there and stays open on a wide screen. */}
+      <details className="group rounded-lg border bg-card md:hidden">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-medium">
+          {t("explanationsSummary")}
+          <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+        </summary>
+        <div className="border-t p-3">{explanations}</div>
+      </details>
+      <div className="hidden md:block">{explanations}</div>
       <InvoiceBuilderForm
         clients={clients}
         defaultLook={defaultLook}
