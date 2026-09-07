@@ -51,10 +51,15 @@ vi.mock("@invoicey/invoice-tools/workspace-context", () => ({
   runWithInvoiceyContext: <T>(_ctx: unknown, fn: () => T) => fn(),
 }));
 
-vi.mock("@invoicey/invoice-core", () => ({
-  renderInvoicePdf: ops.renderInvoicePdf,
-  renderIsdoc: ops.renderIsdoc,
-}));
+vi.mock("@invoicey/invoice-core", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@invoicey/invoice-core")>();
+  return {
+    ...actual,
+    renderInvoicePdf: ops.renderInvoicePdf,
+    renderIsdoc: ops.renderIsdoc,
+  };
+});
 
 vi.mock("./upload-slack-files", () => ({
   uploadInvoiceArtifacts: ops.uploadInvoiceArtifacts,
