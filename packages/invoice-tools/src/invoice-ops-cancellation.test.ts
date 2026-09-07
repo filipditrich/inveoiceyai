@@ -4,6 +4,20 @@ const transactionMocks = vi.hoisted(() => ({
   withDbTransaction: vi.fn(),
 }));
 
+const dbMocks = vi.hoisted(() => ({
+  tryCreateDbFromEnv: vi.fn(() => ({})),
+  assertWorkspaceWritable: vi.fn(async () => undefined),
+}));
+
+vi.mock("@invoicey/db", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@invoicey/db")>();
+  return {
+    ...actual,
+    tryCreateDbFromEnv: dbMocks.tryCreateDbFromEnv,
+    assertWorkspaceWritable: dbMocks.assertWorkspaceWritable,
+  };
+});
+
 vi.mock("@invoicey/db/transaction", () => ({
   withDbTransaction: transactionMocks.withDbTransaction,
 }));
@@ -71,6 +85,8 @@ function lockingTransaction(row: MutableInvoice) {
 describe("invoice cancellation locking", () => {
   beforeEach(() => {
     transactionMocks.withDbTransaction.mockReset();
+    dbMocks.tryCreateDbFromEnv.mockClear();
+    dbMocks.assertWorkspaceWritable.mockClear();
   });
 
   it("locks the invoice before cancelling so a later allocation observes the cancellation", async () => {
