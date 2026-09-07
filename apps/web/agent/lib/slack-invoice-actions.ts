@@ -35,6 +35,13 @@ export const INVOICEY_ACTIONS = {
    * its field ("Splatnost 30 dní", "Měna EUR") nothing is lost by merging them.
    */
   change: "invoicey:change",
+  /**
+   * Payment-review controls. These ride on a proposal id, not an invoice id,
+   * so `handleInvoiceyInteraction` resolves their payload before the
+   * invoice-shaped decoders run.
+   */
+  paymentConfirm: "invoicey:payment_confirm",
+  paymentReject: "invoicey:payment_reject",
 } as const;
 
 export type InvoiceyActionId =
@@ -110,6 +117,31 @@ export function decodeButtonValue(
   const [invoiceId, mask] = raw.split("|");
   if (!invoiceId) return null;
   return { invoiceId, assumedPaths: decodeAssumedMask(mask) };
+}
+
+export function isPaymentAction(actionId: string): boolean {
+  return (
+    actionId === INVOICEY_ACTIONS.paymentConfirm ||
+    actionId === INVOICEY_ACTIONS.paymentReject
+  );
+}
+
+/**
+ * Payment buttons carry the proposal id alone.
+ *
+ * A bare uuid would be indistinguishable from `encodeButtonValue`'s output
+ * with an empty mask, and a click decoded by the wrong reader would confirm
+ * against an invoice id that is really a proposal id. The prefix makes the two
+ * wire formats impossible to confuse, and 36 + 2 characters stays far inside
+ * Slack's 2000-character `value` limit.
+ */
+export function encodePaymentValue(proposalId: string): string {
+  return `p:${proposalId}`;
+}
+
+export function decodePaymentValue(raw: string | undefined): string | null {
+  if (!raw?.startsWith("p:")) return null;
+  return raw.slice(2) || null;
 }
 
 /** The draft path each change clears, so the rebuilt card stops flagging it. */
