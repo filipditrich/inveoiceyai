@@ -6,6 +6,10 @@ import {
   type BankPaymentAutoMatchedEmailProps,
 } from "./templates/bank-payment-auto-matched";
 import {
+  BankSyncFailedEmail,
+  type BankSyncFailedEmailProps,
+} from "./templates/bank-sync-failed";
+import {
   GuestInvoiceEmail,
   type GuestInvoiceEmailProps,
 } from "./templates/guest-invoice";
@@ -25,6 +29,10 @@ import {
   PaymentReceivedEmail,
   type PaymentReceivedEmailProps,
 } from "./templates/payment-received";
+import {
+  PaymentReviewDigestEmail,
+  type PaymentReviewDigestEmailProps,
+} from "./templates/payment-review-digest";
 import {
   TokenRewardEmail,
   type TokenRewardEmailProps,
@@ -46,6 +54,8 @@ export const EMAIL_TEMPLATES = [
   "overdue_reminder",
   "payment_received",
   "bank_payment_auto_matched",
+  "payment_review_digest",
+  "bank_sync_failed",
   "new_sign_in",
   "token_reward",
   "guest_invoice",
@@ -181,6 +191,50 @@ export async function renderBankPaymentAutoMatchedEmail(
       (props.locale ?? "cs") === "cs"
         ? `Platba spárována — ${props.invoiceNumber}`
         : `Payment matched — ${props.invoiceNumber}`,
+    html,
+    text,
+  };
+}
+
+export async function renderPaymentReviewDigestEmail(
+  props: PaymentReviewDigestEmailProps,
+): Promise<RenderedEmail> {
+  const element = PaymentReviewDigestEmail(props);
+  const [html, text] = await Promise.all([
+    render(element),
+    render(element, { plainText: true }),
+  ]);
+  const cs = (props.locale ?? "cs") === "cs";
+  const proposals = props.proposals.length;
+  const unmatched = props.unmatched.length;
+  /**
+   * The subject names the action, not the count total: "3 payments" reads as
+   * a report, "3 payments to review" reads as an inbox item.
+   */
+  const subject =
+    proposals > 0
+      ? cs
+        ? `${proposals} ${proposals === 1 ? "platba čeká" : "plateb čeká"} na potvrzení`
+        : `${proposals} payment${proposals === 1 ? "" : "s"} to review`
+      : cs
+        ? `${unmatched} ${unmatched === 1 ? "platba" : "plateb"} bez faktury`
+        : `${unmatched} unmatched payment${unmatched === 1 ? "" : "s"}`;
+  return { subject, html, text };
+}
+
+export async function renderBankSyncFailedEmail(
+  props: BankSyncFailedEmailProps,
+): Promise<RenderedEmail> {
+  const element = BankSyncFailedEmail(props);
+  const [html, text] = await Promise.all([
+    render(element),
+    render(element, { plainText: true }),
+  ]);
+  return {
+    subject:
+      (props.locale ?? "cs") === "cs"
+        ? `Bankovní připojení nefunguje — ${props.accountLabel}`
+        : `Bank connection is failing — ${props.accountLabel}`,
     html,
     text,
   };
