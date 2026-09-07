@@ -1,0 +1,65 @@
+name: Bank sync
+
+# Vercel Hobby rejects any cron that runs more than once a day (see commits
+# 6a7c78d and 2eae7a6 — a `*/15` schedule in vercel.json blocked every deploy),
+# so `/api/cron/bank-sync` there is stuck at one 05:00 UTC run. That is the
+# morning, and invoices get paid during the day.
+#
+# The route was written for a much tighter loop: a successful sync sets
+# `nextSyncAt = now + 15 min`, and the sweep only picks connections whose
+# `nextSyncAt` has passed. This workflow supplies that cadence from outside
+# Vercel. Runs are idempotent — leases make overlapping sweeps harmless, and
+# the per-connection `nextSyncAt` gate means an early call is a cheap no-op.
+#
+# Requires the repository secret `CRON_SECRET` to match the Vercel environment
+# variable of the same name.
+
+on:
+  schedule:
+    # Every 15 minutes between 05:00 and 20:00 UTC (07:00–22:00 Prague in
+    # summer). Overnight is left to the Vercel cron: Fio books nothing then,
+    # and GitHub's shared scheduler is happier with a smaller window.
+    - cron: "*/15 5-20 * * *"
+  workflow_dispatch:
+
+# A queued run must not pile up behind a slow one; the next tick covers it.
+concurrency:
+  group: bank-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger bank sync
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ vars.APP_URL || 'https://invoicey.app' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CRON_SECRET}" ]; then
+            echo "::error::CRON_SECRET repository secret is not set."
+            exit 1
+          fi
+          # `-w` prints the status on its own line after the body, so the body
+          # stays readable in the log and the status is still assertable.
+          response=$(curl --silent --show-error --fail-with-body \
+            --max-time 120 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -w '\n%{http_code}' \
+            "${APP_URL}/api/cron/bank-sync")
+          status=$(printf '%s' "${response}" | tail -n1)
+          body=$(printf '%s' "${response}" | sed '$d')
+          echo "${body}"
+          if [ "${status}" != "200" ]; then
+            echo "::error::bank-sync returned HTTP ${status}"
+            exit 1
+          fi
+          # The route answers 200 with `ok: false` when an individual
+          # connection failed. Surface that as an annotation rather than a
+          # red run: one lapsed token must not look like broken CI, and the
+          # workspace now gets its own `bank_sync_failed` email.
+          if printf '%s' "${body}" | grep -q '"ok":false'; then
+            echo "::warning::At least one bank connection failed to sync."
+          fi
