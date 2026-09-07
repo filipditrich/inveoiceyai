@@ -62,8 +62,11 @@ jobs:
       - name: Build
         run: bun run build
 
+      # Headless CI launches chromium-headless-shell (Playwright 1.49+). Install
+      # from apps/web so the CLI matches @playwright/test instead of a root bunx.
       - name: Install Chromium
-        run: bunx playwright install --with-deps chromium
+        working-directory: apps/web
+        run: bunx playwright install --with-deps --only-shell
 
       - name: Browser and accessibility smoke
         run: bun run test:e2e
