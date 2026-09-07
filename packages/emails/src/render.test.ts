@@ -111,7 +111,9 @@ describe("email renders", () => {
       downloadUrl: "https://invoicey.app/api/generator/download/xyz",
     });
     expect(out.subject).toContain("Invoice");
-    expect(out.html).toContain("We've kept it for you");
+    /** react-email encodes `'` as `&#x27;` in html; assert the body in text. */
+    expect(out.text).toContain("We've kept it for you");
+    expect(out.html).toContain("sign in to claim it");
     expect(out.html).toContain("claim?token=abc");
     expect(out.text).toContain("claim?token=abc");
     expect(out.text).toContain("download/xyz");
