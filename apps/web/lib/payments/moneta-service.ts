@@ -259,6 +259,10 @@ export type MonetaSyncResult = {
   imported: number;
   proposed: number;
   autoMatched: number;
+  pendingProposalIds: string[];
+  unmatchedTransactionIds: string[];
+  /** Failure streak after this attempt; 0 while the connection is healthy. */
+  consecutiveFailureCount: number;
   error?: string;
 };
 
@@ -293,6 +297,9 @@ export async function syncMonetaConnection(input: {
       imported: 0,
       proposed: 0,
       autoMatched: 0,
+      pendingProposalIds: [],
+      unmatchedTransactionIds: [],
+      consecutiveFailureCount: 0,
       error: "sync_busy",
     };
 
@@ -343,10 +350,10 @@ export async function syncMonetaConnection(input: {
       syncCoverageThrough: batch.to ?? today,
       now,
     });
-    return { ok: true, ...result };
+    return { ok: true, consecutiveFailureCount: 0, ...result };
   } catch (error) {
     const code = error instanceof Error ? error.message : "moneta_sync_failed";
-    await markBankSyncFailed({
+    const failure = await markBankSyncFailed({
       connectionId: input.connectionId,
       errorCode: code,
       now,
@@ -356,6 +363,9 @@ export async function syncMonetaConnection(input: {
       imported: 0,
       proposed: 0,
       autoMatched: 0,
+      pendingProposalIds: [],
+      unmatchedTransactionIds: [],
+      consecutiveFailureCount: failure.consecutiveFailureCount,
       error: code,
     };
   }

@@ -3,6 +3,7 @@ import {
   confirmPaymentProposal,
   rejectPaymentProposal,
   reversePayment,
+  syncBankConnectionsFromPayments,
 } from "@/actions/payments";
 import { PageHeader } from "@/components/layout/page-header";
 import { paymentMatchFactors } from "@/components/payments/payment-match-explanation";
@@ -20,9 +21,10 @@ import { Label } from "@/components/ui/label";
 import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 import { isAppLocale } from "@/i18n/config";
 import { requireWorkspace } from "@/lib/auth/session";
-import { assertCan } from "@/lib/authz/can";
+import { can, assertCan } from "@/lib/authz/can";
 import { formatInvoiceDate, formatMoney } from "@/lib/format";
 import { messageLookup } from "@/lib/i18n-lookup";
+import { listActiveBankConnections } from "@/lib/payments/connections";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import {
   ArrowRightIcon,
@@ -32,6 +34,7 @@ import {
   HashIcon,
   LandmarkIcon,
   PlusIcon,
+  RefreshCwIcon,
   SparklesIcon,
   XIcon,
 } from "lucide-react";
@@ -92,6 +95,8 @@ export default async function PaymentsPage({
   await assertCan("payments:read");
   const { workspaceId } = await requireWorkspace();
   const [
+    canManagePayments,
+    connections,
     t,
     localeValue,
     messages,
@@ -100,6 +105,8 @@ export default async function PaymentsPage({
     allocations,
     outstandingInvoices,
   ] = await Promise.all([
+    can("payments:manage"),
+    listActiveBankConnections(workspaceId),
     getTranslations("Payments"),
     getLocale(),
     getMessages(),
@@ -192,18 +199,29 @@ export default async function PaymentsPage({
   ]);
   const sp = await searchParams;
   const locale: AppLocale = isAppLocale(localeValue) ? localeValue : "cs";
+  /** Nothing to refresh without a connection, and only managers may sync. */
+  const hasBankConnection = canManagePayments && connections.length > 0;
 
   return (
     <div className="space-y-4">
       <ProductToastTracker toast={sp.toast ?? null} />
       <PageHeader
         actions={
-          <Button
-            render={<Link href="/settings/workspace/bank-connections" />}
-            variant="outline"
-          >
-            <LandmarkIcon /> {t("bankConnections")}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {hasBankConnection ? (
+              <form action={syncBankConnectionsFromPayments}>
+                <Button type="submit" variant="outline">
+                  <RefreshCwIcon /> {t("syncNow")}
+                </Button>
+              </form>
+            ) : null}
+            <Button
+              render={<Link href="/settings/workspace/bank-connections" />}
+              variant="outline"
+            >
+              <LandmarkIcon /> {t("bankConnections")}
+            </Button>
+          </div>
         }
         description={t("description")}
         eyebrow={t("eyebrow")}

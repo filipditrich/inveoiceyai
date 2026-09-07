@@ -8,6 +8,8 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const SYSTEM_TEMPLATES = new Set<EmailTemplateId>([
   "bank_payment_auto_matched",
+  "payment_review_digest",
+  "bank_sync_failed",
   "new_sign_in",
   "workspace_invite",
   "guest_invoice",

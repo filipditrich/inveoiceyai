@@ -1,11 +1,13 @@
 export {
   EMAIL_TEMPLATES,
   renderBankPaymentAutoMatchedEmail,
+  renderBankSyncFailedEmail,
   renderGuestInvoiceEmail,
   renderInvoiceSentEmail,
   renderNewSignInEmail,
   renderOverdueReminderEmail,
   renderPaymentReceivedEmail,
+  renderPaymentReviewDigestEmail,
   renderTokenRewardEmail,
   renderWorkspaceInviteEmail,
   type EmailTemplateId,
@@ -23,6 +25,10 @@ export {
   BankPaymentAutoMatchedEmail,
   type BankPaymentAutoMatchedEmailProps,
 } from "./templates/bank-payment-auto-matched";
+export {
+  BankSyncFailedEmail,
+  type BankSyncFailedEmailProps,
+} from "./templates/bank-sync-failed";
 export {
   GuestInvoiceEmail,
   type GuestInvoiceEmailProps,
@@ -43,6 +49,12 @@ export {
   PaymentReceivedEmail,
   type PaymentReceivedEmailProps,
 } from "./templates/payment-received";
+export {
+  PaymentReviewDigestEmail,
+  type PaymentReviewDigestEmailProps,
+  type PaymentReviewProposal,
+  type PaymentReviewUnmatched,
+} from "./templates/payment-review-digest";
 export {
   TokenRewardEmail,
   type TokenRewardEmailProps,

@@ -2856,7 +2856,8 @@ declare const messages: {
         "missing_issuer": "Vyberte firmu, která přijímá platby.",
         "missing_fio_payment_token": "Vložte Fio token s právem odesílat.",
         "missing_payment_token_expiry": "Zadejte datum vypršení tokenu z Fio.",
-        "payment_token_expired": "Token pro odesílání vypršel. Zadejte nový."
+        "payment_token_expired": "Token pro odesílání vypršel. Zadejte nový.",
+        "no_bank_connection": "Tento workspace nemá aktivní bankovní připojení k synchronizaci."
       }
     }
   },
@@ -2919,7 +2920,8 @@ declare const messages: {
     "sources": {
       "bank_confirmed": "Spárováno z banky",
       "manual": "Přidáno ručně"
-    }
+    },
+    "syncNow": "Synchronizovat"
   },
   "Looks": {
     "upgradeHint": "Součást tarifu s katalogem vzhledů.",

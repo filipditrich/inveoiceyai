@@ -1,5 +1,9 @@
 import { syncFioConnection } from "@/lib/payments/fio-service";
 import { syncMonetaConnection } from "@/lib/payments/moneta-service";
+import {
+  notifyBankSyncFailure,
+  notifyPaymentReview,
+} from "@/lib/payments/payment-review-notifications";
 import { and, asc, eq, inArray, isNull, lte, or } from "drizzle-orm";
 
 import {
@@ -57,6 +61,7 @@ export async function GET(request: Request): Promise<Response> {
   let imported = 0;
   let proposed = 0;
   let autoMatched = 0;
+  let notified = 0;
   const errors: Array<{ connectionId: string; code: string }> = [];
   for (const connection of due) {
     const result =
@@ -78,6 +83,28 @@ export async function GET(request: Request): Promise<Response> {
         code: result.error ?? `${connection.provider}_sync_failed`,
       });
     }
+
+    // A failed notification must never fail the sweep — the ledger is already
+    // correct at this point, and the next connection still deserves its run.
+    try {
+      if (result.ok) {
+        const delivery = await notifyPaymentReview({
+          workspaceId: connection.workspaceId,
+          pendingProposalIds: result.pendingProposalIds,
+          unmatchedTransactionIds: result.unmatchedTransactionIds,
+        });
+        notified += delivery.emailed;
+      } else if (result.error && result.error !== "sync_busy") {
+        notified += await notifyBankSyncFailure({
+          workspaceId: connection.workspaceId,
+          connectionId: connection.id,
+          errorCode: result.error,
+          consecutiveFailureCount: result.consecutiveFailureCount,
+        });
+      }
+    } catch (error) {
+      console.error("[bank-sync] notification failed", error);
+    }
   }
   return Response.json({
     ok: errors.length === 0,
@@ -85,6 +112,7 @@ export async function GET(request: Request): Promise<Response> {
     imported,
     proposed,
     autoMatched,
+    notified,
     errors,
   });
 }

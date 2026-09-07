@@ -8,7 +8,12 @@ import {
   type SlackInteractionContext,
 } from "eve/channels/slack";
 
-import { resolveLinkedSlackPrincipal, tryCreateDbFromEnv } from "@invoicey/db";
+import {
+  confirmPaymentMatchProposal,
+  rejectPaymentMatchProposal,
+  resolveLinkedSlackPrincipal,
+  tryCreateDbFromEnv,
+} from "@invoicey/db";
 import {
   invoiceArtifactFileNamesFromInvoice,
   renderInvoicePdf,
@@ -19,7 +24,10 @@ import {
   addCalendarDaysYmd,
   updateDraftInvoice,
 } from "@invoicey/invoice-tools";
-import { sendInvoiceEmailById } from "@invoicey/invoice-tools/email";
+import {
+  sendInvoiceEmailById,
+  sendPaymentReceivedEmailIfEnabled,
+} from "@invoicey/invoice-tools/email";
 import {
   bulkDeleteDraftInvoices,
   getInvoice,
@@ -41,7 +49,9 @@ import {
   INVOICEY_ACTIONS,
   decodeButtonValue,
   decodeChangeValue,
+  decodePaymentValue,
   isInvoiceyAction,
+  isPaymentAction,
   vatOptionFor,
   type ChangeField,
 } from "./slack-invoice-actions";
@@ -65,6 +75,9 @@ import { uploadInvoiceArtifacts } from "./upload-slack-files";
  */
 
 type WorkspacePrincipal = { workspaceId: string; userId: string };
+
+const UNLINKED_NOTICE =
+  "Váš účet Slacku není propojený s Invoicey, akce se neprovedla. Zmiňte mě a pošlu vám nový odkaz.";
 
 async function resolveClicker(
   action: SlackInteractionAction,
@@ -382,6 +395,85 @@ async function handlePreviewPdf(
 }
 
 /**
+ * Confirms or rejects one payment-match proposal from its DM card.
+ *
+ * The card is replaced rather than left in place: a proposal is a one-shot
+ * decision, so leaving live Confirm/Reject buttons on a resolved payment would
+ * invite a second click that can only fail. The repo functions are the same
+ * ones `/payments` calls, including the payment-received email on settlement.
+ */
+async function handlePaymentDecision(
+  ctx: SlackInteractionContext,
+  action: SlackInteractionAction,
+  principal: WorkspacePrincipal,
+  proposalId: string,
+): Promise<void> {
+  const confirming = action.actionId === INVOICEY_ACTIONS.paymentConfirm;
+
+  if (!confirming) {
+    const rejected = await rejectPaymentMatchProposal({
+      workspaceId: principal.workspaceId,
+      proposalId,
+      actorUserId: principal.userId,
+    });
+    if (!rejected) {
+      await fail(ctx, action, "O této platbě už bylo rozhodnuto.");
+      return;
+    }
+    await replaceCard(
+      ctx,
+      action.messageTs,
+      Card({
+        title: "Návrh zamítnut",
+        children: [
+          CardText(
+            `:x: Platba nebyla přiřazena — zamítl <@${action.user.id}>. Přiřaďte ji ručně v Invoicey.`,
+          ),
+        ],
+      }),
+    );
+    return;
+  }
+
+  const result = await confirmPaymentMatchProposal({
+    workspaceId: principal.workspaceId,
+    proposalId,
+    actorUserId: principal.userId,
+  });
+  if (!result.ok) {
+    await fail(ctx, action, `Platbu se nepodařilo potvrdit — ${result.error}`);
+    return;
+  }
+  if (result.becamePaid) {
+    try {
+      // No `db` handle: this module deliberately never imports the concrete
+      // client, so the helper resolves one from the environment itself, the
+      // same way `resolveClicker` does.
+      await sendPaymentReceivedEmailIfEnabled({
+        workspaceId: principal.workspaceId,
+        invoiceId: result.invoiceId,
+      });
+    } catch (error) {
+      console.error("[slack] payment-received email failed", error);
+    }
+  }
+  await replaceCard(
+    ctx,
+    action.messageTs,
+    Card({
+      title: result.becamePaid ? "Faktura zaplacena" : "Platba přiřazena",
+      children: [
+        CardText(
+          `:white_check_mark: Potvrdil <@${action.user.id}>.${
+            result.becamePaid ? "" : " Faktura je stále částečně otevřená."
+          }`,
+        ),
+      ],
+    }),
+  );
+}
+
+/**
  * Entry point wired to `slackChannel({ onInteraction })`.
  *
  * Returns silently for anything outside the `invoicey:` namespace so Eve's own
@@ -395,10 +487,35 @@ export async function handleInvoiceyInteraction(
   /** A URL button still reports a click; opening the link is the whole effect. */
   if (action.actionId === INVOICEY_ACTIONS.openWeb) return;
 
-  const change = decodeChangeValue(action.selectedOptionValue);
-  const button = decodeButtonValue(action.value ?? undefined);
+  /**
+   * Payment cards are keyed by proposal, so their payload is read before the
+   * invoice decoders — `decodeButtonValue` would otherwise happily return the
+   * proposal id under the name `invoiceId`.
+   */
+  const proposalId = isPaymentAction(action.actionId)
+    ? decodePaymentValue(action.value ?? undefined)
+    : null;
+  const change = proposalId
+    ? null
+    : decodeChangeValue(action.selectedOptionValue);
+  const button = proposalId
+    ? null
+    : decodeButtonValue(action.value ?? undefined);
   const invoiceId = change?.invoiceId ?? button?.invoiceId;
   const assumedPaths = change?.assumedPaths ?? button?.assumedPaths ?? [];
+
+  if (isPaymentAction(action.actionId)) {
+    if (!proposalId) {
+      await fail(ctx, action, "Tomuto tlačítku chybí odkaz na platbu.");
+      return;
+    }
+    const payer = await resolveClicker(action, ctx);
+    if (!payer) {
+      await fail(ctx, action, UNLINKED_NOTICE);
+      return;
+    }
+    return handlePaymentDecision(ctx, action, payer, proposalId);
+  }
 
   if (!invoiceId) {
     await fail(ctx, action, "Tomuto tlačítku chybí odkaz na fakturu.");
@@ -407,11 +524,7 @@ export async function handleInvoiceyInteraction(
 
   const principal = await resolveClicker(action, ctx);
   if (!principal) {
-    await fail(
-      ctx,
-      action,
-      "Váš účet Slacku není propojený s Invoicey, akce se neprovedla. Zmiňte mě a pošlu vám nový odkaz.",
-    );
+    await fail(ctx, action, UNLINKED_NOTICE);
     return;
   }
 

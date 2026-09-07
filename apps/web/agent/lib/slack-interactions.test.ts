@@ -11,11 +11,16 @@ const ops = vi.hoisted(() => ({
   renderInvoicePdf: vi.fn(),
   renderIsdoc: vi.fn(),
   uploadInvoiceArtifacts: vi.fn(),
+  confirmPaymentMatchProposal: vi.fn(),
+  rejectPaymentMatchProposal: vi.fn(),
+  sendPaymentReceivedEmailIfEnabled: vi.fn(),
 }));
 
 vi.mock("@invoicey/db", () => ({
   tryCreateDbFromEnv: () => ({}),
   resolveLinkedSlackPrincipal: ops.resolveLinkedSlackPrincipal,
+  confirmPaymentMatchProposal: ops.confirmPaymentMatchProposal,
+  rejectPaymentMatchProposal: ops.rejectPaymentMatchProposal,
 }));
 
 vi.mock("@invoicey/invoice-tools/ops", () => ({
@@ -39,6 +44,7 @@ vi.mock("@invoicey/invoice-tools", () => ({
 
 vi.mock("@invoicey/invoice-tools/email", () => ({
   sendInvoiceEmailById: ops.sendInvoiceEmailById,
+  sendPaymentReceivedEmailIfEnabled: ops.sendPaymentReceivedEmailIfEnabled,
 }));
 
 vi.mock("@invoicey/invoice-tools/workspace-context", () => ({
@@ -55,8 +61,12 @@ vi.mock("./upload-slack-files", () => ({
 }));
 
 const { handleInvoiceyInteraction } = await import("./slack-interactions");
-const { INVOICEY_ACTIONS, encodeButtonValue, encodeChangeValue } =
-  await import("./slack-invoice-actions");
+const {
+  INVOICEY_ACTIONS,
+  encodeButtonValue,
+  encodeChangeValue,
+  encodePaymentValue,
+} = await import("./slack-invoice-actions");
 
 const INVOICE_ID = "11111111-1111-4111-8111-111111111111";
 const MESSAGE_TS = "1700000000.000100";
@@ -382,5 +392,98 @@ describe("handleInvoiceyInteraction: lifecycle actions", () => {
     expect(ops.issueInvoiceById).not.toHaveBeenCalled();
     expect(ops.updateDraftInvoice).not.toHaveBeenCalled();
     expect(request).not.toHaveBeenCalled();
+  });
+});
+
+describe("handleInvoiceyInteraction: payment review", () => {
+  const PROPOSAL_ID = "22222222-2222-4222-8222-222222222222";
+
+  function paymentClick(
+    actionId: string,
+    value = encodePaymentValue(PROPOSAL_ID),
+  ) {
+    return {
+      actionId,
+      value,
+      messageTs: MESSAGE_TS,
+      user: { id: "U123" },
+    } as never;
+  }
+
+  it("confirms against the clicker's own workspace, not the card's", async () => {
+    ops.confirmPaymentMatchProposal.mockResolvedValue({
+      ok: true,
+      invoiceId: INVOICE_ID,
+      becamePaid: true,
+    });
+    const { ctx } = makeCtx();
+    await handleInvoiceyInteraction(
+      paymentClick(INVOICEY_ACTIONS.paymentConfirm),
+      ctx,
+    );
+    expect(ops.confirmPaymentMatchProposal).toHaveBeenCalledWith({
+      workspaceId: "W1",
+      proposalId: PROPOSAL_ID,
+      actorUserId: "U-invoicey",
+    });
+  });
+
+  it("sends the payment-received notice only once the invoice settles", async () => {
+    ops.confirmPaymentMatchProposal.mockResolvedValue({
+      ok: true,
+      invoiceId: INVOICE_ID,
+      becamePaid: false,
+    });
+    const { ctx } = makeCtx();
+    await handleInvoiceyInteraction(
+      paymentClick(INVOICEY_ACTIONS.paymentConfirm),
+      ctx,
+    );
+    expect(ops.sendPaymentReceivedEmailIfEnabled).not.toHaveBeenCalled();
+  });
+
+  it("replaces the card so a resolved proposal cannot be clicked twice", async () => {
+    ops.rejectPaymentMatchProposal.mockResolvedValue(true);
+    const { ctx, request } = makeCtx();
+    await handleInvoiceyInteraction(
+      paymentClick(INVOICEY_ACTIONS.paymentReject),
+      ctx,
+    );
+    expect(request).toHaveBeenCalledWith(
+      "chat.update",
+      expect.objectContaining({ ts: MESSAGE_TS }),
+    );
+  });
+
+  it("reports privately when the proposal was already decided", async () => {
+    ops.rejectPaymentMatchProposal.mockResolvedValue(false);
+    const { ctx, postEphemeral, request } = makeCtx();
+    await handleInvoiceyInteraction(
+      paymentClick(INVOICEY_ACTIONS.paymentReject),
+      ctx,
+    );
+    expect(postEphemeral).toHaveBeenCalledWith(
+      "U123",
+      expect.stringContaining("už bylo rozhodnuto"),
+    );
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it("never reads a payment payload with the invoice decoder", async () => {
+    // An invoice-shaped value on a payment button must not be re-read as an
+    // invoice id: that would confirm an allocation against the wrong entity.
+    const { ctx, postEphemeral } = makeCtx();
+    await handleInvoiceyInteraction(
+      paymentClick(
+        INVOICEY_ACTIONS.paymentConfirm,
+        encodeButtonValue(INVOICE_ID, []),
+      ),
+      ctx,
+    );
+    expect(ops.confirmPaymentMatchProposal).not.toHaveBeenCalled();
+    expect(postEphemeral).toHaveBeenCalledWith(
+      "U123",
+      expect.stringContaining("odkaz na platbu"),
+    );
   });
 });
