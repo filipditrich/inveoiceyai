@@ -58,6 +58,9 @@ Invoicey Drive
   Mirror folder: Proton Drive/Faktury   or  Set mirror…
   ─────────
   Account · Sign out
+  ─────────
+  Check for Updates…
+  Quit Invoicey Drive
 ```
 
 No invoice builder. Opening an invoice opens Preview / Finder, not a native editor. Mirror files get Finder color tags from `displayStatus` (green paid, orange unpaid/future, red overdue). Status stays out of the filename. Proton/iCloud often strip Finder tags; a local folder keeps them.

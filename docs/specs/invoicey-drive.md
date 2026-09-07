@@ -31,13 +31,13 @@ flowchart LR
 
 ### Surfaces
 
-| Surface                                         | Role                                                                     |
-| ----------------------------------------------- | ------------------------------------------------------------------------ |
-| File Provider                                   | Invoicey Drive in Finder Locations. Dataless until open.                 |
-| Menu bar                                        | Connect, sync now, last error, Open Invoicey Drive, optional mirror path |
-| Web `/drive/connect`                            | Pairing (Better Auth + confirm)                                          |
-| Web `/settings/account/drive`                   | Devices, layout template, hide workspaces, download Mac app              |
-| Marketing + `/docs/integrations/invoicey-drive` | What it is, install, first connect                                       |
+| Surface                                         | Role                                                                                        |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| File Provider                                   | Invoicey Drive in Finder Locations. Dataless until open.                                    |
+| Menu bar                                        | Connect, sync now, last error, Open Invoicey Drive, optional mirror path, Check for Updates |
+| Web `/drive/connect`                            | Pairing (Better Auth + confirm)                                                             |
+| Web `/settings/account/drive`                   | Devices, layout template, hide workspaces, download Mac app                                 |
+| Marketing + `/docs/integrations/invoicey-drive` | What it is, install, first connect                                                          |
 
 ### Tree
 
@@ -120,12 +120,15 @@ No invoice bytes in Neon. Mirror folder bookmarks stay on the Mac.
 - Marketing: companion tile, not a second hero product.
 - Fumadocs: `apps/web/content/docs/integrations/invoicey-drive.mdx` (macOS 14+, install, tokens, iCloud vs Invoicey Drive).
 - Associated Domains: `/.well-known/apple-app-site-association` (`72T6DX5YZU.me.ditrich.invoicey.drive`, `/drive/oauth` only).
+- Public `GET /api/drive/latest` `{ version, dmgUrl }` for the Mac updater. Version is the latest GitHub tag (`filipditrich/invoicey-mac`); `dmgUrl` is `INVOICEY_DRIVE_DMG_URL` when set. Optional `INVOICEY_DRIVE_VERSION` is a fallback when GitHub is unreachable. No device token.
 
 ### Mac product (sibling `invoicey-mac`)
 
 Bundle id `me.ditrich.invoicey.drive` (same `me.ditrich.*` house style as Caliper). Targets: app + File Provider extension + App Group. Login item default on. Notarized `.dmg`. macOS 14+.
 
-Out of v1: Windows, iOS Files, create/issue/pay, two-way PDF edit, Proton/iCloud APIs, APNs, Mac App Store.
+**Updates.** Menu **Check for Updates…** plus a quiet check once per 24h after launch. Compares `CFBundleShortVersionString` to `GET /api/drive/latest`. Newer → alert → open the `.dmg`. Replace the app in Applications; pairing and the mirror stay. Sparkle in-place replace is later.
+
+Out of v1: Windows, iOS Files, create/issue/pay, two-way PDF edit, Proton/iCloud APIs, APNs, Mac App Store, Sparkle.
 
 ## Parked on Apple Developer enrollment
 

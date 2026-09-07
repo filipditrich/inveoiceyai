@@ -78,19 +78,20 @@ flowchart LR
 
 ## What does not change
 
-| Thing                                          | Why it is safe to leave alone                              |
-| ---------------------------------------------- | ---------------------------------------------------------- |
-| Vercel project `inveoiceyai-web`               | Same deployment; only hostnames are added                  |
-| Neon `DATABASE_URL` / schema                   | No tenant or URL columns store the public host             |
-| `BETTER_AUTH_SECRET`                           | Same app; do not rotate as part of this cutover            |
-| UploadThing object URLs (`ufs.sh` / `utfs.io`) | Artifacts are on UT, not on our host                       |
-| User PATs / `MCP_API_KEY` / `EVE_API_KEY`      | Bearer auth is host-agnostic                               |
-| Slack Connect UID `slack/invoicey`             | Connect hits the Vercel deployment, not the marketing host |
-| Bank token encryption keys                     | Unrelated                                                  |
-| Cron entries in `apps/web/vercel.json`         | Vercel invokes the project, not a public hostname          |
-| GitHub repo name `filipditrich/inveoiceyai`    | Installer already pins this                                |
-| Drive bundle id `me.ditrich.invoicey.drive`    | Apple identity, not the web host                           |
-| `INVOICEY_DRIVE_DMG_URL` (GitHub Releases)     | Stays on GitHub unless you later host the `.dmg` yourself  |
+| Thing                                          | Why it is safe to leave alone                                   |
+| ---------------------------------------------- | --------------------------------------------------------------- |
+| Vercel project `inveoiceyai-web`               | Same deployment; only hostnames are added                       |
+| Neon `DATABASE_URL` / schema                   | No tenant or URL columns store the public host                  |
+| `BETTER_AUTH_SECRET`                           | Same app; do not rotate as part of this cutover                 |
+| UploadThing object URLs (`ufs.sh` / `utfs.io`) | Artifacts are on UT, not on our host                            |
+| User PATs / `MCP_API_KEY` / `EVE_API_KEY`      | Bearer auth is host-agnostic                                    |
+| Slack Connect UID `slack/invoicey`             | Connect hits the Vercel deployment, not the marketing host      |
+| Bank token encryption keys                     | Unrelated                                                       |
+| Cron entries in `apps/web/vercel.json`         | Vercel invokes the project, not a public hostname               |
+| GitHub repo name `filipditrich/inveoiceyai`    | Installer already pins this                                     |
+| Drive bundle id `me.ditrich.invoicey.drive`    | Apple identity, not the web host                                |
+| `INVOICEY_DRIVE_DMG_URL` (GitHub Releases)     | Stays on GitHub unless you later host the `.dmg` yourself       |
+| `INVOICEY_DRIVE_VERSION`                       | Optional fallback for `GET /api/drive/latest` if GitHub is down |
 
 ## Phase 0 — Prerequisites (operator, no deploy)
 

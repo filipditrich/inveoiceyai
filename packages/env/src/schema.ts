@@ -164,6 +164,14 @@ export const privateEnvSchema = z.object({
    * shows a placeholder instead of a download button.
    */
   INVOICEY_DRIVE_DMG_URL: z.preprocess(emptyEnvToUndefined, z.url().optional()),
+  /**
+   * Optional Drive marketing version when GitHub Releases is unreachable.
+   * The live feed prefers the latest GitHub tag.
+   */
+  INVOICEY_DRIVE_VERSION: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
 
   /**
    * Polar billing (Plan 33 / ADR 0047). Unset disables checkout and webhooks
