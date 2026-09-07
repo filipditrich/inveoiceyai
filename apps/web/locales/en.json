@@ -1033,6 +1033,14 @@
     "unavailable": "Drive pairing is not configured on this server.",
     "backToSettings": "Invoicey Drive settings"
   },
+  "DriveOauth": {
+    "title": "Return to Invoicey Drive",
+    "description": "This Mac is ready to finish pairing. Open Invoicey Drive if it did not come to the front.",
+    "openApp": "Open Invoicey Drive",
+    "errorTitle": "Could not connect this Mac",
+    "errorDescription": "Start again from Invoicey Drive on your Mac.",
+    "missingCode": "The pairing callback did not include an authorization code."
+  },
   "Referral": {
     "title": "{name} invited you to Invoicey",
     "titleAnonymous": "You were invited to Invoicey",

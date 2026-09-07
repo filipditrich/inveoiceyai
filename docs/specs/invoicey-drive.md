@@ -119,6 +119,7 @@ No invoice bytes in Neon. Mirror folder bookmarks stay on the Mac.
 - Invoice detail banner when the user has zero Drive devices (v1, dismissible).
 - Marketing: companion tile, not a second hero product.
 - Fumadocs: `apps/web/content/docs/integrations/invoicey-drive.mdx` (macOS 14+, install, tokens, iCloud vs Invoicey Drive).
+- Associated Domains: `/.well-known/apple-app-site-association` (`72T6DX5YZU.me.ditrich.invoicey.drive`, `/drive/oauth` only).
 
 ### Mac product (sibling `invoicey-mac`)
 
@@ -128,11 +129,10 @@ Out of v1: Windows, iOS Files, create/issue/pay, two-way PDF edit, Proton/iCloud
 
 ## Parked on Apple Developer enrollment
 
-Czech + English Drive catalog copy shipped in [PR 28](https://github.com/filipditrich/inveoiceyai/pull/28). Remaining:
+Czech + English Drive catalog copy shipped in [PR 28](https://github.com/filipditrich/inveoiceyai/pull/28). Team ID `72T6DX5YZU` is live. Remaining:
 
-- Associated Domains `apple-app-site-association` on `invoicey.app` once the Team ID exists
 - `.dmg` hosting URL (`INVOICEY_DRIVE_DMG_URL`; Settings shows a placeholder until the first notarized build)
-- File Provider `.appex` in Finder Locations (same paid team)
+- Notarized File Provider `.appex` in Finder Locations (Xcode project is in `invoicey-mac`)
 
 ## References
 

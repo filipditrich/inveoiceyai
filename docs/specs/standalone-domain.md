@@ -406,9 +406,8 @@ cutover. If it returns, prefer `inbox.invoicey.app`.
 - Resolved: `www.invoicey.app` is attached and should redirect to the apex.
 - `TODO(plan-32):` Confirm the old-host machine-route window (90 days
   suggested).
-- `TODO(plan-32):` Whether to host `/.well-known/apple-app-site-association`
-  in this cutover or wait for the paid Apple team (Drive spec already parks
-  this).
+- Resolved: `/.well-known/apple-app-site-association` is served for Invoicey
+  Drive (`72T6DX5YZU.me.ditrich.invoicey.drive`, `/drive/oauth` only).
 
 ## References
 

@@ -1033,6 +1033,14 @@
     "unavailable": "Párování Drive na tomto serveru není nastavené.",
     "backToSettings": "Nastavení Invoicey Drive"
   },
+  "DriveOauth": {
+    "title": "Vraťte se do Invoicey Drive",
+    "description": "Tento Mac může dokončit párování. Otevřete Invoicey Drive, pokud se nevynořil sám.",
+    "openApp": "Otevřít Invoicey Drive",
+    "errorTitle": "Tento Mac se nepodařilo připojit",
+    "errorDescription": "Začněte znovu z Invoicey Drive na Macu.",
+    "missingCode": "Callback párování neobsahoval autorizační kód."
+  },
   "Referral": {
     "title": "{name} vás zve do Invoicey",
     "titleAnonymous": "Byli jste pozváni do Invoicey",
