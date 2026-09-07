@@ -26,6 +26,18 @@ export type BankSyncImportResult = {
   imported: number;
   proposed: number;
   autoMatched: number;
+  /**
+   * Proposals raised by this run that a human still has to decide on, and
+   * credits this run stored that matched nothing at all.
+   *
+   * Both lists are deliberately built from rows this run actually inserted.
+   * Every sync re-reads a two-day overlap window, so a set built from "what is
+   * currently open" would re-announce the same payment on every run; both
+   * inserts use `onConflictDoNothing`, which makes "was inserted" the natural
+   * once-only signal.
+   */
+  pendingProposalIds: string[];
+  unmatchedTransactionIds: string[];
 };
 
 /** Persist statement rows and run matching. Debits only when importScope is `all`. */
@@ -148,8 +160,13 @@ export async function importBankTransactionBatch(input: {
     ]),
   );
 
+  const insertedProviderIds = new Set(
+    inserted.map((row) => row.providerTransactionId),
+  );
   let proposed = 0;
   let autoMatched = 0;
+  const pendingProposalIds: string[] = [];
+  const unmatchedTransactionIds: string[] = [];
   for (const transaction of credits) {
     const bankTransactionId = matchableByProviderId.get(
       transaction.providerTransactionId,
@@ -160,7 +177,12 @@ export async function importBankTransactionBatch(input: {
       receivingIban: input.receivingIban,
       invoices: invoiceRows,
     });
-    if (proposals.length === 0) continue;
+    if (proposals.length === 0) {
+      if (insertedProviderIds.has(transaction.providerTransactionId)) {
+        unmatchedTransactionIds.push(bankTransactionId);
+      }
+      continue;
+    }
     const insertedProposals = await db
       .insert(paymentMatchProposals)
       .values(
@@ -182,19 +204,28 @@ export async function importBankTransactionBatch(input: {
         invoiceId: paymentMatchProposals.invoiceId,
       });
     proposed += insertedProposals.length;
-    if (!input.autoConfirmExactMatches) continue;
+    if (!input.autoConfirmExactMatches) {
+      pendingProposalIds.push(...insertedProposals.map((row) => row.id));
+      continue;
+    }
     const proposalByInvoiceId = new Map(
       proposals.map((proposal) => [proposal.invoiceId, proposal]),
     );
     for (const insertedProposal of insertedProposals) {
       const proposal = proposalByInvoiceId.get(insertedProposal.invoiceId);
-      if (!proposal || !isExactAutoMatchProposal(proposal)) continue;
+      if (!proposal || !isExactAutoMatchProposal(proposal)) {
+        pendingProposalIds.push(insertedProposal.id);
+        continue;
+      }
       const confirmation = await confirmPaymentMatchProposal({
         workspaceId: input.workspaceId,
         proposalId: insertedProposal.id,
         actorType: "system",
       });
-      if (!confirmation.ok) continue;
+      if (!confirmation.ok) {
+        pendingProposalIds.push(insertedProposal.id);
+        continue;
+      }
       autoMatched += 1;
       if (!confirmation.becamePaid) continue;
       try {
@@ -232,6 +263,8 @@ export async function importBankTransactionBatch(input: {
     imported: inserted.length,
     proposed,
     autoMatched,
+    pendingProposalIds,
+    unmatchedTransactionIds,
   };
 }
 
@@ -255,13 +288,14 @@ export async function markBankSyncSucceeded(input: {
     .where(eq(bankConnections.id, input.connectionId));
 }
 
+/** Returns the post-increment failure streak, which decides whether to alert. */
 export async function markBankSyncFailed(input: {
   connectionId: string;
   errorCode: string;
   now?: Date;
-}): Promise<void> {
+}): Promise<{ consecutiveFailureCount: number }> {
   const now = input.now ?? new Date();
-  await db
+  const [updated] = await db
     .update(bankConnections)
     .set({
       leaseUntil: null,
@@ -270,5 +304,9 @@ export async function markBankSyncFailed(input: {
       nextSyncAt: new Date(now.getTime() + 30 * 60_000),
       updatedAt: now,
     })
-    .where(eq(bankConnections.id, input.connectionId));
+    .where(eq(bankConnections.id, input.connectionId))
+    .returning({
+      consecutiveFailureCount: bankConnections.consecutiveFailureCount,
+    });
+  return { consecutiveFailureCount: updated?.consecutiveFailureCount ?? 0 };
 }
