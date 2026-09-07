@@ -94,4 +94,4 @@ Settings: template field announced with live preview. Connect page: primary butt
 
 ## Parked on Apple Developer enrollment
 
-cs/en Drive catalog keys shipped. Settings download stays a placeholder until `INVOICEY_DRIVE_DMG_URL` points at a notarized `.dmg`. Finder Locations needs the signed File Provider `.appex`.
+cs/en Drive catalog keys shipped. Settings and marketing download the notarized `.dmg` from GitHub `releases/latest`. Finder Locations needs the signed File Provider `.appex`.

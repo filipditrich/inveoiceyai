@@ -1,6 +1,7 @@
 import { DriveSettingsForm } from "@/components/drive/drive-settings-form";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { requireSession } from "@/lib/auth/session";
+import { driveDmgDownloadUrl } from "@/lib/drive/latest-release";
 import { HardDriveIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -32,7 +33,7 @@ export default async function SettingsDrivePage() {
       />
       <DriveSettingsForm
         devices={devices}
-        dmgUrl={env.INVOICEY_DRIVE_DMG_URL ?? null}
+        dmgUrl={driveDmgDownloadUrl(env.INVOICEY_DRIVE_DMG_URL)}
         hiddenWorkspaceIds={settings.hiddenWorkspaceIds}
         includeIsdoc={settings.includeIsdoc}
         layoutTemplate={settings.layoutTemplate}

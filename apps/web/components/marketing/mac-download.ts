@@ -1,9 +1,8 @@
-const RELEASES_FALLBACK =
-  "https://github.com/filipditrich/invoicey-mac/releases";
+import { driveDmgDownloadUrl } from "@/lib/drive/latest-release";
 
-/** Until a signed build is published, the download points at the release list. */
+/** Notarized `.dmg`. Env wins; otherwise the GitHub latest asset. */
 export function macDownloadUrl(configuredUrl: string | undefined): string {
-  return configuredUrl ?? RELEASES_FALLBACK;
+  return driveDmgDownloadUrl(configuredUrl);
 }
 
 export const CLI_INSTALL_COMMAND =

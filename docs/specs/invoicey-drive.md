@@ -132,10 +132,7 @@ Out of v1: Windows, iOS Files, create/issue/pay, two-way PDF edit, Proton/iCloud
 
 ## Parked on Apple Developer enrollment
 
-Czech + English Drive catalog copy shipped in [PR 28](https://github.com/filipditrich/inveoiceyai/pull/28). Team ID `72T6DX5YZU` is live. Remaining:
-
-- `.dmg` hosting URL (`INVOICEY_DRIVE_DMG_URL`; Settings shows a placeholder until the first notarized build)
-- Notarized File Provider `.appex` in Finder Locations (Xcode project is in `invoicey-mac`)
+Czech + English Drive catalog copy shipped in [PR 28](https://github.com/filipditrich/inveoiceyai/pull/28). Team ID `72T6DX5YZU` is live. The notarized `.dmg` is on GitHub Releases; Settings and marketing download `InvoiceyDrive.dmg` from `releases/latest`. Finder Locations needs the signed File Provider `.appex` from `invoicey-mac`.
 
 ## References
 

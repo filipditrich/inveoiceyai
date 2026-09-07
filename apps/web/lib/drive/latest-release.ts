@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const INVOICEY_DRIVE_GITHUB_REPO = "filipditrich/invoicey-mac";
 export const INVOICEY_DRIVE_DMG_ASSET = "InvoiceyDrive.dmg";
+export const INVOICEY_DRIVE_DMG_DOWNLOAD_URL = `https://github.com/${INVOICEY_DRIVE_GITHUB_REPO}/releases/latest/download/${INVOICEY_DRIVE_DMG_ASSET}`;
 
 const RELEASE_CORE = /v?(\d+\.\d+\.\d+)/i;
 
@@ -20,6 +21,13 @@ export type DriveLatestRelease = {
   dmgUrl: string;
 };
 
+export function driveDmgDownloadUrl(configuredUrl?: string): string {
+  return (
+    firstNonEmpty(configuredUrl, INVOICEY_DRIVE_DMG_DOWNLOAD_URL) ??
+    INVOICEY_DRIVE_DMG_DOWNLOAD_URL
+  );
+}
+
 export function normalizeReleaseVersion(raw: string): string | null {
   const match = raw.trim().match(RELEASE_CORE);
   return match?.[1] ?? null;
@@ -37,11 +45,21 @@ export function resolveDriveLatestRelease(input: {
   if (!version) {
     return null;
   }
-  const dmgUrl = input.configuredDmgUrl ?? input.github?.dmgUrl;
+  const dmgUrl = firstNonEmpty(
+    input.configuredDmgUrl,
+    INVOICEY_DRIVE_DMG_DOWNLOAD_URL,
+    input.github?.dmgUrl,
+  );
   if (!dmgUrl) {
     return null;
   }
   return { version, dmgUrl };
+}
+
+function firstNonEmpty(
+  ...candidates: Array<string | undefined>
+): string | undefined {
+  return candidates.find((value) => value !== undefined && value.length > 0);
 }
 
 export async function loadGithubLatestRelease(

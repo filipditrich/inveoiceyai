@@ -1,11 +1,23 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  INVOICEY_DRIVE_DMG_DOWNLOAD_URL,
   INVOICEY_DRIVE_GITHUB_REPO,
+  driveDmgDownloadUrl,
   loadGithubLatestRelease,
   normalizeReleaseVersion,
   resolveDriveLatestRelease,
 } from "./latest-release";
+
+describe("driveDmgDownloadUrl", () => {
+  it("prefers a configured url and otherwise uses GitHub latest", () => {
+    expect(driveDmgDownloadUrl("https://example.com/InvoiceyDrive.dmg")).toBe(
+      "https://example.com/InvoiceyDrive.dmg",
+    );
+    expect(driveDmgDownloadUrl()).toBe(INVOICEY_DRIVE_DMG_DOWNLOAD_URL);
+    expect(driveDmgDownloadUrl("")).toBe(INVOICEY_DRIVE_DMG_DOWNLOAD_URL);
+  });
+});
 
 describe("normalizeReleaseVersion", () => {
   it("strips a leading v and whitespace", () => {
@@ -59,10 +71,22 @@ describe("resolveDriveLatestRelease", () => {
     });
   });
 
-  it("falls back to the github asset when no dmg env is set", () => {
+  it("uses the stable latest download when no dmg env is set", () => {
     expect(resolveDriveLatestRelease({ github })).toEqual({
       version: "0.1.4",
-      dmgUrl: github.dmgUrl,
+      dmgUrl: INVOICEY_DRIVE_DMG_DOWNLOAD_URL,
+    });
+  });
+
+  it("keeps a download url when github is down but a version is configured", () => {
+    expect(
+      resolveDriveLatestRelease({
+        configuredVersion: "0.1.5",
+        github: null,
+      }),
+    ).toEqual({
+      version: "0.1.5",
+      dmgUrl: INVOICEY_DRIVE_DMG_DOWNLOAD_URL,
     });
   });
 
