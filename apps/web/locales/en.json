@@ -2853,7 +2853,8 @@
         "missing_issuer": "Choose the business receiving payments.",
         "missing_fio_payment_token": "Paste a Fio submit-rights token.",
         "missing_payment_token_expiry": "Set the token expiry date from Fio.",
-        "payment_token_expired": "The submit token has expired. Enter a new one."
+        "payment_token_expired": "The submit token has expired. Enter a new one.",
+        "no_bank_connection": "This workspace has no active bank connection to sync."
       }
     }
   },
@@ -2916,7 +2917,8 @@
     "sources": {
       "bank_confirmed": "Matched from bank",
       "manual": "Added manually"
-    }
+    },
+    "syncNow": "Sync now"
   },
   "Looks": {
     "upgradeHint": "Included with catalog looks.",

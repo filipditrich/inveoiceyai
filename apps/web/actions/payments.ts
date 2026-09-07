@@ -2,6 +2,7 @@
 
 import { requireWritableWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
+import { listActiveBankConnections } from "@/lib/payments/connections";
 import { normalizeFioError } from "@/lib/payments/fio-error";
 import {
   createFioConnection,
@@ -275,6 +276,54 @@ export async function toggleMonetaAutoMatch(formData: FormData): Promise<void> {
         }
       : { error: "not_found" },
   );
+}
+
+/**
+ * Sync every active connection and come back to `/payments`.
+ *
+ * `syncFio` / `syncMoneta` both redirect to bank-connection settings, which is
+ * the wrong destination for the one moment this button exists for: waiting on
+ * a specific invoice to be paid. Here the reviewer is already looking at the
+ * ledger and wants it refreshed in place.
+ */
+export async function syncBankConnectionsFromPayments(): Promise<void> {
+  await assertCan("payments:manage");
+  const { workspaceId } = await requireWritableWorkspace();
+  const connections = await listActiveBankConnections(workspaceId);
+  if (connections.length === 0) {
+    paymentRedirect({ error: "no_bank_connection" });
+  }
+
+  let imported = 0;
+  let proposed = 0;
+  let autoMatched = 0;
+  let lastError: string | undefined;
+  for (const connection of connections) {
+    const result =
+      connection.provider === "moneta"
+        ? await syncMonetaConnection({
+            workspaceId,
+            connectionId: connection.id,
+          })
+        : await syncFioConnection({ workspaceId, connectionId: connection.id });
+    imported += result.imported;
+    proposed += result.proposed;
+    autoMatched += result.autoMatched;
+    if (!result.ok) lastError = result.error;
+  }
+
+  revalidatePayments();
+  // A manual sync deliberately sends no digest: the person who pressed the
+  // button is about to see the result on the page they are already on.
+  if (lastError && imported === 0 && proposed === 0) {
+    paymentRedirect({ error: lastError });
+  }
+  paymentRedirect({
+    imported: String(imported),
+    proposed: String(proposed),
+    autoMatched: String(autoMatched),
+    toast: "bank_synced",
+  });
 }
 
 export async function confirmPaymentProposal(
