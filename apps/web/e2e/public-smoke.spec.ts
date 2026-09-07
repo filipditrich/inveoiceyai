@@ -46,8 +46,9 @@ test.describe("public platform", () => {
     await expect(
       page.getByRole("link", { name: /invoicey/i }).first(),
     ).toBeVisible();
+    /** light lockup is `dark:hidden`; dark canvas shows `invoicey-lockup.svg`. */
     await expect(
-      page.locator('img[src*="/brand/invoicey-lockup"]').first(),
+      page.locator('img[src$="/brand/invoicey-lockup.svg"]').first(),
     ).toBeVisible();
   });
 
@@ -160,6 +161,10 @@ test.describe("public platform", () => {
     page,
   }) => {
     await page.goto("/docs");
+    const openSidebar = page.getByRole("button", { name: "Open Sidebar" });
+    if (await openSidebar.isVisible()) {
+      await openSidebar.click();
+    }
     await expect(
       page.getByRole("link", { name: "Home", exact: true }),
     ).toHaveAttribute("href", "/");
@@ -167,7 +172,7 @@ test.describe("public platform", () => {
     await expect(page.getByRole("heading", { name: "CLI" })).toBeVisible();
     await page.goto("/docs/integrations/invoicey-drive");
     await expect(
-      page.getByRole("heading", { name: "Invoicey Drive" }),
+      page.getByRole("heading", { name: "Invoicey Drive", level: 1 }),
     ).toBeVisible();
   });
 
