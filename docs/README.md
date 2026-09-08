@@ -38,6 +38,10 @@ If a doc disagrees with the code, the doc is right and the code is a bug — or 
   deferred (paid, cert/OAuth-heavy, or PSD2-TPP-only).
   capture, extraction ladder, approval rules, and bank-signed payment batches
   for supplier invoices.
+- [Instant QR payment acceptance](./research/instant-qr-payment-acceptance.md) —
+  direction settled (ADR 0050 + 0051), not yet scheduled: a live "ask for an
+  amount, watch it land" loop on top of the existing SPAYD QR and bank readers.
+  Detection latency is the whole design.
 - [Czech OSVČ companion](./research/osvc-companion.md) — exploratory and not
   scheduled.
 - [Personal invoice archive](./research/personal-invoice-archive.md) — selected

@@ -114,6 +114,16 @@ _Avoid_: Clamping refunds to zero, deleting grant or usage rows.
 The merchant-of-record receipt Polar issues to the workspace. It is not an Invoicey invoice.
 _Avoid_: Invoice, faktura (for Polar’s PDF).
 
+## Payments
+
+**Payment request**:
+A live ask for a specific amount into a specific bank account, carrying its own variable symbol. It may point at an invoice or stand alone. It is not a document and is never sent to an authority.
+_Avoid_: Payment link, charge, inkaso, collection, proforma (for this concept).
+
+**Watch session**:
+The bounded window during which a bank connection is polled at its maximum safe rate so a payment can be confirmed while someone waits. Ending it stops the polling, never the expectation of money.
+_Avoid_: Polling loop, live mode, terminal session, listener.
+
 ## Free generator
 
 **Free invoice generator**:
