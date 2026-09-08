@@ -474,7 +474,7 @@ async function companionProposals(): Promise<CompanionResult> {
       bankTransactions,
       eq(bankTransactions.id, paymentMatchProposals.bankTransactionId),
     )
-    .innerJoin(invoices, eq(invoices.id, paymentMatchProposals.invoiceId))
+    .leftJoin(invoices, eq(invoices.id, paymentMatchProposals.invoiceId))
     .where(
       and(
         eq(paymentMatchProposals.workspaceId, workspaceId),
@@ -499,7 +499,7 @@ async function companionConfirm(proposalId: string): Promise<CompanionResult> {
     actorType: ctx?.userId ? "user" : "system",
   });
   if (!result.ok) return fail(result.error);
-  if (result.becamePaid) {
+  if (result.becamePaid && result.invoiceId) {
     try {
       await sendPaymentReceivedEmailIfEnabled({
         db: database,
