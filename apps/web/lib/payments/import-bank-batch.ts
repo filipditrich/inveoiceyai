@@ -288,6 +288,22 @@ export async function markBankSyncSucceeded(input: {
     .where(eq(bankConnections.id, input.connectionId));
 }
 
+/**
+ * Releases the lease after a run that never reached the provider. Deliberately
+ * leaves `next_sync_at`, `last_sync_error_code`, and the failure streak alone:
+ * the connection is still due, and nothing about it has gone wrong.
+ */
+export async function markBankSyncSkipped(input: {
+  connectionId: string;
+  now?: Date;
+}): Promise<void> {
+  const now = input.now ?? new Date();
+  await db
+    .update(bankConnections)
+    .set({ leaseUntil: null, updatedAt: now })
+    .where(eq(bankConnections.id, input.connectionId));
+}
+
 /** Returns the post-increment failure streak, which decides whether to alert. */
 export async function markBankSyncFailed(input: {
   connectionId: string;

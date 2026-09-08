@@ -1,3 +1,4 @@
+import { isBankSyncSkip } from "@/lib/payments/bank-sync-outcome";
 import { syncFioConnection } from "@/lib/payments/fio-service";
 import { syncMonetaConnection } from "@/lib/payments/moneta-service";
 import {
@@ -62,6 +63,7 @@ export async function GET(request: Request): Promise<Response> {
   let proposed = 0;
   let autoMatched = 0;
   let notified = 0;
+  let skipped = 0;
   const errors: Array<{ connectionId: string; code: string }> = [];
   for (const connection of due) {
     const result =
@@ -77,7 +79,11 @@ export async function GET(request: Request): Promise<Response> {
     imported += result.imported;
     proposed += result.proposed;
     autoMatched += result.autoMatched;
-    if (!result.ok) {
+    // A rate-limited or already-leased connection did not fail; it just did not
+    // run. Counting it would make a healthy sweep report itself unhealthy.
+    if (result.skipped) {
+      skipped += 1;
+    } else if (!result.ok) {
       errors.push({
         connectionId: connection.id,
         code: result.error ?? `${connection.provider}_sync_failed`,
@@ -94,7 +100,7 @@ export async function GET(request: Request): Promise<Response> {
           unmatchedTransactionIds: result.unmatchedTransactionIds,
         });
         notified += delivery.emailed;
-      } else if (result.error && result.error !== "sync_busy") {
+      } else if (result.error && !isBankSyncSkip(result.error)) {
         notified += await notifyBankSyncFailure({
           workspaceId: connection.workspaceId,
           connectionId: connection.id,
@@ -113,6 +119,7 @@ export async function GET(request: Request): Promise<Response> {
     proposed,
     autoMatched,
     notified,
+    skipped,
     errors,
   });
 }
