@@ -1155,6 +1155,8 @@ declare const messages: {
       "integrations": "Integrace",
       "usage": "Využití",
       "bank-connections": "Bankovní spojení",
+      "requests": "Výzvy",
+      "collect": "Vybrat platbu",
       "account": "Účet"
     },
     "a11y": {

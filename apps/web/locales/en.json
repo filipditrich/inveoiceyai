@@ -1152,6 +1152,8 @@
       "integrations": "Integrations",
       "usage": "Usage",
       "bank-connections": "Bank connections",
+      "requests": "Requests",
+      "collect": "Collect",
       "account": "Account"
     },
     "a11y": {
