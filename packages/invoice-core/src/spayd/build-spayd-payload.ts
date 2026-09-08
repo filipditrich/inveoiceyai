@@ -59,18 +59,6 @@ function defaultPaymentMessageTemplate(
   return `${label} {number} | ${party}`;
 }
 
-/** Build ČZ IBAN+BIC ACC field (+ separator when BIC present). */
-function buildAcc(account: Invoice["payment"]["bankAccount"]): string {
-  if (!account) {
-    return "";
-  }
-  const bic = account.bic?.trim();
-  if (bic && bic.length > 0) {
-    return `${account.iban}+${bic}`;
-  }
-  return account.iban;
-}
-
 /** SPAYD `AM`: payable amount in koruny (major units), not haléře. */
 function formatSpaydAmCz(totalKorunu: number): string {
   const x = Math.round(totalKorunu * 100) / 100;
@@ -85,8 +73,99 @@ function formatSpaydAmCz(totalKorunu: number): string {
 }
 
 /**
- * Builds a Short Payment Descriptor 1.0 string, or null when QR must not appear
- * (`spayd-qr.md`: non-transfer, missing bank, credit note negative total).
+ * What a SPAYD payload actually needs, with no opinion about where it came
+ * from. An invoice is one source; a payment request is another.
+ */
+export interface SpaydPaymentFacts {
+  /** Beneficiary IBAN, already normalized. */
+  iban: string;
+  /** Optional BIC, appended to `ACC` after `+` when present. */
+  bic?: string | null;
+  /** Payable amount in major units (koruny). */
+  amount: number;
+  currency: string;
+  /** Beneficiary name for `RN`; truncated for scanner compatibility. */
+  beneficiaryName: string;
+  /** `MSG` — shown to the beneficiary. Omitted when null. */
+  beneficiaryMessage?: string | null;
+  /** `X-SELF` — the payer's own note. Omitted when null. */
+  payerNote?: string | null;
+  variableSymbol?: string | null;
+  constantSymbol?: string | null;
+  specificSymbol?: string | null;
+}
+
+/** Build ČZ IBAN+BIC ACC field (+ separator when BIC present). */
+function buildAcc(iban: string, bic: string | null | undefined): string {
+  const trimmedBic = bic?.trim();
+  if (trimmedBic && trimmedBic.length > 0) {
+    return `${iban}+${trimmedBic}`;
+  }
+  return iban;
+}
+
+/**
+ * Builds a Short Payment Descriptor 1.0 string from payment facts, or null
+ * when the payment cannot be expressed as one (`spayd-qr.md`).
+ *
+ * Callers own their own domain guards: this refuses non-CZK, and nothing else.
+ * It deliberately does not reject a zero amount, because the invoice path has
+ * always emitted `AM:0` for a zero-total transfer.
+ */
+export function buildSpaydPayloadFromFacts(
+  facts: SpaydPaymentFacts,
+): string | null {
+  if (facts.currency !== "CZK") {
+    return null;
+  }
+
+  const parts = new Map<string, string>();
+  parts.set("ACC", escapeSpaydValue(buildAcc(facts.iban, facts.bic)));
+  parts.set("AM", escapeSpaydValue(formatSpaydAmCz(facts.amount)));
+  parts.set("CC", escapeSpaydValue(facts.currency));
+  parts.set("RN", escapeSpaydValue(truncateAscii(facts.beneficiaryName, 35)));
+
+  if (
+    facts.beneficiaryMessage !== undefined &&
+    facts.beneficiaryMessage !== null
+  ) {
+    parts.set(
+      "MSG",
+      escapeSpaydValue(truncateAscii(facts.beneficiaryMessage, 60)),
+    );
+  }
+  if (facts.payerNote !== undefined && facts.payerNote !== null) {
+    parts.set("X-SELF", escapeSpaydValue(truncateAscii(facts.payerNote, 60)));
+  }
+  if (facts.variableSymbol) {
+    parts.set("X-VS", escapeSpaydValue(facts.variableSymbol));
+  }
+  if (facts.constantSymbol) {
+    parts.set("X-KS", escapeSpaydValue(facts.constantSymbol));
+  }
+  if (facts.specificSymbol) {
+    parts.set("X-SS", escapeSpaydValue(facts.specificSymbol));
+  }
+
+  // Request an immediate payment when supported. Intentionally omit DT: a
+  // future due date would instruct banking apps to schedule the transfer.
+  parts.set("PT", "IP");
+
+  const segments: string[] = [];
+  for (const key of SPAYD_KEY_ORDER) {
+    const v = parts.get(key);
+    if (v !== undefined) {
+      segments.push(`${key}:${v}`);
+    }
+  }
+
+  return `SPD*1.0*${segments.join("*")}*`;
+}
+
+/**
+ * Builds a Short Payment Descriptor 1.0 string for an invoice, or null when QR
+ * must not appear (`spayd-qr.md`: non-transfer, missing bank, credit note
+ * negative total).
  */
 export function buildSpaydPayload(invoice: Invoice): string | null {
   if (invoice.payment.method !== "transfer" || !invoice.payment.bankAccount) {
@@ -97,61 +176,30 @@ export function buildSpaydPayload(invoice: Invoice): string | null {
     return null;
   }
 
-  if (invoice.meta.currency !== "CZK") {
-    return null;
-  }
-
-  const amountStr = formatSpaydAmCz(invoice.totals.total);
-  const acc = buildAcc(invoice.payment.bankAccount);
-  const parts = new Map<string, string>();
   const messageVariables: PaymentMessageVariables = {
     number: invoice.meta.number,
     client: invoice.client.name,
     issuer: invoice.issuer.name,
   };
-  const beneficiaryMessage = renderPaymentMessageTemplate(
-    invoice.issuer.paymentQr?.beneficiaryMessageTemplate ??
-      defaultPaymentMessageTemplate(invoice.meta.language, "beneficiary"),
-    messageVariables,
-  );
-  const payerNote = renderPaymentMessageTemplate(
-    invoice.issuer.paymentQr?.payerNoteTemplate ??
-      defaultPaymentMessageTemplate(invoice.meta.language, "payer"),
-    messageVariables,
-  );
 
-  parts.set("ACC", escapeSpaydValue(acc));
-  parts.set("AM", escapeSpaydValue(amountStr));
-  parts.set("CC", escapeSpaydValue(invoice.meta.currency));
-  parts.set("RN", escapeSpaydValue(truncateAscii(invoice.issuer.name, 35)));
-  parts.set("MSG", escapeSpaydValue(truncateAscii(beneficiaryMessage, 60)));
-  parts.set("X-SELF", escapeSpaydValue(truncateAscii(payerNote, 60)));
-
-  if (invoice.payment.variableSymbol) {
-    parts.set("X-VS", escapeSpaydValue(invoice.payment.variableSymbol));
-  }
-  if (invoice.payment.constantSymbol) {
-    parts.set("X-KS", escapeSpaydValue(invoice.payment.constantSymbol));
-  }
-  if (invoice.payment.specificSymbol) {
-    parts.set("X-SS", escapeSpaydValue(invoice.payment.specificSymbol));
-  }
-
-  // Request an immediate payment when supported. Intentionally omit DT: a
-  // future due date would instruct banking apps to schedule the transfer.
-  parts.set("PT", "IP");
-
-  let out = "SPD*1.0*";
-  const segments: string[] = [];
-
-  for (const key of SPAYD_KEY_ORDER) {
-    const v = parts.get(key);
-    if (v !== undefined) {
-      segments.push(`${key}:${v}`);
-    }
-  }
-
-  out += segments.join("*");
-  out += "*";
-  return out;
+  return buildSpaydPayloadFromFacts({
+    iban: invoice.payment.bankAccount.iban,
+    bic: invoice.payment.bankAccount.bic,
+    amount: invoice.totals.total,
+    currency: invoice.meta.currency,
+    beneficiaryName: invoice.issuer.name,
+    beneficiaryMessage: renderPaymentMessageTemplate(
+      invoice.issuer.paymentQr?.beneficiaryMessageTemplate ??
+        defaultPaymentMessageTemplate(invoice.meta.language, "beneficiary"),
+      messageVariables,
+    ),
+    payerNote: renderPaymentMessageTemplate(
+      invoice.issuer.paymentQr?.payerNoteTemplate ??
+        defaultPaymentMessageTemplate(invoice.meta.language, "payer"),
+      messageVariables,
+    ),
+    variableSymbol: invoice.payment.variableSymbol,
+    constantSymbol: invoice.payment.constantSymbol,
+    specificSymbol: invoice.payment.specificSymbol,
+  });
 }
