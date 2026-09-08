@@ -954,7 +954,7 @@ and workspace looks, the in-app builder adopting the interpreter.
 
 ## Plan 36 — Payment requests and watch sessions
 
-**Status:** Not started
+**Status:** 36a shipped; 36b in implementation
 
 **Goal:** Name an amount, show a QR, and watch the money land — a live payment
 loop on top of the SPAYD QR and bank readers that already exist.

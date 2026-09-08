@@ -1,6 +1,6 @@
 # Payment requests and watch sessions
 
-**Status:** Specified, not started
+**Status:** 36a shipped; 36b in implementation
 **Decisions:** [ADR 0050](../decisions/0050-polymorphic-payment-allocations.md) · [ADR 0051](../decisions/0051-payment-requests-self-settle.md)
 **Research:** [instant QR payment acceptance](../research/instant-qr-payment-acceptance.md)
 **Siblings:** [payment ledger + Fio](./payment-ledger-fio.md) · [SPAYD QR](./spayd-qr.md)
