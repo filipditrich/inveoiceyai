@@ -15,10 +15,12 @@ import {
   type NormalizedTransactionBatch,
 } from "@invoicey/payment-core";
 
+import { isBankSyncSkip } from "./bank-sync-outcome";
 import { normalizeFioError } from "./fio-error";
 import {
   importBankTransactionBatch,
   markBankSyncFailed,
+  markBankSyncSkipped,
   markBankSyncSucceeded,
 } from "./import-bank-batch";
 import { decryptBankToken, encryptBankToken } from "./token-crypto";
@@ -236,6 +238,8 @@ export type FioSyncResult = {
   unmatchedTransactionIds: string[];
   /** Failure streak after this attempt; 0 while the connection is healthy. */
   consecutiveFailureCount: number;
+  /** The run declined to call Fio. Not a failure: never counted, never alerted. */
+  skipped?: boolean;
   error?: string;
 };
 
@@ -272,6 +276,7 @@ export async function syncFioConnection(input: {
       pendingProposalIds: [],
       unmatchedTransactionIds: [],
       consecutiveFailureCount: 0,
+      skipped: true,
       error: "sync_busy",
     };
 
@@ -324,6 +329,26 @@ export async function syncFioConnection(input: {
     return { ok: true, consecutiveFailureCount: 0, ...result };
   } catch (error) {
     const code = normalizeFioError(error);
+    const empty = {
+      imported: 0,
+      proposed: 0,
+      autoMatched: 0,
+      pendingProposalIds: [],
+      unmatchedTransactionIds: [],
+    };
+    // A rate limit — ours or Fio's — means "ask again shortly". Releasing the
+    // lease leaves the connection due on the next sweep with its streak,
+    // error code, and `next_sync_at` untouched.
+    if (isBankSyncSkip(code)) {
+      await markBankSyncSkipped({ connectionId: input.connectionId, now });
+      return {
+        ok: false,
+        ...empty,
+        consecutiveFailureCount: 0,
+        skipped: true,
+        error: code,
+      };
+    }
     const failure = await markBankSyncFailed({
       connectionId: input.connectionId,
       errorCode: code,
@@ -331,11 +356,7 @@ export async function syncFioConnection(input: {
     });
     return {
       ok: false,
-      imported: 0,
-      proposed: 0,
-      autoMatched: 0,
-      pendingProposalIds: [],
-      unmatchedTransactionIds: [],
+      ...empty,
       consecutiveFailureCount: failure.consecutiveFailureCount,
       error: code,
     };

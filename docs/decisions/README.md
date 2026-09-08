@@ -60,3 +60,5 @@ When a decision changes:
 | [0047](./0047-polar-billing-projects-into-invoicey.md)     | Polar owns commerce; Invoicey owns entitlements               | Accepted                                   |
 | [0048](./0048-guest-issuance-into-unclaimed-workspaces.md) | Guest issuance writes real invoices into unclaimed workspaces | Accepted                                   |
 | [0049](./0049-dom-look-interpreter-for-editing.md)         | DOM look interpreter for editing; react-pdf owns output       | Accepted                                   |
+| [0050](./0050-polymorphic-payment-allocations.md)          | Payment allocations settle invoices or payment requests       | Proposed                                   |
+| [0051](./0051-payment-requests-self-settle.md)             | Payment requests self-settle without the auto-confirm opt-in  | Proposed                                   |

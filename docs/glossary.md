@@ -118,6 +118,14 @@ Workspace-scoped store of normalized bank transactions, match **proposals**, and
 
 A confirmed payment fact linking money (manual or bank transaction) to an invoice for a positive amount. Reversals keep history; they do not delete rows.
 
+### Payment request
+
+_Výzva k platbě._ A live ask for a specific amount into a specific bank account, carrying its own variable symbol. It may point at an invoice or stand alone. Not a document, never sent to an authority, and distinct from a **proforma**.
+
+### Watch session
+
+The bounded window during which a bank connection is polled at its maximum safe rate so a payment can be confirmed while someone waits. Ending a watch session stops the polling, never the expectation of money.
+
 ## Document terminology
 
 ### Faktura
@@ -130,7 +138,7 @@ A confirmed payment fact linking money (manual or bank transaction) to an invoic
 
 ### Proforma
 
-**Proforma invoice** — a non-tax document used as a payment request. Similar to _zálohová faktura_ in everyday speech but with subtler legal differences. Modeled as `docType = 'proforma'`.
+**Proforma invoice** — a non-tax invoice document issued to ask for payment before a tax document exists. Similar to _zálohová faktura_ in everyday speech but with subtler legal differences. Modeled as `docType = 'proforma'`. Not a **payment request**, which is a live ask and not a document at all.
 
 ### Dobropis
 

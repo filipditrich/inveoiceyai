@@ -34,10 +34,12 @@ import { postPaymentReviewSlackCards } from "./slack-payment-dm";
 /**
  * Alert on the third consecutive failure rather than the first.
  *
- * Fio rate-limits one request per 30 seconds and occasionally 5xxs; a single
- * miss is noise. Three in a row is a connection that is actually broken, and
- * because the alert fires on the exact transition it cannot repeat while the
- * streak keeps growing.
+ * Providers occasionally 5xx, so a single miss is noise; three in a row is a
+ * connection that is actually broken. Because the alert fires on the exact
+ * transition it cannot repeat while the streak keeps growing.
+ *
+ * Rate limits never reach this counter — they are bookkept as skips, not
+ * failures (see `bank-sync-outcome.ts`), so the streak counts real breakage.
  */
 const SYNC_FAILURE_ALERT_THRESHOLD = 3;
 
