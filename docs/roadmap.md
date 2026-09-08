@@ -954,7 +954,8 @@ and workspace looks, the in-app builder adopting the interpreter.
 
 ## Plan 36 — Payment requests and watch sessions
 
-**Status:** 36a shipped; 36b in implementation
+**Status:** Done
+**Completed:** 2026-09-08
 
 **Goal:** Name an amount, show a QR, and watch the money land — a live payment
 loop on top of the SPAYD QR and bank readers that already exist.
@@ -964,23 +965,23 @@ loop on top of the SPAYD QR and bank readers that already exist.
 
 ### Exit criteria — 36a (invoice-linked)
 
-- [ ] `buildSpaydPayload` takes payment facts, not an `Invoice`; PDF output is
+- [x] `buildSpaydPayload` takes payment facts, not an `Invoice`; PDF output is
       byte-identical
-- [ ] A watch session polls at the provider's own floor (Fio 31 s, MONETA 5 s),
+- [x] A watch session polls at the provider's own floor (Fio 31 s, MONETA 5 s),
       and N watchers cost one provider request per interval
-- [ ] The cron sweep skips connections under an active watch
-- [ ] "Collect now" on an issued invoice confirms a real payment live, with no
+- [x] The cron sweep skips connections under an active watch
+- [x] "Collect now" on an issued invoice confirms a real payment live, with no
       change to the allocation schema
-- [ ] The waiting screen never shows a failure state on a timer
+- [x] The waiting screen never shows a failure state on a timer
 
 ### Exit criteria — 36b (standalone)
 
-- [ ] A payment request settles money that belongs to no invoice
-- [ ] Symbols are unique per bank account against open requests _and_ invoices
-- [ ] Exact symbol + amount self-settles without `autoConfirmExactMatches`;
+- [x] A payment request settles money that belongs to no invoice
+- [x] Symbols are unique per bank account against open requests _and_ invoices
+- [x] Exact symbol + amount self-settles without `autoConfirmExactMatches`;
       short, over, duplicate, and no-symbol credits all stay manual
-- [ ] A settled standalone request appears in dashboard revenue
-- [ ] A late credit still settles a request whose watch has long expired
+- [x] A settled standalone request appears in dashboard revenue
+- [x] A late credit still settles a request whose watch has long expired
 
 **Out of 36:** Open-amount ("tip jar") QR, non-CZK requests, issuing a document
 from a settlement, Web Push and any native app, payment initiation, and the Fio
