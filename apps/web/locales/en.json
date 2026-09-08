@@ -1845,6 +1845,7 @@
       "issueButton": "Issue",
       "editButton": "Edit",
       "duplicateButton": "Duplicate",
+      "collectButton": "Collect now",
       "markPaidButton": "Mark as paid",
       "unmarkPaidButton": "Unmark paid",
       "cancelButton": "Cancel",
@@ -1903,6 +1904,26 @@
         "total": "Total incl. VAT",
         "totalNonPayer": "Total"
       }
+    },
+    "collect": {
+      "eyebrow": "Live payment",
+      "title": "Show this QR to get paid",
+      "description": "Invoicey is watching your connected account and will confirm the payment here when the bank reports it.",
+      "back": "Back to invoice",
+      "qrLabel": "Payment QR code",
+      "invoice": "Invoice {number}",
+      "forClient": "For {client}",
+      "account": "Account",
+      "variableSymbol": "Variable symbol",
+      "copyAccount": "Copy account number",
+      "copyIban": "Copy IBAN",
+      "copyVariableSymbol": "Copy variable symbol",
+      "waiting": "Waiting for payment",
+      "waitingBody": "Keep this screen open. We’ll confirm the payment as soon as the bank reports it.",
+      "partiallyReceived": "{amount} has arrived. Waiting for the rest.",
+      "refreshInterrupted": "The bank update is taking a little longer. We’ll keep trying.",
+      "received": "Payment received",
+      "receivedBody": "{amount} is confirmed in your payment ledger."
     },
     "builder": {
       "title": "New invoice",

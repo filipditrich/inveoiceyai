@@ -500,6 +500,12 @@ export const bankConnections = pgTable(
     }),
     lastSyncErrorCode: text("last_sync_error_code"),
     nextSyncAt: timestamp("next_sync_at", { withTimezone: true }),
+    /**
+     * While in the future, someone is watching this connection for a payment,
+     * so it is polled at the provider's floor instead of the sweep cadence.
+     * Expiring a watch stops the polling, never the expectation of money.
+     */
+    watchUntil: timestamp("watch_until", { withTimezone: true }),
     consecutiveFailureCount: integer("consecutive_failure_count")
       .notNull()
       .default(0),

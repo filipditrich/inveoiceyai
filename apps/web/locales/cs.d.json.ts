@@ -1848,6 +1848,7 @@ declare const messages: {
       "issueButton": "Vystavit",
       "editButton": "Upravit",
       "duplicateButton": "Duplikovat",
+      "collectButton": "Vybrat platbu",
       "markPaidButton": "Označit zaplaceno",
       "unmarkPaidButton": "Zrušit zaplaceno",
       "cancelButton": "Stornovat",
@@ -1906,6 +1907,26 @@ declare const messages: {
         "total": "Celkem s DPH",
         "totalNonPayer": "Celkem"
       }
+    },
+    "collect": {
+      "eyebrow": "Platba živě",
+      "title": "Ukažte QR a nechte si zaplatit",
+      "description": "Invoicey sleduje propojený účet a platbu zde potvrdí, jakmile ji banka nahlásí.",
+      "back": "Zpět na fakturu",
+      "qrLabel": "QR kód pro platbu",
+      "invoice": "Faktura {number}",
+      "forClient": "Pro {client}",
+      "account": "Účet",
+      "variableSymbol": "Variabilní symbol",
+      "copyAccount": "Zkopírovat číslo účtu",
+      "copyIban": "Zkopírovat IBAN",
+      "copyVariableSymbol": "Zkopírovat variabilní symbol",
+      "waiting": "Čekáme na platbu",
+      "waitingBody": "Nechte tuto stránku otevřenou. Platbu potvrdíme, jakmile ji banka nahlásí.",
+      "partiallyReceived": "Dorazilo {amount}. Čekáme na zbytek.",
+      "refreshInterrupted": "Aktualizace z banky trvá o něco déle. Budeme to zkoušet dál.",
+      "received": "Platba dorazila",
+      "receivedBody": "Částka {amount} je potvrzená v přehledu plateb."
     },
     "builder": {
       "title": "Nová faktura",
