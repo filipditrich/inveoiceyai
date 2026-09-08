@@ -26,10 +26,11 @@ import {
 } from "drizzle-orm";
 
 import {
-  invoicePaymentAllocations,
   invoices,
   issuerBusinesses,
+  paymentAllocations,
   paymentMatchProposals,
+  paymentRequests,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import {
@@ -179,7 +180,8 @@ export async function loadDashboardMetrics(
 
   const issuedMonth = sql<string>`substring(${invoices.issueDate} from 1 for 7)`;
   const invoiceCurrency = sql<string>`coalesce(nullif(${invoices.currency}, ''), 'CZK')`;
-  const paidMonth = sql<string>`substring(${invoicePaymentAllocations.effectiveDate} from 1 for 7)`;
+  const paidMonth = sql<string>`substring(${paymentAllocations.effectiveDate} from 1 for 7)`;
+  const allocationIssuer = sql<string>`coalesce(${invoices.issuerId}, ${paymentRequests.issuerId})`;
 
   const [
     tallies,
@@ -218,18 +220,22 @@ export async function loadDashboardMetrics(
     db
       .select({
         month: paidMonth,
-        amount: sql<string>`sum(${invoicePaymentAllocations.amount})::text`,
+        amount: sql<string>`sum(${paymentAllocations.amount})::text`,
       })
-      .from(invoicePaymentAllocations)
-      .innerJoin(invoices, eq(invoices.id, invoicePaymentAllocations.invoiceId))
+      .from(paymentAllocations)
+      .leftJoin(invoices, eq(invoices.id, paymentAllocations.invoiceId))
+      .leftJoin(
+        paymentRequests,
+        eq(paymentRequests.id, paymentAllocations.paymentRequestId),
+      )
       .where(
         and(
-          eq(invoicePaymentAllocations.workspaceId, workspaceId),
-          isNull(invoicePaymentAllocations.reversedAt),
-          eq(invoicePaymentAllocations.currency, "CZK"),
-          gte(invoicePaymentAllocations.effectiveDate, chartFrom),
-          lte(invoicePaymentAllocations.effectiveDate, chartTo),
-          ...(opts.issuerId ? [eq(invoices.issuerId, opts.issuerId)] : []),
+          eq(paymentAllocations.workspaceId, workspaceId),
+          isNull(paymentAllocations.reversedAt),
+          eq(paymentAllocations.currency, "CZK"),
+          gte(paymentAllocations.effectiveDate, chartFrom),
+          lte(paymentAllocations.effectiveDate, chartTo),
+          ...(opts.issuerId ? [eq(allocationIssuer, opts.issuerId)] : []),
         ),
       )
       .groupBy(paidMonth),
@@ -349,12 +355,23 @@ export async function loadDashboardAttention(
     db
       .select({ count: sql<number>`count(*)::int` })
       .from(paymentMatchProposals)
-      .innerJoin(invoices, eq(invoices.id, paymentMatchProposals.invoiceId))
+      .leftJoin(invoices, eq(invoices.id, paymentMatchProposals.invoiceId))
+      .leftJoin(
+        paymentRequests,
+        eq(paymentRequests.id, paymentMatchProposals.paymentRequestId),
+      )
       .where(
         and(
           eq(paymentMatchProposals.workspaceId, workspaceId),
           eq(paymentMatchProposals.status, "pending"),
-          ...(opts?.issuerId ? [eq(invoices.issuerId, opts.issuerId)] : []),
+          ...(opts?.issuerId
+            ? [
+                eq(
+                  sql<string>`coalesce(${invoices.issuerId}, ${paymentRequests.issuerId})`,
+                  opts.issuerId,
+                ),
+              ]
+            : []),
         ),
       ),
     db

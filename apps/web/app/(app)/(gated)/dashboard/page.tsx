@@ -92,6 +92,13 @@ export default async function DashboardPage({
               <Button render={<Link href="/invoices/new" prefetch />} size="sm">
                 {t("newInvoice")}
               </Button>
+              <Button
+                render={<Link href="/payments/requests/new" prefetch />}
+                size="sm"
+                variant="outline"
+              >
+                {t("requestPayment")}
+              </Button>
             </>
           }
           description={t("subtitle")}

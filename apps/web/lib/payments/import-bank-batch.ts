@@ -7,7 +7,7 @@ import {
   bankAccounts,
   bankConnections,
   bankTransactions,
-  invoicePaymentAllocations,
+  paymentAllocations,
   invoices,
   paymentMatchProposals,
 } from "@invoicey/db";
@@ -17,10 +17,14 @@ import {
   isExactAutoMatchProposal,
   proposeInvoiceMatches,
   type BankProvider,
+  type MatchableInvoice,
+  type NormalizedBankTransaction,
   type NormalizedTransactionBatch,
 } from "@invoicey/payment-core";
 
+import { matchCreditAgainstPaymentRequests } from "./match-payment-requests";
 import { sendAutoMatchOwnerEmail } from "./send-auto-match-email";
+import { sendPaymentRequestSettledEmail } from "./send-payment-request-settled-email";
 
 export type BankSyncImportResult = {
   imported: number;
@@ -146,9 +150,9 @@ export async function importBankTransactionBatch(input: {
             ),
             sql`not exists (
               select 1
-              from ${invoicePaymentAllocations}
-              where ${invoicePaymentAllocations.bankTransactionId} = ${bankTransactions.id}
-                and ${invoicePaymentAllocations.reversedAt} is null
+              from ${paymentAllocations}
+              where ${paymentAllocations.bankTransactionId} = ${bankTransactions.id}
+                and ${paymentAllocations.reversedAt} is null
             )`,
           ),
         )
@@ -172,81 +176,57 @@ export async function importBankTransactionBatch(input: {
       transaction.providerTransactionId,
     );
     if (!bankTransactionId) continue;
-    const proposals = proposeInvoiceMatches({
+
+    const requestMatch = await matchCreditAgainstPaymentRequests({
+      workspaceId: input.workspaceId,
+      bankAccountId: input.bankAccountId,
+      bankTransactionId,
+      creditAmount: transaction.amount,
+      creditSymbol: transaction.variableSymbol,
+      currency: transaction.currency,
+      bookedDate: transaction.bookingDate,
+    });
+    proposed += requestMatch.proposed;
+    autoMatched += requestMatch.autoMatched;
+    pendingProposalIds.push(...requestMatch.pendingProposalIds);
+    if (requestMatch.settledRequestId) {
+      try {
+        await sendPaymentRequestSettledEmail({
+          workspaceId: input.workspaceId,
+          requestId: requestMatch.settledRequestId,
+          amount: transaction.amount,
+          bookedDate: transaction.bookingDate,
+          variableSymbol: transaction.variableSymbol,
+        });
+      } catch (error) {
+        console.error(
+          `[${input.logPrefix}] payment-request email failed`,
+          error,
+        );
+      }
+    }
+    if (requestMatch.handled) continue;
+
+    const invoiceMatch = await matchCreditAgainstInvoices({
+      workspaceId: input.workspaceId,
+      bankTransactionId,
       transaction,
       receivingIban: input.receivingIban,
       invoices: invoiceRows,
+      matcherVersion: input.matcherVersion,
+      autoConfirmExactMatches: input.autoConfirmExactMatches,
+      createdByUserId: input.createdByUserId,
+      logPrefix: input.logPrefix,
     });
-    if (proposals.length === 0) {
-      if (insertedProviderIds.has(transaction.providerTransactionId)) {
-        unmatchedTransactionIds.push(bankTransactionId);
-      }
-      continue;
-    }
-    const insertedProposals = await db
-      .insert(paymentMatchProposals)
-      .values(
-        proposals.map((proposal) => ({
-          workspaceId: input.workspaceId,
-          bankTransactionId,
-          invoiceId: proposal.invoiceId,
-          proposedAmount: proposal.proposedAmount,
-          score: proposal.score,
-          confidence: proposal.confidence,
-          reasonCodes: proposal.reasons,
-          blockerCodes: proposal.blockers,
-          matcherVersion: input.matcherVersion,
-        })),
-      )
-      .onConflictDoNothing()
-      .returning({
-        id: paymentMatchProposals.id,
-        invoiceId: paymentMatchProposals.invoiceId,
-      });
-    proposed += insertedProposals.length;
-    if (!input.autoConfirmExactMatches) {
-      pendingProposalIds.push(...insertedProposals.map((row) => row.id));
-      continue;
-    }
-    const proposalByInvoiceId = new Map(
-      proposals.map((proposal) => [proposal.invoiceId, proposal]),
-    );
-    for (const insertedProposal of insertedProposals) {
-      const proposal = proposalByInvoiceId.get(insertedProposal.invoiceId);
-      if (!proposal || !isExactAutoMatchProposal(proposal)) {
-        pendingProposalIds.push(insertedProposal.id);
-        continue;
-      }
-      const confirmation = await confirmPaymentMatchProposal({
-        workspaceId: input.workspaceId,
-        proposalId: insertedProposal.id,
-        actorType: "system",
-      });
-      if (!confirmation.ok) {
-        pendingProposalIds.push(insertedProposal.id);
-        continue;
-      }
-      autoMatched += 1;
-      if (!confirmation.becamePaid) continue;
-      try {
-        await Promise.all([
-          sendAutoMatchOwnerEmail({
-            workspaceId: input.workspaceId,
-            userId: input.createdByUserId,
-            invoiceId: confirmation.invoiceId,
-            amount: proposal.proposedAmount,
-            bookedDate: transaction.bookingDate,
-            variableSymbol: transaction.variableSymbol,
-          }),
-          sendPaymentReceivedEmailIfEnabled({
-            db,
-            workspaceId: input.workspaceId,
-            invoiceId: confirmation.invoiceId,
-          }),
-        ]);
-      } catch (error) {
-        console.error(`[${input.logPrefix}] auto-match email failed`, error);
-      }
+    proposed += invoiceMatch.proposed;
+    autoMatched += invoiceMatch.autoMatched;
+    pendingProposalIds.push(...invoiceMatch.pendingProposalIds);
+    if (
+      invoiceMatch.proposed === 0 &&
+      invoiceMatch.autoMatched === 0 &&
+      insertedProviderIds.has(transaction.providerTransactionId)
+    ) {
+      unmatchedTransactionIds.push(bankTransactionId);
     }
   }
 
@@ -265,6 +245,107 @@ export async function importBankTransactionBatch(input: {
     autoMatched,
     pendingProposalIds,
     unmatchedTransactionIds,
+  };
+}
+
+async function matchCreditAgainstInvoices(input: {
+  workspaceId: string;
+  bankTransactionId: string;
+  transaction: NormalizedBankTransaction;
+  receivingIban: string;
+  invoices: MatchableInvoice[];
+  matcherVersion: string;
+  autoConfirmExactMatches: boolean;
+  createdByUserId: string;
+  logPrefix: string;
+}): Promise<{
+  proposed: number;
+  autoMatched: number;
+  pendingProposalIds: string[];
+}> {
+  const proposals = proposeInvoiceMatches({
+    transaction: input.transaction,
+    receivingIban: input.receivingIban,
+    invoices: input.invoices,
+  });
+  if (proposals.length === 0) {
+    return { proposed: 0, autoMatched: 0, pendingProposalIds: [] };
+  }
+  const insertedProposals = await db
+    .insert(paymentMatchProposals)
+    .values(
+      proposals.map((proposal) => ({
+        workspaceId: input.workspaceId,
+        bankTransactionId: input.bankTransactionId,
+        invoiceId: proposal.invoiceId,
+        proposedAmount: proposal.proposedAmount,
+        score: proposal.score,
+        confidence: proposal.confidence,
+        reasonCodes: proposal.reasons,
+        blockerCodes: proposal.blockers,
+        matcherVersion: input.matcherVersion,
+      })),
+    )
+    .onConflictDoNothing()
+    .returning({
+      id: paymentMatchProposals.id,
+      invoiceId: paymentMatchProposals.invoiceId,
+    });
+  if (!input.autoConfirmExactMatches) {
+    return {
+      proposed: insertedProposals.length,
+      autoMatched: 0,
+      pendingProposalIds: insertedProposals.map((row) => row.id),
+    };
+  }
+  const proposalByInvoiceId = new Map(
+    proposals.map((proposal) => [proposal.invoiceId, proposal]),
+  );
+  const pendingProposalIds: string[] = [];
+  let autoMatched = 0;
+  for (const insertedProposal of insertedProposals) {
+    const proposal = insertedProposal.invoiceId
+      ? proposalByInvoiceId.get(insertedProposal.invoiceId)
+      : undefined;
+    if (!proposal || !isExactAutoMatchProposal(proposal)) {
+      pendingProposalIds.push(insertedProposal.id);
+      continue;
+    }
+    const confirmation = await confirmPaymentMatchProposal({
+      workspaceId: input.workspaceId,
+      proposalId: insertedProposal.id,
+      actorType: "system",
+    });
+    if (!confirmation.ok || !confirmation.invoiceId) {
+      pendingProposalIds.push(insertedProposal.id);
+      continue;
+    }
+    autoMatched += 1;
+    if (!confirmation.becamePaid) continue;
+    try {
+      await Promise.all([
+        sendAutoMatchOwnerEmail({
+          workspaceId: input.workspaceId,
+          userId: input.createdByUserId,
+          invoiceId: confirmation.invoiceId,
+          amount: proposal.proposedAmount,
+          bookedDate: input.transaction.bookingDate,
+          variableSymbol: input.transaction.variableSymbol,
+        }),
+        sendPaymentReceivedEmailIfEnabled({
+          db,
+          workspaceId: input.workspaceId,
+          invoiceId: confirmation.invoiceId,
+        }),
+      ]);
+    } catch (error) {
+      console.error(`[${input.logPrefix}] auto-match email failed`, error);
+    }
+  }
+  return {
+    proposed: insertedProposals.length,
+    autoMatched,
+    pendingProposalIds,
   };
 }
 

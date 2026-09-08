@@ -1615,6 +1615,7 @@ declare const messages: {
     "subtitle": "Stavy, obrat a co teď potřebuje pozornost.",
     "goToInvoices": "Přejít na faktury",
     "newInvoice": "Nová faktura",
+    "requestPayment": "Vyžádat platbu",
     "empty": {
       "title": "Vítejte v Invoicey",
       "description": "Než vytvoříte první fakturu, přidejte svou firmu.",
@@ -2895,6 +2896,19 @@ declare const messages: {
     "eyebrow": "Párování",
     "description": "Bankovní transakce zůstávají návrhy, dokud potvrdíte přiřazení. Jedna faktura může dostat částečné platby a každé storno zůstane viditelné.",
     "bankConnections": "Bankovní spojení",
+    "requestPayment": "Vyžádat platbu",
+    "requestsTitle": "Výzvy k platbě",
+    "requestsDescription": "Samostatné žádosti s vlastním variabilním symbolem. Potvrdí se, když na něj dorazí přesná částka.",
+    "requestsEmpty": "Zatím žádné výzvy k platbě.",
+    "requestUntitled": "Výzva k platbě",
+    "requestTarget": "{note}",
+    "requestMeta": "VS {vs} · {status}",
+    "notThisRequest": "Není tato výzva",
+    "requestStatus": {
+      "open": "Otevřená",
+      "settled": "Uhrazená",
+      "cancelled": "Zrušená"
+    },
     "suggestedTitle": "Navrhovaná spárování",
     "suggestedDescription": "Deterministické návrhy podle přijímacího IBAN, měny, variabilního symbolu, dlužné částky a data.",
     "suggestedEmpty": "Žádné platby nečekají na kontrolu.",
@@ -2944,13 +2958,62 @@ declare const messages: {
       "plausible_date": "Datum platby sedí"
     },
     "blockers": {
-      "ambiguous_variable_symbol": "Variabilní symbol sedí na víc faktur"
+      "ambiguous_variable_symbol": "Variabilní symbol sedí na víc faktur",
+      "already_settled": "Tato výzva je už uhrazená",
+      "ambiguous_payment_request": "Částka sedí na víc otevřených výzev"
     },
     "sources": {
       "bank_confirmed": "Spárováno z banky",
       "manual": "Přidáno ručně"
     },
     "syncNow": "Synchronizovat"
+  },
+  "PaymentRequests": {
+    "create": {
+      "eyebrow": "Výzva k platbě",
+      "title": "Vyžádat platbu",
+      "description": "Zadejte částku. Invoicey vygeneruje variabilní symbol a bude sledovat propojený účet.",
+      "amount": "Částka",
+      "amountHint": "Pouze CZK.",
+      "note": "Poznámka pro plátce",
+      "notePlaceholder": "Volitelné — zobrazí se na QR",
+      "submit": "Vytvořit výzvu",
+      "noConnection": "Nejdřív propojte CZK účet. Výzva potřebuje, kam mají peníze dorazit.",
+      "connectBank": "Bankovní spojení",
+      "invalidAmount": "Zadejte kladnou částku v CZK."
+    },
+    "wait": {
+      "eyebrow": "Platba živě",
+      "title": "Ukažte QR a nechte si zaplatit",
+      "description": "Invoicey sleduje propojený účet a platbu zde potvrdí, jakmile ji banka nahlásí.",
+      "back": "Zpět na platby",
+      "qrLabel": "QR kód pro platbu",
+      "untitled": "Výzva k platbě",
+      "account": "Účet",
+      "variableSymbol": "Variabilní symbol",
+      "copyAccount": "Zkopírovat číslo účtu",
+      "copyIban": "Zkopírovat IBAN",
+      "copyVariableSymbol": "Zkopírovat variabilní symbol",
+      "copyLink": "Zkopírovat veřejný odkaz",
+      "publicLink": "Veřejná stránka",
+      "waiting": "Čekáme na platbu",
+      "waitingBody": "Nechte tuto stránku otevřenou. Platbu potvrdíme, jakmile ji banka nahlásí.",
+      "partiallyReceived": "Dorazilo {amount}. Čekáme na zbytek.",
+      "refreshInterrupted": "Aktualizace z banky trvá o něco déle. Budeme to zkoušet dál.",
+      "received": "Platba dorazila",
+      "receivedBody": "Částka {amount} je potvrzená v přehledu plateb."
+    },
+    "public": {
+      "title": "Platba pro {issuer}",
+      "description": "Naskenujte QR nebo zkopírujte údaje. Tato stránka se sama neobnovuje.",
+      "qrLabel": "QR kód pro platbu",
+      "account": "Účet",
+      "variableSymbol": "Variabilní symbol",
+      "copyAccount": "Zkopírovat číslo účtu",
+      "copyIban": "Zkopírovat IBAN",
+      "copyVariableSymbol": "Zkopírovat variabilní symbol",
+      "missing": "Tento platební odkaz už není dostupný."
+    }
   },
   "Looks": {
     "upgradeHint": "Součást tarifu s katalogem vzhledů.",

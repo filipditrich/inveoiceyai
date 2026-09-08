@@ -30,7 +30,11 @@ const required = new Map([
   ["bank_accounts", new Set(["iban", "currency"])],
   ["bank_transactions", new Set(["provider_transaction_id", "amount"])],
   ["payment_match_proposals", new Set(["matcher_version", "status"])],
-  ["invoice_payment_allocations", new Set(["amount", "reversed_at"])],
+  [
+    "payment_allocations",
+    new Set(["amount", "reversed_at", "payment_request_id"]),
+  ],
+  ["payment_requests", new Set(["variable_symbol", "public_token", "status"])],
   ["payment_audit_events", new Set(["action", "payload_json"])],
   ["workspace_looks", new Set(["look_id", "version", "document"])],
   [
@@ -57,7 +61,8 @@ const result = await db.execute<{
       'bank_accounts',
       'bank_transactions',
       'payment_match_proposals',
-      'invoice_payment_allocations',
+      'payment_allocations',
+      'payment_requests',
       'payment_audit_events',
       'workspace_looks',
       'community_looks',

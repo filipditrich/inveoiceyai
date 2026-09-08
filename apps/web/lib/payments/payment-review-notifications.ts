@@ -5,9 +5,10 @@ import {
   bankAccounts,
   bankConnections,
   bankTransactions,
-  invoicePaymentAllocations,
+  paymentAllocations,
   invoices,
   paymentMatchProposals,
+  paymentRequests,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import {
@@ -135,6 +136,8 @@ async function loadReviewRows(summary: PaymentReviewSummary): Promise<{
           invoiceNumber: invoices.number,
           clientName: invoices.clientName,
           payloadJson: invoices.payloadJson,
+          paymentRequestId: paymentRequests.id,
+          paymentRequestMessage: paymentRequests.message,
           proposedAmount: paymentMatchProposals.proposedAmount,
           score: paymentMatchProposals.score,
           confidence: paymentMatchProposals.confidence,
@@ -151,7 +154,11 @@ async function loadReviewRows(summary: PaymentReviewSummary): Promise<{
           bankTransactions,
           eq(bankTransactions.id, paymentMatchProposals.bankTransactionId),
         )
-        .innerJoin(invoices, eq(invoices.id, paymentMatchProposals.invoiceId))
+        .leftJoin(invoices, eq(invoices.id, paymentMatchProposals.invoiceId))
+        .leftJoin(
+          paymentRequests,
+          eq(paymentRequests.id, paymentMatchProposals.paymentRequestId),
+        )
         .where(
           and(
             eq(paymentMatchProposals.workspaceId, summary.workspaceId),
@@ -163,9 +170,9 @@ async function loadReviewRows(summary: PaymentReviewSummary): Promise<{
             // `transaction_amount_exhausted`.
             sql`not exists (
               select 1
-              from ${invoicePaymentAllocations}
-              where ${invoicePaymentAllocations.bankTransactionId} = ${paymentMatchProposals.bankTransactionId}
-                and ${invoicePaymentAllocations.reversedAt} is null
+              from ${paymentAllocations}
+              where ${paymentAllocations.bankTransactionId} = ${paymentMatchProposals.bankTransactionId}
+                and ${paymentAllocations.reversedAt} is null
             )`,
           ),
         )
@@ -196,9 +203,10 @@ async function loadReviewRows(summary: PaymentReviewSummary): Promise<{
       const parsed = InvoiceSchema.safeParse(row.payloadJson);
       return {
         proposalId: row.proposalId,
-        invoiceId: row.invoiceId,
+        invoiceId: row.invoiceId ?? row.paymentRequestId ?? "",
         invoiceNumber: row.invoiceNumber ?? "—",
-        clientName: row.clientName,
+        clientName:
+          row.clientName ?? row.paymentRequestMessage ?? "Payment request",
         proposedAmount: row.proposedAmount,
         transactionAmount: row.transactionAmount,
         currency: row.currency,

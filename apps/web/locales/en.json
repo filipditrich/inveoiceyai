@@ -1612,6 +1612,7 @@
     "subtitle": "Statuses, issued volume, and what needs attention.",
     "goToInvoices": "Go to invoices",
     "newInvoice": "New invoice",
+    "requestPayment": "Request payment",
     "empty": {
       "title": "Welcome to Invoicey",
       "description": "Add your business before creating an invoice.",
@@ -2892,6 +2893,19 @@
     "eyebrow": "Reconciliation",
     "description": "Bank transactions remain suggestions until you confirm an allocation. One invoice can receive partial payments and every reversal stays visible.",
     "bankConnections": "Bank connections",
+    "requestPayment": "Request payment",
+    "requestsTitle": "Payment requests",
+    "requestsDescription": "Standalone asks with their own variable symbol. They settle when the exact amount lands on that symbol.",
+    "requestsEmpty": "No payment requests yet.",
+    "requestUntitled": "Payment request",
+    "requestTarget": "{note}",
+    "requestMeta": "VS {vs} · {status}",
+    "notThisRequest": "Not this request",
+    "requestStatus": {
+      "open": "Open",
+      "settled": "Settled",
+      "cancelled": "Cancelled"
+    },
     "suggestedTitle": "Suggested matches",
     "suggestedDescription": "Deterministic proposals based on receiving IBAN, currency, variable symbol, outstanding amount, and date.",
     "suggestedEmpty": "No payment matches need review.",
@@ -2941,13 +2955,62 @@
       "plausible_date": "Payment date fits"
     },
     "blockers": {
-      "ambiguous_variable_symbol": "Variable symbol matches more than one invoice"
+      "ambiguous_variable_symbol": "Variable symbol matches more than one invoice",
+      "already_settled": "This request is already settled",
+      "ambiguous_payment_request": "Amount matches more than one open request"
     },
     "sources": {
       "bank_confirmed": "Matched from bank",
       "manual": "Added manually"
     },
     "syncNow": "Sync now"
+  },
+  "PaymentRequests": {
+    "create": {
+      "eyebrow": "Payment request",
+      "title": "Ask for a payment",
+      "description": "Name an amount. Invoicey generates a variable symbol and watches the connected account.",
+      "amount": "Amount",
+      "amountHint": "CZK only.",
+      "note": "Note for the payer",
+      "notePlaceholder": "Optional — shown on the QR",
+      "submit": "Create request",
+      "noConnection": "Connect a CZK bank account first. A request needs somewhere for the money to land.",
+      "connectBank": "Bank connections",
+      "invalidAmount": "Enter a positive CZK amount."
+    },
+    "wait": {
+      "eyebrow": "Live payment",
+      "title": "Show this QR to get paid",
+      "description": "Invoicey is watching your connected account and will confirm the payment here when the bank reports it.",
+      "back": "Back to payments",
+      "qrLabel": "Payment QR code",
+      "untitled": "Payment request",
+      "account": "Account",
+      "variableSymbol": "Variable symbol",
+      "copyAccount": "Copy account number",
+      "copyIban": "Copy IBAN",
+      "copyVariableSymbol": "Copy variable symbol",
+      "copyLink": "Copy public link",
+      "publicLink": "Public page",
+      "waiting": "Waiting for payment",
+      "waitingBody": "Keep this screen open. We’ll confirm the payment as soon as the bank reports it.",
+      "partiallyReceived": "{amount} has arrived. Waiting for the rest.",
+      "refreshInterrupted": "The bank update is taking a little longer. We’ll keep trying.",
+      "received": "Payment received",
+      "receivedBody": "{amount} is confirmed in your payment ledger."
+    },
+    "public": {
+      "title": "Pay {issuer}",
+      "description": "Scan the QR or copy the payment details. This page does not update live.",
+      "qrLabel": "Payment QR code",
+      "account": "Account",
+      "variableSymbol": "Variable symbol",
+      "copyAccount": "Copy account number",
+      "copyIban": "Copy IBAN",
+      "copyVariableSymbol": "Copy variable symbol",
+      "missing": "This payment link is no longer available."
+    }
   },
   "Looks": {
     "upgradeHint": "Included with catalog looks.",

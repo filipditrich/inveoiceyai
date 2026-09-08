@@ -337,7 +337,7 @@ export async function confirmPaymentProposal(
     actorUserId: userId,
   });
   if (!result.ok) paymentRedirect({ error: result.error });
-  if (result.becamePaid) {
+  if (result.becamePaid && result.invoiceId) {
     try {
       await sendPaymentReceivedEmailIfEnabled({
         db,
@@ -349,6 +349,9 @@ export async function confirmPaymentProposal(
     }
   }
   revalidatePayments(result.invoiceId);
+  if (result.paymentRequestId) {
+    revalidatePath(`/payments/requests/${result.paymentRequestId}`);
+  }
   paymentRedirect({ toast: "payment_confirmed" });
 }
 
