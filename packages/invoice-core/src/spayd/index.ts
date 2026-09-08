@@ -1,6 +1,7 @@
 export {
   buildSpaydPayload,
+  buildSpaydPayloadForAmount,
   buildSpaydPayloadFromFacts,
   type SpaydPaymentFacts,
 } from "./build-spayd-payload";
-export { renderSpaydQr } from "./render-spayd-qr";
+export { renderSpaydQr, renderSpaydQrSvg } from "./render-spayd-qr";

@@ -4,6 +4,7 @@ import {
   buildSpaydPayloadFromFacts,
   type SpaydPaymentFacts,
 } from "./build-spayd-payload";
+import { renderSpaydQrSvg } from "./render-spayd-qr";
 
 const base: SpaydPaymentFacts = {
   iban: "CZ9708000000001920014539",
@@ -81,5 +82,24 @@ describe("buildSpaydPayloadFromFacts", () => {
     expect(buildSpaydPayloadFromFacts({ ...base, amount: 1210.5 })).toContain(
       "*AM:1210.50*",
     );
+  });
+});
+
+describe("renderSpaydQrSvg", () => {
+  it("returns square, CSS-sizable SVG so a held-up phone stays scannable", async () => {
+    const payload = buildSpaydPayloadFromFacts(base);
+    const svg = await renderSpaydQrSvg(payload!);
+
+    expect(svg).toContain("<svg");
+    expect(svg).toMatch(/viewBox="0 0 (\d+) \1"/u);
+    // Intrinsic sizing would fight the layout and blur the code when scaled.
+    expect(svg).not.toMatch(/\swidth="/u);
+    expect(svg).not.toMatch(/\sheight="/u);
+  });
+
+  it("stays black on white so a camera can read it in dark mode", async () => {
+    const svg = await renderSpaydQrSvg(buildSpaydPayloadFromFacts(base)!);
+    expect(svg).toContain("#ffffff");
+    expect(svg).toContain("#000000");
   });
 });

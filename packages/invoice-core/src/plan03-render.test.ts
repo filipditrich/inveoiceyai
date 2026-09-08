@@ -6,6 +6,7 @@ import {
   renderIsdoc,
   validateIsdocXml,
   buildSpaydPayload,
+  buildSpaydPayloadForAmount,
   renderSpaydQr,
   stableIsdocInvoiceUuid,
   parseCzAccountNumber,
@@ -142,6 +143,16 @@ describe("SPAYD", () => {
 
     expect(payload).toContain("*MSG:Doklad 20260001 od NFCtron s.r.o.*");
     expect(payload).toContain("*X-SELF:Platba 20260001 pro Filip Ditrich*");
+  });
+
+  it("keeps invoice payment details but asks only for the outstanding amount", () => {
+    const invoice = parseInvoice(domesticFixture);
+
+    const payload = buildSpaydPayloadForAmount(invoice, 210.5);
+
+    expect(payload).toContain("*AM:210.50*");
+    expect(payload).toContain("*X-VS:20260001*");
+    expect(payload).toContain("*MSG:Faktura 20260001 | NFCtron s.r.o.*");
   });
 
   it("deterministic PNG data URL fingerprint for QR payload", async () => {

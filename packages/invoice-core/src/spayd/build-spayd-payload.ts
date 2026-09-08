@@ -168,6 +168,14 @@ export function buildSpaydPayloadFromFacts(
  * negative total).
  */
 export function buildSpaydPayload(invoice: Invoice): string | null {
+  return buildSpaydPayloadForAmount(invoice, invoice.totals.total);
+}
+
+/** Invoice adapter used when a partial payment leaves a smaller amount due. */
+export function buildSpaydPayloadForAmount(
+  invoice: Invoice,
+  amount: number,
+): string | null {
   if (invoice.payment.method !== "transfer" || !invoice.payment.bankAccount) {
     return null;
   }
@@ -185,7 +193,7 @@ export function buildSpaydPayload(invoice: Invoice): string | null {
   return buildSpaydPayloadFromFacts({
     iban: invoice.payment.bankAccount.iban,
     bic: invoice.payment.bankAccount.bic,
-    amount: invoice.totals.total,
+    amount,
     currency: invoice.meta.currency,
     beneficiaryName: invoice.issuer.name,
     beneficiaryMessage: renderPaymentMessageTemplate(
