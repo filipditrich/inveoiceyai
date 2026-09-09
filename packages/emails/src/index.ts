@@ -7,6 +7,7 @@ export {
   renderNewSignInEmail,
   renderOverdueReminderEmail,
   renderPaymentReceivedEmail,
+  renderPaymentRequestSettledEmail,
   renderPaymentReviewDigestEmail,
   renderTokenRewardEmail,
   renderWorkspaceInviteEmail,
@@ -49,6 +50,10 @@ export {
   PaymentReceivedEmail,
   type PaymentReceivedEmailProps,
 } from "./templates/payment-received";
+export {
+  PaymentRequestSettledEmail,
+  type PaymentRequestSettledEmailProps,
+} from "./templates/payment-request-settled";
 export {
   PaymentReviewDigestEmail,
   type PaymentReviewDigestEmailProps,

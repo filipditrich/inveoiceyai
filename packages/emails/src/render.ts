@@ -30,6 +30,10 @@ import {
   type PaymentReceivedEmailProps,
 } from "./templates/payment-received";
 import {
+  PaymentRequestSettledEmail,
+  type PaymentRequestSettledEmailProps,
+} from "./templates/payment-request-settled";
+import {
   PaymentReviewDigestEmail,
   type PaymentReviewDigestEmailProps,
 } from "./templates/payment-review-digest";
@@ -54,6 +58,7 @@ export const EMAIL_TEMPLATES = [
   "overdue_reminder",
   "payment_received",
   "bank_payment_auto_matched",
+  "payment_request_settled",
   "payment_review_digest",
   "bank_sync_failed",
   "new_sign_in",
@@ -191,6 +196,24 @@ export async function renderBankPaymentAutoMatchedEmail(
       (props.locale ?? "cs") === "cs"
         ? `Platba spárována — ${props.invoiceNumber}`
         : `Payment matched — ${props.invoiceNumber}`,
+    html,
+    text,
+  };
+}
+
+export async function renderPaymentRequestSettledEmail(
+  props: PaymentRequestSettledEmailProps,
+): Promise<RenderedEmail> {
+  const element = PaymentRequestSettledEmail(props);
+  const [html, text] = await Promise.all([
+    render(element),
+    render(element, { plainText: true }),
+  ]);
+  return {
+    subject:
+      (props.locale ?? "cs") === "cs"
+        ? `Platba dorazila — ${props.amountLabel}`
+        : `Payment received — ${props.amountLabel}`,
     html,
     text,
   };

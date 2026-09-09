@@ -34,6 +34,7 @@ import {
   HashIcon,
   LandmarkIcon,
   PlusIcon,
+  QrCodeIcon,
   RefreshCwIcon,
   SparklesIcon,
   XIcon,
@@ -43,9 +44,11 @@ import Link from "next/link";
 
 import {
   bankTransactions,
-  invoicePaymentAllocations,
   invoices,
+  listPaymentRequests,
+  paymentAllocations,
   paymentMatchProposals,
+  paymentRequests,
 } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 
@@ -104,6 +107,7 @@ export default async function PaymentsPage({
     transactions,
     allocations,
     outstandingInvoices,
+    requests,
   ] = await Promise.all([
     can("payments:manage"),
     listActiveBankConnections(workspaceId),
@@ -125,14 +129,20 @@ export default async function PaymentsPage({
         invoiceId: invoices.id,
         invoiceNumber: invoices.number,
         clientName: invoices.clientName,
-        currency: invoices.currency,
+        currency: sql<string>`coalesce(${invoices.currency}, ${paymentRequests.currency})`,
+        paymentRequestId: paymentRequests.id,
+        paymentRequestMessage: paymentRequests.message,
       })
       .from(paymentMatchProposals)
       .innerJoin(
         bankTransactions,
         eq(bankTransactions.id, paymentMatchProposals.bankTransactionId),
       )
-      .innerJoin(invoices, eq(invoices.id, paymentMatchProposals.invoiceId))
+      .leftJoin(invoices, eq(invoices.id, paymentMatchProposals.invoiceId))
+      .leftJoin(
+        paymentRequests,
+        eq(paymentRequests.id, paymentMatchProposals.paymentRequestId),
+      )
       .where(
         and(
           eq(paymentMatchProposals.workspaceId, workspaceId),
@@ -152,7 +162,7 @@ export default async function PaymentsPage({
         variableSymbol: bankTransactions.variableSymbol,
         counterpartyName: bankTransactions.counterpartyName,
         message: bankTransactions.message,
-        allocated: sql<boolean>`exists(select 1 from invoice_payment_allocations a where a.bank_transaction_id = ${bankTransactions.id} and a.reversed_at is null)`,
+        allocated: sql<boolean>`exists(select 1 from payment_allocations a where a.bank_transaction_id = ${bankTransactions.id} and a.reversed_at is null)`,
       })
       .from(bankTransactions)
       .where(eq(bankTransactions.workspaceId, workspaceId))
@@ -163,20 +173,26 @@ export default async function PaymentsPage({
       .limit(50),
     db
       .select({
-        id: invoicePaymentAllocations.id,
-        invoiceId: invoicePaymentAllocations.invoiceId,
+        id: paymentAllocations.id,
+        invoiceId: paymentAllocations.invoiceId,
         invoiceNumber: invoices.number,
         clientName: invoices.clientName,
-        amount: invoicePaymentAllocations.amount,
-        currency: invoicePaymentAllocations.currency,
-        effectiveDate: invoicePaymentAllocations.effectiveDate,
-        source: invoicePaymentAllocations.source,
-        reversedAt: invoicePaymentAllocations.reversedAt,
+        paymentRequestId: paymentAllocations.paymentRequestId,
+        paymentRequestMessage: paymentRequests.message,
+        amount: paymentAllocations.amount,
+        currency: paymentAllocations.currency,
+        effectiveDate: paymentAllocations.effectiveDate,
+        source: paymentAllocations.source,
+        reversedAt: paymentAllocations.reversedAt,
       })
-      .from(invoicePaymentAllocations)
-      .innerJoin(invoices, eq(invoices.id, invoicePaymentAllocations.invoiceId))
-      .where(eq(invoicePaymentAllocations.workspaceId, workspaceId))
-      .orderBy(desc(invoicePaymentAllocations.createdAt))
+      .from(paymentAllocations)
+      .leftJoin(invoices, eq(invoices.id, paymentAllocations.invoiceId))
+      .leftJoin(
+        paymentRequests,
+        eq(paymentRequests.id, paymentAllocations.paymentRequestId),
+      )
+      .where(eq(paymentAllocations.workspaceId, workspaceId))
+      .orderBy(desc(paymentAllocations.createdAt))
       .limit(50),
     db
       .select({
@@ -196,6 +212,7 @@ export default async function PaymentsPage({
         ),
       )
       .orderBy(desc(invoices.issueDate)),
+    listPaymentRequests(db, workspaceId),
   ]);
   const sp = await searchParams;
   const locale: AppLocale = isAppLocale(localeValue) ? localeValue : "cs";
@@ -215,6 +232,11 @@ export default async function PaymentsPage({
                 </Button>
               </form>
             ) : null}
+            {canManagePayments ? (
+              <Button render={<Link href="/payments/requests/new" />}>
+                <QrCodeIcon /> {t("requestPayment")}
+              </Button>
+            ) : null}
             <Button
               render={<Link href="/settings/workspace/bank-connections" />}
               variant="outline"
@@ -228,6 +250,48 @@ export default async function PaymentsPage({
         icon={<LandmarkIcon />}
         title={t("title")}
       />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("requestsTitle")}</CardTitle>
+          <CardDescription>{t("requestsDescription")}</CardDescription>
+        </CardHeader>
+        <CardContent className="divide-y">
+          {requests.length === 0 ? (
+            <p className="py-4 text-sm text-muted-foreground">
+              {t("requestsEmpty")}
+            </p>
+          ) : (
+            requests.map((request) => (
+              <div
+                key={request.id}
+                className="flex items-center justify-between gap-3 py-3 text-sm"
+              >
+                <div className="min-w-0">
+                  <Link
+                    href={`/payments/requests/${request.id}`}
+                    className="truncate font-medium hover:underline"
+                  >
+                    {request.message?.trim() || t("requestUntitled")}
+                  </Link>
+                  <p className="text-xs text-muted-foreground">
+                    {t("requestMeta", {
+                      vs: request.variableSymbol,
+                      status: messageLookup(
+                        messages.Payments.requestStatus,
+                        request.status,
+                      ),
+                    })}
+                  </p>
+                </div>
+                <span className="font-medium tabular-nums">
+                  {money(request.amount, request.currency, locale)}
+                </span>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -265,13 +329,26 @@ export default async function PaymentsPage({
                         {proposal.counterpartyName ?? t("unknownSender")}
                       </span>
                       <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground" />
-                      <Link
-                        href={`/invoices/${proposal.invoiceId}`}
-                        className="truncate font-medium text-brand hover:underline"
-                      >
-                        {proposal.invoiceNumber ?? t("draft")} ·{" "}
-                        {proposal.clientName}
-                      </Link>
+                      {proposal.invoiceId ? (
+                        <Link
+                          href={`/invoices/${proposal.invoiceId}`}
+                          className="truncate font-medium text-brand hover:underline"
+                        >
+                          {proposal.invoiceNumber ?? t("draft")} ·{" "}
+                          {proposal.clientName}
+                        </Link>
+                      ) : (
+                        <Link
+                          href={`/payments/requests/${proposal.paymentRequestId}`}
+                          className="truncate font-medium text-brand hover:underline"
+                        >
+                          {t("requestTarget", {
+                            note:
+                              proposal.paymentRequestMessage ??
+                              t("requestUntitled"),
+                          })}
+                        </Link>
+                      )}
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-2.5 py-1 text-xs text-muted-foreground">
@@ -334,7 +411,10 @@ export default async function PaymentsPage({
                         value={proposal.id}
                       />
                       <Button type="submit" variant="outline">
-                        <XIcon /> {t("notThisInvoice")}
+                        <XIcon />{" "}
+                        {proposal.invoiceId
+                          ? t("notThisInvoice")
+                          : t("notThisRequest")}
                       </Button>
                     </form>
                   </div>
@@ -480,12 +560,25 @@ export default async function PaymentsPage({
                     className="flex items-center justify-between gap-3 py-3 text-sm"
                   >
                     <div className="min-w-0">
-                      <Link
-                        href={`/invoices/${allocation.invoiceId}`}
-                        className="truncate font-medium hover:underline"
-                      >
-                        {allocation.invoiceNumber} · {allocation.clientName}
-                      </Link>
+                      {allocation.invoiceId ? (
+                        <Link
+                          href={`/invoices/${allocation.invoiceId}`}
+                          className="truncate font-medium hover:underline"
+                        >
+                          {allocation.invoiceNumber} · {allocation.clientName}
+                        </Link>
+                      ) : (
+                        <Link
+                          href={`/payments/requests/${allocation.paymentRequestId}`}
+                          className="truncate font-medium hover:underline"
+                        >
+                          {t("requestTarget", {
+                            note:
+                              allocation.paymentRequestMessage ??
+                              t("requestUntitled"),
+                          })}
+                        </Link>
+                      )}
                       <p className="text-xs text-muted-foreground">
                         {allocation.reversedAt
                           ? t("historyMetaReversed", {

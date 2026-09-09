@@ -11,6 +11,7 @@ import {
   timestamp,
   uniqueIndex,
   uuid,
+  check,
 } from "drizzle-orm/pg-core";
 
 import { user } from "./auth-schema";
@@ -500,6 +501,12 @@ export const bankConnections = pgTable(
     }),
     lastSyncErrorCode: text("last_sync_error_code"),
     nextSyncAt: timestamp("next_sync_at", { withTimezone: true }),
+    /**
+     * While in the future, someone is watching this connection for a payment,
+     * so it is polled at the provider's floor instead of the sweep cadence.
+     * Expiring a watch stops the polling, never the expectation of money.
+     */
+    watchUntil: timestamp("watch_until", { withTimezone: true }),
     consecutiveFailureCount: integer("consecutive_failure_count")
       .notNull()
       .default(0),
@@ -591,6 +598,61 @@ export const bankAccountIssuers = pgTable(
   ],
 );
 
+/** Live ask for a specific amount into a specific account (Plan 36b). */
+export const paymentRequests = pgTable(
+  "payment_requests",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    issuerId: uuid("issuer_id")
+      .notNull()
+      .references(() => issuerBusinesses.id, { onDelete: "restrict" }),
+    bankAccountId: uuid("bank_account_id")
+      .notNull()
+      .references(() => bankAccounts.id, { onDelete: "restrict" }),
+    invoiceId: uuid("invoice_id").references(() => invoices.id, {
+      onDelete: "set null",
+    }),
+    amount: numeric("amount", { precision: 18, scale: 2 }).notNull(),
+    currency: text("currency").notNull().default("CZK"),
+    variableSymbol: text("variable_symbol").notNull(),
+    message: text("message"),
+    status: text("status").notNull().default("open"),
+    publicToken: text("public_token").notNull(),
+    createdByUserId: text("created_by_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    settledAt: timestamp("settled_at", { withTimezone: true }),
+    staleAfter: timestamp("stale_after", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex("payment_requests_account_symbol_uidx").on(
+      t.bankAccountId,
+      t.variableSymbol,
+    ),
+    uniqueIndex("payment_requests_public_token_uidx").on(t.publicToken),
+    index("payment_requests_workspace_status_idx").on(t.workspaceId, t.status),
+    index("payment_requests_workspace_created_idx").on(
+      t.workspaceId,
+      t.createdAt,
+    ),
+    check("payment_requests_amount_check", sql`${t.amount} > 0`),
+    check("payment_requests_currency_check", sql`${t.currency} = 'CZK'`),
+    check(
+      "payment_requests_status_check",
+      sql`${t.status} IN ('open', 'settled', 'cancelled')`,
+    ),
+  ],
+);
+
 /** Provider-normalized bank statement row. Provider payloads are not retained. */
 export const bankTransactions = pgTable(
   "bank_transactions",
@@ -656,9 +718,13 @@ export const paymentMatchProposals = pgTable(
     bankTransactionId: uuid("bank_transaction_id")
       .notNull()
       .references(() => bankTransactions.id, { onDelete: "cascade" }),
-    invoiceId: uuid("invoice_id")
-      .notNull()
-      .references(() => invoices.id, { onDelete: "cascade" }),
+    invoiceId: uuid("invoice_id").references(() => invoices.id, {
+      onDelete: "cascade",
+    }),
+    paymentRequestId: uuid("payment_request_id").references(
+      () => paymentRequests.id,
+      { onDelete: "cascade" },
+    ),
     proposedAmount: numeric("proposed_amount", {
       precision: 18,
       scale: 2,
@@ -681,29 +747,41 @@ export const paymentMatchProposals = pgTable(
       .notNull(),
   },
   (t) => [
-    uniqueIndex("payment_match_proposals_version_uidx").on(
-      t.bankTransactionId,
-      t.invoiceId,
-      t.matcherVersion,
-    ),
+    uniqueIndex("payment_match_proposals_invoice_version_uidx")
+      .on(t.bankTransactionId, t.invoiceId, t.matcherVersion)
+      .where(sql`${t.invoiceId} IS NOT NULL`),
+    uniqueIndex("payment_match_proposals_request_version_uidx")
+      .on(t.bankTransactionId, t.paymentRequestId, t.matcherVersion)
+      .where(sql`${t.paymentRequestId} IS NOT NULL`),
     index("payment_match_proposals_workspace_status_idx").on(
       t.workspaceId,
       t.status,
+    ),
+    check(
+      "payment_match_proposals_target_chk",
+      sql`(
+        (${t.invoiceId} IS NOT NULL AND ${t.paymentRequestId} IS NULL)
+        OR (${t.invoiceId} IS NULL AND ${t.paymentRequestId} IS NOT NULL)
+      )`,
     ),
   ],
 );
 
 /** Authoritative, append-oriented money allocation ledger. */
-export const invoicePaymentAllocations = pgTable(
-  "invoice_payment_allocations",
+export const paymentAllocations = pgTable(
+  "payment_allocations",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     workspaceId: text("workspace_id")
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
-    invoiceId: uuid("invoice_id")
-      .notNull()
-      .references(() => invoices.id, { onDelete: "cascade" }),
+    invoiceId: uuid("invoice_id").references(() => invoices.id, {
+      onDelete: "cascade",
+    }),
+    paymentRequestId: uuid("payment_request_id").references(
+      () => paymentRequests.id,
+      { onDelete: "cascade" },
+    ),
     bankTransactionId: uuid("bank_transaction_id").references(
       () => bankTransactions.id,
       { onDelete: "restrict" },
@@ -728,19 +806,30 @@ export const invoicePaymentAllocations = pgTable(
       .notNull(),
   },
   (t) => [
-    index("invoice_payment_allocations_invoice_idx").on(
+    index("payment_allocations_invoice_idx").on(t.workspaceId, t.invoiceId),
+    index("payment_allocations_request_idx").on(
       t.workspaceId,
-      t.invoiceId,
+      t.paymentRequestId,
     ),
-    index("invoice_payment_allocations_transaction_idx").on(
-      t.bankTransactionId,
-    ),
-    uniqueIndex("invoice_payment_allocations_transaction_invoice_uidx")
+    index("payment_allocations_transaction_idx").on(t.bankTransactionId),
+    uniqueIndex("payment_allocations_transaction_invoice_uidx")
       .on(t.bankTransactionId, t.invoiceId)
-      .where(sql`${t.reversedAt} IS NULL`),
-    uniqueIndex("invoice_payment_allocations_legacy_invoice_uidx")
+      .where(sql`${t.reversedAt} IS NULL AND ${t.invoiceId} IS NOT NULL`),
+    uniqueIndex("payment_allocations_transaction_request_uidx")
+      .on(t.bankTransactionId, t.paymentRequestId)
+      .where(
+        sql`${t.reversedAt} IS NULL AND ${t.paymentRequestId} IS NOT NULL`,
+      ),
+    uniqueIndex("payment_allocations_legacy_invoice_uidx")
       .on(t.invoiceId)
       .where(sql`${t.source} = 'legacy_manual' AND ${t.reversedAt} IS NULL`),
+    check(
+      "payment_allocations_target_chk",
+      sql`(
+        (${t.invoiceId} IS NOT NULL AND ${t.paymentRequestId} IS NULL)
+        OR (${t.invoiceId} IS NULL AND ${t.paymentRequestId} IS NOT NULL)
+      )`,
+    ),
   ],
 );
 

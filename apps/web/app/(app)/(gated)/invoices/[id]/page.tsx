@@ -27,6 +27,7 @@ import {
 import { SubmitButton } from "@/components/ui/submit-button";
 import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 import { requireWorkspace } from "@/lib/auth/session";
+import { can } from "@/lib/authz/can";
 import {
   applyDisplayNameTemplate,
   buildViaInvoiceyDisplayName,
@@ -41,6 +42,7 @@ import {
 import { formatInvoiceDate, formatDateTime, formatMoney } from "@/lib/format";
 import { invalidMessage } from "@/lib/invalid-message";
 import { pragueTodayIso } from "@/lib/invoice-status-sql";
+import { loadInvoiceCollection } from "@/lib/payments/invoice-collection-repository";
 import { and, eq } from "drizzle-orm";
 import {
   CopyIcon,
@@ -49,6 +51,7 @@ import {
   PencilIcon,
   ReceiptTextIcon,
   RepeatIcon,
+  ScanLineIcon,
   StampIcon,
   Trash2Icon,
   WalletCardsIcon,
@@ -142,6 +145,8 @@ export default async function InvoiceDetailPage({
     emailRows,
     suppressedRows,
     allocationRows,
+    canManagePayments,
+    collection,
   ] = await Promise.all([
     row.issuedAt ? countActiveDriveDevices(db, userId) : Promise.resolve(1),
     db
@@ -160,6 +165,8 @@ export default async function InvoiceDetailPage({
       .from(emailSuppressions)
       .where(eq(emailSuppressions.workspaceId, workspaceId)),
     listInvoicePaymentAllocations(db, workspaceId, id),
+    can("payments:manage"),
+    loadInvoiceCollection(workspaceId, id),
   ]);
   const showDriveBanner = Boolean(row.issuedAt) && driveDeviceCount === 0;
   const issuerRow = issuerRows[0];
@@ -314,6 +321,15 @@ export default async function InvoiceDetailPage({
                   {t("markPaidButton")}
                 </SubmitButton>
               </form>
+            ) : null}
+            {canManagePayments && collection && !collection.settled ? (
+              <Button
+                render={<Link href={`/invoices/${id}/collect`} prefetch />}
+                size="sm"
+              >
+                <ScanLineIcon data-icon="inline-start" />
+                {t("collectButton")}
+              </Button>
             ) : null}
 
             <ButtonGroup>

@@ -340,7 +340,7 @@ export interface DeleteExpiredGuestWorkspacesResult {
  * `workspaces` in `schema.ts` (unlike most workspace-scoped tables — compare
  * `bankConnections.workspaceId`, which does), so deleting the `workspaces`
  * row would silently leave their rows behind pointing at a dead workspace id.
- * `invoices` first because `invoice_items` and `invoice_payment_allocations`
+ * `invoices` first because `invoice_items` and `payment_allocations`
  * cascade from `invoices.id`, so deleting the parent clears both for free.
  * `guest_issues` is the one workspace-scoped table here that *does* declare
  * `onDelete: cascade` on `workspaceId` (see `guest-issuance.ts`), so it is

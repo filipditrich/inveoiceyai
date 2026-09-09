@@ -36,6 +36,7 @@ Just-in-time convention: write the remaining specs before the plan that consumes
 | `recurring.md`              | Plan 10              | Invoice templates, monthly/quarterly schedules, cron drafts (HITL)                                                                   |
 | `payment-ledger-fio.md`     | Plan 22              | Provider-neutral allocations, deterministic matching, encrypted Fio connection, sync, reconciliation UI                              |
 | `payment-ledger-moneta.md`  | Plan 23              | MONETA VIP AISP read-only adapter on the same ledger                                                                                 |
+| `payment-requests.md`       | Plan 36              | Live "ask for an amount, watch it land" loop: payment requests, watch sessions, self-settlement                                      |
 | `plans-entitlements.md`     | Plan 26              | `plans` table, entitlement resolution, managed client catalogs, token grant rules, permission catalog                                |
 | `pdf-looks.md`              | Plan 27 S0           | Look documents, Classic + Minimal, issue snapshot, Free/Pro apply gate, picker                                                       |
 | `pdf-looks-builder.md`      | Plan 28 S1           | Workspace-origin looks, structured + JSON builder, versioned `workspace_looks` rows                                                  |

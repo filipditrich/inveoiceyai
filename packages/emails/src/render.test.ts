@@ -7,6 +7,7 @@ import {
   renderNewSignInEmail,
   renderOverdueReminderEmail,
   renderPaymentReceivedEmail,
+  renderPaymentRequestSettledEmail,
   renderWorkspaceInviteEmail,
 } from "./render";
 
@@ -37,6 +38,21 @@ describe("email renders", () => {
     expect(out.html).toContain("automaticky");
     expect(out.html).toContain("1 210,00 Kč");
     expect(out.text).toContain("20260018");
+  });
+
+  it("renders a settled payment-request notification", async () => {
+    const out = await renderPaymentRequestSettledEmail({
+      userName: "Filip",
+      amountLabel: "500,00 Kč",
+      bookedDate: "8. 9. 2026",
+      variableSymbol: "9123456789",
+      note: "Workshop",
+      requestUrl: "https://invoicey.app/payments/requests/abc",
+      paymentsUrl: "https://invoicey.app/payments",
+    });
+    expect(out.subject).toContain("500,00 Kč");
+    expect(out.html).toContain("9123456789");
+    expect(out.text).toContain("Workshop");
   });
 
   it("renders invoice_sent", async () => {

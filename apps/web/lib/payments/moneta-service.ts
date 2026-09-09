@@ -24,11 +24,11 @@ import {
   markBankSyncSkipped,
   markBankSyncSucceeded,
 } from "./import-bank-batch";
+import { BANK_POLL_INTERVAL_MS } from "./provider-limits";
 import { decryptBankToken, encryptBankToken } from "./token-crypto";
 
 const MATCHER_VERSION = "moneta-v1";
 const LEASE_MS = 60_000;
-const MIN_REQUEST_INTERVAL_MS = 5_000;
 
 function pragueDate(date = new Date()): string {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -317,7 +317,8 @@ export async function syncMonetaConnection(input: {
     if (!account) throw new Error("bank_account_not_found");
     if (
       leased.lastRequestAt &&
-      now.getTime() - leased.lastRequestAt.getTime() < MIN_REQUEST_INTERVAL_MS
+      now.getTime() - leased.lastRequestAt.getTime() <
+        BANK_POLL_INTERVAL_MS.moneta
     ) {
       throw new Error("moneta_throttled_locally");
     }

@@ -444,7 +444,7 @@ async function handlePaymentDecision(
     await fail(ctx, action, `Platbu se nepodařilo potvrdit — ${result.error}`);
     return;
   }
-  if (result.becamePaid) {
+  if (result.becamePaid && result.invoiceId) {
     try {
       // No `db` handle: this module deliberately never imports the concrete
       // client, so the helper resolves one from the environment itself, the

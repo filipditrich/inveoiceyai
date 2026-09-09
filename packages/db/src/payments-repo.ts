@@ -2,10 +2,11 @@ import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import {
   bankTransactions,
-  invoicePaymentAllocations,
   invoices,
+  paymentAllocations,
   paymentAuditEvents,
   paymentMatchProposals,
+  paymentRequests,
 } from "./schema";
 import { withDbTransaction, type DbTransaction } from "./transaction";
 
@@ -14,7 +15,8 @@ export type PaymentState = "unpaid" | "partial" | "paid" | "overpaid";
 export type AllocationMutationResult =
   | {
       ok: true;
-      invoiceId: string;
+      invoiceId?: string;
+      paymentRequestId?: string;
       allocationId: string;
       paidAmount: string;
       paymentState: PaymentState;
@@ -24,9 +26,9 @@ export type AllocationMutationResult =
 
 function stateSql() {
   return sql<PaymentState>`CASE
-    WHEN coalesce(sum(${invoicePaymentAllocations.amount}) FILTER (WHERE ${invoicePaymentAllocations.reversedAt} IS NULL), 0) <= 0 THEN 'unpaid'
-    WHEN coalesce(sum(${invoicePaymentAllocations.amount}) FILTER (WHERE ${invoicePaymentAllocations.reversedAt} IS NULL), 0) < abs(${invoices.total}) THEN 'partial'
-    WHEN coalesce(sum(${invoicePaymentAllocations.amount}) FILTER (WHERE ${invoicePaymentAllocations.reversedAt} IS NULL), 0) = abs(${invoices.total}) THEN 'paid'
+    WHEN coalesce(sum(${paymentAllocations.amount}) FILTER (WHERE ${paymentAllocations.reversedAt} IS NULL), 0) <= 0 THEN 'unpaid'
+    WHEN coalesce(sum(${paymentAllocations.amount}) FILTER (WHERE ${paymentAllocations.reversedAt} IS NULL), 0) < abs(${invoices.total}) THEN 'partial'
+    WHEN coalesce(sum(${paymentAllocations.amount}) FILTER (WHERE ${paymentAllocations.reversedAt} IS NULL), 0) = abs(${invoices.total}) THEN 'paid'
     ELSE 'overpaid'
   END`;
 }
@@ -52,15 +54,15 @@ async function refreshInvoicePaymentProjection(
 
   const [projection] = await tx
     .select({
-      paidAmount: sql<string>`coalesce(sum(${invoicePaymentAllocations.amount}) FILTER (WHERE ${invoicePaymentAllocations.reversedAt} IS NULL), 0)::text`,
+      paidAmount: sql<string>`coalesce(sum(${paymentAllocations.amount}) FILTER (WHERE ${paymentAllocations.reversedAt} IS NULL), 0)::text`,
       paymentState: stateSql(),
     })
     .from(invoices)
     .leftJoin(
-      invoicePaymentAllocations,
+      paymentAllocations,
       and(
-        eq(invoicePaymentAllocations.invoiceId, invoices.id),
-        eq(invoicePaymentAllocations.workspaceId, workspaceId),
+        eq(paymentAllocations.invoiceId, invoices.id),
+        eq(paymentAllocations.workspaceId, workspaceId),
       ),
     )
     .where(
@@ -91,6 +93,101 @@ async function refreshInvoicePaymentProjection(
       before.paymentState !== "paid" &&
       before.paymentState !== "overpaid",
   };
+}
+
+function requestPaymentState(
+  requested: string,
+  allocated: string,
+): PaymentState {
+  const asked = Number(requested);
+  const paid = Number(allocated);
+  if (paid <= 0) return "unpaid";
+  if (paid < asked) return "partial";
+  if (paid === asked) return "paid";
+  return "overpaid";
+}
+
+async function refreshPaymentRequestProjection(
+  tx: DbTransaction,
+  workspaceId: string,
+  paymentRequestId: string,
+): Promise<{
+  paidAmount: string;
+  paymentState: PaymentState;
+  becamePaid: boolean;
+}> {
+  const [before] = await tx
+    .select({
+      status: paymentRequests.status,
+      amount: paymentRequests.amount,
+    })
+    .from(paymentRequests)
+    .where(
+      and(
+        eq(paymentRequests.id, paymentRequestId),
+        eq(paymentRequests.workspaceId, workspaceId),
+      ),
+    )
+    .for("update")
+    .limit(1);
+  if (!before) throw new Error("payment_request_not_found");
+
+  const [usage] = await tx
+    .select({
+      paidAmount: sql<string>`coalesce(sum(${paymentAllocations.amount}) FILTER (WHERE ${paymentAllocations.reversedAt} IS NULL), 0)::text`,
+    })
+    .from(paymentAllocations)
+    .where(
+      and(
+        eq(paymentAllocations.paymentRequestId, paymentRequestId),
+        eq(paymentAllocations.workspaceId, workspaceId),
+      ),
+    );
+  const paidAmount = usage?.paidAmount ?? "0";
+  const paymentState = requestPaymentState(before.amount, paidAmount);
+  const isSettled = paymentState === "paid" || paymentState === "overpaid";
+
+  if (before.status !== "cancelled") {
+    await tx
+      .update(paymentRequests)
+      .set({
+        status: isSettled ? "settled" : "open",
+        settledAt: isSettled
+          ? sql`coalesce(${paymentRequests.settledAt}, now())`
+          : null,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(paymentRequests.id, paymentRequestId),
+          eq(paymentRequests.workspaceId, workspaceId),
+        ),
+      );
+  }
+
+  return {
+    paidAmount,
+    paymentState,
+    becamePaid: isSettled && before.status !== "settled",
+  };
+}
+
+async function remainingOnTransaction(
+  tx: DbTransaction,
+  bankTransactionId: string,
+): Promise<number> {
+  const [usage] = await tx
+    .select({
+      allocated: sql<string>`coalesce(sum(${paymentAllocations.amount}), 0)::text`,
+    })
+    .from(paymentAllocations)
+    .where(
+      and(
+        eq(paymentAllocations.bankTransactionId, bankTransactionId),
+        isNull(paymentAllocations.reversedAt),
+      ),
+    );
+  return Number(usage?.allocated ?? 0);
 }
 
 async function addAuditEvent(
@@ -148,7 +245,7 @@ export async function createManualPaymentAllocation(input: {
       }
 
       const [allocation] = await tx
-        .insert(invoicePaymentAllocations)
+        .insert(paymentAllocations)
         .values({
           workspaceId: input.workspaceId,
           invoiceId: input.invoiceId,
@@ -158,7 +255,7 @@ export async function createManualPaymentAllocation(input: {
           effectiveDate: input.effectiveDate,
           confirmedByUserId: input.actorUserId,
         })
-        .returning({ id: invoicePaymentAllocations.id });
+        .returning({ id: paymentAllocations.id });
       if (!allocation) throw new Error("allocation_insert_failed");
 
       const projection = await refreshInvoicePaymentProjection(
@@ -202,6 +299,7 @@ export async function confirmPaymentMatchProposal(input: {
         .select({
           id: paymentMatchProposals.id,
           invoiceId: paymentMatchProposals.invoiceId,
+          paymentRequestId: paymentMatchProposals.paymentRequestId,
           bankTransactionId: paymentMatchProposals.bankTransactionId,
           amount: paymentMatchProposals.proposedAmount,
           transactionAmount: bankTransactions.amount,
@@ -233,99 +331,313 @@ export async function confirmPaymentMatchProposal(input: {
           error: "only_credit_transactions_can_be_allocated",
         };
       }
+      if (proposal.paymentRequestId) {
+        return confirmRequestProposal(tx, input, {
+          ...proposal,
+          paymentRequestId: proposal.paymentRequestId,
+        });
+      }
+      if (!proposal.invoiceId) {
+        return { ok: false, error: "proposal_target_missing" };
+      }
+      return confirmInvoiceProposal(tx, input, {
+        ...proposal,
+        invoiceId: proposal.invoiceId,
+      });
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "confirmation_failed",
+    };
+  }
+}
 
-      const [invoice] = await tx
+async function confirmInvoiceProposal(
+  tx: DbTransaction,
+  input: {
+    workspaceId: string;
+    actorUserId?: string;
+    actorType?: "user" | "system";
+  },
+  proposal: {
+    id: string;
+    invoiceId: string;
+    bankTransactionId: string;
+    amount: string;
+    transactionAmount: string;
+    bookedDate: string;
+    currency: string;
+  },
+): Promise<AllocationMutationResult> {
+  const [invoice] = await tx
+    .select({
+      currency: invoices.currency,
+      cancelledAt: invoices.cancelledAt,
+      total: invoices.total,
+      paidAmount: invoices.paidAmount,
+    })
+    .from(invoices)
+    .where(
+      and(
+        eq(invoices.id, proposal.invoiceId),
+        eq(invoices.workspaceId, input.workspaceId),
+      ),
+    )
+    .for("update")
+    .limit(1);
+  if (!invoice || invoice.cancelledAt) {
+    return { ok: false, error: "invoice_not_available" };
+  }
+  if (invoice.currency !== proposal.currency) {
+    return { ok: false, error: "currency_mismatch" };
+  }
+  const invoiceOutstanding = Math.max(
+    0,
+    Math.abs(Number(invoice.total)) - Number(invoice.paidAmount),
+  );
+  if (Number(proposal.amount) > invoiceOutstanding) {
+    return { ok: false, error: "proposal_is_stale" };
+  }
+  const allocated = await remainingOnTransaction(
+    tx,
+    proposal.bankTransactionId,
+  );
+  if (
+    allocated + Number(proposal.amount) >
+    Number(proposal.transactionAmount)
+  ) {
+    return { ok: false, error: "transaction_amount_exhausted" };
+  }
+
+  const [allocation] = await tx
+    .insert(paymentAllocations)
+    .values({
+      workspaceId: input.workspaceId,
+      invoiceId: proposal.invoiceId,
+      bankTransactionId: proposal.bankTransactionId,
+      proposalId: proposal.id,
+      source: "bank_confirmed",
+      amount: proposal.amount,
+      currency: proposal.currency,
+      effectiveDate: proposal.bookedDate,
+      confirmedByUserId: input.actorUserId,
+    })
+    .returning({ id: paymentAllocations.id });
+  if (!allocation) throw new Error("allocation_insert_failed");
+
+  await tx
+    .update(paymentMatchProposals)
+    .set({
+      status: "confirmed",
+      reviewedByUserId: input.actorUserId,
+      reviewedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(paymentMatchProposals.id, proposal.id));
+  const projection = await refreshInvoicePaymentProjection(
+    tx,
+    input.workspaceId,
+    proposal.invoiceId,
+  );
+  await addAuditEvent(tx, {
+    workspaceId: input.workspaceId,
+    action: "proposal.confirmed",
+    actorType: input.actorType ?? (input.actorUserId ? "user" : "system"),
+    actorUserId: input.actorUserId,
+    entityType: "payment_match_proposal",
+    entityId: proposal.id,
+    payload: { allocationId: allocation.id, invoiceId: proposal.invoiceId },
+  });
+  return {
+    ok: true,
+    invoiceId: proposal.invoiceId,
+    allocationId: allocation.id,
+    ...projection,
+  };
+}
+
+async function confirmRequestProposal(
+  tx: DbTransaction,
+  input: {
+    workspaceId: string;
+    actorUserId?: string;
+    actorType?: "user" | "system";
+  },
+  proposal: {
+    id: string;
+    paymentRequestId: string;
+    bankTransactionId: string;
+    amount: string;
+    transactionAmount: string;
+    bookedDate: string;
+    currency: string;
+  },
+): Promise<AllocationMutationResult> {
+  const [request] = await tx
+    .select({
+      status: paymentRequests.status,
+      amount: paymentRequests.amount,
+      currency: paymentRequests.currency,
+    })
+    .from(paymentRequests)
+    .where(
+      and(
+        eq(paymentRequests.id, proposal.paymentRequestId),
+        eq(paymentRequests.workspaceId, input.workspaceId),
+      ),
+    )
+    .for("update")
+    .limit(1);
+  if (!request || request.status === "cancelled") {
+    return { ok: false, error: "payment_request_not_available" };
+  }
+  if (request.currency !== proposal.currency) {
+    return { ok: false, error: "currency_mismatch" };
+  }
+  const current = await refreshPaymentRequestProjection(
+    tx,
+    input.workspaceId,
+    proposal.paymentRequestId,
+  );
+  if (
+    Number(proposal.amount) >
+    Math.max(0, Number(request.amount) - Number(current.paidAmount))
+  ) {
+    return { ok: false, error: "proposal_is_stale" };
+  }
+  const allocated = await remainingOnTransaction(
+    tx,
+    proposal.bankTransactionId,
+  );
+  if (
+    allocated + Number(proposal.amount) >
+    Number(proposal.transactionAmount)
+  ) {
+    return { ok: false, error: "transaction_amount_exhausted" };
+  }
+
+  const [allocation] = await tx
+    .insert(paymentAllocations)
+    .values({
+      workspaceId: input.workspaceId,
+      paymentRequestId: proposal.paymentRequestId,
+      bankTransactionId: proposal.bankTransactionId,
+      proposalId: proposal.id,
+      source: "bank_confirmed",
+      amount: proposal.amount,
+      currency: proposal.currency,
+      effectiveDate: proposal.bookedDate,
+      confirmedByUserId: input.actorUserId,
+    })
+    .returning({ id: paymentAllocations.id });
+  if (!allocation) throw new Error("allocation_insert_failed");
+
+  await tx
+    .update(paymentMatchProposals)
+    .set({
+      status: "confirmed",
+      reviewedByUserId: input.actorUserId,
+      reviewedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(paymentMatchProposals.id, proposal.id));
+  const projection = await refreshPaymentRequestProjection(
+    tx,
+    input.workspaceId,
+    proposal.paymentRequestId,
+  );
+  await addAuditEvent(tx, {
+    workspaceId: input.workspaceId,
+    action: "proposal.confirmed",
+    actorType: input.actorType ?? (input.actorUserId ? "user" : "system"),
+    actorUserId: input.actorUserId,
+    entityType: "payment_match_proposal",
+    entityId: proposal.id,
+    payload: {
+      allocationId: allocation.id,
+      paymentRequestId: proposal.paymentRequestId,
+    },
+  });
+  return {
+    ok: true,
+    paymentRequestId: proposal.paymentRequestId,
+    allocationId: allocation.id,
+    ...projection,
+  };
+}
+
+export async function createPaymentRequestAllocation(input: {
+  workspaceId: string;
+  paymentRequestId: string;
+  bankTransactionId: string;
+  amount: string;
+  currency: string;
+  effectiveDate: string;
+  actorType?: "user" | "system";
+  actorUserId?: string;
+  overAmount?: string;
+}): Promise<AllocationMutationResult> {
+  try {
+    return await withDbTransaction(async (tx) => {
+      const [request] = await tx
         .select({
-          currency: invoices.currency,
-          cancelledAt: invoices.cancelledAt,
-          total: invoices.total,
-          paidAmount: invoices.paidAmount,
+          id: paymentRequests.id,
+          status: paymentRequests.status,
+          currency: paymentRequests.currency,
         })
-        .from(invoices)
+        .from(paymentRequests)
         .where(
           and(
-            eq(invoices.id, proposal.invoiceId),
-            eq(invoices.workspaceId, input.workspaceId),
+            eq(paymentRequests.id, input.paymentRequestId),
+            eq(paymentRequests.workspaceId, input.workspaceId),
           ),
         )
         .for("update")
         .limit(1);
-      if (!invoice || invoice.cancelledAt) {
-        return { ok: false, error: "invoice_not_available" };
+      if (!request || request.status !== "open") {
+        return { ok: false, error: "payment_request_not_available" };
       }
-      if (invoice.currency !== proposal.currency) {
+      if (request.currency !== input.currency) {
         return { ok: false, error: "currency_mismatch" };
-      }
-      const invoiceOutstanding = Math.max(
-        0,
-        Math.abs(Number(invoice.total)) - Number(invoice.paidAmount),
-      );
-      if (Number(proposal.amount) > invoiceOutstanding) {
-        return { ok: false, error: "proposal_is_stale" };
-      }
-      const [transactionUsage] = await tx
-        .select({
-          allocated: sql<string>`coalesce(sum(${invoicePaymentAllocations.amount}), 0)::text`,
-        })
-        .from(invoicePaymentAllocations)
-        .where(
-          and(
-            eq(
-              invoicePaymentAllocations.bankTransactionId,
-              proposal.bankTransactionId,
-            ),
-            isNull(invoicePaymentAllocations.reversedAt),
-          ),
-        );
-      if (
-        Number(transactionUsage?.allocated ?? 0) + Number(proposal.amount) >
-        Number(proposal.transactionAmount)
-      ) {
-        return { ok: false, error: "transaction_amount_exhausted" };
       }
 
       const [allocation] = await tx
-        .insert(invoicePaymentAllocations)
+        .insert(paymentAllocations)
         .values({
           workspaceId: input.workspaceId,
-          invoiceId: proposal.invoiceId,
-          bankTransactionId: proposal.bankTransactionId,
-          proposalId: proposal.id,
+          paymentRequestId: input.paymentRequestId,
+          bankTransactionId: input.bankTransactionId,
           source: "bank_confirmed",
-          amount: proposal.amount,
-          currency: proposal.currency,
-          effectiveDate: proposal.bookedDate,
+          amount: input.amount,
+          currency: input.currency,
+          effectiveDate: input.effectiveDate,
           confirmedByUserId: input.actorUserId,
         })
-        .returning({ id: invoicePaymentAllocations.id });
+        .returning({ id: paymentAllocations.id });
       if (!allocation) throw new Error("allocation_insert_failed");
 
-      await tx
-        .update(paymentMatchProposals)
-        .set({
-          status: "confirmed",
-          reviewedByUserId: input.actorUserId,
-          reviewedAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(paymentMatchProposals.id, proposal.id));
-      const projection = await refreshInvoicePaymentProjection(
+      const projection = await refreshPaymentRequestProjection(
         tx,
         input.workspaceId,
-        proposal.invoiceId,
+        input.paymentRequestId,
       );
       await addAuditEvent(tx, {
         workspaceId: input.workspaceId,
-        action: "proposal.confirmed",
-        actorType: input.actorType ?? (input.actorUserId ? "user" : "system"),
+        action: "allocation.created",
+        actorType: input.actorType ?? "system",
         actorUserId: input.actorUserId,
-        entityType: "payment_match_proposal",
-        entityId: proposal.id,
-        payload: { allocationId: allocation.id, invoiceId: proposal.invoiceId },
+        entityType: "payment_allocation",
+        entityId: allocation.id,
+        payload: {
+          paymentRequestId: input.paymentRequestId,
+          amount: input.amount,
+          overAmount: input.overAmount ?? null,
+        },
       });
       return {
         ok: true,
-        invoiceId: proposal.invoiceId,
+        paymentRequestId: input.paymentRequestId,
         allocationId: allocation.id,
         ...projection,
       };
@@ -333,7 +645,7 @@ export async function confirmPaymentMatchProposal(input: {
   } catch (error) {
     return {
       ok: false,
-      error: error instanceof Error ? error.message : "confirmation_failed",
+      error: error instanceof Error ? error.message : "allocation_failed",
     };
   }
 }
@@ -383,29 +695,30 @@ export async function reversePaymentAllocation(input: {
     return await withDbTransaction(async (tx) => {
       const [allocation] = await tx
         .select({
-          id: invoicePaymentAllocations.id,
-          invoiceId: invoicePaymentAllocations.invoiceId,
-          proposalId: invoicePaymentAllocations.proposalId,
+          id: paymentAllocations.id,
+          invoiceId: paymentAllocations.invoiceId,
+          paymentRequestId: paymentAllocations.paymentRequestId,
+          proposalId: paymentAllocations.proposalId,
         })
-        .from(invoicePaymentAllocations)
+        .from(paymentAllocations)
         .where(
           and(
-            eq(invoicePaymentAllocations.id, input.allocationId),
-            eq(invoicePaymentAllocations.workspaceId, input.workspaceId),
-            isNull(invoicePaymentAllocations.reversedAt),
+            eq(paymentAllocations.id, input.allocationId),
+            eq(paymentAllocations.workspaceId, input.workspaceId),
+            isNull(paymentAllocations.reversedAt),
           ),
         )
         .for("update")
         .limit(1);
       if (!allocation) return { ok: false, error: "allocation_not_found" };
       await tx
-        .update(invoicePaymentAllocations)
+        .update(paymentAllocations)
         .set({
           reversedAt: new Date(),
           reversedByUserId: input.actorUserId,
           reversalReason: input.reason?.trim() || null,
         })
-        .where(eq(invoicePaymentAllocations.id, allocation.id));
+        .where(eq(paymentAllocations.id, allocation.id));
       if (allocation.proposalId) {
         await tx
           .update(paymentMatchProposals)
@@ -417,23 +730,36 @@ export async function reversePaymentAllocation(input: {
           })
           .where(eq(paymentMatchProposals.id, allocation.proposalId));
       }
-      const projection = await refreshInvoicePaymentProjection(
-        tx,
-        input.workspaceId,
-        allocation.invoiceId,
-      );
+      const projection = allocation.paymentRequestId
+        ? await refreshPaymentRequestProjection(
+            tx,
+            input.workspaceId,
+            allocation.paymentRequestId,
+          )
+        : allocation.invoiceId
+          ? await refreshInvoicePaymentProjection(
+              tx,
+              input.workspaceId,
+              allocation.invoiceId,
+            )
+          : {
+              paidAmount: "0",
+              paymentState: "unpaid" as const,
+              becamePaid: false,
+            };
       await addAuditEvent(tx, {
         workspaceId: input.workspaceId,
         action: "allocation.reversed",
         actorType: input.actorUserId ? "user" : "system",
         actorUserId: input.actorUserId,
-        entityType: "invoice_payment_allocation",
+        entityType: "payment_allocation",
         entityId: allocation.id,
         payload: { reason: input.reason ?? null },
       });
       return {
         ok: true,
-        invoiceId: allocation.invoiceId,
+        invoiceId: allocation.invoiceId ?? undefined,
+        paymentRequestId: allocation.paymentRequestId ?? undefined,
         allocationId: allocation.id,
         ...projection,
       };
@@ -457,15 +783,15 @@ export async function reverseAllInvoicePaymentAllocations(input: {
     return await withDbTransaction(async (tx) => {
       const active = await tx
         .select({
-          id: invoicePaymentAllocations.id,
-          proposalId: invoicePaymentAllocations.proposalId,
+          id: paymentAllocations.id,
+          proposalId: paymentAllocations.proposalId,
         })
-        .from(invoicePaymentAllocations)
+        .from(paymentAllocations)
         .where(
           and(
-            eq(invoicePaymentAllocations.workspaceId, input.workspaceId),
-            eq(invoicePaymentAllocations.invoiceId, input.invoiceId),
-            isNull(invoicePaymentAllocations.reversedAt),
+            eq(paymentAllocations.workspaceId, input.workspaceId),
+            eq(paymentAllocations.invoiceId, input.invoiceId),
+            isNull(paymentAllocations.reversedAt),
           ),
         )
         .for("update");
@@ -473,7 +799,7 @@ export async function reverseAllInvoicePaymentAllocations(input: {
         return { ok: false, error: "no_active_allocations" };
       const now = new Date();
       await tx
-        .update(invoicePaymentAllocations)
+        .update(paymentAllocations)
         .set({
           reversedAt: now,
           reversedByUserId: input.actorUserId,
@@ -481,9 +807,9 @@ export async function reverseAllInvoicePaymentAllocations(input: {
         })
         .where(
           and(
-            eq(invoicePaymentAllocations.workspaceId, input.workspaceId),
-            eq(invoicePaymentAllocations.invoiceId, input.invoiceId),
-            isNull(invoicePaymentAllocations.reversedAt),
+            eq(paymentAllocations.workspaceId, input.workspaceId),
+            eq(paymentAllocations.invoiceId, input.invoiceId),
+            isNull(paymentAllocations.reversedAt),
           ),
         );
       const proposalIds = active
@@ -531,12 +857,12 @@ export async function listInvoicePaymentAllocations(
 ) {
   return database
     .select()
-    .from(invoicePaymentAllocations)
+    .from(paymentAllocations)
     .where(
       and(
-        eq(invoicePaymentAllocations.workspaceId, workspaceId),
-        eq(invoicePaymentAllocations.invoiceId, invoiceId),
+        eq(paymentAllocations.workspaceId, workspaceId),
+        eq(paymentAllocations.invoiceId, invoiceId),
       ),
     )
-    .orderBy(desc(invoicePaymentAllocations.createdAt));
+    .orderBy(desc(paymentAllocations.createdAt));
 }

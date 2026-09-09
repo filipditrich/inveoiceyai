@@ -1,4 +1,5 @@
 import { isBankSyncSkip } from "@/lib/payments/bank-sync-outcome";
+import { connectionIsNotWatched } from "@/lib/payments/connection-watch";
 import { syncFioConnection } from "@/lib/payments/fio-service";
 import { syncMonetaConnection } from "@/lib/payments/moneta-service";
 import {
@@ -54,6 +55,9 @@ export async function GET(request: Request): Promise<Response> {
           isNull(bankConnections.nextSyncAt),
           lte(bankConnections.nextSyncAt, now),
         ),
+        // Someone is watching this connection and already polling it at the
+        // provider's floor. The sweep would only contend for the same slot.
+        connectionIsNotWatched(now),
       ),
     )
     .orderBy(asc(bankConnections.nextSyncAt))

@@ -28,6 +28,7 @@ Plans complement [`docs/roadmap.md`](../../docs/roadmap.md): roadmap owns phase 
 | [`plan-29-pdf-looks-s2.md`](./plan-29-pdf-looks-s2.md)                       | Plan 29 — PDF looks S2 (community publish)   |
 | [`plan-30-invoicey-drive.md`](./plan-30-invoicey-drive.md)                   | Plan 30 — Invoicey Drive (macOS companion)   |
 | [`plan-31-invoicey-cli.md`](./plan-31-invoicey-cli.md)                       | Plan 31 — Invoicey CLI                       |
+| [`plan-36-payment-requests.md`](./plan-36-payment-requests.md)               | Plan 36 — Payment requests + watch sessions  |
 
 **Naming:** `plan-NN-short-slug.md` matching roadmap Plan N. When a roadmap phase splits into sub-phases (e.g. 13a / 13b), the file name keeps the parent number and the slug disambiguates.
 

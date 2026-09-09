@@ -55,6 +55,7 @@ export {
 export {
   confirmPaymentMatchProposal,
   createManualPaymentAllocation,
+  createPaymentRequestAllocation,
   listInvoicePaymentAllocations,
   rejectPaymentMatchProposal,
   reverseAllInvoicePaymentAllocations,
@@ -62,6 +63,15 @@ export {
   type AllocationMutationResult,
   type PaymentState,
 } from "./payments-repo";
+export {
+  isPaymentSymbolTaken,
+  listOpenPaymentRequestsForAccount,
+  listPaymentRequests,
+  loadPaymentRequest,
+  loadPaymentRequestByPublicToken,
+  type PaymentRequestRow,
+  type PaymentRequestWithProgress,
+} from "./payment-requests-repo";
 export {
   SLACK_LINK_CODE_TTL_MS,
   consumeSlackLinkCode,

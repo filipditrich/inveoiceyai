@@ -5,7 +5,7 @@ import {
   ensureClient,
   invoiceImportBatches,
   invoiceItems,
-  invoicePaymentAllocations,
+  paymentAllocations,
   invoices,
   issuerBusinesses,
   issuerNumberingSchemes,
@@ -337,7 +337,7 @@ export async function insertIssuedImport(
       month: "2-digit",
       day: "2-digit",
     }).format(input.paidAt);
-    await database.insert(invoicePaymentAllocations).values({
+    await database.insert(paymentAllocations).values({
       workspaceId: input.workspaceId,
       invoiceId,
       source: "legacy_manual",

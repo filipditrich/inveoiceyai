@@ -23,10 +23,10 @@ import {
   markBankSyncSkipped,
   markBankSyncSucceeded,
 } from "./import-bank-batch";
+import { BANK_POLL_INTERVAL_MS } from "./provider-limits";
 import { decryptBankToken, encryptBankToken } from "./token-crypto";
 
 const MATCHER_VERSION = "fio-v1";
-const MIN_REQUEST_INTERVAL_MS = 31_000;
 const LEASE_MS = 60_000;
 
 function pragueDate(date = new Date()): string {
@@ -289,7 +289,7 @@ export async function syncFioConnection(input: {
     if (!account) throw new Error("bank_account_not_found");
     if (
       leased.lastRequestAt &&
-      now.getTime() - leased.lastRequestAt.getTime() < MIN_REQUEST_INTERVAL_MS
+      now.getTime() - leased.lastRequestAt.getTime() < BANK_POLL_INTERVAL_MS.fio
     ) {
       throw new Error("fio_throttled_locally");
     }
