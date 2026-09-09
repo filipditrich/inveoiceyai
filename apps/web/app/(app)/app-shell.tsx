@@ -37,6 +37,7 @@ export function AppShell({
   tokenBalance,
   uploadConfigured = true,
   canSeePayments = true,
+  canRenderInvoices = false,
   frozenReason = null,
   billingAlert = null,
 }: Readonly<{
@@ -49,6 +50,7 @@ export function AppShell({
   tokenBalance?: AppShellTokenBalance | null;
   uploadConfigured?: boolean;
   canSeePayments?: boolean;
+  canRenderInvoices?: boolean;
   frozenReason?: string | null;
   billingAlert?: { pastDue: boolean; canceling: boolean } | null;
 }>) {
@@ -68,6 +70,7 @@ export function AppShell({
       >
         <AppSidebar
           activeWorkspaceId={activeWorkspaceId}
+          canRenderInvoices={canRenderInvoices}
           canSeePayments={canSeePayments}
           defaultWorkspaceId={defaultWorkspaceId}
           isPlatformAdmin={isPlatformAdmin}
@@ -80,7 +83,7 @@ export function AppShell({
             scroll container — `overflow-hidden` here silently killed every
             `position: sticky` inside the app, header and form bars included. */}
         <SidebarInset className="flex min-w-0 flex-1 flex-col overflow-clip bg-background">
-          <SiteHeader />
+          <SiteHeader canRenderInvoices={canRenderInvoices} />
           <ToastFromSearchParams />
           {frozenReason !== null ? (
             <div className="border-b border-destructive/30 bg-destructive/5 px-4 py-3 text-sm md:px-6 lg:px-10">

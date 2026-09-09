@@ -31,6 +31,7 @@ import {
   BookOpenIcon,
   BracesIcon,
   Building2Icon,
+  FileDownIcon,
   FileTextIcon,
   FilesIcon,
   HouseIcon,
@@ -68,6 +69,7 @@ export function AppSidebar({
   tokenBalance = null,
   uploadConfigured = true,
   canSeePayments = true,
+  canRenderInvoices = false,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: { name: string; email: string; avatar: string };
@@ -80,6 +82,7 @@ export function AppSidebar({
    * the server gate on `/payments`, never instead of it.
    */
   canSeePayments?: boolean;
+  canRenderInvoices?: boolean;
   tokenBalance?: {
     giftedRemaining: number;
     monthlyRemaining: number;
@@ -131,6 +134,16 @@ export function AppSidebar({
           icon: <BracesIcon />,
           isActive: pathname.startsWith("/invoices/from-json"),
         },
+        ...(canRenderInvoices
+          ? [
+              {
+                title: t("nav.invoicesRender"),
+                url: "/invoices/render",
+                icon: <FileDownIcon />,
+                isActive: pathname.startsWith("/invoices/render"),
+              },
+            ]
+          : []),
       ],
     },
     ...(canSeePayments
@@ -215,7 +228,10 @@ export function AppSidebar({
           uploadConfigured={uploadConfigured}
           workspaces={workspaces}
         />
-        <NewInvoiceButton pathname={pathname} />
+        <NewInvoiceButton
+          canRenderInvoices={canRenderInvoices}
+          pathname={pathname}
+        />
         <AssistantSidebarTrigger />
       </SidebarHeader>
       <SidebarContent className="pt-1">

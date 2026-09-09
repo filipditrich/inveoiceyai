@@ -136,6 +136,7 @@ export async function AdminEntitlementFields({
               ["recurring", e.features.recurring],
               ["historicalImport", e.features.historicalImport],
               ["agents", e.features.agents],
+              ["invoiceRender", e.features.invoiceRender],
               ["topUpEnabled", e.ai.topUpEnabled],
             ] as const
           ).map(([name, value]) => (

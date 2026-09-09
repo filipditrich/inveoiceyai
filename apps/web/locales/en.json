@@ -1104,6 +1104,7 @@
       "invoicesAi": "Create with AI",
       "invoicesImport": "Import past invoices",
       "invoicesFromJson": "JSON invoice",
+      "invoicesRender": "Render PDFs",
       "invoicesRecurring": "Recurring invoices",
       "payments": "Payments",
       "paymentsMatching": "Matching",
@@ -1138,6 +1139,7 @@
       "issuers": "My businesses",
       "settings": "Settings",
       "fromJson": "From JSON",
+      "render": "Render PDFs",
       "ai": "AI draft",
       "import": "Import",
       "recurring": "Recurring",
@@ -1358,6 +1360,7 @@
             "recurring": "Recurring drafts",
             "historicalImport": "Historical import",
             "agents": "Slack, MCP and Invoicey",
+            "invoiceRender": "Render invoices as a service",
             "catalogLooks": "Catalog looks (Minimal and workspace builder)"
           }
         }
@@ -1644,6 +1647,7 @@
         "aiDraft": "Create invoice with AI",
         "recurring": "Recurring invoices",
         "fromJson": "JSON invoice",
+        "renderPdfs": "Render invoice PDFs",
         "import": "Import past invoices",
         "workspaceSettings": "Workspace settings",
         "looks": "Looks",
@@ -2208,6 +2212,21 @@
       "emptyPreview": "Press “Render PDF” for a preview…",
       "parseError": "Could not parse JSON: fix syntax errors and try again.",
       "validationHelp": "InvoiceSchema validates the structure and highlights errors before creating the PDF."
+    },
+    "render": {
+      "eyebrow": "Engine only",
+      "title": "Render invoice PDFs",
+      "subtitle": "Edit a JSON <code>invoices</code> array of InvoiceSchema objects. Nothing is saved — you get ISDOC.PDF files back.",
+      "backToInvoices": "← Back to Invoices",
+      "jsonLabel": "Invoice JSON",
+      "download": "Download PDFs",
+      "rendering": "Rendering…",
+      "resetSample": "Reset sample",
+      "parseError": "Could not parse JSON: fix syntax errors and try again.",
+      "help": "One invoice downloads a PDF. Two or more download a ZIP. Auth is your session or an API key — no issuers, clients, or ledger rows are created.",
+      "lockedTitle": "This is an enterprise feature",
+      "lockedBody": "Stateless invoice render (JSON in, ISDOC.PDF out) is on plans that include the invoice-render entitlement. Existing enterprise and NFCtron plan rows stay off until an admin ticks the box.",
+      "lockedCta": "See your workspace plan"
     },
     "email": {
       "send": "Send by email",
@@ -3583,6 +3602,7 @@
         "recurring": "Recurring drafts",
         "historicalImport": "Historical import",
         "agents": "Slack / MCP / Invoicey",
+        "invoiceRender": "Render invoices as a service",
         "topUpEnabled": "Token top-up"
       },
       "hints": {

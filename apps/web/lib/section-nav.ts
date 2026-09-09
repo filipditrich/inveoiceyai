@@ -86,13 +86,14 @@ function startsWithPath(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** Invoice list and invoice detail — not create, import, recurring, or JSON. */
+/** Invoice list and invoice detail — not create, import, recurring, JSON, or render. */
 export function isInvoiceListPath(pathname: string): boolean {
   if (pathname === "/invoices") return true;
   if (!pathname.startsWith("/invoices/")) return false;
   if (startsWithPath(pathname, "/invoices/recurring")) return false;
   if (startsWithPath(pathname, "/invoices/import")) return false;
   if (startsWithPath(pathname, "/invoices/from-json")) return false;
+  if (startsWithPath(pathname, "/invoices/render")) return false;
   if (startsWithPath(pathname, "/invoices/new")) return false;
   if (startsWithPath(pathname, "/invoices/ai")) return false;
   return true;
@@ -103,7 +104,8 @@ export function isInvoicesGroupPath(pathname: string): boolean {
     isInvoiceListPath(pathname) ||
     startsWithPath(pathname, "/invoices/recurring") ||
     startsWithPath(pathname, "/invoices/import") ||
-    startsWithPath(pathname, "/invoices/from-json")
+    startsWithPath(pathname, "/invoices/from-json") ||
+    startsWithPath(pathname, "/invoices/render")
   );
 }
 

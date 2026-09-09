@@ -6,6 +6,7 @@ import { SectionPager } from "@/components/layout/section-pager";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { requireWorkspace } from "@/lib/auth/session";
+import { hasEntitlement } from "@/lib/entitlements/entitlements";
 import { displayStatusWhere, pragueTodayIso } from "@/lib/invoice-status-sql";
 import {
   buildInvoiceBaseConditions,
@@ -23,7 +24,7 @@ import {
 } from "@/lib/invoices/status-summary";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import { and, count } from "drizzle-orm";
-import { FilePlusIcon, FilesIcon, SparklesIcon } from "lucide-react";
+import { FileDownIcon, FilePlusIcon, FilesIcon, SparklesIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -57,14 +58,16 @@ export default async function InvoicesPage({
 }: {
   searchParams: Search;
 }) {
-  const [sp, t, tNav, tErrors, tToasts, { workspaceId }] = await Promise.all([
-    searchParams,
-    getTranslations("Invoices.list"),
-    getTranslations("App.nav"),
-    getTranslations("Errors.invalid"),
-    getTranslations("Toasts"),
-    requireWorkspace(),
-  ]);
+  const [sp, t, tNav, tErrors, tToasts, { workspaceId }, canRenderInvoices] =
+    await Promise.all([
+      searchParams,
+      getTranslations("Invoices.list"),
+      getTranslations("App.nav"),
+      getTranslations("Errors.invalid"),
+      getTranslations("Toasts"),
+      requireWorkspace(),
+      hasEntitlement("features.invoiceRender").catch(() => false),
+    ]);
   const page = parsePage(sp.page);
   const pageSize = parsePageSize(sp.pageSize);
   const sort = parseInvoiceSort(sp.sort);
@@ -170,6 +173,15 @@ export default async function InvoicesPage({
               <SparklesIcon data-icon="inline-start" />
               {t("aiButton")}
             </AssistantOpenButton>
+            {canRenderInvoices ? (
+              <Button
+                render={<Link href="/invoices/render" prefetch />}
+                variant="outline"
+              >
+                <FileDownIcon data-icon="inline-start" />
+                {tNav("invoicesRender")}
+              </Button>
+            ) : null}
           </ButtonGroup>
         }
         description={t("subtitle")}

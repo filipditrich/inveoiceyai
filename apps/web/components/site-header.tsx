@@ -20,7 +20,11 @@ import { usePathname } from "next/navigation";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export function SiteHeader() {
+export function SiteHeader({
+  canRenderInvoices = false,
+}: {
+  canRenderInvoices?: boolean;
+}) {
   const pathname = usePathname();
   const t = useTranslations("App");
 
@@ -50,6 +54,7 @@ export function SiteHeader() {
     requests: t("breadcrumb.requests"),
     collect: t("breadcrumb.collect"),
     "from-json": t("breadcrumb.fromJson"),
+    render: t("breadcrumb.render"),
     import: t("breadcrumb.import"),
     recurring: t("breadcrumb.recurring"),
     new: t("breadcrumb.new"),
@@ -132,7 +137,7 @@ export function SiteHeader() {
           </BreadcrumbList>
         </Breadcrumb>
         <div className="flex items-center gap-1.5">
-          <CommandPalette />
+          <CommandPalette canRenderInvoices={canRenderInvoices} />
           <ThemeToggle className="size-10 sm:size-7" />
         </div>
       </div>

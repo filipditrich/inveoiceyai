@@ -1107,6 +1107,7 @@ declare const messages: {
       "invoicesAi": "Vytvořit s AI",
       "invoicesImport": "Importovat staré faktury",
       "invoicesFromJson": "Faktura z JSON",
+      "invoicesRender": "Vykreslit PDF",
       "invoicesRecurring": "Opakované faktury",
       "payments": "Platby",
       "paymentsMatching": "Párování",
@@ -1141,6 +1142,7 @@ declare const messages: {
       "issuers": "Moje firmy",
       "settings": "Nastavení",
       "fromJson": "Z JSON",
+      "render": "Vykreslit PDF",
       "ai": "AI koncept",
       "import": "Import",
       "recurring": "Opakované",
@@ -1361,6 +1363,7 @@ declare const messages: {
             "recurring": "Opakované koncepty",
             "historicalImport": "Import historie",
             "agents": "Slack, MCP a Invoicey",
+            "invoiceRender": "Vykreslení faktur jako služba",
             "catalogLooks": "Katalog vzhledů (Minimal a workspace editor)"
           }
         }
@@ -1647,6 +1650,7 @@ declare const messages: {
         "aiDraft": "Vytvořit fakturu s AI",
         "recurring": "Opakované faktury",
         "fromJson": "Faktura z JSON",
+        "renderPdfs": "Vykreslit PDF faktur",
         "import": "Importovat staré faktury",
         "workspaceSettings": "Nastavení prostoru",
         "looks": "Vzhledy",
@@ -2211,6 +2215,21 @@ declare const messages: {
       "emptyPreview": "Náhled zobrazíte tlačítkem „Vytvořit náhled PDF“.",
       "parseError": "JSON se nepodařilo zpracovat: opravte syntaxi a zkuste znovu.",
       "validationHelp": "InvoiceSchema ověří strukturu a zvýrazní chyby před vytvořením PDF."
+    },
+    "render": {
+      "eyebrow": "Jen engine",
+      "title": "Vykreslit PDF faktur",
+      "subtitle": "Upravte JSON pole <code>invoices</code> objektů InvoiceSchema. Nic se neukládá — dostanete soubory ISDOC.PDF.",
+      "backToInvoices": "← Zpět na faktury",
+      "jsonLabel": "Invoice JSON",
+      "download": "Stáhnout PDF",
+      "rendering": "Renderuji…",
+      "resetSample": "Obnovit ukázku",
+      "parseError": "JSON se nepodařilo zpracovat: opravte syntaxi a zkuste znovu.",
+      "help": "Jedna faktura stáhne PDF. Dvě a víc stáhnou ZIP. Stačí přihlášení nebo API klíč — nevznikají firmy, klienti ani záznamy v účetní knize.",
+      "lockedTitle": "Toto je enterprise funkce",
+      "lockedBody": "Stateless vykreslení faktur (JSON dovnitř, ISDOC.PDF ven) je na tarifech s oprávněním invoice-render. Existující řádky enterprise a NFCtron zůstanou vypnuté, dokud admin nezaškrtne políčko.",
+      "lockedCta": "Zobrazit tarif workspace"
     },
     "email": {
       "send": "Odeslat e-mailem",
@@ -3568,6 +3587,7 @@ declare const messages: {
         "recurring": "Opakované koncepty",
         "historicalImport": "Import historie",
         "agents": "Slack / MCP / Invoicey",
+        "invoiceRender": "Vykreslení faktur jako služba",
         "topUpEnabled": "Dobití tokenů"
       },
       "hints": {
