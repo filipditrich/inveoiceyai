@@ -2,7 +2,9 @@ import { AssistantOpenButton } from "@/components/assistant/assistant-open-butto
 import { InvoiceListTable } from "@/components/invoices/invoice-list-table";
 import { InvoiceStatusSummary } from "@/components/invoices/invoice-status-summary";
 import { PageHeader } from "@/components/layout/page-header";
+import { SectionPager } from "@/components/layout/section-pager";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { requireWorkspace } from "@/lib/auth/session";
 import { displayStatusWhere, pragueTodayIso } from "@/lib/invoice-status-sql";
 import {
@@ -21,7 +23,7 @@ import {
 } from "@/lib/invoices/status-summary";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import { and, count } from "drizzle-orm";
-import { FilesIcon } from "lucide-react";
+import { FilePlusIcon, FilesIcon, SparklesIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -55,9 +57,10 @@ export default async function InvoicesPage({
 }: {
   searchParams: Search;
 }) {
-  const [sp, t, tErrors, tToasts, { workspaceId }] = await Promise.all([
+  const [sp, t, tNav, tErrors, tToasts, { workspaceId }] = await Promise.all([
     searchParams,
     getTranslations("Invoices.list"),
+    getTranslations("App.nav"),
     getTranslations("Errors.invalid"),
     getTranslations("Toasts"),
     requireWorkspace(),
@@ -158,32 +161,19 @@ export default async function InvoicesPage({
     <div className="@container/main space-y-4">
       <PageHeader
         actions={
-          <>
-            <AssistantOpenButton size="sm">{t("aiButton")}</AssistantOpenButton>
-            <Button
-              render={<Link href="/invoices/new" prefetch />}
-              size="sm"
-              variant="outline"
-            >
+          <ButtonGroup>
+            <Button render={<Link href="/invoices/new" prefetch />}>
+              <FilePlusIcon data-icon="inline-start" />
               {t("newButton")}
             </Button>
-            <Button
-              render={<Link href="/invoices/import" prefetch />}
-              size="sm"
-              variant="outline"
-            >
-              {t("importButton")}
-            </Button>
-            <Button
-              render={<Link href="/invoices/from-json" prefetch />}
-              size="sm"
-              variant="outline"
-            >
-              {t("fromJsonButton")}
-            </Button>
-          </>
+            <AssistantOpenButton variant="outline">
+              <SparklesIcon data-icon="inline-start" />
+              {t("aiButton")}
+            </AssistantOpenButton>
+          </ButtonGroup>
         }
         description={t("subtitle")}
+        eyebrow={tNav("invoices")}
         icon={<FilesIcon />}
         title={t("title")}
       />
@@ -215,6 +205,8 @@ export default async function InvoicesPage({
         rows={pageItems}
         total={total}
       />
+
+      <SectionPager group="invoices" />
     </div>
   );
 }

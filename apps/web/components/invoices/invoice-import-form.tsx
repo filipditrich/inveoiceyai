@@ -497,7 +497,7 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
               .
             </p>
           ) : (
-            <div className="rounded-md border">
+            <div className="rounded-md border bg-card">
               <Table>
                 <TableHeader>
                   <TableRow>

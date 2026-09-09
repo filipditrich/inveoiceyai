@@ -92,7 +92,8 @@ const legacySettingsRedirects = [
   ["/settings/members", "/settings/workspace/members"],
   ["/settings/usage", "/settings/workspace/usage"],
   ["/settings/api-keys", "/settings/workspace/api-keys"],
-  ["/settings/bank-connections", "/settings/workspace/bank-connections"],
+  ["/settings/bank-connections", "/payments/connections"],
+  ["/settings/workspace/bank-connections", "/payments/connections"],
   ["/settings/integrations", "/settings/workspace/integrations"],
 ] as const;
 

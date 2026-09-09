@@ -1,9 +1,12 @@
 import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { PanelsTopLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, PanelsTopLeftIcon } from "lucide-react";
+import Link from "next/link";
 
 export function PageHeader({
   actions,
+  back,
   className,
   description,
   eyebrow,
@@ -12,6 +15,7 @@ export function PageHeader({
   title,
 }: {
   actions?: ReactNode;
+  back?: { href: string; label: ReactNode };
   className?: string;
   description?: ReactNode;
   eyebrow?: ReactNode;
@@ -21,6 +25,17 @@ export function PageHeader({
 }) {
   return (
     <header className={cn("border-b bg-transparent py-5 sm:py-6", className)}>
+      {back ? (
+        <Button
+          className="mb-3 -ml-2 text-muted-foreground"
+          render={<Link href={back.href} prefetch />}
+          size="sm"
+          variant="ghost"
+        >
+          <ArrowLeftIcon data-icon="inline-start" />
+          {back.label}
+        </Button>
+      ) : null}
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div className="flex min-w-0 items-start gap-4">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground ring-1 ring-border [&_svg]:size-4">
@@ -47,7 +62,15 @@ export function PageHeader({
              right-aligned wrap only reads well once there is room for one row. */
           <div className="flex w-full max-w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
             {filters}
-            {actions}
+            {actions ? (
+              /** header actions share the default 32px control height */
+              <div
+                className="flex flex-wrap items-center gap-2 [&_[data-slot=button]]:h-8! max-md:[&_[data-slot=button]]:h-10!"
+                data-slot="page-header-actions"
+              >
+                {actions}
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>

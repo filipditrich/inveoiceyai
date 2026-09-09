@@ -64,6 +64,7 @@ export {
   type PaymentState,
 } from "./payments-repo";
 export {
+  countPaymentRequests,
   isPaymentSymbolTaken,
   listOpenPaymentRequestsForAccount,
   listPaymentRequests,

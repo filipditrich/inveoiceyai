@@ -1,14 +1,12 @@
 import { deleteClient } from "@/actions/clients";
 import { ClientEditorForm } from "@/components/clients/client-editor-form";
 import { PageHeader } from "@/components/layout/page-header";
-import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { requireWorkspace } from "@/lib/auth/session";
 import { clientsAreManaged } from "@/lib/entitlements/managed-clients";
 import { and, eq } from "drizzle-orm";
 import { ContactRoundIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { clients } from "@invoicey/db";
@@ -38,7 +36,6 @@ export default async function ClientEditPage({
   const { workspaceId } = await requireWorkspace();
   const sp = await searchParams;
   const t = await getTranslations("Clients");
-  const tCommon = await getTranslations("Common");
 
   const hit = await db
     .select()
@@ -59,16 +56,9 @@ export default async function ClientEditPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        actions={
-          <Button
-            render={<Link href="/clients" prefetch />}
-            size="sm"
-            variant="outline"
-          >
-            ← {tCommon("back")}
-          </Button>
-        }
+        back={{ href: "/clients", label: t("back") }}
         description={snap.data.name}
+        eyebrow={t("title")}
         icon={<ContactRoundIcon />}
         title={t("editTitle")}
       />

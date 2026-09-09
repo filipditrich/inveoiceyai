@@ -32,7 +32,7 @@ export async function createPaymentRequestAction(
 
   const account = await resolveCollectingAccount(workspaceId);
   if (!account) {
-    redirect("/settings/workspace/bank-connections?error=no_bank_connection");
+    redirect("/payments/connections?error=no_bank_connection");
   }
 
   const request = await createStandalonePaymentRequest({
@@ -46,6 +46,7 @@ export async function createPaymentRequestAction(
   });
 
   revalidatePath("/payments");
+  revalidatePath("/payments/requests");
   revalidatePath("/dashboard");
   redirect(`/payments/requests/${request.id}`);
 }

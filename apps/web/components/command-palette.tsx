@@ -15,8 +15,10 @@ import {
   LayoutDashboardIcon,
   LoaderCircleIcon,
   PlusIcon,
+  QrCodeIcon,
   RepeatIcon,
   Rows3Icon,
+  ScanLineIcon,
   SearchIcon,
   Settings2Icon,
   SparklesIcon,
@@ -32,9 +34,12 @@ type CommandKey =
   | "dashboard"
   | "invoices"
   | "payments"
+  | "paymentRequests"
+  | "bankConnections"
   | "clients"
   | "issuers"
   | "newInvoice"
+  | "requestPayment"
   | "aiDraft"
   | "recurring"
   | "fromJson"
@@ -59,12 +64,30 @@ const STATIC_COMMANDS: StaticCommand[] = [
   },
   { key: "invoices", href: "/invoices", icon: <FileTextIcon />, group: "go" },
   { key: "payments", href: "/payments", icon: <LandmarkIcon />, group: "go" },
+  {
+    key: "paymentRequests",
+    href: "/payments/requests",
+    icon: <ScanLineIcon />,
+    group: "go",
+  },
+  {
+    key: "bankConnections",
+    href: "/payments/connections",
+    icon: <LandmarkIcon />,
+    group: "go",
+  },
   { key: "clients", href: "/clients", icon: <UsersIcon />, group: "go" },
   { key: "issuers", href: "/issuers", icon: <Building2Icon />, group: "go" },
   {
     key: "newInvoice",
     href: "/invoices/new",
     icon: <PlusIcon />,
+    group: "create",
+  },
+  {
+    key: "requestPayment",
+    href: "/payments/requests/new",
+    icon: <QrCodeIcon />,
     group: "create",
   },
   {

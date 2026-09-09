@@ -50,7 +50,7 @@ function DataGridMobileCards<TData extends object>({
 
   if (rows.length === 0) {
     return (
-      <p className="rounded-md border px-4 py-8 text-center text-sm text-muted-foreground md:hidden">
+      <p className="rounded-md border bg-card px-4 py-8 text-center text-sm text-muted-foreground md:hidden">
         {emptyMessage}
       </p>
     );
@@ -167,7 +167,7 @@ export function AppDataGrid<TData extends object>({
           table={table}
         />
 
-        <DataGridContainer className="hidden max-w-full min-w-0 overflow-hidden rounded-md border md:block">
+        <DataGridContainer className="hidden max-w-full min-w-0 overflow-hidden rounded-md border bg-card md:block">
           <DataGridScrollArea className="max-h-[min(70vh,720px)] max-w-full overflow-x-auto">
             <DataGridTable />
           </DataGridScrollArea>

@@ -397,7 +397,7 @@ export async function notifyBankSyncFailure(input: {
   if (recipients.length === 0) return 0;
 
   const locale: EmailLocale = "cs";
-  const connectionsUrl = `${appOrigin()}/settings/workspace/bank-connections`;
+  const connectionsUrl = `${appOrigin()}/payments/connections`;
   const rendered = await renderBankSyncFailedEmail({
     userName: "",
     providerLabel: providerLabel(connection.provider),

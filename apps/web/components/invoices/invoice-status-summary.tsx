@@ -49,7 +49,7 @@ export async function InvoiceStatusSummary({
         return (
           <Link
             className={cn(
-              "rounded-md border px-3 py-3 transition-colors hover:bg-muted/40",
+              "rounded-md border bg-card px-3 py-3 transition-colors hover:bg-muted/40",
               active && "ring-2 ring-ring",
               b.status === "cancelled" && "opacity-80",
             )}

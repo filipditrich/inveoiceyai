@@ -164,7 +164,7 @@ function OverduePreview({
   if (rows.length === 0) return null;
 
   return (
-    <ul className="mt-2 divide-y rounded-md border">
+    <ul className="mt-2 divide-y rounded-md border bg-card">
       {rows.map((row) => (
         <li key={row.id}>
           <Link

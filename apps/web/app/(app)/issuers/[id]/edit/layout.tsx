@@ -7,7 +7,6 @@ import { requireWorkspace } from "@/lib/auth/session";
 import { loadIssuerForEdit } from "@/lib/load-issuer";
 import { BriefcaseBusinessIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
 type Params = Promise<{ id: string }>;
 
@@ -36,7 +35,6 @@ export default async function IssuerEditLayout({
               <input name="id" type="hidden" value={id} />
               <SubmitButton
                 pendingLabel={tTable("setDefault")}
-                size="sm"
                 variant="outline"
               >
                 {tTable("setDefault")}
@@ -44,15 +42,9 @@ export default async function IssuerEditLayout({
             </form>
           )
         }
+        back={{ href: "/issuers", label: t("back") }}
         description={t("editSectionsHint")}
-        eyebrow={
-          <Link
-            className="underline-offset-4 hover:text-foreground hover:underline"
-            href="/issuers"
-          >
-            {t("title")}
-          </Link>
-        }
+        eyebrow={t("title")}
         icon={<BriefcaseBusinessIcon />}
         title={issuer.snapshot.name}
       />

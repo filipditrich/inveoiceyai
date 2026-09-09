@@ -51,7 +51,7 @@ export default async function DashboardPage({
       <div className="flex flex-1 flex-col py-6">
         <PageHeader
           actions={
-            <Button render={<Link href="/welcome" prefetch />} size="sm">
+            <Button render={<Link href="/welcome" prefetch />}>
               {t("empty.cta")}
             </Button>
           }
@@ -84,17 +84,15 @@ export default async function DashboardPage({
             <>
               <Button
                 render={<Link href="/invoices" prefetch />}
-                size="sm"
                 variant="outline"
               >
                 {t("goToInvoices")}
               </Button>
-              <Button render={<Link href="/invoices/new" prefetch />} size="sm">
+              <Button render={<Link href="/invoices/new" prefetch />}>
                 {t("newInvoice")}
               </Button>
               <Button
                 render={<Link href="/payments/requests/new" prefetch />}
-                size="sm"
                 variant="outline"
               >
                 {t("requestPayment")}

@@ -1,13 +1,16 @@
 import { InvoiceImportForm } from "@/components/invoices/invoice-import-form";
 import { PageHeader } from "@/components/layout/page-header";
+import { SectionPager } from "@/components/layout/section-pager";
 import { requireWorkspace } from "@/lib/auth/session";
 import { loadIssuerOptions } from "@/lib/load-parties";
 import { FileUpIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
 export default async function InvoiceImportPage() {
-  const t = await getTranslations("Invoices.import");
+  const [t, tNav] = await Promise.all([
+    getTranslations("Invoices.import"),
+    getTranslations("App.nav"),
+  ]);
   const { workspaceId } = await requireWorkspace();
   const issuers = await loadIssuerOptions(workspaceId);
 
@@ -15,13 +18,7 @@ export default async function InvoiceImportPage() {
     <div className="@container/main space-y-4">
       <PageHeader
         description={t("subtitle")}
-        eyebrow={
-          <span>
-            <Link className="hover:underline" href="/invoices">
-              {t("backLink")}
-            </Link>
-          </span>
-        }
+        eyebrow={tNav("invoices")}
         icon={<FileUpIcon />}
         title={t("title")}
       />
@@ -31,6 +28,7 @@ export default async function InvoiceImportPage() {
           name: i.snapshot.name,
         }))}
       />
+      <SectionPager group="invoices" />
     </div>
   );
 }

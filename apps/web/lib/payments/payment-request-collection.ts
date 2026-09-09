@@ -13,6 +13,7 @@ import { buildSpaydPayloadFromFacts } from "@invoicey/invoice-core";
 import { IssuerSnapshotSchema } from "@invoicey/invoice-core/schema";
 
 import { resolveCollectionProgress } from "./invoice-collection";
+import { requestPaymentState } from "./request-payment-state";
 
 export type PaymentRequestCollection = {
   requestId: string;
@@ -31,18 +32,6 @@ export type PaymentRequestCollection = {
   qrPayload: string;
   issuerName: string;
 };
-
-function requestPaymentState(
-  status: string,
-  requested: string,
-  allocated: string,
-): "unpaid" | "partial" | "paid" | "overpaid" {
-  if (status === "settled") {
-    return Number(allocated) > Number(requested) ? "overpaid" : "paid";
-  }
-  if (Number(allocated) > 0) return "partial";
-  return "unpaid";
-}
 
 export async function loadPaymentRequestCollection(
   workspaceId: string,
@@ -120,7 +109,7 @@ export async function loadPaymentRequestCollection(
     requestedAmount: request.amount,
     paidAmount: progress.paidAmount,
     outstandingAmount: progress.outstandingAmount,
-    settled: request.status === "settled" || progress.settled,
+    settled: progress.settled,
     paymentState,
     qrPayload,
     issuerName,

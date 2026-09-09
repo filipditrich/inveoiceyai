@@ -9,7 +9,6 @@ import {
   GiftIcon,
   HardDriveIcon,
   KeyRoundIcon,
-  LandmarkIcon,
   PlugZapIcon,
   Rows3Icon,
   ShieldCheckIcon,
@@ -42,7 +41,6 @@ interface SettingsLink {
     | "usage"
     | "billing"
     | "apiKeys"
-    | "bankConnections"
     | "integrations"
     | "looks";
   exact: boolean;
@@ -112,12 +110,6 @@ const WORKSPACE_LINKS: SettingsLink[] = [
     key: "apiKeys",
     exact: false,
     icon: KeyRoundIcon,
-  },
-  {
-    href: "/settings/workspace/bank-connections",
-    key: "bankConnections",
-    exact: false,
-    icon: LandmarkIcon,
   },
   {
     href: "/settings/workspace/integrations",

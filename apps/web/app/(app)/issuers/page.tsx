@@ -61,7 +61,7 @@ export default async function IssuersPage({
     <div className="space-y-4">
       <PageHeader
         actions={
-          <Button render={<Link href="/issuers/new" prefetch />} size="sm">
+          <Button render={<Link href="/issuers/new" prefetch />}>
             {t("newButton")}
           </Button>
         }
@@ -73,7 +73,7 @@ export default async function IssuersPage({
       {err ? <p className="text-sm text-destructive">{err}</p> : null}
 
       {items.length === 0 ? (
-        <div className="rounded-md border border-dashed p-8 text-center">
+        <div className="rounded-md border border-dashed bg-card p-8 text-center">
           <p className="mb-3 text-sm text-muted-foreground">{t("empty")}</p>
           <Button render={<Link href="/welcome" prefetch />} size="sm">
             {t("createFirst")}

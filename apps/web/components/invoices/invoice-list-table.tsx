@@ -432,7 +432,7 @@ export function InvoiceListTable({
         {rows.length > 0 ? (
           rows.map((row) => <InvoiceMobileCard key={row.id} row={row} />)
         ) : (
-          <p className="rounded-md border px-4 py-8 text-center text-sm text-muted-foreground">
+          <p className="rounded-md border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
             {t("empty")}{" "}
             <Link className="text-primary underline" href="/invoices/new">
               {t("createFirst")}
