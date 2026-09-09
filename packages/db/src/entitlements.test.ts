@@ -115,6 +115,38 @@ describe("plan seeds", () => {
 });
 
 describe("readBooleanEntitlement", () => {
+  it("defaults invoiceRender to false when a plan row predates the key", () => {
+    const stale = {
+      ...BASE_ENTITLEMENTS,
+      features: {
+        bankConnections: false,
+        recurring: true,
+        historicalImport: true,
+        agents: true,
+      },
+    };
+    expect(resolveEntitlements(stale).features.invoiceRender).toBe(false);
+  });
+
+  it("seeds invoiceRender on enterprise and nfctron only", () => {
+    expect(
+      PLAN_SEEDS.find((plan) => plan.key === "free")!.entitlements.features
+        .invoiceRender,
+    ).toBe(false);
+    expect(
+      PLAN_SEEDS.find((plan) => plan.key === "pro")!.entitlements.features
+        .invoiceRender,
+    ).toBe(false);
+    expect(
+      PLAN_SEEDS.find((plan) => plan.key === "enterprise")!.entitlements
+        .features.invoiceRender,
+    ).toBe(true);
+    expect(
+      PLAN_SEEDS.find((plan) => plan.key === "nfctron")!.entitlements.features
+        .invoiceRender,
+    ).toBe(true);
+  });
+
   it("reads feature flags and the top-up flag by path", () => {
     const pro = PLAN_SEEDS.find((plan) => plan.key === "pro")!.entitlements;
     expect(readBooleanEntitlement(pro, "features.bankConnections")).toBe(true);

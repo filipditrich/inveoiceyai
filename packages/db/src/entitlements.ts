@@ -59,6 +59,8 @@ export const EntitlementsSchema = z.object({
     historicalImport: z.boolean(),
     /** Slack, MCP, and Eve as one switch — they meter against the same tokens. */
     agents: z.boolean(),
+    /** Stateless InvoiceSchema → ISDOC.PDF render API and /invoices/render. */
+    invoiceRender: z.boolean(),
   }),
   looks: z.object({
     /**
@@ -100,6 +102,7 @@ export const BASE_ENTITLEMENTS: Entitlements = {
     recurring: true,
     historicalImport: true,
     agents: true,
+    invoiceRender: false,
   },
   looks: { apply: "classic" },
   auth: { allowedEmailDomains: [] },
@@ -108,6 +111,16 @@ export const BASE_ENTITLEMENTS: Entitlements = {
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** Fill feature keys added after a plan row was written, so parse stays valid. */
+function withBaseFeatures(value: unknown): unknown {
+  if (!isPlainObject(value)) return value;
+  const features = isPlainObject(value.features) ? value.features : {};
+  return {
+    ...value,
+    features: { ...BASE_ENTITLEMENTS.features, ...features },
+  };
 }
 
 /**
@@ -123,7 +136,7 @@ export function resolveEntitlements(
   planEntitlements: unknown,
   overrides?: unknown,
 ): Entitlements {
-  const base = EntitlementsSchema.parse(planEntitlements);
+  const base = EntitlementsSchema.parse(withBaseFeatures(planEntitlements));
   if (!isPlainObject(overrides)) {
     return base;
   }
@@ -174,8 +187,8 @@ export function computeEntitlementOverrides(
   planEntitlements: unknown,
   next: unknown,
 ): EntitlementOverrides | null {
-  const plan = EntitlementsSchema.parse(planEntitlements);
-  const parsed = EntitlementsSchema.parse(next);
+  const plan = EntitlementsSchema.parse(withBaseFeatures(planEntitlements));
+  const parsed = EntitlementsSchema.parse(withBaseFeatures(next));
   const overrides: EntitlementOverrides = {};
 
   /** SAFETY: a parsed Entitlements blob only enumerates schema section keys. */
