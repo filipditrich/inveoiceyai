@@ -260,6 +260,13 @@ async function applySubscriptionSnapshot(
   }
 
   if (paidAccessEnded(subscription)) {
+    const [workspace] = await db
+      .select({ billingAuthority: workspaces.billingAuthority })
+      .from(workspaces)
+      .where(eq(workspaces.id, workspaceId))
+      .limit(1);
+    /** Admin takeover left this workspace on manual — do not claw back to Free. */
+    if (workspace?.billingAuthority !== "polar") return;
     const fallback = await getDefaultPlan(db);
     await assignWorkspacePlan(db, {
       workspaceId,
@@ -291,6 +298,26 @@ async function assignPolarPlan(
   workspaceId: string,
   offerKey: BillingOfferKey,
 ): Promise<void> {
+  const [workspace] = await db
+    .select({ billingAuthority: workspaces.billingAuthority })
+    .from(workspaces)
+    .where(eq(workspaces.id, workspaceId))
+    .limit(1);
+
+  /**
+   * After admin detach, authority is `manual` while a Polar subscription row
+   * may still exist. Do not reclaim. First checkout has no subscription row
+   * yet, so Polar may still place the workspace under its authority (ADR 0047).
+   */
+  if (workspace?.billingAuthority === "manual") {
+    const [existingSub] = await db
+      .select({ id: billingSubscriptions.id })
+      .from(billingSubscriptions)
+      .where(eq(billingSubscriptions.workspaceId, workspaceId))
+      .limit(1);
+    if (existingSub) return;
+  }
+
   const planKey = planKeyForOffer(offerKey);
   if (!planKey) return;
   const plan = await getPlanByKey(db, planKey);
