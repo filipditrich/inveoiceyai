@@ -281,6 +281,22 @@ export function createLookStyleIr(theme: LookTheme) {
     },
     paymentInstructionsBefore: { marginTop: 14, marginBottom: 8 },
     paymentInstructionsAfter: { marginTop: 10 },
+    payabilityNotice: {
+      marginTop: compact ? 8 : 12,
+      marginBottom: compact ? 6 : 8,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      borderWidth: 1,
+      borderColor: ink,
+    },
+    payabilityNoticeText: {
+      fontFamily: LOOK_FONT_SANS,
+      fontSize: fs(8.5, factor),
+      fontWeight: 700,
+      color: ink,
+      textAlign: "center",
+      lineHeight: 1.35,
+    },
     paySectionHeading: {
       fontFamily: LOOK_FONT_SANS,
       fontSize: fs(8, factor),

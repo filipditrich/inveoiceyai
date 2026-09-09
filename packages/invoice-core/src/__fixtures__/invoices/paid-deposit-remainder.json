@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "docType": "invoice",
+    "number": "20260002",
+    "issueDate": "2026-08-20",
+    "dueDate": "2026-09-03",
+    "duzp": "2026-08-16",
+    "language": "cs",
+    "currency": "CZK",
+    "issuedBy": { "name": "Ivan", "gender": "him", "label": "Vystavil" },
+    "footer": {
+      "text": "Vystaveno přes Invoicey",
+      "href": "https://invoicey.app/"
+    }
+  },
+  "issuer": {
+    "id": "a11c1111-1111-4111-8111-111111111111",
+    "name": "Společnost s.r.o.",
+    "ico": "11111111",
+    "dic": "CZ11111111",
+    "address": {
+      "street": "Ukázková 1",
+      "city": "Praha",
+      "zip": "110 00",
+      "country": "CZ"
+    },
+    "bank": {
+      "accountNumber": "1920014539/0800",
+      "iban": "CZ9708000000001920014539",
+      "bic": "GIBACZPX"
+    },
+    "vatPayer": true,
+    "contactEmail": "fakturace@spolecnost.example"
+  },
+  "client": {
+    "id": "b22c2222-2222-4222-8222-222222222222",
+    "name": "Testovací odběratel",
+    "ico": "22222222",
+    "address": {
+      "street": "Odběratelská 2",
+      "city": "Brno",
+      "zip": "602 00",
+      "country": "CZ"
+    }
+  },
+  "vat": {
+    "mode": "regular",
+    "suppliesAbroad": "none"
+  },
+  "payment": {
+    "method": "transfer",
+    "methodLabel": "Úhrada zálohou",
+    "payability": "due",
+    "bankAccount": {
+      "accountNumber": "1920014539/0800",
+      "iban": "CZ9708000000001920014539",
+      "bic": "GIBACZPX"
+    },
+    "variableSymbol": "20260002"
+  },
+  "items": [
+    {
+      "position": 1,
+      "description": "Provize pořadateli",
+      "quantity": 1,
+      "unit": "ks",
+      "unitPriceWithoutVat": 65255,
+      "vatRate": 21,
+      "lineSubtotal": 65255,
+      "lineVat": 13703.55,
+      "lineTotal": 78958.55
+    },
+    {
+      "position": 2,
+      "description": "Fixní poplatek",
+      "quantity": 1,
+      "unit": "ks",
+      "unitPriceWithoutVat": 10000,
+      "vatRate": 21,
+      "lineSubtotal": 10000,
+      "lineVat": 2100,
+      "lineTotal": 12100
+    },
+    {
+      "position": 3,
+      "description": "Uhrazená záloha",
+      "quantity": -1,
+      "unit": "ks",
+      "unitPriceWithoutVat": 10000,
+      "vatRate": 0,
+      "lineSubtotal": -10000,
+      "lineVat": 0,
+      "lineTotal": -10000
+    }
+  ],
+  "totals": {
+    "subtotal": 65255,
+    "vatBreakdown": [{ "rate": 21, "base": 75255, "vat": 15803.55 }],
+    "vatTotal": 15803.55,
+    "total": 81058.55
+  },
+  "notes": "Fakturoid sample F0C0D5K3397. Záloha is a 0% deduction line; remainder stays due."
+}

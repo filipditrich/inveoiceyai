@@ -1,5 +1,10 @@
 import type { InvoiceLabels } from "../labels";
-import type { Invoice, InvoiceCurrency, InvoiceLanguage } from "../schema";
+import type {
+  Invoice,
+  InvoiceCurrency,
+  InvoiceLanguage,
+  InvoicePayability,
+} from "../schema";
 import { currencyDisplaySuffix } from "../schema";
 
 export function formatInvoiceMoneyAmount(n: number, locale: string): string {
@@ -90,8 +95,75 @@ export function paymentMethodLabel(
       return labels.payCashShort;
     case "card":
       return labels.payCardShort;
+    case "offset":
+      return labels.payOffsetShort;
     default: {
       const _never: never = method;
+      return _never;
+    }
+  }
+}
+
+export function paymentMethodFullLabel(
+  method: Invoice["payment"]["method"],
+  labels: InvoiceLabels,
+): string {
+  switch (method) {
+    case "transfer":
+      return labels.payTransfer;
+    case "cash":
+      return labels.payCash;
+    case "card":
+      return labels.payCard;
+    case "offset":
+      return labels.payOffset;
+    default: {
+      const _never: never = method;
+      return _never;
+    }
+  }
+}
+
+export function invoicePayability(invoice: Invoice): InvoicePayability {
+  if (invoice.payment.payability) return invoice.payment.payability;
+  if (invoice.totals.total === 0) {
+    return invoice.payment.method === "offset" ? "do_not_pay" : "already_paid";
+  }
+  return "due";
+}
+
+export function invoiceIsSettled(invoice: Invoice): boolean {
+  return invoicePayability(invoice) !== "due";
+}
+
+export function paymentDisplayLabel(
+  invoice: Invoice,
+  labels: InvoiceLabels,
+  variant: "short" | "full" = "short",
+): string {
+  const custom = invoice.payment.methodLabel?.trim();
+  if (custom) return custom;
+  return variant === "full"
+    ? paymentMethodFullLabel(invoice.payment.method, labels)
+    : paymentMethodLabel(invoice.payment.method, labels);
+}
+
+export function paymentNoticeText(
+  invoice: Invoice,
+  labels: InvoiceLabels,
+): string | null {
+  const custom = invoice.payment.notice?.trim();
+  if (custom) return custom;
+  const payability = invoicePayability(invoice);
+  switch (payability) {
+    case "do_not_pay":
+      return labels.doNotPayNotice;
+    case "already_paid":
+      return labels.alreadyPaidNotice;
+    case "due":
+      return null;
+    default: {
+      const _never: never = payability;
       return _never;
     }
   }

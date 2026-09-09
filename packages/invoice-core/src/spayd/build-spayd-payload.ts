@@ -1,3 +1,4 @@
+import { invoiceIsSettled } from "../looks/format-invoice";
 import type { Invoice } from "../schema";
 
 /** SPAYD 1.0 segment order for stable payloads (after SPD*1.0*). */
@@ -176,6 +177,9 @@ export function buildSpaydPayloadForAmount(
   invoice: Invoice,
   amount: number,
 ): string | null {
+  if (invoiceIsSettled(invoice)) {
+    return null;
+  }
   if (invoice.payment.method !== "transfer" || !invoice.payment.bankAccount) {
     return null;
   }

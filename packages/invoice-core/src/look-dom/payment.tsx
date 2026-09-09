@@ -1,6 +1,11 @@
 import React from "react";
 
-import { formatIbanDisplay, paymentMethodLabel } from "../looks/format-invoice";
+import {
+  formatIbanDisplay,
+  invoiceIsSettled,
+  paymentDisplayLabel,
+  paymentNoticeText,
+} from "../looks/format-invoice";
 import { parseInlineMarkdown } from "../pdf/inline-markdown";
 import { cssFromLookBox } from "./css";
 import { LookBox, LookText } from "./field";
@@ -38,11 +43,22 @@ export function renderPayment(ctx: LookDomCtx, compact: boolean) {
   return compact ? renderPaymentCompact(ctx) : renderPaymentFull(ctx);
 }
 
+function renderPayabilityNotice(ctx: LookDomCtx): React.ReactElement | null {
+  const notice = paymentNoticeText(ctx.invoice, ctx.labels);
+  if (!notice) return null;
+  return (
+    <LookBox style={ctx.styles.payabilityNotice}>
+      <LookText style={ctx.styles.payabilityNoticeText}>{notice}</LookText>
+    </LookBox>
+  );
+}
+
 function renderPaymentCompact(ctx: LookDomCtx): React.ReactElement | null {
   const { invoice: inv, labels, styles, onEdit, placeholders } = ctx;
   const transfer = inv.payment.method === "transfer" && inv.payment.bankAccount;
   return (
     <LookBox lookBlock="payment" style={styles.partyMeta}>
+      {renderPayabilityNotice(ctx)}
       {inv.payment.method === "transfer" ? (
         <DomKv
           first
@@ -70,7 +86,7 @@ function renderPaymentCompact(ctx: LookDomCtx): React.ReactElement | null {
         first={inv.payment.method !== "transfer"}
         k={labels.paymentMethod}
         styles={styles}
-        v={paymentMethodLabel(inv.payment.method, labels)}
+        v={paymentDisplayLabel(inv, labels, "short")}
       />
     </LookBox>
   );
@@ -83,6 +99,7 @@ function renderPaymentFull(ctx: LookDomCtx): React.ReactElement {
   const instructionsAfter = inv.payment.instructionsAfter?.trim() || null;
   return (
     <LookBox lookBlock="payment">
+      {renderPayabilityNotice(ctx)}
       {instructionsBefore ? (
         <LookBox style={styles.paymentInstructionsBefore}>
           {markdown(instructionsBefore, styles)}
@@ -133,13 +150,13 @@ function renderPaymentFull(ctx: LookDomCtx): React.ReactElement {
             <DomPaymentKv
               k={labels.paymentMethod}
               styles={styles}
-              v={paymentMethodLabel(inv.payment.method, labels)}
+              v={paymentDisplayLabel(inv, labels, "short")}
             />
           </LookBox>
-        ) : inv.payment.method === "cash" ? (
-          <LookText style={styles.payMethodTxt}>{labels.payCash}</LookText>
         ) : (
-          <LookText style={styles.payMethodTxt}>{labels.payCard}</LookText>
+          <LookText style={styles.payMethodTxt}>
+            {paymentDisplayLabel(inv, labels, "full")}
+          </LookText>
         )}
       </LookBox>
       {instructionsAfter ? (
@@ -153,6 +170,7 @@ function renderPaymentFull(ctx: LookDomCtx): React.ReactElement {
 
 export function renderQr(ctx: LookDomCtx): React.ReactElement | null {
   if (!ctx.look.theme.showQr || !ctx.assets.qrDataUrl) return null;
+  if (invoiceIsSettled(ctx.invoice)) return null;
   const qrBox = cssFromLookBox(ctx.styles.qr);
   return (
     <LookBox lookBlock="qr">

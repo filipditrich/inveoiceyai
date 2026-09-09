@@ -68,11 +68,32 @@ export function renderSignature(ctx: LookDomCtx): React.ReactElement | null {
   );
 }
 
-export function renderFooter(ctx: LookDomCtx): React.ReactElement {
+function renderFooterBrand(ctx: LookDomCtx): React.ReactElement | null {
+  const footer = ctx.invoice.meta.footer;
+  if (footer?.hide) return null;
+  const href = footer?.href?.trim() || INVOICEY_SITE_URL;
+  const text = footer?.text?.trim();
+  return (
+    <a href={href} style={cssFromLookText(ctx.styles.footerBrand)}>
+      {text ? (
+        text
+      ) : (
+        <>
+          {ctx.labels.issuedVia}{" "}
+          <LookText style={ctx.styles.footerBrandStrong}>Invoicey</LookText>
+        </>
+      )}
+    </a>
+  );
+}
+
+export function renderFooter(ctx: LookDomCtx): React.ReactElement | null {
   const issuedBy = ctx.invoice.meta.issuedBy;
   const issuedByLine = issuedBy
     ? issuedByFooterLine(ctx.invoice.meta.language, issuedBy)
     : null;
+  const brand = renderFooterBrand(ctx);
+  if (!issuedByLine && !brand) return null;
   return (
     <LookBox
       extra={issuedByLine ? { justifyContent: "space-between" } : undefined}
@@ -82,13 +103,7 @@ export function renderFooter(ctx: LookDomCtx): React.ReactElement {
       {issuedByLine ? (
         <LookText style={ctx.styles.footerIssuedBy}>{issuedByLine}</LookText>
       ) : null}
-      <a
-        href={INVOICEY_SITE_URL}
-        style={cssFromLookText(ctx.styles.footerBrand)}
-      >
-        {ctx.labels.issuedVia}{" "}
-        <LookText style={ctx.styles.footerBrandStrong}>Invoicey</LookText>
-      </a>
+      {brand}
     </LookBox>
   );
 }
