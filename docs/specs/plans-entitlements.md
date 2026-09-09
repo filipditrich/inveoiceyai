@@ -140,6 +140,7 @@ const EntitlementsSchema = z.object({
     recurring: z.boolean(),
     historicalImport: z.boolean(),
     agents: z.boolean(), // Slack + MCP + Eve as one switch
+    invoiceRender: z.boolean(), // JSON → ISDOC.PDF; enterprise / nfctron seeds
   }),
   looks: z.object({
     apply: z.enum(["classic", "catalog"]),

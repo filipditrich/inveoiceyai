@@ -107,6 +107,7 @@ For each `items[]` (sorted by `position`):
 | `transfer`       | `42`               | Transfer branch: `PaymentDueDate`, BankAccount group (`ID` = local account number, `BankCode`, `Name`, `IBAN`, `BIC` — empty string when BIC unknown; XSD requires the element), then optional `VariableSymbol` / `ConstantSymbol` / `SpecificSymbol` |
 | `cash`           | `10`               | Cash/card branch: stub `DocumentID` + `IssueDate`                                                                                                                                                                                                     |
 | `card`           | `48`               | Same stub branch as cash                                                                                                                                                                                                                              |
+| `offset`         | `97`               | Zápočet (UN/CEFACT 4461 clearing between partners): `PaymentDueDate`, `DocumentID` = invoice number, `IssueDate`                                                                                                                                      |
 
 `parseCzAccountNumber` splits `accountNumber` (`prefix-num/bank` or `num/bank`); invalid input **throws** (validated invoices already match `BankAccountSchema`).
 
