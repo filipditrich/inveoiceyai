@@ -86,5 +86,9 @@ export {
 } from "./style-ir";
 export {
   formatInvoiceDateIsoLocal,
+  invoiceIsSettled,
+  invoicePayability,
   parseInvoiceDateInput,
+  paymentDisplayLabel,
+  paymentNoticeText,
 } from "./format-invoice";

@@ -8,6 +8,7 @@ import {
   listUserWorkspaces,
 } from "@/lib/auth/workspaces";
 import { can } from "@/lib/authz/can";
+import { hasEntitlement } from "@/lib/entitlements/entitlements";
 import { CLAIM_COOKIE_NAME } from "@/lib/generator/claim-cookie";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -45,6 +46,7 @@ export default async function AppShellLayout({
     defaultWorkspaceId,
     tokenSummary,
     canSeePayments,
+    canRenderInvoices,
     freeze,
     billingState,
   ] = await Promise.all([
@@ -59,6 +61,7 @@ export default async function AppShellLayout({
     // Hides the payments nav for a member without the permission. The route
     // itself is gated too — this only avoids offering a dead end (ADR 0038).
     can("payments:read").catch(() => false),
+    hasEntitlement("features.invoiceRender").catch(() => false),
     getWorkspaceFreeze(db, workspaceId).catch((error: unknown) => {
       console.error("[app-shell] freeze state unavailable", error);
       return null;
@@ -77,6 +80,7 @@ export default async function AppShellLayout({
           ? { pastDue: billingState.pastDue, canceling: billingState.canceling }
           : null
       }
+      canRenderInvoices={canRenderInvoices}
       canSeePayments={canSeePayments}
       defaultWorkspaceId={defaultWorkspaceId}
       frozenReason={

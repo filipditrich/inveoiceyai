@@ -148,6 +148,8 @@ function paymentMethodFromCode(code: string): Invoice["payment"]["method"] {
       return "cash";
     case "48":
       return "card";
+    case "97":
+      return "offset";
     case "42":
     default:
       return "transfer";

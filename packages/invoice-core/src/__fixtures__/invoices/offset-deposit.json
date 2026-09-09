@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "docType": "invoice",
+    "number": "20260002",
+    "issueDate": "2026-08-20",
+    "dueDate": "2026-08-20",
+    "duzp": "2026-08-16",
+    "language": "cs",
+    "currency": "CZK",
+    "issuedBy": { "name": "Ivan", "gender": "him", "label": "Vystavil" },
+    "footer": {
+      "text": "Vystaveno přes Invoicey",
+      "href": "https://invoicey.app/"
+    }
+  },
+  "issuer": {
+    "id": "ccf1329f-e606-4c06-bc50-fd612f81af7f",
+    "name": "DAKABEN s.r.o.",
+    "ico": "05560934",
+    "dic": "CZ05560934",
+    "address": {
+      "street": "17. listopadu 549",
+      "city": "Mladá Vožice",
+      "zip": "391 43",
+      "country": "CZ"
+    },
+    "bank": {
+      "accountNumber": "5058469349/0800",
+      "iban": "CZ8508000000005058469349",
+      "bic": "GIBACZPX"
+    },
+    "vatPayer": true,
+    "contactEmail": "spokr.tabor@seznam.cz",
+    "registryNote": "Společnost zapsaná v obchodním rejstříku Krajského soudu v Českých Budějovicích, oddíl C, vložka 25447"
+  },
+  "client": {
+    "id": "b73d5510-98cd-43f9-a031-d71703e491f7",
+    "name": "MrFly s.r.o.",
+    "ico": "19084609",
+    "dic": "CZ19084609",
+    "address": {
+      "street": "U Školky 669",
+      "city": "Velké Popovice",
+      "zip": "251 69",
+      "country": "CZ"
+    },
+    "contactEmail": "mrflyfries@gmail.com"
+  },
+  "vat": {
+    "mode": "regular",
+    "suppliesAbroad": "none"
+  },
+  "payment": {
+    "method": "offset",
+    "methodLabel": "Úhrada zálohou",
+    "payability": "do_not_pay",
+    "notice": "Tuto fakturu neplaťte. Částka je uhrazena zápočtem z přijaté zálohy.",
+    "instructionsBefore": "Faktura se hradí zápočtem z vyúčtování akce Magmafest 2026, případně odečtem přijaté zálohy.",
+    "instructionsAfter": "Přijatá záloha 10 000,00 Kč. Na tuto fakturu je započteno 7 260,00 Kč. Zbytek zálohy se vrací ve vyúčtování."
+  },
+  "items": [
+    {
+      "position": 1,
+      "description": "Pevný poplatek za stánek Magmafest 2026",
+      "quantity": 1,
+      "unit": "ks",
+      "unitPriceWithoutVat": 6000,
+      "vatRate": 21,
+      "lineSubtotal": 6000,
+      "lineVat": 1260,
+      "lineTotal": 7260
+    },
+    {
+      "position": 2,
+      "description": "Odpočet přijaté zálohy",
+      "quantity": -1,
+      "unit": "ks",
+      "unitPriceWithoutVat": 6000,
+      "vatRate": 21,
+      "lineSubtotal": -6000,
+      "lineVat": -1260,
+      "lineTotal": -7260
+    }
+  ],
+  "totals": {
+    "subtotal": 0,
+    "vatBreakdown": [{ "rate": 21, "base": 0, "vat": 0 }],
+    "vatTotal": 0,
+    "total": 0
+  },
+  "notes": "Deal 27310. org_charge 6 000 Kč bez DPH, org_deposit 10 000 Kč."
+}

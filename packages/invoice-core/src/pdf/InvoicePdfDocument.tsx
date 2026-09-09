@@ -23,7 +23,9 @@ import {
   formatInvoiceDateIsoLocal,
   formatInvoiceMoneyWithCurrency,
   formatInvoiceQty,
-  paymentMethodLabel,
+  invoiceIsSettled,
+  paymentDisplayLabel,
+  paymentNoticeText,
   postalCityLine,
   splitDescription,
 } from "../looks/format-invoice";
@@ -402,11 +404,22 @@ function renderClient(ctx: PdfCtx): React.ReactElement {
   );
 }
 
+function renderPayabilityNotice(ctx: PdfCtx): React.ReactElement | null {
+  const notice = paymentNoticeText(ctx.inv, ctx.labels);
+  if (!notice) return null;
+  return (
+    <View style={ctx.styles.payabilityNotice}>
+      <Text style={ctx.styles.payabilityNoticeText}>{notice}</Text>
+    </View>
+  );
+}
+
 function renderPaymentCompact(ctx: PdfCtx): React.ReactElement | null {
   const { inv, labels, styles } = ctx;
   const transfer = inv.payment.method === "transfer" && inv.payment.bankAccount;
   return (
     <View style={styles.partyMeta}>
+      {renderPayabilityNotice(ctx)}
       {transfer ? (
         <PdfKv
           first
@@ -425,7 +438,7 @@ function renderPaymentCompact(ctx: PdfCtx): React.ReactElement | null {
       <PdfKv
         first={!transfer}
         k={labels.paymentMethod}
-        v={paymentMethodLabel(inv.payment.method, labels)}
+        v={paymentDisplayLabel(inv, labels, "short")}
         styles={styles}
       />
     </View>
@@ -439,6 +452,7 @@ function renderPaymentFull(ctx: PdfCtx): React.ReactElement {
   const instructionsAfter = inv.payment.instructionsAfter?.trim() || null;
   return (
     <View>
+      {renderPayabilityNotice(ctx)}
       {instructionsBefore ? (
         <View style={styles.paymentInstructionsBefore}>
           <PdfMarkdownText source={instructionsBefore} styles={styles} />
@@ -485,14 +499,14 @@ function renderPaymentFull(ctx: PdfCtx): React.ReactElement {
             ) : null}
             <PdfPaymentKv
               k={labels.paymentMethod}
-              v={paymentMethodLabel(inv.payment.method, labels)}
+              v={paymentDisplayLabel(inv, labels, "short")}
               styles={styles}
             />
           </View>
-        ) : inv.payment.method === "cash" ? (
-          <Text style={styles.payMethodTxt}>{labels.payCash}</Text>
         ) : (
-          <Text style={styles.payMethodTxt}>{labels.payCard}</Text>
+          <Text style={styles.payMethodTxt}>
+            {paymentDisplayLabel(inv, labels, "full")}
+          </Text>
         )}
       </View>
       {instructionsAfter ? (
@@ -506,6 +520,7 @@ function renderPaymentFull(ctx: PdfCtx): React.ReactElement {
 
 function renderQr(ctx: PdfCtx): React.ReactElement | null {
   if (!ctx.look.theme.showQr || !ctx.assets.qrDataUrl) return null;
+  if (invoiceIsSettled(ctx.inv)) return null;
   return (
     <View>
       <Image style={ctx.styles.qr} src={ctx.assets.qrDataUrl} />
@@ -680,11 +695,32 @@ function renderSignature(ctx: PdfCtx): React.ReactElement | null {
   return <Image style={ctx.styles.signatureImg} src={ctx.assets.signature} />;
 }
 
+function renderFooterBrand(ctx: PdfCtx): React.ReactElement | null {
+  const footer = ctx.inv.meta.footer;
+  if (footer?.hide) return null;
+  const href = footer?.href?.trim() || INVOICEY_SITE_URL;
+  const text = footer?.text?.trim();
+  if (text) {
+    return (
+      <Link src={href} style={ctx.styles.footerBrand}>
+        {text}
+      </Link>
+    );
+  }
+  return (
+    <Link src={href} style={ctx.styles.footerBrand}>
+      {ctx.labels.issuedVia}{" "}
+      <Text style={ctx.styles.footerBrandStrong}>Invoicey</Text>
+    </Link>
+  );
+}
+
 function renderFooter(ctx: PdfCtx): React.ReactElement {
   const issuedBy = ctx.inv.meta.issuedBy;
   const issuedByLine = issuedBy
     ? issuedByFooterLine(ctx.inv.meta.language, issuedBy)
     : null;
+  const brand = renderFooterBrand(ctx);
   return (
     <View
       fixed
@@ -698,10 +734,7 @@ function renderFooter(ctx: PdfCtx): React.ReactElement {
       {issuedByLine ? (
         <Text style={ctx.styles.footerIssuedBy}>{issuedByLine}</Text>
       ) : null}
-      <Link src={INVOICEY_SITE_URL} style={ctx.styles.footerBrand}>
-        {ctx.labels.issuedVia}{" "}
-        <Text style={ctx.styles.footerBrandStrong}>Invoicey</Text>
-      </Link>
+      {brand}
     </View>
   );
 }

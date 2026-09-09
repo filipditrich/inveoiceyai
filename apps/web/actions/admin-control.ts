@@ -29,8 +29,14 @@ function toastFor(error: AdminControlError): string {
       return "admin_reason_required";
     case "invalid_entitlements":
       return "admin_action_failed";
-    default:
+    case "polar_managed":
+      return "admin_polar_managed";
+    case "failed":
       return "admin_action_failed";
+    default: {
+      const _never: never = error;
+      return _never;
+    }
   }
 }
 
@@ -154,10 +160,12 @@ export async function saveWorkspaceOverridesAction(
   if (!existing.success) {
     redirect(`${target}?toast=admin_action_failed`);
   }
+  const detachPolar = formData.get("detachPolar") === "on";
   const result = await adminSaveEntitlementOverrides({
     actorUserId: actor.userId,
     workspaceId,
     next: parseEntitlementsForm(formData, existing.data),
+    ...(detachPolar ? { detachPolar: true } : {}),
   });
   if (!result.ok) redirect(`${target}?toast=${toastFor(result.error)}`);
   revalidatePath(target);
@@ -170,9 +178,11 @@ export async function clearWorkspaceOverridesAction(
   const actor = await assertPlatformAdmin();
   const workspaceId = String(formData.get("workspaceId") ?? "").trim();
   const target = workspaceTarget(workspaceId);
+  const detachPolar = formData.get("detachPolar") === "on";
   const result = await adminClearEntitlementOverrides({
     actorUserId: actor.userId,
     workspaceId,
+    ...(detachPolar ? { detachPolar: true } : {}),
   });
   if (!result.ok) redirect(`${target}?toast=${toastFor(result.error)}`);
   revalidatePath(target);

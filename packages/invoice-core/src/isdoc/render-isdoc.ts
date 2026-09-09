@@ -7,6 +7,7 @@ import { v5 as uuidv5 } from "uuid";
 import { create } from "xmlbuilder2";
 
 import { invoiceLabels, isdocCountryName } from "../labels";
+import { paymentNoticeText } from "../looks/format-invoice";
 import { stripInlineMarkdown } from "../pdf/inline-markdown";
 import type { Invoice } from "../schema";
 
@@ -88,6 +89,10 @@ function unitInclusive(item: Invoice["items"][0]): number {
 
 function headerNote(inv: Invoice): string {
   const parts: string[] = [];
+  const notice = paymentNoticeText(inv, invoiceLabels(inv.meta.language));
+  if (notice) {
+    parts.push(notice);
+  }
   if (inv.vat.legalNote?.trim()) {
     parts.push(inv.vat.legalNote.trim());
   }
@@ -391,6 +396,8 @@ function paymentMeansInteger(invoice: Invoice): number {
       return 10;
     case "card":
       return 48;
+    case "offset":
+      return 97;
     default: {
       const _n: never = invoice.payment.method;
       return _n;
@@ -442,6 +449,10 @@ function appendPaymentMeans(root: Xm, invoice: Invoice) {
         .txt(invoice.payment.specificSymbol.trim())
         .up();
     }
+  } else if (invoice.payment.method === "offset") {
+    details.ele(NSDOC, "PaymentDueDate").txt(invoice.meta.dueDate).up();
+    details.ele(NSDOC, "DocumentID").txt(invoice.meta.number).up();
+    details.ele(NSDOC, "IssueDate").txt(invoice.meta.issueDate).up();
   } else {
     details.ele(NSDOC, "DocumentID").txt(`${invoice.payment.method}-stub`).up();
     details.ele(NSDOC, "IssueDate").txt(invoice.meta.issueDate).up();

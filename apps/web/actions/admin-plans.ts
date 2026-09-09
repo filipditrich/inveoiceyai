@@ -22,10 +22,12 @@ export async function assignWorkspacePlanAction(
   const planId = String(formData.get("planId") ?? "").trim();
   const target = `/admin/workspaces/${workspaceId}`;
 
+  const detachPolar = formData.get("detachPolar") === "on";
   const result = await adminAssignPlan({
     actorUserId: actor.userId,
     workspaceId,
     planId,
+    ...(detachPolar ? { detachPolar: true } : {}),
   });
 
   if (!result.ok) {

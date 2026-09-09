@@ -9,6 +9,7 @@ import {
   resolveDisplayStatus,
   slugifyIssuerName,
   nextInvoiceNumber,
+  issuedByFooterLine,
   ClientSnapshotSchema,
   InvoiceItemSchema,
   InvoiceMetaSchema,
@@ -343,6 +344,174 @@ describe("InvoiceSchema", () => {
         vatBreakdown: [{ rate: 21, base: -10, vat: -2.1 }],
         vatTotal: -2.1,
         total: -12.1,
+      },
+    });
+    expect(res.success).toBe(false);
+  });
+
+  it("accepts offset payment without bankAccount", () => {
+    const res = InvoiceSchema.safeParse({
+      meta: metaBase,
+      issuer: issuerBase,
+      client: clientBase,
+      vat: { mode: "regular", suppliesAbroad: "none" },
+      payment: { method: "offset" },
+      items: [
+        {
+          position: 1,
+          description: "Fee",
+          quantity: 1,
+          unit: "ks",
+          unitPriceWithoutVat: 100,
+          vatRate: 21,
+          lineSubtotal: 100,
+          lineVat: 21,
+          lineTotal: 121,
+        },
+      ],
+      totals: {
+        subtotal: 100,
+        vatBreakdown: [{ rate: 21, base: 100, vat: 21 }],
+        vatTotal: 21,
+        total: 121,
+      },
+    });
+    expect(res.success).toBe(true);
+    if (res.success) {
+      expect(res.data.payment.method).toBe("offset");
+    }
+  });
+
+  it("accepts payability, methodLabel, issuedBy, and footer", () => {
+    const res = InvoiceSchema.safeParse({
+      meta: {
+        ...metaBase,
+        issuedBy: { name: "Ivan", gender: "him", label: "Vystavil" },
+        footer: {
+          text: "Vystaveno přes Invoicey",
+          href: "https://invoicey.app/",
+        },
+      },
+      issuer: issuerBase,
+      client: clientBase,
+      vat: { mode: "regular", suppliesAbroad: "none" },
+      payment: {
+        method: "offset",
+        methodLabel: "Úhrada zálohou",
+        payability: "do_not_pay",
+        notice: "Tuto fakturu neplaťte.",
+      },
+      items: [
+        {
+          position: 1,
+          description: "Fee",
+          quantity: 1,
+          unit: "ks",
+          unitPriceWithoutVat: 100,
+          vatRate: 21,
+          lineSubtotal: 100,
+          lineVat: 21,
+          lineTotal: 121,
+        },
+      ],
+      totals: {
+        subtotal: 100,
+        vatBreakdown: [{ rate: 21, base: 100, vat: 21 }],
+        vatTotal: 21,
+        total: 121,
+      },
+    });
+    expect(res.success).toBe(true);
+    if (res.success) {
+      expect(res.data.payment.methodLabel).toBe("Úhrada zálohou");
+      expect(res.data.payment.payability).toBe("do_not_pay");
+      expect(res.data.meta.issuedBy?.name).toBe("Ivan");
+    }
+  });
+
+  it("rejects issuedBy without name or line", () => {
+    const res = InvoiceMetaSchema.safeParse({
+      ...metaBase,
+      issuedBy: { gender: "him" },
+    });
+    expect(res.success).toBe(false);
+  });
+
+  it("builds the issued-by footer from line or label plus name", () => {
+    expect(issuedByFooterLine("cs", { line: "Vystavil: Nora" })).toBe(
+      "Vystavil: Nora",
+    );
+    expect(
+      issuedByFooterLine("cs", {
+        name: "Ivan",
+        gender: "him",
+        label: "Vystavil",
+      }),
+    ).toBe("Vystavil: Ivan");
+  });
+
+  it("accepts a záloha deduction line on a normal invoice", () => {
+    const inv = buildInvoice({
+      items: [
+        {
+          position: 1,
+          description: "Stánek",
+          quantity: 1,
+          unit: "ks",
+          unitPriceWithoutVat: 6000,
+          vatRate: 21,
+          lineSubtotal: 6000,
+          lineVat: 1260,
+          lineTotal: 7260,
+        },
+        {
+          position: 2,
+          description: "Odpočet přijaté zálohy",
+          quantity: -1,
+          unit: "ks",
+          unitPriceWithoutVat: 6000,
+          vatRate: 21,
+          lineSubtotal: -6000,
+          lineVat: -1260,
+          lineTotal: -7260,
+        },
+      ],
+      totals: {
+        subtotal: 0,
+        vatBreakdown: [{ rate: 21, base: 0, vat: 0 }],
+        vatTotal: 0,
+        total: 0,
+      },
+    });
+    expect(inv.items).toHaveLength(2);
+    expect(inv.totals.total).toBe(0);
+  });
+
+  it("rejects an invoice that is only deduction lines", () => {
+    const res = InvoiceSchema.safeParse({
+      meta: metaBase,
+      issuer: issuerBase,
+      client: clientBase,
+      vat: { mode: "regular", suppliesAbroad: "none" },
+      payment: paymentBase,
+      items: [
+        {
+          position: 1,
+          description: "Odpočet",
+          quantity: -1,
+          unit: "ks",
+          unitPriceWithoutVat: 100,
+          vatRate: 21,
+          lineSubtotal: -100,
+          lineVat: -21,
+          lineTotal: -121,
+        },
+      ],
+      totals: {
+        subtotal: 0,
+        vatBreakdown: [{ rate: 21, base: 0, vat: 0 }],
+        vatTotal: 0,
+        total: 0,
       },
     });
     expect(res.success).toBe(false);

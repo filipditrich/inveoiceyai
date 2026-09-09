@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import creditNoteFixture from "../__fixtures__/invoices/credit-note.json";
 import domesticFixture from "../__fixtures__/invoices/domestic-transfer.json";
 import neplatceFixture from "../__fixtures__/invoices/neplatce-regular.json";
+import offsetDepositFixture from "../__fixtures__/invoices/offset-deposit.json";
+import remainderFixture from "../__fixtures__/invoices/paid-deposit-remainder.json";
 import proformaFixture from "../__fixtures__/invoices/proforma.json";
 import reverseFixture from "../__fixtures__/invoices/reverse-charge.json";
 import { detectInvoiceOrigin } from "../import/origin";
@@ -26,6 +28,8 @@ const fixtures = [
   ["reverse", reverseFixture],
   ["credit", creditNoteFixture],
   ["proforma", proformaFixture],
+  ["offset-deposit", offsetDepositFixture],
+  ["paid-deposit-remainder", remainderFixture],
 ] as const;
 
 describe("parseIsdoc round-trip", () => {
@@ -67,6 +71,17 @@ describe("extractIsdocFromPdf", () => {
     blank.addPage();
     const bytes = await blank.save();
     expect(await extractIsdocFromPdf(bytes)).toBeNull();
+  });
+});
+
+describe("offset payment ISDOC", () => {
+  it("writes PaymentMeansCode 97 and parses offset back", () => {
+    const original = parseInvoice(offsetDepositFixture);
+    const xml = renderIsdoc(original);
+    expect(xml).toContain("PaymentMeansCode>97<");
+    const { invoice } = parseIsdoc(xml, { issuer: original.issuer });
+    expect(invoice.payment.method).toBe("offset");
+    expect(invoice.items[1]?.lineTotal).toBe(-7260);
   });
 });
 

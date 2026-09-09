@@ -77,6 +77,7 @@ export function parseEntitlementsForm(
       recurring: checked(form, "recurring"),
       historicalImport: checked(form, "historicalImport"),
       agents: checked(form, "agents"),
+      invoiceRender: checked(form, "invoiceRender"),
     },
     auth: {
       allowedEmailDomains: parseDomainList(form.get("allowedEmailDomains")),

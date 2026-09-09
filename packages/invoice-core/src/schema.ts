@@ -94,11 +94,32 @@ export type InvoiceLanguage = z.infer<typeof InvoiceLanguageSchema>;
 export const IssuedByGenderSchema = z.enum(["him", "her", "unspecified"]);
 export type IssuedByGender = z.infer<typeof IssuedByGenderSchema>;
 
-export const IssuedBySnapshotSchema = z.object({
-  name: z.string().min(1).max(200),
-  gender: IssuedByGenderSchema,
-});
+export const IssuedBySnapshotSchema = z
+  .object({
+    name: z.string().min(1).max(200).optional(),
+    gender: IssuedByGenderSchema.optional(),
+    /** Overrides the localized “Vystavil” / “Issued by” verb. */
+    label: z.string().min(1).max(80).optional(),
+    /** Full left-footer line. When set, name / gender / label are ignored. */
+    line: z.string().min(1).max(240).optional(),
+  })
+  .superRefine((issued, ctx) => {
+    if (!issued.line?.trim() && !issued.name?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "issuedBy requires name or line",
+        path: ["name"],
+      });
+    }
+  });
 export type IssuedBySnapshot = z.infer<typeof IssuedBySnapshotSchema>;
+
+export const InvoiceFooterSchema = z.object({
+  hide: z.boolean().optional(),
+  text: z.string().min(1).max(200).optional(),
+  href: z.string().url().optional(),
+});
+export type InvoiceFooter = z.infer<typeof InvoiceFooterSchema>;
 
 export function parseIssuedByGender(value: unknown): IssuedByGender {
   const parsed = IssuedByGenderSchema.safeParse(value);
@@ -153,6 +174,7 @@ export const InvoiceMetaSchema = z
     currency: InvoiceCurrencySchema,
     correctedInvoiceNumber: z.string().min(1).max(64).optional(),
     issuedBy: IssuedBySnapshotSchema.optional(),
+    footer: InvoiceFooterSchema.optional(),
   })
   .superRefine((meta, ctx) => {
     if (meta.docType === "credit_note" && !meta.correctedInvoiceNumber) {
@@ -209,9 +231,28 @@ export const ClientSnapshotSchema = z.object({
 
 export type ClientSnapshot = z.infer<typeof ClientSnapshotSchema>;
 
+export const PaymentMethodSchema = z.enum([
+  "transfer",
+  "cash",
+  "card",
+  "offset",
+]);
+export type PaymentMethod = z.infer<typeof PaymentMethodSchema>;
+
+export const InvoicePayabilitySchema = z.enum([
+  "due",
+  "do_not_pay",
+  "already_paid",
+]);
+export type InvoicePayability = z.infer<typeof InvoicePayabilitySchema>;
+
 export const PaymentSchema = z
   .object({
-    method: z.enum(["transfer", "cash", "card"]),
+    method: PaymentMethodSchema,
+    /** Overrides the localized method label (“Úhrada zálohou”, “Zápočet”). */
+    methodLabel: z.string().min(1).max(80).optional(),
+    payability: InvoicePayabilitySchema.optional(),
+    notice: z.string().min(1).max(500).optional(),
     bankAccount: BankAccountSchema.optional(),
     variableSymbol: z
       .string()
@@ -350,6 +391,7 @@ export const InvoiceSchema = z
       }
     }
 
+    let hasPositiveLine = false;
     for (let i = 0; i < inv.items.length; i++) {
       const item = inv.items[i]!;
       if (isCredit) {
@@ -367,22 +409,35 @@ export const InvoiceSchema = z
             path: ["items", i, "lineSubtotal"],
           });
         }
-      } else {
-        if (item.quantity <= 0) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "non–credit_note lines require positive quantity",
-            path: ["items", i, "quantity"],
-          });
-        }
+        continue;
+      }
+
+      if (item.quantity > 0) {
+        hasPositiveLine = true;
         if (item.lineSubtotal < 0 || item.lineVat < 0 || item.lineTotal < 0) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: "non–credit_note lines require nonnegative line amounts",
+            message: "positive lines require nonnegative amounts",
+            path: ["items", i, "lineSubtotal"],
+          });
+        }
+      } else {
+        if (item.lineSubtotal > 0 || item.lineVat > 0 || item.lineTotal > 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "deduction lines require zero or negative amounts",
             path: ["items", i, "lineSubtotal"],
           });
         }
       }
+    }
+
+    if (!isCredit && !hasPositiveLine) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "non–credit_note requires at least one positive line",
+        path: ["items"],
+      });
     }
 
     if (isCredit) {

@@ -987,6 +987,28 @@ loop on top of the SPAYD QR and bank readers that already exist.
 from a settlement, Web Push and any native app, payment initiation, and the Fio
 e-mail doorbell.
 
+## Plan 37 — Invoice issue as a service
+
+**Status:** Drafted  
+**Started:** 2026-09-08
+
+**Goal:** Stateless bulk render: `InvoiceSchema` JSON in, ISDOC.PDF (or a ZIP)
+out. No issuer/client/invoice rows, no payment matching. First consumer:
+NFCtron vendor-fee PDFs attached to existing payout mail.
+
+**Spec:** [`specs/invoice-issue-as-service.md`](./specs/invoice-issue-as-service.md)
+
+### Exit criteria
+
+- [ ] `POST /api/render/invoices` accepts `{ invoices }`, a bare array, or one
+      invoice; session or PAT; 1 PDF or a ZIP of PDFs
+- [ ] `/invoices/render` pastes the same JSON and downloads
+- [ ] Invalid invoices return 422 with per-index issues; nothing is persisted
+- [ ] Batch cap (25) and body cap (2 MB) are enforced
+
+**Out of 37:** Ledger writes, payment matching, Invoicey sending payout email,
+Pohoda, MCP as the machine contract, async jobs.
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:
@@ -996,3 +1018,4 @@ These are tracked here for traceability but not currently slotted:
   and guided portal filings) — see
   [`research/osvc-companion.md`](./research/osvc-companion.md)
 - Tax-period reporting (kontrolní hlášení / DPH přiznání) — adjacent product
+- Async issue jobs + webhooks for 200+ documents (Plan 37 v2)

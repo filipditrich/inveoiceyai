@@ -38,6 +38,9 @@ export type InvoiceLabels = {
   qrHint: string;
   payCash: string;
   payCard: string;
+  payOffset: string;
+  doNotPayNotice: string;
+  alreadyPaidNotice: string;
   notes: string;
   issuedVia: string;
   issuedByHim: string;
@@ -47,6 +50,7 @@ export type InvoiceLabels = {
   payTransfer: string;
   payCashShort: string;
   payCardShort: string;
+  payOffsetShort: string;
   docKindInvoice: string;
   docKindCreditNote: string;
   docKindProforma: string;
@@ -96,6 +100,9 @@ const CS: InvoiceLabels = {
   qrHint: "Úhradu můžete provést naskenováním QR kódu.",
   payCash: "Platba v hotovosti",
   payCard: "Platba kartou",
+  payOffset: "Platba zápočtem",
+  doNotPayNotice: "Tuto fakturu neplaťte.",
+  alreadyPaidNotice: "Tato faktura je již uhrazena.",
   notes: "Poznámka",
   issuedVia: "Vystaveno přes",
   issuedByHim: "Vystavil",
@@ -105,6 +112,7 @@ const CS: InvoiceLabels = {
   payTransfer: "Převodem",
   payCashShort: "Hotově",
   payCardShort: "Kartou",
+  payOffsetShort: "Zápočtem",
   docKindInvoice: "DAŇOVÝ DOKLAD",
   docKindCreditNote: "DOBROPIS",
   docKindProforma: "PROFORMA FAKTURA",
@@ -154,6 +162,9 @@ const EN: InvoiceLabels = {
   qrHint: "You can pay by scanning the QR code.",
   payCash: "Cash payment",
   payCard: "Card payment",
+  payOffset: "Offset / settlement",
+  doNotPayNotice: "Do not pay this invoice.",
+  alreadyPaidNotice: "This invoice has already been paid.",
   notes: "Notes",
   issuedVia: "Issued with",
   issuedByHim: "Issued by",
@@ -163,6 +174,7 @@ const EN: InvoiceLabels = {
   payTransfer: "Bank transfer",
   payCashShort: "Cash",
   payCardShort: "Card",
+  payOffsetShort: "Offset",
   docKindInvoice: "TAX DOCUMENT",
   docKindCreditNote: "CREDIT NOTE",
   docKindProforma: "PROFORMA INVOICE",
@@ -256,5 +268,12 @@ export function issuedByFooterLine(
   language: InvoiceLanguage,
   issuedBy: IssuedBySnapshot,
 ): string {
-  return `${issuedByVerb(language, issuedBy.gender)}: ${issuedBy.name}`;
+  const line = issuedBy.line?.trim();
+  if (line) return line;
+  const name = issuedBy.name?.trim();
+  if (!name) return "";
+  const verb =
+    issuedBy.label?.trim() ||
+    issuedByVerb(language, issuedBy.gender ?? "unspecified");
+  return `${verb}: ${name}`;
 }

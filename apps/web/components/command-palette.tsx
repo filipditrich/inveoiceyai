@@ -10,6 +10,7 @@ import {
   ArchiveRestoreIcon,
   BracesIcon,
   Building2Icon,
+  FileDownIcon,
   FileTextIcon,
   LandmarkIcon,
   LayoutDashboardIcon,
@@ -43,6 +44,7 @@ type CommandKey =
   | "aiDraft"
   | "recurring"
   | "fromJson"
+  | "renderPdfs"
   | "import"
   | "workspaceSettings"
   | "looks"
@@ -115,6 +117,12 @@ const STATIC_COMMANDS: StaticCommand[] = [
     group: "create",
   },
   {
+    key: "renderPdfs",
+    href: "/invoices/render",
+    icon: <FileDownIcon />,
+    group: "create",
+  },
+  {
     key: "workspaceSettings",
     href: "/settings/workspace",
     icon: <Settings2Icon />,
@@ -152,7 +160,11 @@ interface Row {
   hint?: string;
 }
 
-export function CommandPalette() {
+export function CommandPalette({
+  canRenderInvoices = false,
+}: {
+  canRenderInvoices?: boolean;
+}) {
   const t = useTranslations("App.palette");
   const tNav = useTranslations("App.nav");
   const locale = useLocale() as AppLocale;
@@ -216,6 +228,7 @@ export function CommandPalette() {
   const staticRows = React.useMemo<Row[]>(() => {
     const folded = fold(query.trim());
     return STATIC_COMMANDS.filter((command) => {
+      if (command.key === "renderPdfs" && !canRenderInvoices) return false;
       if (!folded) return true;
       return fold(t(`commands.${command.key}`)).includes(folded);
     }).map((command) => ({
@@ -225,7 +238,7 @@ export function CommandPalette() {
       label: t(`commands.${command.key}`),
       hint: t(`groups.${command.group}`),
     }));
-  }, [query, t]);
+  }, [canRenderInvoices, query, t]);
 
   // Results from the previous query stay in state while a new one is in flight;
   // gating on `searchable` keeps stale rows out of an emptied input.

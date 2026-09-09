@@ -22,6 +22,7 @@ import {
   ArchiveRestoreIcon,
   BracesIcon,
   ChevronDownIcon,
+  FileDownIcon,
   FileTextIcon,
   PlusIcon,
   RepeatIcon,
@@ -37,6 +38,7 @@ interface CreateEntry {
     | "invoicesAi"
     | "invoicesRecurring"
     | "invoicesFromJson"
+    | "invoicesRender"
     | "invoicesImport";
   icon: ReactNode;
 }
@@ -66,9 +68,20 @@ const TOOL_ENTRIES: CreateEntry[] = [
     labelKey: "invoicesFromJson",
     icon: <BracesIcon />,
   },
+  {
+    href: "/invoices/render",
+    labelKey: "invoicesRender",
+    icon: <FileDownIcon />,
+  },
 ];
 
-export function NewInvoiceButton({ pathname }: { pathname: string }) {
+export function NewInvoiceButton({
+  pathname,
+  canRenderInvoices = false,
+}: {
+  pathname: string;
+  canRenderInvoices?: boolean;
+}) {
   const t = useTranslations("App.nav");
   const { isMobile, state } = useSidebar();
   const { setOpen: setAssistantOpen } = useAssistant();
@@ -109,7 +122,11 @@ export function NewInvoiceButton({ pathname }: { pathname: string }) {
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
         <DropdownMenuLabel>{t("toolsGroup")}</DropdownMenuLabel>
-        {renderEntries(TOOL_ENTRIES)}
+        {renderEntries(
+          canRenderInvoices
+            ? TOOL_ENTRIES
+            : TOOL_ENTRIES.filter((entry) => entry.href !== "/invoices/render"),
+        )}
       </DropdownMenuGroup>
     </DropdownMenuContent>
   );
