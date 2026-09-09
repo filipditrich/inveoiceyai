@@ -7,9 +7,10 @@ import {
   toggleFioAutoMatch,
   toggleMonetaAutoMatch,
 } from "@/actions/payments";
+import { PageHeader } from "@/components/layout/page-header";
+import { SectionPager } from "@/components/layout/section-pager";
 import { AutoMatchToggle } from "@/components/settings/auto-match-toggle";
 import { MonetaConnectForm } from "@/components/settings/moneta-connect-form";
-import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { isAppLocale } from "@/i18n/config";
 import { requireWorkspace } from "@/lib/auth/session";
+import { assertCan } from "@/lib/authz/can";
 import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { formatDateTime } from "@/lib/format";
 import { messageLookup } from "@/lib/i18n-lookup";
@@ -34,7 +36,6 @@ import {
   Building2Icon,
   CircleDotDashedIcon,
   ExternalLinkIcon,
-  LandmarkIcon,
   LockKeyholeIcon,
   RefreshCwIcon,
   ShieldCheckIcon,
@@ -120,19 +121,41 @@ function BankLogoTile({
   );
 }
 
+function ConnectionsHeader({
+  description,
+  eyebrow,
+  title,
+}: {
+  description: string;
+  eyebrow: string;
+  title: string;
+}) {
+  return (
+    <PageHeader
+      description={description}
+      eyebrow={eyebrow}
+      icon={<Building2Icon />}
+      title={title}
+    />
+  );
+}
+
 export default async function BankConnectionsPage() {
+  await assertCan("payments:read");
   const { workspaceId, role } = await requireWorkspace();
-  const [t, plan] = await Promise.all([
+  const [t, tNav, plan] = await Promise.all([
     getTranslations("Settings.bankConnections"),
+    getTranslations("App.nav"),
     requireEntitlements(),
   ]);
+  const paymentsEyebrow = tNav("payments");
 
   if (!plan.entitlements.features.bankConnections) {
     return (
-      <div className="space-y-6">
-        <SettingsPageHeader
+      <div className="space-y-4">
+        <ConnectionsHeader
           description={t("pageDescription")}
-          icon={<LandmarkIcon />}
+          eyebrow={paymentsEyebrow}
           title={t("pageTitle")}
         />
         <Card>
@@ -186,10 +209,10 @@ export default async function BankConnectionsPage() {
   const errorLabels = messages.Settings.bankConnections.errors;
 
   return (
-    <div className="space-y-6">
-      <SettingsPageHeader
+    <div className="space-y-4">
+      <ConnectionsHeader
         description={t("pageDescription")}
-        icon={<LandmarkIcon />}
+        eyebrow={paymentsEyebrow}
         title={t("pageTitle")}
       />
 
@@ -438,10 +461,11 @@ export default async function BankConnectionsPage() {
         </div>
       </section>
 
-      <div className="flex gap-3 rounded-2xl border border-border/70 bg-muted/25 p-4 text-sm">
+      <div className="flex gap-3 rounded-2xl border border-border/70 bg-card p-4 text-sm">
         <ShieldCheckIcon className="mt-0.5 size-5 shrink-0 text-brand" />
         <p className="leading-relaxed text-muted-foreground">{t("footer")}</p>
       </div>
+      <SectionPager group="payments" />
     </div>
   );
 }

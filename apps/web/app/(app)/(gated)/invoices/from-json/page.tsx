@@ -3,13 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { InvoicePdfPreview } from "@/components/invoices/invoice-pdf-preview";
 import { PageHeader } from "@/components/layout/page-header";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { SectionPager } from "@/components/layout/section-pager";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { demoInvoiceExamples } from "@/lib/demo-invoice-examples";
 import demoSampleInvoice from "@/lib/demo-sample-invoice.json";
-import { cn } from "@/lib/utils";
 import { BracesIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 
 import { InvoiceSchema, type Invoice } from "@invoicey/invoice-core/schema";
 
@@ -21,6 +21,7 @@ const baseDemoInvoice = InvoiceSchema.parse(demoSampleInvoice);
 
 export default function InvoiceFromJsonDemoPage() {
   const t = useTranslations("Invoices.fromJson");
+  const tNav = useTranslations("App.nav");
   const [text, setText] = useState(() => formatSampleJson(baseDemoInvoice));
   const [selectedExampleId, setSelectedExampleId] = useState(
     demoInvoiceExamples[0]?.id ?? "",
@@ -115,27 +116,10 @@ export default function InvoiceFromJsonDemoPage() {
   }, [selectedExampleId]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <PageHeader
-        actions={
-          <Link
-            href="/invoices"
-            className={cn(
-              buttonVariants({ variant: "ghost" }),
-              "h-auto shrink-0 py-2 text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {t("backToInvoices")}
-          </Link>
-        }
-        description={t.rich("subtitle", {
-          code: (chunks) => (
-            <code className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
-              {chunks}
-            </code>
-          ),
-        })}
-        eyebrow={t("eyebrow")}
+        description={t("subtitle")}
+        eyebrow={tNav("invoices")}
         icon={<BracesIcon />}
         title={t("title")}
       />
@@ -159,7 +143,7 @@ export default function InvoiceFromJsonDemoPage() {
               autoComplete="off"
             />
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <select
               value={selectedExampleId}
               onChange={(event) => setSelectedExampleId(event.target.value)}
@@ -172,28 +156,33 @@ export default function InvoiceFromJsonDemoPage() {
               ))}
             </select>
             <Button
-              type="button"
-              variant="outline"
               disabled={busy}
               onClick={loadSelectedExample}
+              size="sm"
+              type="button"
+              variant="outline"
             >
               {t("loadPreset")}
             </Button>
-            <Button
-              type="button"
-              disabled={busy}
-              onClick={() => void renderPdf()}
-            >
-              {busy ? t("rendering") : t("renderPdf")}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={busy}
-              onClick={() => setText(formatSampleJson(baseDemoInvoice))}
-            >
-              {t("resetSample")}
-            </Button>
+            <ButtonGroup>
+              <Button
+                disabled={busy}
+                onClick={() => void renderPdf()}
+                size="sm"
+                type="button"
+              >
+                {busy ? t("rendering") : t("renderPdf")}
+              </Button>
+              <Button
+                disabled={busy}
+                onClick={() => setText(formatSampleJson(baseDemoInvoice))}
+                size="sm"
+                type="button"
+                variant="outline"
+              >
+                {t("resetSample")}
+              </Button>
+            </ButtonGroup>
           </div>
           {error ? (
             <pre className="max-h-48 overflow-auto rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs whitespace-pre-wrap text-destructive">
@@ -214,6 +203,7 @@ export default function InvoiceFromJsonDemoPage() {
           />
         </div>
       </div>
+      <SectionPager group="invoices" />
     </div>
   );
 }

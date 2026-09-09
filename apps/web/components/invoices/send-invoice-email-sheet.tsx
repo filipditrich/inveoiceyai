@@ -46,7 +46,7 @@ export function SendInvoiceEmailSheet(props: SendInvoiceEmailSheetProps) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
-          <Button size="sm" type="button" variant="outline">
+          <Button type="button" variant="outline">
             <MailIcon data-icon="inline-start" />
             {t("send")}
           </Button>

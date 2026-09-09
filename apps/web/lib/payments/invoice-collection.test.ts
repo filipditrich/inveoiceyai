@@ -33,4 +33,12 @@ describe("resolveCollectionProgress", () => {
       },
     );
   });
+
+  it("does not celebrate a paid state when nothing is allocated", () => {
+    expect(resolveCollectionProgress("1.00", "0.00", "paid")).toEqual({
+      paidAmount: "0.00",
+      outstandingAmount: "1.00",
+      settled: false,
+    });
+  });
 });

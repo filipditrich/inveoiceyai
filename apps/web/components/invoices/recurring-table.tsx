@@ -5,8 +5,17 @@ import {
   skipRecurringNext,
 } from "@/actions/recurring";
 import { ConfirmForm } from "@/components/confirm-form";
+import { TableSurface } from "@/components/layout/table-surface";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { formatInvoiceDate } from "@/lib/format";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -28,30 +37,30 @@ export async function RecurringTable({
   const t = await getTranslations("Recurring");
 
   return (
-    <div className="overflow-x-auto rounded-md border">
-      <table className="w-full min-w-[48rem] text-sm">
-        <thead>
-          <tr className="border-b text-left">
-            <th className="p-3 font-medium">{t("list.name")}</th>
-            <th className="p-3 font-medium">{t("list.client")}</th>
-            <th className="p-3 font-medium">{t("list.cadence")}</th>
-            <th className="p-3 font-medium">{t("list.nextRun")}</th>
-            <th className="p-3 font-medium">{t("list.lastDraft")}</th>
-            <th className="p-3 font-medium">{t("list.status")}</th>
-            <th className="p-3 font-medium">{t("list.actions")}</th>
-          </tr>
-        </thead>
-        <tbody>
+    <TableSurface>
+      <Table className="min-w-[48rem]">
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t("list.name")}</TableHead>
+            <TableHead>{t("list.client")}</TableHead>
+            <TableHead>{t("list.cadence")}</TableHead>
+            <TableHead>{t("list.nextRun")}</TableHead>
+            <TableHead>{t("list.lastDraft")}</TableHead>
+            <TableHead>{t("list.status")}</TableHead>
+            <TableHead>{t("list.actions")}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {items.map((row) => (
-            <tr className="border-b align-top" key={row.scheduleId}>
-              <td className="p-3">
+            <TableRow className="align-top" key={row.scheduleId}>
+              <TableCell>
                 <div className="font-medium">{row.name}</div>
                 <div className="text-xs text-muted-foreground">
                   {row.issuerName}
                 </div>
-              </td>
-              <td className="p-3">{row.clientName}</td>
-              <td className="p-3">
+              </TableCell>
+              <TableCell>{row.clientName}</TableCell>
+              <TableCell>
                 {t(cadenceKey(row.cadence))}
                 {row.cadence === "weekly"
                   ? null
@@ -60,11 +69,11 @@ export async function RecurringTable({
                       last: t("list.dayLast"),
                       nth: t("list.day", { day: String(row.dayOfMonth) }),
                     })}`}
-              </td>
-              <td className="p-3 tabular-nums">
+              </TableCell>
+              <TableCell className="tabular-nums">
                 {formatInvoiceDate(row.nextRunOn, locale)}
-              </td>
-              <td className="p-3">
+              </TableCell>
+              <TableCell>
                 {row.lastInvoiceId ? (
                   <Link
                     className="underline"
@@ -76,11 +85,11 @@ export async function RecurringTable({
                 ) : (
                   t("list.never")
                 )}
-              </td>
-              <td className="p-3">
+              </TableCell>
+              <TableCell>
                 {row.paused ? t("list.paused") : t("list.active")}
-              </td>
-              <td className="p-3">
+              </TableCell>
+              <TableCell className="whitespace-normal">
                 <div className="flex flex-wrap gap-1.5">
                   <form action={setRecurringPaused}>
                     <input
@@ -147,12 +156,12 @@ export async function RecurringTable({
                     </SubmitButton>
                   </ConfirmForm>
                 </div>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </TableBody>
+      </Table>
+    </TableSurface>
   );
 }
 
@@ -163,7 +172,7 @@ export async function RecurringEmpty({
 }) {
   const t = await getTranslations("Recurring");
   return (
-    <div className="rounded-md border border-dashed p-8 text-center">
+    <div className="rounded-md border border-dashed bg-card p-8 text-center">
       <p className="mb-3 text-sm text-muted-foreground">{t("list.empty")}</p>
       {hasInvoices ? (
         <Button render={<Link href="/invoices" prefetch />} size="sm">

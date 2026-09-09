@@ -18,7 +18,9 @@ export default async function IssuersNewPage({
   return (
     <div className="space-y-6">
       <PageHeader
+        back={{ href: "/issuers", label: t("back") }}
         description={t("newSubtitle")}
+        eyebrow={t("title")}
         icon={<BriefcaseBusinessIcon />}
         title={t("newTitle")}
       />

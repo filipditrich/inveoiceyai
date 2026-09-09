@@ -120,7 +120,7 @@ export function PaymentRequestWaiting(details: RequestDetails) {
           aria-live="polite"
           className="rounded-xl bg-brand/[0.08] p-4 ring-1 ring-brand/15"
         >
-          {status.settled ? (
+          {status.settled && received > 0 ? (
             <div className="flex items-start gap-3">
               <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground">
                 <CheckIcon className="size-5" />
@@ -132,6 +132,7 @@ export function PaymentRequestWaiting(details: RequestDetails) {
                 <p className="text-sm text-muted-foreground">
                   {t("receivedBody", {
                     amount: formatMoney(received, details.currency, locale),
+                    requested: formatMoney(requested, details.currency, locale),
                   })}
                 </p>
               </div>

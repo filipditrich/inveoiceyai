@@ -38,6 +38,10 @@ export async function isPaymentSymbolTaken(
   return Boolean(invoiceHit);
 }
 
+function allocatedAmountSql() {
+  return sql<string>`coalesce(sum(${paymentAllocations.amount}) FILTER (WHERE ${paymentAllocations.reversedAt} IS NULL), 0)::text`;
+}
+
 export async function loadPaymentRequest(
   database: Pick<DbTransaction, "select">,
   workspaceId: string,
@@ -46,20 +50,20 @@ export async function loadPaymentRequest(
   const [row] = await database
     .select({
       request: paymentRequests,
-      allocatedAmount: sql<string>`coalesce((
-        select sum(${paymentAllocations.amount})
-        from ${paymentAllocations}
-        where ${paymentAllocations.paymentRequestId} = ${paymentRequests.id}
-          and ${paymentAllocations.reversedAt} is null
-      ), 0)::text`,
+      allocatedAmount: allocatedAmountSql(),
     })
     .from(paymentRequests)
+    .leftJoin(
+      paymentAllocations,
+      eq(paymentAllocations.paymentRequestId, paymentRequests.id),
+    )
     .where(
       and(
         eq(paymentRequests.id, requestId),
         eq(paymentRequests.workspaceId, workspaceId),
       ),
     )
+    .groupBy(paymentRequests.id)
     .limit(1);
   if (!row) return null;
   return { ...row.request, allocatedAmount: row.allocatedAmount };
@@ -77,23 +81,56 @@ export async function loadPaymentRequestByPublicToken(
   return row ?? null;
 }
 
+function paymentRequestScope(
+  workspaceId: string,
+  status?: "open" | "settled" | "cancelled",
+) {
+  if (status) {
+    return and(
+      eq(paymentRequests.workspaceId, workspaceId),
+      eq(paymentRequests.status, status),
+    );
+  }
+  return eq(paymentRequests.workspaceId, workspaceId);
+}
+
+export async function countPaymentRequests(
+  database: Pick<DbTransaction, "select">,
+  workspaceId: string,
+  status?: "open" | "settled" | "cancelled",
+): Promise<number> {
+  const [row] = await database
+    .select({ total: sql<number>`count(*)::int` })
+    .from(paymentRequests)
+    .where(paymentRequestScope(workspaceId, status));
+  return row?.total ?? 0;
+}
+
 export async function listPaymentRequests(
   database: Pick<DbTransaction, "select">,
   workspaceId: string,
+  paging?: {
+    limit: number;
+    offset: number;
+    status?: "open" | "settled" | "cancelled";
+  },
 ): Promise<PaymentRequestWithProgress[]> {
-  const rows = await database
+  const query = database
     .select({
       request: paymentRequests,
-      allocatedAmount: sql<string>`coalesce((
-        select sum(${paymentAllocations.amount})
-        from ${paymentAllocations}
-        where ${paymentAllocations.paymentRequestId} = ${paymentRequests.id}
-          and ${paymentAllocations.reversedAt} is null
-      ), 0)::text`,
+      allocatedAmount: allocatedAmountSql(),
     })
     .from(paymentRequests)
-    .where(eq(paymentRequests.workspaceId, workspaceId))
+    .leftJoin(
+      paymentAllocations,
+      eq(paymentAllocations.paymentRequestId, paymentRequests.id),
+    )
+    .where(paymentRequestScope(workspaceId, paging?.status))
+    .groupBy(paymentRequests.id)
     .orderBy(desc(paymentRequests.createdAt));
+  const rows = paging
+    ? await query.limit(paging.limit).offset(paging.offset)
+    : await query;
   return rows.map((row) => ({
     ...row.request,
     allocatedAmount: row.allocatedAmount,
@@ -107,20 +144,20 @@ export async function listOpenPaymentRequestsForAccount(
   const rows = await database
     .select({
       request: paymentRequests,
-      allocatedAmount: sql<string>`coalesce((
-        select sum(${paymentAllocations.amount})
-        from ${paymentAllocations}
-        where ${paymentAllocations.paymentRequestId} = ${paymentRequests.id}
-          and ${paymentAllocations.reversedAt} is null
-      ), 0)::text`,
+      allocatedAmount: allocatedAmountSql(),
     })
     .from(paymentRequests)
+    .leftJoin(
+      paymentAllocations,
+      eq(paymentAllocations.paymentRequestId, paymentRequests.id),
+    )
     .where(
       and(
         eq(paymentRequests.workspaceId, input.workspaceId),
         eq(paymentRequests.bankAccountId, input.bankAccountId),
       ),
-    );
+    )
+    .groupBy(paymentRequests.id);
   return rows.map((row) => ({
     ...row.request,
     allocatedAmount: row.allocatedAmount,

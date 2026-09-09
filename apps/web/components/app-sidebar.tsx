@@ -22,14 +22,23 @@ import {
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 import { appResourceLinks } from "@/lib/public-nav";
 import {
+  isInvoiceListPath,
+  isInvoicesGroupPath,
+  isPaymentsGroupPath,
+} from "@/lib/section-nav";
+import {
   ArchiveRestoreIcon,
   BookOpenIcon,
+  BracesIcon,
   Building2Icon,
   FileTextIcon,
+  FilesIcon,
   HouseIcon,
   LandmarkIcon,
   LayoutDashboardIcon,
+  ListChecksIcon,
   RepeatIcon,
+  ScanLineIcon,
   SettingsIcon,
   ShieldIcon,
   UserRoundIcon,
@@ -42,12 +51,9 @@ import { usePathname } from "next/navigation";
 import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 
 /**
- * Five destinations and a create button, as before — the Automation, Tools and
- * Manage groups are not coming back. What changed is that the places those
- * groups used to hold are no longer reachable *only* from a dropdown: recurring
- * invoices, the importer and bank connections now hang off the section that
- * owns them, expanded when you are already in that section and out of the way
- * otherwise.
+ * Five destinations and a create button. Each group keeps a parent link to its
+ * home, repeats that home as the first child, and stays open so the siblings
+ * are visible without an extra click.
  *
  * Settings keep their two doors (the workspace switcher, the user menu) and gain
  * a third, explicit one. The doors were never the problem — an unlabelled menu
@@ -86,16 +92,6 @@ export function AppSidebar({
   const pathname = usePathname();
   const t = useTranslations("App");
 
-  /** The create routes live under /invoices but belong to the create button. */
-  const invoicesActive =
-    pathname === "/invoices" ||
-    (pathname.startsWith("/invoices/") &&
-      !pathname.startsWith("/invoices/new") &&
-      !pathname.startsWith("/invoices/ai") &&
-      !pathname.startsWith("/invoices/from-json") &&
-      !pathname.startsWith("/invoices/import") &&
-      !pathname.startsWith("/invoices/recurring"));
-
   const navMain = [
     {
       title: t("nav.dashboard"),
@@ -107,10 +103,16 @@ export function AppSidebar({
       title: t("nav.invoices"),
       url: "/invoices",
       icon: <FileTextIcon />,
-      isActive: invoicesActive,
-      /** Open while anywhere under /invoices, so the siblings are one click away. */
-      defaultOpen: pathname.startsWith("/invoices"),
+      isActive: isInvoicesGroupPath(pathname),
+      /** Keep children visible — a closed group hides the invoices home. */
+      defaultOpen: true,
       items: [
+        {
+          title: t("nav.invoicesMine"),
+          url: "/invoices",
+          icon: <FilesIcon />,
+          isActive: isInvoiceListPath(pathname),
+        },
         {
           title: t("nav.invoicesRecurring"),
           url: "/invoices/recurring",
@@ -123,6 +125,12 @@ export function AppSidebar({
           icon: <ArchiveRestoreIcon />,
           isActive: pathname.startsWith("/invoices/import"),
         },
+        {
+          title: t("nav.invoicesFromJson"),
+          url: "/invoices/from-json",
+          icon: <BracesIcon />,
+          isActive: pathname.startsWith("/invoices/from-json"),
+        },
       ],
     },
     ...(canSeePayments
@@ -131,20 +139,27 @@ export function AppSidebar({
             title: t("nav.payments"),
             url: "/payments",
             icon: <LandmarkIcon />,
-            isActive:
-              pathname === "/payments" || pathname.startsWith("/payments/"),
-            defaultOpen:
-              pathname.startsWith("/payments") ||
-              pathname.startsWith("/settings/workspace/bank-connections"),
+            isActive: isPaymentsGroupPath(pathname),
+            /** Keep children visible — a closed group hides matching and banks. */
+            defaultOpen: true,
             items: [
               {
-                /** Lives in workspace settings, but it is the payments feature's plumbing. */
+                title: t("nav.paymentsMatching"),
+                url: "/payments",
+                icon: <ListChecksIcon />,
+                isActive: pathname === "/payments",
+              },
+              {
+                title: t("nav.paymentRequests"),
+                url: "/payments/requests",
+                icon: <ScanLineIcon />,
+                isActive: pathname.startsWith("/payments/requests"),
+              },
+              {
                 title: t("nav.bankConnections"),
-                url: "/settings/workspace/bank-connections",
+                url: "/payments/connections",
                 icon: <LandmarkIcon />,
-                isActive: pathname.startsWith(
-                  "/settings/workspace/bank-connections",
-                ),
+                isActive: pathname.startsWith("/payments/connections"),
               },
             ],
           },

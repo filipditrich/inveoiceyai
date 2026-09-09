@@ -46,7 +46,7 @@ export function SaveRecurringSheet({
     <Sheet onOpenChange={setOpen} open={open}>
       <SheetTrigger
         render={
-          <Button size="sm" type="button" variant="outline">
+          <Button type="button" variant="outline">
             <RepeatIcon data-icon="inline-start" />
             {t("sheet.trigger")}
           </Button>

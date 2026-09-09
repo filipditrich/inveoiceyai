@@ -77,7 +77,6 @@ export default async function AdminUserDetailPage({
             />
             <SubmitButton
               disabled={isSelf && isAdmin}
-              size="sm"
               variant={isAdmin ? "outline" : "default"}
             >
               {isAdmin ? tUsers("actions.revoke") : tUsers("actions.grant")}

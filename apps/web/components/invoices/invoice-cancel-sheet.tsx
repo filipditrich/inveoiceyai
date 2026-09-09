@@ -29,7 +29,7 @@ export function InvoiceCancelSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
-          <Button size="sm" type="button" variant="secondary">
+          <Button type="button" variant="secondary">
             <BanIcon data-icon="inline-start" />
             {t("trigger")}
           </Button>

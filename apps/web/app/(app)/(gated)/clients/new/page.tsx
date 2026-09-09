@@ -27,7 +27,9 @@ export default async function ClientsNewPage({
   return (
     <div className="space-y-6">
       <PageHeader
+        back={{ href: "/clients", label: t("back") }}
         description={t("newSubtitle")}
+        eyebrow={t("title")}
         icon={<ContactRoundIcon />}
         title={t("newTitle")}
       />

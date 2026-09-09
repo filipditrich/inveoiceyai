@@ -40,6 +40,7 @@ export default async function InvoiceEditPage({
   const { id } = await params;
   const sp = await searchParams;
   const t = await getTranslations("Invoices.builder");
+  const tNav = await getTranslations("App.nav");
   const { workspaceId } = await requireWorkspace();
   const rows = await db
     .select()
@@ -100,7 +101,9 @@ export default async function InvoiceEditPage({
         toast={sp.toast ?? null}
       />
       <PageHeader
+        back={{ href: `/invoices/${id}`, label: t("backToInvoice") }}
         description={t("subtitle")}
+        eyebrow={tNav("invoices")}
         icon={<FilePenLineIcon />}
         title={t("editTitle")}
       />

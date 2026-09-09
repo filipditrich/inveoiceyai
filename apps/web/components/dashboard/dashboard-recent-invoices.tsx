@@ -56,7 +56,7 @@ export async function DashboardRecentInvoices({
         {rows.map((row) => (
           <li
             className={cn(
-              "rounded-md border p-3",
+              "rounded-md border bg-card p-3",
               DISPLAY_STATUS_ROW_ACCENT[row.displayStatus],
             )}
             key={row.id}
@@ -90,7 +90,7 @@ export async function DashboardRecentInvoices({
         ))}
       </ul>
 
-      <div className="hidden rounded-md border md:block">
+      <div className="hidden rounded-md border bg-card md:block">
         <Table>
           <TableHeader>
             <TableRow>

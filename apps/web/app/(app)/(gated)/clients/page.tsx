@@ -72,12 +72,12 @@ export default async function ClientsPage({
           // The server actions refuse regardless (ADR 0036).
           managed ? null : (
             <>
-              <form action={mergeClientsAction}>
-                <Button size="sm" type="submit" variant="outline">
+              <form action={mergeClientsAction} className="contents">
+                <Button type="submit" variant="outline">
                   {t("mergeDuplicates")}
                 </Button>
               </form>
-              <Button render={<Link href="/clients/new" prefetch />} size="sm">
+              <Button render={<Link href="/clients/new" prefetch />}>
                 {t("newButton")}
               </Button>
             </>
@@ -89,13 +89,13 @@ export default async function ClientsPage({
       />
       {err ? <p className="text-sm text-destructive">{err}</p> : null}
       {managed ? (
-        <p className="rounded-md border border-dashed px-4 py-3 text-sm text-muted-foreground">
+        <p className="rounded-md border border-dashed bg-card px-4 py-3 text-sm text-muted-foreground">
           {t("managedNotice")}
         </p>
       ) : null}
 
       {items.length === 0 ? (
-        <div className="rounded-md border border-dashed p-8 text-center">
+        <div className="rounded-md border border-dashed bg-card p-8 text-center">
           <p className="mb-3 text-sm text-muted-foreground">{t("empty")}</p>
           {managed ? null : (
             <Button render={<Link href="/clients/new" prefetch />} size="sm">

@@ -46,6 +46,7 @@ export function SiteHeader() {
     integrations: t("breadcrumb.integrations"),
     usage: t("breadcrumb.usage"),
     "bank-connections": t("breadcrumb.bank-connections"),
+    connections: t("breadcrumb.connections"),
     requests: t("breadcrumb.requests"),
     collect: t("breadcrumb.collect"),
     "from-json": t("breadcrumb.fromJson"),

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { InvoiceBuilderForm } from "@/components/invoices/invoice-builder-form";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { requireWorkspace } from "@/lib/auth/session";
 import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { loadLastInvoiceSuggestions } from "@/lib/load-last-invoice-suggestions";
@@ -31,6 +32,7 @@ export default async function InvoiceNewPage({
   const { workspaceId } = await requireWorkspace();
   const sp = await searchParams;
   const t = await getTranslations("Invoices.builder");
+  const tNav = await getTranslations("App.nav");
   const [issuers, clients, plan, defaultLook, workspaceLooks] =
     await Promise.all([
       loadIssuerOptions(workspaceId),
@@ -69,22 +71,22 @@ export default async function InvoiceNewPage({
       <PageHeader
         actions={
           <>
-            <Button
-              render={<Link href="/docs/guides/creating-invoices" prefetch />}
-              size="sm"
-              variant="outline"
-            >
-              <BookOpenIcon />
-              {t("builderGuide")}
-            </Button>
-            <Button
-              render={<Link href="/docs/concepts/czech-vat" prefetch />}
-              size="sm"
-              variant="outline"
-            >
-              <BookOpenIcon />
-              {t("vatGuide")}
-            </Button>
+            <ButtonGroup>
+              <Button
+                render={<Link href="/docs/guides/creating-invoices" prefetch />}
+                variant="outline"
+              >
+                <BookOpenIcon data-icon="inline-start" />
+                {t("builderGuide")}
+              </Button>
+              <Button
+                render={<Link href="/docs/concepts/czech-vat" prefetch />}
+                variant="outline"
+              >
+                <BookOpenIcon data-icon="inline-start" />
+                {t("vatGuide")}
+              </Button>
+            </ButtonGroup>
             <Button
               render={
                 <a
@@ -93,15 +95,16 @@ export default async function InvoiceNewPage({
                   target="_blank"
                 />
               }
-              size="sm"
               variant="ghost"
             >
               {t("officialAres")}
-              <ExternalLinkIcon />
+              <ExternalLinkIcon data-icon="inline-end" />
             </Button>
           </>
         }
+        back={{ href: "/invoices", label: t("back") }}
         description={t("subtitle")}
+        eyebrow={tNav("invoices")}
         icon={<FilePenLineIcon />}
         title={t("title")}
       />

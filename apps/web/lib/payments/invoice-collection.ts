@@ -20,12 +20,14 @@ export function resolveCollectionProgress(
   const outstandingMinor =
     totalMinor > paidMinor ? totalMinor - paidMinor : zero;
 
+  const hasPayment = paidMinor > zero;
   return {
     paidAmount: minorToDecimal(paidMinor),
     outstandingAmount: minorToDecimal(outstandingMinor),
     settled:
-      paymentState === "paid" ||
-      paymentState === "overpaid" ||
-      outstandingMinor === zero,
+      hasPayment &&
+      (paymentState === "paid" ||
+        paymentState === "overpaid" ||
+        outstandingMinor === zero),
   };
 }

@@ -1,56 +1,23 @@
-import {
-  addManualPayment,
-  confirmPaymentProposal,
-  rejectPaymentProposal,
-  reversePayment,
-  syncBankConnectionsFromPayments,
-} from "@/actions/payments";
+import { syncBankConnectionsFromPayments } from "@/actions/payments";
 import { PageHeader } from "@/components/layout/page-header";
-import { paymentMatchFactors } from "@/components/payments/payment-match-explanation";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { SectionPager } from "@/components/layout/section-pager";
+import { ManualPaymentDialog } from "@/components/payments/manual-payment-dialog";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+  PaymentsHistoryTable,
+  PaymentsIncomingTable,
+} from "@/components/payments/payments-ledger-tables";
+import { PaymentsSuggestedTable } from "@/components/payments/payments-suggested-table";
+import { Button } from "@/components/ui/button";
 import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 import { isAppLocale } from "@/i18n/config";
 import { requireWorkspace } from "@/lib/auth/session";
-import { can, assertCan } from "@/lib/authz/can";
-import { formatInvoiceDate, formatMoney } from "@/lib/format";
+import { assertCan, can } from "@/lib/authz/can";
 import { messageLookup } from "@/lib/i18n-lookup";
 import { listActiveBankConnections } from "@/lib/payments/connections";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
-import {
-  ArrowRightIcon,
-  CalendarDaysIcon,
-  CheckCircle2Icon,
-  CheckIcon,
-  HashIcon,
-  LandmarkIcon,
-  PlusIcon,
-  QrCodeIcon,
-  RefreshCwIcon,
-  SparklesIcon,
-  XIcon,
-} from "lucide-react";
+import { loadPaymentsRecon } from "@/lib/payments/load-payments-recon";
+import { parseIncomingState, parsePage } from "@/lib/payments/page-query";
+import { ArrowLeftRightIcon, RefreshCwIcon } from "lucide-react";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
-import Link from "next/link";
-
-import {
-  bankTransactions,
-  invoices,
-  listPaymentRequests,
-  paymentAllocations,
-  paymentMatchProposals,
-  paymentRequests,
-} from "@invoicey/db";
-import { db } from "@invoicey/db/client";
 
 import type { AppLocale } from "@/i18n/config";
 
@@ -63,160 +30,53 @@ function todayPrague(): string {
   }).format(new Date());
 }
 
-function money(value: string, currency: string, locale: AppLocale): string {
-  return formatMoney(Number(value), currency, locale);
-}
-
-function matchLabel(
-  t: Awaited<ReturnType<typeof getTranslations>>,
-  proposal: {
-    confidence: string;
-    score: number;
-    blockers: string[];
-    reasons: string[];
-  },
-): string {
-  if (
-    proposal.score === 100 &&
-    proposal.confidence === "high" &&
-    proposal.blockers.length === 0 &&
-    proposal.reasons.includes("exact_variable_symbol") &&
-    proposal.reasons.includes("exact_outstanding_amount")
-  ) {
-    return t("match.exact");
-  }
-  if (proposal.confidence === "high") return t("match.high");
-  if (proposal.confidence === "medium") return t("match.medium");
-  return t("match.low");
+function visibleCount(sliceTo: number, total: number): number {
+  return sliceTo === 0 ? 0 : total;
 }
 
 export default async function PaymentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ toast?: string }>;
+  searchParams: Promise<{
+    toast?: string;
+    incoming?: string;
+    history?: string;
+    matches?: string;
+    incomingState?: string;
+  }>;
 }) {
   await assertCan("payments:read");
   const { workspaceId } = await requireWorkspace();
-  const [
-    canManagePayments,
-    connections,
-    t,
-    localeValue,
-    messages,
-    proposals,
-    transactions,
-    allocations,
-    outstandingInvoices,
-    requests,
-  ] = await Promise.all([
-    can("payments:manage"),
-    listActiveBankConnections(workspaceId),
-    getTranslations("Payments"),
-    getLocale(),
-    getMessages(),
-    db
-      .select({
-        id: paymentMatchProposals.id,
-        amount: paymentMatchProposals.proposedAmount,
-        score: paymentMatchProposals.score,
-        confidence: paymentMatchProposals.confidence,
-        reasons: paymentMatchProposals.reasonCodes,
-        blockers: paymentMatchProposals.blockerCodes,
-        transactionAmount: bankTransactions.amount,
-        bookedDate: bankTransactions.bookedDate,
-        variableSymbol: bankTransactions.variableSymbol,
-        counterpartyName: bankTransactions.counterpartyName,
-        invoiceId: invoices.id,
-        invoiceNumber: invoices.number,
-        clientName: invoices.clientName,
-        currency: sql<string>`coalesce(${invoices.currency}, ${paymentRequests.currency})`,
-        paymentRequestId: paymentRequests.id,
-        paymentRequestMessage: paymentRequests.message,
-      })
-      .from(paymentMatchProposals)
-      .innerJoin(
-        bankTransactions,
-        eq(bankTransactions.id, paymentMatchProposals.bankTransactionId),
-      )
-      .leftJoin(invoices, eq(invoices.id, paymentMatchProposals.invoiceId))
-      .leftJoin(
-        paymentRequests,
-        eq(paymentRequests.id, paymentMatchProposals.paymentRequestId),
-      )
-      .where(
-        and(
-          eq(paymentMatchProposals.workspaceId, workspaceId),
-          eq(paymentMatchProposals.status, "pending"),
-        ),
-      )
-      .orderBy(
-        desc(paymentMatchProposals.score),
-        desc(bankTransactions.bookedDate),
-      ),
-    db
-      .select({
-        id: bankTransactions.id,
-        bookedDate: bankTransactions.bookedDate,
-        amount: bankTransactions.amount,
-        currency: bankTransactions.currency,
-        variableSymbol: bankTransactions.variableSymbol,
-        counterpartyName: bankTransactions.counterpartyName,
-        message: bankTransactions.message,
-        allocated: sql<boolean>`exists(select 1 from payment_allocations a where a.bank_transaction_id = ${bankTransactions.id} and a.reversed_at is null)`,
-      })
-      .from(bankTransactions)
-      .where(eq(bankTransactions.workspaceId, workspaceId))
-      .orderBy(
-        desc(bankTransactions.bookedDate),
-        desc(bankTransactions.createdAt),
-      )
-      .limit(50),
-    db
-      .select({
-        id: paymentAllocations.id,
-        invoiceId: paymentAllocations.invoiceId,
-        invoiceNumber: invoices.number,
-        clientName: invoices.clientName,
-        paymentRequestId: paymentAllocations.paymentRequestId,
-        paymentRequestMessage: paymentRequests.message,
-        amount: paymentAllocations.amount,
-        currency: paymentAllocations.currency,
-        effectiveDate: paymentAllocations.effectiveDate,
-        source: paymentAllocations.source,
-        reversedAt: paymentAllocations.reversedAt,
-      })
-      .from(paymentAllocations)
-      .leftJoin(invoices, eq(invoices.id, paymentAllocations.invoiceId))
-      .leftJoin(
-        paymentRequests,
-        eq(paymentRequests.id, paymentAllocations.paymentRequestId),
-      )
-      .where(eq(paymentAllocations.workspaceId, workspaceId))
-      .orderBy(desc(paymentAllocations.createdAt))
-      .limit(50),
-    db
-      .select({
-        id: invoices.id,
-        number: invoices.number,
-        clientName: invoices.clientName,
-        currency: invoices.currency,
-        outstanding: sql<string>`greatest(abs(${invoices.total}) - ${invoices.paidAmount}, 0)::text`,
-      })
-      .from(invoices)
-      .where(
-        and(
-          eq(invoices.workspaceId, workspaceId),
-          isNull(invoices.cancelledAt),
-          sql`${invoices.issuedAt} IS NOT NULL`,
-          sql`${invoices.paidAmount} < abs(${invoices.total})`,
-        ),
-      )
-      .orderBy(desc(invoices.issueDate)),
-    listPaymentRequests(db, workspaceId),
-  ]);
-  const sp = await searchParams;
+  const [canManagePayments, connections, t, tNav, localeValue, messages, sp] =
+    await Promise.all([
+      can("payments:manage"),
+      listActiveBankConnections(workspaceId),
+      getTranslations("Payments"),
+      getTranslations("App.nav"),
+      getLocale(),
+      getMessages(),
+      searchParams,
+    ]);
   const locale: AppLocale = isAppLocale(localeValue) ? localeValue : "cs";
-  /** Nothing to refresh without a connection, and only managers may sync. */
+  const incomingState = parseIncomingState(sp.incomingState);
+  const query = {
+    incoming: sp.incoming,
+    history: sp.history,
+    matches: sp.matches,
+    incomingState: incomingState === "all" ? undefined : incomingState,
+  };
+  const recon = await loadPaymentsRecon(workspaceId, {
+    incoming: parsePage(sp.incoming),
+    history: parsePage(sp.history),
+    matches: parsePage(sp.matches),
+    incomingState,
+  });
+  /** SAFETY: Payments catalog leaves are string maps used with messageLookup. */
+  const paymentCatalog = messages.Payments as {
+    reasons: Record<string, string>;
+    blockers: Record<string, string>;
+    sources: Record<string, string>;
+  };
   const hasBankConnection = canManagePayments && connections.length > 0;
 
   return (
@@ -224,403 +84,73 @@ export default async function PaymentsPage({
       <ProductToastTracker toast={sp.toast ?? null} />
       <PageHeader
         actions={
-          <div className="flex flex-wrap gap-2">
+          <>
             {hasBankConnection ? (
               <form action={syncBankConnectionsFromPayments}>
                 <Button type="submit" variant="outline">
-                  <RefreshCwIcon /> {t("syncNow")}
+                  <RefreshCwIcon data-icon="inline-start" />
+                  {t("syncNow")}
                 </Button>
               </form>
             ) : null}
             {canManagePayments ? (
-              <Button render={<Link href="/payments/requests/new" />}>
-                <QrCodeIcon /> {t("requestPayment")}
-              </Button>
+              <ManualPaymentDialog
+                defaultDate={todayPrague()}
+                invoices={recon.outstandingInvoices}
+                locale={locale}
+              />
             ) : null}
-            <Button
-              render={<Link href="/settings/workspace/bank-connections" />}
-              variant="outline"
-            >
-              <LandmarkIcon /> {t("bankConnections")}
-            </Button>
-          </div>
+          </>
         }
         description={t("description")}
-        eyebrow={t("eyebrow")}
-        icon={<LandmarkIcon />}
+        eyebrow={tNav("payments")}
+        icon={<ArrowLeftRightIcon />}
         title={t("title")}
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("requestsTitle")}</CardTitle>
-          <CardDescription>{t("requestsDescription")}</CardDescription>
-        </CardHeader>
-        <CardContent className="divide-y">
-          {requests.length === 0 ? (
-            <p className="py-4 text-sm text-muted-foreground">
-              {t("requestsEmpty")}
-            </p>
-          ) : (
-            requests.map((request) => (
-              <div
-                key={request.id}
-                className="flex items-center justify-between gap-3 py-3 text-sm"
-              >
-                <div className="min-w-0">
-                  <Link
-                    href={`/payments/requests/${request.id}`}
-                    className="truncate font-medium hover:underline"
-                  >
-                    {request.message?.trim() || t("requestUntitled")}
-                  </Link>
-                  <p className="text-xs text-muted-foreground">
-                    {t("requestMeta", {
-                      vs: request.variableSymbol,
-                      status: messageLookup(
-                        messages.Payments.requestStatus,
-                        request.status,
-                      ),
-                    })}
-                  </p>
-                </div>
-                <span className="font-medium tabular-nums">
-                  {money(request.amount, request.currency, locale)}
-                </span>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
+      <PaymentsSuggestedTable
+        blockerLabels={paymentCatalog.blockers}
+        count={visibleCount(recon.matchesSlice.to, recon.matchesTotal)}
+        from={recon.matchesSlice.from}
+        locale={locale}
+        page={recon.matchesSlice.page}
+        pageCount={recon.matchesSlice.pageCount}
+        proposals={recon.proposals}
+        query={query}
+        reasonLabels={paymentCatalog.reasons}
+        to={recon.matchesSlice.to}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("suggestedTitle")}</CardTitle>
-          <CardDescription>{t("suggestedDescription")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {proposals.length === 0 ? (
-            <p className="py-4 text-sm text-muted-foreground">
-              {t("suggestedEmpty")}
-            </p>
-          ) : (
-            proposals.map((proposal) => (
-              <div
-                key={proposal.id}
-                className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-brand/[0.07] via-transparent to-transparent p-4 sm:p-5"
-              >
-                <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xl font-semibold tabular-nums">
-                        {money(
-                          proposal.transactionAmount,
-                          proposal.currency,
-                          locale,
-                        )}
-                      </span>
-                      <Badge className="gap-1" variant="default">
-                        <SparklesIcon className="size-3" />
-                        {matchLabel(t, proposal)}
-                      </Badge>
-                    </div>
-                    <div className="mt-3 flex min-w-0 items-center gap-2 text-sm">
-                      <span className="truncate font-medium">
-                        {proposal.counterpartyName ?? t("unknownSender")}
-                      </span>
-                      <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground" />
-                      {proposal.invoiceId ? (
-                        <Link
-                          href={`/invoices/${proposal.invoiceId}`}
-                          className="truncate font-medium text-brand hover:underline"
-                        >
-                          {proposal.invoiceNumber ?? t("draft")} ·{" "}
-                          {proposal.clientName}
-                        </Link>
-                      ) : (
-                        <Link
-                          href={`/payments/requests/${proposal.paymentRequestId}`}
-                          className="truncate font-medium text-brand hover:underline"
-                        >
-                          {t("requestTarget", {
-                            note:
-                              proposal.paymentRequestMessage ??
-                              t("requestUntitled"),
-                          })}
-                        </Link>
-                      )}
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-2.5 py-1 text-xs text-muted-foreground">
-                        <CalendarDaysIcon className="size-3.5" />
-                        {formatInvoiceDate(proposal.bookedDate, locale)}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-2.5 py-1 text-xs text-muted-foreground">
-                        <HashIcon className="size-3.5" />
-                        {t("vsLabel", {
-                          value: proposal.variableSymbol ?? t("vsMissing"),
-                        })}
-                      </span>
-                      {paymentMatchFactors(proposal.reasons).map((reason) => (
-                        <span
-                          key={reason}
-                          className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-700 dark:text-emerald-400"
-                        >
-                          <CheckCircle2Icon className="size-3.5" />
-                          {messageLookup(messages.Payments.reasons, reason)}
-                        </span>
-                      ))}
-                    </div>
-                    {proposal.blockers.length > 0 ? (
-                      <p className="mt-3 text-xs text-destructive">
-                        {t("pleaseReview", {
-                          details: proposal.blockers
-                            .map((blocker) =>
-                              messageLookup(
-                                messages.Payments.blockers,
-                                blocker,
-                              ),
-                            )
-                            .join(", "),
-                        })}
-                      </p>
-                    ) : null}
-                  </div>
-                  <div className="flex shrink-0 flex-wrap gap-2">
-                    <form action={confirmPaymentProposal}>
-                      <input
-                        type="hidden"
-                        name="proposalId"
-                        value={proposal.id}
-                      />
-                      <Button type="submit">
-                        <CheckIcon />{" "}
-                        {t("confirmAmount", {
-                          amount: money(
-                            proposal.amount,
-                            proposal.currency,
-                            locale,
-                          ),
-                        })}
-                      </Button>
-                    </form>
-                    <form action={rejectPaymentProposal}>
-                      <input
-                        type="hidden"
-                        name="proposalId"
-                        value={proposal.id}
-                      />
-                      <Button type="submit" variant="outline">
-                        <XIcon />{" "}
-                        {proposal.invoiceId
-                          ? t("notThisInvoice")
-                          : t("notThisRequest")}
-                      </Button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("manualTitle")}</CardTitle>
-          <CardDescription>{t("manualDescription")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {outstandingInvoices.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("manualEmpty")}</p>
-          ) : (
-            <form
-              action={addManualPayment}
-              className="grid gap-4 sm:grid-cols-4 sm:items-end"
-            >
-              <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="invoiceId">{t("invoice")}</Label>
-                <select
-                  id="invoiceId"
-                  name="invoiceId"
-                  required
-                  className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
-                >
-                  {outstandingInvoices.map((invoice) => (
-                    <option key={invoice.id} value={invoice.id}>
-                      {t("invoiceOption", {
-                        number: invoice.number ?? t("draft"),
-                        client: invoice.clientName,
-                        amount: money(
-                          invoice.outstanding,
-                          invoice.currency,
-                          locale,
-                        ),
-                      })}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="amount">{t("amount")}</Label>
-                <Input
-                  id="amount"
-                  name="amount"
-                  inputMode="decimal"
-                  required
-                  placeholder="1000.00"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="effectiveDate">{t("paidOn")}</Label>
-                <Input
-                  id="effectiveDate"
-                  name="effectiveDate"
-                  type="date"
-                  required
-                  defaultValue={todayPrague()}
-                />
-              </div>
-              <Button type="submit" className="sm:col-start-4">
-                <PlusIcon /> {t("addPayment")}
-              </Button>
-            </form>
-          )}
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("incomingTitle")}</CardTitle>
-            <CardDescription>{t("incomingDescription")}</CardDescription>
-          </CardHeader>
-          <CardContent className="divide-y">
-            {transactions.length === 0 ? (
-              <p className="py-4 text-sm text-muted-foreground">
-                {t("incomingEmpty")}
-              </p>
-            ) : (
-              transactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex items-start justify-between gap-3 py-3 text-sm"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">
-                      {transaction.counterpartyName ??
-                        transaction.message ??
-                        t("incomingFallback")}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {t("incomingMeta", {
-                        date: formatInvoiceDate(transaction.bookedDate, locale),
-                        vs: transaction.variableSymbol ?? "—",
-                      })}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium tabular-nums">
-                      {money(transaction.amount, transaction.currency, locale)}
-                    </p>
-                    <Badge
-                      className="mt-1"
-                      variant={transaction.allocated ? "secondary" : "outline"}
-                    >
-                      {transaction.allocated
-                        ? t("allocated")
-                        : t("readyToMatch")}
-                    </Badge>
-                  </div>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("historyTitle")}</CardTitle>
-            <CardDescription>{t("historyDescription")}</CardDescription>
-          </CardHeader>
-          <CardContent className="divide-y">
-            {allocations.length === 0 ? (
-              <p className="py-4 text-sm text-muted-foreground">
-                {t("historyEmpty")}
-              </p>
-            ) : (
-              allocations.map((allocation) => {
-                const source = messageLookup(
-                  messages.Payments.sources,
-                  allocation.source,
-                );
-                return (
-                  <div
-                    key={allocation.id}
-                    className="flex items-center justify-between gap-3 py-3 text-sm"
-                  >
-                    <div className="min-w-0">
-                      {allocation.invoiceId ? (
-                        <Link
-                          href={`/invoices/${allocation.invoiceId}`}
-                          className="truncate font-medium hover:underline"
-                        >
-                          {allocation.invoiceNumber} · {allocation.clientName}
-                        </Link>
-                      ) : (
-                        <Link
-                          href={`/payments/requests/${allocation.paymentRequestId}`}
-                          className="truncate font-medium hover:underline"
-                        >
-                          {t("requestTarget", {
-                            note:
-                              allocation.paymentRequestMessage ??
-                              t("requestUntitled"),
-                          })}
-                        </Link>
-                      )}
-                      <p className="text-xs text-muted-foreground">
-                        {allocation.reversedAt
-                          ? t("historyMetaReversed", {
-                              date: formatInvoiceDate(
-                                allocation.effectiveDate,
-                                locale,
-                              ),
-                              source,
-                            })
-                          : t("historyMeta", {
-                              date: formatInvoiceDate(
-                                allocation.effectiveDate,
-                                locale,
-                              ),
-                              source,
-                            })}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium tabular-nums">
-                        {money(allocation.amount, allocation.currency, locale)}
-                      </span>
-                      {!allocation.reversedAt ? (
-                        <form action={reversePayment}>
-                          <input
-                            type="hidden"
-                            name="allocationId"
-                            value={allocation.id}
-                          />
-                          <Button type="submit" variant="ghost" size="sm">
-                            {t("reverse")}
-                          </Button>
-                        </form>
-                      ) : null}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 xl:grid-cols-2">
+        <PaymentsIncomingTable
+          incomingState={incomingState}
+          locale={locale}
+          pager={{
+            ...recon.incomingSlice,
+            count: visibleCount(recon.incomingSlice.to, recon.incomingTotal),
+            query,
+            pageKey: "incoming",
+          }}
+          transactions={recon.transactions}
+        />
+        <PaymentsHistoryTable
+          allocations={recon.allocations.map((allocation) => ({
+            ...allocation,
+            sourceLabel: messageLookup(
+              paymentCatalog.sources,
+              allocation.source,
+            ),
+          }))}
+          locale={locale}
+          pager={{
+            ...recon.historySlice,
+            count: visibleCount(recon.historySlice.to, recon.historyTotal),
+            query,
+            pageKey: "history",
+          }}
+        />
       </div>
+      <SectionPager group="payments" />
     </div>
   );
 }

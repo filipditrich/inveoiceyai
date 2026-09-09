@@ -98,6 +98,7 @@ export default async function InvoiceDetailPage({
     { id },
     sp,
     t,
+    tNav,
     tOrigin,
     tErrors,
     localeValue,
@@ -106,6 +107,7 @@ export default async function InvoiceDetailPage({
     params,
     searchParams,
     getTranslations("Invoices.detail"),
+    getTranslations("App.nav"),
     getTranslations("Invoices.origin"),
     getTranslations("Errors.invalid"),
     getLocale(),
@@ -291,21 +293,15 @@ export default async function InvoiceDetailPage({
         successInvoiceId={id}
         toast={sp.toast ?? null}
       />
-      <Link
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        href="/invoices"
-        prefetch
-      >
-        {t("backToList")}
-      </Link>
       {showDriveBanner ? <DrivePromoBanner /> : null}
       <PageHeader
+        back={{ href: "/invoices", label: t("backToList") }}
         actions={
           <>
             {displayStatus === "draft" ? (
               <form action={issueSavedInvoice}>
                 <input name="id" type="hidden" value={id} />
-                <SubmitButton pendingLabel={t("issuingPending")} size="sm">
+                <SubmitButton pendingLabel={t("issuingPending")}>
                   <StampIcon data-icon="inline-start" />
                   {t("issueButton")}
                 </SubmitButton>
@@ -316,7 +312,7 @@ export default async function InvoiceDetailPage({
             displayStatus === "future" ? (
               <form action={markInvoicePaid}>
                 <input name="id" type="hidden" value={id} />
-                <SubmitButton pendingLabel={t("savingPending")} size="sm">
+                <SubmitButton pendingLabel={t("savingPending")}>
                   <WalletCardsIcon data-icon="inline-start" />
                   {t("markPaidButton")}
                 </SubmitButton>
@@ -325,7 +321,6 @@ export default async function InvoiceDetailPage({
             {canManagePayments && collection && !collection.settled ? (
               <Button
                 render={<Link href={`/invoices/${id}/collect`} prefetch />}
-                size="sm"
               >
                 <ScanLineIcon data-icon="inline-start" />
                 {t("collectButton")}
@@ -335,7 +330,6 @@ export default async function InvoiceDetailPage({
             <ButtonGroup>
               <Button
                 render={<a href={`/api/invoices/${id}/pdf`} download />}
-                size="sm"
                 variant="outline"
               >
                 <FileDownIcon data-icon="inline-start" />
@@ -344,7 +338,6 @@ export default async function InvoiceDetailPage({
               {showIsdoc ? (
                 <Button
                   render={<a href={`/api/invoices/${id}/isdoc`} download />}
-                  size="sm"
                   variant="outline"
                 >
                   <FileCodeIcon data-icon="inline-start" />
@@ -356,7 +349,6 @@ export default async function InvoiceDetailPage({
             {displayStatus === "draft" ? (
               <Button
                 render={<Link href={`/invoices/${id}/edit`} prefetch />}
-                size="sm"
                 variant="outline"
               >
                 <PencilIcon data-icon="inline-start" />
@@ -367,7 +359,6 @@ export default async function InvoiceDetailPage({
               <input name="id" type="hidden" value={id} />
               <SubmitButton
                 pendingLabel={t("duplicatingPending")}
-                size="sm"
                 variant="outline"
               >
                 <CopyIcon data-icon="inline-start" />
@@ -378,7 +369,6 @@ export default async function InvoiceDetailPage({
               row.recurringScheduleId ? (
                 <Button
                   render={<Link href="/invoices/recurring" prefetch />}
-                  size="sm"
                   variant="outline"
                 >
                   <RepeatIcon data-icon="inline-start" />
@@ -422,7 +412,6 @@ export default async function InvoiceDetailPage({
                 <input name="id" type="hidden" value={id} />
                 <SubmitButton
                   pendingLabel={t("savingPending")}
-                  size="sm"
                   variant="secondary"
                 >
                   <WalletCardsIcon data-icon="inline-start" />
@@ -435,7 +424,6 @@ export default async function InvoiceDetailPage({
                 <input name="id" type="hidden" value={id} />
                 <SubmitButton
                   pendingLabel={t("deletingPending")}
-                  size="sm"
                   variant="destructive"
                 >
                   <Trash2Icon data-icon="inline-start" />
@@ -446,6 +434,7 @@ export default async function InvoiceDetailPage({
           </>
         }
         description={headerDescription}
+        eyebrow={tNav("invoices")}
         icon={<ReceiptTextIcon />}
         title={<span className="tabular-nums">{row.number ?? "DRAFT"}</span>}
       />
@@ -683,7 +672,7 @@ export default async function InvoiceDetailPage({
               </li>
             ))}
           </ul>
-          <div className="hidden max-w-full overflow-x-auto rounded-md border md:block">
+          <div className="hidden max-w-full overflow-x-auto rounded-md border bg-card md:block">
             <table className="w-full min-w-[42rem] text-sm">
               <thead>
                 <tr className="border-b text-left">

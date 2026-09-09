@@ -1,12 +1,10 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { InvoiceCollectionWaiting } from "@/components/payments/invoice-collection-waiting";
-import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
 import { loadInvoiceCollection } from "@/lib/payments/invoice-collection-repository";
-import { ArrowLeftIcon, ScanLineIcon } from "lucide-react";
+import { ScanLineIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { renderSpaydQrSvg } from "@invoicey/invoice-core/spayd";
@@ -18,10 +16,11 @@ export default async function CollectInvoicePage({
 }: {
   params: Params;
 }) {
-  const [{ id }, { workspaceId }, t] = await Promise.all([
+  const [{ id }, { workspaceId }, t, tNav] = await Promise.all([
     params,
     requireWorkspace(),
     getTranslations("Invoices.collect"),
+    getTranslations("App.nav"),
     assertCan("payments:manage"),
   ]);
   const collection = await loadInvoiceCollection(workspaceId, id);
@@ -31,16 +30,10 @@ export default async function CollectInvoicePage({
 
   return (
     <div className="space-y-6">
-      <Button
-        render={<Link href={`/invoices/${id}`} prefetch />}
-        variant="ghost"
-      >
-        <ArrowLeftIcon data-icon="inline-start" />
-        {t("back")}
-      </Button>
       <PageHeader
+        back={{ href: `/invoices/${id}`, label: t("back") }}
         description={t("description")}
-        eyebrow={t("eyebrow")}
+        eyebrow={tNav("invoices")}
         icon={<ScanLineIcon />}
         title={t("title")}
       />

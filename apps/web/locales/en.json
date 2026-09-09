@@ -1100,11 +1100,13 @@
       "group": "Workspace",
       "dashboard": "Overview",
       "invoices": "Invoices",
+      "invoicesMine": "My invoices",
       "invoicesAi": "Create with AI",
       "invoicesImport": "Import past invoices",
       "invoicesFromJson": "JSON invoice",
       "invoicesRecurring": "Recurring invoices",
       "payments": "Payments",
+      "paymentsMatching": "Matching",
       "clients": "Clients",
       "issuers": "My businesses",
       "newInvoice": "New invoice",
@@ -1116,7 +1118,9 @@
       "newInvoiceMore": "More ways to create",
       "createGroup": "Create",
       "invoiceBlank": "Blank invoice",
-      "bankConnections": "Bank connections",
+      "bankConnections": "Banks",
+      "requestPayment": "Request payment",
+      "paymentRequests": "Requests",
       "settingsGroup": "Settings",
       "settingsWorkspace": "Workspace",
       "settingsAccount": "My account",
@@ -1153,8 +1157,43 @@
       "usage": "Usage",
       "bank-connections": "Bank connections",
       "requests": "Requests",
+      "connections": "Banks",
       "collect": "Collect",
       "account": "Account"
+    },
+    "section": {
+      "invoices": {
+        "home": {
+          "title": "My invoices",
+          "description": "Drafts, issued documents, and their status."
+        },
+        "recurring": {
+          "title": "Recurring invoices",
+          "description": "A schedule that creates the next draft for you."
+        },
+        "import": {
+          "title": "Import past invoices",
+          "description": "Bring PDFs from another tool into Invoicey."
+        },
+        "fromJson": {
+          "title": "JSON invoice",
+          "description": "Paste JSON and preview the PDF."
+        }
+      },
+      "payments": {
+        "home": {
+          "title": "Matching",
+          "description": "Incoming bank payments and confirmed matches."
+        },
+        "requests": {
+          "title": "Requests",
+          "description": "Ask for money with a QR, no invoice needed."
+        },
+        "connections": {
+          "title": "Banks",
+          "description": "Read-only statement connections."
+        }
+      }
     },
     "a11y": {
       "toggleSidebar": "Toggle sidebar",
@@ -1596,9 +1635,12 @@
         "dashboard": "Overview",
         "invoices": "Invoices",
         "payments": "Payments",
+        "paymentRequests": "Requests",
+        "bankConnections": "Banks",
         "clients": "Clients",
         "issuers": "My businesses",
         "newInvoice": "New invoice",
+        "requestPayment": "Request payment",
         "aiDraft": "Create invoice with AI",
         "recurring": "Recurring invoices",
         "fromJson": "JSON invoice",
@@ -1685,12 +1727,10 @@
   },
   "Invoices": {
     "list": {
-      "title": "Invoices",
-      "subtitle": "Statuses, filters, and actions for invoices.",
+      "title": "My invoices",
+      "subtitle": "Drafts and issued invoices in one list. Filter by status, then issue, send, or collect payment.",
       "newButton": "New invoice",
       "aiButton": "AI draft",
-      "importButton": "Import",
-      "fromJsonButton": "From JSON",
       "empty": "No invoices.",
       "createFirst": "Create your first invoice",
       "page": "Page {current} / {total} ({records})",
@@ -1838,7 +1878,7 @@
       "totalInclVat": "Total incl. VAT",
       "archiveNote": "Archive import — line items are not available. Download the original PDF.",
       "invalidPayload": "Invalid payload in DB.",
-      "backToList": "← Back to list",
+      "backToList": "Back to invoices",
       "driveBannerTitle": "Keep a Finder copy on your Mac",
       "driveBannerBody": "Invoicey Drive lists issued PDFs in Finder. Install the Mac app, then Connect Invoicey from the menu bar.",
       "driveBannerCta": "Invoicey Drive settings",
@@ -1909,9 +1949,8 @@
       }
     },
     "collect": {
-      "eyebrow": "Live payment",
       "title": "Show this QR to get paid",
-      "description": "Invoicey is watching your connected account and will confirm the payment here when the bank reports it.",
+      "description": "Keep this screen open. Invoicey watches the connected account and confirms the payment here when the bank reports it.",
       "back": "Back to invoice",
       "qrLabel": "Payment QR code",
       "invoice": "Invoice {number}",
@@ -1930,7 +1969,9 @@
     },
     "builder": {
       "title": "New invoice",
-      "subtitle": "Draft → Issue. PDF preview on the right.",
+      "subtitle": "Fill in the parties and line items, then issue. The PDF preview grows with the document.",
+      "back": "Back to invoices",
+      "backToInvoice": "Back to invoice",
       "builderGuide": "Builder guide",
       "vatGuide": "VAT guide",
       "officialAres": "Official ARES",
@@ -2112,9 +2153,8 @@
       "explanationsSummary": "How issuing works"
     },
     "import": {
-      "title": "Import historical invoices",
-      "subtitle": "Upload PDFs. If they contain ISDOC (~80%), we'll parse them in full. Without ISDOC we store the original as an archive and you fill in the header manually.",
-      "backLink": "← Invoices",
+      "title": "Import past invoices",
+      "subtitle": "Upload PDFs from another tool. Files with ISDOC fill in automatically; the rest you complete by hand.",
       "missingIssuer": "First create <issuer></issuer>.",
       "issuerLink": "a business",
       "stepsAria": "Import steps",
@@ -2158,10 +2198,8 @@
       "done": "Import finished: {created} created, {skipped} skipped, {failed} failed."
     },
     "fromJson": {
-      "eyebrow": "Structured input",
-      "title": "Invoice from JSON",
-      "subtitle": "Paste an <code>InvoiceSchema</code> JSON payload, validate its structure, and create a PDF preview.",
-      "backToInvoices": "← Back to Invoices",
+      "title": "JSON invoice",
+      "subtitle": "Paste invoice JSON, check it, and preview the PDF. Handy for scripts, MCP, or a quick test.",
       "jsonLabel": "Invoice JSON",
       "loadPreset": "Load preset",
       "renderPdf": "Render PDF",
@@ -2193,7 +2231,7 @@
   "Recurring": {
     "list": {
       "title": "Recurring invoices",
-      "subtitle": "Templates that create a draft on a schedule. You issue and send them yourself.",
+      "subtitle": "Save a schedule from an issued invoice. Invoicey creates the next draft on time; you issue and send it.",
       "empty": "No recurring schedules yet.",
       "emptyCta": "Open an invoice and save it as recurring",
       "createFirst": "Create an invoice first",
@@ -2264,6 +2302,7 @@
     },
     "newTitle": "New client",
     "newSubtitle": "Enter IČO and look up via ARES, or fill in manually.",
+    "back": "Back to clients",
     "editTitle": "Edit client",
     "editSubtitle": "Update customer details.",
     "mergeDuplicates": "Merge duplicates",
@@ -2322,6 +2361,7 @@
     },
     "newTitle": "New business",
     "newSubtitle": "IČO via ARES, contact email, and bank. Other settings can be completed in sections after creation.",
+    "back": "Back to businesses",
     "editTitle": "Edit business",
     "editSubtitle": "Update business details, bank, and numbering.",
     "form": {
@@ -2778,7 +2818,7 @@
     },
     "bankConnections": {
       "pageTitle": "Bank connections",
-      "pageDescription": "Connect a read-only bank feed to this workspace. For Fio, a separate submit token can place payment batches in the signing queue; Invoicey never authorizes payments.",
+      "pageDescription": "Connect a read-only statement so Invoicey can import incoming payments and suggest matches. Invoicey never sends money.",
       "unnamedIssuer": "Unnamed business",
       "readOnly": "Read-only",
       "submitRights": "Submit rights enabled",
@@ -2792,6 +2832,24 @@
       "autoMatchAria": "Automatic exact matching",
       "on": "On",
       "off": "Off",
+      "pager": {
+        "previous": "Previous",
+        "next": "Next",
+        "pageInfo": "{from}–{to} of {count}"
+      },
+      "columns": {
+        "date": "Date",
+        "from": "From",
+        "to": "To",
+        "amount": "Amount",
+        "vs": "VS",
+        "match": "Match",
+        "status": "Status",
+        "actions": "Actions",
+        "note": "Note",
+        "received": "Received",
+        "source": "Source"
+      },
       "syncNow": "Sync now",
       "disconnect": "Disconnect",
       "encryptionMissing": "Bank token encryption is not configured. Set BANK_TOKEN_ENCRYPTION_KEY_V1 before connecting an account.",
@@ -2891,9 +2949,8 @@
     }
   },
   "Payments": {
-    "title": "Payments",
-    "eyebrow": "Reconciliation",
-    "description": "Bank transactions remain suggestions until you confirm an allocation. One invoice can receive partial payments and every reversal stays visible.",
+    "title": "Matching",
+    "description": "Incoming bank payments stay as suggestions until you confirm them. Partial payments and reversals stay in the list.",
     "bankConnections": "Bank connections",
     "requestPayment": "Request payment",
     "requestsTitle": "Payment requests",
@@ -2909,7 +2966,7 @@
       "cancelled": "Cancelled"
     },
     "suggestedTitle": "Suggested matches",
-    "suggestedDescription": "Deterministic proposals based on receiving IBAN, currency, variable symbol, outstanding amount, and date.",
+    "suggestedDescription": "Invoicey suggests a match when the account, amount, and variable symbol line up. Confirm or dismiss each one.",
     "suggestedEmpty": "No payment matches need review.",
     "unknownSender": "Unknown sender",
     "draft": "Draft",
@@ -2927,14 +2984,14 @@
     "paidOn": "Paid on",
     "addPayment": "Add payment",
     "incomingTitle": "Incoming transactions",
-    "incomingDescription": "Latest imported bank credits.",
+    "incomingDescription": "Credits imported from your connected bank.",
     "incomingEmpty": "No imported transactions yet.",
     "incomingFallback": "Incoming payment",
     "incomingMeta": "{date} · VS {vs}",
     "allocated": "Allocated",
     "readyToMatch": "Ready to match",
     "historyTitle": "Allocation history",
-    "historyDescription": "Confirmed, manual, and reversed ledger entries.",
+    "historyDescription": "Payments you confirmed, added by hand, or reversed.",
     "historyEmpty": "No allocations yet.",
     "historyMeta": "{date} · {source}",
     "historyMetaReversed": "{date} · {source} · Reversed",
@@ -2965,27 +3022,60 @@
       "bank_confirmed": "Matched from bank",
       "manual": "Added manually"
     },
-    "syncNow": "Sync now"
+    "pager": {
+      "previous": "Previous",
+      "next": "Next",
+      "pageInfo": "{from}–{to} of {count}"
+    },
+    "columns": {
+      "date": "Date",
+      "from": "From",
+      "to": "To",
+      "amount": "Amount",
+      "vs": "VS",
+      "match": "Match",
+      "status": "Status",
+      "actions": "Actions",
+      "note": "Note",
+      "received": "Received",
+      "source": "Source"
+    },
+    "incomingFilter": {
+      "all": "All",
+      "unmatched": "Unmatched",
+      "allocated": "Matched"
+    },
+    "openRequest": "Open",
+    "syncNow": "Sync bank"
   },
   "PaymentRequests": {
+    "list": {
+      "title": "Payment requests",
+      "description": "Ask for a payment without an invoice. The payer gets a QR; Invoicey watches the connected account.",
+      "empty": "No payment requests yet.",
+      "untitled": "Payment request",
+      "create": "Request payment",
+      "filterAll": "All"
+    },
     "create": {
-      "eyebrow": "Payment request",
       "title": "Ask for a payment",
-      "description": "Name an amount. Invoicey generates a variable symbol and watches the connected account.",
+      "description": "Enter an amount. Invoicey creates a variable symbol and a QR for the connected account.",
+      "back": "Back to requests",
       "amount": "Amount",
-      "amountHint": "CZK only.",
+      "amountHint": "The QR will ask for this exact CZK amount.",
       "note": "Note for the payer",
       "notePlaceholder": "Optional — shown on the QR",
       "submit": "Create request",
       "noConnection": "Connect a CZK bank account first. A request needs somewhere for the money to land.",
-      "connectBank": "Bank connections",
-      "invalidAmount": "Enter a positive CZK amount."
+      "connectBank": "Connect a bank",
+      "invalidAmount": "Enter a positive CZK amount.",
+      "accountLabel": "Receiving account",
+      "accountHint": "{account}"
     },
     "wait": {
-      "eyebrow": "Live payment",
       "title": "Show this QR to get paid",
-      "description": "Invoicey is watching your connected account and will confirm the payment here when the bank reports it.",
-      "back": "Back to payments",
+      "description": "Keep this screen open. Invoicey watches the connected account and confirms the payment here when the bank reports it.",
+      "back": "Back to requests",
       "qrLabel": "Payment QR code",
       "untitled": "Payment request",
       "account": "Account",
@@ -3000,7 +3090,7 @@
       "partiallyReceived": "{amount} has arrived. Waiting for the rest.",
       "refreshInterrupted": "The bank update is taking a little longer. We’ll keep trying.",
       "received": "Payment received",
-      "receivedBody": "{amount} is confirmed in your payment ledger."
+      "receivedBody": "{amount} of {requested} is confirmed in your payment ledger."
     },
     "public": {
       "title": "Pay {issuer}",

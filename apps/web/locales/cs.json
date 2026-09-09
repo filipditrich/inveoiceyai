@@ -1100,11 +1100,13 @@
       "group": "Pracovní prostor",
       "dashboard": "Přehled",
       "invoices": "Faktury",
+      "invoicesMine": "Moje faktury",
       "invoicesAi": "Vytvořit s AI",
       "invoicesImport": "Importovat staré faktury",
       "invoicesFromJson": "Faktura z JSON",
       "invoicesRecurring": "Opakované faktury",
       "payments": "Platby",
+      "paymentsMatching": "Párování",
       "clients": "Klienti",
       "issuers": "Moje firmy",
       "newInvoice": "Nová faktura",
@@ -1116,7 +1118,9 @@
       "newInvoiceMore": "Další způsoby vytvoření",
       "createGroup": "Vytvořit",
       "invoiceBlank": "Prázdná faktura",
-      "bankConnections": "Bankovní spojení",
+      "bankConnections": "Banky",
+      "requestPayment": "Vyžádat platbu",
+      "paymentRequests": "Výzvy",
       "settingsGroup": "Nastavení",
       "settingsWorkspace": "Pracovní prostor",
       "settingsAccount": "Můj účet",
@@ -1153,8 +1157,43 @@
       "usage": "Využití",
       "bank-connections": "Bankovní spojení",
       "requests": "Výzvy",
+      "connections": "Banky",
       "collect": "Vybrat platbu",
       "account": "Účet"
+    },
+    "section": {
+      "invoices": {
+        "home": {
+          "title": "Moje faktury",
+          "description": "Návrhy, vystavené doklady a jejich stav."
+        },
+        "recurring": {
+          "title": "Opakované faktury",
+          "description": "Plán, který za vás založí další návrh."
+        },
+        "import": {
+          "title": "Importovat staré faktury",
+          "description": "Přineste PDF z jiného nástroje do Invoicey."
+        },
+        "fromJson": {
+          "title": "Faktura z JSON",
+          "description": "Vložte JSON a zobrazte náhled PDF."
+        }
+      },
+      "payments": {
+        "home": {
+          "title": "Párování",
+          "description": "Příchozí bankovní platby a potvrzená spárování."
+        },
+        "requests": {
+          "title": "Výzvy",
+          "description": "Požádejte o peníze QR kódem, bez faktury."
+        },
+        "connections": {
+          "title": "Banky",
+          "description": "Napojení výpisu jen pro čtení."
+        }
+      }
     },
     "a11y": {
       "toggleSidebar": "Přepnout postranní panel",
@@ -1596,9 +1635,12 @@
         "dashboard": "Přehled",
         "invoices": "Faktury",
         "payments": "Platby",
+        "paymentRequests": "Výzvy",
+        "bankConnections": "Banky",
         "clients": "Klienti",
         "issuers": "Moje firmy",
         "newInvoice": "Nová faktura",
+        "requestPayment": "Vyžádat platbu",
         "aiDraft": "Vytvořit fakturu s AI",
         "recurring": "Opakované faktury",
         "fromJson": "Faktura z JSON",
@@ -1685,12 +1727,10 @@
   },
   "Invoices": {
     "list": {
-      "title": "Faktury",
-      "subtitle": "Stavy, filtry a akce nad fakturami.",
+      "title": "Moje faktury",
+      "subtitle": "Návrhy i vystavené faktury na jednom místě. Filtrujte podle stavu a pak vystavte, odešlete nebo vyberte platbu.",
       "newButton": "Nová faktura",
       "aiButton": "AI koncept",
-      "importButton": "Import",
-      "fromJsonButton": "Z JSON",
       "empty": "Žádné faktury.",
       "createFirst": "Vytvořit první fakturu",
       "page": "Strana {current} / {total} ({records})",
@@ -1838,7 +1878,7 @@
       "totalInclVat": "Celkem s DPH",
       "archiveNote": "Archivní import — položky nejsou k dispozici. Stáhněte originální PDF.",
       "invalidPayload": "Uložená data faktury jsou neplatná.",
-      "backToList": "← Zpět na seznam",
+      "backToList": "Zpět na faktury",
       "driveBannerTitle": "Kopii ve Finderu na Macu",
       "driveBannerBody": "Invoicey Drive ukáže vystavená PDF ve Finderu. Nainstalujte aplikaci a v liště nabídek zvolte Connect Invoicey.",
       "driveBannerCta": "Nastavení Invoicey Drive",
@@ -1909,9 +1949,8 @@
       }
     },
     "collect": {
-      "eyebrow": "Platba živě",
       "title": "Ukažte QR a nechte si zaplatit",
-      "description": "Invoicey sleduje propojený účet a platbu zde potvrdí, jakmile ji banka nahlásí.",
+      "description": "Nechte tuto stránku otevřenou. Invoicey hlídá napojený účet a platbu zde potvrdí, jakmile ji banka nahlásí.",
       "back": "Zpět na fakturu",
       "qrLabel": "QR kód pro platbu",
       "invoice": "Faktura {number}",
@@ -1930,7 +1969,9 @@
     },
     "builder": {
       "title": "Nová faktura",
-      "subtitle": "Nejprve vytvořte návrh, potom jej zkontrolujte a vystavte. Náhled PDF najdete vedle formuláře nebo pod ním.",
+      "subtitle": "Vyplňte strany a položky a pak vystavte. Náhled PDF se roztáhne s dokladem.",
+      "back": "Zpět na faktury",
+      "backToInvoice": "Zpět na fakturu",
       "builderGuide": "Průvodce formulářem",
       "vatGuide": "Průvodce DPH",
       "officialAres": "Oficiální ARES",
@@ -2112,9 +2153,8 @@
       "explanationsSummary": "Jak vystavení funguje"
     },
     "import": {
-      "title": "Import historických faktur",
-      "subtitle": "Nahrajte soubory PDF. Pokud obsahují vložený ISDOC, načteme i strukturovaná data. Ostatní uložíme jako archivní originály a základní údaje doplníte ručně.",
-      "backLink": "← Faktury",
+      "title": "Importovat staré faktury",
+      "subtitle": "Nahrajte PDF z jiného nástroje. Soubory s ISDOC se vyplní samy, u ostatních doplníte hlavičku ručně.",
       "missingIssuer": "Nejprve vytvořte <issuer></issuer>.",
       "issuerLink": "firmu",
       "stepsAria": "Kroky importu",
@@ -2158,10 +2198,8 @@
       "done": "Import hotov: {created} vytvořeno, {skipped} přeskočeno, {failed} chyb."
     },
     "fromJson": {
-      "eyebrow": "Strukturované zadání",
       "title": "Faktura z JSON",
-      "subtitle": "Vložte <code>InvoiceSchema</code> JSON, ověřte jeho strukturu a vytvořte náhled PDF.",
-      "backToInvoices": "← Zpět na faktury",
+      "subtitle": "Vložte fakturu jako JSON, zkontrolujte ji a zobrazte náhled PDF. Hodí se pro skripty, MCP nebo rychlý test.",
       "jsonLabel": "Invoice JSON",
       "loadPreset": "Načíst předvolbu",
       "renderPdf": "Vytvořit náhled PDF",
@@ -2193,7 +2231,7 @@
   "Recurring": {
     "list": {
       "title": "Opakované faktury",
-      "subtitle": "Šablony, ze kterých vznikne návrh podle plánu. Vystavení a odeslání zůstává na vás.",
+      "subtitle": "Plán uložíte z vystavené faktury. Invoicey v termínu založí další návrh, vystavení a odeslání zůstává na vás.",
       "empty": "Zatím nemáte žádný opakovaný plán.",
       "emptyCta": "Otevřete fakturu a uložte ji jako opakovanou",
       "createFirst": "Nejprve vytvořte fakturu",
@@ -2264,6 +2302,7 @@
     },
     "newTitle": "Nový klient",
     "newSubtitle": "Zadejte IČO a načtěte údaje z ARES, nebo klienta vyplňte ručně.",
+    "back": "Zpět na klienty",
     "editTitle": "Upravit klienta",
     "editSubtitle": "Aktualizujte údaje odběratele.",
     "mergeDuplicates": "Sloučit duplicity",
@@ -2322,6 +2361,7 @@
     },
     "newTitle": "Nová firma",
     "newSubtitle": "IČO přes ARES, kontaktní e-mail a banka. Ostatní nastavení doplníte v sekcích po vytvoření.",
+    "back": "Zpět na firmy",
     "editTitle": "Upravit firmu",
     "editSubtitle": "Aktualizujte firemní údaje, banku a číslování.",
     "form": {
@@ -2778,7 +2818,7 @@
     },
     "bankConnections": {
       "pageTitle": "Bankovní spojení",
-      "pageDescription": "Připojte k tomuto workspace bankovní přehled jen pro čtení. Samostatný Fio token pro odesílání může vložit dávku do fronty k podpisu; Invoicey platbu nikdy neautorizuje.",
+      "pageDescription": "Připojte výpis jen pro čtení. Invoicey naimportuje příchozí platby a navrhne spárování. Peníze nikdy neodesílá.",
       "unnamedIssuer": "Firma bez názvu",
       "readOnly": "Jen pro čtení",
       "submitRights": "Odesílání povoleno",
@@ -2891,9 +2931,8 @@
     }
   },
   "Payments": {
-    "title": "Platby",
-    "eyebrow": "Párování",
-    "description": "Bankovní transakce zůstávají návrhy, dokud potvrdíte přiřazení. Jedna faktura může dostat částečné platby a každé storno zůstane viditelné.",
+    "title": "Párování",
+    "description": "Příchozí bankovní platby zůstávají návrhy, dokud je nepotvrdíte. Částečné platby i storna zůstanou v přehledu.",
     "bankConnections": "Bankovní spojení",
     "requestPayment": "Vyžádat platbu",
     "requestsTitle": "Výzvy k platbě",
@@ -2909,7 +2948,7 @@
       "cancelled": "Zrušená"
     },
     "suggestedTitle": "Navrhovaná spárování",
-    "suggestedDescription": "Deterministické návrhy podle přijímacího IBAN, měny, variabilního symbolu, dlužné částky a data.",
+    "suggestedDescription": "Invoicey navrhne shodu, když sedí účet, částka a variabilní symbol. Každý návrh potvrďte nebo zamítněte.",
     "suggestedEmpty": "Žádné platby nečekají na kontrolu.",
     "unknownSender": "Neznámý odesílatel",
     "draft": "Návrh",
@@ -2927,14 +2966,14 @@
     "paidOn": "Zaplaceno",
     "addPayment": "Přidat platbu",
     "incomingTitle": "Příchozí transakce",
-    "incomingDescription": "Nejnovější importované bankovní kredity.",
+    "incomingDescription": "Platby stažené z napojené banky.",
     "incomingEmpty": "Zatím žádné importované transakce.",
     "incomingFallback": "Příchozí platba",
     "incomingMeta": "{date} · VS {vs}",
     "allocated": "Přiřazeno",
     "readyToMatch": "K párování",
     "historyTitle": "Historie přiřazení",
-    "historyDescription": "Potvrzené, ruční a stornované záznamy evidence.",
+    "historyDescription": "Platby, které jste potvrdili, přidali ručně, nebo stornovali.",
     "historyEmpty": "Zatím žádná přiřazení.",
     "historyMeta": "{date} · {source}",
     "historyMetaReversed": "{date} · {source} · Stornováno",
@@ -2965,27 +3004,60 @@
       "bank_confirmed": "Spárováno z banky",
       "manual": "Přidáno ručně"
     },
-    "syncNow": "Synchronizovat"
+    "pager": {
+      "previous": "Předchozí",
+      "next": "Další",
+      "pageInfo": "{from}–{to} z {count}"
+    },
+    "columns": {
+      "date": "Datum",
+      "from": "Od",
+      "to": "Pro",
+      "amount": "Částka",
+      "vs": "VS",
+      "match": "Shoda",
+      "status": "Stav",
+      "actions": "Akce",
+      "note": "Poznámka",
+      "received": "Přijato",
+      "source": "Zdroj"
+    },
+    "incomingFilter": {
+      "all": "Vše",
+      "unmatched": "Nespárované",
+      "allocated": "Spárované"
+    },
+    "openRequest": "Otevřít",
+    "syncNow": "Načíst z banky"
   },
   "PaymentRequests": {
+    "list": {
+      "title": "Výzvy k platbě",
+      "description": "Požádejte o platbu bez faktury. Plátce dostane QR, Invoicey hlídá napojený účet.",
+      "empty": "Zatím žádné výzvy k platbě.",
+      "untitled": "Výzva k platbě",
+      "create": "Vyžádat platbu",
+      "filterAll": "Vše"
+    },
     "create": {
-      "eyebrow": "Výzva k platbě",
       "title": "Vyžádat platbu",
-      "description": "Zadejte částku. Invoicey vygeneruje variabilní symbol a bude sledovat propojený účet.",
+      "description": "Zadejte částku. Invoicey vytvoří variabilní symbol a QR pro napojený účet.",
+      "back": "Zpět na výzvy",
       "amount": "Částka",
-      "amountHint": "Pouze CZK.",
+      "amountHint": "QR požádá přesně o tuto částku v CZK.",
       "note": "Poznámka pro plátce",
       "notePlaceholder": "Volitelné — zobrazí se na QR",
       "submit": "Vytvořit výzvu",
       "noConnection": "Nejdřív propojte CZK účet. Výzva potřebuje, kam mají peníze dorazit.",
-      "connectBank": "Bankovní spojení",
-      "invalidAmount": "Zadejte kladnou částku v CZK."
+      "connectBank": "Připojit banku",
+      "invalidAmount": "Zadejte kladnou částku v CZK.",
+      "accountLabel": "Přijímací účet",
+      "accountHint": "{account}"
     },
     "wait": {
-      "eyebrow": "Platba živě",
       "title": "Ukažte QR a nechte si zaplatit",
-      "description": "Invoicey sleduje propojený účet a platbu zde potvrdí, jakmile ji banka nahlásí.",
-      "back": "Zpět na platby",
+      "description": "Nechte tuto stránku otevřenou. Invoicey hlídá napojený účet a platbu zde potvrdí, jakmile ji banka nahlásí.",
+      "back": "Zpět na výzvy",
       "qrLabel": "QR kód pro platbu",
       "untitled": "Výzva k platbě",
       "account": "Účet",
@@ -3000,7 +3072,7 @@
       "partiallyReceived": "Dorazilo {amount}. Čekáme na zbytek.",
       "refreshInterrupted": "Aktualizace z banky trvá o něco déle. Budeme to zkoušet dál.",
       "received": "Platba dorazila",
-      "receivedBody": "Částka {amount} je potvrzená v přehledu plateb."
+      "receivedBody": "Částka {amount} z {requested} je potvrzená v přehledu plateb."
     },
     "public": {
       "title": "Platba pro {issuer}",
