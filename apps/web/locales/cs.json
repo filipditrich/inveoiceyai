@@ -3471,6 +3471,8 @@
       "overrides": {
         "title": "Výjimky oprávnění",
         "description": "Ukládají se jen klíče, které se liší od tarifu. Smazání vrátí tarif přesně. Grantová pravidla zůstávají na tarifu.",
+        "detachLabel": "Odpojit Polar a převzít správu",
+        "detachHint": "Nutné u workspace placených přes Polar. Polar už nebude vlastnit tarif; předplatné v Polaru zrušte zvlášť, pokud nechcete dál platit.",
         "save": "Uložit výjimky",
         "clear": "Smazat výjimky"
       },
@@ -3497,10 +3499,15 @@
         "assigned": "Přiřazeno",
         "assignedManually": "Ručně administrátorem",
         "assignedAutomatically": "Automaticky podle domény",
+        "billingAuthority": "Správa tarifu",
+        "polarManaged": "Polar",
+        "manualAuthority": "Ruční",
         "seats": "Místa",
         "monthlyTokens": "Měsíční tokeny",
         "unlimited": "Neomezeně",
         "selectLabel": "Přesunout na tarif",
+        "detachLabel": "Odpojit Polar a převzít správu",
+        "detachHint": "Nutné u workspace placených přes Polar. Polar už nebude vlastnit tarif; předplatné v Polaru zrušte zvlášť, pokud nechcete dál platit.",
         "hint": "Snížení tarifu nikdy nic nemaže. Workspace nad limit zůstane čitelný, jen už nemůže růst.",
         "submit": "Přiřadit tarif",
         "missing": "Pro tento workspace se nepodařilo určit tarif."

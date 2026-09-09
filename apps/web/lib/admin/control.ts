@@ -6,6 +6,7 @@ import { deleteMonetaConnection } from "@/lib/payments/moneta-service";
 import { and, eq } from "drizzle-orm";
 
 import {
+  PolarPlanLockedError,
   apikey,
   assignWorkspacePlan,
   computeEntitlementOverrides,
@@ -28,6 +29,7 @@ export type AdminControlError =
   | "not_found"
   | "reason_required"
   | "invalid_entitlements"
+  | "polar_managed"
   | "failed";
 
 async function loadWorkspaceName(
@@ -179,6 +181,8 @@ export async function adminSaveEntitlementOverrides(input: {
   actorUserId: string;
   workspaceId: string;
   next: Entitlements;
+  /** Take over a Polar-billed workspace (ADR 0047). */
+  detachPolar?: boolean;
 }): Promise<AdminControlResult> {
   const state = await getWorkspaceEntitlements(db, input.workspaceId);
   if (!state) return { ok: false, error: "not_found" };
@@ -192,9 +196,13 @@ export async function adminSaveEntitlementOverrides(input: {
       planId: plan.id,
       assignedBy: input.actorUserId,
       overrides,
+      ...(input.detachPolar ? { detachPolar: true } : {}),
     });
   } catch (error) {
     console.error("[admin] entitlement override failed", error);
+    if (error instanceof PolarPlanLockedError) {
+      return { ok: false, error: "polar_managed" };
+    }
     return { ok: false, error: "failed" };
   }
 
@@ -206,6 +214,7 @@ export async function adminSaveEntitlementOverrides(input: {
       planId: plan.id,
       cleared: overrides == null,
       keys: overrides ? Object.keys(overrides) : [],
+      ...(input.detachPolar ? { detachPolar: true } : {}),
     },
   });
   return { ok: true };
@@ -214,6 +223,8 @@ export async function adminSaveEntitlementOverrides(input: {
 export async function adminClearEntitlementOverrides(input: {
   actorUserId: string;
   workspaceId: string;
+  /** Take over a Polar-billed workspace (ADR 0047). */
+  detachPolar?: boolean;
 }): Promise<AdminControlResult> {
   const state = await getWorkspaceEntitlements(db, input.workspaceId);
   if (!state) return { ok: false, error: "not_found" };
@@ -224,9 +235,13 @@ export async function adminClearEntitlementOverrides(input: {
       planId: state.planId,
       assignedBy: input.actorUserId,
       overrides: null,
+      ...(input.detachPolar ? { detachPolar: true } : {}),
     });
   } catch (error) {
     console.error("[admin] entitlement override clear failed", error);
+    if (error instanceof PolarPlanLockedError) {
+      return { ok: false, error: "polar_managed" };
+    }
     return { ok: false, error: "failed" };
   }
 
@@ -234,7 +249,11 @@ export async function adminClearEntitlementOverrides(input: {
     userId: input.actorUserId,
     workspaceId: input.workspaceId,
     type: "platform_entitlement_override",
-    metadata: { planId: state.planId, cleared: true },
+    metadata: {
+      planId: state.planId,
+      cleared: true,
+      ...(input.detachPolar ? { detachPolar: true } : {}),
+    },
   });
   return { ok: true };
 }

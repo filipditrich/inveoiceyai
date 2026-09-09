@@ -3489,6 +3489,8 @@
       "overrides": {
         "title": "Entitlement overrides",
         "description": "Only keys that differ from the plan are stored. Clearing restores the plan exactly. Grant rules stay on the plan row.",
+        "detachLabel": "Detach Polar and take over",
+        "detachHint": "Required for Polar-billed workspaces. Stops Polar from owning the plan; cancel the Polar subscription separately if you do not want to keep paying.",
         "save": "Save overrides",
         "clear": "Clear overrides"
       },
@@ -3515,10 +3517,15 @@
         "assigned": "Assigned",
         "assignedManually": "Manually by an admin",
         "assignedAutomatically": "Automatically by domain rule",
+        "billingAuthority": "Billing authority",
+        "polarManaged": "Polar",
+        "manualAuthority": "Manual",
         "seats": "Seats",
         "monthlyTokens": "Monthly tokens",
         "unlimited": "Unlimited",
         "selectLabel": "Move to plan",
+        "detachLabel": "Detach Polar and take over",
+        "detachHint": "Required for Polar-billed workspaces. Stops Polar from owning the plan; cancel the Polar subscription separately if you do not want to keep paying.",
         "hint": "Downgrades never delete anything. An over-limit workspace stays readable and simply cannot grow.",
         "submit": "Assign plan",
         "missing": "No plan resolved for this workspace."

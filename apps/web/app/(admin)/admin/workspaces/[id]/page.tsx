@@ -177,6 +177,15 @@ export default async function AdminWorkspaceDetailPage({
                     : t("plan.assignedAutomatically"),
                 },
                 {
+                  label: t("plan.billingAuthority"),
+                  value:
+                    entitlementState.billingAuthority === "polar" ? (
+                      <Badge variant="outline">{t("plan.polarManaged")}</Badge>
+                    ) : (
+                      t("plan.manualAuthority")
+                    ),
+                },
+                {
                   label: t("plan.seats"),
                   value:
                     entitlementState.entitlements.seats.max ??
@@ -209,6 +218,22 @@ export default async function AdminWorkspaceDetailPage({
                   </select>
                 </div>
               </div>
+              {entitlementState.billingAuthority === "polar" ? (
+                <label className="flex items-start gap-2 text-sm">
+                  <input
+                    className="mt-1"
+                    name="detachPolar"
+                    type="checkbox"
+                    value="on"
+                  />
+                  <span>
+                    <span className="font-medium">{t("plan.detachLabel")}</span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                      {t("plan.detachHint")}
+                    </span>
+                  </span>
+                </label>
+              ) : null}
               {/* Downgrades keep everything: quotas are checked on the write
                   path, so an over-limit workspace stays readable (ADR 0035). */}
               <p className="text-xs text-muted-foreground">{t("plan.hint")}</p>
@@ -222,6 +247,7 @@ export default async function AdminWorkspaceDetailPage({
 
       {entitlementState ? (
         <AdminWorkspaceOverridesSection
+          billingAuthority={entitlementState.billingAuthority}
           entitlements={entitlementState.entitlements}
           hasOverrides={Boolean(entitlementState.overrides)}
           workspaceId={detail.id}

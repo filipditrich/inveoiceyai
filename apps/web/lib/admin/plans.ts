@@ -78,6 +78,8 @@ export async function adminAssignPlan(input: {
   actorUserId: string;
   workspaceId: string;
   planId: string;
+  /** Take over a Polar-billed workspace (ADR 0047). */
+  detachPolar?: boolean;
 }): Promise<AdminMutationResult> {
   const plan = await getPlanById(db, input.planId);
   if (!plan) {
@@ -89,6 +91,7 @@ export async function adminAssignPlan(input: {
       workspaceId: input.workspaceId,
       planId: plan.id,
       assignedBy: input.actorUserId,
+      ...(input.detachPolar ? { detachPolar: true } : {}),
     });
     // Materialize (or clear) the managed catalog immediately, so the workspace
     // is never on a managed plan with an empty client list, and never keeps
@@ -115,7 +118,11 @@ export async function adminAssignPlan(input: {
     userId: input.actorUserId,
     workspaceId: input.workspaceId,
     type: "platform_plan_assign",
-    metadata: { planId: plan.id, planKey: plan.key },
+    metadata: {
+      planId: plan.id,
+      planKey: plan.key,
+      ...(input.detachPolar ? { detachPolar: true } : {}),
+    },
   });
 
   return { ok: true };
