@@ -71,13 +71,21 @@ export function PaymentRequestWaiting(details: RequestDetails) {
 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(18rem,0.9fr)_minmax(20rem,1.1fr)]">
-      <section className="flex items-center justify-center rounded-2xl border bg-white p-5 shadow-sm sm:p-8">
+      <section
+        className={
+          status.settled && received > 0
+            ? "flex items-center justify-center rounded-2xl border bg-card p-5 text-card-foreground shadow-sm sm:p-8"
+            : "flex items-center justify-center rounded-2xl border bg-white p-5 shadow-sm sm:p-8"
+        }
+      >
         {status.settled && received > 0 ? (
           <div className="flex flex-col items-center gap-3 text-center">
             <span className="flex size-14 items-center justify-center rounded-full bg-brand text-brand-foreground">
               <CheckIcon aria-hidden className="size-7" />
             </span>
-            <p className="font-heading text-lg font-medium">{t("received")}</p>
+            <p className="font-heading text-lg font-medium text-card-foreground">
+              {t("received")}
+            </p>
           </div>
         ) : (
           <div

@@ -33,10 +33,12 @@ export default async function PaymentRequestPage({
     <div className="space-y-6">
       <PageHeader
         back={{ href: "/payments/requests", label: t("back") }}
-        description={t("description")}
+        description={
+          collection.settled ? t("paidDescription") : t("description")
+        }
         eyebrow={tNav("payments")}
         icon={<ScanLineIcon />}
-        title={t("title")}
+        title={collection.settled ? t("paidTitle") : t("title")}
       />
       <PaymentRequestWaiting
         accountNumber={collection.accountNumber}
