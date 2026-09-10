@@ -3,7 +3,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AssistantProvider } from "@/components/assistant/assistant-provider";
-import { NavigationPendingOverlay } from "@/components/navigation/navigation-progress";
 import { BillingBanner } from "@/components/settings/billing-banner";
 import { SiteHeader } from "@/components/site-header";
 import { ToastFromSearchParams } from "@/components/toast-from-search-params";
@@ -105,7 +104,6 @@ export function AppShell({
               ) : null}
               {children}
             </div>
-            <NavigationPendingOverlay />
           </div>
         </SidebarInset>
       </SidebarProvider>
