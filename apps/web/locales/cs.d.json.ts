@@ -3079,6 +3079,8 @@ declare const messages: {
     "wait": {
       "title": "Ukažte QR a nechte si zaplatit",
       "description": "Nechte tuto stránku otevřenou. Invoicey hlídá napojený účet a platbu zde potvrdí, jakmile ji banka nahlásí.",
+      "paidTitle": "Platba dorazila",
+      "paidDescription": "Výzva je potvrzená v přehledu plateb. Tuto stránku můžete zavřít.",
       "back": "Zpět na výzvy",
       "qrLabel": "QR kód pro platbu",
       "untitled": "Výzva k platbě",

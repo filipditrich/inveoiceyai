@@ -3094,6 +3094,8 @@
     "wait": {
       "title": "Show this QR to get paid",
       "description": "Keep this screen open. Invoicey watches the connected account and confirms the payment here when the bank reports it.",
+      "paidTitle": "Payment received",
+      "paidDescription": "This request is confirmed in your ledger. You can close this page.",
       "back": "Back to requests",
       "qrLabel": "Payment QR code",
       "untitled": "Payment request",
