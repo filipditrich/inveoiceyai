@@ -3113,14 +3113,20 @@
     },
     "public": {
       "title": "Pay {issuer}",
-      "description": "Scan the QR or copy the payment details. This page does not update live.",
+      "description": "Scan the QR or copy the payment details. Reload this page after you pay to see it confirmed.",
       "qrLabel": "Payment QR code",
       "account": "Account",
       "variableSymbol": "Variable symbol",
       "copyAccount": "Copy account number",
       "copyIban": "Copy IBAN",
       "copyVariableSymbol": "Copy variable symbol",
-      "missing": "This payment link is no longer available."
+      "missing": "This payment link is no longer available.",
+      "partialNote": "{amount} already received. The QR asks for the remaining {remaining}.",
+      "paidEyebrow": "Paid",
+      "paidTitle": "Paid to {issuer}",
+      "paidDescription": "This payment is confirmed. You don’t need to pay again.",
+      "requested": "Asked for",
+      "paidAt": "Confirmed"
     }
   },
   "Looks": {

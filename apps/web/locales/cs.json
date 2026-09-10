@@ -3095,14 +3095,20 @@
     },
     "public": {
       "title": "Platba pro {issuer}",
-      "description": "Naskenujte QR nebo zkopírujte údaje. Tato stránka se sama neobnovuje.",
+      "description": "Naskenujte QR nebo zkopírujte údaje. Po odeslání platby stránku obnovte — potvrzení se tu zobrazí.",
       "qrLabel": "QR kód pro platbu",
       "account": "Účet",
       "variableSymbol": "Variabilní symbol",
       "copyAccount": "Zkopírovat číslo účtu",
       "copyIban": "Zkopírovat IBAN",
       "copyVariableSymbol": "Zkopírovat variabilní symbol",
-      "missing": "Tento platební odkaz už není dostupný."
+      "missing": "Tento platební odkaz už není dostupný.",
+      "partialNote": "Už dorazilo {amount}. QR žádá o zbývajících {remaining}.",
+      "paidEyebrow": "Uhrazeno",
+      "paidTitle": "Uhrazeno · {issuer}",
+      "paidDescription": "Platba je potvrzená. Znovu platit nemusíte.",
+      "requested": "Požadováno",
+      "paidAt": "Potvrzeno"
     }
   },
   "Looks": {

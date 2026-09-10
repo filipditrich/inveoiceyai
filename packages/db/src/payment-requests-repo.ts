@@ -72,13 +72,22 @@ export async function loadPaymentRequest(
 export async function loadPaymentRequestByPublicToken(
   database: Pick<DbTransaction, "select">,
   token: string,
-): Promise<PaymentRequestRow | null> {
+): Promise<PaymentRequestWithProgress | null> {
   const [row] = await database
-    .select()
+    .select({
+      request: paymentRequests,
+      allocatedAmount: allocatedAmountSql(),
+    })
     .from(paymentRequests)
+    .leftJoin(
+      paymentAllocations,
+      eq(paymentAllocations.paymentRequestId, paymentRequests.id),
+    )
     .where(eq(paymentRequests.publicToken, token))
+    .groupBy(paymentRequests.id)
     .limit(1);
-  return row ?? null;
+  if (!row) return null;
+  return { ...row.request, allocatedAmount: row.allocatedAmount };
 }
 
 function paymentRequestScope(

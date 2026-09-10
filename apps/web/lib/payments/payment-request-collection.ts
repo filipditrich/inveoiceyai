@@ -13,6 +13,10 @@ import { buildSpaydPayloadFromFacts } from "@invoicey/invoice-core";
 import { IssuerSnapshotSchema } from "@invoicey/invoice-core/schema";
 
 import { resolveCollectionProgress } from "./invoice-collection";
+import {
+  toPublicPaymentRequestView,
+  type PublicPaymentRequestView,
+} from "./public-payment-request";
 import { requestPaymentState } from "./request-payment-state";
 
 export type PaymentRequestCollection = {
@@ -116,18 +120,11 @@ export async function loadPaymentRequestCollection(
   };
 }
 
-export async function loadPublicPaymentRequest(token: string): Promise<{
-  issuerName: string;
-  amount: string;
-  currency: "CZK";
-  accountNumber: string;
-  iban: string;
-  variableSymbol: string;
-  qrPayload: string;
-  title: string;
-} | null> {
+export async function loadPublicPaymentRequest(
+  token: string,
+): Promise<PublicPaymentRequestView | null> {
   const request = await loadPaymentRequestByPublicToken(db, token);
-  if (!request || request.status === "cancelled") return null;
+  if (!request) return null;
 
   const [row] = await db
     .select({
@@ -144,25 +141,16 @@ export async function loadPublicPaymentRequest(token: string): Promise<{
 
   const parsed = IssuerSnapshotSchema.safeParse(row.issuerSnapshot);
   const issuerName = parsed.success ? parsed.data.name : "Invoicey";
-  const qrPayload = buildSpaydPayloadFromFacts({
-    iban: row.iban,
-    bic: row.bic,
-    amount: Number(request.amount),
-    currency: "CZK",
-    beneficiaryName: issuerName,
-    beneficiaryMessage: request.message,
-    variableSymbol: request.variableSymbol,
-  });
-  if (!qrPayload) return null;
-
-  return {
-    issuerName,
+  return toPublicPaymentRequestView({
+    status: request.status,
     amount: request.amount,
-    currency: "CZK",
+    allocatedAmount: request.allocatedAmount,
+    message: request.message,
+    variableSymbol: request.variableSymbol,
+    settledAt: request.settledAt,
+    issuerName,
     accountNumber: row.accountNumber,
     iban: row.iban,
-    variableSymbol: request.variableSymbol,
-    qrPayload,
-    title: request.message?.trim() || "",
-  };
+    bic: row.bic,
+  });
 }
