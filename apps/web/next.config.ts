@@ -99,6 +99,16 @@ const legacySettingsRedirects = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    /**
+     * Dynamic pages default to 0s client cache, so a back-link refetch
+     * swaps in `loading.tsx` over a page we already have. 30s matches
+     * the Next 14 default and still yields to `revalidatePath` / actions.
+     */
+    staleTimes: {
+      dynamic: 30,
+    },
+  },
   async redirects() {
     return [
       ...legacyHostHtmlRedirects,

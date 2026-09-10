@@ -3,21 +3,22 @@
 import {
   createContext,
   Suspense,
-  useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
+  type MutableRefObject,
   type ReactNode,
 } from "react";
-import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
 
-const SHOW_DELAY_MS = 100;
-const MIN_VISIBLE_MS = 240;
-const FAILSAFE_MS = 12_000;
+import {
+  createNavigationPendingMachine,
+  navigationLocationKey,
+  shouldStartPendingOnPopState,
+} from "./navigation-pending";
 
 const NavigationPendingContext = createContext(false);
 
@@ -31,45 +32,38 @@ export function NavigationProgressProvider({
   children: ReactNode;
 }) {
   const [pending, setPending] = useState(false);
+  const lastReactLocationRef = useRef("");
+  const machineRef = useRef<ReturnType<
+    typeof createNavigationPendingMachine
+  > | null>(null);
+  if (machineRef.current === null) {
+    machineRef.current = createNavigationPendingMachine({
+      onChange: setPending,
+    });
+  }
+  const machine = machineRef.current;
+
+  useEffect(() => {
+    return () => {
+      machine.dispose();
+    };
+  }, [machine]);
 
   return (
     <NavigationPendingContext.Provider value={pending}>
       {children}
       <NavigationProgressBar />
+      <NavigationIntentListener
+        lastReactLocationRef={lastReactLocationRef}
+        machine={machine}
+      />
       <Suspense fallback={null}>
-        <NavigationProgressController onPendingChange={setPending} />
+        <NavigationLocationListener
+          lastReactLocationRef={lastReactLocationRef}
+          machine={machine}
+        />
       </Suspense>
     </NavigationPendingContext.Provider>
-  );
-}
-
-export function NavigationPendingOverlay({
-  className,
-}: {
-  className?: string;
-}) {
-  const pending = useNavigationPending();
-  const t = useTranslations("App.a11y");
-
-  return (
-    <div
-      aria-busy={pending}
-      aria-hidden={!pending}
-      className={cn(
-        "pointer-events-none fixed inset-0 z-20 flex items-start justify-center pt-20 transition-opacity duration-150",
-        pending
-          ? "pointer-events-auto bg-background/45 opacity-100 backdrop-blur-[1px]"
-          : "opacity-0",
-        className,
-      )}
-    >
-      {pending ? (
-        <div className="mt-2 flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm text-foreground shadow-sm">
-          <Spinner className="size-3.5" />
-          <span>{t("navigating")}</span>
-        </div>
-      ) : null}
-    </div>
   );
 }
 
@@ -97,81 +91,13 @@ function NavigationProgressBar() {
   );
 }
 
-function NavigationProgressController({
-  onPendingChange,
+function NavigationIntentListener({
+  lastReactLocationRef,
+  machine,
 }: {
-  onPendingChange: (pending: boolean) => void;
+  lastReactLocationRef: MutableRefObject<string>;
+  machine: ReturnType<typeof createNavigationPendingMachine>;
 }) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const showTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const failsafeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const shownAt = useRef<number | null>(null);
-  const pendingRef = useRef(false);
-
-  const clearTimers = useCallback(() => {
-    if (showTimer.current) {
-      clearTimeout(showTimer.current);
-      showTimer.current = null;
-    }
-    if (hideTimer.current) {
-      clearTimeout(hideTimer.current);
-      hideTimer.current = null;
-    }
-    if (failsafeTimer.current) {
-      clearTimeout(failsafeTimer.current);
-      failsafeTimer.current = null;
-    }
-  }, []);
-
-  const start = useCallback(() => {
-    if (pendingRef.current || showTimer.current) {
-      return;
-    }
-    if (hideTimer.current) {
-      clearTimeout(hideTimer.current);
-      hideTimer.current = null;
-    }
-    showTimer.current = setTimeout(() => {
-      showTimer.current = null;
-      pendingRef.current = true;
-      shownAt.current = Date.now();
-      onPendingChange(true);
-      failsafeTimer.current = setTimeout(() => {
-        pendingRef.current = false;
-        shownAt.current = null;
-        onPendingChange(false);
-      }, FAILSAFE_MS);
-    }, SHOW_DELAY_MS);
-  }, [onPendingChange]);
-
-  const stop = useCallback(() => {
-    if (showTimer.current) {
-      clearTimeout(showTimer.current);
-      showTimer.current = null;
-    }
-    if (failsafeTimer.current) {
-      clearTimeout(failsafeTimer.current);
-      failsafeTimer.current = null;
-    }
-    if (!pendingRef.current) {
-      return;
-    }
-    const elapsed = shownAt.current ? Date.now() - shownAt.current : 0;
-    const wait = Math.max(0, MIN_VISIBLE_MS - elapsed);
-    hideTimer.current = setTimeout(() => {
-      hideTimer.current = null;
-      pendingRef.current = false;
-      shownAt.current = null;
-      onPendingChange(false);
-    }, wait);
-  }, [onPendingChange]);
-
-  useEffect(() => {
-    stop();
-  }, [pathname, searchParams, stop]);
-
   useEffect(() => {
     function onClick(event: MouseEvent) {
       if (event.defaultPrevented || event.button !== 0) {
@@ -180,15 +106,30 @@ function NavigationProgressController({
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
         return;
       }
-      const anchor = (event.target as Element | null)?.closest("a");
+      const eventTarget = event.target;
+      const anchor =
+        eventTarget instanceof Element ? eventTarget.closest("a") : null;
       if (!anchor || !shouldTrackAnchorNavigation(anchor)) {
         return;
       }
-      start();
+      machine.start();
     }
 
     function onPopState() {
-      start();
+      const browserLocation = navigationLocationKey(
+        window.location.pathname,
+        window.location.search,
+      );
+      if (
+        !shouldStartPendingOnPopState(
+          browserLocation,
+          lastReactLocationRef.current,
+        )
+      ) {
+        machine.stop();
+        return;
+      }
+      machine.start();
     }
 
     window.addEventListener("click", onClick, true);
@@ -196,9 +137,27 @@ function NavigationProgressController({
     return () => {
       window.removeEventListener("click", onClick, true);
       window.removeEventListener("popstate", onPopState);
-      clearTimers();
     };
-  }, [clearTimers, start]);
+  }, [lastReactLocationRef, machine]);
+
+  return null;
+}
+
+function NavigationLocationListener({
+  lastReactLocationRef,
+  machine,
+}: {
+  lastReactLocationRef: MutableRefObject<string>;
+  machine: ReturnType<typeof createNavigationPendingMachine>;
+}) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const location = navigationLocationKey(pathname, searchParams.toString());
+
+  useEffect(() => {
+    lastReactLocationRef.current = location;
+    machine.stop();
+  }, [lastReactLocationRef, location, machine]);
 
   return null;
 }

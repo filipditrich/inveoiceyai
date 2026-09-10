@@ -3,7 +3,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminSiteHeader } from "@/components/admin/admin-site-header";
-import { NavigationPendingOverlay } from "@/components/navigation/navigation-progress";
 import { ToastFromSearchParams } from "@/components/toast-from-search-params";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
@@ -34,7 +33,6 @@ export function AdminShell({
           <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col px-4 py-4 md:gap-6 md:px-6 md:py-6 lg:px-10">
             {children}
           </div>
-          <NavigationPendingOverlay />
         </div>
       </SidebarInset>
     </SidebarProvider>
