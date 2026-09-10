@@ -72,13 +72,22 @@ export function PaymentRequestWaiting(details: RequestDetails) {
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(18rem,0.9fr)_minmax(20rem,1.1fr)]">
       <section className="flex items-center justify-center rounded-2xl border bg-white p-5 shadow-sm sm:p-8">
-        <div
-          aria-label={t("qrLabel")}
-          className="aspect-square w-full max-w-md [&_svg]:size-full"
-          // SAFETY: generated locally by the QR library from an escaped SPAYD payload.
-          dangerouslySetInnerHTML={{ __html: details.qrSvg }}
-          role="img"
-        />
+        {status.settled && received > 0 ? (
+          <div className="flex flex-col items-center gap-3 text-center">
+            <span className="flex size-14 items-center justify-center rounded-full bg-brand text-brand-foreground">
+              <CheckIcon aria-hidden className="size-7" />
+            </span>
+            <p className="font-heading text-lg font-medium">{t("received")}</p>
+          </div>
+        ) : (
+          <div
+            aria-label={t("qrLabel")}
+            className="aspect-square w-full max-w-md [&_svg]:size-full"
+            // SAFETY: generated locally by the QR library from an escaped SPAYD payload.
+            dangerouslySetInnerHTML={{ __html: details.qrSvg }}
+            role="img"
+          />
+        )}
       </section>
 
       <section className="flex flex-col justify-between gap-6 rounded-2xl border bg-card p-5 shadow-sm sm:p-7">
