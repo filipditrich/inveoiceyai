@@ -1038,8 +1038,8 @@ reusable notification engine.
 - [x] The engine materializes in-app and per-device APNs deliveries with retry,
       dedupe, and permanent-token handling
 - [x] Native and web unit tests/typechecks pass
-- [ ] Apply the Plan 38 production SQL, provision APNs credentials and validate
-      a real-device push
+- [x] Apply and verify the additive Plan 38 production SQL
+- [ ] Provision APNs credentials and validate a real-device push
 - [ ] Add App Store artwork/privacy metadata and distribute the first TestFlight
 
 **Out of 38:** Nearby discovery, NFC/Bluetooth, payment initiation, payer-side
