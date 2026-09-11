@@ -106,12 +106,17 @@ export function BankAccountFields(props: {
   accountHint?: string | null;
   ibanHint?: string | null;
   required?: boolean;
+  /** Welcome onboarding hides BIC so the last step stays account + IBAN. */
+  showBic?: boolean;
+  autoFocusAccount?: boolean;
 }) {
   const t = useTranslations("Issuers.form");
+  const showBic = props.showBic !== false;
   return (
     <>
       <FieldGroup label={t("accountNumber")}>
         <Input
+          autoFocus={props.autoFocusAccount}
           onChange={(ev) => {
             props.onAccountNumber(ev.target.value);
           }}
@@ -134,14 +139,16 @@ export function BankAccountFields(props: {
           <p className="text-xs text-muted-foreground">{props.ibanHint}</p>
         ) : null}
       </FieldGroup>
-      <FieldGroup label={t("bic")}>
-        <Input
-          onChange={(ev) => {
-            props.onBic(ev.target.value);
-          }}
-          value={props.bic}
-        />
-      </FieldGroup>
+      {showBic ? (
+        <FieldGroup label={t("bic")}>
+          <Input
+            onChange={(ev) => {
+              props.onBic(ev.target.value);
+            }}
+            value={props.bic}
+          />
+        </FieldGroup>
+      ) : null}
     </>
   );
 }

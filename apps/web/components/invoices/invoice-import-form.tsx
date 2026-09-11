@@ -7,6 +7,7 @@ import {
   type ClassifiedImportFile,
   type CommitImportItem,
 } from "@/actions/import-invoices";
+import { MigrationProviderGrid } from "@/components/onboarding/migration-provider-grid";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -110,7 +111,13 @@ function resolveRowOrigin(
   };
 }
 
-export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
+export function InvoiceImportForm({
+  issuers,
+  initialOrigin,
+}: {
+  issuers: IssuerOption[];
+  initialOrigin?: InvoiceOriginProvider | null;
+}) {
   const t = useTranslations("Invoices.import");
   const tOrigin = useTranslations("Invoices.origin");
   const tCommon = useTranslations("Common");
@@ -118,11 +125,12 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
   const router = useRouter();
   const [step, setStep] = useState<ImportStep>("settings");
   const [issuerId, setIssuerId] = useState(issuers[0]?.id ?? "");
-  const [originProvider, setOriginProvider] =
-    useState<InvoiceOriginProvider>("custom");
+  const [originProvider, setOriginProvider] = useState<InvoiceOriginProvider>(
+    initialOrigin ?? "custom",
+  );
   const [originLabel, setOriginLabel] = useState("");
   const [originVersion, setOriginVersion] = useState("");
-  const [originTouched, setOriginTouched] = useState(false);
+  const [originTouched, setOriginTouched] = useState(Boolean(initialOrigin));
   const [defaultPaid, setDefaultPaid] = useState(false);
   const [rows, setRows] = useState<ReviewRow[]>([]);
   const [message, setMessage] = useState<string | null>(null);
@@ -345,6 +353,21 @@ export function InvoiceImportForm({ issuers }: { issuers: IssuerOption[] }) {
 
       {step === "settings" ? (
         <div className="space-y-4">
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <p className="text-sm font-medium">{t("catalogTitle")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("catalogHint")}
+              </p>
+            </div>
+            <MigrationProviderGrid
+              onSelectOrigin={(origin) => {
+                setOriginTouched(true);
+                setOriginProvider(origin);
+              }}
+              selectedOrigin={originProvider}
+            />
+          </div>
           <div className="grid gap-4 rounded-md border p-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="issuerId">{t("issuer")}</Label>

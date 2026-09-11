@@ -5,3 +5,8 @@ const UUID_PATTERN =
 export function welcomeDoneIssuerId(value: string | undefined): string | null {
   return value && UUID_PATTERN.test(value) ? value : null;
 }
+
+/** After creating the first issuer, show the skippable history catalog. */
+export function welcomeMigrateRequested(value: string | undefined): boolean {
+  return value === "1" || value === "true";
+}

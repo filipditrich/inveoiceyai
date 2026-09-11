@@ -371,7 +371,7 @@ export const invoices = pgTable(
     /**
      * Provenance for imported invoices.
      * `invoicey` | `fakturaonline` | `idoklad` | `fakturoid` | `pohoda` |
-     * `money_s3` | `vyfakturuj` | `superfaktura` | `custom`
+     * `money_s3` | `vyfakturuj` | `superfaktura` | `iucto` | `custom`
      */
     originProvider: text("origin_provider"),
     originLabel: text("origin_label"),

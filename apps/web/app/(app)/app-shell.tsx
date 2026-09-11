@@ -3,11 +3,14 @@
 import type { CSSProperties, ReactNode } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AssistantProvider } from "@/components/assistant/assistant-provider";
+import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { BillingBanner } from "@/components/settings/billing-banner";
 import { SiteHeader } from "@/components/site-header";
 import { ToastFromSearchParams } from "@/components/toast-from-search-params";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { isWelcomePath } from "@/lib/welcome-flow";
 import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 
 import type { WorkspaceListItem } from "@/lib/auth/workspace-types";
 
@@ -54,6 +57,10 @@ export function AppShell({
   billingAlert?: { pastDue: boolean; canceling: boolean } | null;
 }>) {
   const t = useTranslations("App.freeze");
+  const pathname = usePathname();
+  if (isWelcomePath(pathname)) {
+    return <OnboardingShell>{children}</OnboardingShell>;
+  }
   return (
     <AssistantProvider
       initialBalance={tokenBalance ?? null}
