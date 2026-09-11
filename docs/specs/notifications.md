@@ -43,7 +43,8 @@ fan-out.
 - Push workers claim rows with `FOR UPDATE SKIP LOCKED` and a 60-second lease;
   an overlapping cron cannot double-send them and a crashed worker is reclaimed.
 - Unconfigured APNs leaves delivery rows pending. The bank import invokes the
-  engine opportunistically; `/api/cron/notifications` retries each minute.
+  engine opportunistically; `/api/cron/notifications` provides a daily
+  recovery pass within the production Vercel plan's cron limits.
 - Copy is rendered by event-specific presentation code. Unsupported types fail
   visibly on the event rather than being discarded.
 
