@@ -16,6 +16,7 @@ export const INVOICE_ORIGIN_PROVIDERS = [
   "money_s3",
   "vyfakturuj",
   "superfaktura",
+  "iucto",
   "custom",
 ] as const;
 
@@ -55,8 +56,32 @@ export const ORIGIN_PROVIDER_LABELS: Record<InvoiceOriginProvider, string> = {
   money_s3: "Money S3",
   vyfakturuj: "VyFakturuj.cz",
   superfaktura: "SuperFaktura",
+  iucto: "iÚčto",
   custom: "Jiné / vlastní",
 };
+
+const ORIGIN_HINTS: ReadonlyArray<{
+  provider: Exclude<InvoiceOriginProvider, "invoicey" | "custom">;
+  needles: readonly string[];
+}> = [
+  { provider: "fakturaonline", needles: ["fakturaonline", "faktura online"] },
+  { provider: "idoklad", needles: ["idoklad"] },
+  { provider: "fakturoid", needles: ["fakturoid"] },
+  { provider: "pohoda", needles: ["pohoda"] },
+  { provider: "money_s3", needles: ["money s3", "moneys3", "money_s3"] },
+  { provider: "vyfakturuj", needles: ["vyfakturuj"] },
+  { provider: "superfaktura", needles: ["superfaktura"] },
+  { provider: "iucto", needles: ["iucto", "iúčto", "iúcto"] },
+];
+
+function matchOriginHint(blob: string): InvoiceOriginProvider | null {
+  for (const rule of ORIGIN_HINTS) {
+    if (rule.needles.some((needle) => blob.includes(needle))) {
+      return rule.provider;
+    }
+  }
+  return null;
+}
 
 /**
  * Heuristic origin from ISDOC/PDF producer strings.
@@ -88,30 +113,10 @@ export function detectInvoiceOrigin(hints: {
       version: versionMatch?.[1],
     };
   }
-  if (blob.includes("fakturaonline") || blob.includes("faktura online")) {
-    return { provider: "fakturaonline" };
-  }
-  if (blob.includes("idoklad")) {
-    return { provider: "idoklad" };
-  }
-  if (blob.includes("fakturoid")) {
-    return { provider: "fakturoid" };
-  }
-  if (blob.includes("pohoda")) {
-    return { provider: "pohoda" };
-  }
-  if (
-    blob.includes("money s3") ||
-    blob.includes("moneys3") ||
-    blob.includes("money_s3")
-  ) {
-    return { provider: "money_s3" };
-  }
-  if (blob.includes("vyfakturuj")) {
-    return { provider: "vyfakturuj" };
-  }
-  if (blob.includes("superfaktura")) {
-    return { provider: "superfaktura" };
+
+  const hinted = matchOriginHint(blob);
+  if (hinted) {
+    return { provider: hinted };
   }
 
   return {

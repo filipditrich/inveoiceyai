@@ -11,7 +11,11 @@ import { detectInvoiceOrigin } from "../import/origin";
 import { renderInvoicePdf } from "../pdf";
 import { InvoiceSchema, type Invoice } from "../schema";
 import { extractIsdocFromPdf } from "./extract-isdoc-from-pdf";
-import { parseIsdoc } from "./parse-isdoc";
+import {
+  parseClientFromIsdoc,
+  parseIsdoc,
+  parseIssuerFromIsdoc,
+} from "./parse-isdoc";
 import { renderIsdoc } from "./render-isdoc";
 
 function parseInvoice(raw: unknown): Invoice {
@@ -93,8 +97,31 @@ describe("detectInvoiceOrigin", () => {
     expect(
       detectInvoiceOrigin({ softwareName: "FakturaOnline.cz" }).provider,
     ).toBe("fakturaonline");
+    expect(detectInvoiceOrigin({ softwareName: "iÚčto" }).provider).toBe(
+      "iucto",
+    );
     expect(detectInvoiceOrigin({ producer: "Unknown Tool" }).provider).toBe(
       "custom",
     );
+  });
+});
+
+describe("parseIssuerFromIsdoc / parseClientFromIsdoc", () => {
+  it("reads supplier, customer, and bank from rendered ISDOC", () => {
+    const original = parseInvoice(domesticFixture);
+    const xml = renderIsdoc(original);
+    const issuer = parseIssuerFromIsdoc(xml);
+    const client = parseClientFromIsdoc(xml);
+    expect(issuer.name).toBe(original.issuer.name);
+    expect(issuer.ico).toBe(original.issuer.ico);
+    expect(issuer.accountNumber).toBe(original.issuer.bank.accountNumber);
+    expect(issuer.iban).toBe(original.issuer.bank.iban);
+    expect(client?.name).toBe(original.client.name);
+    expect(client?.ico).toBe(original.client.ico);
+    expect(client?.city).toBe(original.client.address.city);
+  });
+
+  it("returns null when the customer party is missing", () => {
+    expect(parseClientFromIsdoc("<not-an-invoice/>")).toBeNull();
   });
 });

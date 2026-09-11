@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { welcomeDoneIssuerId } from "./issuer-welcome-query";
+import {
+  welcomeDoneIssuerId,
+  welcomeMigrateRequested,
+} from "./issuer-welcome-query";
 
 describe("welcome done query", () => {
   it("rejects malformed ids before a workspace query", () => {
@@ -15,5 +18,14 @@ describe("welcome done query", () => {
     expect(welcomeDoneIssuerId("0632b366-9900-4e89-aa59-1b18fcad8d58")).toBe(
       "0632b366-9900-4e89-aa59-1b18fcad8d58",
     );
+  });
+});
+
+describe("welcome migrate query", () => {
+  it("treats 1 and true as requested", () => {
+    expect(welcomeMigrateRequested("1")).toBe(true);
+    expect(welcomeMigrateRequested("true")).toBe(true);
+    expect(welcomeMigrateRequested("0")).toBe(false);
+    expect(welcomeMigrateRequested(undefined)).toBe(false);
   });
 });

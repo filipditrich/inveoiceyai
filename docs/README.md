@@ -52,6 +52,8 @@ If a doc disagrees with the code, the doc is right and the code is a bug — or 
   the Drive spec as a menu-bar librarian / File Provider, not a web-app clone.
 - [Invoicey CLI](./research/invoicey-cli.md) — selected as Plan 31 operator
   companion (PAT JSON API + `apps/cli`).
+- [Czech invoicing platform migration](./research/czech-invoicing-platform-migration.md)
+  — file dump of ISDOC.PDF is the live path; hosted Connect stays locked.
 
 ## Conventions
 

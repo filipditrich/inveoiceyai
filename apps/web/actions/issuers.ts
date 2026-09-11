@@ -1,5 +1,6 @@
 "use server";
 
+import { saveWelcomeClientFromDraft } from "@/actions/clients";
 import { requireWritableWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
 import { assertIssuerQuota } from "@/lib/entitlements/quotas";
@@ -24,6 +25,7 @@ import { db } from "@invoicey/db/client";
 import { withDbTransaction } from "@invoicey/db/transaction";
 import {
   extractIsdocFromPdf,
+  parseClientFromIsdoc,
   parseIssuerFromIsdoc,
 } from "@invoicey/invoice-core";
 import {
@@ -349,9 +351,30 @@ function parsePaymentQrFromForm(
   };
 }
 
+async function maybeSaveWelcomeClient(formData: FormData): Promise<void> {
+  const name = optionalTrim(formData.get("clientName"));
+  if (!name) {
+    return;
+  }
+  try {
+    await saveWelcomeClientFromDraft({
+      name,
+      ico: optionalTrim(formData.get("clientIco")) ?? "",
+      dic: optionalTrim(formData.get("clientDic")) ?? "",
+      street: optionalTrim(formData.get("clientStreet")) ?? "",
+      city: optionalTrim(formData.get("clientCity")) ?? "",
+      zip: optionalTrim(formData.get("clientZip")) ?? "",
+      country: optionalTrim(formData.get("clientCountry")) ?? "CZ",
+      contactEmail: optionalTrim(formData.get("clientContactEmail")) ?? "",
+    });
+  } catch (err) {
+    console.error("[createIssuer] welcome client skipped", err);
+  }
+}
+
 /**
  * Create issuer with identity + bank; numbering and email get defaults.
- * Redirects to edit identity (or welcome done when `next=welcome`).
+ * Redirects to edit identity (or welcome migrate when `next=welcome`).
  */
 export async function createIssuer(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWritableWorkspace();
@@ -430,7 +453,8 @@ export async function createIssuer(formData: FormData): Promise<void> {
 
   revalidateIssuerPaths(snapshot.id);
   if (next === "welcome") {
-    redirect(`/welcome?done=${encodeURIComponent(snapshot.id)}`);
+    await maybeSaveWelcomeClient(formData);
+    redirect(`/welcome?done=${encodeURIComponent(snapshot.id)}&migrate=1`);
   }
   redirect(`/issuers/${snapshot.id}/edit/identity?toast=issuer_saved`);
 }
@@ -866,35 +890,71 @@ export type WelcomeIssuerDraft = {
   bic: string;
 };
 
+export type WelcomeClientDraft = {
+  name: string;
+  ico: string;
+  dic: string;
+  street: string;
+  city: string;
+  zip: string;
+  country: string;
+  contactEmail: string;
+};
+
+export type WelcomePdfParseErrorCode =
+  | "missing_file"
+  | "not_pdf"
+  | "no_isdoc"
+  | "isdoc_missing_invoice_root"
+  | "isdoc_missing_supplier"
+  | "isdoc_missing_supplier_name"
+  | "isdoc_supplier_not_cz"
+  | "parse_failed";
+
+const WELCOME_PDF_ERROR_CODES = new Set<string>([
+  "isdoc_missing_invoice_root",
+  "isdoc_missing_supplier",
+  "isdoc_missing_supplier_name",
+  "isdoc_supplier_not_cz",
+]);
+
+function toWelcomePdfError(code: string): WelcomePdfParseErrorCode {
+  if (WELCOME_PDF_ERROR_CODES.has(code)) {
+    // SAFETY: membership is the closed set above.
+    return code as WelcomePdfParseErrorCode;
+  }
+  return "parse_failed";
+}
+
 /**
- * Prefill welcome issuer draft from an issued PDF with embedded ISDOC.
+ * Prefill welcome issuer + first client from an issued PDF with embedded ISDOC.
  */
-export async function parseIssuerFromWelcomePdf(
-  formData: FormData,
-): Promise<
-  { ok: true; draft: WelcomeIssuerDraft } | { ok: false; message: string }
+export async function parseWelcomeInvoicePdf(formData: FormData): Promise<
+  | {
+      ok: true;
+      draft: WelcomeIssuerDraft;
+      client: WelcomeClientDraft | null;
+    }
+  | { ok: false; code: WelcomePdfParseErrorCode }
 > {
   await requireWritableWorkspace();
   await assertCan("issuers:manage");
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, message: "Vyberte PDF fakturu." };
+    return { ok: false, code: "missing_file" };
   }
   if (file.type && file.type !== "application/pdf") {
-    return { ok: false, message: "Nahrajte soubor PDF." };
+    return { ok: false, code: "not_pdf" };
   }
 
   try {
     const bytes = new Uint8Array(await file.arrayBuffer());
     const xml = await extractIsdocFromPdf(bytes);
     if (!xml) {
-      return {
-        ok: false,
-        message:
-          "V PDF není vložený ISDOC. Nahrajte fakturu vydanou systémem, který ISDOC embeduje (např. Invoicey / fakturaonline).",
-      };
+      return { ok: false, code: "no_isdoc" };
     }
     const parsed = parseIssuerFromIsdoc(xml);
+    const client = parseClientFromIsdoc(xml);
     return {
       ok: true,
       draft: {
@@ -910,18 +970,21 @@ export async function parseIssuerFromWelcomePdf(
         iban: parsed.iban ?? "",
         bic: parsed.bic ?? "",
       },
+      client: client
+        ? {
+            name: client.name,
+            ico: client.ico ?? "",
+            dic: client.dic ?? "",
+            street: client.street,
+            city: client.city,
+            zip: client.zip,
+            country: client.country,
+            contactEmail: client.contactEmail ?? "",
+          }
+        : null,
     };
   } catch (err) {
     const code = err instanceof Error ? err.message : "parse_failed";
-    const map: Record<string, string> = {
-      isdoc_missing_invoice_root: "Soubor neobsahuje platný ISDOC doklad.",
-      isdoc_missing_supplier: "V ISDOC chybí údaje dodavatele.",
-      isdoc_missing_supplier_name: "V ISDOC chybí název dodavatele.",
-      isdoc_supplier_not_cz: "Dodavatel musí mít adresu v ČR.",
-    };
-    return {
-      ok: false,
-      message: map[code] ?? "Nepodařilo se načíst dodavatele z PDF.",
-    };
+    return { ok: false, code: toWelcomePdfError(code) };
   }
 }

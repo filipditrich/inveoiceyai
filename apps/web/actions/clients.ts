@@ -3,7 +3,10 @@
 import { requireWritableWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
 import { lookupAresByIcoCached } from "@/lib/cached-ares";
-import { assertClientsWritable } from "@/lib/entitlements/managed-clients";
+import {
+  clientsAreManaged,
+  assertClientsWritable,
+} from "@/lib/entitlements/managed-clients";
 import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -276,4 +279,87 @@ export async function mergeClientsAction(): Promise<void> {
   redirect(
     `/clients?toast=clients_merged&groups=${result.mergedGroups}&removed=${result.clientsRemoved}&repointed=${result.invoicesRepointed}`,
   );
+}
+
+export type WelcomeClientDraft = {
+  name: string;
+  ico: string;
+  dic: string;
+  street: string;
+  city: string;
+  zip: string;
+  country: string;
+  contactEmail: string;
+};
+
+/**
+ * Best-effort first client from a welcome invoice. Invalid snapshots are skipped
+ * so issuer setup still finishes.
+ */
+export async function saveWelcomeClientFromDraft(
+  draft: WelcomeClientDraft,
+): Promise<{ ok: true; id: string } | { ok: false }> {
+  await assertCan("clients:manage");
+  const { workspaceId } = await requireWritableWorkspace();
+  if (await clientsAreManaged(workspaceId)) {
+    return { ok: false };
+  }
+
+  const name = draft.name.trim();
+  if (!name) {
+    return { ok: false };
+  }
+
+  const icoRaw = draft.ico.replaceAll(/\s/g, "");
+  const icoParsed = IcoSchema.safeParse(icoRaw);
+  const dicParsed = ClientVatIdSchema.safeParse(draft.dic.trim());
+  const email = draft.contactEmail.trim();
+  const country = /^[A-Z]{2}$/.test(draft.country) ? draft.country : "CZ";
+  const preferredId = crypto.randomUUID();
+  const snapshotInput: {
+    id: string;
+    name: string;
+    ico?: string;
+    dic?: string;
+    address: {
+      street: string;
+      city: string;
+      zip: string;
+      country: string;
+    };
+    contactEmail?: string;
+  } = {
+    id: preferredId,
+    name,
+    address: {
+      street: draft.street.trim() || name,
+      city: draft.city.trim() || country,
+      zip: draft.zip.trim(),
+      country,
+    },
+  };
+  if (icoParsed.success) {
+    snapshotInput.ico = icoParsed.data;
+  }
+  if (dicParsed.success) {
+    snapshotInput.dic = dicParsed.data;
+  }
+  if (email.includes("@")) {
+    snapshotInput.contactEmail = email;
+  }
+  const parsedSnapshot = ClientSnapshotSchema.safeParse(snapshotInput);
+  if (!parsedSnapshot.success) {
+    return { ok: false };
+  }
+
+  const clientId = await ensureClient(
+    db,
+    workspaceId,
+    // SAFETY: ClientSnapshot is persisted as jsonb; ensureClient stores the record.
+    parsedSnapshot.data as Record<string, unknown>,
+    { preferredId, source: "manual" },
+  );
+  revalidatePath("/clients");
+  revalidatePath("/invoices/new");
+  return { ok: true, id: clientId };
 }

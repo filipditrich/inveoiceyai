@@ -5,56 +5,116 @@ import * as React from "react";
 import {
   createIssuer,
   dismissIssuerWelcome,
-  parseIssuerFromWelcomePdf,
+  parseWelcomeInvoicePdf,
+  type WelcomeClientDraft,
+  type WelcomeIssuerDraft,
+  type WelcomePdfParseErrorCode,
 } from "@/actions/issuers";
 import { updateWorkspaceAction } from "@/actions/workspace";
 import {
-  BankAccountFields,
-  FieldGroup,
   formatAresLookupError,
   lookupAresByIco,
   useCzechIbanSuggest,
   useInvalidQueryMessage,
 } from "@/components/issuers/issuer-form-shared";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ImageUploadField } from "@/components/upload/image-upload-field";
-import { WorkspaceMark } from "@/components/workspace-mark";
+import {
+  WelcomeBankStep,
+  WelcomeDoneStep,
+  WelcomeIdentityDetailsStep,
+  WelcomeIdentityLookupStep,
+  WelcomeMigrateStep,
+  WelcomePathStep,
+  WelcomeProgress,
+  WelcomeReviewStep,
+  WelcomeSkip,
+  WelcomeWorkspaceStep,
+} from "@/components/issuers/issuer-welcome-steps";
 import {
   clearWelcomeRecovery,
   loadWelcomeRecovery,
   saveWelcomeRecovery,
 } from "@/lib/issuer-welcome-recovery";
 import { emitProductEvent } from "@/lib/product-analytics";
+import {
+  welcomeBankIsComplete,
+  welcomeIdentityViewFromName,
+  welcomeSetupIndex,
+  welcomeStepLabelKey,
+  type WelcomeIdentityView,
+  type WelcomeStep,
+} from "@/lib/welcome-flow";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 
-type Step = "workspace" | "identity" | "bank" | "done";
+const EMPTY_CLIENT: WelcomeClientDraft = {
+  name: "",
+  ico: "",
+  dic: "",
+  street: "",
+  city: "",
+  zip: "",
+  country: "CZ",
+  contactEmail: "",
+};
+
+function applyIssuerDraft(
+  draft: WelcomeIssuerDraft,
+  setters: {
+    setSource: (value: "ares" | "manual") => void;
+    setIcoInput: (value: string) => void;
+    setName: (value: string) => void;
+    setDic: (value: string) => void;
+    setStreet: (value: string) => void;
+    setCity: (value: string) => void;
+    setZip: (value: string) => void;
+    setContactEmail: (value: string) => void;
+    setVatPayer: (value: boolean) => void;
+    seedBank: (account: string, iban?: string) => void;
+    setBic: (value: string) => void;
+  },
+) {
+  setters.setSource("manual");
+  setters.setIcoInput(draft.ico);
+  setters.setName(draft.name);
+  setters.setDic(draft.dic);
+  setters.setStreet(draft.street);
+  setters.setCity(draft.city);
+  setters.setZip(draft.zip);
+  setters.setContactEmail(draft.contactEmail);
+  setters.setVatPayer(draft.vatPayer);
+  if (draft.accountNumber) {
+    setters.seedBank(draft.accountNumber, draft.iban || undefined);
+  }
+  if (draft.bic) {
+    setters.setBic(draft.bic);
+  }
+}
 
 export function IssuerWelcomeWizard(props: {
   workspaceId: string;
   workspaceName: string;
-  workspaceLogo: string | null;
-  uploadConfigured: boolean;
-  invalidQuery?: string | null;
   doneIssuerId?: string | null;
+  showMigrate?: boolean;
+  invalidQuery?: string | null;
 }) {
   const t = useTranslations("Issuers.welcome");
-  const tForm = useTranslations("Issuers.form");
   const tAres = useTranslations("Issuers.ares");
-  const tCommon = useTranslations("Common");
   const tWorkspaceErrors = useTranslations("App.workspaceErrors");
   const invalidFromQuery = useInvalidQueryMessage(props.invalidQuery);
-  const [step, setStep] = React.useState<Step>(
-    props.doneIssuerId ? "done" : "workspace",
-  );
+  const [step, setStep] = React.useState<WelcomeStep>(() => {
+    if (!props.doneIssuerId) {
+      return "workspace";
+    }
+    return props.showMigrate ? "migrate" : "done";
+  });
+  const [identityView, setIdentityView] =
+    React.useState<WelcomeIdentityView>("path");
   const [createdId] = React.useState(() => crypto.randomUUID());
   const [doneId, setDoneId] = React.useState(props.doneIssuerId ?? "");
   const [pending, startTransition] = React.useTransition();
   const [skipPending, startSkip] = React.useTransition();
   const [lookupPending, setLookupPending] = React.useState(false);
   const [uploadPending, setUploadPending] = React.useState(false);
+  const [fromReview, setFromReview] = React.useState(false);
 
   const [source, setSource] = React.useState<"ares" | "manual">("manual");
   const [icoInput, setIcoInput] = React.useState("");
@@ -67,23 +127,14 @@ export function IssuerWelcomeWizard(props: {
   const [vatPayer, setVatPayer] = React.useState(true);
   const bank = useCzechIbanSuggest();
   const [bic, setBic] = React.useState("");
+  const [client, setClient] = React.useState<WelcomeClientDraft>(EMPTY_CLIENT);
   const [workspaceName, setWorkspaceName] = React.useState(props.workspaceName);
-  const [workspaceLogo, setWorkspaceLogo] = React.useState(
-    props.workspaceLogo ?? "",
-  );
   const [msg, setMsg] = React.useState<string | null>(null);
   const [hideQueryError, setHideQueryError] = React.useState(false);
   const analyticsEmitted = React.useRef(false);
   const visibleMessage = msg ?? (hideQueryError ? null : invalidFromQuery);
-  const currentStep =
-    step === "workspace"
-      ? 1
-      : step === "identity"
-        ? 2
-        : step === "bank"
-          ? 3
-          : 4;
-  const steps = ["workspace", "business", "bank", "ready"] as const;
+  const currentStep = welcomeSetupIndex(step);
+  const stepLabel = t(`steps.${welcomeStepLabelKey(step)}`);
 
   function clearStaleQueryError() {
     if (!props.invalidQuery) return;
@@ -108,6 +159,7 @@ export function IssuerWelcomeWizard(props: {
       setVatPayer(recovered.vatPayer);
       bank.seedBank(recovered.accountNumber, recovered.iban || undefined);
       setBic(recovered.bic);
+      setIdentityView(welcomeIdentityViewFromName(recovered.name));
     }, 0);
     return () => window.clearTimeout(timeout);
     // `bank` is a stable hook API, and recovery must load once only.
@@ -115,7 +167,7 @@ export function IssuerWelcomeWizard(props: {
   }, [props.workspaceId]);
 
   React.useEffect(() => {
-    if (step === "done") return;
+    if (step === "done" || step === "migrate") return;
     const timeout = window.setTimeout(() => {
       saveWelcomeRecovery(window.sessionStorage, props.workspaceId, {
         icoInput,
@@ -163,6 +215,10 @@ export function IssuerWelcomeWizard(props: {
     }
   }, [props.doneIssuerId, props.workspaceId, step]);
 
+  function parseErrorMessage(code: WelcomePdfParseErrorCode): string {
+    return t(`parseErrors.${code}`);
+  }
+
   async function onUploadIssuedPdf(file: File | null) {
     if (!file) {
       return;
@@ -173,33 +229,34 @@ export function IssuerWelcomeWizard(props: {
     try {
       const fd = new FormData();
       fd.set("file", file);
-      const result = await parseIssuerFromWelcomePdf(fd);
-      if (!result.ok) {
-        setMsg(result.message);
+      const parsed = await parseWelcomeInvoicePdf(fd);
+      if (!parsed.ok) {
+        setMsg(parseErrorMessage(parsed.code));
         return;
       }
-      const { draft } = result;
-      setSource("manual");
-      setIcoInput(draft.ico);
-      setName(draft.name);
-      setDic(draft.dic);
-      setStreet(draft.street);
-      setCity(draft.city);
-      setZip(draft.zip);
-      setContactEmail(draft.contactEmail);
-      setVatPayer(draft.vatPayer);
-      if (draft.accountNumber) {
-        bank.seedBank(draft.accountNumber, draft.iban || undefined);
-      }
-      if (draft.bic) {
-        setBic(draft.bic);
-      }
+      applyIssuerDraft(parsed.draft, {
+        setSource,
+        setIcoInput,
+        setName,
+        setDic,
+        setStreet,
+        setCity,
+        setZip,
+        setContactEmail,
+        setVatPayer,
+        seedBank: bank.seedBank,
+        setBic,
+      });
+      setClient(parsed.client ?? EMPTY_CLIENT);
+      setFromReview(true);
+      setIdentityView("review");
     } finally {
       setUploadPending(false);
     }
   }
 
-  async function onLookupFromAres() {
+  async function onLookupFromAres(e: FormEvent) {
+    e.preventDefault();
     clearStaleQueryError();
     setMsg(null);
     setLookupPending(true);
@@ -222,15 +279,16 @@ export function IssuerWelcomeWizard(props: {
       if (draft.ico) {
         setIcoInput(draft.ico);
       }
+      setFromReview(false);
+      setIdentityView("details");
     } finally {
       setLookupPending(false);
     }
   }
 
   /**
-   * Saves the workspace name/logo before moving on. A workspace is created
-   * silently on first sign-in, so this is the only place the owner sees what it
-   * is called before they start issuing invoices from it.
+   * Saves the workspace name before moving on. A workspace is created silently
+   * on first sign-in, so this is the only place the owner names it.
    */
   function onWorkspaceNext(e: FormEvent) {
     e.preventDefault();
@@ -241,51 +299,64 @@ export function IssuerWelcomeWizard(props: {
       setMsg(t("workspaceNameRequired"));
       return;
     }
-    const unchanged =
-      trimmedName === props.workspaceName.trim() &&
-      workspaceLogo.trim() === (props.workspaceLogo ?? "").trim();
+    const unchanged = trimmedName === props.workspaceName.trim();
     if (unchanged) {
+      setIdentityView(welcomeIdentityViewFromName(name));
       setStep("identity");
       return;
     }
     startTransition(async () => {
       const result = await updateWorkspaceAction({
         name: trimmedName,
-        logo: workspaceLogo.trim() || null,
       });
       if (!result.ok) {
         setMsg(tWorkspaceErrors(result.errorCode));
         return;
       }
+      setIdentityView(welcomeIdentityViewFromName(name));
       setStep("identity");
     });
   }
 
-  function onIdentityNext(e: FormEvent) {
-    e.preventDefault();
-    setMsg(null);
-    clearStaleQueryError();
-    if (
+  function identityMissing(): boolean {
+    return (
       !icoInput.trim() ||
       !name.trim() ||
       !street.trim() ||
       !city.trim() ||
       !zip.trim() ||
       !contactEmail.trim()
-    ) {
+    );
+  }
+
+  function onIdentityNext(e: FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    clearStaleQueryError();
+    if (identityMissing()) {
       setMsg(t("identityRequired"));
+      return;
+    }
+    setFromReview(false);
+    setStep("bank");
+  }
+
+  function onReviewNext(e: FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    clearStaleQueryError();
+    if (identityMissing()) {
+      setMsg(t("identityRequired"));
+      return;
+    }
+    if (welcomeBankIsComplete(bank.accountNumber, bank.iban)) {
+      submitCreate();
       return;
     }
     setStep("bank");
   }
 
-  function onCreate(e: FormEvent) {
-    e.preventDefault();
-    setMsg(null);
-    if (!bank.accountNumber.trim() || !bank.iban.trim()) {
-      setMsg(t("bankRequired"));
-      return;
-    }
+  function buildCreateForm(): FormData {
     const fd = new FormData();
     fd.set("id", createdId);
     fd.set("source", source);
@@ -305,92 +376,64 @@ export function IssuerWelcomeWizard(props: {
     }
     fd.set("vatPayer", vatPayer ? "true" : "false");
     fd.set("next", "welcome");
+    if (client.name.trim()) {
+      fd.set("clientName", client.name.trim());
+      fd.set("clientIco", client.ico.trim());
+      fd.set("clientDic", client.dic.trim());
+      fd.set("clientStreet", client.street.trim());
+      fd.set("clientCity", client.city.trim());
+      fd.set("clientZip", client.zip.trim());
+      fd.set("clientCountry", client.country.trim() || "CZ");
+      fd.set("clientContactEmail", client.contactEmail.trim());
+    }
+    return fd;
+  }
+
+  function submitCreate() {
+    if (!welcomeBankIsComplete(bank.accountNumber, bank.iban)) {
+      setMsg(t("bankRequired"));
+      return;
+    }
+    const fd = buildCreateForm();
     startTransition(async () => {
       setDoneId(createdId);
       await createIssuer(fd);
     });
   }
 
-  if (step === "done" || props.doneIssuerId) {
-    const issuerId = props.doneIssuerId ?? doneId;
+  function onCreate(e: FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    submitCreate();
+  }
+
+  function onSkip() {
+    startSkip(async () => {
+      clearWelcomeRecovery(window.sessionStorage, props.workspaceId);
+      await dismissIssuerWelcome();
+    });
+  }
+
+  const busy = pending || skipPending;
+  const issuerReady =
+    step === "done" || (Boolean(props.doneIssuerId) && step !== "migrate");
+
+  if (issuerReady) {
     return (
-      <div className="mx-auto max-w-2xl space-y-6">
-        <WelcomeProgress
-          ariaLabel={t("progressLabel")}
-          current={steps.length}
-          labels={steps.map((key) => t(`steps.${key}`))}
-        />
-        <div className="space-y-2 rounded-xl border bg-card p-6 shadow-sm">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t("doneTitle")}
-          </h1>
-          <p className="text-sm text-muted-foreground">{t("doneBody")}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button render={<Link href="/invoices/new" prefetch />} size="sm">
-            {t("createFirstInvoice")}
-          </Button>
-          {issuerId ? (
-            <Button
-              render={
-                <Link href={`/issuers/${issuerId}/edit/identity`} prefetch />
-              }
-              size="sm"
-              variant="outline"
-            >
-              {t("editBusiness")}
-            </Button>
-          ) : null}
-          <Button
-            render={<Link href="/dashboard" prefetch />}
-            size="sm"
-            variant="ghost"
-          >
-            {t("goDashboard")}
-          </Button>
-        </div>
+      <div className="space-y-6 rounded-xl border bg-card p-6 shadow-sm">
+        <WelcomeDoneStep issuerId={props.doneIssuerId ?? doneId} />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="space-y-6">
       <WelcomeProgress
         ariaLabel={t("progressLabel")}
         current={currentStep}
-        labels={steps.map((key) => t(`steps.${key}`))}
+        stepLabel={stepLabel}
       />
       <div className="space-y-6 rounded-xl border bg-card p-6 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {t("title")}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {step === "workspace"
-                ? t("workspaceHint")
-                : step === "identity"
-                  ? t("identityHint")
-                  : t("bankHint")}
-            </p>
-          </div>
-          <Button
-            disabled={skipPending || pending}
-            onClick={() => {
-              startSkip(async () => {
-                clearWelcomeRecovery(window.sessionStorage, props.workspaceId);
-                await dismissIssuerWelcome();
-              });
-            }}
-            size="sm"
-            type="button"
-            variant="ghost"
-          >
-            {skipPending ? t("skipping") : t("skip")}
-          </Button>
-        </div>
-
-        <p className="text-xs text-muted-foreground">{t("skipHint")}</p>
         {visibleMessage ? (
           <p className="text-sm text-destructive" role="alert">
             {visibleMessage}
@@ -398,246 +441,99 @@ export function IssuerWelcomeWizard(props: {
         ) : null}
 
         {step === "workspace" ? (
-          <form className="space-y-6" onSubmit={onWorkspaceNext}>
-            <fieldset className="space-y-4">
-              <legend className="font-medium">{t("workspaceTitle")}</legend>
-              <p className="text-sm text-muted-foreground">
-                {t("workspaceBody")}
-              </p>
-              <div className="flex items-center gap-3">
-                <WorkspaceMark
-                  className="size-12 rounded-xl text-base"
-                  logo={workspaceLogo.trim() || null}
-                  name={workspaceName.trim() || "?"}
-                />
-                <div className="min-w-0 flex-1 space-y-2">
-                  <Label htmlFor="welcome-workspace-name">
-                    {t("workspaceNameLabel")}
-                  </Label>
-                  <Input
-                    id="welcome-workspace-name"
-                    onChange={(ev) => setWorkspaceName(ev.target.value)}
-                    required
-                    value={workspaceName}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="space-y-1">
-                  <Label>{t("workspaceLogoLabel")}</Label>
-                  <p className="text-xs text-muted-foreground">
-                    {t("workspaceLogoHint")}
-                  </p>
-                </div>
-                {props.uploadConfigured ? (
-                  <ImageUploadField
-                    alt={t("workspaceLogoLabel")}
-                    disabled={pending}
-                    endpoint="workspaceLogo"
-                    onUrl={(url) => setWorkspaceLogo(url ?? "")}
-                    url={workspaceLogo}
-                  />
-                ) : null}
-              </div>
-            </fieldset>
-            <div className="flex flex-wrap gap-2">
-              <Button disabled={pending} type="submit">
-                {pending ? tCommon("loading") : t("continue")}
-              </Button>
-            </div>
-          </form>
+          <WelcomeWorkspaceStep
+            onName={setWorkspaceName}
+            onSubmit={onWorkspaceNext}
+            pending={pending}
+            workspaceName={workspaceName}
+          />
         ) : null}
 
-        {step === "identity" ? (
-          <form className="space-y-6" onSubmit={onIdentityNext}>
-            <fieldset className="space-y-4">
-              <legend className="font-medium">{t("aresTitle")}</legend>
-              <p className="text-sm text-muted-foreground">{t("aresHint")}</p>
-              <FieldGroup label={tForm("ico")}>
-                <div className="flex flex-wrap gap-2">
-                  <Input
-                    className="max-w-xs"
-                    inputMode="numeric"
-                    maxLength={8}
-                    onChange={(ev) => {
-                      setIcoInput(ev.target.value);
-                    }}
-                    pattern="\d{0,8}"
-                    placeholder="12345678"
-                    required
-                    value={icoInput}
-                  />
-                  <Button
-                    disabled={lookupPending}
-                    onClick={() => void onLookupFromAres()}
-                    type="button"
-                    variant="secondary"
-                  >
-                    {lookupPending ? tForm("lookingUp") : tForm("lookup")}
-                  </Button>
-                </div>
-              </FieldGroup>
-            </fieldset>
-            <fieldset className="space-y-4">
-              <legend className="font-medium">{t("businessDetails")}</legend>
-              <p className="text-sm text-muted-foreground">
-                {t("contactEmailHint")}
-              </p>
-              <FieldGroup label={tForm("name")}>
-                <Input
-                  onChange={(ev) => {
-                    setName(ev.target.value);
-                  }}
-                  required
-                  value={name}
-                />
-              </FieldGroup>
-              <FieldGroup label={tForm("dic")}>
-                <Input
-                  onChange={(ev) => {
-                    setDic(ev.target.value);
-                  }}
-                  placeholder="CZ12345678"
-                  value={dic}
-                />
-              </FieldGroup>
-              <FieldGroup label={tForm("street")}>
-                <Input
-                  onChange={(ev) => {
-                    setStreet(ev.target.value);
-                  }}
-                  required
-                  value={street}
-                />
-              </FieldGroup>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <FieldGroup label={tForm("city")}>
-                  <Input
-                    onChange={(ev) => setCity(ev.target.value)}
-                    required
-                    value={city}
-                  />
-                </FieldGroup>
-                <FieldGroup label={tForm("zip")}>
-                  <Input
-                    onChange={(ev) => setZip(ev.target.value)}
-                    required
-                    value={zip}
-                  />
-                </FieldGroup>
-              </div>
-              <FieldGroup label={tForm("contactEmail")}>
-                <Input
-                  onChange={(ev) => setContactEmail(ev.target.value)}
-                  required
-                  type="email"
-                  value={contactEmail}
-                />
-              </FieldGroup>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  checked={vatPayer}
-                  onChange={(ev) => setVatPayer(ev.target.checked)}
-                  type="checkbox"
-                />
-                {tForm("vatPayer")}
-              </label>
-            </fieldset>
-            <fieldset className="border-t pt-4">
-              <legend className="px-1 text-sm text-muted-foreground">
-                {t("isdocAlternative")}
-              </legend>
-              <FieldGroup label={t("uploadLabel")}>
-                <Input
-                  accept="application/pdf,.pdf"
-                  disabled={uploadPending}
-                  onChange={(ev) => {
-                    void onUploadIssuedPdf(ev.target.files?.[0] ?? null);
-                    ev.target.value = "";
-                  }}
-                  type="file"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {uploadPending ? t("uploadPending") : t("uploadHint")}
-                </p>
-              </FieldGroup>
-            </fieldset>
-            <div className="flex gap-2">
-              <Button type="submit">{t("continue")}</Button>
-            </div>
-          </form>
-        ) : (
-          <form className="space-y-4" onSubmit={onCreate}>
-            <p className="text-sm text-muted-foreground">
-              {t("bankForBusiness", { business: name })}
-            </p>
-            <BankAccountFields
-              accountHint={bank.accountHint}
-              accountNumber={bank.accountNumber}
-              bic={bic}
-              iban={bank.iban}
-              ibanHint={bank.ibanHint}
-              onAccountNumber={bank.setAccountNumber}
-              onBic={setBic}
-              onIban={bank.setIban}
-              required
-            />
-            <div className="flex flex-wrap gap-2">
-              <Button
-                disabled={pending}
-                onClick={() => {
-                  setStep("identity");
-                }}
-                type="button"
-                variant="outline"
-              >
-                {tCommon("back")}
-              </Button>
-              <Button disabled={pending} type="submit">
-                {pending ? tForm("creating") : tForm("create")}
-              </Button>
-            </div>
-          </form>
-        )}
-      </div>
-    </div>
-  );
-}
+        {step === "identity" && identityView === "path" ? (
+          <WelcomePathStep
+            onBack={() => setStep("workspace")}
+            onIcoPath={() => setIdentityView("lookup")}
+            onUpload={(file) => void onUploadIssuedPdf(file)}
+            uploadPending={uploadPending}
+          />
+        ) : null}
 
-function WelcomeProgress({
-  current,
-  labels,
-  ariaLabel,
-}: {
-  current: number;
-  labels: string[];
-  ariaLabel: string;
-}) {
-  return (
-    <ol className="grid grid-cols-3 gap-2" aria-label={ariaLabel}>
-      {labels.map((label, index) => {
-        const position = index + 1;
-        return (
-          <li className="flex items-center gap-2 text-sm" key={label}>
-            <span
-              className={
-                position <= current
-                  ? "flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground"
-                  : "flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground"
-              }
-            >
-              {position}
-            </span>
-            <span
-              className={
-                position === current ? "font-medium" : "text-muted-foreground"
-              }
-            >
-              {label}
-            </span>
-          </li>
-        );
-      })}
-    </ol>
+        {step === "identity" && identityView === "lookup" ? (
+          <WelcomeIdentityLookupStep
+            icoInput={icoInput}
+            lookupPending={lookupPending}
+            onBack={() => setIdentityView("path")}
+            onEnterManually={() => setIdentityView("details")}
+            onIco={setIcoInput}
+            onLookup={onLookupFromAres}
+          />
+        ) : null}
+
+        {step === "identity" && identityView === "review" ? (
+          <WelcomeReviewStep
+            accountNumber={bank.accountNumber}
+            clientName={client.name}
+            contactEmail={contactEmail}
+            iban={bank.iban}
+            issuerIco={icoInput}
+            issuerName={name}
+            onBack={() => setIdentityView("path")}
+            onContactEmail={setContactEmail}
+            onEditDetails={() => setIdentityView("details")}
+            onSubmit={onReviewNext}
+          />
+        ) : null}
+
+        {step === "identity" && identityView === "details" ? (
+          <WelcomeIdentityDetailsStep
+            city={city}
+            contactEmail={contactEmail}
+            dic={dic}
+            ico={icoInput}
+            name={name}
+            onBack={() => setIdentityView(fromReview ? "review" : "lookup")}
+            onCity={setCity}
+            onContactEmail={setContactEmail}
+            onDic={setDic}
+            onIco={setIcoInput}
+            onName={setName}
+            onStreet={setStreet}
+            onSubmit={onIdentityNext}
+            onVatPayer={setVatPayer}
+            onZip={setZip}
+            street={street}
+            vatPayer={vatPayer}
+            zip={zip}
+          />
+        ) : null}
+
+        {step === "bank" ? (
+          <WelcomeBankStep
+            accountHint={bank.accountHint}
+            accountNumber={bank.accountNumber}
+            bic={bic}
+            businessName={name}
+            iban={bank.iban}
+            ibanHint={bank.ibanHint}
+            onAccountNumber={bank.setAccountNumber}
+            onBack={() => {
+              setStep("identity");
+              setIdentityView(fromReview ? "review" : "details");
+            }}
+            onBic={setBic}
+            onIban={bank.setIban}
+            onSubmit={onCreate}
+            pending={pending}
+          />
+        ) : null}
+
+        {step === "migrate" ? (
+          <WelcomeMigrateStep onSkip={() => setStep("done")} />
+        ) : null}
+      </div>
+      {step === "migrate" || props.doneIssuerId ? null : (
+        <WelcomeSkip disabled={busy} onSkip={onSkip} pending={skipPending} />
+      )}
+    </div>
   );
 }

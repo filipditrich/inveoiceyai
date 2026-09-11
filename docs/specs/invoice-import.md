@@ -18,7 +18,7 @@ Bulk-import previously issued invoices (PDF) into a workspace so Invoicey can ma
 
 ## Provenance columns (`invoices`)
 
-- `origin_provider` — `invoicey` \| `fakturaonline` \| `idoklad` \| `fakturoid` \| `pohoda` \| `money_s3` \| `vyfakturuj` \| `superfaktura` \| `custom`
+- `origin_provider` — `invoicey` \| `fakturaonline` \| `idoklad` \| `fakturoid` \| `pohoda` \| `money_s3` \| `vyfakturuj` \| `superfaktura` \| `iucto` \| `custom`
 - `origin_label` / `origin_version`
 - `import_completeness` — `full` \| `archive` (null = native Invoicey issue)
 - `import_batch_id`, `imported_at`, `external_key`
@@ -28,7 +28,7 @@ Bulk-import previously issued invoices (PDF) into a workspace so Invoicey can ma
 
 Web UI is a three-step wizard on `/invoices/import` (same route, client step state):
 
-1. **Nastavení** — pick issuer; set batch default origin / label / version and default paid
+1. **Nastavení** — pick the previous tool from the catalog (live **Upload files**, locked **Connect**); pick issuer; set batch default origin / label / version and default paid. `?origin=` preselects a catalog tile.
 2. **Nahrání** — UploadThing `importedInvoicePdf` (up to 40 per drop, 16 MB)
 3. **Kontrola** — review grid + commit
 

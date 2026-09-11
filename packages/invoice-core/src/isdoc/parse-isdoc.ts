@@ -12,6 +12,7 @@ import type {
   IssuerSnapshot,
 } from "../schema";
 import {
+  ClientVatIdSchema,
   InvoiceCurrencySchema,
   InvoiceLanguageSchema,
   InvoiceSchema,
@@ -579,6 +580,60 @@ export function parseIssuerFromIsdoc(xml: string): ParsedIssuerFromIsdoc {
     iban,
     bic,
   };
+}
+
+export type ParsedClientFromIsdoc = {
+  name: string;
+  ico?: string;
+  dic?: string;
+  street: string;
+  city: string;
+  zip: string;
+  country: string;
+  contactEmail?: string;
+};
+
+/**
+ * Extract customer identity from ISDOC AccountingCustomerParty.
+ * Missing or unnamed customers return null — bootstrap still works.
+ */
+export function parseClientFromIsdoc(
+  xml: string,
+): ParsedClientFromIsdoc | null {
+  const converted = convert(xml, { format: "object" });
+  const root = findInvoiceRoot(converted);
+  if (!root) {
+    return null;
+  }
+
+  const customerParty = child(child(root, "AccountingCustomerParty"), "Party");
+  const name = partyName(customerParty);
+  if (!name) {
+    return null;
+  }
+
+  const address = partyAddress(customerParty);
+  const client: ParsedClientFromIsdoc = {
+    name,
+    street: address.street,
+    city: address.city,
+    zip: address.zip,
+    country: address.country,
+  };
+  const ico = partyIco(customerParty);
+  if (ico) {
+    client.ico = ico;
+  }
+  const dicRaw = partyDic(customerParty);
+  const dicParsed = dicRaw ? ClientVatIdSchema.safeParse(dicRaw) : null;
+  if (dicParsed?.success) {
+    client.dic = dicParsed.data;
+  }
+  const contactEmail = partyEmail(customerParty);
+  if (contactEmail) {
+    client.contactEmail = contactEmail;
+  }
+  return client;
 }
 
 export type IncomingDocType =

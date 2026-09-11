@@ -18,10 +18,12 @@ export {
   parseIsdoc,
   parseIsdocAsIncoming,
   parseIssuerFromIsdoc,
+  parseClientFromIsdoc,
   type IncomingDocType,
   type IncomingInvoiceLine,
   type ParseIsdocOptions,
   type ParseIsdocResult,
   type ParsedIncomingIsdoc,
   type ParsedIssuerFromIsdoc,
+  type ParsedClientFromIsdoc,
 } from "./parse-isdoc";
