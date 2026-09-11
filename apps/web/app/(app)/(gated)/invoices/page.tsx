@@ -24,7 +24,12 @@ import {
 } from "@/lib/invoices/status-summary";
 import { loadClientOptions, loadIssuerOptions } from "@/lib/load-parties";
 import { and, count } from "drizzle-orm";
-import { FileDownIcon, FilePlusIcon, FilesIcon, SparklesIcon } from "lucide-react";
+import {
+  FileDownIcon,
+  FilePlusIcon,
+  FilesIcon,
+  SparklesIcon,
+} from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 

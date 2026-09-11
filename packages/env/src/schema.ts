@@ -132,6 +132,14 @@ export const privateEnvSchema = z.object({
     emptyEnvToUndefined,
     z.string().min(1).optional(),
   ),
+  /** Apple Push Notification service token credentials for Invoicey Pocket. */
+  APNS_KEY_ID: z.preprocess(emptyEnvToUndefined, z.string().min(1).optional()),
+  APNS_TEAM_ID: z.preprocess(emptyEnvToUndefined, z.string().min(1).optional()),
+  APNS_PRIVATE_KEY: z.preprocess(
+    emptyEnvToUndefined,
+    z.string().min(1).optional(),
+  ),
+  APNS_TOPIC: z.preprocess(emptyEnvToUndefined, z.string().min(1).optional()),
   /** Bearer for `/api/cron/overdue-reminders` and `/api/cron/recurring-drafts`. */
   CRON_SECRET: z.preprocess(emptyEnvToUndefined, z.string().min(1).optional()),
   /**

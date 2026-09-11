@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 
 import {
   bankAccountIssuers,
@@ -30,6 +30,16 @@ export type InvoiceCollectionDetails = CollectionProgress & {
   variableSymbol: string;
   qrPayload: string;
   paymentState: CollectionPaymentState;
+};
+
+export type CollectibleInvoiceSummary = {
+  invoiceId: string;
+  number: string;
+  clientName: string;
+  requestedAmount: string;
+  paidAmount: string;
+  outstandingAmount: string;
+  dueDate: string;
 };
 
 function collectionPaymentState(value: string): CollectionPaymentState {
@@ -136,4 +146,78 @@ export async function loadInvoiceCollection(
     paymentState,
     ...progress,
   };
+}
+
+/** Issued, unpaid CZK invoices that resolve to a live watched bank account. */
+export async function listCollectibleInvoices(
+  workspaceId: string,
+  limit: number,
+): Promise<CollectibleInvoiceSummary[]> {
+  const rows = await db
+    .selectDistinctOn([invoices.id], {
+      id: invoices.id,
+      number: invoices.number,
+      clientName: invoices.clientName,
+      total: invoices.total,
+      paidAmount: invoices.paidAmount,
+      dueDate: invoices.dueDate,
+    })
+    .from(invoices)
+    .innerJoin(
+      bankAccountIssuers,
+      and(
+        eq(bankAccountIssuers.issuerId, invoices.issuerId),
+        eq(bankAccountIssuers.workspaceId, invoices.workspaceId),
+      ),
+    )
+    .innerJoin(
+      bankAccounts,
+      and(
+        eq(bankAccounts.id, bankAccountIssuers.bankAccountId),
+        eq(bankAccounts.workspaceId, invoices.workspaceId),
+        eq(bankAccounts.iban, invoices.paymentAccountIban),
+        eq(bankAccounts.currency, "CZK"),
+      ),
+    )
+    .innerJoin(
+      bankConnections,
+      and(
+        eq(bankConnections.id, bankAccounts.connectionId),
+        eq(bankConnections.workspaceId, invoices.workspaceId),
+        eq(bankConnections.status, "active"),
+        inArray(bankConnections.provider, ["fio", "moneta"]),
+      ),
+    )
+    .where(
+      and(
+        eq(invoices.workspaceId, workspaceId),
+        eq(invoices.currency, "CZK"),
+        isNotNull(invoices.issuedAt),
+        isNull(invoices.cancelledAt),
+        isNotNull(invoices.paymentAccountIban),
+        isNotNull(invoices.paymentVariableSymbol),
+        sql`${invoices.paidAmount} < abs(${invoices.total})`,
+      ),
+    )
+    .orderBy(invoices.id, desc(invoices.dueDate))
+    .limit(limit);
+  return rows.flatMap((row) => {
+    if (!row.number) return [];
+    const progress = resolveCollectionProgress(
+      row.total,
+      row.paidAmount,
+      "unpaid",
+    );
+    return [
+      {
+        invoiceId: row.id,
+        number: row.number,
+        clientName: row.clientName,
+        requestedAmount: row.total,
+        paidAmount: progress.paidAmount,
+        outstandingAmount: progress.outstandingAmount,
+        dueDate: row.dueDate,
+      },
+    ];
+  });
 }

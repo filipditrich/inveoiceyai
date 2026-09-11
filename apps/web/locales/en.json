@@ -1033,6 +1033,26 @@
     "unavailable": "Drive pairing is not configured on this server.",
     "backToSettings": "Invoicey Drive settings"
   },
+  "PocketConnect": {
+    "title": "Connect Invoicey Pocket",
+    "description": "Allow this iPhone to create and watch payment requests for one workspace.",
+    "confirm": "Connect this iPhone",
+    "confirming": "Connecting…",
+    "cancel": "Cancel",
+    "invoiceyAccount": "Invoicey account",
+    "deviceName": "Device: {name}",
+    "workspace": "Workspace for received payments",
+    "invalid": "This connect link is invalid or you do not belong to a workspace. Start again in Invoicey Pocket.",
+    "unavailable": "Pocket pairing is not configured on this server."
+  },
+  "PocketOauth": {
+    "title": "Return to Invoicey Pocket",
+    "description": "This iPhone is ready to finish pairing.",
+    "openApp": "Open Invoicey Pocket",
+    "errorTitle": "Could not connect this iPhone",
+    "errorDescription": "Start again from Invoicey Pocket.",
+    "missingCode": "The pairing callback did not include an authorization code."
+  },
   "DriveOauth": {
     "title": "Return to Invoicey Drive",
     "description": "This Mac is ready to finish pairing. Open Invoicey Drive if it did not come to the front.",

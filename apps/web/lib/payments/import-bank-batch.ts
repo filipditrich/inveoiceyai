@@ -22,6 +22,7 @@ import {
   type NormalizedTransactionBatch,
 } from "@invoicey/payment-core";
 
+import { runNotificationEngine } from "../notifications/notification-engine";
 import { matchCreditAgainstPaymentRequests } from "./match-payment-requests";
 import { sendAutoMatchOwnerEmail } from "./send-auto-match-email";
 import { sendPaymentRequestSettledEmail } from "./send-payment-request-settled-email";
@@ -238,6 +239,15 @@ export async function importBankTransactionBatch(input: {
       updatedAt: new Date(),
     })
     .where(eq(bankAccounts.id, input.bankAccountId));
+
+  try {
+    await runNotificationEngine({ workspaceId: input.workspaceId });
+  } catch (error) {
+    console.error(
+      `[${input.logPrefix}] push notification delivery failed`,
+      error,
+    );
+  }
 
   return {
     imported: inserted.length,

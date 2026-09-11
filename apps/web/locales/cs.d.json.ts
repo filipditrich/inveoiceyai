@@ -1036,6 +1036,26 @@ declare const messages: {
     "unavailable": "Párování Drive na tomto serveru není nastavené.",
     "backToSettings": "Nastavení Invoicey Drive"
   },
+  "PocketConnect": {
+    "title": "Připojit Invoicey Pocket",
+    "description": "Povolte tomuto iPhonu vytvářet a sledovat výzvy k platbě v jednom pracovním prostoru.",
+    "confirm": "Připojit tento iPhone",
+    "confirming": "Připojuji…",
+    "cancel": "Zrušit",
+    "invoiceyAccount": "Účet Invoicey",
+    "deviceName": "Zařízení: {name}",
+    "workspace": "Pracovní prostor pro přijaté platby",
+    "invalid": "Odkaz je neplatný nebo nejste členem žádného pracovního prostoru. Začněte znovu v Invoicey Pocket.",
+    "unavailable": "Párování Pocket na tomto serveru není nastavené."
+  },
+  "PocketOauth": {
+    "title": "Vraťte se do Invoicey Pocket",
+    "description": "Tento iPhone může dokončit párování.",
+    "openApp": "Otevřít Invoicey Pocket",
+    "errorTitle": "Tento iPhone se nepodařilo připojit",
+    "errorDescription": "Začněte znovu v Invoicey Pocket.",
+    "missingCode": "Callback párování neobsahoval autorizační kód."
+  },
   "DriveOauth": {
     "title": "Vraťte se do Invoicey Drive",
     "description": "Tento Mac může dokončit párování. Otevřete Invoicey Drive, pokud se nevynořil sám.",

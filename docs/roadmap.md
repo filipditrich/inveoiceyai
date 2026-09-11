@@ -1009,6 +1009,42 @@ NFCtron vendor-fee PDFs attached to existing payout mail.
 **Out of 37:** Ledger writes, payment matching, Invoicey sending payout email,
 Pohoda, MCP as the machine contract, async jobs.
 
+## Plan 38 — Invoicey Pocket receive companion + notification engine
+
+**Status:** Implementation complete; provisioning pending
+**Started:** 2026-09-10
+
+**Goal:** A native iPhone receive surface for ad-hoc requests and unpaid
+invoices, backed by Invoicey's authoritative bank reconciliation and a durable,
+reusable notification engine.
+
+**Specs:** [`specs/invoicey-pocket.md`](./specs/invoicey-pocket.md) ·
+[`specs/notifications.md`](./specs/notifications.md)
+**ADRs:** [0052](./decisions/0052-durable-notification-outbox.md) ·
+[0053](./decisions/0053-invoicey-pocket-native-receive-companion.md)
+
+### Exit criteria
+
+- [x] Native SwiftUI app pairs through one-use PKCE and stores only its raw
+      device token in Keychain
+- [x] Amount entry creates a server-side payment request and presents a SPAYD
+      QR plus shareable public link
+- [x] Eligible unpaid invoices can be selected and watched without copying bank
+      credentials to the phone
+- [x] Foreground watch respects the shared Fio/MONETA provider polling floor and
+      transitions to a strong paid state with haptics
+- [x] Settlement writes a deduplicated notification event in the same database
+      transaction as ledger state
+- [x] The engine materializes in-app and per-device APNs deliveries with retry,
+      dedupe, and permanent-token handling
+- [x] Native and web unit tests/typechecks pass
+- [ ] Apply the Plan 38 production SQL, provision APNs credentials and validate
+      a real-device push
+- [ ] Add App Store artwork/privacy metadata and distribute the first TestFlight
+
+**Out of 38:** Nearby discovery, NFC/Bluetooth, payment initiation, payer-side
+software, non-CZK requests, and automatic workspace switching.
+
 ## Plans not yet promised
 
 These are tracked here for traceability but not currently slotted:

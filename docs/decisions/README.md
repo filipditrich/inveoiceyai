@@ -62,3 +62,5 @@ When a decision changes:
 | [0049](./0049-dom-look-interpreter-for-editing.md)         | DOM look interpreter for editing; react-pdf owns output       | Accepted                                   |
 | [0050](./0050-polymorphic-payment-allocations.md)          | Payment allocations settle invoices or payment requests       | Accepted                                   |
 | [0051](./0051-payment-requests-self-settle.md)             | Payment requests self-settle without the auto-confirm opt-in  | Accepted                                   |
+| [0052](./0052-durable-notification-outbox.md)              | Durable notification events fan out to channel deliveries     | Accepted                                   |
+| [0053](./0053-invoicey-pocket-native-receive-companion.md) | Invoicey Pocket is a native receive-only iPhone companion     | Accepted                                   |

@@ -82,5 +82,6 @@ two steps (add nullable + backfill, then tighten), as
 | `2026-09-01-plan30-invoicey-drive.sql`                | Plan 30 Invoicey Drive settings, devices, pair grants                              |
 | `2026-09-03-perf-indexes.sql`                         | `invoices_workspace_updated_idx` for the dashboard recent-invoices list            |
 | `2026-09-04-plan34-guest-issuance.sql`                | Plan 34 S0 — guest workspace columns, `guest_issues` allowance reservations        |
+| `2026-09-10-plan38-pocket-notifications.sql`          | Plan 38 — Pocket devices, pairing grants, durable notification outbox and delivery |
 
 Apply Plan 19 before deploying referral routes (`/r/*`, `/settings/account/referrals`, admin users list).

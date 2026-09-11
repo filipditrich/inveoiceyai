@@ -51,7 +51,9 @@ export type SecurityAuditEventType =
   | "slack_unlink"
   | "slack_rebind"
   | "drive_device_create"
-  | "drive_device_revoke";
+  | "drive_device_revoke"
+  | "pocket_device_create"
+  | "pocket_device_revoke";
 
 /** Soft-trusted browsers (Plan 16, ADR 0023). */
 export const trustedDevices = pgTable(

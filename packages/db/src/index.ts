@@ -240,3 +240,31 @@ export {
   type DriveIndexItem,
   type DriveUserSettingsRow,
 } from "./drive-repo";
+export {
+  POCKET_PAIR_GRANT_TTL_MS,
+  consumePocketPairGrant,
+  disablePocketPushToken,
+  findActivePocketDeviceByTokenHash,
+  insertPocketDevice,
+  insertPocketPairGrant,
+  listPocketDevicesForUser,
+  listPushEnabledPocketDevices,
+  registerPocketPushToken,
+  touchPocketDevice,
+  type PocketDeviceIdentity,
+} from "./pocket-repo";
+export {
+  enqueueNotificationEvent,
+  insertNotificationDeliveries,
+  listPendingNotificationEvents,
+  claimPendingPushDeliveries,
+  listUserNotifications,
+  markNotificationDeliveryFailed,
+  markNotificationDeliverySent,
+  markNotificationEventFailed,
+  markNotificationEventProcessed,
+  markUserNotificationRead,
+  type NewNotificationDelivery,
+  type NotificationEventInput,
+} from "./notifications-repo";
+export type { NotificationEventPayload } from "./notification-schema";

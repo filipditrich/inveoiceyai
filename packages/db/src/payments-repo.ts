@@ -1,5 +1,6 @@
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
+import { enqueueNotificationEvent } from "./notifications-repo";
 import {
   bankTransactions,
   invoices,
@@ -210,6 +211,36 @@ async function addAuditEvent(
     entityType: input.entityType,
     entityId: input.entityId,
     payloadJson: input.payload ?? {},
+  });
+}
+
+async function enqueueSettledPaymentRequest(
+  tx: DbTransaction,
+  input: {
+    workspaceId: string;
+    requestId: string;
+    allocationId: string;
+    amount: string;
+    currency: string;
+    message: string | null;
+    variableSymbol: string;
+    becamePaid: boolean;
+  },
+): Promise<void> {
+  if (!input.becamePaid) return;
+  await enqueueNotificationEvent(tx, {
+    workspaceId: input.workspaceId,
+    type: "payment_request.settled",
+    subjectType: "payment_request",
+    subjectId: input.requestId,
+    dedupeKey: `payment_request.settled:${input.allocationId}`,
+    payload: {
+      amount: input.amount,
+      currency: input.currency,
+      message: input.message,
+      variableSymbol: input.variableSymbol,
+      allocationId: input.allocationId,
+    },
   });
 }
 
@@ -479,6 +510,8 @@ async function confirmRequestProposal(
       status: paymentRequests.status,
       amount: paymentRequests.amount,
       currency: paymentRequests.currency,
+      message: paymentRequests.message,
+      variableSymbol: paymentRequests.variableSymbol,
     })
     .from(paymentRequests)
     .where(
@@ -559,6 +592,16 @@ async function confirmRequestProposal(
       paymentRequestId: proposal.paymentRequestId,
     },
   });
+  await enqueueSettledPaymentRequest(tx, {
+    workspaceId: input.workspaceId,
+    requestId: proposal.paymentRequestId,
+    allocationId: allocation.id,
+    amount: request.amount,
+    currency: request.currency,
+    message: request.message,
+    variableSymbol: request.variableSymbol,
+    becamePaid: projection.becamePaid,
+  });
   return {
     ok: true,
     paymentRequestId: proposal.paymentRequestId,
@@ -584,7 +627,10 @@ export async function createPaymentRequestAllocation(input: {
         .select({
           id: paymentRequests.id,
           status: paymentRequests.status,
+          amount: paymentRequests.amount,
           currency: paymentRequests.currency,
+          message: paymentRequests.message,
+          variableSymbol: paymentRequests.variableSymbol,
         })
         .from(paymentRequests)
         .where(
@@ -634,6 +680,16 @@ export async function createPaymentRequestAllocation(input: {
           amount: input.amount,
           overAmount: input.overAmount ?? null,
         },
+      });
+      await enqueueSettledPaymentRequest(tx, {
+        workspaceId: input.workspaceId,
+        requestId: input.paymentRequestId,
+        allocationId: allocation.id,
+        amount: request.amount,
+        currency: request.currency,
+        message: request.message,
+        variableSymbol: request.variableSymbol,
+        becamePaid: projection.becamePaid,
       });
       return {
         ok: true,
