@@ -99,6 +99,7 @@ const legacySettingsRedirects = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  allowedDevOrigins: ["invoicey.localhost", "*.invoicey.localhost"],
   experimental: {
     /**
      * Dynamic pages default to 0s client cache, so a back-link refetch

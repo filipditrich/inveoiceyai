@@ -6,7 +6,8 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "portless",
+    "dev:app": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
     "typecheck": "node scripts/generate-messages-declaration.mjs && tsc --noEmit",
@@ -15,6 +16,7 @@
     "check:auth-schema": "NODE_ENV=development bun --conditions react-server scripts/check-auth-schema.ts",
     "check:runtime-schema": "NODE_ENV=development bun --conditions react-server scripts/check-runtime-schema.ts"
   },
+  "portless": { "name": "invoicey", "script": "dev:app" },
   "dependencies": {
     "@ai-sdk/gateway": "4.0.46",
     "@base-ui/react": "1.4.1",
