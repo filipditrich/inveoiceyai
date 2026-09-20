@@ -238,10 +238,10 @@ erDiagram
 
 | Condition                                          | Store                                                            |
 | -------------------------------------------------- | ---------------------------------------------------------------- |
-| `DATABASE_URL` set and no `path` override          | Neon `presets`                                                   |
+| `INVOICEY_DATABASE_URL` set and no `path` override | Neon `presets`                                                   |
 | `INVOICEY_PRESETS_BACKEND=file` or explicit `path` | JSON file (`INVOICEY_PRESETS_PATH` / `~/.invoicey/presets.json`) |
 
-`create_invoice` (MCP) persists a draft invoice row when `DATABASE_URL` is set.
+`create_invoice` (MCP) persists a draft invoice row when `INVOICEY_DATABASE_URL` is set.
 
 ## References
 

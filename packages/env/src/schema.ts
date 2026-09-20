@@ -56,11 +56,12 @@ function emptyEnvToUndefined(value: unknown): unknown {
 
 /** Server-only / secret env vars. */
 export const privateEnvSchema = z.object({
-  DATABASE_URL: z
+  /** Pooled Neon URL. Vercel Marketplace injects this with the INVOICEY_ prefix. */
+  INVOICEY_DATABASE_URL: z
     .string()
     .transform((s) => s.trim())
     .pipe(z.string().min(1)),
-  DATABASE_URL_UNPOOLED: z.preprocess(
+  INVOICEY_DATABASE_URL_UNPOOLED: z.preprocess(
     emptyEnvToUndefined,
     z.string().min(1).optional(),
   ),

@@ -60,7 +60,7 @@ export type RecurringListItem = {
 function requireDb(): InvoiceyDb {
   const database = tryCreateDbFromEnv();
   if (!database) {
-    throw new Error("DATABASE_URL is not set");
+    throw new Error("INVOICEY_DATABASE_URL is not set");
   }
   return database;
 }
@@ -341,8 +341,8 @@ export async function createRecurringFromInvoice(options: {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (message.includes("DATABASE_URL")) {
-      return { ok: false, error: "DATABASE_URL is not set" };
+    if (message.includes("INVOICEY_DATABASE_URL")) {
+      return { ok: false, error: "INVOICEY_DATABASE_URL is not set" };
     }
     return { ok: false, error: message };
   }
@@ -579,7 +579,11 @@ export async function runDueRecurringForWorkspace(options: {
 
   const database = tryCreateDbFromEnv();
   if (!database) {
-    return { created: 0, skipped: 0, errors: ["DATABASE_URL is not set"] };
+    return {
+      created: 0,
+      skipped: 0,
+      errors: ["INVOICEY_DATABASE_URL is not set"],
+    };
   }
 
   const due = await database

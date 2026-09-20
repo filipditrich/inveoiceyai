@@ -179,7 +179,7 @@ export function registerInvoiceyMcpTools(
 
   s.tool(
     "list_invoices",
-    "List workspace invoices from Neon (requires DATABASE_URL). Returns summaries with domain status + displayStatus.",
+    "List workspace invoices from Neon (requires INVOICEY_DATABASE_URL). Returns summaries with domain status + displayStatus.",
     {
       limit: z
         .number()
@@ -212,7 +212,7 @@ export function registerInvoiceyMcpTools(
 
   s.tool(
     "get_invoice",
-    "Get one invoice by id from Neon (requires DATABASE_URL). Includes summary with status/displayStatus and validated payload when present.",
+    "Get one invoice by id from Neon (requires INVOICEY_DATABASE_URL). Includes summary with status/displayStatus and validated payload when present.",
     { id: z.string().uuid().describe("Invoice row id") },
     wrap("get_invoice", async (args) => {
       try {
@@ -227,7 +227,7 @@ export function registerInvoiceyMcpTools(
 
   s.tool(
     "mark_invoice_paid",
-    "Mark an issued unpaid invoice as paid (requires DATABASE_URL). Sets paidAt.",
+    "Mark an issued unpaid invoice as paid (requires INVOICEY_DATABASE_URL). Sets paidAt.",
     { id: z.string().uuid().describe("Invoice row id") },
     wrap("mark_invoice_paid", async (args) => {
       try {
@@ -242,7 +242,7 @@ export function registerInvoiceyMcpTools(
 
   s.tool(
     "issue_invoice",
-    "Issue a draft invoice (atomic numbering). Requires DATABASE_URL. Idempotent if already issued.",
+    "Issue a draft invoice (atomic numbering). Requires INVOICEY_DATABASE_URL. Idempotent if already issued.",
     { id: z.string().uuid().describe("Draft invoice id") },
     wrap("issue_invoice", async (args) => {
       try {
@@ -257,7 +257,7 @@ export function registerInvoiceyMcpTools(
 
   s.tool(
     "send_invoice_email",
-    "Email an issued invoice (PDF + optional ISDOC) via the configured email transport. Requires DATABASE_URL and a configured transport (Resend today). Pass `to` when the client has no contactEmail — do not invent an address.",
+    "Email an issued invoice (PDF + optional ISDOC) via the configured email transport. Requires INVOICEY_DATABASE_URL and a configured transport (Resend today). Pass `to` when the client has no contactEmail — do not invent an address.",
     {
       id: z.string().uuid().describe("Invoice row id"),
       to: z

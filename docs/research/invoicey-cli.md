@@ -56,7 +56,7 @@ TypeScript entry.
 **Wrap `/api/mcp` as the CLI transport.** Rejected: MCP envelopes are for
 models. A person-facing client wants JSON `{ ok, error }` and binary PDF GET.
 
-**Give the CLI `DATABASE_URL`.** Rejected: that is an internal admin tool, not
+**Give the CLI `INVOICEY_DATABASE_URL`.** Rejected: that is an internal admin tool, not
 a companion product.
 
 **Port the look builder / members / bank connect.** Rejected: those need the

@@ -81,7 +81,7 @@ flowchart LR
 | Thing                                          | Why it is safe to leave alone                                   |
 | ---------------------------------------------- | --------------------------------------------------------------- |
 | Vercel project `inveoiceyai-web`               | Same deployment; only hostnames are added                       |
-| Neon `DATABASE_URL` / schema                   | No tenant or URL columns store the public host                  |
+| Neon `INVOICEY_DATABASE_URL` / schema          | No tenant or URL columns store the public host                  |
 | `BETTER_AUTH_SECRET`                           | Same app; do not rotate as part of this cutover                 |
 | UploadThing object URLs (`ufs.sh` / `utfs.io`) | Artifacts are on UT, not on our host                            |
 | User PATs / `MCP_API_KEY` / `EVE_API_KEY`      | Bearer auth is host-agnostic                                    |
@@ -320,7 +320,7 @@ proven. A dangling apex with no target is worse than a long-lived 308.
 | `EMAIL_FROM`          | `Invoicey <invoices@invoicey.app>` |
 | `EMAIL_SYSTEM_FROM`   | `Invoicey <noreply@invoicey.app>`  |
 
-Everything else (`DATABASE_URL`, `BETTER_AUTH_SECRET`, Resend API key, Slack
+Everything else (`INVOICEY_DATABASE_URL`, `BETTER_AUTH_SECRET`, Resend API key, Slack
 Connect, UploadThing, bank keys, cron secret, AI gateway) stays.
 
 ### Hardcoded host (runtime)

@@ -149,7 +149,7 @@ The agent cannot complete these steps:
    VERCEL_USE_EXPERIMENTAL_FRAMEWORKS=1 vercel deploy --prod
    ```
    (or `eve deploy` / ensure `withEve` generated services).
-5. Set Vercel env: `DATABASE_URL`, `AI_GATEWAY_API_KEY` (or OIDC), `INVOICEY_DEFAULT_WORKSPACE_ID`, `EVE_API_KEY` and/or `MCP_API_KEY`, `NEXT_PUBLIC_APP_URL`, UploadThing if issuer assets needed. Optional: `INVOICEY_AI_MODEL`.
+5. Set Vercel env: `INVOICEY_DATABASE_URL`, `AI_GATEWAY_API_KEY` (or OIDC), `INVOICEY_DEFAULT_WORKSPACE_ID`, `EVE_API_KEY` and/or `MCP_API_KEY`, `NEXT_PUBLIC_APP_URL`, UploadThing if issuer assets needed. Optional: `INVOICEY_AI_MODEL`.
 6. Invite the bot to the target channel; run the E2E checklist below once.
 7. If Deployment Protection is on, supply a bypass secret for Connect / health checks.
 

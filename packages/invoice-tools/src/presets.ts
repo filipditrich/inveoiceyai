@@ -62,7 +62,7 @@ function prefersDbStore(pathOverride?: string): boolean {
   if (process.env.INVOICEY_PRESETS_BACKEND?.trim() === "file") {
     return false;
   }
-  return Boolean(process.env.DATABASE_URL?.trim());
+  return Boolean(process.env.INVOICEY_DATABASE_URL?.trim());
 }
 
 async function readStore(filePath: string): Promise<PresetFile> {

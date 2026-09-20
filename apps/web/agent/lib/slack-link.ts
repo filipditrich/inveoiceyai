@@ -143,7 +143,7 @@ export async function deliverSlackLinkInvite(input: {
   const database = input.db ?? tryCreateDbFromEnv();
   if (!database) {
     const text =
-      "Invoicey is not connected to a database, so I cannot link Slack accounts. Ask the operator to set DATABASE_URL.";
+      "Invoicey is not connected to a database, so I cannot link Slack accounts. Ask the operator to set INVOICEY_DATABASE_URL.";
     await input.thread.post(text);
     return;
   }

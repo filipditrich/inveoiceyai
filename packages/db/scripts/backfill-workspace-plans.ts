@@ -41,9 +41,9 @@ const apply = process.argv.includes("--apply");
 const onlyArg = process.argv.find((a) => a.startsWith("--only="));
 const only = onlyArg?.slice("--only=".length);
 
-const url = process.env.DATABASE_URL?.trim();
+const url = process.env.INVOICEY_DATABASE_URL?.trim();
 if (!url) {
-  console.error("\n✗ DATABASE_URL is empty");
+  console.error("\n✗ INVOICEY_DATABASE_URL is empty");
   process.exit(1);
 }
 const db = createDb(url);

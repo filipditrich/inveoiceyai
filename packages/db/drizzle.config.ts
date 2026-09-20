@@ -6,10 +6,12 @@ import { loadRepoEnv } from "@invoicey/env/load";
 /** drizzle-kit runs with cwd `packages/db`, so root `.env` is not automatic. */
 const repoRoot = loadRepoEnv();
 
-const databaseUrl = process.env.DATABASE_URL?.trim();
+const databaseUrl =
+  process.env.INVOICEY_DATABASE_URL_UNPOOLED?.trim() ||
+  process.env.INVOICEY_DATABASE_URL?.trim();
 if (!databaseUrl) {
   throw new Error(
-    `DATABASE_URL is empty. Set it in ${resolve(repoRoot, ".env")} or ${resolve(repoRoot, ".env.local")} at the monorepo root, then run bun db:push again.`,
+    `INVOICEY_DATABASE_URL is empty. Set it in ${resolve(repoRoot, ".env")} or ${resolve(repoRoot, ".env.local")} at the monorepo root, then run bun db:push again.`,
   );
 }
 

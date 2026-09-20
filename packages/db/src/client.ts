@@ -5,7 +5,7 @@ import { env } from "@invoicey/env/server";
 
 import * as schema from "./schema";
 
-const sql = neon(env.DATABASE_URL);
+const sql = neon(env.INVOICEY_DATABASE_URL);
 
 /** Default HTTP client for RSC reads and simple mutations. */
 export const db = drizzle(sql, { schema });

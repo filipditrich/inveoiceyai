@@ -76,8 +76,8 @@ if (!orderId) {
 }
 const offerKey: BillingOfferKey = offerArg;
 
-const url = process.env.DATABASE_URL?.trim();
-if (!url) fail("DATABASE_URL is empty");
+const url = process.env.INVOICEY_DATABASE_URL?.trim();
+if (!url) fail("INVOICEY_DATABASE_URL is empty");
 const db = createDb(url);
 
 const [workspace] = await db

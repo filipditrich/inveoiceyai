@@ -354,7 +354,7 @@ Resend + `@invoicey/emails` (react-email). Sub-phases below. **Operator still ne
 **Spec:** [`specs/db-schema.md`](./specs/db-schema.md)
 
 - Tables: `workspaces`, `issuer_businesses`, `issuer_numbering_schemes`, `clients`, `invoices`, `invoice_items`, `presets`
-- MCP presets + draft invoice persist when `DATABASE_URL` is set; file fallback otherwise
+- MCP presets + draft invoice persist when `INVOICEY_DATABASE_URL` is set; file fallback otherwise
 - Still single-tenant via `INVOICEY_DEFAULT_WORKSPACE_ID` (seeded UUID; no Clerk)
 
 ### Plan 12b — MCP server, DB-backed tools

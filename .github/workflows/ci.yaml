@@ -23,7 +23,7 @@ jobs:
       NODE_ENV: production
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       NEXT_PUBLIC_APP_STAGE: development
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/invoicey
+      INVOICEY_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/invoicey
       BETTER_AUTH_SECRET: ci-only-secret-at-least-thirty-two-characters
       BETTER_AUTH_URL: http://localhost:3000
       INVOICEY_DEFAULT_WORKSPACE_ID: 00000000-0000-4000-8000-000000000001

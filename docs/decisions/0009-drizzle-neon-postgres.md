@@ -32,7 +32,7 @@ ORM options:
 Forces:
 
 - We are explicit fans of "describe schema in TypeScript, get migrations free" → Drizzle
-- Vercel Marketplace simplifies provisioning Neon → set the integration, get `DATABASE_URL` injected
+- Vercel Marketplace simplifies provisioning Neon → set the integration, get `INVOICEY_DATABASE_URL` injected
 - Drizzle's bundled migrator (`drizzle-kit`) is enough for our scale
 - Drizzle plays nicely with both serverless (Neon HTTP driver) and Node.js (Neon WS driver) — we'll use the appropriate one per runtime
 
@@ -46,7 +46,7 @@ Specifically:
 - Connection: `@neondatabase/serverless` HTTP driver in serverless functions; `drizzle-orm/neon-http` adapter
 - Migrations: `drizzle-kit generate` produces SQL; `drizzle-kit migrate` runs it; we commit both the schema source and the generated SQL
 - Typing: each table has a `selectSchema = createSelectSchema(table)` and `insertSchema = createInsertSchema(table)` from `drizzle-zod`, so DB shapes have Zod parsers at hand
-- Two URL env vars: `DATABASE_URL` (pooled, used by app) and `DATABASE_URL_UNPOOLED` (direct, used by migrations)
+- Two URL env vars: `INVOICEY_DATABASE_URL` (pooled, used by app) and `INVOICEY_DATABASE_URL_UNPOOLED` (direct, used by migrations)
 - Branching: each Vercel Preview gets a branched Neon DB (Neon's Vercel integration handles this)
 
 ## Consequences

@@ -11,9 +11,9 @@ export function createDb(databaseUrl: string) {
   return drizzle(sql, { schema });
 }
 
-/** DB client when `DATABASE_URL` is set; otherwise `null`. */
+/** DB client when `INVOICEY_DATABASE_URL` is set; otherwise `null`. */
 export function tryCreateDbFromEnv(): InvoiceyDb | null {
-  const url = process.env.DATABASE_URL?.trim();
+  const url = process.env.INVOICEY_DATABASE_URL?.trim();
   if (url == null || url === "") {
     return null;
   }

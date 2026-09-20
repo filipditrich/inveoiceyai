@@ -158,9 +158,9 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 
 | Var                                            | Purpose                                                                                                 | Where set                      | When introduced        |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------ | ---------------------- |
-| `DATABASE_URL`                                 | Neon Postgres connection string (also enables durable MCP presets + draft invoices)                     | Vercel + `.env.local`          | Plan 1 / DB foundation |
-| `DATABASE_URL_UNPOOLED`                        | Neon direct (non-pooled) URL for migrations                                                             | Vercel + `.env.local`          | Plan 1                 |
-| `INVOICEY_PRESETS_BACKEND`                     | Set `file` to force JSON presets even with `DATABASE_URL`                                               | local / optional               | DB foundation          |
+| `INVOICEY_DATABASE_URL`                        | Neon Postgres connection string (also enables durable MCP presets + draft invoices)                     | Vercel + `.env.local`          | Plan 1 / DB foundation |
+| `INVOICEY_DATABASE_URL_UNPOOLED`               | Neon direct (non-pooled) URL for migrations                                                             | Vercel + `.env.local`          | Plan 1                 |
+| `INVOICEY_PRESETS_BACKEND`                     | Set `file` to force JSON presets even with `INVOICEY_DATABASE_URL`                                      | local / optional               | DB foundation          |
 | `UPLOADTHING_TOKEN`                            | UploadThing API token                                                                                   | Vercel + `.env.local`          | Plan 5                 |
 | `UPLOADTHING_APP_ID`                           | UploadThing app ID                                                                                      | Vercel + `.env.local`          | Plan 5                 |
 | `NEXT_PUBLIC_APP_URL`                          | Public origin (used by SPAYD message templates, future emails)                                          | Vercel + `.env.local`          | Plan 1                 |
@@ -190,7 +190,7 @@ See [ADR 0007](./decisions/0007-workspace-scoped-data-model.md).
 ## Hosting & deploy
 
 - **Vercel** for `apps/web` — Next.js 16 + Server Actions + route handlers run on Vercel Functions
-- **Neon** for Postgres — wired via Vercel Marketplace (auto-injects `DATABASE_URL`); schema in [`docs/specs/db-schema.md`](./specs/db-schema.md)
+- **Neon** for Postgres — wired via Vercel Marketplace (auto-injects `INVOICEY_DATABASE_URL`); schema in [`docs/specs/db-schema.md`](./specs/db-schema.md)
 - **UploadThing** for files — configured per-app
 - **Plan 13b (Eve Slack):** `apps/web/agent/` mounted with `withEve()`; Connect trigger → `/eve/v1/slack`; Node 24+. Spec: [`specs/slack-eve.md`](./specs/slack-eve.md). Plan 13a `/api/slack/*` retired.
 - **Plan 12a (MCP):** local stdio via `apps/mcp`; remote Streamable HTTP via `apps/web` `/api/mcp` (`mcp-handler`, Node runtime, `MCP_API_KEY` bearer, fail-closed when unset). Shared tool logic in `@invoicey/invoice-tools` (+ `/ops` for issue/paid).

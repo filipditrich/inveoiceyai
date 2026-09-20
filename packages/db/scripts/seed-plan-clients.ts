@@ -38,8 +38,8 @@ const icos = (arg("ico") ?? "")
 if (!planKey) fail("--plan=<key> is required");
 if (icos.length === 0) fail("--ico=<comma separated> is required");
 
-const url = process.env.DATABASE_URL?.trim();
-if (!url) fail("DATABASE_URL is empty");
+const url = process.env.INVOICEY_DATABASE_URL?.trim();
+if (!url) fail("INVOICEY_DATABASE_URL is empty");
 const db = createDb(url);
 
 const plan = await getPlanByKey(db, planKey);

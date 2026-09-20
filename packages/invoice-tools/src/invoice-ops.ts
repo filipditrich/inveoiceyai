@@ -76,7 +76,7 @@ function pragueTodayIso(): string {
 function requireDb(): InvoiceyDb {
   const database = tryCreateDbFromEnv();
   if (!database) {
-    throw new Error("DATABASE_URL is not set");
+    throw new Error("INVOICEY_DATABASE_URL is not set");
   }
   return database;
 }

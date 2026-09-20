@@ -218,7 +218,7 @@ export async function sendInvoiceEmailById(
 ): Promise<SendInvoiceEmailByIdResult> {
   const database = tryCreateDbFromEnv();
   if (!database) {
-    return { ok: false, error: "DATABASE_URL is not set" };
+    return { ok: false, error: "INVOICEY_DATABASE_URL is not set" };
   }
   const workspaceId = resolveWorkspaceId(input.workspaceId);
   try {

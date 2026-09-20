@@ -14,9 +14,9 @@ let pool: Pool | null = null;
 let transactionalDb: NeonDatabase<typeof schema> | null = null;
 
 function getTransactionalDb(): NeonDatabase<typeof schema> {
-  const connectionString = process.env.DATABASE_URL?.trim();
+  const connectionString = process.env.INVOICEY_DATABASE_URL?.trim();
   if (!connectionString) {
-    throw new Error("DATABASE_URL is not set");
+    throw new Error("INVOICEY_DATABASE_URL is not set");
   }
   if (!pool) {
     pool = new Pool({
@@ -34,7 +34,7 @@ function getTransactionalDb(): NeonDatabase<typeof schema> {
 /**
  * Runs `fn` inside a WebSocket-backed interactive transaction (SELECT FOR UPDATE).
  * Prefer HTTP `db` for simple single-statement CRUD.
- * Uses `process.env.DATABASE_URL` (not `@invoicey/env`) for Eve/MCP discovery.
+ * Uses `process.env.INVOICEY_DATABASE_URL` (not `@invoicey/env`) for Eve/MCP discovery.
  */
 export async function withDbTransaction<T>(
   fn: (tx: DbTransaction) => Promise<T>,

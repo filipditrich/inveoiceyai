@@ -30,8 +30,8 @@ const workspaceId = arg("workspace");
 const apply = flag("apply");
 const now = new Date();
 
-const url = process.env.DATABASE_URL?.trim();
-if (!url) fail("DATABASE_URL is empty");
+const url = process.env.INVOICEY_DATABASE_URL?.trim();
+if (!url) fail("INVOICEY_DATABASE_URL is empty");
 const db = createDb(url);
 
 if (workspaceId) {
