@@ -1,4 +1,13 @@
-import { and, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  sql,
+} from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
 import {
@@ -16,6 +25,8 @@ import {
   resolveDisplayStatus,
   type InvoiceDisplayStatus,
 } from "@invoicey/invoice-core/status-display";
+
+import { driveIndexEtag } from "./drive-index-etag";
 
 export { DEFAULT_DRIVE_LAYOUT_TEMPLATE };
 
@@ -64,15 +75,13 @@ export interface DriveIndexItem {
   displayStatus: InvoiceDisplayStatus;
 }
 
-function snapshotName(
-  snapshot: Record<string, unknown> | null | undefined,
-  fallback: string,
-): string {
-  const name = snapshot?.name;
-  if (typeof name === "string" && name.trim().length > 0) {
-    return sanitizeDriveSegment(name);
+function invoiceLanguageCode(
+  language: string | null | undefined,
+): InvoiceLanguage {
+  if (language === "en" || language === "cs") {
+    return language;
   }
-  return fallback;
+  return "cs";
 }
 
 function invoiceLanguage(
@@ -80,10 +89,9 @@ function invoiceLanguage(
 ): InvoiceLanguage {
   const meta = payload?.meta;
   if (meta && typeof meta === "object" && "language" in meta) {
+    /** SAFETY: `meta` is a JSON object; `language` is an optional string */
     const language = (meta as { language?: unknown }).language;
-    if (language === "en" || language === "cs") {
-      return language;
-    }
+    return invoiceLanguageCode(typeof language === "string" ? language : null);
   }
   return "cs";
 }
@@ -364,48 +372,167 @@ export async function listMemberWorkspaces(
     .where(eq(member.userId, userId));
 }
 
+interface DriveIndexScope {
+  settings: DriveUserSettingsRow;
+  visible: { id: string; name: string }[];
+}
+
+function driveIndexScope(
+  settings: DriveUserSettingsRow,
+  memberships: { id: string; name: string }[],
+): DriveIndexScope {
+  const hidden = new Set(settings.hiddenWorkspaceIds);
+  return {
+    settings,
+    visible: memberships.filter((workspace) => !hidden.has(workspace.id)),
+  };
+}
+
+function issuedInvoiceWhere(workspaceIds: string[]) {
+  return and(
+    inArray(invoices.workspaceId, workspaceIds),
+    isNotNull(invoices.issuedAt),
+    isNull(invoices.cancelledAt),
+  );
+}
+
+/**
+ * Validator for the Drive index. The aggregate hashes ids and timestamps
+ * inside Postgres so an unchanged tree does not ship invoice payloads.
+ */
+export async function readDriveIndexEtag(
+  db: InvoiceyDb,
+  userId: string,
+): Promise<string> {
+  const settings = await getDriveUserSettings(db, userId);
+  const memberships = await listMemberWorkspaces(db, userId);
+  const scope = driveIndexScope(settings, memberships);
+  const stamps = await readDriveIndexStamps(
+    db,
+    scope.visible.map((workspace) => workspace.id),
+  );
+  return driveIndexEtag({
+    pragueDate: pragueTodayIso(),
+    layoutTemplate: scope.settings.layoutTemplate,
+    includeIsdoc: scope.settings.includeIsdoc,
+    hiddenWorkspaceIds: scope.settings.hiddenWorkspaceIds,
+    workspaces: scope.visible,
+    invoiceCount: stamps.invoiceCount,
+    invoiceStamp: stamps.invoiceStamp,
+    issuerStamp: stamps.issuerStamp,
+  });
+}
+
+async function readDriveIndexStamps(
+  db: InvoiceyDb,
+  workspaceIds: string[],
+): Promise<{
+  invoiceCount: number;
+  invoiceStamp: string;
+  issuerStamp: string;
+}> {
+  if (workspaceIds.length === 0) {
+    return { invoiceCount: 0, invoiceStamp: "", issuerStamp: "" };
+  }
+  const [row] = await db
+    .select({
+      invoiceCount: count(),
+      invoiceStamp: sql<string>`md5(coalesce(string_agg(${invoices.id}::text || '|' || coalesce(${invoices.updatedAt}::text, ''), ',' order by ${invoices.id}::text), ''))`,
+      issuerStamp: sql<string>`md5(coalesce(string_agg(${issuerBusinesses.id}::text || '|' || coalesce(${issuerBusinesses.updatedAt}::text, '') || '|' || coalesce(${issuerBusinesses.snapshot}->>'name', ''), ',' order by ${issuerBusinesses.id}::text), ''))`,
+    })
+    .from(invoices)
+    .innerJoin(issuerBusinesses, eq(issuerBusinesses.id, invoices.issuerId))
+    .where(issuedInvoiceWhere(workspaceIds));
+  return {
+    invoiceCount: Number(row?.invoiceCount ?? 0),
+    invoiceStamp: row?.invoiceStamp ?? "",
+    issuerStamp: row?.issuerStamp ?? "",
+  };
+}
+
+interface DriveIndexInvoiceRow {
+  id: string;
+  workspaceId: string;
+  issuerId: string;
+  issueDate: string;
+  number: string | null;
+  docType: string;
+  clientName: string;
+  issuedAt: Date | null;
+  dueDate: string;
+  paidAt: Date | null;
+  cancelledAt: Date | null;
+  pdfUrl: string | null;
+  isdocUrl: string | null;
+  pdfSha256: string | null;
+  isdocSha256: string | null;
+  artifactsImmutable: number;
+  importCompleteness: string | null;
+  language: string | null;
+  issuerName: string | null;
+}
+
 export async function listDriveIndex(
   db: InvoiceyDb,
   userId: string,
 ): Promise<DriveIndexItem[]> {
   const settings = await getDriveUserSettings(db, userId);
   const memberships = await listMemberWorkspaces(db, userId);
-  const hidden = new Set(settings.hiddenWorkspaceIds);
-  const visible = memberships.filter((workspace) => !hidden.has(workspace.id));
-  if (visible.length === 0) {
+  const scope = driveIndexScope(settings, memberships);
+  if (scope.visible.length === 0) {
     return [];
   }
-  const workspaceIds = visible.map((workspace) => workspace.id);
+  const workspaceIds = scope.visible.map((workspace) => workspace.id);
+  const rows = await db
+    .select({
+      id: invoices.id,
+      workspaceId: invoices.workspaceId,
+      issuerId: invoices.issuerId,
+      issueDate: invoices.issueDate,
+      number: invoices.number,
+      docType: invoices.docType,
+      clientName: invoices.clientName,
+      issuedAt: invoices.issuedAt,
+      dueDate: invoices.dueDate,
+      paidAt: invoices.paidAt,
+      cancelledAt: invoices.cancelledAt,
+      pdfUrl: invoices.pdfUrl,
+      isdocUrl: invoices.isdocUrl,
+      pdfSha256: invoices.pdfSha256,
+      isdocSha256: invoices.isdocSha256,
+      artifactsImmutable: invoices.artifactsImmutable,
+      importCompleteness: invoices.importCompleteness,
+      language: sql<
+        string | null
+      >`${invoices.payloadJson} -> 'meta' ->> 'language'`,
+      issuerName: sql<string | null>`${issuerBusinesses.snapshot} ->> 'name'`,
+    })
+    .from(invoices)
+    .innerJoin(issuerBusinesses, eq(issuerBusinesses.id, invoices.issuerId))
+    .where(issuedInvoiceWhere(workspaceIds));
+  return mapDriveIndexItems(rows, scope);
+}
+
+function mapDriveIndexItems(
+  rows: DriveIndexInvoiceRow[],
+  scope: DriveIndexScope,
+): DriveIndexItem[] {
   const workspaceTitles = disambiguateDriveTitles(
-    visible.map((workspace) => ({
+    scope.visible.map((workspace) => ({
       id: workspace.id,
       name: sanitizeDriveSegment(workspace.name),
     })),
   );
-
-  const rows = await db
-    .select({
-      invoice: invoices,
-      issuerSnapshot: issuerBusinesses.snapshot,
-    })
-    .from(invoices)
-    .innerJoin(issuerBusinesses, eq(issuerBusinesses.id, invoices.issuerId))
-    .where(
-      and(
-        inArray(invoices.workspaceId, workspaceIds),
-        isNotNull(invoices.issuedAt),
-        isNull(invoices.cancelledAt),
-      ),
-    );
-
   const issuersByWorkspace = new Map<string, { id: string; name: string }[]>();
   for (const row of rows) {
-    const issuerName = snapshotName(row.issuerSnapshot, "issuer");
-    const list = issuersByWorkspace.get(row.invoice.workspaceId) ?? [];
-    if (!list.some((issuer) => issuer.id === row.invoice.issuerId)) {
-      list.push({ id: row.invoice.issuerId, name: issuerName });
+    const list = issuersByWorkspace.get(row.workspaceId) ?? [];
+    if (!list.some((issuer) => issuer.id === row.issuerId)) {
+      list.push({
+        id: row.issuerId,
+        name: driveIssuerName(row.issuerName),
+      });
     }
-    issuersByWorkspace.set(row.invoice.workspaceId, list);
+    issuersByWorkspace.set(row.workspaceId, list);
   }
   const issuerTitles = new Map<string, string>();
   for (const [workspaceId, issuers] of issuersByWorkspace) {
@@ -418,51 +545,55 @@ export async function listDriveIndex(
   const todayIso = pragueTodayIso();
   const items: DriveIndexItem[] = [];
   for (const row of rows) {
-    const invoice = row.invoice;
-    if (!invoice.issuedAt) {
+    if (!row.issuedAt) {
       continue;
     }
     /** imports without a stored PDF cannot be rendered */
-    if (!invoice.pdfUrl && isDriveImportWithoutPdf(invoice)) {
+    if (!row.pdfUrl && isDriveImportWithoutPdf(row)) {
       continue;
     }
     const layout = applyDriveLayout({
-      template: settings.layoutTemplate,
-      issueDate: invoice.issueDate,
-      number: invoice.number ?? invoice.id,
-      language: invoiceLanguage(invoice.payloadJson),
-      docType: invoice.docType,
-      clientName: invoice.clientName,
+      template: scope.settings.layoutTemplate,
+      issueDate: row.issueDate,
+      number: row.number ?? row.id,
+      language: invoiceLanguageCode(row.language),
+      docType: row.docType,
+      clientName: row.clientName,
     });
     items.push({
-      invoiceId: invoice.id,
-      workspaceId: invoice.workspaceId,
-      issuerId: invoice.issuerId,
-      workspaceName:
-        workspaceTitles.get(invoice.workspaceId) ?? invoice.workspaceId,
+      invoiceId: row.id,
+      workspaceId: row.workspaceId,
+      issuerId: row.issuerId,
+      workspaceName: workspaceTitles.get(row.workspaceId) ?? row.workspaceId,
       issuerName:
-        issuerTitles.get(`${invoice.workspaceId}:${invoice.issuerId}`) ??
-        "issuer",
+        issuerTitles.get(`${row.workspaceId}:${row.issuerId}`) ?? "issuer",
       layoutRelPath: layout.relPath,
-      pdfSha256: invoice.pdfSha256 ?? "",
-      isdocSha256: invoice.isdocSha256 ?? "",
-      hasIsdoc: Boolean(invoice.isdocUrl),
-      includeIsdoc: settings.includeIsdoc && Boolean(invoice.isdocUrl),
-      issuedAt: invoice.issuedAt.toISOString(),
-      docType: invoice.docType,
+      pdfSha256: row.pdfSha256 ?? "",
+      isdocSha256: row.isdocSha256 ?? "",
+      hasIsdoc: Boolean(row.isdocUrl),
+      includeIsdoc: scope.settings.includeIsdoc && Boolean(row.isdocUrl),
+      issuedAt: row.issuedAt.toISOString(),
+      docType: row.docType,
       displayStatus: resolveDisplayStatus(
         {
-          issuedAt: invoice.issuedAt,
-          dueDate: invoice.dueDate,
-          paidAt: invoice.paidAt,
-          cancelledAt: invoice.cancelledAt,
-          issueDate: invoice.issueDate,
+          issuedAt: row.issuedAt,
+          dueDate: row.dueDate,
+          paidAt: row.paidAt,
+          cancelledAt: row.cancelledAt,
+          issueDate: row.issueDate,
         },
         todayIso,
       ),
     });
   }
   return items;
+}
+
+function driveIssuerName(name: string | null): string {
+  if (name && name.trim().length > 0) {
+    return sanitizeDriveSegment(name);
+  }
+  return "issuer";
 }
 
 export async function getDriveIssuedInvoice(input: {

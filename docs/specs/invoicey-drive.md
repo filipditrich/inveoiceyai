@@ -79,7 +79,7 @@ See [ADR 0042](../decisions/0042-drive-device-pairing.md).
 
 ### Sync
 
-1. Mac polls `GET /api/drive/index` every 60s, on wake, and on Sync now. APNs is out of Plan 30.
+1. The menu-bar app polls `GET /api/drive/index` every 15 minutes, on wake, and on Sync now. The File Provider reads the same cached index and does not poll on its own. The server answers `304` when the index is unchanged and selects only the columns the tree needs. 15 minutes is past Neon’s 5-minute scale-to-zero, so an idle Mac lets compute suspend. APNs is out of Plan 30.
 2. Diff against local enumerator by `invoiceId`.
 3. New / hash-changed: mark File Provider item dirty; download on open (dataless until then).
 4. Mirror folder (if set): write the same relative path under the bookmark. Skip when SHA-256 matches. After download **and** skip, set the Finder color label from `displayStatus` (paid = green, unpaid/future = orange, overdue = red). Do not put status in the filename. Do not wipe user `tagNames`. Labels are local Finder metadata; they often do not survive Proton/iCloud. Delete-from-mirror restores on next sync, same as Finder.

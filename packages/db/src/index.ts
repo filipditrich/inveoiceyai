@@ -232,6 +232,7 @@ export {
   listDriveDevicesForUser,
   listDriveIndex,
   listMemberWorkspaces,
+  readDriveIndexEtag,
   revokeDriveDevice,
   revokeDriveDeviceByTokenHash,
   touchDriveDevice,
@@ -240,6 +241,7 @@ export {
   type DriveIndexItem,
   type DriveUserSettingsRow,
 } from "./drive-repo";
+export { ifNoneMatchHits } from "./drive-index-etag";
 export {
   POCKET_PAIR_GRANT_TTL_MS,
   consumePocketPairGrant,

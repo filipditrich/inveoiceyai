@@ -28,7 +28,7 @@ Ship **Invoicey Drive**: a macOS companion that is a file librarian, not a secon
 
 The Swift app lives in a **sibling repo** (`invoicey-mac`). This Turborepo stays TypeScript. Invoicey (`apps/web`) owns pairing, the Drive HTTP API, Settings, marketing, and product docs.
 
-Distribution is a **notarized `.dmg`** from Account Settings. No Mac App Store. macOS 14+. Login item on by default. V1 sync is poll (60s + Sync now + wake); APNs is later.
+Distribution is a **notarized `.dmg`** from Account Settings. No Mac App Store. macOS 14+. Login item on by default. V1 sync is poll (15 minutes + Sync now + wake, one shared index cache, `304` when unchanged); APNs is later.
 
 ## Consequences
 
