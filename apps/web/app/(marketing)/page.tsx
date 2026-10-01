@@ -190,6 +190,15 @@ export default async function HomePage() {
       href: "/docs/integrations/invoicey-drive",
     },
   ];
+
+  if (process.env.INVOICEY_CHATGPT_LAUNCH === "1") {
+    integrations.unshift({
+      icon: MessageSquareTextIcon,
+      title: t("integrations.chatgptTitle"),
+      description: t("integrations.chatgptDescription"),
+      href: "/docs/integrations/chatgpt",
+    });
+  }
   const faq = [
     { question: t("faq.q1"), answer: t("faq.a1") },
     { question: t("faq.q2"), answer: t("faq.a2") },

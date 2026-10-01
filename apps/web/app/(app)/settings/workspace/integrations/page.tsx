@@ -1,4 +1,5 @@
 import { IntegrationsPanels } from "@/components/settings/integrations-panels";
+import { McpConnections } from "@/components/settings/mcp-connections";
 import { SettingsPageHeader } from "@/components/settings/settings-page-header";
 import { requireWorkspace } from "@/lib/auth/session";
 import { PlugZapIcon } from "lucide-react";
@@ -21,6 +22,7 @@ export default async function SettingsIntegrationsPage() {
         icon={<PlugZapIcon />}
         title={t("pageTitle")}
       />
+      <McpConnections userId={userId} workspaceId={workspaceId} />
       <IntegrationsPanels
         currentWorkspaceId={workspaceId}
         currentWorkspaceName={currentWorkspaceName}

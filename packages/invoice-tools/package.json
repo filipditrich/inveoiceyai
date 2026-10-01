@@ -11,7 +11,8 @@
     "./import": "./src/invoice-import.ts",
     "./email": "./src/send-invoice-email.ts",
     "./workspace-context": "./src/workspace-context.ts",
-    "./companion": "./src/companion-ops.ts"
+    "./companion": "./src/companion-ops.ts",
+    "./mcp-policy": "./src/mcp-policy.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
@@ -23,7 +24,7 @@
     "@invoicey/db": "workspace:*",
     "@invoicey/emails": "workspace:*",
     "@invoicey/invoice-core": "workspace:*",
-    "@modelcontextprotocol/sdk": "1.26.0",
+    "@modelcontextprotocol/sdk": "1.31.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "drizzle-orm": "^0.44.3",

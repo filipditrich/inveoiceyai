@@ -190,7 +190,7 @@ const nextConfig: NextConfig = {
     "@invoicey/invoice-tools",
   ],
   outputFileTracingIncludes: {
-    "/api/**": invoiceCoreAssets,
+    "/api/**": [...invoiceCoreAssets, "./public/mcp/invoicey.html"],
     "/invoices/**": invoiceCoreAssets,
     "/eve/**": invoiceCoreAssets,
     /** Eve durable tools run here — was missing; caused missing Inter.ttf on create_invoice */

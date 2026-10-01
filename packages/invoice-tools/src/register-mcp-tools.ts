@@ -6,10 +6,12 @@ import {
   tryCreateDbFromEnv,
 } from "@invoicey/db";
 
+import { runCompanionOp } from "./companion-ops";
 import {
   createAndRenderInvoice,
   lookupBusiness,
   searchBusiness,
+  updateDraftInvoice,
 } from "./handlers";
 import {
   getInvoice,
@@ -18,7 +20,9 @@ import {
   markInvoicePaidById,
   resolveDefaultIssuer,
 } from "./invoice-ops";
+import { McpDraftSchema, McpDraftPatchSchema } from "./mcp-draft-schema";
 import { jsonToolResult } from "./mcp-json-result";
+import { mcpToolPolicy } from "./mcp-policy";
 import {
   deletePreset,
   getPreset,
@@ -29,26 +33,26 @@ import {
 import { sendInvoiceEmailById } from "./send-invoice-email";
 import { resolveWorkspaceId } from "./workspace-context";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type {
+  CallToolRequest,
+  CallToolResult,
+  Tool,
+} from "@modelcontextprotocol/sdk/types.js";
 
 const presetKindSchema = z.enum(["issuer", "invoice_template"]);
 const jsonObjectSchema = z.record(z.string(), z.any());
 
-type ToolResult = {
-  content: Array<{ type: "text"; text: string }>;
-  isError?: boolean;
-};
-
-/** Narrowed registrar — full McpServer.tool() generics blow TS instantiation depth. */
-type ToolRegistrar = {
-  tool: (
-    name: string,
-    description: string,
-    schema: Record<string, z.ZodTypeAny>,
-    handler: (args: Record<string, unknown>) => Promise<ToolResult>,
-  ) => unknown;
-};
+type ToolResult = ReturnType<typeof jsonToolResult> &
+  Pick<CallToolResult, "_meta">;
+type ToolArguments = NonNullable<CallToolRequest["params"]["arguments"]>;
+type ToolMetadata = NonNullable<Tool["_meta"]>;
 
 export type RegisterInvoiceyMcpToolsOptions = {
+  resultMeta?: ToolMetadata;
+  authErrorMeta?: (error: string) => ToolMetadata;
+  authorize?: (toolName: string) => Promise<string | null>;
+  toolMeta?: (toolName: string) => ToolMetadata;
+
   /** Fired after each tool completes (success or error). Used for MCP activity metering. */
   onToolCall?: (info: {
     toolName: string;
@@ -58,6 +62,7 @@ export type RegisterInvoiceyMcpToolsOptions = {
 
 const WRITE_TOOLS = new Set([
   "create_invoice",
+  "update_invoice_draft",
   "mark_invoice_paid",
   "issue_invoice",
   "send_invoice_email",
@@ -88,14 +93,58 @@ export function registerInvoiceyMcpTools(
   server: McpServer,
   options?: RegisterInvoiceyMcpToolsOptions,
 ): void {
-  const s = server as unknown as ToolRegistrar;
+  const s = {
+    tool(
+      name: string,
+      description: string,
+      schema: Record<string, z.ZodTypeAny>,
+      handler: (args: ToolArguments) => Promise<ToolResult>,
+    ) {
+      const policy = mcpToolPolicy(name);
+      // SAFETY: registerTool accepts these Zod schemas and CallToolResult-compatible handlers; narrowing avoids recursive Zod 3/4 inference.
+      const register = server.registerTool.bind(server) as (
+        name: string,
+        config: {
+          title: string;
+          description: string;
+          inputSchema: Record<string, z.ZodTypeAny>;
+          annotations: ReturnType<typeof mcpToolPolicy>["annotations"];
+          _meta: ToolMetadata;
+        },
+        handler: (args: ToolArguments) => Promise<ToolResult>,
+      ) => ReturnType<McpServer["registerTool"]>;
+      register(
+        name,
+        {
+          title: name
+            .split("_")
+            .map((word) => word[0].toUpperCase() + word.slice(1))
+            .join(" "),
+          description,
+          inputSchema: schema,
+          annotations: policy.annotations,
+          _meta: {
+            securitySchemes: [{ type: "oauth2", scopes: [policy.scope] }],
+            ...options?.toolMeta?.(name),
+          },
+        },
+        handler,
+      );
+    },
+  };
   const onToolCall = options?.onToolCall;
 
   const wrap = (
     toolName: string,
-    handler: (args: Record<string, unknown>) => Promise<ToolResult>,
+    handler: (args: ToolArguments) => Promise<ToolResult>,
   ) => {
-    return async (args: Record<string, unknown>): Promise<ToolResult> => {
+    return async (args: ToolArguments): Promise<ToolResult> => {
+      const denied = await options?.authorize?.(toolName);
+      if (denied)
+        return {
+          ...jsonToolResult({ ok: false, error: denied }, true),
+          _meta: options?.authErrorMeta?.(denied),
+        };
       const frozen = await rejectFrozenWrite(toolName);
       const result = frozen ?? (await handler(args));
       if (onToolCall) {
@@ -108,16 +157,21 @@ export function registerInvoiceyMcpTools(
           /** metering must not break tools */
         }
       }
-      return result;
+      return { ...result, _meta: options?.resultMeta };
     };
   };
 
   s.tool(
     "lookup_business",
     "Look up a Czech economic subject by IČO (8 digits) via ARES. Returns draft client fields (no `id`). Prefer this once IČO is known.",
-    { ico: z.string().describe("Eight-digit IČO") },
+    {
+      ico: z
+        .string()
+        .regex(/^\d{8}$/)
+        .describe("Eight-digit IČO"),
+    },
     wrap("lookup_business", async (args) => {
-      const ico = String(args.ico ?? "");
+      const ico = z.string().parse(args.ico);
       const r = await lookupBusiness(ico);
       return jsonToolResult(r, !r.ok);
     }),
@@ -137,7 +191,7 @@ export function registerInvoiceyMcpTools(
         .describe("Max matches (default 5)"),
     },
     wrap("search_business", async (args) => {
-      const query = String(args.query ?? "");
+      const query = z.string().parse(args.query);
       const limit =
         typeof args.limit === "number" && Number.isFinite(args.limit)
           ? args.limit
@@ -151,11 +205,9 @@ export function registerInvoiceyMcpTools(
     "create_invoice",
     "Assemble a draft invoice, validate against InvoiceSchema, and render PDF + ISDOC. Issuer is locked to the workspace default (do not pass issuer or preset ids).",
     {
-      draft: jsonObjectSchema
-        .optional()
-        .describe(
-          'Partial invoice draft (issuer ignored — locked server-side). Required: meta, client, payment, items. Optional meta.language: `cs` | `en` (PDF/ISDOC labels; omitted → cs). VAT: prefer top-level `vat: { mode, suppliesAbroad }` OR high-level `vatPreset` (`neplatce`|`regular`|`reverse_charge`|`oss`). oss invents `{ mode: "oss", suppliesAbroad: "eu" }` when `vat` is missing; other presets invent suppliesAbroad `"none"`. Line amounts are stored exclusive: `unitPriceWithoutVat` + line `vatRate`. Set `pricesIncludeVat: true` if spoken/unit prices include VAT — normalizer converts to exclusive using line vatRate (0 for reverse_charge / neplátce). Do not invent legalNote or localReverseChargeCode; reverse_charge fails without localReverseChargeCode. Domestic default: vat `{ mode: "regular", suppliesAbroad: "none" }` with vatRate 21 (or 0 if issuer is non–VAT-payer).',
-        ),
+      draft: McpDraftSchema.describe(
+        "Invoice facts explicitly provided or confirmed by the user. Ask for missing fields. Seller and bank account come from the connected workspace; invoice number is assigned on issue.",
+      ),
     },
     wrap("create_invoice", async (args) => {
       const issuer = await resolveDefaultIssuer();
@@ -173,8 +225,51 @@ export function registerInvoiceyMcpTools(
         draft: args.draft,
         issuer,
       });
+      if (!r.ok) return jsonToolResult(r, true);
+      return jsonToolResult({
+        ok: true,
+        invoice: r.invoice,
+        invoiceId: r.invoiceId,
+        assumptions: r.assumptions,
+      });
+    }),
+  );
+
+  s.tool(
+    "get_workspace",
+    "Get the connected workspace's default issuer and bank details before drafting. Ask the user to confirm missing invoice facts; never invent identifiers.",
+    {},
+    wrap("get_workspace", async () => {
+      return jsonToolResult({
+        ok: true,
+        workspaceId: resolveWorkspaceId(),
+        issuer: await resolveDefaultIssuer(),
+      });
+    }),
+  );
+
+  s.tool(
+    "update_invoice_draft",
+    "Update a saved draft and recalculate totals. Read get_invoice first; supply only confirmed changed fields. The seller stays locked. Issued invoices cannot be edited.",
+    {
+      id: z.string().uuid(),
+      patch: McpDraftPatchSchema,
+    },
+    wrap("update_invoice_draft", async (args) => {
+      const r = await updateDraftInvoice({
+        id: z.string().parse(args.id),
+        patch: McpDraftPatchSchema.parse(args.patch),
+      });
       return jsonToolResult(r, !r.ok);
     }),
+  );
+  s.tool(
+    "list_clients",
+    "List saved clients in this workspace before choosing an invoice recipient. Returns up to 200 client summaries; use ARES lookup for complete Czech business details.",
+    {},
+    wrap("list_clients", async () =>
+      jsonToolResult(await runCompanionOp({ op: "clients.list" })),
+    ),
   );
 
   s.tool(
@@ -188,6 +283,12 @@ export function registerInvoiceyMcpTools(
         .max(100)
         .optional()
         .describe("Max rows (default 25)"),
+      query: z
+        .string()
+        .max(200)
+        .optional()
+        .describe("Invoice number or client name"),
+      offset: z.number().int().min(0).max(100000).optional(),
       unpaidOnly: z
         .boolean()
         .optional()
@@ -199,10 +300,20 @@ export function registerInvoiceyMcpTools(
           typeof args.limit === "number" && Number.isFinite(args.limit)
             ? args.limit
             : undefined;
-        const unpaidOnly =
-          typeof args.unpaidOnly === "boolean" ? args.unpaidOnly : undefined;
-        const rows = await listInvoices({ limit, unpaidOnly });
-        return jsonToolResult({ ok: true as const, invoices: rows });
+        const unpaidOnly = z.boolean().optional().parse(args.unpaidOnly);
+        const offset = z.number().default(0).parse(args.offset);
+        const pageSize = limit ?? 25;
+        const rows = await listInvoices({
+          limit: pageSize + 1,
+          unpaidOnly,
+          offset,
+          query: z.string().optional().parse(args.query),
+        });
+        return jsonToolResult({
+          ok: true as const,
+          invoices: rows.slice(0, pageSize),
+          nextOffset: rows.length > pageSize ? offset + pageSize : null,
+        });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         return jsonToolResult({ ok: false as const, error: message }, true);
@@ -216,7 +327,7 @@ export function registerInvoiceyMcpTools(
     { id: z.string().uuid().describe("Invoice row id") },
     wrap("get_invoice", async (args) => {
       try {
-        const r = await getInvoice({ id: String(args.id ?? "") });
+        const r = await getInvoice({ id: z.string().parse(args.id) });
         return jsonToolResult(r, !r.ok);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -231,7 +342,7 @@ export function registerInvoiceyMcpTools(
     { id: z.string().uuid().describe("Invoice row id") },
     wrap("mark_invoice_paid", async (args) => {
       try {
-        const r = await markInvoicePaidById({ id: String(args.id ?? "") });
+        const r = await markInvoicePaidById({ id: z.string().parse(args.id) });
         return jsonToolResult(r, !r.ok);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -246,7 +357,7 @@ export function registerInvoiceyMcpTools(
     { id: z.string().uuid().describe("Draft invoice id") },
     wrap("issue_invoice", async (args) => {
       try {
-        const r = await issueInvoiceById({ id: String(args.id ?? "") });
+        const r = await issueInvoiceById({ id: z.string().parse(args.id) });
         return jsonToolResult(r, !r.ok);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -279,7 +390,7 @@ export function registerInvoiceyMcpTools(
     wrap("send_invoice_email", async (args) => {
       try {
         const r = await sendInvoiceEmailById({
-          id: String(args.id ?? ""),
+          id: z.string().parse(args.id),
           to: typeof args.to === "string" ? args.to : undefined,
           cc: Array.isArray(args.cc)
             ? args.cc.filter((x): x is string => typeof x === "string")
@@ -302,7 +413,7 @@ export function registerInvoiceyMcpTools(
 
   s.tool(
     "list_presets",
-    "List locally saved issuer and invoice_template presets.",
+    "List saved issuer and invoice template presets in the connected workspace.",
     {
       kind: presetKindSchema
         .optional()
@@ -323,14 +434,14 @@ export function registerInvoiceyMcpTools(
     "Get one preset by id.",
     { id: z.string().uuid() },
     wrap("get_preset", async (args) => {
-      const r = await getPreset({ id: String(args.id ?? "") });
+      const r = await getPreset({ id: z.string().parse(args.id) });
       return jsonToolResult(r, !r.ok);
     }),
   );
 
   s.tool(
     "save_preset",
-    "Create or update a local preset (issuer snapshot or invoice_template draft).",
+    "Create or update a workspace preset (issuer snapshot or invoice_template draft).",
     {
       id: z.string().uuid().optional().describe("Omit to create a new preset"),
       kind: presetKindSchema,
@@ -344,7 +455,7 @@ export function registerInvoiceyMcpTools(
       const r = await savePreset({
         id: typeof args.id === "string" ? args.id : undefined,
         kind,
-        name: String(args.name ?? ""),
+        name: z.string().parse(args.name),
         data: args.data,
       });
       return jsonToolResult(r, !r.ok);
@@ -353,10 +464,10 @@ export function registerInvoiceyMcpTools(
 
   s.tool(
     "delete_preset",
-    "Delete a local preset by id.",
+    "Delete a workspace preset by id.",
     { id: z.string().uuid() },
     wrap("delete_preset", async (args) => {
-      const r = await deletePreset({ id: String(args.id ?? "") });
+      const r = await deletePreset({ id: z.string().parse(args.id) });
       return jsonToolResult(r, !r.ok);
     }),
   );

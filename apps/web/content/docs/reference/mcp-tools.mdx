@@ -5,9 +5,9 @@ icon: Wrench
 ---
 
 Setup: [MCP](/docs/integrations/mcp) · [Cursor](/docs/integrations/cursor) ·
-[Claude Code](/docs/integrations/claude-code).
+[Claude Code](/docs/integrations/claude-code) · [ChatGPT](/docs/integrations/chatgpt).
 
-Every tool returns a JSON result with an `ok` boolean. Failures carry a message rather than throwing.
+Business tools return JSON in `structuredContent` and text. Domain failures set `isError`; invalid inputs are rejected by the MCP SDK. Read/write OAuth scopes and current workspace permissions gate every tool.
 
 ---
 
@@ -45,20 +45,20 @@ with `lookup_business` on the chosen IČO.
 ## create_invoice
 
 Assemble a draft, validate it against the schema, and render the PDF and ISDOC. Returns the validated
-invoice, base64 PDF and ISDOC XML — or the list of validation issues.
+invoice, saved invoice ID and assumptions — or validation issues. Binary artifacts are kept out of model context; use `get_invoice` for stored PDF/ISDOC links.
 
 <TypeTable
   type={{
     draft: {
       type: "object",
       description:
-        "Partial invoice: meta, client, vat, payment, items. Issuer is ignored.",
+        "Required confirmed meta, client, payment and items; optional VAT settings and notes. Issuer is rejected.",
     },
   }}
 />
 
 <Callout type="warn" title="The issuer is locked server-side">
-  Any `issuer` inside `draft` is **ignored**. The issuer is the workspace
+  An `issuer` inside `draft` is **rejected**. The issuer is the workspace
   default (`is_default`). If the workspace has no issuer, the tool fails — a
   demo issuer is never written to Neon. A model cannot put a bank account or IČO
   on your invoice.
@@ -71,6 +71,25 @@ Nothing is silently defaulted. Omitting `duzp` is an error, not an invoice dated
 
 ---
 
+## get_workspace
+
+Returns the connected workspace ID and default issuer. Read this before drafting.
+
+## list_clients
+
+Returns up to 200 saved client summaries from the connected workspace.
+
+## update_invoice_draft
+
+Takes `id` (saved draft UUID) and `patch` (confirmed changed fields). Read the invoice first.
+Nested meta/client/payment fields merge; an items array replaces the entire line-item list.
+The issuer remains locked and issued invoices cannot be edited.
+
+## open_invoicey
+
+Remote hosts can open the interactive invoice workspace with an optional `query` string.
+Supporting hosts also expose navigation and composer invoice mentions.
+
 ## list_invoices
 
 Workspace invoices as summaries, each with both the domain `status` and the UI `displayStatus`.
@@ -78,6 +97,15 @@ Workspace invoices as summaries, each with both the domain `status` and the UI `
 <TypeTable
   type={{
     limit: { type: "number", description: "1–100. Default 25" },
+    query: {
+      type: "string",
+      description: "Client name or invoice number; up to 200 characters",
+    },
+    offset: {
+      type: "number",
+      description:
+        "Start position; pass the returned nextOffset for the following page",
+    },
     unpaidOnly: {
       type: "boolean",
       description: "Only open issued invoices — unpaid, overdue or future",
@@ -87,7 +115,7 @@ Workspace invoices as summaries, each with both the domain `status` and the UI `
 
 ## get_invoice
 
-One invoice: summary with status, plus the validated payload when present.
+One invoice: summary with status, validated payload when present, and stored PDF/ISDOC URLs.
 
 <TypeTable
   type={{
@@ -197,11 +225,11 @@ VAT flag, contact email. For `kind: "invoice_template"`, any partial draft: `met
 ## Storage
 
 Presets are stored in your Invoicey workspace database and available to every MCP session that uses
-your personal API key.
+the same connected workspace.
 
 ## Not available over MCP
 
-- Creating issuers or clients — web UI only; MCP consumes them via presets
+- Dedicated issuer/client administration — use the web UI; draft creation can save its validated recipient
 - [Historical import](/docs/guides/importing-history) — web only, by design
 - Unmarking an invoice as paid
 - Cancelling an invoice

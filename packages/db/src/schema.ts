@@ -1051,3 +1051,5 @@ export const emailSuppressions = pgTable(
     ),
   ],
 );
+
+export * from "./mcp-oauth-schema";

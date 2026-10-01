@@ -1,4 +1,14 @@
-import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  isNull,
+  or,
+  sql,
+} from "drizzle-orm";
 
 import {
   WorkspaceFrozenError,
@@ -175,12 +185,23 @@ export async function listInvoices(options?: {
   workspaceId?: string;
   limit?: number;
   unpaidOnly?: boolean;
+  query?: string;
+  offset?: number;
 }): Promise<InvoiceSummary[]> {
   const database = requireDb();
   const workspaceId = resolveWorkspaceId(options?.workspaceId);
   const limit = options?.limit ?? 25;
 
   const conditions = [eq(invoices.workspaceId, workspaceId)];
+  const query = options?.query?.trim();
+  if (query) {
+    const pattern = `%${query.replace(/[\\%_]/g, "\\$&")}%`;
+    const matches = or(
+      ilike(invoices.number, pattern),
+      ilike(invoices.clientName, pattern),
+    );
+    if (matches) conditions.push(matches);
+  }
   if (options?.unpaidOnly) {
     conditions.push(sql`${invoices.issuedAt} is not null`);
     conditions.push(isNull(invoices.paidAt));
@@ -191,7 +212,8 @@ export async function listInvoices(options?: {
     .select()
     .from(invoices)
     .where(and(...conditions))
-    .orderBy(desc(invoices.updatedAt))
+    .orderBy(desc(invoices.updatedAt), desc(invoices.id))
+    .offset(options?.offset ?? 0)
     .limit(limit);
 
   return rows.map(rowToSummary);
@@ -201,7 +223,13 @@ export async function getInvoice(options: {
   id: string;
   workspaceId?: string;
 }): Promise<
-  | { ok: true; summary: InvoiceSummary; invoice: Invoice | null }
+  | {
+      ok: true;
+      summary: InvoiceSummary;
+      invoice: Invoice | null;
+      pdfUrl: string | null;
+      isdocUrl: string | null;
+    }
   | { ok: false; error: string }
 > {
   const database = requireDb();
@@ -222,6 +250,8 @@ export async function getInvoice(options: {
     ok: true,
     summary: rowToSummary(row),
     invoice: parsed.success ? parsed.data : null,
+    pdfUrl: row.pdfUrl,
+    isdocUrl: row.isdocUrl,
   };
 }
 

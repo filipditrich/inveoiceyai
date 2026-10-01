@@ -270,3 +270,5 @@ export {
   type NotificationEventInput,
 } from "./notifications-repo";
 export type { NotificationEventPayload } from "./notification-schema";
+
+export * from "./mcp-oauth-schema";

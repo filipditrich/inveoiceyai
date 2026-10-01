@@ -50,3 +50,6 @@ scripts/.cutover-invoicey-app.state
 
 # Local git worktrees
 .worktrees/
+
+# Generated MCP app bundle
+apps/web/public/mcp/

@@ -4,6 +4,7 @@
   "pages": [
     "api-keys",
     "mcp",
+    "chatgpt",
     "cli",
     "cursor",
     "claude-code",

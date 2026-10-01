@@ -1,15 +1,20 @@
 import "server-only";
 import { sendWorkspaceInviteEmail } from "@/lib/email/invite";
+import { MCP_ISSUER, MCP_RESOURCE } from "@/lib/mcp/config";
+import { requireMcpWorkspace } from "@/lib/mcp/membership";
+import { mcpOAuthOptions } from "@/lib/mcp/oauth-options";
 import { apiKey } from "@better-auth/api-key";
+import { oauthProvider } from "@better-auth/oauth-provider";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
-import { mcp, organization } from "better-auth/plugins";
+import { jwt, organization } from "better-auth/plugins";
 
-import { authSchema } from "@invoicey/db";
+import { mcpAuthSchema } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import { env } from "@invoicey/env/server";
+import { getInvoiceyRequestContext } from "@invoicey/invoice-tools/workspace-context";
 
 import {
   deviceCookieOptions,
@@ -77,6 +82,7 @@ const socialProviders = {
  */
 export const auth = betterAuth({
   appName: "Invoicey",
+  disabledPaths: ["/token"],
   baseURL,
   secret: env.BETTER_AUTH_SECRET,
   /** dual-serve during the invoicey.app cutover (ADR 0045) */
@@ -85,7 +91,7 @@ export const auth = betterAuth({
     "https://www.invoicey.app",
     "https://invoicey.ditrich.me",
   ],
-  database: drizzleAdapter(db, { provider: "pg", schema: authSchema }),
+  database: drizzleAdapter(db, { provider: "pg", schema: mcpAuthSchema }),
 
   // OAuth only — no email+password (ADR 0018).
   emailAndPassword: { enabled: false },
@@ -273,7 +279,14 @@ export const auth = betterAuth({
         }
       },
     }),
-    mcp({ loginPage: "/sign-in" }),
+    jwt({ jwt: { issuer: MCP_ISSUER, audience: MCP_RESOURCE } }),
+    oauthProvider(
+      mcpOAuthOptions(
+        baseURL.replace(/\/$/, ""),
+        requireMcpWorkspace,
+        () => getInvoiceyRequestContext()?.workspaceId,
+      ),
+    ),
     apiKey(),
     // Must stay last: it writes any Set-Cookie the request produced.
     nextCookies(),

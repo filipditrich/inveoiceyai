@@ -13,7 +13,9 @@ MCP tools call the same handlers and validate against the same
 
 ## Connect
 
-Streamable HTTP at `https://invoicey.app/api/mcp`. Create a personal key under
+Streamable HTTP at `https://invoicey.app/api/mcp`. OAuth-capable clients can discover the authorization server from the endpoint, sign in and approve a specific workspace. See [ChatGPT setup](/docs/integrations/chatgpt) for interactive invoice views.
+
+For personal-key clients, create a key under
 **Settings → API keys** — see [API keys](/docs/integrations/api-keys).
 
 ```json
@@ -41,6 +43,10 @@ Client-specific setup: [Cursor](/docs/integrations/cursor) ·
 | --------------------------------------------------------------- | -------------------------------------------- |
 | `lookup_business`                                               | ARES lookup by IČO                           |
 | `search_business`                                               | ARES search by company name                  |
+| `get_workspace`                                                 | Connected workspace and default issuer       |
+| `list_clients`                                                  | Saved client summaries                       |
+| `update_invoice_draft`                                          | Correct a saved draft                        |
+| `issue_invoice`                                                 | Issue a reviewed draft                       |
 | `create_invoice`                                                | Build, validate and render an invoice        |
 | `list_invoices`                                                 | Summaries, with `status` and `displayStatus` |
 | `get_invoice`                                                   | One invoice with its full payload            |
@@ -55,7 +61,7 @@ Full input and output shapes: [MCP tool reference](/docs/reference/mcp-tools).
 Presets are what make this safe enough to use.
 
 **Issuer presets** hold a complete issuer — name, IČO, DIČ, address, bank account, VAT status.
-`create_invoice` takes a preset _ID_ and injects the issuer server-side. The model never supplies the
+`create_invoice` injects the workspace default issuer server-side and does not accept issuer or preset IDs. The model never supplies the
 "from" party, so it cannot hallucinate your bank account onto an invoice.
 
 **Invoice template presets** hold a partial draft — standard line items, VAT settings, payment
@@ -72,15 +78,14 @@ Save presets from the assistant once, then refer to them by name or ID.
 
 ## Try a complete request
 
-> Look up NFCtron by IČO. Using my "s.r.o." issuer preset, invoice them 40 hours of consulting at
+> Look up NFCtron by IČO. Using my workspace default issuer, invoice them 40 hours of consulting at
 > 1 800 CZK, due in 14 days. Return the draft for review; do not issue it yet.
 
 ## Limitations
 
 - **One workspace per key.** A personal key binds to your **default** workspace; there is no
   per-call override. Change the default via the sidebar switcher or **Settings → API keys**.
-- **No scopes.** A key is full access to that workspace, including sending email.
+- **OAuth scopes and roles.** OAuth grants distinguish read and write access. Both OAuth and personal keys enforce current membership, role and plan permissions.
 - **No import tool.** [Historical import](/docs/guides/importing-history) is web-only by design.
 - **No `unmark_invoice_paid`.** Web only.
-- **MCP does not create issuers or clients.** Those are managed in the web UI; MCP consumes them
-  through presets.
+- **MCP does not create issuers or clients.** Those are managed in the web UI; MCP can list saved clients and consumes issuer details through the workspace default and presets.

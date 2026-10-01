@@ -16,12 +16,12 @@
 import "@invoicey/env/load";
 import { getAuthTables } from "better-auth/db";
 
-import { authSchema } from "@invoicey/db";
+import { mcpAuthSchema } from "@invoicey/db";
 
 import { auth } from "../lib/auth/auth";
 
 const tables = getAuthTables(auth.options);
-const schema: Record<string, unknown> = authSchema;
+const schema: Record<string, unknown> = mcpAuthSchema;
 let bad = 0;
 
 for (const [model, def] of Object.entries(tables)) {

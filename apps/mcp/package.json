@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@invoicey/invoice-tools": "workspace:*",
-    "@modelcontextprotocol/sdk": "1.26.0",
+    "@modelcontextprotocol/sdk": "1.31.0",
     "zod": "^3.24.4"
   },
   "devDependencies": {
