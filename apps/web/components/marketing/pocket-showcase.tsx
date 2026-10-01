@@ -130,7 +130,7 @@ export async function PocketShowcase() {
               </p>
             </div>
           </div>
-          <figcaption className="relative mt-7 text-center text-xs text-zinc-500">
+          <figcaption className="relative mt-7 text-center text-xs text-zinc-400">
             {t("preview")}
           </figcaption>
         </figure>
