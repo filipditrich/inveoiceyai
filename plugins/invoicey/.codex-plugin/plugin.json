@@ -1,0 +1,29 @@
+{
+  "interface": {
+    "displayName": "Invoicey",
+    "shortDescription": "Invoices in your conversation",
+    "longDescription": "Turn confirmed work details into a reviewed invoice. Search workspace invoices, review line items and totals in native controls, then confirm issuing, sending or recording payment. Uses your saved issuer, Czech business lookup, PDF and ISDOC. OAuth access follows your workspace permissions.",
+    "developerName": "Invoicey",
+    "category": "Productivity",
+    "capabilities": ["Interactive"],
+    "defaultPrompt": [
+      "Show my unpaid invoices.",
+      "Help me draft an invoice and review it before issuing.",
+      "Open my Invoicey workspace."
+    ],
+    "logo": "./assets/logo.png",
+    "composerIcon": "./assets/mark.svg",
+    "websiteURL": "https://invoicey.app/docs/integrations/chatgpt"
+  },
+  "name": "invoicey",
+  "version": "1.0.1",
+  "description": "Invoice automation in your connected Invoicey workspace: search, draft, review, issue and send invoices.",
+  "author": {
+    "name": "Invoicey",
+    "url": "https://invoicey.app"
+  },
+  "keywords": [],
+  "homepage": "https://invoicey.app/docs/integrations/chatgpt",
+  "skills": "./skills",
+  "mcpServers": "./.mcp.json"
+}

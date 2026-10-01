@@ -3,7 +3,7 @@
 ## Verified locally
 
 - Turbo typecheck: 10 packages passed.
-- Turbo tests: 854 tests across nine packages passed, including real Better Auth OAuth code/PKCE exchange, signed consent tampering, code replay, denied consent, workspace-bound refresh and removed membership.
+- Turbo tests: 855 tests across nine packages passed, including real Better Auth OAuth code/PKCE exchange, signed consent tampering, code replay, denied consent, workspace-bound refresh and removed membership.
 - Full lint: exit 0; existing repository warnings remain. New OAuth, UI and test-host files pass the focused lint check.
 - Next production build: passed, including the generated MCP App bundle and discovery routes.
 - Official MCP SDK in-memory transport: denied requests stop before database access; invalid company IDs fail validation; side-effect annotations are exposed to the client.
@@ -13,9 +13,17 @@
 
 Screenshots: `screenshots/chatgpt-workspace-desktop.png` and `screenshots/chatgpt-invoice-mobile-dark.png`. These show the official test host, not a connected ChatGPT account.
 
+## Production release
+
+Deployment `dpl_2EsTrftChhEsFjtEVfhPZZKcZxDc` reached READY and was aliased to `https://invoicey.app`.
+The OAuth migration ran inside Vercel with its existing credentials. A cached dependency graph caused the first build to fail;
+a clean-cache deployment passed without weakening TypeScript checks. The existing production app remained live during the failed build.
+Production discovery returns issuer `https://invoicey.app/api/auth`, S256, code/refresh grants and the intended scopes.
+Unauthenticated MCP POST returns 401 with the resource-metadata challenge. The setup guide is published.
+Private plugin version 1.0.1 is saved; source read-back verified the setup URL and preserved skills/server configuration.
+
 ## Release acceptance still required
 
-- Vercel migration/deployment READY and production discovery checks.
 - User-approved OAuth connection of the saved private plugin.
 - Real ChatGPT invoice discovery, resource mentions and native rendering.
 - Enable the homepage launch card only after that host acceptance.

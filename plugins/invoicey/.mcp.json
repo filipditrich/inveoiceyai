@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "invoicey": {
+      "type": "streamable-http",
+      "url": "https://invoicey.app/api/mcp",
+      "headers": {}
+    }
+  }
+}

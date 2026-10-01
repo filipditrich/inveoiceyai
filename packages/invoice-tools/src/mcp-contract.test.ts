@@ -58,9 +58,21 @@ describe("MCP wire contract", () => {
     expect(
       tools.find((tool) => tool.name === "list_invoices")?.annotations,
     ).toMatchObject({ readOnlyHint: true, destructiveHint: false });
-    expect(
-      tools.find((tool) => tool.name === "create_invoice")?.inputSchema
-        .properties?.draft,
-    ).toHaveProperty("properties.client");
+  });
+  it("rejects incomplete draft facts at the wire boundary before resolving the issuer", async () => {
+    const client = await connect();
+    const result = await client.callTool({
+      name: "create_invoice",
+      arguments: { draft: { meta: {}, items: [] } },
+    });
+    expect(result.isError).toBe(true);
+    expect(result.content).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: "text",
+          text: expect.stringContaining("Input validation error"),
+        }),
+      ]),
+    );
   });
 });

@@ -10,9 +10,9 @@ ChatGPT gets a native-styled invoice workspace, inline invoice review, navigatio
 
 ## Phases and acceptance
 
-- [ ] MCP: typed inputs, structured outputs, annotations, permissions, paging, resources, prompts and protocol tests.
+- [x] MCP: typed inputs, structured outputs, annotations, permissions, paging, resources, prompts and protocol tests.
 - [ ] Authorization: OAuth discovery, consent, workspace binding, renewal, revocation and cross-tenant denial tests.
-- [ ] ChatGPT: extension registration, bundled native UI, loading/error/empty states, invoice actions, accessibility and responsive browser checks.
+- [x] ChatGPT (official host harness): extension registration, bundled native UI, loading/error/empty states, invoice actions, accessibility and responsive browser checks.
 - [ ] Distribution: validated portable plugin package, private connection, host rendering and real tool verification.
 - [ ] Web: Czech/English feature presentation and accurate setup/revocation guide after integration validation.
 - [ ] Release: typecheck, lint, tests, build, diff review, deployment readiness and production smoke checks.
@@ -37,7 +37,7 @@ flowchart LR
 ## Private plugin
 
 Private package: `plugins/invoicey`. Created plugin ID: `plugins_6abe92279bfc8191aaff5cd11904f96e`.
-Release: `pluginrel_6abe9228d1b081919714e73ab0c6bd75`.
+Release: `pluginrel_6abe9765f4e88191887df2c9108f09c0`.
 [Open Invoicey plugin](https://chatgpt.com/plugins/plugins_6abe92279bfc8191aaff5cd11904f96e).
 Saving the package is verified; connecting it and rendering inside the actual host remains a separate acceptance step.
 
