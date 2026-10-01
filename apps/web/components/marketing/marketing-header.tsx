@@ -41,6 +41,8 @@ export async function MarketingHeader() {
     label: tDownload("label"),
     mac: tDownload("mac"),
     macHint: tDownload("macHint"),
+    pocket: tDownload("pocket"),
+    pocketHint: tDownload("pocketHint"),
     requirements: tDownload("requirements"),
     trigger: tDownload("trigger"),
   };

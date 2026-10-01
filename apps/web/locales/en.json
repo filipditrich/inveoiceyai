@@ -289,7 +289,7 @@
       "openMenu": "Open menu",
       "skipToContent": "Skip to content",
       "ariaLabel": "Main navigation",
-      "apps": "Mac & CLI",
+      "apps": "iPhone, Mac & CLI",
       "pricing": "Pricing",
       "comparison": "Compare",
       "menuTitle": "Menu",
@@ -303,7 +303,9 @@
       "macHint": "Mirror issued PDFs into Finder",
       "cli": "Invoicey CLI",
       "cliHint": "Invoices from your terminal",
-      "requirements": "macOS 14 Sonoma or later, Apple silicon. The CLI runs anywhere with bash."
+      "requirements": "macOS 14 Sonoma or later, Apple silicon. The CLI runs anywhere with bash.",
+      "pocket": "Invoicey Pocket for iPhone",
+      "pocketHint": "Receive payments · TestFlight coming soon"
     },
     "footer": {
       "description": "Invoices as structured data. Create them in the web, via JSON, or with AI — and always get the same validated output.",
@@ -328,8 +330,8 @@
       "betaAccess": "Beta access",
       "bankMatching": "Bank matching",
       "badgeTag": "Beta",
-      "badgeTitle": "The Mac app and CLI are here",
-      "badgeAction": "Get them",
+      "badgeTitle": "Meet Invoicey Pocket for iPhone",
+      "badgeAction": "Explore the apps",
       "backedBy": "Backed by"
     },
     "generatorTeaser": {
@@ -706,7 +708,7 @@
       "accountingNote2": "Full agenda",
       "accountingNote3": "",
       "mobileAppLabel": "Mobile app",
-      "mobileAppNote0": "No extra app",
+      "mobileAppNote0": "Pocket for iPhone · coming soon",
       "mobileAppNote1": "iOS and Android",
       "mobileAppNote2": "iOS and Android",
       "mobileAppNote3": ""
@@ -756,7 +758,7 @@
     "companions": {
       "eyebrow": "Native companions",
       "title": "Invoicey beyond the browser.",
-      "description": "Keep issued documents in Finder or operate a workspace from the terminal. Both companions use the same identity, access boundaries, and Invoicey data.",
+      "description": "Receive payments on iPhone, keep issued documents in Finder, or work from the terminal. All connected to your Invoicey workspace.",
       "macLabel": "Invoicey for Mac",
       "macTitle": "Your issued invoices, where files belong.",
       "macDescription": "Invoicey Drive mirrors issued PDFs into Finder, iCloud Drive, or Proton Drive. Pair once from the menu bar; creation and payment decisions stay in the web app.",
@@ -770,6 +772,30 @@
       "cliDocs": "Open the CLI quickstart",
       "macRequirements": "macOS 14 Sonoma or later, Apple silicon. Free during beta; pairing needs an Invoicey account.",
       "cliRequirements": "macOS and Linux, any POSIX shell. Authenticates with a workspace API key."
+    },
+    "pocket": {
+      "name": "Invoicey Pocket",
+      "platform": "iOS 17+",
+      "title": "Receive money.",
+      "titleAccent": "From your pocket.",
+      "description": "At a workshop, with a client, or on the go. Enter an amount or pick an unpaid invoice. Your iPhone takes it from there.",
+      "qrTitle": "An amount. A QR code.",
+      "qrDescription": "Create a CZK payment request and show a QR code your customer can scan in their banking app.",
+      "invoiceTitle": "Collect an invoice",
+      "invoiceDescription": "Choose an unpaid invoice from your workspace. The amount and payment details are ready.",
+      "shareTitle": "Send a payment link",
+      "shareDescription": "Share a request in Messages, by email, or wherever you talk to your customers.",
+      "paidTitle": "Know when it’s paid",
+      "paidDescription": "See confirmation when Invoicey matches the incoming bank payment. Keep recent requests at hand.",
+      "testflight": "Join on TestFlight",
+      "comingSoon": "Coming soon",
+      "availability": "TestFlight invitations are not open yet. We’ll add the link here when testing opens.",
+      "screenshotAlt": "Invoicey Pocket on iPhone: a CZK 2,500 request and an unpaid invoice, shown in Czech.",
+      "confirmationTitle": "Payment received",
+      "confirmationDescription": "Confirmed by Invoicey’s bank reconciliation.",
+      "preview": "App preview · example payment",
+      "account": "Your Invoicey workspace, on your iPhone.",
+      "banks": "CZK payments · Connected Fio or MONETA account"
     }
   },
   "BrandPage": {

@@ -14,6 +14,7 @@ import {
   ArrowUpRightIcon,
   ChevronDownIcon,
   SquareTerminalIcon,
+  SmartphoneIcon,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -26,6 +27,8 @@ type DownloadMenuLabels = Readonly<{
   label: string;
   mac: string;
   macHint: string;
+  pocket: string;
+  pocketHint: string;
   requirements: string;
   trigger: string;
 }>;
@@ -88,6 +91,18 @@ export function DownloadMenu({
             <span className="block font-medium">{labels.cli}</span>
             <span className="mt-0.5 block text-xs text-muted-foreground">
               {labels.cliHint}
+            </span>
+          </span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="items-start gap-2.5 p-2"
+          render={<Link href="/#pocket" />}
+        >
+          <SmartphoneIcon className="mt-0.5 size-4" />
+          <span className="flex-1">
+            <span className="block font-medium">{labels.pocket}</span>
+            <span className="mt-0.5 block text-xs text-muted-foreground">
+              {labels.pocketHint}
             </span>
           </span>
         </DropdownMenuItem>

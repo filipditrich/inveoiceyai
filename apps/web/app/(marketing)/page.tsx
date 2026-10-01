@@ -13,6 +13,7 @@ import { MARKETING_PILL_LG_CLASS } from "@/components/marketing/marketing-cta";
 import motionStyles from "@/components/marketing/marketing-motion.module.css";
 import { MarketingSignedInChip } from "@/components/marketing/marketing-signed-in";
 import { NfctronLogo } from "@/components/marketing/nfctron-logo";
+import { PocketShowcase } from "@/components/marketing/pocket-showcase";
 import { PricingPlans } from "@/components/marketing/pricing-plans";
 import { ProductDemo } from "@/components/marketing/product-demo";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +77,8 @@ export default async function HomePage() {
     label: tDownload("label"),
     mac: tDownload("mac"),
     macHint: tDownload("macHint"),
+    pocket: tDownload("pocket"),
+    pocketHint: tDownload("pocketHint"),
     requirements: tDownload("requirements"),
     trigger: tDownload("trigger"),
   };
@@ -369,7 +372,8 @@ export default async function HomePage() {
             title={t("companions.title")}
             description={t("companions.description")}
           />
-          <div className="mt-14 grid gap-5 lg:grid-cols-2">
+          <PocketShowcase />
+          <div className="mt-5 grid gap-5 lg:grid-cols-2">
             <article
               className={`${motionStyles.liftCard} relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#101012] p-7 text-white shadow-2xl shadow-black/20 sm:p-10`}
             >

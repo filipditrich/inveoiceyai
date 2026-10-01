@@ -107,7 +107,7 @@ const ROWS = [
       "mobileAppNote2",
       "mobileAppNote3",
     ],
-    values: ["no", "yes", "yes", "no"],
+    values: ["partial", "yes", "yes", "no"],
   },
 ] as const satisfies readonly {
   key: string;

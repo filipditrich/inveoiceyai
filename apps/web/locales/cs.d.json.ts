@@ -292,7 +292,7 @@ declare const messages: {
       "openMenu": "Otevřít nabídku",
       "skipToContent": "Přeskočit na obsah",
       "ariaLabel": "Hlavní navigace",
-      "apps": "Mac a CLI",
+      "apps": "iPhone, Mac a CLI",
       "pricing": "Ceník",
       "comparison": "Srovnání",
       "menuTitle": "Menu",
@@ -306,7 +306,9 @@ declare const messages: {
       "macHint": "Vystavená PDF přímo ve Finderu",
       "cli": "Invoicey CLI",
       "cliHint": "Faktury přímo z terminálu",
-      "requirements": "macOS 14 Sonoma nebo novější, Apple silicon. CLI běží všude, kde je bash."
+      "requirements": "macOS 14 Sonoma nebo novější, Apple silicon. CLI běží všude, kde je bash.",
+      "pocket": "Invoicey Pocket pro iPhone",
+      "pocketHint": "Příjem plateb · TestFlight připravujeme"
     },
     "footer": {
       "description": "Faktury jako strukturovaná data. Vytvořte je ve webu, přes JSON nebo s pomocí AI a pokaždé získejte stejný validovaný výstup.",
@@ -331,8 +333,8 @@ declare const messages: {
       "betaAccess": "Beta přístup",
       "bankMatching": "Párování plateb",
       "badgeTag": "Beta",
-      "badgeTitle": "Aplikace pro Mac a CLI jsou tu",
-      "badgeAction": "Stáhnout",
+      "badgeTitle": "Invoicey i ve vašem iPhonu",
+      "badgeAction": "Prohlédnout",
       "backedBy": "Za Invoicey stojí"
     },
     "generatorTeaser": {
@@ -709,7 +711,7 @@ declare const messages: {
       "accountingNote2": "Kompletní agenda",
       "accountingNote3": "",
       "mobileAppLabel": "Mobilní aplikace",
-      "mobileAppNote0": "Žádná zbytečná appka",
+      "mobileAppNote0": "Pocket pro iPhone · připravujeme",
       "mobileAppNote1": "iOS a Android",
       "mobileAppNote2": "iOS a Android",
       "mobileAppNote3": ""
@@ -759,7 +761,7 @@ declare const messages: {
     "companions": {
       "eyebrow": "Nativní doplňky",
       "title": "Invoicey i mimo prohlížeč.",
-      "description": "Mějte vystavené doklady ve Finderu nebo obsluhujte workspace z terminálu. Oba doplňky používají stejnou identitu, pravidla přístupu a data Invoicey.",
+      "description": "Přijímejte platby na iPhonu, mějte vystavené doklady ve Finderu nebo pracujte z terminálu. Vše propojené s vaším pracovním prostorem Invoicey.",
       "macLabel": "Invoicey pro Mac",
       "macTitle": "Vystavené faktury tam, kam soubory patří.",
       "macDescription": "Invoicey Drive zrcadlí vystavená PDF do Finderu, iCloud Drive nebo Proton Drive. Mac spárujete jednou z menu baru; vystavení a platby zůstávají ve webové aplikaci.",
@@ -773,6 +775,30 @@ declare const messages: {
       "cliDocs": "Otevřít rychlý start CLI",
       "macRequirements": "macOS 14 Sonoma nebo novější, Apple silicon. Po dobu bety zdarma; spárování vyžaduje účet Invoicey.",
       "cliRequirements": "macOS a Linux, libovolný POSIX shell. Přihlašuje se API klíčem workspace."
+    },
+    "pocket": {
+      "name": "Invoicey Pocket",
+      "platform": "iOS 17+",
+      "title": "Přijímejte platby.",
+      "titleAccent": "Přímo z kapsy.",
+      "description": "Na workshopu, u klienta i na cestách. Zadejte částku nebo vyberte nezaplacenou fakturu. Zbytek máte po ruce v iPhonu.",
+      "qrTitle": "Částka. A QR kód.",
+      "qrDescription": "Vytvořte požadavek v korunách a ukažte QR kód. Zákazník ho naskenuje ve své bankovní aplikaci.",
+      "invoiceTitle": "Vyberte fakturu",
+      "invoiceDescription": "Otevřete nezaplacenou fakturu z pracovního prostoru. Částka i platební údaje už jsou připravené.",
+      "shareTitle": "Pošlete platební odkaz",
+      "shareDescription": "Sdílejte požadavek ve zprávě, e-mailem nebo tam, kde se zákazníky běžně komunikujete.",
+      "paidTitle": "Víte, kdy je zaplaceno",
+      "paidDescription": "Jakmile Invoicey spáruje příchozí platbu z banky, uvidíte potvrzení. Nedávné požadavky máte vždy po ruce.",
+      "testflight": "Vyzkoušet přes TestFlight",
+      "comingSoon": "Připravujeme",
+      "availability": "TestFlight zatím není otevřený. Odkaz sem přidáme, jakmile spustíme testování.",
+      "screenshotAlt": "Invoicey Pocket na iPhonu: požadavek na 2 500 Kč a nezaplacená faktura.",
+      "confirmationTitle": "Platba přijata",
+      "confirmationDescription": "Potvrzeno spárováním platby z banky.",
+      "preview": "Ukázka aplikace · ilustrační platba",
+      "account": "Váš pracovní prostor Invoicey. I v iPhonu.",
+      "banks": "Platby v CZK · Připojený účet Fio nebo MONETA"
     }
   },
   "BrandPage": {
