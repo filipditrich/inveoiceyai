@@ -6,6 +6,8 @@ import { authClient } from "@/lib/auth/client";
 import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { InvoiceyIdentityForm } from "./invoicey-identity-form";
+
 type Provider = "google" | "github";
 
 export function SignInForm({
@@ -68,6 +70,7 @@ export function SignInForm({
           </span>
         </Button>
       )}
+      <InvoiceyIdentityForm next={next} disabled={pending !== null} />
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {t("failed")} ({error})

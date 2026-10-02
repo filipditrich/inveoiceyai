@@ -536,7 +536,7 @@
         "s1Title": "1. The Service",
         "s1Body": "Invoicey is a tool for preparing, managing, importing, rendering, and sending invoicing documents. Some features may be available as beta, experimental, or only to selected users. The scope of the service may change during the beta.",
         "s2Title": "2. Account & Access",
-        "s2Body": "Sign-in uses a supported OAuth provider — currently Google or GitHub. The user is responsible for securing this account and for the actions of people invited to their workspace. Access may not be shared in a way that bypasses permissions or technical limits.",
+        "s2Body": "Sign-in uses Google or GitHub, or an Invoicey Identity account provisioned by the operator. Public registration with a password is not available. You are responsible for securing your login and for the actions of people invited to your workspace. Access may not be shared to bypass permissions or technical limits.",
         "s3Title": "3. Document Responsibility",
         "s3Body": "Invoicey performs technical and schema-level checks but does not provide accounting, tax, or legal advice. The user is responsible for the accuracy of input data, choice of tax regime, authorization to issue a document, and its compliance with each specific business case. The user should review a document before issuing.",
         "s4Title": "4. Agent & Automated Features",
@@ -578,7 +578,7 @@
         "s6Title": "6. Your Rights",
         "s6Body": "Within GDPR limits you may request access, correction, erasure, restriction of processing, portability, or raise an objection. Measurement consent can be withdrawn immediately via cookie settings. Some data from accounting documents may not be erasable if required by law.",
         "s7Title": "7. Security & Changes",
-        "s7Body": "Application access uses OAuth without a separate Invoicey password. Working data is always queried in the context of verified workspace membership. No internet service can promise absolute security. This page will be updated when processing changes significantly, and a new update date will be published.",
+        "s7Body": "Sign-in uses Google/GitHub OAuth or a password for accounts provisioned by Invoicey. Passwords are stored as hashes. Application requests check workspace membership and permissions. No internet service can promise absolute security.",
         "contactTitle": "Operator and contact",
         "updated": "Updated: 2 October 2026",
         "chatgptTitle": "ChatGPT connection",
@@ -857,11 +857,11 @@
   "Auth": {
     "meta": {
       "title": "Sign In",
-      "description": "Sign in to Invoicey with Google or GitHub."
+      "description": "Sign in to your Invoicey workspace."
     },
     "eyebrow": "Welcome back",
     "title": "Sign in to Invoicey",
-    "subtitle": "Continue with your Google or GitHub account. Invoicey never creates or stores a separate password — you can revoke access at your provider any time.",
+    "subtitle": "Use Google or GitHub, or sign in with an Invoicey Identity account provided by our team.",
     "noProviders": "No sign-in provider is configured. Add Google or GitHub credentials and reload this page.",
     "continueWith": "Continue with {provider}",
     "consent": "By continuing you confirm that you have read the terms of use and privacy policy.",
@@ -870,7 +870,7 @@
       "eyebrow": "One schema, every channel",
       "title": "From data to a finished document without detours.",
       "description": "Web, PDF, ISDOC, SPAYD QR, and agent tools all use the same validated invoice.",
-      "oauthNote": "OAuth sign-in · no extra password",
+      "oauthNote": "Secure access to your workspace",
       "backHome": "Back to Invoicey",
       "badge": "Private beta",
       "benefit1Title": "Czech rules built in",
@@ -886,9 +886,19 @@
     "continueGoogle": "Continue with Google",
     "continueGitHub": "Continue with GitHub",
     "continueNote": "After signing in we'll take you back where you were heading.",
-    "secureNote": "Sign-in happens at your provider; Invoicey never sees a password.",
+    "secureNote": "Secure sign-in with Google, GitHub, or a provisioned Invoicey Identity account.",
     "docsPrompt": "Still deciding?",
-    "docsCta": "Read the docs"
+    "docsCta": "Read the docs",
+    "identity": {
+      "continue": "Continue with Invoicey Identity",
+      "hint": "For accounts provided by the Invoicey team. Public password registration is not available.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "pending": "Signing in…",
+      "error": "Unable to sign in. Check your credentials or try again later.",
+      "support": "Need help? Contact support"
+    }
   },
   "Onboarding": {
     "meta": {

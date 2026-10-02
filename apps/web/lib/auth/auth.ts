@@ -21,6 +21,7 @@ import {
   readDeviceTokenFromHeaders,
 } from "./device-trust";
 import { checkAcceptPolicy, checkInvitePolicy } from "./invite-policy";
+import { invoiceyIdentityOptions } from "./invoicey-identity";
 import { onSessionCreated } from "./on-session-created";
 import { takePendingDeviceToken } from "./pending-device-cookie";
 import { assignReferralCodeOnCreate } from "./referral";
@@ -82,7 +83,7 @@ const socialProviders = {
  */
 export const auth = betterAuth({
   appName: "Invoicey",
-  disabledPaths: ["/token"],
+  disabledPaths: ["/token", ...invoiceyIdentityOptions.disabledPaths],
   baseURL,
   secret: env.BETTER_AUTH_SECRET,
   /** dual-serve during the invoicey.app cutover (ADR 0045) */
@@ -93,8 +94,8 @@ export const auth = betterAuth({
   ],
   database: drizzleAdapter(db, { provider: "pg", schema: mcpAuthSchema }),
 
-  // OAuth only — no email+password (ADR 0018).
-  emailAndPassword: { enabled: false },
+  // Public signup stays social-only; credentials are operator-provisioned.
+  emailAndPassword: invoiceyIdentityOptions.emailAndPassword,
   socialProviders,
 
   advanced: {
@@ -108,6 +109,7 @@ export const auth = betterAuth({
     storage: "database",
     window: 10,
     max: 100,
+    customRules: { "/sign-in/email": { window: 60, max: 5 } },
   },
 
   /**

@@ -118,7 +118,7 @@ export const account = pgTable(
       withTimezone: true,
     }),
     scope: text("scope"),
-    /** Unused — OAuth only (ADR 0018) — but part of the Better Auth contract. */
+    /** Better Auth password hash for operator-provisioned Invoicey Identity accounts. */
     password: text("password"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()

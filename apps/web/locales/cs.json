@@ -536,7 +536,7 @@
         "s1Title": "1. Služba",
         "s1Body": "Invoicey je nástroj pro přípravu, správu, import, vykreslení a odesílání fakturačních dokladů. Některé funkce mohou být dostupné jako beta, experiment nebo pouze vybraným uživatelům. Aktuální rozsah služby se může během beta provozu měnit.",
         "s2Title": "2. Účet a přístup",
-        "s2Body": "Přihlášení probíhá přes podporovaného OAuth poskytovatele, aktuálně Google nebo GitHub. Uživatel odpovídá za zabezpečení tohoto účtu a za činnost osob, které pozve do svého pracovního prostoru. Přístup není dovoleno sdílet způsobem, který obchází oprávnění nebo technická omezení služby.",
+        "s2Body": "Přihlášení využívá Google nebo GitHub, případně účet Invoicey Identity vytvořený provozovatelem. Veřejná registrace pomocí hesla není dostupná. Odpovídáte za zabezpečení přihlášení a za jednání osob pozvaných do pracovního prostoru. Přístup nesmí být sdílen za účelem obcházení oprávnění nebo technických limitů.",
         "s3Title": "3. Odpovědnost za doklady",
         "s3Body": "Invoicey provádí technické a schématické kontroly, ale neposkytuje účetní, daňové ani právní poradenství. Uživatel odpovídá za pravdivost vstupních údajů, volbu daňového režimu, oprávnění doklad vystavit a jeho soulad s konkrétním obchodním případem. Před vydáním má uživatel doklad zkontrolovat.",
         "s4Title": "4. Agentní a automatizované funkce",
@@ -578,7 +578,7 @@
         "s6Title": "6. Vaše práva",
         "s6Body": "V mezích GDPR můžete požádat o přístup, opravu, výmaz, omezení zpracování, přenositelnost nebo vznést námitku. Souhlas s měřením lze odvolat okamžitě přes nastavení cookies. Některé údaje z účetních dokladů nemusí být možné vymazat, pokud jejich uchování vyžaduje zákon.",
         "s7Title": "7. Zabezpečení a změny",
-        "s7Body": "Přístup do aplikace používá OAuth bez vlastního hesla u Invoicey. Pracovní data jsou vždy dotazována v kontextu ověřeného členství v pracovním prostoru. Žádné internetové službě však nelze slíbit absolutní bezpečnost. Tuto stránku upravíme při změně významného způsobu zpracování a zveřejníme nové datum aktualizace.",
+        "s7Body": "Přihlášení využívá Google/GitHub OAuth nebo heslo u účtů vytvořených týmem Invoicey. Hesla ukládáme v podobě hashů. Požadavky aplikace kontrolují členství a oprávnění v pracovním prostoru. Žádná internetová služba nemůže zaručit absolutní bezpečnost.",
         "contactTitle": "Provozovatel a kontakt",
         "updated": "Aktualizováno: 2. října 2026",
         "chatgptTitle": "Propojení s ChatGPT",
@@ -857,11 +857,11 @@
   "Auth": {
     "meta": {
       "title": "Přihlášení",
-      "description": "Přihlaste se do Invoicey přes Google nebo GitHub."
+      "description": "Přihlaste se do svého pracovního prostoru Invoicey."
     },
     "eyebrow": "Vítejte zpět",
     "title": "Přihlášení do Invoicey",
-    "subtitle": "Pokračujte účtem Google nebo GitHub. Invoicey nevytváří ani neukládá další heslo — přístup můžete kdykoli odebrat u poskytovatele.",
+    "subtitle": "Použijte Google či GitHub, nebo se přihlaste účtem Invoicey Identity, který vám přidělil náš tým.",
     "noProviders": "Není nastavený žádný poskytovatel přihlášení. Doplňte přístupové údaje Google nebo GitHub a stránku načtěte znovu.",
     "continueWith": "Pokračovat přes {provider}",
     "consent": "Pokračováním potvrzujete, že jste se seznámili s podmínkami používání a zásadami ochrany soukromí.",
@@ -870,7 +870,7 @@
       "eyebrow": "Jedno schéma, všechny kanály",
       "title": "Od údajů k hotovému dokladu bez zbytečných odboček.",
       "description": "Web, PDF, ISDOC, SPAYD QR i agentní nástroje pracují se stejnou validovanou fakturou.",
-      "oauthNote": "OAuth přihlášení · žádné další heslo",
+      "oauthNote": "Bezpečný přístup k vašemu pracovnímu prostoru",
       "backHome": "Zpět na Invoicey",
       "badge": "Neveřejná beta",
       "benefit1Title": "České reálie v základu",
@@ -886,9 +886,19 @@
     "continueGoogle": "Pokračovat přes Google",
     "continueGitHub": "Pokračovat přes GitHub",
     "continueNote": "Po přihlášení vás vrátíme tam, kam jste mířili.",
-    "secureNote": "Přihlášení probíhá u poskytovatele, heslo Invoicey nevidí.",
+    "secureNote": "Bezpečné přihlášení přes Google, GitHub nebo přidělený účet Invoicey Identity.",
     "docsPrompt": "Ještě zvažujete?",
-    "docsCta": "Projděte dokumentaci"
+    "docsCta": "Projděte dokumentaci",
+    "identity": {
+      "continue": "Pokračovat s Invoicey Identity",
+      "hint": "Pro účty vytvořené týmem Invoicey. Veřejná registrace pomocí hesla není dostupná.",
+      "email": "E-mail",
+      "password": "Heslo",
+      "submit": "Přihlásit se",
+      "pending": "Přihlašování…",
+      "error": "Přihlášení se nezdařilo. Zkontrolujte přihlašovací údaje nebo to zkuste později.",
+      "support": "Potřebujete pomoc? Kontaktujte podporu"
+    }
   },
   "Onboarding": {
     "meta": {

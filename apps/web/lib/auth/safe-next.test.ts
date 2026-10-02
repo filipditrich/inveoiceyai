@@ -14,6 +14,8 @@ describe("safeNext", () => {
     "",
     "https://attacker.example",
     "//attacker.example/path",
+    "/\\attacker.example/path",
+    "/\t/attacker.example",
     "invoices",
     "/sign-in?next=/sign-in",
   ])("falls back for unsafe value %s", (value) => {

@@ -6,6 +6,7 @@ export function safeNext(value: string | undefined): string {
     !value ||
     !value.startsWith("/") ||
     value.startsWith("//") ||
+    /[\\\u0000-\u0020\u007f]/.test(value) ||
     value.startsWith("/sign-in")
   ) {
     return DEFAULT_AFTER_SIGN_IN;

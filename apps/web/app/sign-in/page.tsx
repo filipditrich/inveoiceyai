@@ -67,13 +67,7 @@ export default async function SignInPage({
         ) : null}
 
         <div className="mt-7">
-          {providers.length > 0 ? (
-            <SignInForm next={target} providers={providers} />
-          ) : (
-            <div className="rounded-2xl border border-destructive/25 bg-destructive/5 p-4 text-sm leading-relaxed text-destructive">
-              {t("noProviders")}
-            </div>
-          )}
+          <SignInForm next={target} providers={providers} />
         </div>
 
         <p className="mt-5 flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
