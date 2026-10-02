@@ -21,6 +21,6 @@ The original action reproduced the production `request not found` exception in t
 - Tampered callback in signed query: no external redirect, no 500, recovery page.
 - Expired link: recovery page without a submit button.
 
-Full Turbo tests passed (including 425 web tests); monorepo typechecks passed. Focused lint and isolated-host typechecks are also required before release.
+Full Turbo tests passed (including 425 web tests); monorepo typechecks passed. Focused lint and isolated-host typechecks passed. CI now runs these browser regressions after installing Chromium.
 
 These tests prove Invoicey's browser/server OAuth integration. They do not substitute for final authorization of a real workspace in ChatGPT or native iOS/Android acceptance. Production ChatGPT authorization requires the account owner's consent; public launch remains gated pending that acceptance.

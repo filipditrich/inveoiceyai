@@ -68,5 +68,9 @@ jobs:
         working-directory: apps/web
         run: bunx playwright install --with-deps --only-shell
 
+      - name: OAuth consent browser regression
+        working-directory: apps/web
+        run: bun run test:oauth
+
       - name: Browser and accessibility smoke
         run: bun run test:e2e
