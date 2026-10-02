@@ -1,5 +1,6 @@
 import { BrandLogo } from "@/components/brand-logo";
 import { AppleLogo } from "@/components/marketing/apple-logo";
+import { ChatgptShowcase } from "@/components/marketing/chatgpt-showcase";
 import { CompetitorComparison } from "@/components/marketing/competitor-comparison";
 import { DownloadMenu } from "@/components/marketing/download-menu";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
@@ -194,14 +195,12 @@ export default async function HomePage() {
     },
   ];
 
-  if (process.env.INVOICEY_CHATGPT_LAUNCH === "1") {
-    integrations.unshift({
-      icon: MessageSquareTextIcon,
-      title: t("integrations.chatgptTitle"),
-      description: t("integrations.chatgptDescription"),
-      href: "/docs/integrations/chatgpt",
-    });
-  }
+  integrations.unshift({
+    icon: MessageSquareTextIcon,
+    title: t("integrations.chatgptTitle"),
+    description: t("integrations.chatgptDescription"),
+    href: "/chatgpt",
+  });
   const faq = [
     { question: t("faq.q1"), answer: t("faq.a1") },
     { question: t("faq.q2"), answer: t("faq.a2") },
@@ -361,6 +360,8 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <ChatgptShowcase />
 
       <section
         id="apps"

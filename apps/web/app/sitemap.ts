@@ -6,6 +6,7 @@ import type { MetadataRoute } from "next";
 const PUBLIC_ROUTES = [
   "",
   "/brand",
+  "/chatgpt",
   "/privacy",
   "/terms",
   "/cookies",

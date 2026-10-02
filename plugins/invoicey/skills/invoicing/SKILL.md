@@ -5,6 +5,8 @@ description: Use Invoicey to find, draft, review, issue and send invoices in the
 
 Use the connected Invoicey MCP tools for workspace facts and invoice actions.
 
+If this chat does not expose Invoicey tools, ask the user to select the connected **Invoicey** app from the composer. **Invoicey workflows** is this optional skill package; selecting the app directly is the supported fallback. Never substitute web search for private workspace facts or claim the connection failed based only on missing tools in one chat.
+
 1. Read `get_workspace` before drafting. The seller and payment account come from the workspace default issuer; never supply another seller or invent IDs, addresses or bank details.
 2. Use `list_clients`, `lookup_business` or `search_business` to establish the recipient. Ask the user to resolve ambiguous companies.
 3. Ask for missing required invoice facts: client address, document type, issue/due/tax dates, currency, document language, payment method and line items. Confirm VAT treatment. Do not silently guess.

@@ -799,6 +799,23 @@ declare const messages: {
       "preview": "Ukázka aplikace · ilustrační platba",
       "account": "Váš pracovní prostor Invoicey. I v iPhonu.",
       "banks": "Platby v CZK · Připojený účet Fio nebo MONETA"
+    },
+    "chatgpt": {
+      "eyebrow": "Novinka · Invoicey v ChatGPT",
+      "title": "Popište práci. Zkontrolujte fakturu.",
+      "description": "Najděte fakturu, připravte koncept ze zadání a zkontrolujte každý detail přímo v konverzaci.",
+      "feature1": "Vaše faktury a klienti přímo v konverzaci",
+      "feature2": "Interaktivní koncepty s částkami, daty a položkami",
+      "feature3": "O vystavení, odeslání i zápisu úhrady rozhodujete vy",
+      "cta": "Prozkoumat Invoicey v ChatGPT",
+      "availability": "Veřejné vydání připravujeme",
+      "example": "Ilustrační ukázka",
+      "prompt": "Připrav koncept faktury za 12 hodin designu po 1 500 Kč. Na chybějící údaje se mě zeptej.",
+      "draft": "Koncept ke kontrole",
+      "line": "Design · 12 hodin × 1 500 Kč",
+      "amount": "18 000 Kč",
+      "review": "Před vystavením zkontrolujte klienta, DPH a splatnost.",
+      "control": "Uloženo v Invoicey. Vystavení až po vašem potvrzení."
     }
   },
   "BrandPage": {
@@ -4016,6 +4033,30 @@ declare const messages: {
     "readWrite": "Čtení a zápis v mezích vaší role v prostoru",
     "readOnly": "Přístup jen pro čtení",
     "disconnect": "Odpojit"
+  },
+  "ChatgptSetup": {
+    "metaTitle": "Invoicey v ChatGPT — nastavení a předběžný přístup",
+    "title": "Jedno propojení. Vaše faktury v ChatGPT.",
+    "description": "Veřejná verze propojí váš prostor Invoicey na pár kliknutí. Bez adres serverů, API klíčů a vývojářského nastavení.",
+    "earlyAccess": "Funguje v soukromém testování. Veřejná instalace zatím není dostupná: aplikaci musí posoudit OpenAI a následně ji zveřejníme. Až bude připravená, najdete zde přímý odkaz na schválenou aplikaci.",
+    "step1Title": "Otevřete Invoicey v ChatGPT",
+    "step1Body": "Začněte na oficiální stránce aplikace Invoicey. Tlačítko pro veřejnou instalaci sem přidáme po schválení.",
+    "step2Title": "Propojte svůj účet",
+    "step2Body": "Zvolte Připojit a přihlaste se do Invoicey přes Google nebo GitHub. Bez technického nastavování.",
+    "step3Title": "Vyberte svůj prostor",
+    "step3Body": "Zkontrolujte požadovaný přístup a vyberte prostor Invoicey, který chcete používat. Vaše stávající role a oprávnění nadále platí.",
+    "step4Title": "Řekněte, co potřebujete",
+    "step4Body": "Vraťte se do ChatGPT a vyberte Invoicey. Najděte fakturu nebo popište další. Před potvrzením akce si prohlédněte interaktivní koncept.",
+    "firstPrompt": "Ukaž mi poslední faktury v Invoicey.",
+    "controlTitle": "Nejdřív kontrola. Potom potvrzení.",
+    "controlBody": "Koncepty zůstávají ve vašem prostoru Invoicey. Před vystavením zkontrolujte odběratele, položky, daně, jazyk a splatnost. Odeslání e-mailu i zápis úhrady vyžadují vaše potvrzení. Nadále platí vaše role a tarif v Invoicey.",
+    "disconnect": "Přístup kdykoli zrušíte v Invoicey → Prostor → Integrace a odebráním připojení v ChatGPT.",
+    "duplicateTitle": "Jedna aplikace na výběr",
+    "duplicateBody": "Pro zákazníky bude vstupním bodem Invoicey. Samostatný balíček Invoicey workflows je volitelný a není součástí běžného nastavení.",
+    "mobileTitle": "Chcete používat telefon?",
+    "mobileBody": "Zobrazení se přizpůsobí telefonu. Dostupnost v aplikacích ChatGPT pro iOS a Android závisí na podpoře hostitele a ověříme ji před oznámením nativní mobilní podpory.",
+    "guide": "Už testujete? Pomoc s připojením",
+    "installPending": "Veřejnou instalaci připravujeme"
   }
 };
 export default messages;

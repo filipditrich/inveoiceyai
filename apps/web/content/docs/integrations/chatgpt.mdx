@@ -7,39 +7,45 @@ icon: MessageSquare
 Invoicey connects your workspace to ChatGPT. Describe the work, review the invoice in an
 interactive card, and decide when to issue or send it. The same invoice stays available in Invoicey.
 
-## Before connecting
+## Start here
 
-Create an Invoicey account and workspace, then add your default issuer with its address,
-contact email, VAT settings and payment account. ChatGPT uses this saved seller identity.
-Your workspace role and plan determine which actions are available.
+The [customer page](/chatgpt), available in Czech and English, previews the planned public
+connection flow. Public installation is not available yet: the app needs review and publication
+in ChatGPT. Customers will open the listing and connect their own Invoicey account.
 
-## Connect your workspace
+The instructions below are for developers and invited testers with custom-app access.
+The private development plugin link is not a public invitation.
 
-1. Open ChatGPT's app or plugin connection settings. If your account supports custom MCP
-   connections, add **Invoicey** using `https://invoicey.app/api/mcp` and choose **OAuth**.
-   Use **Plugins → Add → Create MCP App** for the hosted connection. Developer mode may
-   need to be enabled in **Settings → Security and login**.
-2. Sign in to Invoicey using Google or GitHub.
-3. Review the requesting application's name, choose the workspace and approve the requested
-   read/write access. Offline access lets the connection renew without signing in for every request.
-4. Return to ChatGPT and ask: **“Open Invoicey and show my unpaid invoices.”**
+## Developer and invited-tester setup
 
-Availability of custom connections and interactive views depends on your ChatGPT account and
-host. Navigation entrypoints and invoice mentions use OpenAI MCP Extensions where supported;
-other MCP Apps hosts can render the invoice cards. This is a custom integration, not a claim of
-public directory approval.
+1. Create an Invoicey workspace and add a default issuer, contact email, VAT settings and bank account.
+2. On ChatGPT web, enable Developer mode if your account offers it. Open **Plugins → Add →
+   Create MCP App** (some accounts use **Apps → Create**). Organization users may need an administrator.
+3. Name the app **Invoicey**, enter `https://invoicey.app/api/mcp`, and choose **OAuth**.
+   Use automatic client registration when offered; do not paste personal API keys into chat.
+4. Connect, sign in to Invoicey, select the workspace and approve access. Return to ChatGPT.
+5. Start a new conversation, select the connected **Invoicey app**, and ask:
+   **“Show my recent invoices in Invoicey.”** This first check only reads data.
 
-## Desktop, web and mobile
+If custom-app creation is unavailable, this early-access setup is not supported by your account.
+A public directory release will provide the simpler install path after review and publication.
+See OpenAI's [custom-app access guidance](https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt).
 
-An imported plugin that bundles an MCP server URL is marked **Desktop only** by ChatGPT,
-even when the URL is hosted online. Installing that package on desktop does not unlock it
-on your phone. Invoicey versions 1.0.0 and 1.0.1 used this desktop distribution path.
+### Two Invoicey entries during early testing
 
-Invoicey 1.0.2 uses a registered ChatGPT app connection, and its listing is available on
-ChatGPT web with **Try in chat**. Open your private plugin invitation, connect the Invoicey
-app shown under **Apps**, and approve your workspace. Use the same ChatGPT account on your
-phone. Native iOS/Android invoice actions are still awaiting end-to-end validation.
-Composer invoice mentions are currently available only in the ChatGPT desktop app.
+**Invoicey** is the connected app with live tools. **Invoicey workflows** is an optional skill
+package (version 1.0.3). You do not need that package for the setup above. Its package version
+is separate from the app listing's version. If a chat says tools are unavailable, start a new
+chat and select the connected app directly. Do not disconnect the working app to remove the
+optional workflow package.
+
+### Desktop, web and mobile
+
+The live ChatGPT integration has been verified for invoice listing and interactive draft
+creation. The consent flow has desktop and mobile-browser regression coverage. Complete
+initial setup on ChatGPT web. Custom-app access on phones depends on ChatGPT's current host
+support; native iOS/Android behavior has not yet been validated. Composer invoice mentions
+are host-dependent. A responsive view alone does not establish native mobile availability.
 
 ## From a sentence to an invoice
 
