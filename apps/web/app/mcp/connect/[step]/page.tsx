@@ -5,10 +5,22 @@ import { listUserWorkspaces } from "@/lib/auth/workspaces";
 import { oauthQuery } from "@/lib/mcp/oauth-query";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { approveConnection, continueConnection } from "../actions";
+
+function canResumeConnection(step: string, search: URLSearchParams) {
+  const expiresAt = Number(search.get("exp"));
+  return (
+    ["consent", "login", "workspace"].includes(step) &&
+    Boolean(search.get("client_id")) &&
+    Boolean(search.get("sig")) &&
+    Number.isFinite(expiresAt) &&
+    expiresAt > Date.now() / 1000
+  );
+}
 
 export const metadata = { robots: { index: false, follow: false } };
 export default async function ConnectPage({
@@ -22,6 +34,25 @@ export default async function ConnectPage({
   const query = await searchParams;
   const search = oauthQuery(query);
   const t = await getTranslations("McpConnect");
+  if (!canResumeConnection(step, search))
+    return (
+      <AuthShell>
+        <section className="rounded-3xl border bg-card p-7 sm:p-8">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {t("restartTitle")}
+          </h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {t("restartDescription")}
+          </p>
+          <Link
+            className="mt-6 inline-block underline"
+            href="/docs/integrations/chatgpt"
+          >
+            {t("setupGuide")}
+          </Link>
+        </section>
+      </AuthShell>
+    );
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session)
     redirect(

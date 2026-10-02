@@ -3935,6 +3935,9 @@
     }
   },
   "McpConnect": {
+    "restartTitle": "Spusťte připojení znovu",
+    "restartDescription": "Odkaz pro připojení chybí, vypršel nebo už není platný. Vraťte se do aplikace, kterou jste připojovali, a znovu zvolte připojení Invoicey.",
+    "setupGuide": "Návod k připojení",
     "application": "Připojená aplikace",
     "title": "Propojit pracovní prostor",
     "description": "Vyberte pracovní prostor Invoicey, ke kterému bude mít aplikace přístup. Pro každou akci nadále platí vaše oprávnění.",

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -12,15 +12,19 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "incremental": true,
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./*"]
-    }
+      "@/lib/auth/auth": ["./auth.ts"],
+      "@/lib/auth/session": ["./identity.ts"],
+      "@/lib/auth/workspaces": ["./identity.ts"],
+      "@/lib/mcp/membership": ["./identity.ts"],
+      "@/*": ["../../../*"]
+    },
+    "incremental": true
   },
   "include": [
     "next-env.d.ts",
@@ -29,5 +33,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "tests/mcp-oauth/site"]
+  "exclude": ["node_modules"]
 }

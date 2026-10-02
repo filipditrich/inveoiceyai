@@ -13,6 +13,7 @@
     "typecheck": "node scripts/generate-messages-declaration.mjs && tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:oauth": "playwright test --config playwright.oauth.config.ts",
     "check:auth-schema": "NODE_ENV=development bun --conditions react-server scripts/check-auth-schema.ts",
     "check:runtime-schema": "NODE_ENV=development bun --conditions react-server scripts/check-runtime-schema.ts",
     "build:mcp-ui": "node scripts/build-mcp-ui.mjs"

@@ -3953,6 +3953,9 @@
     }
   },
   "McpConnect": {
+    "restartTitle": "Start the connection again",
+    "restartDescription": "This connection link is missing, expired, or no longer valid. Return to the application you were connecting and choose Connect Invoicey again.",
+    "setupGuide": "Connection setup guide",
     "application": "Connected application",
     "title": "Connect your workspace",
     "description": "Choose which Invoicey workspace this application can access. Your workspace role still applies to every action.",
