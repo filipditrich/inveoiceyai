@@ -2,7 +2,11 @@ import { and, eq } from "drizzle-orm";
 import { createHash } from "node:crypto";
 import { UTApi, UTFile } from "uploadthing/server";
 
-import { invoices, tryCreateDbFromEnv } from "@invoicey/db";
+import {
+  createWorkspaceFileId,
+  invoices,
+  tryCreateDbFromEnv,
+} from "@invoicey/db";
 import {
   InvoiceSchema,
   invoiceArtifactFileNamesFromInvoice,
@@ -33,11 +37,15 @@ async function uploadBytes(
   bytes: Uint8Array | string,
   name: string,
   type: string,
+  workspaceId: string,
 ): Promise<string> {
   const utapi = new UTApi();
   const body =
     typeof bytes === "string" ? Buffer.from(bytes, "utf8") : Buffer.from(bytes);
-  const file = new UTFile([body], name, { type });
+  const file = new UTFile([body], name, {
+    type,
+    customId: createWorkspaceFileId(workspaceId),
+  });
   const result = await utapi.uploadFiles(file);
   if (result.error || !result.data) {
     throw new Error(result.error?.message ?? `upload failed for ${name}`);
@@ -115,12 +123,22 @@ export async function ensureInvoiceArtifacts(options: {
   if (!pdfUrl) {
     const pdfBytes = await renderInvoicePdf(parsed.data);
     pdfSha256 = sha256(pdfBytes);
-    pdfUrl = await uploadBytes(pdfBytes, names.pdf, "application/pdf");
+    pdfUrl = await uploadBytes(
+      pdfBytes,
+      names.pdf,
+      "application/pdf",
+      workspaceId,
+    );
   }
   if (!isdocUrl) {
     const xml = renderIsdoc(parsed.data);
     isdocSha256 = sha256(xml);
-    isdocUrl = await uploadBytes(xml, names.isdoc, "application/xml");
+    isdocUrl = await uploadBytes(
+      xml,
+      names.isdoc,
+      "application/xml",
+      workspaceId,
+    );
   }
 
   const pdfGeneratedAt = new Date();

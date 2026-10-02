@@ -272,3 +272,5 @@ export {
 export type { NotificationEventPayload } from "./notification-schema";
 
 export * from "./mcp-oauth-schema";
+
+export { createWorkspaceFileId, workspaceOwnsFile } from "./workspace-file-id";

@@ -1,16 +1,29 @@
 import { getOptionalWorkspace } from "@/lib/auth/session";
-import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { createUploadthing, UTFiles, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
+
+import { createWorkspaceFileId } from "@invoicey/db";
 
 const f = createUploadthing();
 
 /** Uploads are attributed to the caller's workspace; anonymous uploads are refused. */
-async function authedMiddleware() {
+async function authedMiddleware({
+  files,
+}: {
+  files: readonly { name: string; size: number; type: string }[];
+}) {
   const context = await getOptionalWorkspace();
   if (!context) {
     throw new UploadThingError("Unauthorized");
   }
-  return { userId: context.userId, workspaceId: context.workspaceId };
+  return {
+    userId: context.userId,
+    workspaceId: context.workspaceId,
+    [UTFiles]: files.map((file) => ({
+      ...file,
+      customId: createWorkspaceFileId(context.workspaceId),
+    })),
+  };
 }
 
 export const ourFileRouter = {

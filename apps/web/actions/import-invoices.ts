@@ -1,11 +1,11 @@
 "use server";
-
 import { requireWritableWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { UTApi, UTFile } from "uploadthing/server";
 
+import { createWorkspaceFileId } from "@invoicey/db";
 import { issuerBusinesses } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import {
@@ -85,6 +85,7 @@ async function fetchBytes(url: string): Promise<Uint8Array> {
 async function uploadIsdocXml(
   number: string,
   xml: string,
+  workspaceId: string,
 ): Promise<string | null> {
   if (!process.env.UPLOADTHING_TOKEN?.trim()) {
     return null;
@@ -92,6 +93,7 @@ async function uploadIsdocXml(
   const utapi = new UTApi();
   const file = new UTFile([Buffer.from(xml, "utf8")], `${number}.isdoc`, {
     type: "application/xml",
+    customId: createWorkspaceFileId(workspaceId),
   });
   const result = await utapi.uploadFiles(file);
   if (result.error || !result.data) {
@@ -261,6 +263,7 @@ export async function commitInvoiceImport(input: {
           isdocUrl = await uploadIsdocXml(
             item.invoice.meta.number,
             item.isdocXml,
+            workspaceId,
           );
         }
 
