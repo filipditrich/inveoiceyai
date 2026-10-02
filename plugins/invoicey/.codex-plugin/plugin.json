@@ -16,7 +16,7 @@
     "websiteURL": "https://invoicey.app/docs/integrations/chatgpt"
   },
   "name": "invoicey",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Invoice automation in your connected Invoicey workspace: search, draft, review, issue and send invoices.",
   "author": {
     "name": "Invoicey",
@@ -25,5 +25,5 @@
   "keywords": [],
   "homepage": "https://invoicey.app/docs/integrations/chatgpt",
   "skills": "./skills",
-  "mcpServers": "./.mcp.json"
+  "apps": "./.app.json"
 }

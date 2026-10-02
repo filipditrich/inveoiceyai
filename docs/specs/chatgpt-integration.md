@@ -37,9 +37,19 @@ flowchart LR
 ## Private plugin
 
 Private package: `plugins/invoicey`. Created plugin ID: `plugins_6abe92279bfc8191aaff5cd11904f96e`.
-Release: `pluginrel_6abe9765f4e88191887df2c9108f09c0`.
+Release: `pluginrel_6abf514c9c2c819192fa2984e13ae52b`.
 [Open Invoicey plugin](https://chatgpt.com/plugins/plugins_6abe92279bfc8191aaff5cd11904f96e).
-Saving the package is verified; connecting it and rendering inside the actual host remains a separate acceptance step.
+Version 1.0.2 binds the registered app `asdk_app_6abf508edcc48191b06aed095e86da3b`
+through `.app.json`. ChatGPT web now shows **Try in chat**, replacing **Open in desktop app**.
+The hosted connection uses the same `https://invoicey.app/api/mcp` endpoint. User OAuth consent
+and native iOS/Android invoice flows remain pending.
+
+Do not reintroduce bundled server declarations into this private package: OpenAI marks those
+plugins desktop-only, including HTTPS servers. The empty `mcp.json` and `.mcp.json` overwrite
+old declarations because the account update tool overlays files and cannot delete them.
+For a future public submission, prepare a separate upload with the verified remote endpoint;
+do not submit this private account's app binding. Keep the published private plugin's identity
+and audience unchanged.
 
 ## Deployment
 

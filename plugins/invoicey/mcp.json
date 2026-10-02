@@ -1,9 +1,4 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
-  "mcpServers": {
-    "invoicey": {
-      "type": "streamable-http",
-      "url": "https://invoicey.app/api/mcp"
-    }
-  }
+  "mcpServers": {}
 }
