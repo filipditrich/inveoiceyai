@@ -10,7 +10,9 @@ The private package is now **Invoicey workflows 1.0.3**, preserving its ID and a
 
 OpenAI's package guide currently describes `plugin_asdk_app…` IDs, but Plugin Creator rejects those and requires `asdk_app_`, `connector_` or `templated_apps_`. The accepted existing binding was preserved. Do not repeat the rejected ID migration without a changed platform contract.
 
-The host displayed “CSP off” during the initial inspection. A production-policy run with CSP enforced, native iOS/Android acceptance and the remaining write confirmations are not claimed verified.
+The host initially displayed “CSP off”. On the follow-up, Enforce CSP for custom apps was enabled and read back as checked. The conversation was reloaded: the draft card rendered and workspace Refresh completed with returned invoice rows. This verifies rendering and a read-only tool interaction under enforced CSP, not every workflow. Native iOS/Android acceptance and remaining write confirmations are still unverified.
+
+Follow-up validation: typecheck and lint passed; all 12 desktop/mobile OAuth browser regressions passed. The demo and reviewer setup are documented in [the walkthrough](chatgpt-review-walkthrough.md).
 
 ## Distribution
 
@@ -27,8 +29,8 @@ Readiness gaps:
 
 - Owner confirmed the individual publisher: **Ing. Filip Ditrich**. Package author/developer name is populated; portal identity verification remains outstanding.
 - Owner confirmed **Czechia only** (`CZ`) and **no buying or payments through the integration**. Country targeting is populated. The package declares `review.commerce: false`; invoice payment recording is bookkeeping, not payment processing.
-- Owner confirmed support contact **filip@ditrich.me**. A public support page on invoicey.app still needs to be published and verified before adding its URL to the package.
-- Published privacy/terms currently defer operator identity/contact and retention details. Owner must resolve those statements before public launch. ChatGPT-specific sharing should be covered in the final policy.
+- Owner confirmed support contact **filip@ditrich.me**. The public [support page](https://invoicey.app/support) was deployed and browser-verified with the correct mailto contact; its URL is in the package.
+- Published privacy/terms now identify the operator and contact and explain ChatGPT sharing and no-payment behavior. Retention and remaining beta terms still require completion before public launch. These updates do not claim a completed legal review.
 - A real, reviewer-accessible recorded demo using a dedicated sample workspace.
 - Secure reviewer access independent of the owner's mailbox/MFA.
 - Public portal validation, domain/developer verification and owner-completed attestations.

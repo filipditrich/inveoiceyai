@@ -14,11 +14,13 @@ interface = openai["interface"]
 interface["displayName"] = "Invoicey"
 interface["developerName"] = "Ing. Filip Ditrich"
 interface["websiteURL"] = "https://invoicey.app/chatgpt"
+interface["supportURL"] = "https://invoicey.app/support"
 interface["privacyPolicyURL"] = "https://invoicey.app/privacy"
 interface["termsOfServiceURL"] = "https://invoicey.app/terms"
 interface["composerIcon"] = "./assets/logo.png"
 openai["publication"] = {
     "countries": ["CZ"],
+    "translations": {"cs-CZ": {"subtitle": "Faktury ve vaší konverzaci", "description": "Propojte svůj pracovní prostor Invoicey s ChatGPT. Vyhledejte faktury, připravte návrh a zkontrolujte odběratele, položky a částky. Vystavení, odeslání a zaznamenání úhrady vyžaduje potvrzení. Přístup respektuje oprávnění pracovního prostoru. Integrace neprovádí platby."}},
     "release_notes": "Connect an Invoicey workspace, search invoices and review interactive drafts in ChatGPT. OAuth access respects workspace permissions."
 }
 openai["review"] = {
@@ -52,4 +54,4 @@ with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as archive:
             if path.is_file():
                 archive.write(path, path.relative_to(SOURCE))
 print(OUT)
-print("Candidate only: support URL verification, policy completion, recorded demo and reviewer access remain pending.")
+print("Candidate only: policy completion, recorded demo and reviewer access remain pending.")
