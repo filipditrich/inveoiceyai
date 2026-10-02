@@ -11,15 +11,30 @@ Status: preparation only. No recorded demo or public submission yet.
 
 ## Isolated review workspace
 
-Use a dedicated Google or GitHub identity and a separate Invoicey workspace named
-Invoicey Review. Do not invite reviewers to the publisher's real workspace.
-The owner must complete account creation/sign-in and any identity checks. Review
-access must work without the owner's personal mailbox, phone or network. Validate
-that the provider's login does not strand reviewers at an MFA challenge.
+An operator-provisioned Invoicey Identity account now owns a separate workspace
+named Invoicey Review, with no platform-admin access. Reviewers do not need Google
+or GitHub: on `/sign-in`, choose **Continue with Invoicey Identity**, then enter the
+privately supplied login identifier and password. Public password signup and reset
+remain disabled. Do not invite reviewers to the publisher's real workspace.
 
-Configure a default issuer using confirmed details and seed sample drafts only.
-Keep credentials outside this repository and ZIP; enter them in the portal's
-secure reviewer fields. Do not weaken production authentication to make review easier.
+Production sign-in was confirmed by the owner and independently repeated in the
+canonical-domain browser on 2026-10-02. The reviewer lands in Invoicey Review,
+with no platform-admin menu. The only seeded invoices are unissued drafts:
+
+- REVIEW-CZ-001: Czech, CZK 4,000, five hours at 800, VAT 0.
+- REVIEW-EN-002: English, EUR 4,000, five hours at 800, VAT 0.
+
+Both use Review Client — SAMPLE and the default issuer Invoicey Review — DEMO
+ONLY. The issuer is fictional (IČO 00000000), not an ARES identity. Its bank
+field comes from the existing test fixture, not a verified payment destination;
+sample payments use cash and `do_not_pay`. Never issue or send these fixtures.
+No real customer records were copied. Credentials stay outside the repository
+and ZIP. Enter them only in the portal's secure reviewer fields.
+
+The owner approved the ChatGPT development connection on 2026-10-02. Its
+selected account is labelled Invoicey Review. The workspace app and the first
+chat list response both show exactly the two sample drafts above. These are development-connection results, not evidence against a saved
+submission draft.
 
 ## Rehearsal and recording
 
@@ -36,7 +51,7 @@ Rehearse this sequence before recording:
    line items, currency and total with the selected result.
 4. Ask: “Who is registered under IČO 09870113?” Verify the live returned identity.
 5. Ask: “Help me draft a 1 CZK invoice for one item called Review example, to
-   IČO 09870113, in English, payable by bank transfer. Ask for anything else you
+   IČO 09870113, in English, payable in cash. Ask for anything else you
    need. Do not issue it.” Supply dates and VAT treatment from the sample setup.
 6. Ask: “Change the draft's note to Thanks for reviewing. Keep it as a draft.”
    Verify only the note changed and the document remains unissued.
@@ -64,3 +79,49 @@ After the policy and recording are complete: verify the individual publisher,
 upload the rebuilt ZIP, connect its saved MCP version, run all five positive and
 three negative cases, resolve required scans, and have the owner complete legal
 attestations. Submit for review. Publication after approval is a separate step.
+
+## Retention implementation audit (2026-10-02)
+
+Verified source mechanisms: plan-based security-audit pruning and 12-month
+unclaimed-guest database cleanup. Neither establishes a complete deletion flow
+for registered users, uploaded artifacts, or provider backups. No end-to-end
+registered-account erasure workflow was found in the inspected auth configuration.
+The privacy page still explicitly says specific retention periods are pending.
+
+Before asking the operator to approve published promises, prepare a registered
+account closure procedure covering access revocation, ownership of shared
+workspaces, exports, database rows, uploaded artifacts and backup expiry. Confirm
+Neon/UploadThing retention from the actual project settings. Do not assume guest
+cleanup also removes hosted files or that an invoice archiving obligation applies
+identically to every data category.
+
+## Development rehearsal evidence (2026-10-02)
+
+- List: passed. ChatGPT and the workspace app listed the two seeded drafts,
+  with correct currencies, totals and draft statuses.
+- Detail: passed. REVIEW-EN-002 returned its client, demo issuer, dates, five
+  hours at EUR 800, zero VAT and EUR 4,000 total.
+- ARES lookup: passed. IČO 09870113 returned the publisher's public business
+  identity; it was not substituted for the configured demo seller.
+- Create: passed for persistence. ChatGPT created DRAFT-20261002-1654,
+  invoice ID `21fdfd40-e4b8-489b-a97e-de9ff2d1508d`, in the review workspace.
+  Read-back confirmed one Review example at CZK 1, English, cash, demo seller,
+  null issuedAt and null paidAt. Dates and VAT treatment were supplied up front.
+- Update: passed. ChatGPT changed the note to Thanks for reviewing. Database
+  read-back and the native workspace detail agree; amount and item unchanged.
+- Native controls: Refresh revealed the new draft; opening it rendered the
+  actual detail and note. No issue/payment/send action was performed.
+- Bank-transfer negative: safe refusal, but initial explanation focused on the
+  demo restriction rather than clearly stating the platform capability limit.
+  A follow-up explicitly confirmed that chat tools cannot initiate transfers
+  and that recording payment is bookkeeping only.
+- VAT-filing negative: passed. Explained there is no VAT-return submission
+  function and did not claim submission.
+- Historical-import negative: passed. Directed historical import to the web
+  app, warned against importing a real archive into this demo workspace, and
+  did not create replacement invoices.
+
+These results do not establish native iOS/Android host compatibility, the
+optional skill wrapper, or the final saved submission version. The floating chat
+showed textual tool summaries beside the interactive workspace; a separate
+inline draft card in that chat was not observed.
