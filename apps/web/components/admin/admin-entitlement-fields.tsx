@@ -65,6 +65,7 @@ export async function AdminEntitlementFields({
             id={id("auditRetentionDays")}
             inputMode="numeric"
             name="auditRetentionDays"
+            max={365}
             placeholder={t("foreverPlaceholder")}
           />
         </div>

@@ -12,20 +12,7 @@ export interface AuditRetentionResult {
   deleted: number;
 }
 
-/**
- * Deletes security-audit events past each workspace's plan retention
- * (ADR 0035).
- *
- * Grouped by plan rather than iterated per workspace: retention is a plan
- * property, so one DELETE per distinct cutoff covers every workspace on it.
- * `null` retention means keep forever and is skipped entirely — never
- * translated into a very large number, which would silently start deleting on
- * an Enterprise workspace the day someone changed the constant.
- *
- * Events with no `workspace_id` (account-scoped: sign-ins, device trust) are
- * never touched here. They belong to a user, not a workspace, so no workspace's
- * plan governs them.
- */
+/** Prune workspace logs by plan and all security logs at the 365-day ceiling. */
 export async function pruneAuditEvents(
   db: InvoiceyDb,
   now = new Date(),
@@ -50,7 +37,17 @@ export async function pruneAuditEvents(
     byCutoff.set(days, [...(byCutoff.get(days) ?? []), row.workspaceId]);
   }
 
-  let deleted = 0;
+  // Includes account-scoped events and workspaces without a matching plan.
+  const expired = await db
+    .delete(securityAuditEvents)
+    .where(
+      lt(
+        securityAuditEvents.createdAt,
+        new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000),
+      ),
+    )
+    .returning({ id: securityAuditEvents.id });
+  let deleted = expired.length;
   let scanned = 0;
 
   for (const [days, workspaceIds] of byCutoff) {

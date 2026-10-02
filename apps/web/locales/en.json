@@ -3704,7 +3704,7 @@
       "affects": "{count, plural, one {# workspace resolves to this plan.} other {# workspaces resolve to this plan.}}",
       "save": "Save entitlements",
       "unlimitedPlaceholder": "Unlimited",
-      "foreverPlaceholder": "Keep forever",
+      "foreverPlaceholder": "Up to 365 days",
       "noGrants": "None",
       "kind": {
         "builtin": "Built-in",

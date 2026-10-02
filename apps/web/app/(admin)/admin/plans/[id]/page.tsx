@@ -162,6 +162,7 @@ export default async function AdminPlanDetailPage({
                 id="auditRetentionDays"
                 inputMode="numeric"
                 name="auditRetentionDays"
+                max={365}
                 placeholder={t("foreverPlaceholder")}
               />
             </div>

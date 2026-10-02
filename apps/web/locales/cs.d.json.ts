@@ -3689,7 +3689,7 @@ declare const messages: {
       "affects": "{count, plural, one {Na tento tarif se překládá # workspace.} few {Na tento tarif se překládají # workspacy.} other {Na tento tarif se překládá # workspaců.}}",
       "save": "Uložit oprávnění",
       "unlimitedPlaceholder": "Neomezeně",
-      "foreverPlaceholder": "Uchovávat trvale",
+      "foreverPlaceholder": "Nejvýše 365 dní",
       "noGrants": "Žádné",
       "kind": {
         "builtin": "Vestavěný",

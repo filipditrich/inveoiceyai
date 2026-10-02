@@ -138,7 +138,7 @@ export function resolveEntitlements(
 ): Entitlements {
   const base = EntitlementsSchema.parse(withBaseFeatures(planEntitlements));
   if (!isPlainObject(overrides)) {
-    return base;
+    return capAuditRetention(base);
   }
 
   const merged: Record<string, unknown> = { ...base };
@@ -151,7 +151,17 @@ export function resolveEntitlements(
         : value;
   }
 
-  return EntitlementsSchema.parse(merged);
+  return capAuditRetention(EntitlementsSchema.parse(merged));
+}
+
+/** Public retention ceiling also applies to legacy plans and overrides. */
+function capAuditRetention(entitlements: Entitlements): Entitlements {
+  return {
+    ...entitlements,
+    audit: {
+      retentionDays: Math.min(entitlements.audit.retentionDays ?? 365, 365),
+    },
+  };
 }
 
 /** Dot-path into resolved entitlements, for `requireEntitlement()` call sites. */

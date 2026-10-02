@@ -114,7 +114,7 @@ const ENTERPRISE: PlanSeed = {
       invoiceRender: true,
     },
     looks: { apply: "catalog" },
-    audit: { retentionDays: null },
+    audit: { retentionDays: 365 },
   },
 };
 
