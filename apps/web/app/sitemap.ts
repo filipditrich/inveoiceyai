@@ -7,6 +7,7 @@ const PUBLIC_ROUTES = [
   "",
   "/brand",
   "/chatgpt",
+  "/support",
   "/privacy",
   "/terms",
   "/cookies",

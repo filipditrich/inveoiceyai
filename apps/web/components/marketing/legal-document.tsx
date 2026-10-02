@@ -5,11 +5,13 @@ export function LegalDocument({
   description,
   eyebrow,
   title,
+  updated,
 }: Readonly<{
   children: ReactNode;
   description: string;
   eyebrow: string;
   title: string;
+  updated?: string;
 }>) {
   return (
     <article className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
@@ -24,7 +26,7 @@ export function LegalDocument({
           {description}
         </p>
         <p className="mt-4 text-xs text-muted-foreground">
-          Poslední aktualizace: 11. srpna 2026
+          {updated ?? "Poslední aktualizace: 11. srpna 2026"}
         </p>
       </header>
       <div className="legal-copy pt-10">{children}</div>

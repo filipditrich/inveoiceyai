@@ -25,8 +25,9 @@ Run `python3 scripts/package-chatgpt-submission.py`. It creates `dist/invoicey-p
 
 Readiness gaps:
 
-- Verified publisher identity, country targeting and commerce declaration: requested from owner, not inferred.
-- Support contact: owner selected invoicey.app as the domain; actual support contact still needed.
+- Owner confirmed the individual publisher: **Ing. Filip Ditrich**. Package author/developer name is populated; portal identity verification remains outstanding.
+- Owner confirmed **Czechia only** (`CZ`) and **no buying or payments through the integration**. Country targeting is populated. The package declares `review.commerce: false`; invoice payment recording is bookkeeping, not payment processing.
+- Owner confirmed support contact **filip@ditrich.me**. A public support page on invoicey.app still needs to be published and verified before adding its URL to the package.
 - Published privacy/terms currently defer operator identity/contact and retention details. Owner must resolve those statements before public launch. ChatGPT-specific sharing should be covered in the final policy.
 - A real, reviewer-accessible recorded demo using a dedicated sample workspace.
 - Secure reviewer access independent of the owner's mailbox/MFA.

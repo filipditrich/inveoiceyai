@@ -319,7 +319,8 @@ declare const messages: {
       "cookieSettings": "Nastavení cookies",
       "brand": "Brand materiály",
       "copyright": "© {year} Invoicey · Neveřejná beta",
-      "legalNav": "Právní informace"
+      "legalNav": "Právní informace",
+      "support": "Podpora"
     },
     "hero": {
       "titleLine1": "Fakturace, která začíná daty.",
@@ -534,7 +535,7 @@ declare const messages: {
         "eyebrow": "Právní informace",
         "title": "Podmínky používání",
         "description": "Pravidla pro používání aktuální beta verze Invoicey a rozdělení odpovědnosti mezi službu a uživatele.",
-        "betaNotice": "Neveřejná beta verze. Tyto podmínky jsou pracovní verzí pro omezený beta provoz. Identifikace provozovatele, placené tarify, úroveň podpory a komerční podmínky budou doplněny před veřejným spuštěním.",
+        "betaNotice": "Soukromá beta. Tyto podmínky zůstávají pracovní verzí pro omezené testování. Před veřejným spuštěním je nutné dokončit úroveň podpory a zbývající obchodní podmínky.",
         "s1Title": "1. Služba",
         "s1Body": "Invoicey je nástroj pro přípravu, správu, import, vykreslení a odesílání fakturačních dokladů. Některé funkce mohou být dostupné jako beta, experiment nebo pouze vybraným uživatelům. Aktuální rozsah služby se může během beta provozu měnit.",
         "s2Title": "2. Účet a přístup",
@@ -552,7 +553,11 @@ declare const messages: {
         "s8Title": "8. Omezení odpovědnosti",
         "s8Body": "V rozsahu dovoleném právem neodpovídá beta služba za nepřímou škodu, ušlý zisk ani důsledky rozhodnutí založených na nezkontrolovaném automatizovaném výstupu. Tím nejsou dotčena práva, která podle zákona nelze smluvně omezit.",
         "s9Title": "9. Změny podmínek",
-        "s9Body": "Podmínky mohou být upraveny spolu s vývojem služby. Nová verze bude zveřejněna zde s datem aktualizace. Pokračování v používání po účinnosti změny znamená přijetí aktualizovaných podmínek, pokud právní předpis nevyžaduje jiný postup."
+        "s9Body": "Podmínky mohou být upraveny spolu s vývojem služby. Nová verze bude zveřejněna zde s datem aktualizace. Pokračování v používání po účinnosti změny znamená přijetí aktualizovaných podmínek, pokud právní předpis nevyžaduje jiný postup.",
+        "contactTitle": "Provozovatel a kontakt",
+        "updated": "Aktualizováno: 2. října 2026",
+        "chatgptTitle": "Integrace s ChatGPT",
+        "chatgptBody": "Integrace s ChatGPT nenabízí nákupy ani nezpracovává platby. Označení faktury jako zaplacené mění její evidovaný stav; nepřevádí peníze. Před vystavením, odesláním nebo zaznamenáním úhrady zkontrolujte údaje a akci potvrďte."
       },
       "privacy": {
         "metaTitle": "Ochrana soukromí",
@@ -560,7 +565,7 @@ declare const messages: {
         "eyebrow": "Právní informace",
         "title": "Ochrana soukromí",
         "description": "Přehled údajů, které Invoicey potřebuje k provozu služby, proč je zpracovává a jaké máte možnosti.",
-        "betaNotice": "Neveřejná beta verze. Invoicey je nyní poskytováno omezenému okruhu uživatelů. Úplné identifikační a kontaktní údaje provozovatele budou doplněny před veřejným komerčním spuštěním. Do té doby použijte pro požadavky stejný kontaktní kanál, kterým jste získali přístup.",
+        "betaNotice": "Soukromá beta. Připravujeme veřejné vydání; před spuštěním je ještě nutné doplnit níže uvedená pravidla uchovávání údajů.",
         "s1Title": "1. Jaké údaje zpracováváme",
         "s1Intro": "Podle toho, jak Invoicey používáte, může služba zpracovávat:",
         "s1Items": "jméno, e-mail a profilový obrázek z Google nebo GitHub účtu;členství a roli v pracovním prostoru;údaje dodavatelů, klientů a faktur, včetně kontaktních údajů, bankovních údajů, IČO, DIČ a položek dokladů;nahrané logo, podpis, razítko a archivní fakturační soubory;záznamy o odeslání, doručení a stavu fakturačních e-mailů;technické bezpečnostní záznamy a, pokud s tím souhlasíte, anonymní souhrnné měření návštěvnosti.",
@@ -576,7 +581,11 @@ declare const messages: {
         "s6Title": "6. Vaše práva",
         "s6Body": "V mezích GDPR můžete požádat o přístup, opravu, výmaz, omezení zpracování, přenositelnost nebo vznést námitku. Souhlas s měřením lze odvolat okamžitě přes nastavení cookies. Některé údaje z účetních dokladů nemusí být možné vymazat, pokud jejich uchování vyžaduje zákon.",
         "s7Title": "7. Zabezpečení a změny",
-        "s7Body": "Přístup do aplikace používá OAuth bez vlastního hesla u Invoicey. Pracovní data jsou vždy dotazována v kontextu ověřeného členství v pracovním prostoru. Žádné internetové službě však nelze slíbit absolutní bezpečnost. Tuto stránku upravíme při změně významného způsobu zpracování a zveřejníme nové datum aktualizace."
+        "s7Body": "Přístup do aplikace používá OAuth bez vlastního hesla u Invoicey. Pracovní data jsou vždy dotazována v kontextu ověřeného členství v pracovním prostoru. Žádné internetové službě však nelze slíbit absolutní bezpečnost. Tuto stránku upravíme při změně významného způsobu zpracování a zveřejníme nové datum aktualizace.",
+        "contactTitle": "Provozovatel a kontakt",
+        "updated": "Aktualizováno: 2. října 2026",
+        "chatgptTitle": "Propojení s ChatGPT",
+        "chatgptBody": "Při propojení s ChatGPT povolíte přístup k vybranému pracovnímu prostoru. Odpovědi nástrojů mohou s ChatGPT sdílet vyžádané údaje o fakturách, odběratelích a dodavateli, včetně kontaktů, položek, částek a odkazů na dokumenty. Schválené změny se mohou uložit do Invoicey. OpenAI zpracovává informace přijaté službou ChatGPT podle vlastních podmínek a nastavení soukromí. Odpojení zastaví další autorizovaný přístup; nevymaže informace, které už jsou v konverzacích ChatGPT."
       },
       "cookies": {
         "metaTitle": "Používání cookies",
@@ -4057,6 +4066,15 @@ declare const messages: {
     "mobileBody": "Zobrazení se přizpůsobí telefonu. Dostupnost v aplikacích ChatGPT pro iOS a Android závisí na podpoře hostitele a ověříme ji před oznámením nativní mobilní podpory.",
     "guide": "Už testujete? Pomoc s připojením",
     "installPending": "Veřejnou instalaci připravujeme"
+  },
+  "Support": {
+    "title": "Podpora Invoicey",
+    "description": "Pomoc s Invoicey a propojením s ChatGPT.",
+    "publisher": "Vydavatel a kontakt",
+    "help": "Popište, co jste chtěli udělat a co se stalo. Přiložte chybovou zprávu nebo snímek obrazovky se skrytými soukromými údaji. Nikdy neposílejte hesla, API klíče ani přístupové tokeny k bance.",
+    "chatgpt": "Pomoc s propojením s ChatGPT",
+    "privacy": "Soukromí a žádosti o údaje",
+    "privacyBody": "Žádosti o přístup k údajům, opravu nebo výmaz posílejte na stejnou adresu. Uveďte e-mail účtu a pracovní prostor; obsah faktur přikládejte pouze na vyžádání."
   }
 };
 export default messages;

@@ -316,7 +316,8 @@
       "cookieSettings": "Cookie settings",
       "brand": "Brand assets",
       "copyright": "© {year} Invoicey · Private beta",
-      "legalNav": "Legal"
+      "legalNav": "Legal",
+      "support": "Support"
     },
     "hero": {
       "titleLine1": "Invoicing that starts with data.",
@@ -531,7 +532,7 @@
         "eyebrow": "Legal",
         "title": "Terms of Use",
         "description": "Rules for using the current beta version of Invoicey and the division of responsibility between the service and the user.",
-        "betaNotice": "Private beta. These terms are a working version for the limited beta. Operator identification, paid plans, support level, and commercial terms will be added before public launch.",
+        "betaNotice": "Private beta. These terms remain a working version for limited testing. Support levels and the remaining commercial terms must be finalized before public launch.",
         "s1Title": "1. The Service",
         "s1Body": "Invoicey is a tool for preparing, managing, importing, rendering, and sending invoicing documents. Some features may be available as beta, experimental, or only to selected users. The scope of the service may change during the beta.",
         "s2Title": "2. Account & Access",
@@ -549,7 +550,11 @@
         "s8Title": "8. Limitation of Liability",
         "s8Body": "To the extent permitted by law, the beta service is not liable for indirect damage, lost profits, or consequences of decisions based on unreviewed automated output. This does not affect rights that cannot be contractually limited under applicable law.",
         "s9Title": "9. Changes to Terms",
-        "s9Body": "Terms may be updated as the service evolves. A new version will be published here with the update date. Continued use after the effective date of a change constitutes acceptance of the updated terms, unless law requires otherwise."
+        "s9Body": "Terms may be updated as the service evolves. A new version will be published here with the update date. Continued use after the effective date of a change constitutes acceptance of the updated terms, unless law requires otherwise.",
+        "contactTitle": "Operator and contact",
+        "updated": "Updated: 2 October 2026",
+        "chatgptTitle": "ChatGPT integration",
+        "chatgptBody": "The ChatGPT integration does not offer purchases or process payments. Recording an invoice as paid updates its accounting status; it does not transfer money. Review invoice details and confirm issuance, sending or payment recording before those actions."
       },
       "privacy": {
         "metaTitle": "Privacy",
@@ -557,7 +562,7 @@
         "eyebrow": "Legal",
         "title": "Privacy",
         "description": "An overview of data Invoicey needs to operate, why it processes them, and what choices you have.",
-        "betaNotice": "Private beta. Invoicey is currently provided to a limited circle of users. Full operator identification and contact details will be added before public commercial launch. Until then, use the same contact channel through which you gained access.",
+        "betaNotice": "Private beta. Public release preparation is in progress; the retention policy below still needs completion before public launch.",
         "s1Title": "1. What Data We Process",
         "s1Intro": "Depending on how you use Invoicey, the service may process:",
         "s1Items": "name, email, and profile picture from your Google or GitHub account;membership and role in a workspace;issuer, client, and invoice data including contacts, bank details, ICO, DIC, and line items;uploaded logo, signature, stamp, and archival invoicing files;records of sending, delivery, and status of invoicing emails;technical security logs and, if you consent, anonymous aggregate traffic measurement.",
@@ -573,7 +578,11 @@
         "s6Title": "6. Your Rights",
         "s6Body": "Within GDPR limits you may request access, correction, erasure, restriction of processing, portability, or raise an objection. Measurement consent can be withdrawn immediately via cookie settings. Some data from accounting documents may not be erasable if required by law.",
         "s7Title": "7. Security & Changes",
-        "s7Body": "Application access uses OAuth without a separate Invoicey password. Working data is always queried in the context of verified workspace membership. No internet service can promise absolute security. This page will be updated when processing changes significantly, and a new update date will be published."
+        "s7Body": "Application access uses OAuth without a separate Invoicey password. Working data is always queried in the context of verified workspace membership. No internet service can promise absolute security. This page will be updated when processing changes significantly, and a new update date will be published.",
+        "contactTitle": "Operator and contact",
+        "updated": "Updated: 2 October 2026",
+        "chatgptTitle": "ChatGPT connection",
+        "chatgptBody": "When you connect ChatGPT, Invoicey authorizes access to the workspace you select. Tool responses can share requested invoice, client and issuer details with ChatGPT, including contacts, line items, amounts and document links. Approved write actions can save changes in Invoicey. OpenAI handles information received by ChatGPT under its own terms and privacy settings. Disconnecting stops future authorized access; it does not erase information already in your ChatGPT conversations."
       },
       "cookies": {
         "metaTitle": "Cookie Policy",
@@ -4072,5 +4081,14 @@
     "mobileBody": "The views adapt to phone screens. Availability in the ChatGPT iOS and Android apps depends on host support and will be confirmed before we advertise native mobile access.",
     "guide": "Already testing? Connection help",
     "installPending": "Public installation coming soon"
+  },
+  "Support": {
+    "title": "Invoicey support",
+    "description": "Help with Invoicey and the ChatGPT integration.",
+    "publisher": "Publisher and contact",
+    "help": "Describe what you were trying to do and what happened. Include an error message or a screenshot with private details hidden. Never send passwords, API keys or bank access tokens.",
+    "chatgpt": "ChatGPT connection help",
+    "privacy": "Privacy and data requests",
+    "privacyBody": "For access, correction or deletion requests, contact the same address. Identify your account email and workspace; do not attach invoice contents unless requested."
   }
 }

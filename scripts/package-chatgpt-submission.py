@@ -7,18 +7,23 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "plugins/invoicey"
 OUT = ROOT / "dist/invoicey-public-review-candidate.zip"
 manifest = json.loads((SOURCE / "plugin.json").read_text())
+manifest["author"] = {"name": "Ing. Filip Ditrich", "email": "filip@ditrich.me", "url": "https://invoicey.app"}
 openai = manifest["extensions"]["com.openai"]
 openai.pop("apps", None)
 interface = openai["interface"]
 interface["displayName"] = "Invoicey"
+interface["developerName"] = "Ing. Filip Ditrich"
 interface["websiteURL"] = "https://invoicey.app/chatgpt"
 interface["privacyPolicyURL"] = "https://invoicey.app/privacy"
 interface["termsOfServiceURL"] = "https://invoicey.app/terms"
 interface["composerIcon"] = "./assets/logo.png"
 openai["publication"] = {
+    "countries": ["CZ"],
     "release_notes": "Connect an Invoicey workspace, search invoices and review interactive drafts in ChatGPT. OAuth access respects workspace permissions."
 }
 openai["review"] = {
+    "commerce": False,
+    "commerce_description": "No purchases or payment processing. Recording an invoice payment updates bookkeeping only; it does not move money.",
     "test_cases": {
         "positive": [
             {"prompt": "Show my recent invoices in Invoicey.", "description": "Use a dedicated reviewer workspace containing sample invoices, never the publisher's real invoices.", "tools_triggered": "list_invoices", "expected_behavior": "Return only the connected workspace's invoices. Display amounts, currencies and statuses from the tool response in the interactive list."},
@@ -47,4 +52,4 @@ with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as archive:
             if path.is_file():
                 archive.write(path, path.relative_to(SOURCE))
 print(OUT)
-print("Candidate only: publisher/countries/commerce, support URL, policy completion, recorded demo and reviewer access remain pending.")
+print("Candidate only: support URL verification, policy completion, recorded demo and reviewer access remain pending.")

@@ -71,6 +71,12 @@ export async function MarketingFooter() {
             </Link>
             <Link
               className="transition-colors hover:text-foreground"
+              href="/support"
+            >
+              {t("support")}
+            </Link>
+            <Link
+              className="transition-colors hover:text-foreground"
               href="/privacy"
             >
               {t("privacy")}

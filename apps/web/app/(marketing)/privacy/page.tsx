@@ -28,8 +28,16 @@ export default async function PrivacyPage() {
       eyebrow={t("eyebrow")}
       title={t("title")}
       description={t("description")}
+      updated={t("updated")}
     >
       <aside>{t("betaNotice")}</aside>
+      <h2>{t("contactTitle")}</h2>
+      <p>
+        Ing. Filip Ditrich ·{" "}
+        <a href="mailto:filip@ditrich.me">filip@ditrich.me</a>
+      </p>
+      <h2>{t("chatgptTitle")}</h2>
+      <p>{t("chatgptBody")}</p>
       <h2>{t("s1Title")}</h2>
       <p>{t("s1Intro")}</p>
       <ul>
