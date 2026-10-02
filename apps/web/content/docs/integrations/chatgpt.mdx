@@ -17,7 +17,8 @@ Your workspace role and plan determine which actions are available.
 
 1. Open ChatGPT's app or plugin connection settings. If your account supports custom MCP
    connections, add **Invoicey** using `https://invoicey.app/api/mcp` and choose **OAuth**.
-   If you have an Invoicey private plugin invitation, install it and use its connect action.
+   Use **Plugins → Add → Create MCP App** for the hosted connection. Developer mode may
+   need to be enabled in **Settings → Security and login**.
 2. Sign in to Invoicey using Google or GitHub.
 3. Review the requesting application's name, choose the workspace and approve the requested
    read/write access. Offline access lets the connection renew without signing in for every request.
@@ -27,6 +28,17 @@ Availability of custom connections and interactive views depends on your ChatGPT
 host. Navigation entrypoints and invoice mentions use OpenAI MCP Extensions where supported;
 other MCP Apps hosts can render the invoice cards. This is a custom integration, not a claim of
 public directory approval.
+
+## Desktop, web and mobile
+
+An imported plugin that bundles an MCP server URL is marked **Desktop only** by ChatGPT,
+even when the URL is hosted online. Installing that package on desktop does not unlock it
+on your phone. Invoicey's current private package uses this desktop distribution path.
+
+Web and mobile access require a registered ChatGPT app connection. Invoicey's hosted server
+and invoice cards support this architecture; actual ChatGPT mobile availability is still
+being validated. Do not treat a phone-size screenshot as proof of mobile app support.
+Composer invoice mentions are currently available only in the ChatGPT desktop app.
 
 ## From a sentence to an invoice
 
