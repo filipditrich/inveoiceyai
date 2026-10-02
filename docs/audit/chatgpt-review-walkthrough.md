@@ -1,6 +1,6 @@
 # Invoicey public review walkthrough
 
-Status: preparation only. No recorded demo or public submission yet.
+Status: recorded demo hosted; policy completion and public submission still pending.
 
 ## Confirmed listing
 
@@ -125,3 +125,13 @@ These results do not establish native iOS/Android host compatibility, the
 optional skill wrapper, or the final saved submission version. The floating chat
 showed textual tool summaries beside the interactive workspace; a separate
 inline draft card in that chat was not observed.
+
+## Hosted recording
+
+Demo: https://tc99v5dgse.ufs.sh/f/8wSnoaZkwaDSnWVPxpG4kZHoUE69XcWObR0r3qaFdwieAhgp
+
+Recorded walkthrough covers list, detail, ARES lookup, creation of
+DRAFT-20261002-1705, note update and all three unsupported-request cases.
+Original MOV preserved on the operator Desktop. MP4 copy uploaded to Invoicey
+UploadThing storage with inline disposition. Anonymous byte-range request
+verified separately; no reviewer login is required to retrieve the video.

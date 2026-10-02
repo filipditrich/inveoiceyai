@@ -24,6 +24,7 @@ openai["publication"] = {
     "release_notes": "Connect an Invoicey workspace, search invoices and review interactive drafts in ChatGPT. OAuth access respects workspace permissions."
 }
 openai["review"] = {
+    "demo_recording_url": "https://tc99v5dgse.ufs.sh/f/8wSnoaZkwaDSnWVPxpG4kZHoUE69XcWObR0r3qaFdwieAhgp",
     "commerce": False,
     "commerce_description": "No purchases or payment processing. Recording an invoice payment updates bookkeeping only; it does not move money.",
     "test_cases": {
@@ -54,4 +55,4 @@ with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as archive:
             if path.is_file():
                 archive.write(path, path.relative_to(SOURCE))
 print(OUT)
-print("Candidate only: policy completion, recorded demo and saved submission validation remain pending.")
+print("Candidate only: policy completion and saved submission validation remain pending.")
