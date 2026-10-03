@@ -44,8 +44,14 @@ openai["review"] = {
 }
 mcp = {
     "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
-    "mcpServers": {"invoicey": {"type": "http", "url": "https://invoicey.app/api/mcp"}}
+    "mcpServers": {"invoicey": {"type": "streamable-http", "url": "https://invoicey.app/api/mcp"}}
 }
+cases = openai["review"].pop("test_cases")
+mapping = {"prompt": "userPrompt", "tools_triggered": "toolsTriggered", "expected_behavior": "expectedOutput"}
+mcp["mcpServers"]["invoicey"]["extensions"] = {"com.openai": {"review": {
+    "testCases": [{mapping.get(k, k): v for k, v in case.items()} for case in cases["positive"]],
+    "negativeTestCases": [{mapping.get(k, k): v for k, v in case.items()} for case in cases["negative"]],
+}}}
 OUT.parent.mkdir(exist_ok=True)
 with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as archive:
     archive.writestr("plugin.json", json.dumps(manifest, indent=2) + "\n")
