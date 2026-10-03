@@ -12,6 +12,8 @@ openai = manifest["extensions"]["com.openai"]
 openai.pop("apps", None)
 interface = openai["interface"]
 interface["displayName"] = "Invoicey"
+interface["category"] = "Finance"
+interface["longDescription"] = "Invoice management for freelancers and businesses using Invoicey in Czechia. Search invoices, draft and review line items, amounts and due dates, then explicitly confirm issuing, sending or recording a payment. Uses your workspace issuer, Czech business lookup, PDF and ISDOC. Access follows your workspace permissions. Recording payment is bookkeeping only: this integration cannot move money, make purchases or file tax returns."
 interface["developerName"] = "Ing. Filip Ditrich"
 interface["websiteURL"] = "https://invoicey.app/chatgpt"
 interface["supportURL"] = "https://invoicey.app/support"

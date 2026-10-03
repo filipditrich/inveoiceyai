@@ -135,3 +135,24 @@ DRAFT-20261002-1705, note update and all three unsupported-request cases.
 Original MOV preserved on the operator Desktop. MP4 copy uploaded to Invoicey
 UploadThing storage with inline disposition. Anonymous byte-range request
 verified separately; no reviewer login is required to retrieve the video.
+
+## Public submission draft — 3 October 2026
+
+Saved in the verified individual publisher account:
+https://platform.openai.com/plugins/manage/plugin_asdk_app_6ac15c60bad48191b03d0059a8f7561c
+
+- App: asdk_app_6ac15c60bad48191b03d0059a8f7561c.
+- Metadata version: appsub_6ac15c60bb008191bb2ca12d5a0367d4.
+- Public package: Invoicey 1.0.3, Finance category, Ing. Filip Ditrich.
+- Metadata and invoicing skill checks passed with no issues.
+- Domain invoicey.app verified using the portal-issued well-known challenge.
+- Package cases use per-server review metadata; plugin-level case mapping was
+  rejected by this portal. MCP transport uses streamable-http.
+- Public support-handled privacy and retention policy is deployed and inspected.
+- OAuth consent reached the isolated Invoicey Review workspace. New access grant
+  awaits operator confirmation. No submission or approval has occurred yet.
+- Remaining: OAuth discovery, saved-version tests/scans, reviewer access fields,
+  review targeting read-back, owner declarations and submission confirmation.
+- After approval/publication: verify actual public URL and update homepage,
+  /chatgpt, setup guidance and Czech/English availability copy. Do not link the
+  development app as a publicly installable extension.
