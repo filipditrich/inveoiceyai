@@ -109,7 +109,8 @@ declare const messages: {
       "sum_mismatch": "Fio přijalo jinou částku, než je v dávce.",
       "run_create_failed": "Platební dávku se nepodařilo vytvořit.",
       "look_not_entitled": "Váš tarif smí použít jen vzhled Classic. Pro ostatní vzhledy přejděte na vyšší tarif.",
-      "invalid_look": "Tento vzhled není k dispozici."
+      "invalid_look": "Tento vzhled není k dispozici.",
+      "issuer_quota": "Dosáhli jste limitu firem svého tarifu. Pro přidání další firmy změňte tarif v nastavení pracovního prostoru."
     }
   },
   "Toasts": {
@@ -2643,6 +2644,11 @@ declare const messages: {
         "advance": "Záloha (ZF)",
         "credit_note": "Dobropis (DOB)"
       }
+    },
+    "quota": {
+      "title": "Dosáhli jste limitu firem",
+      "description": "Váš tarif umožňuje {limit, plural, one {# firmu} few {# firmy} other {# firem}} v tomto pracovním prostoru. Pro přidání další firmy zvolte vyšší tarif. Stávající firmy zůstávají dostupné.",
+      "plans": "Zobrazit tarify"
     }
   },
   "Settings": {

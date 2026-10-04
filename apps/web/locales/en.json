@@ -106,7 +106,8 @@
       "sum_mismatch": "Fio accepted a different total than this run.",
       "run_create_failed": "Could not create the payment run.",
       "look_not_entitled": "Your plan can only apply the Classic look. Upgrade to apply other looks.",
-      "invalid_look": "That look is not available."
+      "invalid_look": "That look is not available.",
+      "issuer_quota": "You have reached your plan’s company limit. To add another company, change your plan in workspace settings."
     }
   },
   "Toasts": {
@@ -2640,6 +2641,11 @@
         "advance": "Advance (ZF)",
         "credit_note": "Credit note (DOB)"
       }
+    },
+    "quota": {
+      "title": "You have reached your company limit",
+      "description": "Your plan allows {limit, plural, one {# company} other {# companies}} in this workspace. Choose a higher plan to add another company. Your existing companies remain available.",
+      "plans": "View plans"
     }
   },
   "Settings": {

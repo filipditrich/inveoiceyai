@@ -10,9 +10,8 @@ import { loadEntitlements } from "./entitlements";
 /**
  * Plan quotas, enforced on the **write path only** (ADR 0035).
  *
- * Never called on a read. A workspace that exceeds its limits after a downgrade
- * stays fully readable and simply cannot grow — anything else would make every
- * plan change a data-loss event, and nobody would dare touch one.
+ * Assertions guard mutations; read helpers only inform the creation UI.
+ * A workspace that exceeds its limits after a downgrade stays readable.
  */
 
 export class QuotaExceededError extends ForbiddenError {
@@ -25,19 +24,25 @@ export class QuotaExceededError extends ForbiddenError {
   }
 }
 
-/** Blocks creating an issuer beyond the plan's ceiling. */
-export async function assertIssuerQuota(workspaceId: string): Promise<void> {
+/** Read the current limit so creation screens can explain it before data entry. */
+export async function getIssuerQuota(workspaceId: string) {
   const { entitlements } = await loadEntitlements(workspaceId);
-  const max = entitlements.issuers.max;
-  if (max === null) return;
+  const limit = entitlements.issuers.max;
+  if (limit === null) return { limit, canCreate: true };
 
   const rows = await db
     .select({ id: issuerBusinesses.id })
     .from(issuerBusinesses)
     .where(eq(issuerBusinesses.workspaceId, workspaceId));
 
-  if (!hasQuotaRoom(max, rows.length)) {
-    throw new QuotaExceededError("issuers", max);
+  return { limit, canCreate: hasQuotaRoom(limit, rows.length) };
+}
+
+/** Rechecks the quota on submission, including forms opened before a plan change. */
+export async function assertIssuerQuota(workspaceId: string): Promise<void> {
+  const { limit, canCreate } = await getIssuerQuota(workspaceId);
+  if (!canCreate && limit !== null) {
+    throw new QuotaExceededError("issuers", limit);
   }
 }
 

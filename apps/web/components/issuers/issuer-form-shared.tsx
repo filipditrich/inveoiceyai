@@ -198,6 +198,7 @@ const INVALID_MESSAGE_KEYS = [
   "snapshot_validation",
   "missing_row",
   "save_failed",
+  "issuer_quota",
 ] as const;
 
 export function lookupMessageFromInvalid(

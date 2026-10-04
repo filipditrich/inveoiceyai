@@ -3,7 +3,10 @@
 import { saveWelcomeClientFromDraft } from "@/actions/clients";
 import { requireWritableWorkspace } from "@/lib/auth/session";
 import { assertCan } from "@/lib/authz/can";
-import { assertIssuerQuota } from "@/lib/entitlements/quotas";
+import {
+  assertIssuerQuota,
+  QuotaExceededError,
+} from "@/lib/entitlements/quotas";
 import {
   DEFAULT_NUMBERING_TEMPLATES,
   ISSUER_DOC_TYPES,
@@ -379,12 +382,18 @@ async function maybeSaveWelcomeClient(formData: FormData): Promise<void> {
 export async function createIssuer(formData: FormData): Promise<void> {
   const { workspaceId } = await requireWritableWorkspace();
   await assertCan("issuers:manage");
-  // Write path only: an over-limit workspace after a downgrade stays readable,
-  // it just cannot add another issuer (ADR 0035).
-  await assertIssuerQuota(workspaceId);
   const rowId = optionalTrim(formData.get("id")) ?? crypto.randomUUID();
   const next = optionalTrim(formData.get("next"));
   const errBase = next === "welcome" ? "/welcome" : "/issuers/new";
+
+  try {
+    await assertIssuerQuota(workspaceId);
+  } catch (error) {
+    if (error instanceof QuotaExceededError) {
+      redirect(`${errBase}?invalid=issuer_quota`);
+    }
+    throw error;
+  }
 
   const identity = parseIdentityFromForm(formData);
   if (!identity.ok) {

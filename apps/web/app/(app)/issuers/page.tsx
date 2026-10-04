@@ -1,14 +1,16 @@
+import { IssuerQuotaNotice } from "@/components/issuers/issuer-quota-notice";
 import { IssuersDataGrid } from "@/components/issuers/issuers-data-grid";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { requireWorkspace } from "@/lib/auth/session";
+import { requireEntitlements } from "@/lib/entitlements/entitlements";
 import { invalidMessage } from "@/lib/invalid-message";
 import { desc, eq } from "drizzle-orm";
 import { BriefcaseBusinessIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-import { issuerBusinesses } from "@invoicey/db";
+import { hasQuotaRoom, issuerBusinesses } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
 import {
   IssuerSnapshotSchema,
@@ -29,17 +31,23 @@ export default async function IssuersPage({
 }: {
   searchParams: Search;
 }) {
-  const [t, tErrors, sp, { workspaceId }] = await Promise.all([
-    getTranslations("Issuers"),
-    getTranslations("Errors.invalid"),
-    searchParams,
-    requireWorkspace(),
-  ]);
+  const [t, tErrors, sp, { workspaceId }, { entitlements }] = await Promise.all(
+    [
+      getTranslations("Issuers"),
+      getTranslations("Errors.invalid"),
+      searchParams,
+      requireWorkspace(),
+      requireEntitlements(),
+    ],
+  );
   const rows = await db
     .select()
     .from(issuerBusinesses)
     .where(eq(issuerBusinesses.workspaceId, workspaceId))
     .orderBy(desc(issuerBusinesses.updatedAt));
+
+  const limit = entitlements.issuers.max;
+  const canCreate = hasQuotaRoom(limit, rows.length);
 
   const items: IssuerTableItem[] = [];
   for (const r of rows) {
@@ -61,9 +69,11 @@ export default async function IssuersPage({
     <div className="space-y-4">
       <PageHeader
         actions={
-          <Button render={<Link href="/issuers/new" prefetch />}>
-            {t("newButton")}
-          </Button>
+          canCreate ? (
+            <Button render={<Link href="/issuers/new" prefetch />}>
+              {t("newButton")}
+            </Button>
+          ) : undefined
         }
         description={t("subtitle")}
         icon={<BriefcaseBusinessIcon />}
@@ -71,6 +81,9 @@ export default async function IssuersPage({
       />
 
       {err ? <p className="text-sm text-destructive">{err}</p> : null}
+      {!canCreate && limit !== null ? (
+        <IssuerQuotaNotice limit={limit} />
+      ) : null}
 
       {items.length === 0 ? (
         <div className="rounded-md border border-dashed bg-card p-8 text-center">
