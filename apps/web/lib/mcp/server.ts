@@ -7,7 +7,7 @@ import {
   McpServer,
   ResourceTemplate,
 } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { OpenAIExtensions } from "@openai/mcp-extensions/server";
+import { createMentions } from "@openai/mcp-extensions/server";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
@@ -226,8 +226,24 @@ export function createInvoiceyMcpServer(principal: Principal) {
       ],
     }),
   );
-  const extensions = new OpenAIExtensions(server);
-  extensions.mentions.setHandler(async ({ query }) => {
+  // The extension SDK supplies only readOnlyHint; publication requires explicit
+  // destructive and open-world hints for this workspace-only search as well.
+  const mentions = createMentions({
+    registerTool: (name, config, handler) =>
+      server.registerTool(
+        name,
+        {
+          ...config,
+          annotations: {
+            ...config.annotations,
+            destructiveHint: false,
+            openWorldHint: false,
+          },
+        },
+        handler,
+      ),
+  });
+  mentions.setHandler(async ({ query }) => {
     await assertRead();
     const invoices = await listInvoices({
       query: query.slice(0, 200),
