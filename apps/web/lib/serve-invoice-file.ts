@@ -13,6 +13,7 @@ import { withLookSnapshotForRender } from "@invoicey/invoice-core/looks";
 
 type InvoiceRow = typeof invoices.$inferSelect;
 const MAX_ARTIFACT_BYTES = 25 * 1024 * 1024;
+const ARTIFACT_FETCH_TIMEOUT_MS = 20_000;
 
 export type FileDisposition = "attachment" | "inline";
 
@@ -47,6 +48,51 @@ function contentDisposition(
   return `${disposition}; filename="${asciiName}"; filename*=UTF-8''${encodedName}`;
 }
 
+async function downloadStoredArtifact(
+  url: string,
+): Promise<Buffer<ArrayBuffer>> {
+  const controller = new AbortController();
+  try {
+    const upstream = await fetch(url, {
+      signal: AbortSignal.any([
+        controller.signal,
+        AbortSignal.timeout(ARTIFACT_FETCH_TIMEOUT_MS),
+      ]),
+    });
+    if (!upstream.ok || !upstream.body) {
+      throw new Error(`artifact fetch failed: ${upstream.status}`);
+    }
+    const declaredLength = Number(upstream.headers.get("content-length"));
+    if (
+      Number.isFinite(declaredLength) &&
+      declaredLength > MAX_ARTIFACT_BYTES
+    ) {
+      throw new Error("artifact exceeds size limit");
+    }
+
+    const reader = upstream.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let length = 0;
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        length += value.byteLength;
+        if (length > MAX_ARTIFACT_BYTES) {
+          throw new Error("artifact exceeds size limit");
+        }
+        chunks.push(value);
+      }
+    } finally {
+      reader.releaseLock();
+    }
+    return Buffer.concat(chunks, length);
+  } finally {
+    // Abort also disposes of unread bodies rejected by status or declared size.
+    controller.abort();
+  }
+}
+
 export async function proxyStoredFile(
   url: string,
   filename: string,
@@ -54,33 +100,7 @@ export async function proxyStoredFile(
   disposition: FileDisposition = "attachment",
   expectedSha256?: string | null,
 ): Promise<NextResponse> {
-  const upstream = await fetch(url);
-  if (!upstream.ok || !upstream.body) {
-    throw new Error(`artifact fetch failed: ${upstream.status}`);
-  }
-  const declaredLength = Number(upstream.headers.get("content-length"));
-  if (Number.isFinite(declaredLength) && declaredLength > MAX_ARTIFACT_BYTES) {
-    throw new Error("artifact exceeds size limit");
-  }
-
-  const reader = upstream.body.getReader();
-  const chunks: Uint8Array[] = [];
-  let length = 0;
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      length += value.byteLength;
-      if (length > MAX_ARTIFACT_BYTES) {
-        await reader.cancel();
-        throw new Error("artifact exceeds size limit");
-      }
-      chunks.push(value);
-    }
-  } finally {
-    reader.releaseLock();
-  }
-  const bytes = Buffer.concat(chunks, length);
+  const bytes = await downloadStoredArtifact(url);
   if (expectedSha256) {
     const actualSha256 = createHash("sha256").update(bytes).digest("hex");
     if (actualSha256 !== expectedSha256) {
