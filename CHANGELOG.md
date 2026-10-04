@@ -1,3 +1,5 @@
+## [1.59.3](https://github.com/filipditrich/inveoiceyai/compare/v1.59.2...v1.59.3) (2026-10-04)
+
 ## [1.59.2](https://github.com/filipditrich/inveoiceyai/compare/v1.59.1...v1.59.2) (2026-10-03)
 
 ## [1.59.1](https://github.com/filipditrich/inveoiceyai/compare/v1.59.0...v1.59.1) (2026-10-02)
