@@ -33,8 +33,7 @@ export function mcpToolPolicy(name: string) {
     scope: readOnly ? MCP_READ_SCOPE : MCP_WRITE_SCOPE,
     annotations: {
       readOnlyHint: readOnly,
-      destructiveHint:
-        !readOnly && name !== "create_invoice" && name !== "save_preset",
+      destructiveHint: !readOnly && name !== "create_invoice",
       idempotentHint:
         readOnly ||
         name === "issue_invoice" ||
