@@ -15,28 +15,25 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { applyLookEdit } from "@/lib/generator/apply-look-edit";
 import {
-  applyAresToIssuer,
-  applyAresToParty,
+  applyAresToGeneratorDraft,
   guestDisplayInvoiceFromDraft,
   guestInvoiceFromDraft,
   guestPreviewInvoiceFromDraft,
-  parseGeneratorDraftUrl,
-  sampleGeneratorDraft,
   withPrefillNumber,
   withVatMode,
   type GeneratorDraft,
 } from "@/lib/generator/draft";
-import { readGeneratorHandoff } from "@/lib/generator/handoff";
 import { appLocaleFrom } from "@/lib/generator/href";
 import { generatorIssueKeys } from "@/lib/generator/issue-hints";
 import { cn } from "@/lib/utils";
 import { DownloadIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Inter } from "next/font/google";
-import { debounce, parseAsJson, parseAsString, useQueryState } from "nuqs";
 
 import {
   LookDocumentView,
@@ -45,7 +42,7 @@ import {
 } from "@invoicey/invoice-core/look-dom";
 import { ACCENT_COLOR_HEX } from "@invoicey/invoice-core/looks";
 
-import type { AppLocale } from "@/i18n/config";
+import { useGeneratorDraft } from "./use-generator-draft";
 
 const lookSans = Inter({ subsets: ["latin", "latin-ext"] });
 
@@ -58,11 +55,6 @@ const ACCENT_KEYS = [
   "violet",
 ] as const;
 
-const draftUrlParser = parseAsJson(parseGeneratorDraftUrl).withOptions({
-  history: "replace",
-  limitUrlUpdates: debounce(400),
-});
-
 function patchDraft(
   setDraft: React.Dispatch<React.SetStateAction<GeneratorDraft | null>>,
   updater: (draft: GeneratorDraft) => GeneratorDraft,
@@ -72,57 +64,20 @@ function patchDraft(
   );
 }
 
-function useGeneratorDraft(locale: AppLocale) {
-  const [icoParam] = useQueryState("ico", parseAsString);
-  const [draftUrl, setDraftUrl] = useQueryState("d", draftUrlParser);
-  const [draft, setDraft] = React.useState<GeneratorDraft | null>(null);
-  const lastIssuerIco = React.useRef("");
-  const lastClientIco = React.useRef("");
-
-  React.useEffect(() => {
-    if (draft) return;
-    const sample = sampleGeneratorDraft({
-      issuerId: crypto.randomUUID(),
-      clientId: crypto.randomUUID(),
-      locale,
-    });
-    if (draftUrl) {
-      lastIssuerIco.current = draftUrl.issuer.ico;
-      lastClientIco.current = draftUrl.client.ico;
-      setDraft(withPrefillNumber(draftUrl));
-      return;
-    }
-    const fromQuery = (icoParam ?? "").replace(/\D/gu, "").slice(0, 8);
-    const handoff = readGeneratorHandoff();
-    const issuerIco =
-      fromQuery.length === 8 ? fromQuery : (handoff.issuerIco ?? "");
-    lastClientIco.current = sample.client.ico;
-    if (!issuerIco) {
-      lastIssuerIco.current = sample.issuer.ico;
-      setDraft(sample);
-      return;
-    }
-    lastIssuerIco.current = "";
-    setDraft({
-      ...sample,
-      issuer: { ...sample.issuer, ico: issuerIco },
-    });
-  }, [draft, draftUrl, icoParam, locale]);
-
-  React.useEffect(() => {
-    if (!draft) return;
-    void setDraftUrl(draft);
-  }, [draft, setDraftUrl]);
-
-  return { draft, setDraft, lastIssuerIco, lastClientIco };
-}
-
 export function GeneratorForm() {
   const t = useTranslations("Generator");
   const locale = appLocaleFrom(useLocale());
-  const { draft, setDraft, lastIssuerIco, lastClientIco } =
-    useGeneratorDraft(locale);
+  const {
+    draft,
+    setDraft,
+    lastIssuerIco,
+    lastClientIco,
+    recovered,
+    storageAvailable,
+    resetDraft,
+  } = useGeneratorDraft(locale);
   const [gateOpen, setGateOpen] = React.useState(false);
+  const [resetOpen, setResetOpen] = React.useState(false);
   const [pdfOpen, setPdfOpen] = React.useState(false);
   const [qrDataUrl, setQrDataUrl] = React.useState<string | null>(null);
 
@@ -199,9 +154,22 @@ export function GeneratorForm() {
       <div className="min-w-0 space-y-3">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className="rounded-full border px-2 py-0.5 text-[0.7rem] font-medium tracking-wide text-muted-foreground uppercase">
-            {t("sampleBadge")}
+            {recovered ? t("recoveredBadge") : t("sampleBadge")}
           </span>
           <p className="text-sm text-muted-foreground">{t("editorHint")}</p>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground" role="status">
+            {storageAvailable ? t("draftSaved") : t("draftStorageUnavailable")}
+          </p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setResetOpen(true)}
+          >
+            {t("newDraft")}
+          </Button>
         </div>
         <LookPageFrame>
           {previewBuild.display ? (
@@ -251,6 +219,33 @@ export function GeneratorForm() {
           />
         </div>
       </aside>
+      <Dialog open={resetOpen} onOpenChange={setResetOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("newDraft")}</DialogTitle>
+            <DialogDescription>{t("resetDescription")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setResetOpen(false)}
+            >
+              {t("keepEditing")}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => {
+                resetDraft();
+                setResetOpen(false);
+              }}
+            >
+              {t("confirmReset")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <DownloadGate
         invoice={issueInvoice.ok ? issueInvoice.invoice : null}
         onOpenChange={setGateOpen}
@@ -305,19 +300,11 @@ async function lookupPartyIco(
   last.current = ico;
   const result = await lookupAresByIco(ico, { endpoint: "generator" });
   if (!result.ok) return;
-  setDraft((current) => {
-    if (!current) return current;
-    if (side === "issuer") {
-      return withPrefillNumber({
-        ...current,
-        issuer: applyAresToIssuer(current.issuer, result.draft),
-      });
-    }
-    return {
-      ...current,
-      client: applyAresToParty(current.client, result.draft),
-    };
-  });
+  setDraft((current) =>
+    current
+      ? applyAresToGeneratorDraft(current, side, ico, result.draft)
+      : current,
+  );
 }
 
 function SettingsPanel({

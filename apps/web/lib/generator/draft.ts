@@ -211,6 +211,22 @@ export function applyAresToIssuer(
   return { ...next, accountNumber: "", iban: "", ibanTouched: false };
 }
 
+export function applyAresToGeneratorDraft(
+  current: GeneratorDraft,
+  side: "issuer" | "client",
+  requestedIco: string,
+  result: ClientDraft,
+): GeneratorDraft {
+  if (current[side].ico !== requestedIco) return current;
+  if (side === "issuer") {
+    return withPrefillNumber({
+      ...current,
+      issuer: applyAresToIssuer(current.issuer, result),
+    });
+  }
+  return { ...current, client: applyAresToParty(current.client, result) };
+}
+
 export function withSuggestedIban(issuer: GeneratorIssuer): GeneratorIssuer {
   const suggested = suggestCzIban(issuer.accountNumber);
   if (issuer.ibanTouched) return issuer;

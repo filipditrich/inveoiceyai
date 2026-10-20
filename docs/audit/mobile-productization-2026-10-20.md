@@ -42,3 +42,11 @@ All 34 public checks pass across desktop Chromium and the Pixel 7 browser profil
 Local public checks now use an already supervised server via `INVOICEY_E2E_BASE_URL`. CI retains its existing managed Playwright server startup. For local development, start with `devd up`, pass its URL to the test command, and stop that devd id once finished.
 
 The temporary review-account password file from submission setup is no longer present. No production credential was reset or new account created. Main authenticated product journeys still need an isolated local fixture or restored reviewer access. Native ChatGPT iOS/Android testing remains pending a real phone session.
+
+## Free generator recovery pass
+
+Observed production behavior serialized the entire unissued invoice into `?d=` automatically, including party addresses, contact emails, bank fields and line items. The new recovery path keeps edits in the current tab's session storage instead. Existing links still import, then their draft query is cleared; invalid links fall back safely. The UI explains local recovery and storage failure in Czech and English, and confirms before replacing a draft. The cookies page now describes the functional draft storage.
+
+Regression evidence: the old-link browser check failed against the previous implementation because `d` remained in the URL. Twelve browser checks now pass across desktop and phone profiles for import, reload, reset/cancel, blocked storage, Czech copy, invalid-link cleanup and issuer-prefill cleanup. Two additional failing unit cases reproduced delayed ARES responses replacing a party after its IČO changed; the response now applies only when its requested IČO still matches. Existing draft normalization coverage remains unchanged. The full web suite passes all 448 tests, and web typechecking passes after regenerating route types.
+
+Verification uses synthetic invoice data only. No production invoice was issued or emailed. Native ChatGPT phone testing and authenticated main-app mobile verification remain open requirements.

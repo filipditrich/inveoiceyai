@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyAresToIssuer,
+  applyAresToGeneratorDraft,
   applyAresToParty,
   emptyGeneratorDraft,
   guestDisplayInvoiceFromDraft,
@@ -257,3 +258,25 @@ describe("withSuggestedIban", () => {
     expect(withSuggestedIban(issuer).iban).toBe("CZ6508000000192000145399");
   });
 });
+
+// A lookup that finishes after reset or another IČO edit must not replace the new party.
+for (const side of ["issuer", "client"] as const) {
+  it(`ignores an outdated ${side} ARES result`, () => {
+    const current = completeDraft();
+    const result = {
+      name: "Outdated company",
+      ico: "27082440",
+      address: { street: "Old 1", city: "Praha", zip: "11000", country: "CZ" },
+    };
+    expect(applyAresToGeneratorDraft(current, side, "27082440", result)).toBe(
+      current,
+    );
+    const active = {
+      ...current,
+      [side]: { ...current[side], ico: "27082440" },
+    };
+    expect(
+      applyAresToGeneratorDraft(active, side, "27082440", result)[side].name,
+    ).toBe("Outdated company");
+  });
+}

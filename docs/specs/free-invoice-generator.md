@@ -111,6 +111,14 @@ The generator's form is replaced by the DOM look interpreter
 - Side panel for VAT mode, currency, document language, and colours
 - Server-side validation and issue are unchanged
 
+## Private draft recovery
+
+Unissued generator edits are saved in `sessionStorage` in the current browser tab. Reloading or switching between the Czech and English generator routes restores that draft, including its chosen document language. Invoice details are no longer serialized into the page query string on every edit. Copying the ordinary page link does not copy the draft.
+
+Existing `?d=` links remain readable: their data takes precedence over the tab copy, is validated, and is removed from the address bar after import. A new explicit `?ico=` prefill for a different issuer starts a new sample instead of reusing another issuer's cached draft. Browser storage failures leave the editor usable and show that reload recovery is unavailable.
+
+Starting a new draft requires confirmation and replaces only the local tab copy. It does not change issued invoices or workspace data. A company lookup that finishes after an IČO change or reset cannot replace the current party with an outdated result.
+
 ## Delivery
 
 **Plan 34 — guest issuance.** Route, teaser and state handoff, gate, disposable
