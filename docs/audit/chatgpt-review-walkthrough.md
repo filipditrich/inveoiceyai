@@ -156,3 +156,10 @@ https://platform.openai.com/plugins/manage/plugin_asdk_app_6ac15c60bad48191b03d0
 - After approval/publication: verify actual public URL and update homepage,
   /chatgpt, setup guidance and Czech/English availability copy. Do not link the
   development app as a publicly installable extension.
+
+## Public release — 2026-10-20
+
+- Portal verified version 1.0.3 as Approved / Ready to publish, then publication returned “Plugin published!”.
+- Public listing verified while signed out: https://chatgpt.com/plugins/plugin_asdk_app_6ac15c60bad48191b03d0059a8f7561c (Invoicey, Ing. Filip Ditrich, version 1.0.3, Install plugin).
+- Homepage availability, Czech/English setup page and connection documentation now point users to the public installation flow. Developer mode is not required for this flow.
+- Native ChatGPT iOS/Android installation and interaction remain unverified; publication does not establish mobile host support.

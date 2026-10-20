@@ -815,7 +815,7 @@
       "feature2": "Interactive drafts with amounts, dates and line items",
       "feature3": "You decide when to issue, send or record payment",
       "cta": "Explore Invoicey in ChatGPT",
-      "availability": "Public release in preparation",
+      "availability": "Available in ChatGPT · Czechia",
       "example": "Illustrative example",
       "prompt": "Draft an invoice for 12 hours of design at 1,500 CZK per hour. Ask me for any missing details.",
       "draft": "Draft for review",
@@ -4075,14 +4075,14 @@
     "disconnect": "Disconnect"
   },
   "ChatgptSetup": {
-    "metaTitle": "Invoicey in ChatGPT — setup and early access",
+    "metaTitle": "Invoicey in ChatGPT — connect your workspace",
     "title": "One connection. Your invoices in ChatGPT.",
-    "description": "The public release will connect your Invoicey workspace in a few clicks. No server URLs, API keys or developer settings.",
-    "earlyAccess": "Working in private testing. Public installation is not available yet: the app still needs OpenAI review and publication. This page will link directly to the approved listing when it is ready.",
+    "description": "Connect your Invoicey workspace in a few clicks. No server URLs, API keys or developer settings.",
+    "earlyAccess": "Available in the ChatGPT plugin directory for users in Czechia. Install Invoicey, then connect the workspace you want to use. A ChatGPT account and an Invoicey workspace are required.",
     "step1Title": "Open Invoicey in ChatGPT",
-    "step1Body": "Start from the official Invoicey listing. The public install button will appear here after approval.",
+    "step1Body": "Open the official Invoicey listing and choose Install plugin. Sign in to ChatGPT if prompted.",
     "step2Title": "Connect your account",
-    "step2Body": "Choose Connect and sign in to Invoicey with Google or GitHub. No technical configuration.",
+    "step2Body": "Choose Connect and sign in to Invoicey with Google or GitHub. If you are new to Invoicey, create your workspace and add your issuer details first.",
     "step3Title": "Choose your workspace",
     "step3Body": "Review the requested access and select the Invoicey workspace you want to use. Your existing role and permissions still apply.",
     "step4Title": "Ask for what you need",
@@ -4092,11 +4092,11 @@
     "controlBody": "Drafts stay in your Invoicey workspace. Review the customer, line items, taxes, language and due date before issuing. Sending an email and recording a payment need your confirmation. Your Invoicey role and plan still apply.",
     "disconnect": "Disconnect at any time in Invoicey → Workspace → Integrations, and remove the connection in ChatGPT.",
     "duplicateTitle": "One app to choose",
-    "duplicateBody": "The customer entry point will be Invoicey. The separately named Invoicey workflows package is optional and is not part of the standard setup.",
+    "duplicateBody": "Install Invoicey from the official listing linked here. The public plugin includes the invoice tools and invoicing skill; no separate workflow package is needed.",
     "mobileTitle": "Using your phone?",
     "mobileBody": "The views adapt to phone screens. Availability in the ChatGPT iOS and Android apps depends on host support and will be confirmed before we advertise native mobile access.",
-    "guide": "Already testing? Connection help",
-    "installPending": "Public installation coming soon"
+    "guide": "Connection guide and troubleshooting",
+    "install": "Install Invoicey in ChatGPT"
   },
   "Support": {
     "title": "Invoicey support",

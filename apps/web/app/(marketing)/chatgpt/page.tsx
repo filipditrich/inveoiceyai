@@ -43,9 +43,12 @@ export default async function ChatgptPage() {
                   {step.body}
                 </p>
                 {index === 0 && (
-                  <span className="mt-3 inline-flex min-h-11 items-center rounded-full border bg-muted px-5 text-sm text-muted-foreground">
-                    {t("installPending")}
-                  </span>
+                  <a
+                    href="https://chatgpt.com/plugins/plugin_asdk_app_6ac15c60bad48191b03d0059a8f7561c"
+                    className="mt-3 inline-flex min-h-11 items-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground hover:opacity-90"
+                  >
+                    {t("install")}
+                  </a>
                 )}
                 {index === 3 && (
                   <blockquote className="mt-3 rounded-xl border-l-4 border-primary bg-muted p-4">

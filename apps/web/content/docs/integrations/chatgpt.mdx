@@ -9,43 +9,27 @@ interactive card, and decide when to issue or send it. The same invoice stays av
 
 ## Start here
 
-The [customer page](/chatgpt), available in Czech and English, previews the planned public
-connection flow. Public installation is not available yet: the app needs review and publication
-in ChatGPT. Customers will open the listing and connect their own Invoicey account.
+[Install Invoicey in ChatGPT](https://chatgpt.com/plugins/plugin_asdk_app_6ac15c60bad48191b03d0059a8f7561c).
+The public plugin is available for users in Czechia. You need a ChatGPT account and an Invoicey
+workspace. Developer mode, server URLs and API keys are not required.
 
-The instructions below are for developers and invited testers with custom-app access.
-The private development plugin link is not a public invitation.
+1. Create an Invoicey workspace and add your default issuer, contact email, VAT settings and payment details.
+2. Open the official listing above and choose **Install plugin**. Sign in to ChatGPT if prompted.
+3. Choose **Connect**, sign in to Invoicey with Google or GitHub, and select your workspace.
+4. Review the requested access and approve the connection.
+5. In a new conversation, select **Invoicey** and ask: **“Show my recent invoices in Invoicey.”**
+   This first check only reads data.
 
-## Developer and invited-tester setup
-
-1. Create an Invoicey workspace and add a default issuer, contact email, VAT settings and bank account.
-2. On ChatGPT web, enable Developer mode if your account offers it. Open **Plugins → Add →
-   Create MCP App** (some accounts use **Apps → Create**). Organization users may need an administrator.
-3. Name the app **Invoicey**, enter `https://invoicey.app/api/mcp`, and choose **OAuth**.
-   Use automatic client registration when offered; do not paste personal API keys into chat.
-4. Connect, sign in to Invoicey, select the workspace and approve access. Return to ChatGPT.
-5. Start a new conversation, select the connected **Invoicey app**, and ask:
-   **“Show my recent invoices in Invoicey.”** This first check only reads data.
-
-If custom-app creation is unavailable, this early-access setup is not supported by your account.
-A public directory release will provide the simpler install path after review and publication.
-See OpenAI's [custom-app access guidance](https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt).
-
-### Two Invoicey entries during early testing
-
-**Invoicey** is the connected app with live tools. **Invoicey workflows** is an optional skill
-package (version 1.0.3). You do not need that package for the setup above. Its package version
-is separate from the app listing's version. If a chat says tools are unavailable, start a new
-chat and select the connected app directly. Do not disconnect the working app to remove the
-optional workflow package.
+The [setup page](/chatgpt) provides these steps in Czech and English. The public plugin includes
+both the connected invoice tools and the invoicing skill; no separate workflow package is needed.
+If you previously installed a private development version, use the official listing for the public release.
 
 ### Desktop, web and mobile
 
-The live ChatGPT integration has been verified for invoice listing and interactive draft
-creation. The consent flow has desktop and mobile-browser regression coverage. Complete
-initial setup on ChatGPT web. Custom-app access on phones depends on ChatGPT's current host
-support; native iOS/Android behavior has not yet been validated. Composer invoice mentions
-are host-dependent. A responsive view alone does not establish native mobile availability.
+Start with the public listing on ChatGPT web. Invoicey views adapt to phone screens, and the
+consent flow has desktop and mobile-browser regression coverage. Native ChatGPT iOS/Android
+behavior has not yet been validated. Availability of interactive views and composer invoice
+mentions depends on the ChatGPT host; responsive views alone do not establish native mobile support.
 
 ## From a sentence to an invoice
 
