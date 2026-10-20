@@ -50,7 +50,7 @@
     "{apps,packages}/**/*.{js,jsx,mjs,cjs,ts,tsx}": "oxlint --fix",
     "*": "oxfmt --no-error-on-unmatched-pattern"
   },
-  "version": "1.59.6",
+  "version": "1.60.0",
   "engines": {
     "node": ">=24"
   },
