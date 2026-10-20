@@ -32,3 +32,13 @@ On a phone signed into the same ChatGPT account, open the official public Invoic
 3. Audit mobile loading states, failed requests, empty results and form recovery. Preserve entered draft data through recoverable errors.
 4. Review public homepage, feature pages and setup guidance against actual released behavior in both Czech and English; correct unsupported or stale claims.
 5. Measure core page loading and interaction delays, then optimize the measured bottlenecks and verify deployment behavior.
+
+## Public navigation and setup pass
+
+The production phone menu had no direct ChatGPT entry. Added a localized Invoicey in ChatGPT link to desktop and phone navigation and raised phone menu link targets to 44px. The new Czech and English browser journeys first failed because the entry was absent, then passed through navigation to the correct setup heading and public install URL. Pricing guidance now explains when upgrading helps instead of describing the internal billing integration.
+
+All 34 public checks pass across desktop Chromium and the Pixel 7 browser profile, including landmarks, horizontal overflow, light/dark contrast, accessibility, locale handling, documentation navigation and browser hardening headers. Two request-client checks initially failed to trust the portless HTTPS certificate; rerunning those two with `NODE_EXTRA_CA_CERTS=$HOME/.portless/ca.pem` passed with certificate validation enabled. The browser-facing checks passed on the first full run. A malformed ignored Next dev type cache was regenerated after stopping the server.
+
+Local public checks now use an already supervised server via `INVOICEY_E2E_BASE_URL`. CI retains its existing managed Playwright server startup. For local development, start with `devd up`, pass its URL to the test command, and stop that devd id once finished.
+
+The temporary review-account password file from submission setup is no longer present. No production credential was reset or new account created. Main authenticated product journeys still need an isolated local fixture or restored reviewer access. Native ChatGPT iOS/Android testing remains pending a real phone session.

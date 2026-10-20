@@ -19,20 +19,20 @@ export async function MarketingHeader() {
   const locale = appLocaleFrom(await getLocale());
   const generatorHref = generatorPathForLocale(locale);
 
-  /** Generator first — the rest is the page itself. */
   const navItems = [
     { href: generatorHref, label: t("generator") },
     { href: "/#jak-to-funguje", label: t("howItWorks") },
+    { href: "/chatgpt", label: t("chatgpt") },
     { href: "/#prehled", label: t("capabilities") },
     { href: "/#cenik", label: t("pricing") },
     { href: "/docs", label: t("docs") },
   ];
   /** The sheet has room the header bar does not, so it carries the long tail. */
   const mobileNavItems = [
-    ...navItems.slice(0, 2),
+    ...navItems.slice(0, 3),
     { href: "/#apps", label: t("apps") },
     { href: "/#srovnani", label: t("comparison") },
-    ...navItems.slice(2),
+    ...navItems.slice(3),
     { href: "/#faq", label: t("faq") },
   ];
   const downloadLabels = {

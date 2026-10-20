@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const port = Number(process.env.INVOICEY_E2E_PORT ?? 3_000);
-const baseURL = `http://localhost:${port}`;
+const baseURL = process.env.INVOICEY_E2E_BASE_URL ?? `http://localhost:${port}`;
 const authStorageState = process.env.INVOICEY_E2E_AUTH_STORAGE_STATE;
 const createsAgentSession = Boolean(
   authStorageState && process.env.INVOICEY_AGENT_LOGIN_SECRET,
@@ -48,13 +48,16 @@ export default defineConfig({
       use: { ...devices["Pixel 7"], ...authenticatedProject.use },
     },
   ],
-  webServer: {
-    command: process.env.INVOICEY_E2E_NODE_24
-      ? `NODE_ENV=development ${process.env.INVOICEY_E2E_NODE_24} node_modules/next/dist/bin/next dev --webpack --port ${port}`
-      : `NODE_ENV=development bun run dev --port ${port}`,
-    cwd: process.cwd(),
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer:
+    process.env.CI && !process.env.INVOICEY_E2E_BASE_URL
+      ? {
+          command: process.env.INVOICEY_E2E_NODE_24
+            ? `NODE_ENV=development ${process.env.INVOICEY_E2E_NODE_24} node_modules/next/dist/bin/next dev --webpack --port ${port}`
+            : `NODE_ENV=development bun run dev --port ${port}`,
+          cwd: process.cwd(),
+          url: baseURL,
+          reuseExistingServer: !process.env.CI,
+          timeout: 120_000,
+        }
+      : undefined,
 });

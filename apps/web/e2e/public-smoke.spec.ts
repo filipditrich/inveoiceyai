@@ -227,3 +227,57 @@ test.describe("public platform", () => {
     );
   });
 });
+
+// Guards against the phone menu omitting the public integration and trapping
+// visitors in a menu after navigating to its installation guide.
+for (const locale of ["cs", "en"] as const) {
+  test(`phone menu reaches the public ChatGPT setup in ${locale}`, async ({
+    context,
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await context.addCookies([
+      {
+        name: "NEXT_LOCALE",
+        value: locale,
+        url: testInfo.project.use.baseURL!,
+      },
+    ]);
+    await page.goto("/");
+    await page
+      .getByRole("button", {
+        name: locale === "cs" ? "Otevřít nabídku" : "Open menu",
+      })
+      .click();
+    const link = page.getByRole("link", {
+      name: locale === "cs" ? "Invoicey v ChatGPT" : "Invoicey in ChatGPT",
+      exact: true,
+    });
+    await expect(link).toBeVisible();
+    expect(
+      await link.evaluate((element) => element.getBoundingClientRect().height),
+    ).toBeGreaterThanOrEqual(44);
+    await link.click();
+    await expect(page).toHaveURL(/\/chatgpt$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      locale === "cs"
+        ? "Jedno propojení. Vaše faktury v ChatGPT."
+        : "One connection. Your invoices in ChatGPT.",
+    );
+    await expect(
+      page.getByRole("link", {
+        name:
+          locale === "cs"
+            ? "Nainstalovat Invoicey do ChatGPT"
+            : "Install Invoicey in ChatGPT",
+        exact: true,
+      }),
+    ).toHaveAttribute(
+      "href",
+      "https://chatgpt.com/plugins/plugin_asdk_app_6ac15c60bad48191b03d0059a8f7561c",
+    );
+    await expect(
+      page.getByRole("button", { name: "Close", exact: true }),
+    ).toHaveCount(0);
+  });
+}

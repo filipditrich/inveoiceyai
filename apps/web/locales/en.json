@@ -295,6 +295,7 @@
       "comparison": "Compare",
       "menuTitle": "Menu",
       "menuDescription": "Invoicey — invoice automation",
+      "chatgpt": "Invoicey in ChatGPT",
       "generator": "Free invoice"
     },
     "download": {
@@ -726,7 +727,7 @@
     "pricing": {
       "eyebrow": "Pricing",
       "title": "Start free. Upgrade when the workspace grows.",
-      "description": "CZK prices include VAT. Polar collects payment; Invoicey still decides what the plan allows.",
+      "description": "CZK prices include VAT. Start free and upgrade when you need more businesses, teammates or bank payment matching.",
       "betaBadge": "Most chosen",
       "freeName": "Free",
       "freePeriod": "/ month",

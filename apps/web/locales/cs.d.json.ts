@@ -298,6 +298,7 @@ declare const messages: {
       "comparison": "Srovnání",
       "menuTitle": "Menu",
       "menuDescription": "Invoicey — automatizace faktur",
+      "chatgpt": "Invoicey v ChatGPT",
       "generator": "Faktura zdarma"
     },
     "download": {
@@ -729,7 +730,7 @@ declare const messages: {
     "pricing": {
       "eyebrow": "Ceník",
       "title": "Začněte zdarma. Pro až workspace poroste.",
-      "description": "Ceny v Kč včetně DPH. Platbu vybere Polar; Invoicey dál rozhoduje, co tarif dovolí.",
+      "description": "Ceny v Kč včetně DPH. Začněte zdarma a přejděte na Pro, až budete potřebovat více firem, členů nebo párování plateb.",
       "betaBadge": "Nejčastější volba",
       "freeName": "Free",
       "freePeriod": "/ měsíc",
