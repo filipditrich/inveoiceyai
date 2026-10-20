@@ -50,3 +50,20 @@ Observed production behavior serialized the entire unissued invoice into `?d=` a
 Regression evidence: the old-link browser check failed against the previous implementation because `d` remained in the URL. Twelve browser checks now pass across desktop and phone profiles for import, reload, reset/cancel, blocked storage, Czech copy, invalid-link cleanup and issuer-prefill cleanup. Two additional failing unit cases reproduced delayed ARES responses replacing a party after its IČO changed; the response now applies only when its requested IČO still matches. Existing draft normalization coverage remains unchanged. The full web suite passes all 448 tests, and web typechecking passes after regenerating route types.
 
 Verification uses synthetic invoice data only. No production invoice was issued or emailed. Native ChatGPT phone testing and authenticated main-app mobile verification remain open requirements.
+
+## Authenticated onboarding and drafting pass
+
+Used a disposable loopback PostgreSQL database with synthetic users, issuer, client and an unissued CZK 1,250 English-language draft. Production providers were disabled throughout. Temporary local database adapters and environment overrides were restored after verification; the supervised server and disposable database were stopped.
+
+Observed and fixed:
+
+- Local HTTPS agent sign-in used a cookie name that differed from Better Auth's secure session cookie. The helper now uses Better Auth's configured name and attributes.
+- Issuer captions did not label their inputs. Shared fields now associate captions with controls, including the nested ARES input. Label taps focus the input.
+- Optional history import placed its skip action below nine providers. Skip now appears before the provider grid and is visible in the first phone viewport.
+- Four invoice appearance checkboxes lacked accessible names. They now expose their translated labels.
+- The empty PDF preview used dark-theme muted text on a white canvas. Its text now has sufficient contrast on that canvas.
+- The closed assistant drawer retained keyboard-focusable controls. It is now inert while closed.
+
+Evidence: four isolated onboarding browser cases passed across desktop and phone profiles before creating the fixture issuer. All 453 web unit tests and ten package typecheck tasks pass. Five new rendering regressions pass; restoring the old issuer field component made all four label cases fail, and the history-order test failed before its fix. The unchanged authenticated journey suite passes 17 checks across desktop and phone, including axe, navigation, overflow and structured draft recovery. Two issued-invoice lifecycle cases remain skipped because this fixture deliberately contains only an unissued draft. Free-plan navigation was checked first; Pro was then enabled only in the disposable database for the payment and assistant checks. No production invoice was created, issued, sent or marked paid.
+
+A remaining onboarding improvement is the client-creation handoff: adding a client from a draft currently returns to the client list, requiring users to reopen their recovered draft and select the new client. Draft recovery itself worked. Native ChatGPT iOS/Android verification still requires a real phone session.

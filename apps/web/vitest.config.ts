@@ -7,7 +7,7 @@ export default defineConfig({
     include: [
       "lib/**/*.test.ts",
       "agent/**/*.test.ts",
-      "components/**/*.test.ts",
+      "components/**/*.test.{ts,tsx}",
     ],
     passWithNoTests: true,
   },

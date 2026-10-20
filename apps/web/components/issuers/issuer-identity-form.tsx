@@ -22,6 +22,7 @@ export function IssuerIdentityForm(props: {
   invalidQuery?: string | null;
 }) {
   const t = useTranslations("Issuers.form");
+  const icoInputId = React.useId();
   const tAres = useTranslations("Issuers.ares");
   const { snapshot } = props;
   const [pending, startTransition] = React.useTransition();
@@ -104,9 +105,10 @@ export function IssuerIdentityForm(props: {
       {userMsg ? <p className="text-sm text-destructive">{userMsg}</p> : null}
 
       <div className="space-y-2">
-        <FieldGroup label={t("icoAres")}>
+        <FieldGroup label={t("icoAres")} controlId={icoInputId}>
           <div className="flex flex-wrap gap-2">
             <Input
+              id={icoInputId}
               className="max-w-xs"
               inputMode="numeric"
               maxLength={8}

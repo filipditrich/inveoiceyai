@@ -515,10 +515,10 @@ export function WelcomeMigrateStep({ onSkip }: { onSkip: () => void }) {
   return (
     <div className="space-y-6">
       <WelcomeStepIntro hint={t("migrate.hint")} title={t("migrate.title")} />
-      <MigrationProviderGrid />
-      <Button onClick={onSkip} type="button" variant="ghost">
+      <Button onClick={onSkip} type="button" variant="outline">
         {t("migrate.skip")}
       </Button>
+      <MigrationProviderGrid />
     </div>
   );
 }

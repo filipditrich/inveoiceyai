@@ -81,11 +81,18 @@ export async function agentLoginAction(formData: FormData): Promise<void> {
     created.expiresAt ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   const jar = await cookies();
-  jar.set("better-auth.session_token", `${created.token}.${signature}`, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    secure: process.env.NODE_ENV === "production",
+  const sessionCookie = ctx.authCookies.sessionToken;
+  const sameSite = sessionCookie.attributes.sameSite;
+  jar.set(sessionCookie.name, `${created.token}.${signature}`, {
+    ...sessionCookie.attributes,
+    sameSite:
+      sameSite === "Strict"
+        ? "strict"
+        : sameSite === "Lax"
+          ? "lax"
+          : sameSite === "None"
+            ? "none"
+            : sameSite,
     expires: expiresAt,
   });
   redirect("/dashboard");

@@ -23,6 +23,7 @@ export function IssuerCreateForm(props: {
   next?: "welcome";
 }) {
   const t = useTranslations("Issuers.form");
+  const icoInputId = React.useId();
   const tAres = useTranslations("Issuers.ares");
   const [createdId] = React.useState(() => crypto.randomUUID());
   const [pending, startTransition] = React.useTransition();
@@ -108,9 +109,10 @@ export function IssuerCreateForm(props: {
 
       <section className="space-y-4">
         <h2 className="text-lg font-medium">{t("identitySection")}</h2>
-        <FieldGroup label={t("icoAres")}>
+        <FieldGroup label={t("icoAres")} controlId={icoInputId}>
           <div className="flex flex-wrap gap-2">
             <Input
+              id={icoInputId}
               className="max-w-xs"
               inputMode="numeric"
               maxLength={8}

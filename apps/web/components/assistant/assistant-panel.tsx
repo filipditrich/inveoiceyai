@@ -44,6 +44,7 @@ export function AssistantPanel() {
   return (
     <aside
       aria-hidden={!open}
+      inert={!open}
       aria-label={t("title")}
       className={cn(
         /**

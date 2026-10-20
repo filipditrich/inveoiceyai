@@ -101,7 +101,7 @@ export function InvoicePdfPreview({
         </>
       ) : (
         <div
-          className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground"
+          className="absolute inset-0 flex items-center justify-center text-sm text-zinc-600"
           data-slot="pdf-frame"
         >
           {emptyLabel ?? t("empty")}

@@ -1451,6 +1451,7 @@ export function InvoiceBuilderForm({
               ).map(([name, label]) => (
                 <label key={name} className="flex items-center gap-2 text-sm">
                   <Checkbox
+                    aria-label={label}
                     checked={watched[name]}
                     onCheckedChange={(checked) =>
                       form.setValue(name, checked === true, {

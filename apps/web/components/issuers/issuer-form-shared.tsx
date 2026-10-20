@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Field } from "@/components/invoices/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,12 +25,20 @@ export { DEFAULT_TEMPLATES, DOC_TYPES, type NumberingSchemeDraft };
 export function FieldGroup(props: {
   label: string;
   children: React.ReactNode;
+  controlId?: string;
 }) {
+  if (props.controlId) {
+    return (
+      <div className="space-y-2">
+        <Label htmlFor={props.controlId}>{props.label}</Label>
+        {props.children}
+      </div>
+    );
+  }
   return (
-    <div className="space-y-2">
-      <Label>{props.label}</Label>
+    <Field label={props.label} className="space-y-2">
       {props.children}
-    </div>
+    </Field>
   );
 }
 
