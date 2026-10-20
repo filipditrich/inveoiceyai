@@ -25,6 +25,6 @@ createServer((request, response) => {
   response.end(
     '<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Invoicey MCP Apps test host</title><style>body{margin:0;background:#f3f3f3}iframe{display:block;width:100%;min-height:100vh;border:0}</style></head><body><iframe title="Invoicey"></iframe><script type="module" src="/host.js"></script></body></html>',
   );
-}).listen(3120, "127.0.0.1", () =>
-  console.log("MCP UI test host: http://127.0.0.1:3120"),
-);
+}).listen(Number(process.env.PORT ?? 3120), "127.0.0.1", function () {
+  console.log(`MCP UI test host listening on ${this.address().port}`);
+});

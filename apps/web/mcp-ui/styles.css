@@ -302,6 +302,18 @@ footer {
   .intro {
     margin-top: 32px;
   }
+  .invoicey-app button:not([role="checkbox"]),
+  .invoicey-app input {
+    min-height: 44px;
+  }
+  .list-controls > [data-has-label] {
+    align-items: center;
+  }
+  .list-controls label {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
   .invoice-icon {
     display: none;
   }

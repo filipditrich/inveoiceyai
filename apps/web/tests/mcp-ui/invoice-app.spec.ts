@@ -165,3 +165,48 @@ test("invoice workspace fits desktop and has accessible light controls", async (
     fullPage: true,
   });
 });
+
+// Guards against iOS input zoom and undersized SDK controls in the embedded app.
+test("phone search controls are touch sized and avoid input zoom", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/?locale=en");
+  const ui = page.frameLocator("iframe");
+  await expect(ui.getByText("Ateliér Forma", { exact: true })).toBeVisible();
+  const input = ui.getByRole("textbox", {
+    name: "Search client or invoice number",
+  });
+  expect(
+    await input.evaluate((element) =>
+      parseFloat(getComputedStyle(element).fontSize),
+    ),
+  ).toBeGreaterThanOrEqual(16);
+  for (const control of [
+    input,
+    ui.getByRole("button", { name: "Search", exact: true }),
+    ui.getByRole("button", { name: "Refresh", exact: true }),
+  ]) {
+    expect(
+      await control.evaluate(
+        (element) => element.getBoundingClientRect().height,
+      ),
+    ).toBeGreaterThanOrEqual(44);
+  }
+  expect(
+    await ui
+      .getByText("Unpaid", { exact: true })
+      .evaluate((element) => element.getBoundingClientRect().height),
+  ).toBeGreaterThanOrEqual(44);
+  const checkbox = ui.getByRole("checkbox", { name: "Unpaid" });
+  expect(
+    await checkbox.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      return box.width === box.height;
+    }),
+  ).toBe(true);
+  await input.fill("North");
+  await input.press("Enter");
+  await expect(ui.getByText("Ateliér Forma", { exact: true })).toHaveCount(0);
+  await expect(ui.getByText("North Design", { exact: true })).toBeVisible();
+});
