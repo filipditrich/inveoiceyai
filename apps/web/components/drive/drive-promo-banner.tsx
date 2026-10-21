@@ -13,7 +13,12 @@ export function DrivePromoBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    setVisible(window.localStorage.getItem(STORAGE_KEY) !== "1");
+    try {
+      setVisible(window.localStorage.getItem(STORAGE_KEY) !== "1");
+    } catch {
+      // Dismissal is optional; restricted storage must not break the invoice.
+      setVisible(true);
+    }
   }, []);
 
   if (!visible) {
@@ -23,7 +28,7 @@ export function DrivePromoBanner() {
   return (
     <div
       role="note"
-      className="flex items-start gap-3 rounded-lg border border-border bg-muted/40 px-3 py-2.5"
+      className="hidden items-start gap-3 rounded-lg border border-border bg-muted/40 px-3 py-2.5 md:flex"
     >
       <HardDriveIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
       <div className="min-w-0 flex-1 space-y-1">
@@ -44,8 +49,12 @@ export function DrivePromoBanner() {
         className="rounded-md p-1 text-muted-foreground hover:text-foreground"
         aria-label={t("driveBannerDismiss")}
         onClick={() => {
-          window.localStorage.setItem(STORAGE_KEY, "1");
           setVisible(false);
+          try {
+            window.localStorage.setItem(STORAGE_KEY, "1");
+          } catch {
+            // Keep this visit dismissed even when the preference cannot persist.
+          }
         }}
       >
         <XIcon className="size-4" />
