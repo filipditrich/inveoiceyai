@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
 
+import { attachRenderDiagnostics } from "./helpers/render-diagnostics";
+
+test.afterEach(async ({ page }, testInfo) => {
+  await attachRenderDiagnostics(page, testInfo);
+});
+
 for (const locale of ["cs", "en"] as const) {
   for (const mode of ["success", "denied", "missing"] as const) {
     test(`CLI install handles ${mode} clipboard in ${locale}`, async ({

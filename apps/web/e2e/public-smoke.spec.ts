@@ -1,6 +1,12 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+import { attachRenderDiagnostics } from "./helpers/render-diagnostics";
+
+test.afterEach(async ({ page }, testInfo) => {
+  await attachRenderDiagnostics(page, testInfo);
+});
+
 const PUBLIC_ROUTES = [
   "/",
   "/brand",
