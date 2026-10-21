@@ -242,3 +242,86 @@ test("Czech reset dialog exposes a localized close control", async ({
   await expect(dialog).toBeHidden();
   await expect(reset).toBeFocused();
 });
+
+for (const labels of [
+  {
+    locale: "en",
+    newDraft: "Start a new draft",
+    keepEditing: "Keep editing",
+    confirmReset: "Discard draft and start again",
+    close: "Close",
+  },
+  {
+    locale: "cs",
+    newDraft: "Začít nový koncept",
+    keepEditing: "Pokračovat v úpravách",
+    confirmReset: "Zahodit koncept a začít znovu",
+    close: "Zavřít",
+  },
+]) {
+  test(`${labels.locale} touch reset keeps cookie controls behind the modal and preserves cancelled drafts`, async ({
+    context,
+    page,
+    isMobile,
+    baseURL,
+  }) => {
+    test.skip(!isMobile, "Requires a phone with touch input.");
+    if (!baseURL) throw new Error("Missing application URL");
+    await context.addCookies([
+      { name: "NEXT_LOCALE", value: labels.locale, url: baseURL },
+    ]);
+    await context.clearCookies({ name: "c15t-consent" });
+    await page.addInitScript(() => localStorage.removeItem("c15t-consent"));
+    await page.route("**/api/generator/ares/**", (route) =>
+      route.fulfill({ status: 404, json: { ok: false } }),
+    );
+    await page.goto("/free-invoice-generator?ico=12345678");
+    const banner = page.getByTestId("consent-banner-root");
+    const controls = [
+      page.getByTestId("consent-banner-reject-button"),
+      page.getByTestId("consent-banner-accept-button"),
+      page.getByTestId("consent-banner-customize-button"),
+    ];
+    await expect(banner).toBeVisible();
+    for (const control of controls) await expect(control).toBeVisible();
+    const reset = page.getByRole("button", {
+      name: labels.newDraft,
+      exact: true,
+    });
+    const dialog = page.getByRole("dialog", {
+      name: labels.newDraft,
+      exact: true,
+    });
+    await reset.tap();
+    await expect(dialog).toBeVisible();
+    // A hidden root is insufficient when descendants override visibility.
+    await expect(banner).not.toBeVisible();
+    // Inert visibility checks miss children that the browser still paints.
+    // Removing the root's layout box prevents that escape.
+    await expect(banner).toHaveCSS("display", "none");
+    for (const control of controls) await expect(control).not.toBeVisible();
+    await dialog
+      .getByRole("button", { name: labels.keepEditing, exact: true })
+      .tap();
+    await expect(dialog).toBeHidden();
+    await expect(reset).toBeFocused();
+    expect(new URL(page.url()).searchParams.get("ico")).toBe("12345678");
+    for (const control of controls) await expect(control).toBeVisible();
+    await reset.tap();
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: labels.close, exact: true }).tap();
+    await expect(dialog).toBeHidden();
+    await expect(reset).toBeFocused();
+    expect(new URL(page.url()).searchParams.get("ico")).toBe("12345678");
+    await reset.tap();
+    await expect(dialog).toBeVisible();
+    await dialog
+      .getByRole("button", { name: labels.confirmReset, exact: true })
+      .tap();
+    await expect(dialog).toBeHidden();
+    await expect
+      .poll(() => new URL(page.url()).searchParams.has("ico"))
+      .toBe(false);
+    for (const control of controls) await expect(control).toBeVisible();
+  });
+}

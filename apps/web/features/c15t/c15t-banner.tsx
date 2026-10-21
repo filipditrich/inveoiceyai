@@ -18,7 +18,7 @@ export function C15tBanner() {
       noStyle
       scrollLock={false}
       trapFocus={false}
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[100] p-3 data-[base-ui-inert]:invisible sm:p-4"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[100] p-3 data-[base-ui-inert]:hidden sm:p-4"
     >
       <ConsentBanner.Card className="pointer-events-auto mx-auto flex w-full max-w-5xl flex-col gap-4 rounded-2xl border bg-popover/95 p-4 text-popover-foreground shadow-2xl shadow-black/10 backdrop-blur-xl sm:flex-row sm:items-center sm:gap-6 sm:p-5 dark:shadow-black/35">
         <ConsentBanner.Header className="flex min-w-0 flex-1 items-start gap-3">
