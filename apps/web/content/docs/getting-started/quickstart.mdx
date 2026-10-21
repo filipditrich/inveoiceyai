@@ -1,15 +1,16 @@
 ---
 title: Quickstart
-description: Create and send your first invoice in about ten minutes.
+description: Set up your workspace, review a draft and send your first invoice.
 icon: Rocket
 ---
 
-This walks the whole path once: sign in, set up the business that issues invoices, add a client,
-create an invoice, issue it, and send it. Everything after this page goes deeper on one step.
+Start by setting up the business that issues your invoices. Then choose where to work:
+Invoicey's assistant, ChatGPT, or the structured form. Each path creates an invoice in the
+same workspace, with a review before you issue or send it.
 
-<Callout type="warn" title="Have your company and bank details ready">
-  Invoicey requires a valid 8-digit IČO, Czech IBAN and complete issuer address
-  before issue. Keep them nearby for this walkthrough.
+<Callout title="Have your business details ready">
+  Your issuer needs an 8-digit IČO, a complete address, a contact email, and a
+  Czech bank account with a matching valid Czech IBAN. Review VAT settings too.
 </Callout>
 
 <Steps>
@@ -18,141 +19,144 @@ create an invoice, issue it, and send it. Everything after this page goes deeper
 
 ### Sign in
 
-Invoicey uses OAuth only — **Google** or **GitHub**. There is no password to set and no
-email-confirmation step.
+[Sign in to Invoicey](/sign-in) with **Google** or **GitHub**. Regular accounts do not need a
+separate Invoicey password or email-confirmation step.
 
-First sign-in creates a personal [workspace](/docs/getting-started/workspaces) for you
-automatically. All your data lives inside it.
-
-</Step>
-
-<Step>
-
-### Create an issuer
-
-An **issuer** is a business that issues invoices — you, or your s.r.o. Go to **Issuers → New**.
-
-Type your **IČO** and Invoicey fills the legal name, address and DIČ from
-[ARES](/docs/guides/clients#ares-lookup). Review the result, then add the details ARES cannot know:
-
-You must still supply:
-
-- **Bank account and matching IBAN** — used on the PDF and in the
-  [payment QR](/docs/outputs/payment-qr).
-- **VAT payer** — whether you charge DPH. If off, every line is forced to 0 % and the PDF prints
-  _Nejsem plátce DPH_ instead of a VAT breakdown.
-- **Contact email** — required. It becomes the `Reply-To` on invoice emails.
-- **Numbering** — the default `{YYYY}{####}` produces `20260001`.
-
-Optionally upload a **logo**, **stamp** and **signature** image; they are placed on the PDF.
+First sign-in creates your personal [workspace](/docs/getting-started/workspaces).
+If a teammate invited you, accept their invitation to work in the shared workspace instead.
 
 </Step>
 
 <Step>
 
-### Add a client
+### Set up your issuer
 
-**Clients → New**, then the same trick: enter the client's IČO and let ARES fill the rest. If you
-do not know the IČO, search by company name instead.
+Follow the welcome steps, or open [Issuers](/issuers) and choose **New**. An issuer is the business
+on the supplier side of your invoice — you, or your company.
 
-For clients you will email invoices to, set **contact email** now. Without it, every send needs a
-manually typed recipient.
+Enter your **IČO** to fill the legal name, address and DIČ from ARES. Review the result and add:
 
-</Step>
+- **Bank account and IBAN.** Invoicey can suggest the IBAN from a Czech account number; check it before saving.
+- **VAT settings.** Confirm whether the issuer is a VAT payer and review the defaults for your work.
+- **Contact email.** Replies to invoice emails go here. ARES does not provide it.
+- **Numbering.** Review the default sequence or set your own before issuing.
 
-<Step>
-
-### Create an invoice
-
-**Invoices → New**. Pick the issuer and client you just made, then add line items — description,
-quantity, unit price, VAT rate.
-
-Invoicey pre-fills the header; review these fields:
-
-| Field                 | Meaning                                                                          |
-| --------------------- | -------------------------------------------------------------------------------- |
-| **Datum vystavení**   | Issue date                                                                       |
-| **Datum splatnosti**  | Due date — must be on or after the issue date                                    |
-| **DUZP**              | Date of taxable supply. Required on invoices and credit notes                    |
-| **VAT mode**          | `regular`, `reverse charge` or `OSS` — see [Czech VAT](/docs/concepts/czech-vat) |
-| **Variabilní symbol** | Payment reference. Defaults to the invoice number's digits                       |
-
-Totals recompute as you type, per VAT rate, and are checked again server-side when you issue.
+You can also upload a logo, stamp and signature. Optional history import can wait until later.
+Make this issuer the workspace default if you want an assistant to use it for new drafts.
 
 </Step>
 
 <Step>
 
-### Issue it
+### Choose where to draft
 
-A saved invoice is a **draft**: no number, fully editable, not a tax document.
+- **In Invoicey:** open the [Assistant](/invoices/ai) and describe the work. It can ask follow-up questions and show a draft to review. If the assistant is unavailable, use the form below.
+- **In ChatGPT:** follow [Connect Invoicey to ChatGPT](/chatgpt#setup). Use the public listing; developer mode and API keys are not needed. Set up your default issuer before connecting.
+- **With the form:** open [New invoice](/invoices/new), choose an issuer and client, and enter the line items. **Add manually** creates a client without leaving or losing your invoice edits.
 
-**Issue** turns it into a real one, in a single transaction: allocates the next number from your
-scheme, freezes [snapshots](/docs/concepts/snapshots) of the issuer and client, recomputes totals,
-renders the PDF and ISDOC, and stamps the issue date.
+For an assistant, start with something like:
+
+> Draft an invoice for 12 hours of design at 1,500 CZK per hour. Use my workspace's
+> default issuer. Ask me for the client details and anything else missing, then
+> show me the draft before issuing it.
+
+For a Czech client, use a confirmed IČO for ARES lookup. If you only know the company name,
+ask the assistant to find candidates and confirm the right one. The web client form supports
+IČO lookup and manual entry, including [foreign clients](/docs/guides/clients#foreign-clients).
+Add the client's email if you plan to send the invoice by email.
+
+</Step>
+
+<Step>
+
+### Review and save
+
+Check the supplier, client, line items and totals, then review:
+
+| Field                 | What to check                                                                                                    |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Dates**             | Issue date, due date and date of supply. Due date must not be before issue date.                                 |
+| **Currency**          | Choose CZK, EUR or USD. Payment QR is available only for CZK invoices.                                           |
+| **Document language** | Choose Czech or English independently of the app's language.                                                     |
+| **VAT**               | Review payer status, line rates and VAT mode for this transaction. See [VAT settings](/docs/concepts/czech-vat). |
+| **Payment reference** | Check the variable symbol; by default it follows the invoice number's digits.                                    |
+
+**Save draft** keeps the invoice in your workspace without assigning a final number. Browser
+recovery helps with unsaved edits during the current session; it does not replace Save draft.
+If recovery is unavailable in your browser, you can still save explicitly.
+
+If the page says you have read-only access, you can view and download the document. Ask a
+workspace owner or administrator for the access you need; see [Members and roles](/docs/getting-started/workspaces#members-and-roles).
+
+</Step>
+
+<Step>
+
+### Issue when the draft is final
+
+Choose **Issue**, or explicitly confirm issuance with the assistant after reviewing its draft.
+Invoicey assigns the next number and freezes the document's issuer, client and invoice details.
+PDF and ISDOC downloads are available from invoice detail.
 
 <Callout type="warn">
-  Issuing is one-way. Issued invoices cannot be edited — only cancelled and
-  re-issued. This is deliberate; see
-  [statuses](/docs/concepts/statuses#why-issued-invoices-are-frozen).
+  An issued invoice is locked. Review the client, amounts, dates and VAT before
+  confirming. For an issued document that needs a correction, see [Invoice
+  statuses](/docs/concepts/statuses#why-issued-invoices-are-frozen).
 </Callout>
 
 </Step>
 
 <Step>
 
-### Send it
+### Send the invoice
 
-From the invoice detail, **Send email**. Invoicey attaches the PDF (always) and the ISDOC (on by
-default) and sends via Resend.
+On invoice detail, choose **Send by email**. Review the recipient, subject, cover text and
+attachments before choosing **Send**. The PDF is attached; the separate ISDOC attachment is
+optional and follows your issuer's email default.
 
-The email uses `{Issuer name} via Invoicey`, replies go to the issuer's contact address, and delivery
-events appear on the invoice timeline.
+The sender appears as `{Issuer name} via Invoicey`, replies go to the issuer's contact email,
+and delivery events appear on the invoice timeline. See [Email delivery](/docs/guides/sending-email)
+if a message needs attention.
 
 </Step>
 
 <Step>
 
-### Mark it paid
+### Record payment when it arrives
 
-When the money lands, **Mark paid** on the invoice (or add a manual payment under **Payments**).
-Invoicey records an allocation in the payment ledger; when the total is covered, status derives to
-`paid` and it drops out of your overdue list.
+For a full payment, choose **Mark as paid** on invoice detail. This records the remaining balance.
+For a partial payment, use **Add payment** in [Matching](/payments) and enter the amount actually received.
+The ledger shows what is allocated and what remains outstanding.
 
-If you bank with **Fio**, connect a read-only monitoring token under **Settings → Bank connections**
-and confirm match proposals on **Payments** instead of typing everything by hand — see
-[Reconcile payments](/docs/guides/reconciling-payments).
+You can optionally connect **Fio** or **MONETA** in [Bank connections](/payments/connections)
+to import transactions and review match proposals. See [Reconcile payments](/docs/guides/reconciling-payments)
+for setup and for correcting an allocation. Recording a payment does not transfer money.
 
 </Step>
 
 </Steps>
 
-## Next
+## Keep going
 
 <Cards>
   <Card
-    title="How invoices actually work"
-    href="/docs/concepts/invoice-as-data"
-    description="The schema every surface validates against."
+    title="Use Invoicey in ChatGPT"
+    href="/chatgpt"
+    description="Install the public plugin and connect your workspace."
   />
   <Card
-    title="Do this from Cursor instead"
-    href="/docs/integrations/cursor"
-    description="Create and issue invoices by asking an assistant."
+    title="Other assistants"
+    href="/docs/integrations/mcp"
+    description="Connect Cursor, Claude Code and other MCP clients."
   />
   <Card
     title="Import your old invoices"
     href="/docs/guides/importing-history"
-    description="Bulk-load PDFs from your previous tool."
+    description="Bring historical documents from your previous tool."
   />
   <Card
     title="Reconcile payments"
     href="/docs/guides/reconciling-payments"
-    description="Fio bank feed and the payment ledger."
-  />
-  <Card
-    title="Something went wrong"
-    href="/docs/reference/troubleshooting"
-    description="The usual suspects."
+    description="Fio and MONETA feeds, manual payments and the ledger."
   />
 </Cards>
