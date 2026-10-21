@@ -9,8 +9,10 @@ account, numbering and branding.
 
 ## Creating one
 
-**Issuers → New.** Enter the IČO and Invoicey fills the legal name, address and DIČ from
-[ARES](/docs/guides/clients#ares-lookup).
+Open [My businesses](/issuers), then **New business**. On your first sign-in, the welcome flow
+also helps you create the first business. Enter the IČO and look it up in
+[ARES](/docs/guides/clients#ares-lookup), then review the legal name, address and DIČ it returns.
+Check your contact details and bank account yourself; a registry lookup cannot supply everything.
 
 ARES cannot tell you everything, so these are yours to supply:
 
@@ -20,7 +22,11 @@ ARES cannot tell you everything, so these are yours to supply:
 
 ### Bank account
 
-Add the domestic account and IBAN:
+Enter the Czech domestic account number. Invoicey suggests its IBAN as you type; check both against
+your bank before saving. If you edit the IBAN yourself, the form preserves that edit rather than
+silently replacing it with a new suggestion.
+
+The supported formats are:
 
 | Field          | Format                     | Example                    |
 | -------------- | -------------------------- | -------------------------- |
@@ -29,7 +35,9 @@ Add the domestic account and IBAN:
 | BIC            | Optional, 8 or 11 chars    | `GIBACZPX`                 |
 
 The account number appears on the PDF; the IBAN powers the [payment QR](/docs/outputs/payment-qr).
-Invoicey validates their formats, not whether they identify the same account.
+Invoicey checks the IBAN checksum and that it matches the domestic account number. A mismatch must
+be corrected before saving. These checks do not verify account ownership. Connecting a bank for
+[payment matching](/docs/integrations/bank-connections) is a separate, optional step.
 
 </Step>
 
@@ -46,8 +54,9 @@ VAT recap on the PDF with _Nejsem plátce DPH_. See [Czech VAT](/docs/concepts/c
 
 ### Contact email
 
-Required. It becomes the `Reply-To` on every invoice email sent for this issuer, so client replies
-reach you rather than the sending domain.
+Required. It is saved with the issuer details on an issued invoice and becomes the reply address
+when that invoice is emailed. Check it before issuing: changing the business contact later does not
+rewrite older invoices. See [email delivery](/docs/guides/sending-email#sender-and-replies).
 
 </Step>
 
@@ -71,7 +80,9 @@ Use the wording from your registry entry.
 
 ### Numbering scheme
 
-Per document type. The default `{YYYY}{####}` gives `20260001`. Full token list and reset behaviour
+Each document type has its own scheme. The standard invoice default `{YYYY}{####}` gives
+`20260001` for the first invoice of 2026; proforma, advance and credit-note defaults include their
+own prefixes. Full token list and reset behaviour
 in [numbering](/docs/concepts/numbering).
 
 </Step>
@@ -82,14 +93,18 @@ in [numbering](/docs/concepts/numbering).
 
 Three optional images placed on the PDF:
 
-| Asset           | Formats        | Max size |
-| --------------- | -------------- | -------- |
-| Logo            | PNG, JPEG, SVG | 1 MB     |
-| Stamp (razítko) | PNG, JPEG      | 1 MB     |
-| Signature       | PNG, JPEG      | 1 MB     |
+| Asset           | Formats   | Max size |
+| --------------- | --------- | -------- |
+| Logo            | PNG, JPEG | 1 MB     |
+| Stamp (razítko) | PNG, JPEG | 1 MB     |
+| Signature       | PNG, JPEG | 1 MB     |
 
-Uploads go through Invoicey's file storage. Prefer PNG or JPEG — SVG is not rasterised reliably for
-the PDF. Without an uploaded file you can still paste a publicly reachable image URL.
+Open the business’s **Assets** section and choose an image from your device. On a computer, you
+can also drag it onto the upload area. SVG, WebP and HEIC are not accepted; export the image as
+PNG or JPEG first. A transparent PNG works well for a logo, stamp or signature.
+
+Review the preview, then save the section. Uploading the file alone does not save the business
+settings. Use the image’s remove control to clear it, or choose another image to replace it.
 
 Replacing an asset preserves its old URL so issued-invoice [snapshots](/docs/concepts/snapshots)
 continue to render correctly.
@@ -101,7 +116,7 @@ Per issuer, used at send time:
 | Setting                 | Default                           |
 | ----------------------- | --------------------------------- |
 | Default subject         | `Faktura {number} — {issuerName}` |
-| Default cover text      | —                                 |
+| Default cover text      | Invoice cover message, editable   |
 | Attach ISDOC by default | on                                |
 | Display name template   | `{issuerName} via Invoicey`       |
 | Overdue reminders       | off                               |
@@ -109,8 +124,25 @@ Per issuer, used at send time:
 | Payment-received email  | off                               |
 
 Email settings are read **when you send**, so changes also apply when resending an older invoice.
+Review custom subject and cover text when using English documents: saved template wording is not
+automatically translated. See [email delivery](/docs/guides/sending-email) for recipient review,
+delivery status and blocked addresses.
 
 ## Editing an issuer
+
+Open a business from [My businesses](/issuers). Settings are split into five sections:
+
+| Section   | What to change                                                     |
+| --------- | ------------------------------------------------------------------ |
+| Identity  | Legal and contact details, address and VAT-payer status            |
+| Bank      | Domestic account, IBAN and optional BIC                            |
+| Assets    | Logo, stamp and signature uploads                                  |
+| Numbering | Separate number schemes for each document type                     |
+| Email     | Subject, cover text, attachment preferences and automated messages |
+
+**Save each section before moving to another.** A change in one section does not save unsaved edits
+in the others. You can add optional branding and email preferences after completing the required
+identity and bank details.
 
 Edits apply to **future** invoices only. Already-issued invoices hold frozen copies and will not
 change — see [snapshots](/docs/concepts/snapshots).
