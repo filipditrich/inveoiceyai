@@ -1,3 +1,13 @@
+## [1.62.9](https://github.com/filipditrich/inveoiceyai/compare/v1.62.8...v1.62.9) (2026-10-21)
+
+### Bug Fixes
+
+* **web:** register generator reset dialog controls ([5552a97](https://github.com/filipditrich/inveoiceyai/commit/5552a97df79a1961720c1a5766305e54bdacedd2))
+
+### Documentation
+
+* record live initial-theme verification ([074ab80](https://github.com/filipditrich/inveoiceyai/commit/074ab80a8237d78ee48da8ab42538e7198ee0df8))
+
 ## [1.62.8](https://github.com/filipditrich/inveoiceyai/compare/v1.62.7...v1.62.8) (2026-10-21)
 
 ### Bug Fixes
