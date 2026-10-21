@@ -1,3 +1,9 @@
+## [1.62.12](https://github.com/filipditrich/inveoiceyai/compare/v1.62.11...v1.62.12) (2026-10-21)
+
+### Bug Fixes
+
+* **web:** discard stale PDFs when preview refresh fails ([aa7b825](https://github.com/filipditrich/inveoiceyai/commit/aa7b825a3782e8be748266f4788ba014306ccc43))
+
 ## [1.62.11](https://github.com/filipditrich/inveoiceyai/compare/v1.62.10...v1.62.11) (2026-10-21)
 
 ### Bug Fixes
