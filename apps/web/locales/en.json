@@ -1917,6 +1917,7 @@
       "custom": "Other / custom"
     },
     "detail": {
+      "readOnly": "You can view and download this invoice. Your workspace role does not allow changes.",
       "issueDate": "Issue date",
       "dueDate": "Due date",
       "duzp": "Tax point date",
@@ -2031,6 +2032,7 @@
         "description": "Review this before making a permanent accounting change.",
         "permanent": "Cancellation keeps the invoice number and leaves the document in history.",
         "blocked": "Payments are allocated to this invoice. Reverse them first before it can be cancelled.",
+        "askPaymentManager": "Ask a teammate with payment access to review and reverse the allocations.",
         "reviewPayments": "Review payment ledger",
         "confirm": "Cancel invoice permanently",
         "pending": "Cancelling…"

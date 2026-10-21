@@ -18,9 +18,11 @@ import { useTranslations } from "next-intl";
 export function InvoiceCancelSheet({
   invoiceId,
   blockedByPayment,
+  paymentAccess,
 }: {
   invoiceId: string;
   blockedByPayment: boolean;
+  paymentAccess: "manage" | "read" | "none";
 }) {
   const t = useTranslations("Invoices.detail.cancelSheet");
   const [open, setOpen] = React.useState(false);
@@ -45,14 +47,19 @@ export function InvoiceCancelSheet({
           {blockedByPayment ? (
             <div className="space-y-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
               <p>{t("blocked")}</p>
-              <Button
-                onClick={() => setOpen(false)}
-                render={<a href="#payment-ledger" />}
-                size="sm"
-                variant="outline"
-              >
-                {t("reviewPayments")}
-              </Button>
+              {paymentAccess !== "manage" ? (
+                <p>{t("askPaymentManager")}</p>
+              ) : null}
+              {paymentAccess !== "none" ? (
+                <Button
+                  onClick={() => setOpen(false)}
+                  render={<a href="#payment-ledger" />}
+                  size="sm"
+                  variant="outline"
+                >
+                  {t("reviewPayments")}
+                </Button>
+              ) : null}
             </div>
           ) : (
             <form action={cancelInvoice}>

@@ -1917,6 +1917,7 @@
       "custom": "Jiné / vlastní"
     },
     "detail": {
+      "readOnly": "Tuto fakturu můžete zobrazit a stáhnout. Vaše role v pracovním prostoru neumožňuje změny.",
       "issueDate": "Datum vystavení",
       "dueDate": "Splatnost",
       "duzp": "DUZP",
@@ -2031,6 +2032,7 @@
         "description": "Před trvalou účetní změnou si vše zkontrolujte.",
         "permanent": "Storno ponechá číslo faktury a doklad zůstane v historii.",
         "blocked": "K faktuře jsou přiřazené platby. Před stornem je nejdřív stornujte.",
+        "askPaymentManager": "Požádejte kolegu s přístupem k platbám, aby přiřazené platby zkontroloval a stornoval.",
         "reviewPayments": "Zobrazit přehled plateb",
         "confirm": "Trvale stornovat fakturu",
         "pending": "Stornuji…"

@@ -27,7 +27,7 @@ import {
 import { SubmitButton } from "@/components/ui/submit-button";
 import { ProductToastTracker } from "@/features/c15t/product-toast-tracker";
 import { requireWorkspace } from "@/lib/auth/session";
-import { can } from "@/lib/authz/can";
+import { loadPermissions } from "@/lib/authz/can";
 import {
   applyDisplayNameTemplate,
   buildViaInvoiceyDisplayName,
@@ -114,6 +114,8 @@ export default async function InvoiceDetailPage({
     requireWorkspace(),
   ]);
   const locale = localeValue as AppLocale;
+  const permissions = await loadPermissions();
+  if (!permissions.has("invoices:read")) notFound();
   const rows = await db
     .select()
     .from(invoices)
@@ -140,10 +142,21 @@ export default async function InvoiceDetailPage({
     (row.issuedAt ? "invoicey" : null)) as InvoiceOriginProvider | null;
   const originLabel =
     originProvider != null ? tOrigin(originProvider) : row.originLabel;
-  const [canReadPayments, canManagePayments] = await Promise.all([
-    can("payments:read"),
-    can("payments:manage"),
-  ]);
+  const canReadPayments = permissions.has("payments:read");
+  const canManagePayments = permissions.has("payments:manage");
+  const canCreateInvoices = permissions.has("invoices:create");
+  const canIssueInvoices = permissions.has("invoices:issue");
+  const canSendInvoices = permissions.has("invoices:send");
+  const canDeleteInvoices = permissions.has("invoices:delete");
+  const canManageRecurring = permissions.has("recurring:manage");
+  const readOnly = ![
+    canCreateInvoices,
+    canIssueInvoices,
+    canSendInvoices,
+    canDeleteInvoices,
+    canManageRecurring,
+    canManagePayments,
+  ].some(Boolean);
   // Second wave: everything that only needs the invoice row we just read.
   const [
     driveDeviceCount,
@@ -239,7 +252,10 @@ export default async function InvoiceDetailPage({
   };
 
   const canEmail =
-    Boolean(row.issuedAt) && !row.cancelledAt && displayStatus !== "draft";
+    canSendInvoices &&
+    Boolean(row.issuedAt) &&
+    !row.cancelledAt &&
+    displayStatus !== "draft";
   const showPdfPreview = Boolean(row.issuedAt) || Boolean(payload?.success);
   const documentLanguage =
     payload?.success && payload.data.meta.language === "en" ? "en" : "cs";
@@ -261,9 +277,17 @@ export default async function InvoiceDetailPage({
         </span>
       ) : null}
       {row.recurringScheduleId ? (
-        <Link className="text-xs underline" href="/invoices/recurring" prefetch>
-          {t("fromRecurring")}
-        </Link>
+        canManageRecurring ? (
+          <Link
+            className="text-xs underline"
+            href="/invoices/recurring"
+            prefetch
+          >
+            {t("fromRecurring")}
+          </Link>
+        ) : (
+          <span className="text-xs">{t("fromRecurring")}</span>
+        )
       ) : null}
       {originLabel ? (
         <span className="text-xs">
@@ -304,7 +328,7 @@ export default async function InvoiceDetailPage({
         back={{ href: "/invoices", label: t("backToList") }}
         actions={
           <>
-            {displayStatus === "draft" ? (
+            {canIssueInvoices && displayStatus === "draft" ? (
               <form action={issueSavedInvoice}>
                 <input name="id" type="hidden" value={id} />
                 <SubmitButton pendingLabel={t("issuingPending")}>
@@ -353,7 +377,7 @@ export default async function InvoiceDetailPage({
               ) : null}
             </ButtonGroup>
 
-            {displayStatus === "draft" ? (
+            {canCreateInvoices && displayStatus === "draft" ? (
               <Button
                 render={<Link href={`/invoices/${id}/edit`} prefetch />}
                 variant="outline"
@@ -362,17 +386,19 @@ export default async function InvoiceDetailPage({
                 {t("editButton")}
               </Button>
             ) : null}
-            <form action={duplicateInvoice}>
-              <input name="id" type="hidden" value={id} />
-              <SubmitButton
-                pendingLabel={t("duplicatingPending")}
-                variant="outline"
-              >
-                <CopyIcon data-icon="inline-start" />
-                {t("duplicateButton")}
-              </SubmitButton>
-            </form>
-            {row.docType === "invoice" && !archive ? (
+            {canCreateInvoices ? (
+              <form action={duplicateInvoice}>
+                <input name="id" type="hidden" value={id} />
+                <SubmitButton
+                  pendingLabel={t("duplicatingPending")}
+                  variant="outline"
+                >
+                  <CopyIcon data-icon="inline-start" />
+                  {t("duplicateButton")}
+                </SubmitButton>
+              </form>
+            ) : null}
+            {canManageRecurring && row.docType === "invoice" && !archive ? (
               row.recurringScheduleId ? (
                 <Button
                   render={<Link href="/invoices/recurring" prefetch />}
@@ -406,12 +432,20 @@ export default async function InvoiceDetailPage({
               />
             ) : null}
 
-            {displayStatus === "unpaid" ||
-            displayStatus === "overdue" ||
-            displayStatus === "future" ? (
+            {canIssueInvoices &&
+            (displayStatus === "unpaid" ||
+              displayStatus === "overdue" ||
+              displayStatus === "future") ? (
               <InvoiceCancelSheet
                 blockedByPayment={cancellationBlocked}
                 invoiceId={id}
+                paymentAccess={
+                  canReadPayments
+                    ? canManagePayments
+                      ? "manage"
+                      : "read"
+                    : "none"
+                }
               />
             ) : null}
             {canManagePayments && displayStatus === "paid" ? (
@@ -426,7 +460,8 @@ export default async function InvoiceDetailPage({
                 </SubmitButton>
               </form>
             ) : null}
-            {displayStatus === "draft" || displayStatus === "cancelled" ? (
+            {canDeleteInvoices &&
+            (displayStatus === "draft" || displayStatus === "cancelled") ? (
               <form action={deleteInvoice}>
                 <input name="id" type="hidden" value={id} />
                 <SubmitButton
@@ -445,6 +480,15 @@ export default async function InvoiceDetailPage({
         icon={<ReceiptTextIcon />}
         title={<span className="tabular-nums">{row.number ?? "DRAFT"}</span>}
       />
+
+      {readOnly ? (
+        <p
+          className="rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground"
+          role="note"
+        >
+          {t("readOnly")}
+        </p>
+      ) : null}
 
       {sp.invalid ? (
         <p className="text-sm text-destructive">

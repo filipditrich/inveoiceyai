@@ -1,4 +1,5 @@
 import { requireWorkspaceForRoute } from "@/lib/auth/api";
+import { can } from "@/lib/authz/can";
 import {
   parseFileDisposition,
   serveInvoicePdf,
@@ -16,6 +17,9 @@ export async function GET(request: NextRequest, ctx: { params: Params }) {
   const gate = await requireWorkspaceForRoute(request);
   if ("response" in gate) {
     return gate.response;
+  }
+  if (!(await can("invoices:read"))) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
   const { workspaceId } = gate.context;
   const disposition = parseFileDisposition(
