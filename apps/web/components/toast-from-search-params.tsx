@@ -4,7 +4,7 @@ import { Suspense, useEffect } from "react";
 import { formatTokenCount } from "@/lib/ai/format-tokens";
 import { messageLookup } from "@/lib/i18n-lookup";
 import { useMessages, useTranslations } from "next-intl";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 const TOAST_KEYS = [
@@ -107,7 +107,6 @@ function isToastKey(value: string | null): value is ToastKey {
 
 function ToastFromSearchParamsInner() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const t = useTranslations("Toasts");
   const descriptions = useTranslations("ToastDescriptions");
   const bankCopy = useTranslations("Settings.bankConnections");
@@ -185,7 +184,11 @@ function ToastFromSearchParamsInner() {
       const notify = warningKeys.includes(toastKey)
         ? toast.warning
         : toast.success;
-      notify(t(toastKey), { description: detail, duration: 5000 });
+      notify(t(toastKey), {
+        id: `invoicey-action:${toastKey}`,
+        description: detail,
+        duration: 5000,
+      });
     }
     const url = new URL(window.location.href);
     url.searchParams.delete("toast");
@@ -201,9 +204,11 @@ function ToastFromSearchParamsInner() {
     url.searchParams.delete("proposed");
     url.searchParams.delete("autoMatched");
     url.searchParams.delete("tokens");
-    router.replace(`${url.pathname}${url.search}${url.hash}`, {
-      scroll: false,
-    });
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`,
+    );
   }, [
     toastKey,
     error,
@@ -217,7 +222,6 @@ function ToastFromSearchParamsInner() {
     imported,
     proposed,
     autoMatched,
-    router,
     t,
     descriptions,
     bankCopy,
