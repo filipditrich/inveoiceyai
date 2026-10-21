@@ -34,7 +34,13 @@ flowchart LR
   Tools --> Artifacts[PDF / ISDOC]
 ```
 
-## Private plugin
+## Current public release
+
+The public plugin is version 1.0.3: [Open Invoicey in ChatGPT](https://chatgpt.com/plugins/plugin_asdk_app_6ac15c60bad48191b03d0059a8f7561c). Public setup uses this listing and OAuth consent; developer mode is not required.
+
+On 21 October 2026, the user confirmed that interactive controls open in the native ChatGPT iOS app. This verifies opening the controls, not every invoice action or the Android app. Android remains unverified. See `docs/audit/mobile-productization-2026-10-20.md` for browser and device evidence.
+
+## Historical private prototype
 
 Private package: `plugins/invoicey`. Created plugin ID: `plugins_6abe92279bfc8191aaff5cd11904f96e`.
 Release: `pluginrel_6abf514c9c2c819192fa2984e13ae52b`.
@@ -42,7 +48,7 @@ Release: `pluginrel_6abf514c9c2c819192fa2984e13ae52b`.
 Version 1.0.2 binds the registered app `asdk_app_6abf508edcc48191b06aed095e86da3b`
 through `.app.json`. ChatGPT web now shows **Try in chat**, replacing **Open in desktop app**.
 The hosted connection uses the same `https://invoicey.app/api/mcp` endpoint. User OAuth consent
-and native iOS/Android invoice flows remain pending.
+was pending at the time of this prototype. Current public-release verification is recorded above.
 
 Do not reintroduce bundled server declarations into this private package: OpenAI marks those
 plugins desktop-only, including HTTPS servers. The empty `mcp.json` and `.mcp.json` overwrite

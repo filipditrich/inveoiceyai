@@ -13,7 +13,7 @@ Improve Invoicey across the ChatGPT integration, main web app, onboarding, relia
 | Phone controls               | New Playwright regression failed on a 40px search input; CSS now gives buttons and text inputs 44px minimum height and the checkbox label a 44px touch area | Fixed; nine seeded MCP UI tests pass |
 | iOS input sizing             | Input is already at least 16px; regression preserves this                                                                                                   | Verified in the browser              |
 | Public setup guide           | 390px browser layout has no horizontal document overflow                                                                                                    | Verified on production               |
-| Native ChatGPT iOS / Android | No real phone session is available through current browser tooling; local simulator discovery did not return and was stopped                                | Pending device test                  |
+| Native ChatGPT iOS / Android | User confirmed interactive controls open in the native ChatGPT iOS app on 21 October; Android and complete native invoice workflows remain unverified       | iOS controls open; Android pending   |
 
 No production invoices were created, issued, sent, deleted or marked paid during this pass. Mutation controls were exercised only against the existing seeded test host.
 
@@ -294,3 +294,7 @@ All six isolated integration cases passed with the real C15tProvider, C15tBanner
 The fix is deployed and visually verified on invoicey.app. All 103 applicable live public/generator/theme/clipboard cases passed; the two desktop instances of the phone-touch cases were intentionally skipped. The four previously red touch cases now pass. A separate real iPhone WebKit touch check confirmed zero client rectangles for all consent buttons during the modal and return of pending choices after closing. Inspected /private/tmp/invoicey-consent-live-fixed-iphone.png: the floating cookie controls are gone. No consent choice or real invoice was submitted.
 
 Main CI 39607749152 passed all 125 applicable browser cases without retries and all 14 OAuth cases (112 intentional skips). Release verification 39607749721 passed with 124 cases plus one successful retry of the existing WebKit issuer-prefill reset case, and all 14 OAuth cases. The missing-dialog retry therefore remains under investigation. GitHub published v1.62.10 with the consent fix in its release notes; Vercel deployment dpl_2rMqdpiSMX4twGNpDXb9kttUR3X8 is Ready and aliased to invoicey.app. The live version endpoint returned 1.62.10 / f58f036.
+
+## Native ChatGPT iOS confirmation — 21 October
+
+The user opened the public Invoicey listing on their phone and replied “iOS: interactive controls open” to the requested native-app check. This is direct user-reported confirmation of opening the interactive controls in ChatGPT for iOS. No OS/app version or complete invoice workflow was reported, and Android remains unverified. Updated both public guide translations to describe precisely this scope and linked the current public listing from the integration specification, distinguishing it from the historical private prototype.

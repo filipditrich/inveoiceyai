@@ -4116,7 +4116,7 @@
     "duplicateTitle": "One app to choose",
     "duplicateBody": "Install Invoicey from the official listing linked here. The public plugin includes the invoice tools and invoicing skill; no separate workflow package is needed.",
     "mobileTitle": "Using your phone?",
-    "mobileBody": "The views adapt to phone screens. Availability in the ChatGPT iOS and Android apps depends on host support and will be confirmed before we advertise native mobile access.",
+    "mobileBody": "Open Invoicey from its public ChatGPT listing. Interactive controls have been confirmed to open in the ChatGPT iOS app. The views adapt to phone screens; Android app support has not yet been verified.",
     "guide": "Connection guide and troubleshooting",
     "install": "Install Invoicey in ChatGPT"
   },
