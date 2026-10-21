@@ -44,6 +44,7 @@ import {
 } from "@/lib/build-invoice";
 import { formatMoney } from "@/lib/format";
 import {
+  withInvoiceDraftStorage,
   clearRecoveredInvoiceDraft,
   loadRecoveredInvoiceDraft,
   markNewInvoiceRecoverySubmission,
@@ -408,6 +409,8 @@ export function InvoiceBuilderForm({
   const [addingClient, setAddingClient] = React.useState(false);
   const [recoveredDraft, setRecoveredDraft] = React.useState(false);
   const [localDraftSaved, setLocalDraftSaved] = React.useState(false);
+  const [localRecoveryUnavailable, setLocalRecoveryUnavailable] =
+    React.useState(false);
   const [savedLocalSnapshot, setSavedLocalSnapshot] = React.useState<
     string | null
   >(null);
@@ -421,14 +424,43 @@ export function InvoiceBuilderForm({
     !issuerVatPayer || watched.vatMode === "reverse_charge";
   const watchedSnapshot = JSON.stringify(watched);
 
+  const saveLocalRecovery = React.useCallback(() => {
+    const value = form.getValues();
+    const saved = withInvoiceDraftStorage((storage) => {
+      saveRecoveredInvoiceDraft(storage, {
+        context: { workspaceId, issuerId: value.issuerId },
+        value,
+      });
+      return JSON.stringify(value);
+    });
+    setLocalRecoveryUnavailable(!saved.available);
+    setLocalDraftSaved(saved.available);
+    setSavedLocalSnapshot(saved.available ? saved.value : null);
+  }, [form, workspaceId]);
+
+  function clearLocalRecovery(): boolean {
+    const cleared = withInvoiceDraftStorage((storage) =>
+      clearRecoveredInvoiceDraft(storage, workspaceId),
+    );
+    if (!cleared.available) setLocalRecoveryUnavailable(true);
+    return cleared.available;
+  }
+
   React.useEffect(() => {
     if (mode !== "create" || !firstIssuer || typeof window === "undefined") {
       return;
     }
-    const recovered = loadRecoveredInvoiceDraft<unknown>(
-      window.sessionStorage,
-      { workspaceId, issuerId: firstIssuer.id },
+    const loaded = withInvoiceDraftStorage((storage) =>
+      loadRecoveredInvoiceDraft<unknown>(storage, {
+        workspaceId,
+        issuerId: firstIssuer.id,
+      }),
     );
+    if (!loaded.available) {
+      setLocalRecoveryUnavailable(true);
+      return;
+    }
+    const recovered = loaded.value;
     const restored = normalizeRecoveredInvoiceBuilderDraft(recovered);
     if (
       restored &&
@@ -460,17 +492,14 @@ export function InvoiceBuilderForm({
         look.id !== restored.lookId ||
         look.version !== restored.lookVersion
       ) {
-        saveRecoveredInvoiceDraft(window.sessionStorage, {
-          context: { workspaceId, issuerId: firstIssuer.id },
-          value: next,
-        });
+        saveLocalRecovery();
       }
       setRecoveredDraft(true);
       emitProductEvent("invoice_draft_recovered", {
         creationEntry: "structured",
       });
     } else if (recovered) {
-      clearRecoveredInvoiceDraft(window.sessionStorage, workspaceId);
+      clearLocalRecovery();
     }
     // Recovery is intentionally read only once. A later issuer selection must
     // not replace the form currently being edited.
@@ -482,21 +511,19 @@ export function InvoiceBuilderForm({
       mode !== "create" ||
       !watched.issuerId ||
       !form.formState.isDirty ||
-      typeof window === "undefined"
-    ) {
+      localRecoveryUnavailable
+    )
       return;
-    }
-    const timeout = window.setTimeout(() => {
-      const snapshot = JSON.stringify(form.getValues());
-      saveRecoveredInvoiceDraft(window.sessionStorage, {
-        context: { workspaceId, issuerId: watched.issuerId },
-        value: form.getValues(),
-      });
-      setLocalDraftSaved(true);
-      setSavedLocalSnapshot(snapshot);
-    }, 400);
+    const timeout = window.setTimeout(saveLocalRecovery, 400);
     return () => window.clearTimeout(timeout);
-  }, [form, mode, watched, workspaceId]);
+  }, [
+    form,
+    mode,
+    watchedSnapshot,
+    watched.issuerId,
+    localRecoveryUnavailable,
+    saveLocalRecovery,
+  ]);
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -865,11 +892,14 @@ export function InvoiceBuilderForm({
     const fd = new FormData();
     if (mode === "create" && typeof window !== "undefined") {
       const recoveryAttempt = crypto.randomUUID();
-      markNewInvoiceRecoverySubmission(window.sessionStorage, {
-        workspaceId,
-        attempt: recoveryAttempt,
-      });
-      fd.set("recoveryAttempt", recoveryAttempt);
+      const marked = withInvoiceDraftStorage((storage) =>
+        markNewInvoiceRecoverySubmission(storage, {
+          workspaceId,
+          attempt: recoveryAttempt,
+        }),
+      );
+      if (marked.available) fd.set("recoveryAttempt", recoveryAttempt);
+      else setLocalRecoveryUnavailable(true);
     }
     if (invoiceId) {
       fd.set("id", invoiceId);
@@ -927,17 +957,7 @@ export function InvoiceBuilderForm({
     });
     if (mode !== "create") return;
     // Persist the completed handoff immediately, before a reload can beat the debounce.
-    try {
-      const value = form.getValues();
-      saveRecoveredInvoiceDraft(window.sessionStorage, {
-        context: { workspaceId, issuerId: value.issuerId },
-        value,
-      });
-      setLocalDraftSaved(true);
-      setSavedLocalSnapshot(JSON.stringify(value));
-    } catch {
-      setLocalDraftSaved(false);
-    }
+    saveLocalRecovery();
   }
 
   async function addClientFromAres() {
@@ -1052,7 +1072,8 @@ export function InvoiceBuilderForm({
             <span>{t("recoveredDraft" as never)}</span>
             <Button
               onClick={() => {
-                clearRecoveredInvoiceDraft(window.sessionStorage, workspaceId);
+                if (!clearLocalRecovery()) return;
+                setLocalRecoveryUnavailable(false);
                 form.reset();
                 setRecoveredDraft(false);
                 setLocalDraftSaved(false);
@@ -1066,7 +1087,16 @@ export function InvoiceBuilderForm({
             </Button>
           </div>
         ) : null}
+        {mode === "create" && localRecoveryUnavailable ? (
+          <p
+            className="rounded-md border bg-muted/50 px-3 py-2 text-sm text-muted-foreground"
+            role="status"
+          >
+            {t("localRecoveryUnavailable")}
+          </p>
+        ) : null}
         {mode === "create" &&
+        !localRecoveryUnavailable &&
         localDraftSaved &&
         savedLocalSnapshot === watchedSnapshot ? (
           <p className="text-xs text-muted-foreground" role="status">

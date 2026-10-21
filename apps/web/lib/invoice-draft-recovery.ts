@@ -7,6 +7,22 @@ export type StoredInvoiceDraft<T> = {
   value: T;
 };
 
+export type InvoiceDraftStorageResult<T> =
+  | { available: true; value: T }
+  | { available: false };
+
+/** Browser policy can refuse the storage object itself, not just its operations. */
+export function withInvoiceDraftStorage<T>(
+  operation: (storage: Storage) => T,
+  getStorage: () => Storage = () => window.sessionStorage,
+): InvoiceDraftStorageResult<T> {
+  try {
+    return { available: true, value: operation(getStorage()) };
+  } catch {
+    return { available: false };
+  }
+}
+
 const recoveryKey = (workspaceId: string) =>
   `invoicey:invoice-draft:${workspaceId}`;
 const createSuccessKey = (workspaceId: string) =>

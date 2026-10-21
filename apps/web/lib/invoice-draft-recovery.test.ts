@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  withInvoiceDraftStorage,
   clearRecoveredInvoiceDraft,
   consumeNewInvoiceRecoverySubmission,
   loadRecoveredInvoiceDraft,
@@ -212,4 +213,69 @@ it("normalizes incomplete local builder input without accepting malformed drafts
       incomplete.issuerId,
     ]),
   ).toBe(false);
+});
+
+// Browser privacy policies and quota failures must not abort invoice editing or submission.
+it("reports unavailable when acquiring session storage throws", () => {
+  const result = withInvoiceDraftStorage(
+    (local) =>
+      loadRecoveredInvoiceDraft(local, {
+        workspaceId: "workspace-a",
+        issuerId: "issuer-a",
+      }),
+    () => {
+      throw new DOMException("Blocked", "SecurityError");
+    },
+  );
+  expect(result).toEqual({ available: false });
+});
+
+for (const operation of ["read", "write", "clear"] as const) {
+  it(`reports unavailable when a recovery ${operation} is refused`, () => {
+    const local = storage();
+    const fail = () => {
+      throw new DOMException(
+        "Blocked",
+        operation === "write" ? "QuotaExceededError" : "SecurityError",
+      );
+    };
+    if (operation === "read") local.getItem = fail;
+    if (operation === "write") local.setItem = fail;
+    if (operation === "clear") local.removeItem = fail;
+    const result = withInvoiceDraftStorage(
+      (browserStorage) => {
+        if (operation === "read")
+          return loadRecoveredInvoiceDraft(browserStorage, {
+            workspaceId: "workspace-a",
+            issuerId: "issuer-a",
+          });
+        if (operation === "write")
+          return saveRecoveredInvoiceDraft(browserStorage, {
+            context: { workspaceId: "workspace-a", issuerId: "issuer-a" },
+            value: { notes: "Private work" },
+          });
+        return clearRecoveredInvoiceDraft(browserStorage, "workspace-a");
+      },
+      () => local,
+    );
+    expect(result).toEqual({ available: false });
+  });
+}
+
+it("keeps a recoverable draft when storage is available", () => {
+  const local = storage();
+  const result = withInvoiceDraftStorage(
+    (browserStorage) => {
+      saveRecoveredInvoiceDraft(browserStorage, {
+        context: { workspaceId: "workspace-a", issuerId: "issuer-a" },
+        value: { notes: "Private work" },
+      });
+      return loadRecoveredInvoiceDraft(browserStorage, {
+        workspaceId: "workspace-a",
+        issuerId: "issuer-a",
+      });
+    },
+    () => local,
+  );
+  expect(result).toEqual({ available: true, value: { notes: "Private work" } });
 });

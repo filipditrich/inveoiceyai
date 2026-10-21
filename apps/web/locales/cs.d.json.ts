@@ -2234,6 +2234,7 @@ declare const messages: {
       "removeItem": "Odebrat položku {n}",
       "duplicate": "Duplikovat",
       "duplicateItem": "Duplikovat položku {n}",
+      "localRecoveryUnavailable": "Místní obnovení konceptu není v tomto prohlížeči dostupné. Nechte stránku otevřenou a před odchodem použijte Uložit koncept.",
       "recoveredDraft": "Obnovili jsme neuložený místní návrh.",
       "savedLocally": "Neuložený návrh je uložený v této relaci prohlížeče.",
       "discardRecoveredDraft": "Zahodit obnovený návrh",

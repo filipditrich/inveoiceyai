@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import {
+  withInvoiceDraftStorage,
   clearRecoveredInvoiceDraft,
   consumeNewInvoiceRecoverySubmission,
 } from "@/lib/invoice-draft-recovery";
@@ -32,19 +33,21 @@ export function ProductToastTracker({
     );
     if (event) {
       emitProductEvent(event, productEventProperties(event, properties));
-      if (
-        clearNewInvoiceRecoveryWorkspaceId &&
-        consumeNewInvoiceRecoverySubmission(window.sessionStorage, {
-          workspaceId: clearNewInvoiceRecoveryWorkspaceId,
-          attempt: url.searchParams.get("recoveryAttempt"),
-          successInvoiceId,
-          toast,
-        })
-      ) {
-        clearRecoveredInvoiceDraft(
-          window.sessionStorage,
-          clearNewInvoiceRecoveryWorkspaceId,
-        );
+      if (clearNewInvoiceRecoveryWorkspaceId) {
+        withInvoiceDraftStorage((storage) => {
+          if (
+            consumeNewInvoiceRecoverySubmission(storage, {
+              workspaceId: clearNewInvoiceRecoveryWorkspaceId,
+              attempt: url.searchParams.get("recoveryAttempt"),
+              successInvoiceId,
+              toast,
+            })
+          )
+            clearRecoveredInvoiceDraft(
+              storage,
+              clearNewInvoiceRecoveryWorkspaceId,
+            );
+        });
       }
       url.searchParams.delete("toast");
       url.searchParams.delete("recoveryAttempt");

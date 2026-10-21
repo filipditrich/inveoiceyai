@@ -2231,6 +2231,7 @@
       "removeItem": "Remove line {n}",
       "duplicate": "Duplicate",
       "duplicateItem": "Duplicate line {n}",
+      "localRecoveryUnavailable": "Local draft recovery is unavailable in this browser. Keep this page open and use Save draft before leaving.",
       "recoveredDraft": "Recovered an unsaved local draft.",
       "savedLocally": "Unsaved draft saved in this browser session.",
       "discardRecoveredDraft": "Discard recovered draft",

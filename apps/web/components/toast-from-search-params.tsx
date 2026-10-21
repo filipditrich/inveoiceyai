@@ -189,6 +189,7 @@ function ToastFromSearchParamsInner() {
     }
     const url = new URL(window.location.href);
     url.searchParams.delete("toast");
+    url.searchParams.delete("recoveryAttempt");
     url.searchParams.delete("error");
     url.searchParams.delete("groups");
     url.searchParams.delete("removed");
