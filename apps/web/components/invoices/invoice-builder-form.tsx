@@ -13,6 +13,7 @@ import {
   issueInvoice,
   saveInvoiceDraft,
 } from "@/actions/invoices";
+import { ClientCreateDialog } from "@/components/clients/client-create-dialog";
 import {
   collectFormErrorMessages,
   Field,
@@ -301,6 +302,7 @@ export function InvoiceBuilderForm({
 }: InvoiceBuilderFormProps) {
   const t = useTranslations("Invoices.builder");
   const tErr = useTranslations("Errors.invalid");
+  const [clientDialogOpen, setClientDialogOpen] = React.useState(false);
   const tAres = useTranslations("Issuers.ares");
   const locale = useLocale() as AppLocale;
   const schema = React.useMemo(
@@ -913,6 +915,31 @@ export function InvoiceBuilderForm({
     }
   }
 
+  function selectCreatedClient(client: ClientOption) {
+    setClientOptions((current) =>
+      [...current.filter((option) => option.id !== client.id), client].toSorted(
+        (a, b) => a.snapshot.name.localeCompare(b.snapshot.name, locale),
+      ),
+    );
+    form.setValue("clientId", client.id, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    if (mode !== "create") return;
+    // Persist the completed handoff immediately, before a reload can beat the debounce.
+    try {
+      const value = form.getValues();
+      saveRecoveredInvoiceDraft(window.sessionStorage, {
+        context: { workspaceId, issuerId: value.issuerId },
+        value,
+      });
+      setLocalDraftSaved(true);
+      setSavedLocalSnapshot(JSON.stringify(value));
+    } catch {
+      setLocalDraftSaved(false);
+    }
+  }
+
   async function addClientFromAres() {
     if (addingClient) {
       return;
@@ -927,18 +954,7 @@ export function InvoiceBuilderForm({
         setClientLookupMessage(tAres(result.code));
         return;
       }
-      setClientOptions((current) =>
-        [
-          ...current.filter((item) => item.id !== result.client.id),
-          result.client,
-        ].toSorted((a, b) =>
-          a.snapshot.name.localeCompare(b.snapshot.name, "cs"),
-        ),
-      );
-      form.setValue("clientId", result.client.id, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
+      selectCreatedClient(result.client);
       setClientIco(result.client.snapshot.ico ?? clientIco);
       setClientLookupMessage(
         result.existing
@@ -1147,6 +1163,7 @@ export function InvoiceBuilderForm({
                     Boolean(fieldError(errors, "clientId")),
                   )}
                   {...form.register("clientId")}
+                  value={watched.clientId}
                 >
                   <option disabled value="">
                     {t("selectClient")}
@@ -1173,13 +1190,19 @@ export function InvoiceBuilderForm({
                 </div>
               ) : null}
               <Button
-                render={<Link href="/clients/new" prefetch />}
+                type="button"
+                onClick={() => setClientDialogOpen(true)}
                 size="sm"
                 variant="ghost"
               >
                 <UserPlusIcon />
                 {t("addClientManually")}
               </Button>
+              <ClientCreateDialog
+                open={clientDialogOpen}
+                onOpenChange={setClientDialogOpen}
+                onCreated={selectCreatedClient}
+              />
             </div>
 
             <div className="space-y-3 rounded-lg border bg-muted/20 p-4 sm:col-span-2">

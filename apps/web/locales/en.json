@@ -2437,6 +2437,7 @@
       "country": "Country (ISO)",
       "contactEmail": "Contact email",
       "save": "Save",
+      "saveFailed": "Could not save the client. Your details are still here; try again.",
       "saving": "Saving…",
       "source": "Source: {source}",
       "sourceAres": "ARES",

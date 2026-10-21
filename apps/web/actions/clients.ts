@@ -128,14 +128,19 @@ export async function createClientFromAres(
   };
 }
 
-/** UPSERT validated `ClientSnapshot` in default workspace. */
-export async function saveClient(formData: FormData): Promise<void> {
+export type SaveClientResult =
+  | { ok: true; client: { id: string; snapshot: ClientSnapshot } }
+  | {
+      ok: false;
+      code: "required_fields" | "bad_ico" | "bad_dic" | "snapshot_validation";
+    };
+
+/** Share validation, permissions and persistence between the page and draft dialog. */
+async function persistClient(formData: FormData): Promise<SaveClientResult> {
   await assertCan("clients:manage");
   const { workspaceId } = await requireWritableWorkspace();
   await assertClientsWritable(workspaceId);
   const rowId = optionalTrim(formData.get("id")) ?? crypto.randomUUID();
-  const errBase = `/clients/${rowId}/edit`;
-  const createBase = "/clients/new";
 
   const name = optionalTrim(formData.get("name")) ?? null;
   const street = optionalTrim(formData.get("street")) ?? null;
@@ -145,9 +150,7 @@ export async function saveClient(formData: FormData): Promise<void> {
   const country = (optionalTrim(formData.get("country")) ?? "CZ").toUpperCase();
 
   if (!name || !street || !city || !zipResolved) {
-    redirect(
-      `${optionalTrim(formData.get("id")) ? errBase : createBase}?invalid=${encodeURIComponent("required_fields")}`,
-    );
+    return { ok: false, code: "required_fields" };
   }
 
   let icoParsed: string | undefined;
@@ -155,9 +158,7 @@ export async function saveClient(formData: FormData): Promise<void> {
   if (icoRaw) {
     const i = IcoSchema.safeParse(icoRaw.replace(/\s/g, ""));
     if (!i.success) {
-      redirect(
-        `${optionalTrim(formData.get("id")) ? errBase : createBase}?invalid=${encodeURIComponent("bad_ico")}`,
-      );
+      return { ok: false, code: "bad_ico" };
     }
     icoParsed = i.data;
   }
@@ -167,35 +168,31 @@ export async function saveClient(formData: FormData): Promise<void> {
   if (dicRaw) {
     const d = ClientVatIdSchema.safeParse(dicRaw);
     if (!d.success) {
-      redirect(
-        `${optionalTrim(formData.get("id")) ? errBase : createBase}?invalid=${encodeURIComponent("bad_dic")}`,
-      );
+      return { ok: false, code: "bad_dic" };
     }
     dicParsed = d.data;
   }
 
   const emailParsed = optionalTrim(formData.get("contactEmail"));
-  const sourceLabelRaw = formData.get("source")?.toString();
+  const sourceLabelRaw = optionalTrim(formData.get("source"));
   const sourceLabel = sourceLabelRaw === "ares" ? "ares" : "manual";
 
   const snapshotCandidate = ClientSnapshotSchema.safeParse({
     id: rowId,
     name,
-    ...(icoParsed !== undefined ? { ico: icoParsed } : {}),
-    ...(dicParsed !== undefined ? { dic: dicParsed } : {}),
+    ico: icoParsed,
+    dic: dicParsed,
     address: {
       street,
       city,
       zip: zipResolved,
       country,
     },
-    ...(emailParsed !== undefined ? { contactEmail: emailParsed } : {}),
+    contactEmail: emailParsed,
   });
 
   if (!snapshotCandidate.success) {
-    redirect(
-      `${optionalTrim(formData.get("id")) ? errBase : createBase}?invalid=${encodeURIComponent("snapshot_validation")}`,
-    );
+    return { ok: false, code: "snapshot_validation" };
   }
 
   const snapshot = snapshotCandidate.data;
@@ -206,17 +203,18 @@ export async function saveClient(formData: FormData): Promise<void> {
     .where(and(eq(clients.id, rowId), eq(clients.workspaceId, workspaceId)))
     .limit(1);
 
+  let savedId = rowId;
   if (existing[0]) {
     await db
       .update(clients)
       .set({
-        snapshot: snapshot as Record<string, unknown>,
+        snapshot: snapshot,
         source: sourceLabel,
         updatedAt: new Date(),
       })
       .where(and(eq(clients.id, rowId), eq(clients.workspaceId, workspaceId)));
   } else {
-    await ensureClient(db, workspaceId, snapshot as Record<string, unknown>, {
+    savedId = await ensureClient(db, workspaceId, snapshot, {
       preferredId: snapshot.id,
       source: sourceLabel,
     });
@@ -224,6 +222,29 @@ export async function saveClient(formData: FormData): Promise<void> {
 
   revalidatePath("/clients");
   revalidatePath("/invoices/new");
+  const [saved] = await db
+    .select({ snapshot: clients.snapshot })
+    .from(clients)
+    .where(and(eq(clients.id, savedId), eq(clients.workspaceId, workspaceId)))
+    .limit(1);
+  const savedSnapshot = ClientSnapshotSchema.parse(saved?.snapshot);
+  return { ok: true, client: { id: savedId, snapshot: savedSnapshot } };
+}
+
+export async function saveClientInline(
+  formData: FormData,
+): Promise<SaveClientResult> {
+  return persistClient(formData);
+}
+
+/** UPSERT validated `ClientSnapshot` in the active workspace. */
+export async function saveClient(formData: FormData): Promise<void> {
+  const result = await persistClient(formData);
+  if (!result.ok) {
+    const rowId = optionalTrim(formData.get("id"));
+    const base = rowId ? `/clients/${rowId}/edit` : "/clients/new";
+    redirect(`${base}?invalid=${encodeURIComponent(result.code)}`);
+  }
   redirect("/clients?toast=client_saved");
 }
 

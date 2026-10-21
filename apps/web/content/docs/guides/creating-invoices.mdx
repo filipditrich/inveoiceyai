@@ -32,13 +32,20 @@ Choose a form, JSON or an assistant. Every path produces the same
 Pick the issuer and the client, then add lines. Each line has a description, quantity, unit, unit
 price and VAT rate. Totals recalculate as you type, grouped per rate.
 
+Need a new client? Choose **Add manually** in the client section. The form opens over your invoice;
+saving selects the client and keeps your line items, dates and other edits in place. Cancel returns
+to the invoice without creating a client. You can also add a Czech business by IČO through ARES.
+
+This works for new invoices and existing drafts. Adding a client does not save or issue the invoice:
+choose **Save draft** when you want to persist the invoice changes.
+
 The header fields:
 
 | Field                      | Default                      | Notes                                                 |
 | -------------------------- | ---------------------------- | ----------------------------------------------------- |
 | Document type              | `invoice`                    | Also proforma, advance, credit note                   |
 | Issue date                 | Today                        |                                                       |
-| Due date                   | Issue date + issuer's terms  | Must not precede the issue date                       |
+| Due date                   | Issue date + 14 days         | Must not precede the issue date                       |
 | DUZP                       | Issue date                   | Required on invoices and credit notes. Can be earlier |
 | VAT mode                   | `regular`                    | Reverse charge and OSS are the alternatives           |
 | Variable symbol            | Digits of the invoice number | The payment reference your client quotes              |

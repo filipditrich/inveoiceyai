@@ -47,8 +47,9 @@ Every path falls back to manual entry. ARES being unavailable never blocks you f
 
 ## Required fields
 
-The same validation as everywhere else: IČO exactly 8 digits, DIČ `CZ` + 8–10 digits if present, PSČ
-five digits, complete address.
+A name and complete address are required. IČO is optional for a client; when supplied, it must have
+8 digits. Czech DIČ uses `CZ` plus 8–10 digits; the client field also accepts foreign VAT identifiers.
+Choose the two-letter country code and use the client’s postal code. ARES lookup applies to Czech IČO.
 
 DIČ is optional in general but **required** when you invoice that client under
 [reverse charge](/docs/concepts/czech-vat) — the schema enforces it at issue time, so a missing DIČ
@@ -56,12 +57,12 @@ surfaces as a blocked issue rather than an invalid invoice in the wild.
 
 ## Foreign clients
 
-Partially supported. The address schema targets Czech addresses, and the invoice currency is fixed
-to CZK.
+Enter a foreign client manually, including the country code and postal address. A Czech IČO is not
+required. In the invoice builder you can choose CZK, EUR or USD, and select Czech or English document
+language independently of the app language. Payment QR is available only for CZK invoices.
 
-What works today is the [OSS mode](/docs/concepts/czech-vat) for EU B2C, where you charge the
-destination country's rate while still invoicing in koruna. What does not work is invoicing a foreign
-client in their own currency.
+Review VAT mode and cross-border settings for the transaction before issuing; adding a foreign
+address does not determine those settings for you. See [VAT settings](/docs/concepts/czech-vat).
 
 ## Editing and deleting
 

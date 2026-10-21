@@ -2440,6 +2440,7 @@ declare const messages: {
       "country": "Stát (ISO)",
       "contactEmail": "Kontaktní e-mail",
       "save": "Uložit",
+      "saveFailed": "Odběratele se nepodařilo uložit. Údaje zůstaly vyplněné; zkuste to znovu.",
       "saving": "Ukládám…",
       "source": "Zdroj: {source}",
       "sourceAres": "ARES",

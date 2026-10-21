@@ -2,7 +2,7 @@
 
 import type { FormEvent } from "react";
 import * as React from "react";
-import { saveClient } from "@/actions/clients";
+import { saveClient, saveClientInline } from "@/actions/clients";
 import {
   formatAresLookupError,
   lookupAresByIco,
@@ -19,12 +19,14 @@ export interface ClientEditorFormProps {
   mode: "create" | "edit";
   invalidQuery?: string | null;
   snapshot?: ClientSnapshot;
+  onSaved?: (client: { id: string; snapshot: ClientSnapshot }) => void;
 }
 
 export function ClientEditorForm({
   mode,
   invalidQuery,
   snapshot,
+  onSaved,
 }: ClientEditorFormProps) {
   const t = useTranslations("Clients.form");
   const tErr = useTranslations("Errors.invalid");
@@ -84,6 +86,7 @@ export function ClientEditorForm({
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    e.stopPropagation();
     if (saving || lookingUp) {
       return;
     }
@@ -106,7 +109,20 @@ export function ClientEditorForm({
     }
     setSaving(true);
     try {
-      await saveClient(fd);
+      if (!onSaved) {
+        await saveClient(fd);
+        return;
+      }
+      try {
+        const result = await saveClientInline(fd);
+        if (!result.ok) {
+          setLookupMsg(lookupMessageFromInvalid(result.code, tErr));
+          return;
+        }
+        onSaved(result.client);
+      } catch {
+        setLookupMsg(t("saveFailed"));
+      }
     } finally {
       setSaving(false);
     }
@@ -117,7 +133,11 @@ export function ClientEditorForm({
 
   return (
     <form className="mx-auto max-w-xl space-y-6" onSubmit={onSubmit}>
-      {userMsg ? <p className="text-sm text-destructive">{userMsg}</p> : null}
+      {userMsg ? (
+        <p role="alert" className="text-sm text-destructive">
+          {userMsg}
+        </p>
+      ) : null}
 
       <div className="space-y-2">
         <Label htmlFor="client-ico">{t("ico")}</Label>
