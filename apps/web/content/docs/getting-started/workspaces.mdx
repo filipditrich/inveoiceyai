@@ -50,17 +50,27 @@ PDFs still use each issuer’s logo.
 
 ## Members and roles
 
-| Role       | Can do                                                                            |
-| ---------- | --------------------------------------------------------------------------------- |
-| **owner**  | Everything, including managing members. Assigned to whoever created the workspace |
-| **admin**  | Everything except transferring ownership                                          |
-| **member** | Day-to-day work: issuers, clients, invoices, sending                              |
+| Role               | Can do                                                                                                                                              |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Owner**          | All workspace actions, including managing members and the workspace itself.                                                                         |
+| **Admin**          | Manage day-to-day work and members; cannot rename, transfer or delete the workspace.                                                                |
+| **Accountant**     | Review, issue and send invoices; manage payments and bank connections.                                                                              |
+| **Invoice issuer** | Create, edit, issue and send invoices, and manage recurring drafts; no access to the payment ledger. The built-in **member** role uses this preset. |
+| **Viewer**         | View invoices, clients and issuers, and download invoice documents; no changes or payment-ledger access.                                            |
+
+Available role presets and per-member overrides depend on the workspace plan. Owners and
+administrators manage access in [Members](/settings/members). Current permissions apply to
+both the website and connected tools.
+
+Invoice detail shows only the actions you can use. A read-only notice means you can still
+view and download the document; ask a workspace owner or administrator if your work needs
+more access. If allocated payments prevent cancellation, a teammate with payment access
+must review them first.
 
 Invite someone by email address. They get an email with a link; accepting adds them to the
 workspace with the role you chose, sets that workspace as active (and as their API-key default),
-and sends them to the dashboard. If the invitation email fails to send — for example on a
-deployment with no mail configured — the invitation row is still created and the link stays
-copyable from settings, so you can pass it along yourself.
+and sends them to the dashboard. If the email cannot be delivered, copy the invitation link
+from Members and share it directly.
 
 ## Active workspace vs default workspace
 
