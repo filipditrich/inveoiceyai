@@ -197,6 +197,13 @@
   }
 }
 
+/* Keep scrolled article text out of the sticky docs navigation. */
+#nd-docs-layout #nd-subnav,
+#nd-docs-layout [data-toc-popover] > header {
+  background-color: var(--background);
+  backdrop-filter: none;
+}
+
 @layer components {
   /** Quiet graphite application chrome with a precise active indicator. */
   [data-slot="sidebar"][data-variant="inset"] [data-slot="sidebar-inner"] {
