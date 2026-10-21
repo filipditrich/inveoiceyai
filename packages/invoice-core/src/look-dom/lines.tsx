@@ -197,7 +197,7 @@ function DomInvoiceLineRow({
             onChange={patch?.("unit")}
             placeholder={ctx.placeholders.unit}
             style={styles.cellFig}
-            value={invoiceDisplayUnit(item.unit, inv.meta.language)}
+            value={item.unit}
           />
         ) : null}
       </LookBox>

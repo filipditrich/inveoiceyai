@@ -163,3 +163,16 @@ describe("LookDocumentView", () => {
     expect(html).toContain('placeholder="číslo/kód banky"');
   });
 });
+
+it("keeps a partially typed unit unchanged in the editable document", () => {
+  const invoice = parseInvoice(domesticFixture);
+  invoice.meta.language = "en";
+  invoice.items[0]!.unit = "work ";
+  const html = renderToStaticMarkup(
+    createElement(LookDocumentView, {
+      invoice,
+      onEdit: () => undefined,
+    }),
+  );
+  expect(html).toMatch(/aria-label="U\."[^>]*value="work "/u);
+});

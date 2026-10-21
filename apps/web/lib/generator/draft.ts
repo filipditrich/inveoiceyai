@@ -467,9 +467,9 @@ function overlayAddress<
 >(address: T, party: GeneratorParty): T {
   return {
     ...address,
-    street: party.street.trim(),
-    city: party.city.trim(),
-    zip: party.zip.trim(),
+    street: party.street,
+    city: party.city,
+    zip: party.zip,
   };
 }
 
@@ -481,7 +481,7 @@ function overlayIssuer(
   const bank = withSuggestedIban(draft.issuer);
   const next: Invoice["issuer"] = {
     ...issuer,
-    name: draft.issuer.name.trim(),
+    name: draft.issuer.name,
     ico: draft.issuer.ico.replace(/\s/gu, ""),
     contactEmail: draft.issuer.contactEmail.trim(),
     address: overlayAddress(invoice.issuer.address, draft.issuer),
@@ -508,7 +508,7 @@ function overlayClient(
   } = invoice.client;
   const next: Invoice["client"] = {
     ...client,
-    name: draft.client.name.trim(),
+    name: draft.client.name,
     address: overlayAddress(invoice.client.address, draft.client),
   };
   const ico = draft.client.ico.replace(/\s/gu, "");
@@ -522,7 +522,8 @@ function overlayClient(
 
 /**
  * Overlay the visitor's (possibly empty) draft onto a schema-valid preview
- * invoice so inputs start blank instead of showing stub glyphs.
+ * invoice so inputs keep the text being typed, including word separators.
+ * Trimming belongs to the preview/issuance builders, not controlled inputs.
  */
 function overlayDraftValues(invoice: Invoice, draft: GeneratorDraft): Invoice {
   const issuer = overlayIssuer(invoice, draft);
@@ -542,11 +543,11 @@ function overlayDraftValues(invoice: Invoice, draft: GeneratorDraft): Invoice {
       if (!line) return item;
       return {
         ...item,
-        description: line.description.trim(),
-        unit: line.unit.trim() || item.unit,
+        description: line.description,
+        unit: line.unit,
       };
     }),
-    notes: draft.notes.trim() || undefined,
+    notes: draft.notes || undefined,
   };
 }
 
