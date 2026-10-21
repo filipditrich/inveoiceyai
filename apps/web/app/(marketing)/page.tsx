@@ -450,6 +450,7 @@ export default async function HomePage() {
                     command={CLI_INSTALL_COMMAND}
                     copiedLabel={t("companions.copied")}
                     copyLabel={t("companions.copy")}
+                    failedLabel={t("companions.copyFailed")}
                   />
                 </div>
                 <p className="mt-4 text-xs leading-relaxed text-zinc-400">

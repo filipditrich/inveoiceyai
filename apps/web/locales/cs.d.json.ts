@@ -788,6 +788,7 @@ declare const messages: {
       "cliDescription": "Seznamy, koncepty, vystavení, odeslání i párování plateb bez ruční práce s MCP obálkami. CLI používá API klíč workspace a nevratné kroky vždy potvrzuje.",
       "copy": "Kopírovat instalační příkaz",
       "copied": "Instalační příkaz zkopírován",
+      "copyFailed": "Příkaz se nepodařilo zkopírovat. Označte ho a zkopírujte ručně.",
       "cliDocs": "Otevřít rychlý start CLI",
       "macRequirements": "macOS 14 Sonoma nebo novější, Apple silicon. Po dobu bety zdarma; spárování vyžaduje účet Invoicey.",
       "cliRequirements": "macOS a Linux, libovolný POSIX shell. Přihlašuje se API klíčem workspace."

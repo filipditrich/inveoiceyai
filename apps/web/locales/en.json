@@ -785,6 +785,7 @@
       "cliDescription": "List, draft, issue, send, and reconcile without wrapping MCP envelopes by hand. The CLI uses a workspace API key and keeps irreversible actions behind confirmation.",
       "copy": "Copy install command",
       "copied": "Install command copied",
+      "copyFailed": "Couldn’t copy the command. Select it and copy it manually.",
       "cliDocs": "Open the CLI quickstart",
       "macRequirements": "macOS 14 Sonoma or later, Apple silicon. Free during beta; pairing needs an Invoicey account.",
       "cliRequirements": "macOS and Linux, any POSIX shell. Authenticates with a workspace API key."
