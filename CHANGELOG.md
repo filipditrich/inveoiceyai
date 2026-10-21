@@ -1,3 +1,9 @@
+## [1.62.10](https://github.com/filipditrich/inveoiceyai/compare/v1.62.9...v1.62.10) (2026-10-21)
+
+### Bug Fixes
+
+* **web:** hide inert consent controls during dialogs ([0fc1ab0](https://github.com/filipditrich/inveoiceyai/commit/0fc1ab09e8aebb5b8f34927ed0cab0065dd92db9))
+
 ## [1.62.9](https://github.com/filipditrich/inveoiceyai/compare/v1.62.8...v1.62.9) (2026-10-21)
 
 ### Bug Fixes
