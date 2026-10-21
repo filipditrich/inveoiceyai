@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { CopyablePaymentFact as PaymentFact } from "@/components/payments/copyable-payment-fact";
 import { isAppLocale, type AppLocale } from "@/i18n/config";
 import { formatMoney } from "@/lib/format";
 import {
   InvoiceCollectionStatusSchema,
   type InvoiceCollectionStatus,
 } from "@/lib/payments/invoice-collection-status";
-import { CheckIcon, CopyIcon, LoaderCircleIcon } from "lucide-react";
+import { CheckIcon, LoaderCircleIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 const HEARTBEAT_INTERVAL_MS = 2_500;
@@ -156,34 +156,6 @@ export function InvoiceCollectionWaiting(details: CollectionDetails) {
           )}
         </div>
       </section>
-    </div>
-  );
-}
-
-function PaymentFact({
-  label,
-  value,
-  copyLabel,
-}: {
-  label: string;
-  value: string;
-  copyLabel: string;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-3">
-      <div className="min-w-0">
-        <dt className="text-xs text-muted-foreground">{label}</dt>
-        <dd className="truncate font-medium tabular-nums">{value}</dd>
-      </div>
-      <Button
-        aria-label={copyLabel}
-        onClick={() => void navigator.clipboard.writeText(value)}
-        size="icon-sm"
-        type="button"
-        variant="ghost"
-      >
-        <CopyIcon />
-      </Button>
     </div>
   );
 }

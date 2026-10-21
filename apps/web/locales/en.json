@@ -1,5 +1,9 @@
 {
   "Common": {
+    "clipboard": {
+      "copied": "Copied",
+      "failed": "Couldn’t copy. Select the value and copy it manually."
+    },
     "returnToDialog": "Return to dialog",
     "save": "Save",
     "delete": "Delete",

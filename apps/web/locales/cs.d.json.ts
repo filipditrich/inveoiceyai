@@ -3,6 +3,10 @@
 
 declare const messages: {
   "Common": {
+    "clipboard": {
+      "copied": "Zkopírováno",
+      "failed": "Kopírování se nezdařilo. Označte údaj a zkopírujte ho ručně."
+    },
     "returnToDialog": "Zpět do dialogu",
     "save": "Uložit",
     "delete": "Smazat",
