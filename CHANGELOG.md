@@ -1,3 +1,15 @@
+## [1.62.11](https://github.com/filipditrich/inveoiceyai/compare/v1.62.10...v1.62.11) (2026-10-21)
+
+### Bug Fixes
+
+* **emails:** bound and validate stored invoice attachments ([67f1c44](https://github.com/filipditrich/inveoiceyai/commit/67f1c447cc227e58cd189d0ae52c5f7d08da374f))
+
+### Documentation
+
+* confirm native ChatGPT iOS controls in setup guide ([9d100e4](https://github.com/filipditrich/inveoiceyai/commit/9d100e4192696683946dc862e9176839a64a80cb))
+* record deployed consent touch verification ([bd35c06](https://github.com/filipditrich/inveoiceyai/commit/bd35c065988b17d4d3d4157898899101579f7c1a))
+* sync generated ChatGPT setup messages ([4d9e468](https://github.com/filipditrich/inveoiceyai/commit/4d9e4680e652810b8f447c48d1157e6a30cfacf5))
+
 ## [1.62.10](https://github.com/filipditrich/inveoiceyai/compare/v1.62.9...v1.62.10) (2026-10-21)
 
 ### Bug Fixes
