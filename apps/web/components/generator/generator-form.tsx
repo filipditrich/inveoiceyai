@@ -15,8 +15,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { applyLookEdit } from "@/lib/generator/apply-look-edit";
 import {
@@ -42,6 +40,7 @@ import {
 } from "@invoicey/invoice-core/look-dom";
 import { ACCENT_COLOR_HEX } from "@invoicey/invoice-core/looks";
 
+import { GeneratorDraftReset } from "./generator-draft-reset";
 import { useGeneratorDraft } from "./use-generator-draft";
 
 const lookSans = Inter({ subsets: ["latin", "latin-ext"] });
@@ -77,7 +76,6 @@ export function GeneratorForm() {
     resetDraft,
   } = useGeneratorDraft(locale);
   const [gateOpen, setGateOpen] = React.useState(false);
-  const [resetOpen, setResetOpen] = React.useState(false);
   const [pdfOpen, setPdfOpen] = React.useState(false);
   const [qrDataUrl, setQrDataUrl] = React.useState<string | null>(null);
 
@@ -162,14 +160,7 @@ export function GeneratorForm() {
           <p className="text-xs text-muted-foreground" role="status">
             {storageAvailable ? t("draftSaved") : t("draftStorageUnavailable")}
           </p>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setResetOpen(true)}
-          >
-            {t("newDraft")}
-          </Button>
+          <GeneratorDraftReset onReset={resetDraft} />
         </div>
         <LookPageFrame>
           {previewBuild.display ? (
@@ -219,33 +210,6 @@ export function GeneratorForm() {
           />
         </div>
       </aside>
-      <Dialog open={resetOpen} onOpenChange={setResetOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("newDraft")}</DialogTitle>
-            <DialogDescription>{t("resetDescription")}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setResetOpen(false)}
-            >
-              {t("keepEditing")}
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={() => {
-                resetDraft();
-                setResetOpen(false);
-              }}
-            >
-              {t("confirmReset")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
       <DownloadGate
         invoice={issueInvoice.ok ? issueInvoice.invoice : null}
         onOpenChange={setGateOpen}

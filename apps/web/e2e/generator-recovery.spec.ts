@@ -183,3 +183,62 @@ test("pending cookie choices never cover the reset dialog and return after cance
   await page.getByRole("button", { name: "Keep editing", exact: true }).click();
   await expect(banner).toBeVisible();
 });
+
+// The reset button was outside the dialog's trigger context, so it exposed no
+// popup/expanded state and the dialog could not track its triggering control.
+test("reset dialog announces its state and restores keyboard focus to its trigger", async ({
+  page,
+}) => {
+  await page.route("**/api/generator/ares/**", (route) =>
+    route.fulfill({ status: 404, json: { ok: false } }),
+  );
+  await page.goto("/free-invoice-generator?ico=12345678");
+  const reset = page.getByRole("button", {
+    name: "Start a new draft",
+    exact: true,
+    includeHidden: true,
+  });
+  await expect(reset).toHaveAttribute("aria-haspopup", "dialog");
+  await expect(reset).toHaveAttribute("aria-expanded", "false");
+  await reset.click();
+  const dialog = page.getByRole("dialog", {
+    name: "Start a new draft",
+    exact: true,
+  });
+  await expect(dialog).toBeVisible();
+  await expect(reset).toHaveAttribute("aria-expanded", "true");
+  await page.getByRole("button", { name: "Keep editing", exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await expect(reset).toHaveAttribute("aria-expanded", "false");
+  await expect(reset).toBeFocused();
+  await reset.press("Enter");
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(reset).toBeFocused();
+});
+
+test("Czech reset dialog exposes a localized close control", async ({
+  context,
+  page,
+}, testInfo) => {
+  await context.addCookies([
+    { name: "NEXT_LOCALE", value: "cs", url: testInfo.project.use.baseURL! },
+  ]);
+  await page.goto("/faktura-zdarma");
+  const reset = page.getByRole("button", {
+    name: "Začít nový koncept",
+    exact: true,
+  });
+  await reset.click();
+  const dialog = page.getByRole("dialog", {
+    name: "Začít nový koncept",
+    exact: true,
+  });
+  await expect(dialog).toBeVisible();
+  const close = dialog.getByRole("button", { name: "Zavřít", exact: true });
+  await expect(close).toBeVisible();
+  await close.click();
+  await expect(dialog).toBeHidden();
+  await expect(reset).toBeFocused();
+});

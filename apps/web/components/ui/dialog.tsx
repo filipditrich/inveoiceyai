@@ -6,10 +6,19 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useDialogFocusLabel } from "@/hooks/use-dialog-focus-label";
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
+}
+
+function DialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {
+  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
+}
+
+function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
+  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
 function DialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
@@ -42,6 +51,7 @@ function DialogContent({
   showCloseButton = true,
   ...props
 }: DialogPrimitive.Popup.Props & { showCloseButton?: boolean }) {
+  const t = useTranslations("Common");
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -66,7 +76,7 @@ function DialogContent({
             }
           >
             <XIcon />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{t("close")}</span>
           </DialogPrimitive.Close>
         ) : null}
       </DialogPrimitive.Popup>
@@ -119,6 +129,8 @@ function DialogDescription({
 
 export {
   Dialog,
+  DialogTrigger,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
