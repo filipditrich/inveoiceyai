@@ -987,6 +987,8 @@
     "downloading": "Issuing…",
     "preview": "Preview",
     "previewLoading": "Building preview…",
+    "previewFailed": "We couldn’t build the preview. Close it and try again.",
+    "previewIncomplete": "Complete the invoice details before opening the preview.",
     "previewReal": "See real PDF preview",
     "issueClientDic": "Reverse charge needs the customer's VAT ID (DIČ) on the invoice.",
     "issueIssuerDic": "Add the supplier VAT ID (DIČ).",

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import type { Invoice } from "@invoicey/invoice-core/schema";
 
@@ -28,6 +29,7 @@ async function fetchDemoPdf(
 
 /** On-demand Classic PDF. Pass `bakeWatermark` so Open PDF carries PREVIEW. */
 export function useDemoInvoicePreview(options?: { bakeWatermark?: boolean }) {
+  const t = useTranslations("Generator");
   const [url, setUrl] = React.useState<string | null>(null);
   const [updating, setUpdating] = React.useState(false);
   const [previewError, setPreviewError] = React.useState<string | null>(null);
@@ -37,8 +39,13 @@ export function useDemoInvoicePreview(options?: { bakeWatermark?: boolean }) {
   const render = React.useCallback(
     async (invoice: Invoice | null): Promise<string | null> => {
       controllerRef.current?.abort();
+      controllerRef.current = null;
+      if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+      urlRef.current = null;
+      setUrl(null);
       if (!invoice) {
-        setPreviewError("invoice build failed");
+        setUpdating(false);
+        setPreviewError(t("previewIncomplete"));
         return null;
       }
       const controller = new AbortController();
@@ -51,26 +58,22 @@ export function useDemoInvoicePreview(options?: { bakeWatermark?: boolean }) {
           controller.signal,
           options?.bakeWatermark === true,
         );
-        if (controller.signal.aborted) return null;
-        if (urlRef.current && urlRef.current !== nextUrl) {
-          URL.revokeObjectURL(urlRef.current);
+        if (controller.signal.aborted) {
+          URL.revokeObjectURL(nextUrl);
+          return null;
         }
         urlRef.current = nextUrl;
         setUrl(nextUrl);
         return nextUrl;
-      } catch (error) {
-        /** SAFETY: fetchDemoPdf rejects Error; abort is ignored */
-        if (!(error instanceof Error)) return null;
-        if (controller.signal.aborted || error.name === "AbortError") {
-          return null;
-        }
-        setPreviewError(error.message);
+      } catch {
+        if (controller.signal.aborted) return null;
+        setPreviewError(t("previewFailed"));
         return null;
       } finally {
         if (!controller.signal.aborted) setUpdating(false);
       }
     },
-    [options?.bakeWatermark],
+    [options?.bakeWatermark, t],
   );
 
   React.useEffect(() => {

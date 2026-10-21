@@ -63,7 +63,10 @@ export function InvoicePdfPreview({
         </span>
       ) : null}
       {error ? (
-        <p className="absolute inset-x-2 top-2 z-10 rounded bg-background/90 px-2 py-1 text-xs text-destructive-foreground backdrop-blur">
+        <p
+          role="alert"
+          className="absolute inset-x-2 top-2 z-10 rounded bg-background/90 px-2 py-1 text-xs text-destructive-foreground backdrop-blur"
+        >
           {error}
           {errorDetail ? (
             <span className="mt-1 block font-mono text-[0.65rem] leading-snug text-muted-foreground">
@@ -155,7 +158,13 @@ function CompactPdfPreview({
         </span>
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{t("title")}</p>
-          <p className="truncate text-xs text-muted-foreground">
+          <p
+            role={error ? "alert" : undefined}
+            className={cn(
+              "text-xs text-muted-foreground",
+              error ? "break-words" : "truncate",
+            )}
+          >
             {statusLine()}
           </p>
         </div>

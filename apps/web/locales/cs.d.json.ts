@@ -990,6 +990,8 @@ declare const messages: {
     "downloading": "Vystavuji…",
     "preview": "Náhled",
     "previewLoading": "Sestavuji náhled…",
+    "previewFailed": "Náhled se nepodařilo vytvořit. Zavřete ho a zkuste to znovu.",
+    "previewIncomplete": "Před otevřením náhledu doplňte údaje faktury.",
     "previewReal": "Zobrazit opravdové PDF",
     "issueClientDic": "Přenesení daňové povinnosti potřebuje DIČ odběratele na faktuře.",
     "issueIssuerDic": "Doplňte DIČ dodavatele.",
