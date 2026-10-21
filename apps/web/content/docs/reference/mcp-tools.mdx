@@ -148,8 +148,9 @@ There is no `unmark_invoice_paid` over MCP — that one is web-only.
 
 ## send_invoice_email
 
-Emails an issued invoice with the PDF and, by default, the ISDOC. Needs `RESEND_API_KEY` as well as a
-database.
+Emails an issued, non-cancelled invoice with the PDF and, by default, the ISDOC. Hosted Invoicey
+handles email delivery. Review the recipient and explicitly confirm sending; blocked To or Cc
+addresses are rejected. See [email delivery](/docs/guides/sending-email) for delivery status and retries.
 
 <TypeTable
   type={{

@@ -1,87 +1,95 @@
 ---
 title: Email delivery
-description: Send attachments, track delivery and configure reminders.
+description: Send invoice attachments, check delivery and handle failed sends.
 icon: Send
 ---
 
-Invoicey sends transactional email through [Resend](https://resend.com). Five kinds:
-
-| Email            | When                                                               |
-| ---------------- | ------------------------------------------------------------------ |
-| Invoice          | You (or an assistant) send an issued invoice                       |
-| Workspace invite | You invite someone to the workspace                                |
-| New sign-in      | A soft alert when your account is used from an unrecognised device |
-| Overdue reminder | Daily cron, if enabled per issuer                                  |
-| Payment received | Optional, on mark-paid                                             |
+Send an issued invoice directly from Invoicey, with the PDF attached and an optional ISDOC file for
+accounting software. Invoicey handles delivery; you do not need to connect an email provider or
+configure a sending domain.
 
 ## Sending an invoice
 
-From the invoice detail, **Send email**. The dialog offers recipient, Cc, subject, cover text and an
-ISDOC toggle.
+1. Open an **issued, non-cancelled invoice** and choose **Send by email**. Your workspace role must
+   allow sending invoices; a read-only role can inspect the invoice without sending it.
+2. Check the recipient. Invoicey suggests the client contact saved on the invoice. Enter the correct
+   address if it is missing, and review any Cc recipients.
+3. Review the subject and cover text. Defaults come from the issuer's
+   [email settings](/docs/guides/issuers#email-settings), but you can edit them for this send.
+4. Choose whether to attach ISDOC. The PDF is always attached; the ISDOC checkbox starts with your
+   issuer's preference, which is on by default.
+5. Check the displayed sender and reply address, then send. This sends a real email to the listed
+   recipients.
 
-Defaults come from the issuer's [email settings](/docs/guides/issuers#email-settings) — subject
-template, cover text, whether ISDOC is attached — and are read live at send time, so improving a
-default immediately improves future sends of old invoices.
+In [ChatGPT](/docs/integrations/chatgpt), review the invoice and recipient, then explicitly confirm
+sending. An assistant should ask for a missing address rather than invent one.
 
-**Attachments:** the PDF always; the ISDOC by default, toggleable per send. Both are taken from the
-stored copies made at issue rather than re-rendered.
+<Callout>
+  Issuing and sending are separate actions. Saving a draft or issuing its number
+  does not by itself email the client. If **Send by email** is unavailable,
+  check the invoice status and ask your workspace owner to check your
+  [role](/docs/guides/workspaces).
+</Callout>
 
-## Addressing
+Attachments use the stored invoice files when available. Changing issuer details after issuing
+an invoice does not rewrite its frozen seller details.
 
-You do not control the From address, and that is a feature.
+## Sender and replies
 
-| Part         | Value                                                                  |
-| ------------ | ---------------------------------------------------------------------- |
-| From address | The deployment's verified sending domain, e.g. `invoices@invoicey.app` |
-| From display | `{Issuer name} via Invoicey`                                           |
-| Reply-To     | The issuer's contact email                                             |
+| Part         | What your client sees                           |
+| ------------ | ----------------------------------------------- |
+| From address | `invoices@invoicey.app`                         |
+| Display name | `{Issuer name} via Invoicey` by default         |
+| Reply-To     | The contact email saved on the invoice's issuer |
 
-Sending _as_ an arbitrary address would fail SPF and DKIM and land in spam. The `via Invoicey`
-display name plus a real `Reply-To` gets you recognisable, deliverable mail — replies go to you, not
-to the server.
+Client replies go to that contact email. Check it before issuing your first invoice. Sending a new
+message for an older invoice uses the current issuer email settings for its subject, cover text,
+attachment preference and display name; the invoice's frozen contact email remains its reply address.
 
-## Tracking
+## Language and templates
 
-Every send is logged and its status updated by webhook:
+Invoice emails, overdue reminders and payment-received emails follow the invoice's document language
+(**Czech or English**). Changing the web app's interface language does not translate an existing
+invoice. Custom subject and cover templates keep the wording you entered, so review them when
+sending invoices in another language.
 
-<Mermaid
-  chart="
-stateDiagram-v2
-  [*] --> queued
-  queued --> sent
-  sent --> delivered
-  sent --> delayed
-  sent --> bounced
-  sent --> failed
-  sent --> complained
-  delayed --> delivered
-  delayed --> bounced
-  delayed --> failed
-"
-/>
+## Checking delivery
 
-Opens and clicks are recorded as soft signals and never move the delivery status backwards. Terminal
-outcomes — bounced, failed, complained — win over `delivered`.
+Open the invoice's email history to see each sending attempt, recipient, subject and delivery events.
 
-The full history appears on the invoice timeline.
+| Status            | Meaning and next step                                                            |
+| ----------------- | -------------------------------------------------------------------------------- |
+| Queued or sent    | The message is being processed. This does not yet prove delivery.                |
+| Delivered         | The recipient's mail server accepted it. This does not prove the client read it. |
+| Delayed           | Delivery is taking longer; check the history again before sending another copy.  |
+| Bounced or failed | Delivery did not complete. Check the recipient and the recorded events.          |
+| Complained        | The message was reported as spam. Contact the client through another channel.    |
 
-## Suppression
+Open and click events are additional signals. They do not replace the delivery status or confirm
+that an invoice has been paid.
 
-Addresses that hard-bounce or file a spam complaint are added to a suppression list per workspace.
+To retry a failed delivery, correct the recipient if needed and use **Send by email** to create a new
+attempt. Earlier attempts remain in the history. Check the existing status first to avoid sending
+duplicate copies.
 
-**Automated** sends — reminders, payment-received — skip suppressed addresses silently. **Manual**
-sends are still allowed but warn you first: sometimes you know the bounce was a temporary mailbox
-problem, and that judgement is yours.
+## Blocked recipients
 
-## Overdue reminders
+A bounce or spam complaint can block an address within your workspace. Invoicey blocks manual sends
+when either the recipient or a Cc address is on that list; automated reminders and payment-received
+emails also skip blocked recipients.
 
-Off by default, per issuer. When enabled, a daily cron finds overdue unpaid invoices for that issuer
-and emails the client every _N_ days (7 by default).
+Confirm the correct address with your client through another channel. You can send to a confirmed,
+unblocked alternative. If an address appears to be blocked incorrectly, [contact support](/support)
+with the invoice number and delivery details. Repeatedly retrying the same blocked address will not
+bypass the block.
 
-Enable them in the issuer's email settings. Reminders run on Invoicey's schedule once enabled —
-there is nothing else to configure in the product UI.
+## Overdue reminders and payment confirmations
 
-## Templates
+Overdue reminders are **off by default**. Enable them for a business under
+[issuer email settings](/docs/guides/issuers#email-settings). Invoicey checks eligible overdue unpaid
+invoices daily and spaces reminders by your chosen interval, **7 days by default**. A valid client
+contact email is required. There is no separate scheduler to configure.
 
-Email copy is Czech, matching the app UI. Invoice, invite, sign-in alert, overdue reminder and
-payment-received templates all go through the same delivery pipeline and suppression rules above.
+Payment-received emails are also off by default and can be enabled in the same settings. Recording
+payment is bookkeeping: it does not transfer money. Check the invoice's payment history separately
+from its email delivery history.
