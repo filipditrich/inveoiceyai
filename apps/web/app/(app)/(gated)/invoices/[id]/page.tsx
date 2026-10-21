@@ -140,6 +140,10 @@ export default async function InvoiceDetailPage({
     (row.issuedAt ? "invoicey" : null)) as InvoiceOriginProvider | null;
   const originLabel =
     originProvider != null ? tOrigin(originProvider) : row.originLabel;
+  const [canReadPayments, canManagePayments] = await Promise.all([
+    can("payments:read"),
+    can("payments:manage"),
+  ]);
   // Second wave: everything that only needs the invoice row we just read.
   const [
     driveDeviceCount,
@@ -147,7 +151,6 @@ export default async function InvoiceDetailPage({
     emailRows,
     suppressedRows,
     allocationRows,
-    canManagePayments,
     collection,
   ] = await Promise.all([
     row.issuedAt ? countActiveDriveDevices(db, userId) : Promise.resolve(1),
@@ -166,9 +169,12 @@ export default async function InvoiceDetailPage({
       .select({ email: emailSuppressions.email })
       .from(emailSuppressions)
       .where(eq(emailSuppressions.workspaceId, workspaceId)),
-    listInvoicePaymentAllocations(db, workspaceId, id),
-    can("payments:manage"),
-    loadInvoiceCollection(workspaceId, id),
+    canReadPayments
+      ? listInvoicePaymentAllocations(db, workspaceId, id)
+      : Promise.resolve([]),
+    canManagePayments
+      ? loadInvoiceCollection(workspaceId, id)
+      : Promise.resolve(null),
   ]);
   const showDriveBanner = Boolean(row.issuedAt) && driveDeviceCount === 0;
   const issuerRow = issuerRows[0];
@@ -307,9 +313,10 @@ export default async function InvoiceDetailPage({
                 </SubmitButton>
               </form>
             ) : null}
-            {displayStatus === "unpaid" ||
-            displayStatus === "overdue" ||
-            displayStatus === "future" ? (
+            {canManagePayments &&
+            (displayStatus === "unpaid" ||
+              displayStatus === "overdue" ||
+              displayStatus === "future") ? (
               <form action={markInvoicePaid}>
                 <input name="id" type="hidden" value={id} />
                 <SubmitButton pendingLabel={t("savingPending")}>
@@ -407,7 +414,7 @@ export default async function InvoiceDetailPage({
                 invoiceId={id}
               />
             ) : null}
-            {displayStatus === "paid" ? (
+            {canManagePayments && displayStatus === "paid" ? (
               <form action={unmarkInvoicePaid}>
                 <input name="id" type="hidden" value={id} />
                 <SubmitButton
@@ -497,7 +504,7 @@ export default async function InvoiceDetailPage({
         paymentState={row.paymentState}
       />
 
-      {row.issuedAt ? (
+      {row.issuedAt && canReadPayments ? (
         <Card id="payment-ledger">
           <CardHeader>
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -571,7 +578,7 @@ export default async function InvoiceDetailPage({
                           : ""}
                       </p>
                     </div>
-                    {!allocation.reversedAt ? (
+                    {canManagePayments && !allocation.reversedAt ? (
                       <form action={reversePayment}>
                         <input
                           type="hidden"

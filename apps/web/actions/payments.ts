@@ -330,6 +330,7 @@ export async function syncBankConnectionsFromPayments(): Promise<void> {
 export async function confirmPaymentProposal(
   formData: FormData,
 ): Promise<void> {
+  await assertCan("payments:manage");
   const { workspaceId, userId } = await requireWritableWorkspace();
   const proposalId = field(formData, "proposalId");
   const result = await confirmPaymentMatchProposal({
@@ -357,6 +358,7 @@ export async function confirmPaymentProposal(
 }
 
 export async function rejectPaymentProposal(formData: FormData): Promise<void> {
+  await assertCan("payments:manage");
   const { workspaceId, userId } = await requireWritableWorkspace();
   const proposalId = field(formData, "proposalId");
   const rejected = await rejectPaymentMatchProposal({
@@ -371,6 +373,7 @@ export async function rejectPaymentProposal(formData: FormData): Promise<void> {
 }
 
 export async function addManualPayment(formData: FormData): Promise<void> {
+  await assertCan("payments:manage");
   const { workspaceId, userId } = await requireWritableWorkspace();
   const invoiceId = field(formData, "invoiceId");
   const amount = field(formData, "amount").replace(",", ".");
@@ -405,6 +408,7 @@ export async function addManualPayment(formData: FormData): Promise<void> {
 }
 
 export async function reversePayment(formData: FormData): Promise<void> {
+  await assertCan("payments:manage");
   const { workspaceId, userId } = await requireWritableWorkspace();
   const allocationId = field(formData, "allocationId");
   const result = await reversePaymentAllocation({
