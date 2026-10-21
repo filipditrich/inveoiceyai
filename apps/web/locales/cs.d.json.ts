@@ -4101,7 +4101,7 @@ declare const messages: {
     "duplicateTitle": "Jedna aplikace na výběr",
     "duplicateBody": "Nainstalujte Invoicey z oficiální stránky odkazované zde. Veřejný plugin obsahuje nástroje pro faktury i dovednost invoicing; samostatný balíček workflows nepotřebujete.",
     "mobileTitle": "Chcete používat telefon?",
-    "mobileBody": "Zobrazení se přizpůsobí telefonu. Dostupnost v aplikacích ChatGPT pro iOS a Android závisí na podpoře hostitele a ověříme ji před oznámením nativní mobilní podpory.",
+    "mobileBody": "Otevřete Invoicey z veřejné stránky v ChatGPT. Otevření interaktivních ovládacích prvků je ověřeno v aplikaci ChatGPT pro iOS. Zobrazení se přizpůsobí telefonu; podporu aplikace pro Android jsme zatím neověřili.",
     "guide": "Návod k připojení a řešení potíží",
     "install": "Nainstalovat Invoicey do ChatGPT"
   },
