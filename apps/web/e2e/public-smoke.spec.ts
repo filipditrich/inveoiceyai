@@ -48,7 +48,11 @@ test.describe("public platform", () => {
     ).toBeVisible();
     /** light lockup is `dark:hidden`; dark canvas shows `invoicey-lockup.svg`. */
     await expect(
-      page.locator('img[src$="/brand/invoicey-lockup.svg"]').first(),
+      page
+        .locator(
+          'img[src="/brand/invoicey-lockup.svg"], img[src^="/brand/invoicey-lockup.svg?"]',
+        )
+        .first(),
     ).toBeVisible();
   });
 

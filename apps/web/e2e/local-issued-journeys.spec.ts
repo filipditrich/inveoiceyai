@@ -27,14 +27,14 @@ test("issuing preserves invoice content and delivers readable documents on deskt
     page.getByRole("heading", { name: "Invoice lifecycle", exact: true }),
   ).toBeVisible();
   await expect(
-    testInfo.project.name === "mobile-chromium"
+    testInfo.project.use.isMobile
       ? page.locator("main li p").filter({ hasText: description })
       : page.getByRole("cell", { name: description, exact: true }),
   ).toBeVisible();
   const id = new URL(page.url()).pathname.split("/").at(-1)!;
   await page.reload();
   await expect(
-    testInfo.project.name === "mobile-chromium"
+    testInfo.project.use.isMobile
       ? page.locator("main li p").filter({ hasText: description })
       : page.getByRole("cell", { name: description, exact: true }),
   ).toBeVisible();
@@ -46,7 +46,7 @@ test("issuing preserves invoice content and delivers readable documents on deskt
       () => document.documentElement.scrollWidth > window.innerWidth + 1,
     ),
   ).toBe(false);
-  if (testInfo.project.name === "mobile-chromium") {
+  if (testInfo.project.use.isMobile) {
     await expect(
       page.locator('[data-slot="pdf-preview-compact"]'),
     ).toBeVisible();
@@ -92,4 +92,33 @@ test("issuing preserves invoice content and delivers readable documents on deskt
     body: await page.screenshot({ fullPage: true }),
     contentType: "image/png",
   });
+});
+
+// A failed preview must remain readable; document rendering errors used a red
+// with insufficient contrast against the dark translucent preview surface.
+test("preview service failures expose readable guidance", async ({
+  page,
+}, testInfo) => {
+  const origin = new URL(testInfo.project.use.baseURL!);
+  if (!origin.hostname.endsWith(".localhost"))
+    throw new Error("Local QA only.");
+  await page.route("**/api/demo/invoice-pdf", (route) =>
+    route.fulfill({ status: 503, json: { error: "preview service is busy" } }),
+  );
+  await page.goto("/invoices/new");
+  await page
+    .getByLabel("Description", { exact: true })
+    .first()
+    .fill("Preview failure QA");
+  await expect(
+    page.getByText("Could not generate preview", { exact: false }).first(),
+  ).toBeVisible();
+  const axe = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze();
+  expect(
+    axe.violations.filter(
+      (v) => v.impact === "serious" || v.impact === "critical",
+    ),
+  ).toEqual([]);
 });

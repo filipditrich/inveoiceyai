@@ -63,7 +63,7 @@ export function InvoicePdfPreview({
         </span>
       ) : null}
       {error ? (
-        <p className="absolute inset-x-2 top-2 z-10 rounded bg-background/90 px-2 py-1 text-xs text-destructive backdrop-blur">
+        <p className="absolute inset-x-2 top-2 z-10 rounded bg-background/90 px-2 py-1 text-xs text-destructive-foreground backdrop-blur">
           {error}
           {errorDetail ? (
             <span className="mt-1 block font-mono text-[0.65rem] leading-snug text-muted-foreground">

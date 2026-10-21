@@ -51,7 +51,7 @@ for (const failure of ["getter", "read", "write"] as const) {
     const promotion = page
       .locator('[role="note"]')
       .filter({ hasText: "Keep a Finder copy on your Mac" });
-    if (testInfo.project.name === "mobile-chromium") {
+    if (testInfo.project.use.isMobile) {
       await expect(promotion).toHaveCount(1);
       await expect(promotion).not.toBeVisible();
     } else {
@@ -79,7 +79,7 @@ test("desktop dismissal persists across reload while phones keep the invoice fir
   const promotion = page
     .locator('[role="note"]')
     .filter({ hasText: "Keep a Finder copy on your Mac" });
-  if (testInfo.project.name === "mobile-chromium") {
+  if (testInfo.project.use.isMobile) {
     await expect(promotion).toHaveCount(1);
     await expect(promotion).not.toBeVisible();
     await testInfo.attach("invoice-without-desktop-promotion", {

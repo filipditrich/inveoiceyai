@@ -1044,7 +1044,11 @@ export function InvoiceBuilderForm({
   ];
 
   return (
-    <div className="grid items-start gap-8 xl:grid-cols-2">
+    <fieldset
+      className="grid min-w-0 items-start gap-8 xl:grid-cols-2"
+      disabled={!form.formState.isReady}
+      aria-busy={!form.formState.isReady}
+    >
       <form
         className="space-y-5"
         onSubmit={(e) => {
@@ -2226,7 +2230,7 @@ export function InvoiceBuilderForm({
           url={previewUrl}
         />
       </aside>
-    </div>
+    </fieldset>
   );
 }
 

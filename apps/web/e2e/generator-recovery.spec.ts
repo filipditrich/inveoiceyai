@@ -158,3 +158,28 @@ test("confirming a fresh draft also clears an earlier issuer-prefill link", asyn
     .poll(() => new URL(page.url()).searchParams.has("ico"))
     .toBe(false);
 });
+
+// Cookie consent remains pending while another modal owns the screen.
+test("pending cookie choices never cover the reset dialog and return after cancelling", async ({
+  page,
+  context,
+}) => {
+  await context.clearCookies({ name: "c15t-consent" });
+  await page.addInitScript(() => localStorage.removeItem("c15t-consent"));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/free-invoice-generator");
+  const banner = page.getByTestId("consent-banner-root");
+  await expect(banner).toBeVisible();
+  await page
+    .getByRole("button", { name: "Start a new draft", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", {
+      name: "Discard draft and start again",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(banner).not.toBeVisible();
+  await page.getByRole("button", { name: "Keep editing", exact: true }).click();
+  await expect(banner).toBeVisible();
+});

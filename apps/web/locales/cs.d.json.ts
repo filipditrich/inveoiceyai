@@ -3,6 +3,7 @@
 
 declare const messages: {
   "Common": {
+    "returnToDialog": "Zpět do dialogu",
     "save": "Uložit",
     "delete": "Smazat",
     "edit": "Upravit",

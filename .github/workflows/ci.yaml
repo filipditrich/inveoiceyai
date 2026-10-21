@@ -62,11 +62,11 @@ jobs:
       - name: Build
         run: bun run build
 
-      # Headless CI launches chromium-headless-shell (Playwright 1.49+). Install
+      # Phone coverage includes Safari WebKit; Chromium uses its headless shell. Install
       # from apps/web so the CLI matches @playwright/test instead of a root bunx.
-      - name: Install Chromium
+      - name: Install browser engines
         working-directory: apps/web
-        run: bunx playwright install --with-deps --only-shell
+        run: bunx playwright install --with-deps --only-shell chromium webkit
 
       - name: OAuth consent browser regression
         working-directory: apps/web

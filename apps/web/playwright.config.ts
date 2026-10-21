@@ -47,6 +47,11 @@ export default defineConfig({
       ...authenticatedProject,
       use: { ...devices["Pixel 7"], ...authenticatedProject.use },
     },
+    {
+      name: "mobile-webkit",
+      ...authenticatedProject,
+      use: { ...devices["iPhone 13"], ...authenticatedProject.use },
+    },
   ],
   webServer:
     process.env.CI && !process.env.INVOICEY_E2E_BASE_URL

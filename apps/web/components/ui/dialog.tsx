@@ -6,13 +6,21 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
+import { useDialogFocusLabel } from "@/hooks/use-dialog-focus-label";
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
 function DialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
+  const focusLabelRef = useDialogFocusLabel();
+  return (
+    <DialogPrimitive.Portal
+      ref={focusLabelRef}
+      data-slot="dialog-portal"
+      {...props}
+    />
+  );
 }
 
 function DialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) {
