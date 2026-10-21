@@ -8,4 +8,4 @@ export type {
 } from "./edits";
 export type { LookDomAssets } from "./types";
 export { cssFromLookBox, cssFromLookText } from "./css";
-export { renderSpaydQrDataUrl } from "./qr";
+export { renderSpaydQrDataUrl, renderSpaydPayloadDataUrl } from "./qr";

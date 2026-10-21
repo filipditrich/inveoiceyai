@@ -9,6 +9,11 @@ export async function renderSpaydQrDataUrl(
 ): Promise<string | null> {
   const payload = buildSpaydPayload(invoice);
   if (payload === null) return null;
+  return renderSpaydPayloadDataUrl(payload);
+}
+
+/** Encode payment facts without depending on unrelated invoice fields. */
+export function renderSpaydPayloadDataUrl(payload: string): Promise<string> {
   return QRCode.toDataURL(payload, {
     width: 164,
     margin: 1,

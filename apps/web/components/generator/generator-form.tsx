@@ -35,13 +35,13 @@ import { Inter } from "next/font/google";
 
 import {
   LookDocumentView,
-  renderSpaydQrDataUrl,
   type LookEdit,
 } from "@invoicey/invoice-core/look-dom";
 import { ACCENT_COLOR_HEX } from "@invoicey/invoice-core/looks";
 
 import { GeneratorDraftReset } from "./generator-draft-reset";
 import { useGeneratorDraft } from "./use-generator-draft";
+import { usePaymentQr } from "./use-payment-qr";
 
 const lookSans = Inter({ subsets: ["latin", "latin-ext"] });
 
@@ -77,7 +77,6 @@ export function GeneratorForm() {
   } = useGeneratorDraft(locale);
   const [gateOpen, setGateOpen] = React.useState(false);
   const [pdfOpen, setPdfOpen] = React.useState(false);
-  const [qrDataUrl, setQrDataUrl] = React.useState<string | null>(null);
 
   const previewBuild = React.useMemo(() => {
     if (!draft) return { invoice: null, display: null };
@@ -88,28 +87,13 @@ export function GeneratorForm() {
     };
   }, [draft]);
 
-  React.useEffect(() => {
-    const invoice = previewBuild.invoice;
-    const hasBank = Boolean(
-      draft?.issuer.accountNumber.trim() || draft?.issuer.iban.trim(),
-    );
-    if (!invoice || !draft?.showQr || !hasBank) {
-      setQrDataUrl(null);
-      return;
-    }
-    let cancelled = false;
-    void renderSpaydQrDataUrl(invoice).then((url) => {
-      if (!cancelled) setQrDataUrl(url);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [
+  const qrDataUrl = usePaymentQr(
     previewBuild.invoice,
-    draft?.showQr,
-    draft?.issuer.accountNumber,
-    draft?.issuer.iban,
-  ]);
+    Boolean(
+      draft?.showQr &&
+      (draft.issuer.accountNumber.trim() || draft.issuer.iban.trim()),
+    ),
+  );
 
   const issuerIco = draft?.issuer.ico ?? "";
   const clientIco = draft?.client.ico ?? "";
