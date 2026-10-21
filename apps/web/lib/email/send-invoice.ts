@@ -1,8 +1,8 @@
-import "server-only";
 import {
   applyDisplayNameTemplate,
   isValidEmailAddress,
 } from "@/lib/email/from";
+import "server-only";
 import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 
 import {
@@ -21,6 +21,7 @@ import {
   toInvoiceIntlLocale,
   type Invoice,
 } from "@invoicey/invoice-core";
+import { downloadInvoiceArtifact } from "@invoicey/invoice-tools/artifact-download";
 import {
   isEmailSuppressed,
   resolveIssuerEmailSettings,
@@ -48,18 +49,12 @@ function formatTotalLabel(
   return `${formatted} ${currency}`;
 }
 
-async function fetchBytes(url: string): Promise<Buffer> {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Failed to fetch attachment (${res.status})`);
-  }
-  return Buffer.from(await res.arrayBuffer());
-}
-
 async function buildInvoiceAttachments(opts: {
   invoice: Invoice;
   pdfUrl: string | null;
+  pdfSha256?: string | null;
   isdocUrl: string | null;
+  isdocSha256?: string | null;
   attachIsdoc: boolean;
   filenameTemplate?: string | null;
 }): Promise<EmailAttachment[]> {
@@ -72,7 +67,7 @@ async function buildInvoiceAttachments(opts: {
   if (opts.pdfUrl) {
     attachments.push({
       filename: pdfName,
-      content: await fetchBytes(opts.pdfUrl),
+      content: await downloadInvoiceArtifact(opts.pdfUrl, opts.pdfSha256),
       contentType: "application/pdf",
     });
   } else {
@@ -89,7 +84,7 @@ async function buildInvoiceAttachments(opts: {
     if (opts.isdocUrl) {
       attachments.push({
         filename: isdocName,
-        content: await fetchBytes(opts.isdocUrl),
+        content: await downloadInvoiceArtifact(opts.isdocUrl, opts.isdocSha256),
         contentType: "application/xml",
       });
     } else {
@@ -191,15 +186,16 @@ export async function sendOverdueReminderForInvoice(opts: {
     locale: invoice.meta.language,
   });
 
-  const attachments = await buildInvoiceAttachments({
-    invoice,
-    pdfUrl: row.pdfUrl,
-    isdocUrl: row.isdocUrl,
-    attachIsdoc: settings.attachIsdocByDefault,
-    filenameTemplate: settings.filenameTemplate,
-  });
-
   try {
+    const attachments = await buildInvoiceAttachments({
+      invoice,
+      pdfUrl: row.pdfUrl,
+      pdfSha256: row.pdfSha256,
+      isdocUrl: row.isdocUrl,
+      isdocSha256: row.isdocSha256,
+      attachIsdoc: settings.attachIsdocByDefault,
+      filenameTemplate: settings.filenameTemplate,
+    });
     const result = await sendTransactionalEmail({
       db: opts.db,
       workspaceId: opts.workspaceId,

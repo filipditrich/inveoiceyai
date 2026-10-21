@@ -28,6 +28,7 @@ import {
   type Invoice,
 } from "@invoicey/invoice-core";
 
+import { downloadInvoiceArtifact } from "./download-invoice-artifact";
 import { isValidEmailAddress, sendTransactionalEmail } from "./email-transport";
 import {
   getInvoiceyRequestContext,
@@ -83,16 +84,12 @@ export function resolveIssuerEmailSettings(
   };
 }
 
-async function fetchBytes(url: string): Promise<Buffer> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to fetch attachment (${res.status})`);
-  return Buffer.from(await res.arrayBuffer());
-}
-
 async function buildAttachments(opts: {
   invoice: Invoice;
   pdfUrl: string | null;
+  pdfSha256?: string | null;
   isdocUrl: string | null;
+  isdocSha256?: string | null;
   attachIsdoc: boolean;
   filenameTemplate?: string | null;
 }): Promise<{ filename: string; content: Buffer; contentType?: string }[]> {
@@ -105,7 +102,7 @@ async function buildAttachments(opts: {
   if (opts.pdfUrl) {
     out.push({
       filename: pdfName,
-      content: await fetchBytes(opts.pdfUrl),
+      content: await downloadInvoiceArtifact(opts.pdfUrl, opts.pdfSha256),
       contentType: "application/pdf",
     });
   } else {
@@ -121,7 +118,7 @@ async function buildAttachments(opts: {
     if (opts.isdocUrl) {
       out.push({
         filename: isdocName,
-        content: await fetchBytes(opts.isdocUrl),
+        content: await downloadInvoiceArtifact(opts.isdocUrl, opts.isdocSha256),
         contentType: "application/xml",
       });
     } else {
@@ -317,7 +314,9 @@ export async function sendInvoiceEmailById(
     const attachments = await buildAttachments({
       invoice,
       pdfUrl: row.pdfUrl,
+      pdfSha256: row.pdfSha256,
       isdocUrl: row.isdocUrl,
+      isdocSha256: row.isdocSha256,
       attachIsdoc,
       filenameTemplate: settings.filenameTemplate,
     });

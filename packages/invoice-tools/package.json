@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./mcp": "./src/register-mcp-tools.ts",
     "./ops": "./src/invoice-ops.ts",
+    "./artifact-download": "./src/download-invoice-artifact.ts",
     "./artifacts": "./src/invoice-artifacts.ts",
     "./import": "./src/invoice-import.ts",
     "./email": "./src/send-invoice-email.ts",

@@ -1,5 +1,5 @@
-import "server-only";
 import { eq } from "drizzle-orm";
+import "server-only";
 
 import { invoices } from "@invoicey/db";
 import { db } from "@invoicey/db/client";
@@ -10,6 +10,7 @@ import {
   toInvoiceIntlLocale,
   type Invoice,
 } from "@invoicey/invoice-core";
+import { downloadInvoiceArtifact } from "@invoicey/invoice-tools/artifact-download";
 
 import { isEmailConfigured } from "./client";
 import { sendTransactionalEmail, type EmailAttachment } from "./send";
@@ -27,18 +28,14 @@ function formatTotalLabel(
   return `${formatted} ${currency}`;
 }
 
-async function pdfAttachment(invoice: Invoice, pdfUrl: string | null) {
+async function pdfAttachment(
+  invoice: Invoice,
+  pdfUrl: string | null,
+  pdfSha256?: string | null,
+) {
   const names = invoiceArtifactFileNamesFromInvoice(invoice);
   const content = pdfUrl
-    ? Buffer.from(
-        await (async () => {
-          const res = await fetch(pdfUrl);
-          if (!res.ok) {
-            throw new Error(`Failed to fetch attachment (${res.status})`);
-          }
-          return res.arrayBuffer();
-        })(),
-      )
+    ? await downloadInvoiceArtifact(pdfUrl, pdfSha256)
     : Buffer.from(await renderInvoicePdf(invoice));
   const attachment: EmailAttachment = {
     filename: names.pdf,
@@ -65,7 +62,11 @@ export async function sendGuestInvoiceEmail(input: {
   }
 
   const [row] = await db
-    .select({ pdfUrl: invoices.pdfUrl, total: invoices.total })
+    .select({
+      pdfUrl: invoices.pdfUrl,
+      pdfSha256: invoices.pdfSha256,
+      total: invoices.total,
+    })
     .from(invoices)
     .where(eq(invoices.id, input.invoiceId))
     .limit(1);
@@ -99,7 +100,9 @@ export async function sendGuestInvoiceEmail(input: {
       text: rendered.text,
       invoiceId: input.invoiceId,
       attachPdf: true,
-      attachments: [await pdfAttachment(input.invoice, row?.pdfUrl ?? null)],
+      attachments: [
+        await pdfAttachment(input.invoice, row?.pdfUrl ?? null, row?.pdfSha256),
+      ],
     });
     return { ok: true };
   } catch (error) {
