@@ -1,3 +1,13 @@
+## [1.62.13](https://github.com/filipditrich/inveoiceyai/compare/v1.62.12...v1.62.13) (2026-10-21)
+
+### Bug Fixes
+
+* **web:** preserve word separators while editing invoices ([2ef9845](https://github.com/filipditrich/inveoiceyai/commit/2ef9845884a11a88b25c9ed53d19360801e7f9b8))
+
+### Performance
+
+* **web:** reuse payment QR across unrelated invoice edits ([b276878](https://github.com/filipditrich/inveoiceyai/commit/b27687883628d2dcf3d39e609c1b05d09f25917e))
+
 ## [1.62.12](https://github.com/filipditrich/inveoiceyai/compare/v1.62.11...v1.62.12) (2026-10-21)
 
 ### Bug Fixes
