@@ -15,8 +15,8 @@ test.beforeAll(() => {
       "build",
       "e2e/fixtures/payment-copy.tsx",
       "--target=browser",
-      "--minify",
-      '--define=process.env.NODE_ENV="production"',
+      // Bun 1.3.5 needs production mode for both JSX and React runtime selection.
+      "--production",
       `--outfile=${output}`,
     ],
     { cwd: process.cwd() },
