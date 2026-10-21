@@ -5,7 +5,6 @@ import {
 import { paymentMatchFactors } from "@/components/payments/payment-match-explanation";
 import { TablePager } from "@/components/payments/table-pager";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SubmitButton } from "@/components/ui/submit-button";
 import {
   Table,
   TableBody,
@@ -198,7 +198,10 @@ export async function PaymentsSuggestedTable({
                             name="proposalId"
                             value={proposal.id}
                           />
-                          <Button size="sm" type="submit">
+                          <SubmitButton
+                            size="sm"
+                            pendingLabel={t("confirmingPayment")}
+                          >
                             <CheckIcon />
                             {t("confirmAmount", {
                               amount: formatMoney(
@@ -207,7 +210,7 @@ export async function PaymentsSuggestedTable({
                                 locale,
                               ),
                             })}
-                          </Button>
+                          </SubmitButton>
                         </form>
                         <form action={rejectPaymentProposal}>
                           <input
@@ -215,12 +218,16 @@ export async function PaymentsSuggestedTable({
                             name="proposalId"
                             value={proposal.id}
                           />
-                          <Button size="sm" type="submit" variant="outline">
+                          <SubmitButton
+                            size="sm"
+                            variant="outline"
+                            pendingLabel={t("rejectingPayment")}
+                          >
                             <XIcon />
                             {proposal.invoiceId
                               ? t("notThisInvoice")
                               : t("notThisRequest")}
-                          </Button>
+                          </SubmitButton>
                         </form>
                       </div>
                     </TableCell>

@@ -2,7 +2,6 @@ import { reversePayment } from "@/actions/payments";
 import { TableFilterBar } from "@/components/layout/table-filter-bar";
 import { TablePager } from "@/components/payments/table-pager";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SubmitButton } from "@/components/ui/submit-button";
 import {
   Table,
   TableBody,
@@ -251,9 +251,13 @@ export async function PaymentsHistoryTable({
                             name="allocationId"
                             value={allocation.id}
                           />
-                          <Button size="sm" type="submit" variant="ghost">
+                          <SubmitButton
+                            size="sm"
+                            variant="ghost"
+                            pendingLabel={t("reversingPayment")}
+                          >
                             {t("reverse")}
-                          </Button>
+                          </SubmitButton>
                         </form>
                       ) : (
                         <Badge variant="outline">{t("reversed")}</Badge>
