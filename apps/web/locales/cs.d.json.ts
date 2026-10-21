@@ -3138,6 +3138,7 @@ declare const messages: {
     "amount": "Částka",
     "paidOn": "Zaplaceno",
     "addPayment": "Přidat platbu",
+    "recordingPayment": "Zapisuji platbu…",
     "incomingTitle": "Příchozí transakce",
     "incomingDescription": "Platby stažené z napojené banky.",
     "incomingEmpty": "Zatím žádné importované transakce.",

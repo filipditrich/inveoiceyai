@@ -3153,6 +3153,7 @@
     "amount": "Amount",
     "paidOn": "Paid on",
     "addPayment": "Add payment",
+    "recordingPayment": "Recording payment…",
     "incomingTitle": "Incoming transactions",
     "incomingDescription": "Credits imported from your connected bank.",
     "incomingEmpty": "No imported transactions yet.",

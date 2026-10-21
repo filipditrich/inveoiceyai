@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { formatMoney } from "@/lib/format";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -98,9 +99,9 @@ export function ManualPaymentDialog({
             </div>
           </div>
           <DialogFooter className="mt-2">
-            <Button type="submit">
+            <SubmitButton pendingLabel={t("recordingPayment")}>
               <PlusIcon /> {t("addPayment")}
-            </Button>
+            </SubmitButton>
           </DialogFooter>
         </form>
       </DialogContent>
