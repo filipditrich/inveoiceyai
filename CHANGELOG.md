@@ -1,3 +1,13 @@
+## [1.62.7](https://github.com/filipditrich/inveoiceyai/compare/v1.62.6...v1.62.7) (2026-10-21)
+
+### Bug Fixes
+
+* **release:** restore generated change descriptions ([cd4f7fc](https://github.com/filipditrich/inveoiceyai/commit/cd4f7fcd12989380e2bfc0fb4ec7bcad36cf1a1f))
+
+### Documentation
+
+* record production browser verifier results ([f3c45e5](https://github.com/filipditrich/inveoiceyai/commit/f3c45e5cf3236a02955a576f5b21eb04e93b4dc3))
+
 ## [1.62.6](https://github.com/filipditrich/inveoiceyai/compare/v1.62.5...v1.62.6) (2026-10-21)
 
 ## [1.62.5](https://github.com/filipditrich/inveoiceyai/compare/v1.62.4...v1.62.5) (2026-10-21)
