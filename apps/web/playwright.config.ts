@@ -57,9 +57,11 @@ export default defineConfig({
   webServer:
     process.env.CI && !process.env.INVOICEY_E2E_BASE_URL
       ? {
+          // CI builds the app before this suite. Exercise that output rather than
+          // development hydration, Turbopack compilation and the HMR client.
           command: process.env.INVOICEY_E2E_NODE_24
-            ? `NODE_ENV=development ${process.env.INVOICEY_E2E_NODE_24} node_modules/next/dist/bin/next dev --webpack --port ${port}`
-            : `NODE_ENV=development bun run dev --port ${port}`,
+            ? `${process.env.INVOICEY_E2E_NODE_24} node_modules/next/dist/bin/next start --port ${port}`
+            : `bun run start --port ${port}`,
           cwd: process.cwd(),
           url: baseURL,
           reuseExistingServer: !process.env.CI,
