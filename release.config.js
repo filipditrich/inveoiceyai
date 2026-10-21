@@ -13,6 +13,9 @@ module.exports = {
         releaseRules: [{ breaking: true, release: "minor" }],
       },
     ],
+    // Generator 14 uses writer 8: keep the conventionalcommits preset on v9.
+    // Preset v10's function templates silently produce empty notes with writer 8.
+    // Upgrade them together once a compatible stable generator is available.
     [
       "@semantic-release/release-notes-generator",
       {
