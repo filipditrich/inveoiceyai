@@ -1,3 +1,9 @@
+## [1.62.8](https://github.com/filipditrich/inveoiceyai/compare/v1.62.7...v1.62.8) (2026-10-21)
+
+### Bug Fixes
+
+* **web:** render the default theme before hydration ([f3ad44b](https://github.com/filipditrich/inveoiceyai/commit/f3ad44b82ab60cbff050005cd80517393dd0a80a))
+
 ## [1.62.7](https://github.com/filipditrich/inveoiceyai/compare/v1.62.6...v1.62.7) (2026-10-21)
 
 ### Bug Fixes
