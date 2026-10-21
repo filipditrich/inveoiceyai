@@ -74,3 +74,14 @@ jobs:
 
       - name: Browser and accessibility smoke
         run: bun run test:e2e
+
+      - name: Upload browser failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-failures-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            apps/web/test-results
+            apps/web/playwright-report
+          if-no-files-found: ignore
+          retention-days: 7
