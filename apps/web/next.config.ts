@@ -150,6 +150,19 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Only authenticated inline invoice PDFs may be framed by this app.
+      // Next's global headers otherwise overwrite the route's SAMEORIGIN header.
+      {
+        source: "/api/invoices/:id/pdf",
+        has: [{ type: "query", key: "disposition", value: "inline" }],
+        headers: [
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          {
+            key: "Content-Security-Policy-Report-Only",
+            value: "frame-ancestors 'self'",
+          },
+        ],
+      },
       /**
        * `public/` is served with `max-age=0` by default, so the mascot GLB
        * (~3.9 MB) and the brand raster art are revalidated on every landing.
