@@ -31,8 +31,9 @@ claude mcp list
 
 Tools appear as `invoicey` tools in any session:
 
-> Look up NFCtron in ARES, then draft an invoice from my "main" issuer preset for October
-> consulting — 32 hours at 1 800 CZK. Due in 14 days.
+> Check my connected workspace and issuer, then look up NFCtron in ARES and prepare a draft for
+> 32 hours of consulting at 1,800 CZK per hour, due in 14 days. Ask for missing dates, VAT and
+> document language. Show the draft before issuing.
 
 And for follow-ups:
 
@@ -40,13 +41,14 @@ And for follow-ups:
 >
 > Mark 20260012 as paid and email the client a copy with the ISDOC attached.
 
-Claude Code will ask before tools that send email or change payment state. Let it.
+Review the invoice and explicitly confirm issuing, sending or recording payment. Host approval controls may vary; the connected workspace permissions still apply.
 
-## Presets first
+## Workspace issuer first
 
-`create_invoice` needs an issuer preset, otherwise it falls back to a demo issuer that renders
-correctly and is entirely fictional. Save one before your first real invoice — see
-[presets](/docs/integrations/mcp#presets).
+Add your business in Invoicey and choose its default issuer before drafting. The connected tools
+load the seller server-side and do not accept issuer or template preset IDs on `create_invoice`.
+If the workspace has no usable issuer, drafting fails with setup guidance. See
+[issuer setup](/docs/guides/issuers#presets-for-automation).
 
 ## Troubleshooting
 
@@ -55,7 +57,7 @@ correctly and is entirely fictional. Save one before your first real invoice —
 <Accordion title="Unauthorized on every call">
   The key was revoked, mistyped, or truncated when copied. Personal keys are
   shown once — if you are not certain you have it intact, create a new one under
-  **Settings → API keys**.
+  **[Workspace → API keys](/settings/workspace/api-keys)**.
 </Accordion>
 
 <Accordion title="The server shows as failed">

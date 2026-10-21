@@ -19,17 +19,17 @@ exception that only _reads_ issued invoices — it never drafts or issues.
 
 ## What you get
 
-| Capability           | Detail                                                             |
-| -------------------- | ------------------------------------------------------------------ |
-| **Czech VAT**        | Standard/reduced rates, reverse charge, OSS, exempt supplies, DUZP |
-| **ARES lookup**      | Type an IČO, get the legal name, address and DIČ filled in         |
-| **PDF**              | Branded invoice PDF with the payment QR embedded                   |
-| **ISDOC 6.0.2**      | XML your accountant's software imports without retyping            |
-| **SPAYD QR**         | Czech banking apps pre-fill amount, account, VS from a scan        |
-| **Multiple issuers** | Separate businesses, each with its own numbering and bank account  |
-| **Payment ledger**   | Manual payments + Fio bank feed; other banks deferred for now      |
-| **Automation**       | Create and issue from Cursor, Claude Code, Slack or the CLI        |
-| **Invoicey Drive**   | Issued PDFs as files in Finder on your Mac                         |
+| Capability           | Detail                                                               |
+| -------------------- | -------------------------------------------------------------------- |
+| **Czech VAT**        | Standard/reduced rates, reverse charge, OSS, exempt supplies, DUZP   |
+| **ARES lookup**      | Type an IČO, get the legal name, address and DIČ filled in           |
+| **PDF**              | Branded invoice PDF with the payment QR embedded                     |
+| **ISDOC 6.0.2**      | XML your accountant's software imports without retyping              |
+| **SPAYD QR**         | Czech banking apps pre-fill amount, account, VS from a scan          |
+| **Multiple issuers** | Separate businesses, each with its own numbering and bank account    |
+| **Payment ledger**   | Manual payments + Fio and MONETA bank feeds                          |
+| **Automation**       | Draft and review from ChatGPT, Cursor, Claude Code, Slack or the CLI |
+| **Invoicey Drive**   | Issued PDFs as files in Finder on your Mac                           |
 
 ## How the pieces fit
 
@@ -73,14 +73,19 @@ Every surface must satisfy the same schema before Invoicey renders or stores an 
     description="Issued invoices as files in Finder on your Mac."
   />
   <Card
+    title="Invoicey in ChatGPT"
+    href="/docs/integrations/chatgpt"
+    description="Install the public plugin, connect a workspace and review drafts in chat."
+  />
+  <Card
     title="Integrations"
     href="/docs/integrations/api-keys"
-    description="API keys, MCP, Cursor, Claude Code and Slack."
+    description="ChatGPT, API keys, MCP, Cursor, Claude Code and Slack."
   />
   <Card
     title="Reconcile payments"
     href="/docs/guides/reconciling-payments"
-    description="Fio bank feed, match proposals and the payment ledger."
+    description="Fio and MONETA feeds, match proposals and the payment ledger."
   />
   <Card
     title="Bank connections"
@@ -96,11 +101,11 @@ Every surface must satisfy the same schema before Invoicey renders or stores an 
 
 ## Current scope
 
-Invoicey is pre-1.0. Today that means:
+The main product boundaries are:
 
-- **Czech koruna only.** Multi-currency is not implemented. The Fio pilot is CZK-only.
-- **Czech and English UI.** Issued PDF and ISDOC labels remain Czech.
-- **API keys have no scopes.** A key is full access to one workspace — see [API keys](/docs/integrations/api-keys).
-- **No public REST API.** Automation goes through MCP, the CLI, or the Slack agent.
-- **Recurring invoices are drafts only.** A daily cron creates a reviewable draft; you issue and send it. Auto-issue and auto-email are not in v1.
-- **Bank matching is confirm-first.** Fio imports proposals; a person confirms allocations — see [Reconcile payments](/docs/guides/reconciling-payments). Why only Fio: [Bank connections](/docs/integrations/bank-connections).
+- **CZK, EUR and USD invoices.** Payment QR is available for CZK.
+- **Czech and English.** The app locale and each invoice's document language are selected separately.
+- **Automation follows your permissions.** Personal keys follow the user's default workspace and current permissions. OAuth connections stay bound to the workspace and scopes approved during connection. See [API keys](/docs/integrations/api-keys) and [ChatGPT](/docs/integrations/chatgpt).
+- **Automation through supported clients.** Use MCP, the CLI or Slack; there is no general public REST API for direct application integrations.
+- **Recurring invoices are drafts only.** Scheduled runs prepare reviewable drafts; you issue and send them.
+- **Fio and MONETA connections.** Bank matching proposes allocations for review. Exact-match automatic confirmation is optional and off by default. See [Reconcile payments](/docs/guides/reconciling-payments) and [Bank connections](/docs/integrations/bank-connections).

@@ -160,21 +160,24 @@ See [payment QR](/docs/outputs/payment-qr).
 
 <Accordion title="MCP returns unauthorized on everything">
 The key was revoked, mistyped, or truncated when copied. Personal keys are shown once, so create a
-fresh one under **Settings → API keys** if you are unsure. Test with:
+fresh one under **[Workspace → API keys](/settings/workspace/api-keys)** if you are unsure. Test with:
 
 ```bash
 curl -X POST https://invoicey.app/api/mcp \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
 </Accordion>
 
-<Accordion title="An assistant invented issuer details">
-  No issuer preset was passed, so `create_invoice` fell back to the demo issuer.
-  Save a preset and name it explicitly in your prompt — see
-  [presets](/docs/integrations/mcp#presets).
+<Accordion title="Automation uses the wrong issuer or reports that none is configured">
+  Check the connected workspace, then open **My businesses** and choose its
+  default issuer. MCP's `get_workspace` shows the selected seller before
+  drafting. `create_invoice` reads it server-side and does not accept issuer
+  preset IDs. A connected workspace without a usable issuer cannot create a
+  draft. See [issuer setup](/docs/guides/issuers#presets-for-automation).
 </Accordion>
 
 <Accordion title="The Slack bot never responds">

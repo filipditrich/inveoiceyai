@@ -59,9 +59,10 @@ invoice, saved invoice ID and assumptions — or validation issues. Binary artif
 
 <Callout type="warn" title="The issuer is locked server-side">
   An `issuer` inside `draft` is **rejected**. The issuer is the workspace
-  default (`is_default`). If the workspace has no issuer, the tool fails — a
-  demo issuer is never written to Neon. A model cannot put a bank account or IČO
-  on your invoice.
+  default (`is_default`), or its first saved business if none is marked default.
+  If the connected workspace has no usable issuer, the tool fails. Use
+  `get_workspace` to inspect the seller before drafting; no issuer preset ID is
+  accepted.
 </Callout>
 
 Do not pass `issuerPresetId` or `templatePresetId` — those arguments do not exist.

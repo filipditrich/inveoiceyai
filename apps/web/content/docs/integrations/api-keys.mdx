@@ -6,12 +6,12 @@ icon: KeyRound
 
 Automation surfaces — [MCP](/docs/integrations/mcp), the [CLI](/docs/integrations/cli),
 and assistants that speak MCP — authenticate with
-a **personal API key**. Create and revoke keys under **Settings → API keys** without sharing your
+a **personal API key**. Create and revoke keys under **[Workspace → API keys](/settings/workspace/api-keys)** without sharing your
 sign-in session.
 
 ## Creating a personal key
 
-**Settings → API keys → give it a name → Create.**
+Open **[Workspace → API keys](/settings/workspace/api-keys)**, give the key a name and choose **Create**.
 
 The key is displayed **once**. Copy it immediately — it is not recoverable afterwards, and losing it
 means creating a new one and revoking the old.
@@ -25,6 +25,7 @@ Requests carry it as an ordinary bearer token:
 curl -X POST https://invoicey.app/api/mcp \
   -H "Authorization: Bearer YOUR_KEY" \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
@@ -33,11 +34,13 @@ curl -X POST https://invoicey.app/api/mcp \
 A personal key resolves to **your user**, and operates against **your default workspace**.
 
 Switching workspaces in the sidebar updates that default so automation follows where you work.
-**Settings → API keys** also lets you set the default without changing the browser session — useful
+**[Workspace → API keys](/settings/workspace/api-keys)** also lets you set the default without changing the browser session — useful
 when you want MCP pointed at one workspace while you browse another.
 
-Within that workspace it is full access. There are no scopes and no read-only variant: a holder can
-list invoices, create them, issue them, mark them paid, and email them to your clients.
+Personal keys have read and write capability rather than selectable per-key scopes. They remain
+limited by your current workspace membership, role permissions and plan. Within those permissions,
+a holder can read invoices, create drafts, issue them, record payment and send email to clients.
+[OAuth connections](/docs/integrations/chatgpt) additionally use the scopes approved during connection.
 
 Treat the key like a password: it can change financial records and send email to clients.
 
@@ -50,13 +53,13 @@ Treat the key like a password: it can change financial records and send email to
   Switching in the sidebar keeps them aligned.
 </Callout>
 
-The one real containment: `create_invoice` injects the issuer from a server-side
-[preset](/docs/guides/issuers#presets-for-automation). A model cannot invent a bank account or IČO
-onto your invoice, regardless of what it is asked to do.
+For invoice creation, the seller comes from the connected workspace's
+[issuer setup](/docs/guides/issuers#presets-for-automation), not an issuer preset selected by the
+assistant. Review the actual seller and invoice facts before issuing.
 
 ## Revoking
 
-**Settings → API keys → Revoke.** Immediate, and scoped to that one key — everything else keeps
+Open **[Workspace → API keys](/settings/workspace/api-keys)** and choose **Revoke**. Immediate, and scoped to that one key — everything else keeps
 working.
 
 Revoke whenever a key has been in a shared config file, a screenshot, or a chat you no longer trust.

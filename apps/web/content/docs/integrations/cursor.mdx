@@ -24,7 +24,7 @@ MCP servers are configured in `mcp.json` — `~/.cursor/mcp.json` for every proj
 }
 ```
 
-Create the key under **Settings → API keys** — see [API keys](/docs/integrations/api-keys).
+Create the key under **[Workspace → API keys](/settings/workspace/api-keys)** — see [API keys](/docs/integrations/api-keys).
 
 <Callout type="warn" title="Do not commit this file">
   A project-level `.cursor/mcp.json` containing a bearer token is a credential
@@ -34,23 +34,23 @@ Create the key under **Settings → API keys** — see [API keys](/docs/integrat
 
 Then **Settings → MCP → Reload**, and confirm Invoicey is listed with its tools.
 
-## Set up a preset first
+## Set up the workspace issuer
 
-Before your first invoice, save an issuer preset. Ask Cursor:
+In Invoicey, add your business under **My businesses**, complete its identity, contact email and
+bank details, and choose the default issuer. Connected-workspace invoice tools read that seller
+server-side; they do not accept an issuer preset ID. A workspace without a usable issuer cannot
+create a draft. See [issuer setup](/docs/guides/issuers).
 
-> Save an issuer preset called "main" using these details: …
-
-The preset locks the "from" party. Without one, `create_invoice` falls back to a demo issuer — which
-renders fine and is completely wrong for real use.
+Ask the assistant to call `get_workspace` first so you can check the connected workspace and issuer.
 
 ## Working with it
 
 Cursor decides when to call tools, so plain description works:
 
-> Look up IČO 27074358 and create an invoice from my "main" preset for 25 hours of development at
-> 1 500 CZK, due in 21 days.
+> Look up IČO 27074358 and prepare a draft using my workspace issuer for 25 hours of development
+> at 1,500 CZK per hour, due in 21 days. Ask for missing dates, VAT and document language. Do not issue it yet.
 
-Naming the preset explicitly avoids a round-trip where the assistant lists presets to find one.
+Check the client, seller, amounts, dates and assumptions before confirming issuance.
 
 For follow-ups:
 
@@ -69,12 +69,13 @@ For follow-ups:
 
 <Accordion title="Every call returns unauthorized">
 The key was revoked, mistyped, or truncated when copied. Personal keys are shown once, so create a
-fresh one under **Settings → API keys** if you are unsure. Verify with:
+fresh one under **[Workspace → API keys](/settings/workspace/api-keys)** if you are unsure. Verify with:
 
 ```bash
 curl -X POST https://invoicey.app/api/mcp \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 

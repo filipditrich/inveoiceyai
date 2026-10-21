@@ -16,7 +16,7 @@ MCP tools call the same handlers and validate against the same
 Streamable HTTP at `https://invoicey.app/api/mcp`. OAuth-capable clients can discover the authorization server from the endpoint, sign in and approve a specific workspace. See [ChatGPT setup](/docs/integrations/chatgpt) for interactive invoice views.
 
 For personal-key clients, create a key under
-**Settings → API keys** — see [API keys](/docs/integrations/api-keys).
+**[Workspace → API keys](/settings/workspace/api-keys)** — see [API keys](/docs/integrations/api-keys).
 
 ```json
 {
@@ -32,7 +32,7 @@ For personal-key clients, create a key under
 ```
 
 Your key resolves to your user and binds every tool call to **your default workspace** (updated when
-you switch workspaces or change it under **Settings → API keys**).
+you switch workspaces or change it under **[Workspace → API keys](/settings/workspace/api-keys)**).
 
 Client-specific setup: [Cursor](/docs/integrations/cursor) ·
 [Claude Code](/docs/integrations/claude-code).
@@ -58,17 +58,15 @@ Full input and output shapes: [MCP tool reference](/docs/reference/mcp-tools).
 
 ## Presets
 
-Presets are what make this safe enough to use.
+The workspace business registry controls the seller. `create_invoice` reads the default issuer
+server-side and does not accept issuer or preset IDs. Complete your business details in Invoicey before
+drafting. If no default is marked, the tools use the first saved business; setting the default
+explicitly avoids ambiguity. A connected workspace without a usable issuer cannot create a draft.
 
-**Issuer presets** hold a complete issuer — name, IČO, DIČ, address, bank account, VAT status.
-`create_invoice` injects the workspace default issuer server-side and does not accept issuer or preset IDs. The model never supplies the
-"from" party, so it cannot hallucinate your bank account onto an invoice.
-
-**Invoice template presets** hold a partial draft — standard line items, VAT settings, payment
-defaults — merged underneath whatever the assistant specifies. Useful for a monthly retainer where
-only the period changes.
-
-Save presets from the assistant once, then refer to them by name or ID.
+The preset tools can store and inspect **issuer snapshots** or **invoice template data**. These
+are reusable data, not a way to override the invoice tool's seller. An assistant reusing template
+facts must still include them in the confirmed draft; `create_invoice` does not take a template
+preset ID or automatically merge a preset.
 
 <Callout type="warn" title="Validation is not verification">
   The schema guarantees an invoice is well-formed, not that it is right. It
@@ -84,8 +82,10 @@ Save presets from the assistant once, then refer to them by name or ID.
 ## Limitations
 
 - **One workspace per key.** A personal key binds to your **default** workspace; there is no
-  per-call override. Change the default via the sidebar switcher or **Settings → API keys**.
+  per-call override. Change the default via the sidebar switcher or **[Workspace → API keys](/settings/workspace/api-keys)**.
 - **OAuth scopes and roles.** OAuth grants distinguish read and write access. Both OAuth and personal keys enforce current membership, role and plan permissions.
 - **No import tool.** [Historical import](/docs/guides/importing-history) is web-only by design.
 - **No `unmark_invoice_paid`.** Web only.
-- **MCP does not create issuers or clients.** Those are managed in the web UI; MCP can list saved clients and consumes issuer details through the workspace default and presets.
+- **Issuer setup stays in the web app.** MCP reads the configured workspace issuer.
+- **Client persistence follows drafts.** There is no standalone client-create tool, but saving a draft can create or reuse its confirmed client in the workspace registry. Managed client catalogs remain restricted.
+- **Recurring schedules stay in the web app.** MCP does not configure unattended issuance or historical import.

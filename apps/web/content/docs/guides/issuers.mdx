@@ -119,7 +119,12 @@ Rebranding or switching banks is safe, but a correction does not rewrite an invo
 
 ## Presets for automation
 
-Save issuers as **presets** for [MCP](/docs/integrations/mcp) and
-[Slack](/docs/integrations/slack). When the assistant selects a preset ID, Invoicey injects its
-identity and bank details server-side. Without one, automation uses the configured demo issuer;
-review that setup before issuing.
+[MCP](/docs/integrations/mcp), [ChatGPT](/docs/integrations/chatgpt) and
+[Slack](/docs/integrations/slack) use the connected workspace's issuer. Choose the default under
+**My businesses**, then check it with `get_workspace` in MCP before drafting. If no default is
+marked, the tools use the first saved business; explicitly setting the default keeps the choice clear.
+
+`create_invoice` does not accept an issuer or preset ID. Saving an issuer preset does not change
+the seller selected by that tool. If the connected workspace has no usable issuer, drafting stops
+until you complete issuer setup. Changing the business registry affects future drafts; issued
+invoices retain their frozen seller details.

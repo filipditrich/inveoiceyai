@@ -5,30 +5,30 @@ icon: MessageSquare
 ---
 
 Invoicey runs a durable agent in Slack. Mention it, or DM it, and describe the invoice you want — it
-looks the client up in ARES, builds the invoice, posts the PDF and ISDOC into the thread, and asks
-before doing anything irreversible.
+looks the client up in ARES and prepares a review card with the draft and its assumptions.
+You decide when to issue, send or record payment.
 
 ## Using it
 
 Mention the bot in a channel it has been invited to, or send it a direct message:
 
-> @Invoicey invoice NFCtron (IČO 27074358) for 40 hours of consulting at 1 800 CZK, due in 14 days,
-> from my "s.r.o." preset
+> @Invoicey prepare a draft using my workspace issuer for NFCtron (IČO 27074358),
+> 40 hours of consulting at 1,800 CZK per hour, due in 14 days. Ask for missing dates,
+> VAT and document language. Show the draft before issuing.
 
-It replies in a thread with the draft, the invoice ID, a link into the web app, and the rendered PDF
-and ISDOC as file attachments. The first time you talk to the bot, it DMs a link to confirm your
-Slack account against the Invoicey workspace you are viewing in the browser.
+It replies in a thread with an interactive review card and a link into Invoicey. Draft revisions do
+not automatically upload PDF and ISDOC files; use **Preview PDF** when you want a document preview.
+The first time you talk to the bot, it DMs a link to confirm your Slack account against the Invoicey
+workspace you are viewing in the browser.
 
 **Follow-ups in the same thread do not need a mention.** The agent keeps session context, so you can
 just say:
 
-> issue it
->
-> actually make it 45 hours first
+> Make it 45 hours and show me the updated draft. Do not issue it yet.
 
 ## Human approval on the dangerous parts
 
-Three actions always stop and ask, with an approve/reject prompt in the thread:
+Review the displayed invoice before using an action button or explicitly approving a tool action:
 
 | Tool                 | Why it asks                                               |
 | -------------------- | --------------------------------------------------------- |
@@ -41,15 +41,17 @@ Creating and revising drafts does not require approval.
 <Callout type="warn" title="Link Slack before the bot will work">
   Unlinked Slack users are refused — no drafts, no ARES. The bot DMs a one-shot
   confirm link (15 minutes). Confirm it while viewing the Invoicey workspace
-  that should receive **new** invoices. Anyone in the channel can still click
-  Allow/Deny on an approval card; keep the bot in a private channel.
+  that should receive **new** invoices. Custom invoice-card actions resolve the
+  clicker's linked Invoicey workspace and re-check membership. A Slack approval
+  prompt is not an invitation to the Invoicey workspace; keep review cards in
+  channels appropriate for the invoice data.
 </Callout>
 
 The agent uses the same validated handlers as [MCP](/docs/integrations/mcp), plus Slack file upload.
 
 ## Getting the bot in your workspace
 
-Ask an Invoicey workspace owner/admin to enable Slack under **Settings → Integrations**, invite the
+Ask an Invoicey workspace owner/admin to enable Slack under **[Workspace → Integrations](/settings/workspace/integrations)**, invite the
 bot to the channel you will use, and complete the one-time Slack ↔ Invoicey link when the bot DMs
 you.
 
@@ -58,9 +60,8 @@ you.
 - **Link required.** Each Slack user must confirm `/slack/link/[code]` against an Invoicey workspace
   they belong to. There is no email matching.
 - **One Slack account → one Invoicey user + one workspace.** Rebind the workspace in
-  **Settings → Integrations**, or unlink so someone else can confirm.
-- **HITL is not identity.** Allow/Deny in the thread can be clicked by anyone in the channel. Keep
-  the bot private.
+  **[Workspace → Integrations](/settings/workspace/integrations)**, or unlink so someone else can confirm.
+- **Approval is not account linking.** Each Slack user links their own Invoicey identity. Keep invoice conversations within the intended team.
 - **No slash commands.** Mentions and DMs only.
 - **No import.** [Historical import](/docs/guides/importing-history) stays web-only.
 
@@ -71,13 +72,16 @@ you.
 <Accordion title="The bot never responds">
   Confirm it is invited to the channel, your Slack account is linked, and you
   are messaging from the workspace that completed the link. If it still stays
-  quiet, ask a workspace admin to re-check **Settings → Integrations**.
+  quiet, ask a workspace admin to re-check **[Workspace →
+  Integrations](/settings/workspace/integrations)**.
 </Accordion>
 
-<Accordion title="It invents issuer details">
-  No issuer preset. Save one and refer to it by name. Without a preset,
-  `create_invoice` falls back to a demo issuer. See
-  [presets](/docs/integrations/mcp#presets).
+<Accordion title="The issuer is missing or incorrect">
+  Open **My businesses** in the linked Invoicey workspace, complete the business
+  and choose its default. The draft tool reads the seller server-side; it does
+  not accept an issuer preset ID. If no usable issuer exists, drafting stops.
+  Review the seller shown on the card before issuing. See [issuer
+  setup](/docs/guides/issuers#presets-for-automation).
 </Accordion>
 
 </Accordions>

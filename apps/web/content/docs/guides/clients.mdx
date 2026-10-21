@@ -4,7 +4,7 @@ description: Build a clean client registry with ARES-assisted company data.
 icon: Contact
 ---
 
-Clients are the businesses you invoice. They live in a shared registry per workspace, so you enter
+Clients are the people or businesses you invoice. They live in a shared registry per workspace, so you enter
 each one once and reuse it.
 
 ## ARES lookup
@@ -21,8 +21,8 @@ you rarely type a client's details by hand.
 | `dic`           | DIČ, only if it is well-formed            |
 | `sidlo`         | Address — street, house number, city, PSČ |
 
-**By name** — if you do not have the IČO, search by company name and pick from the matches, each
-shown with its IČO and address.
+**By name with an assistant** — ask an [MCP assistant](/docs/integrations/mcp) to search the company
+name and confirm the matching IČO. In the web client form, enter the IČO or use manual entry.
 
 Successful lookups are cached for 24 hours per IČO, reducing unnecessary calls to the public API.
 
@@ -69,5 +69,6 @@ address does not determine those settings for you. See [VAT settings](/docs/conc
 Edits affect **future** invoices only. Invoices already issued to a client carry a frozen
 [snapshot](/docs/concepts/snapshots) of how they looked at issue time.
 
-That also makes deleting a client safe — every invoice you ever sent them still renders in full,
-because it no longer depends on the record existing.
+Invoicey blocks deletion when a client is referenced by an invoice or recurring template, including
+a draft. You can delete an unused client. Editing the registry does not rewrite the frozen details
+on an issued invoice.

@@ -20,7 +20,7 @@ Choose a form, JSON or an assistant. Every path produces the same
   />
   <Card
     title="From an assistant"
-    href="/docs/integrations/mcp"
+    href="/docs/integrations/chatgpt"
     description="Describe it in words. Best once your setup is stable."
   />
 </Cards>
@@ -41,16 +41,15 @@ choose **Save draft** when you want to persist the invoice changes.
 
 The header fields:
 
-| Field                      | Default                      | Notes                                                 |
-| -------------------------- | ---------------------------- | ----------------------------------------------------- |
-| Document type              | `invoice`                    | Also proforma, advance, credit note                   |
-| Issue date                 | Today                        |                                                       |
-| Due date                   | Issue date + 14 days         | Must not precede the issue date                       |
-| DUZP                       | Issue date                   | Required on invoices and credit notes. Can be earlier |
-| VAT mode                   | `regular`                    | Reverse charge and OSS are the alternatives           |
-| Variable symbol            | Digits of the invoice number | The payment reference your client quotes              |
-| Constant / specific symbol | —                            | Rarely needed                                         |
-| Notes                      | —                            | Free text, max 2000 chars, printed on the PDF         |
+| Field           | Default                      | Notes                                                 |
+| --------------- | ---------------------------- | ----------------------------------------------------- |
+| Document type   | `invoice`                    | Also proforma, advance, credit note                   |
+| Issue date      | Today                        |                                                       |
+| Due date        | Issue date + 14 days         | Must not precede the issue date                       |
+| DUZP            | Issue date                   | Required on invoices and credit notes. Can be earlier |
+| VAT mode        | `regular`                    | Reverse charge and OSS are the alternatives           |
+| Variable symbol | Digits of the invoice number | The payment reference your client quotes              |
+| Notes           | —                            | Free text, max 2000 chars, printed on the PDF         |
 
 A **credit note** additionally requires the number of the invoice it corrects.
 
@@ -68,14 +67,17 @@ Field reference: [invoice schema](/docs/reference/invoice-schema).
 
 ## From an assistant
 
-With [MCP configured](/docs/integrations/mcp), you can describe the invoice instead of filling a
-form:
+Use [Invoicey in ChatGPT](/docs/integrations/chatgpt), the [web AI draft](/invoices/ai),
+or another [MCP assistant](/docs/integrations/mcp) to describe the work instead of filling every field:
 
-> Look up NFCtron by IČO, use my "s.r.o." issuer preset, and invoice them 40 hours of consulting at
-> 1 800 CZK plus 12 000 CZK for the integration work. Due in 14 days.
+> Prepare a draft using my workspace issuer for 40 hours of consulting at 1,800 CZK per hour,
+> plus 12,000 CZK for integration work. Ask me for the client, dates, VAT treatment, document
+> language and any other missing details. Show me the draft before issuing it.
 
-The assistant looks up the client, loads your issuer preset, builds the payload and corrects any
-validation errors. Review the result before issuing:
+The connected-workspace tools use the issuer configured in Invoicey. Add your business and set
+its default before drafting; passing an issuer preset does not select a different seller. The
+assistant can look up the client, ask for missing facts and prepare a validated draft. Review the
+result and any assumptions before issuing:
 
 <Callout type="warn" title="Read what the assistant produced">
   Validation guarantees an invoice is *well-formed*, not that it is *correct*.
@@ -86,19 +88,26 @@ validation errors. Review the result before issuing:
 
 ## Templates
 
-Save recurring line items, VAT settings and payment defaults as **invoice template presets**. An
-assistant can merge a template with the details for this invoice.
+An **invoice template preset** can store reusable draft data for an MCP assistant. It is separate
+from a recurring schedule and does not change the workspace issuer. The assistant must include the
+confirmed invoice facts in its draft; `create_invoice` does not accept a template preset ID.
+
+For a one-off repeat, use **Duplicate**. For scheduled drafts, use **Repeat** as described below.
 
 ## Recurring drafts
 
-**Invoices → Recurring**, or **Repeat** on an invoice detail. Invoicey saves the
-lines as a template and creates a **draft** on the chosen day (monthly or
-quarterly, days 1–28). You still issue and send it yourself.
+Open an invoice and choose **Repeat**, then name the schedule. Choose weekly, monthly, quarterly
+or yearly recurrence. For non-weekly schedules the day picker offers the first, fifteenth or last
+day of the month, plus the source invoice's day when applicable. Weekly schedules advance by seven days.
 
-The next run is never the same calendar day. If a previous draft from that
-schedule is still unissued, Invoicey skips rather than piling drafts. Change
-lines by saving a new template from a newer invoice — there is no template
-editor.
+Invoicey creates a **draft**, using the current issuer and client details and the template's line
+items and payment terms. It does not issue or email the invoice automatically. By default the first
+scheduled run is after today. A daily scheduled job prepares due drafts; **Run now** creates one on demand.
+
+Under **Invoices → Recurring** you can open the latest draft, pause or resume the schedule, skip the
+next run, run it now or delete the recurring template. If its previous draft is still unissued,
+Invoicey skips creating another. To change the saved lines or recurrence, create a replacement from
+the desired invoice and pause or remove the old schedule; the list has no template editor.
 
 ## Duplicating
 
